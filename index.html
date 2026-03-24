@@ -1,0 +1,3428 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Red de Fotógrafos - Visualización Interactiva</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: flex;
+            height: calc(100vh - 180px);
+        }
+
+        .left-panel {
+            flex: 1;
+            padding: 20px;
+            border-right: 2px solid #e0e0e0;
+        }
+
+        .right-panel {
+            width: 400px;
+            padding: 20px;
+            background: #f8f9fa;
+            overflow-y: auto;
+        }
+
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .filters h3 {
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .filters label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .filters select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .filters select:hover {
+            border-color: #667eea;
+        }
+
+        #graph {
+            width: 100%;
+            height: calc(100vh - 280px);
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .info-card h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.5em;
+        }
+
+        .info-placeholder {
+            text-align: center;
+            color: #999;
+            padding: 50px 20px;
+        }
+
+        .info-placeholder svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .fotografo-nombre {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 15px;
+        }
+
+        .info-item {
+            margin-bottom: 15px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-item-label {
+            font-weight: 600;
+            color: #555;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .info-item-value {
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .nivel-trofico {
+            font-size: 2em;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        .enlaces {
+            margin-top: 25px;
+        }
+
+        .enlaces a {
+            display: block;
+            padding: 12px 20px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .enlaces a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .enlaces a:active {
+            transform: translateY(0);
+        }
+
+        .node {
+            cursor: pointer;
+            stroke: white;
+            stroke-width: 2px;
+        }
+
+        .node:hover {
+            stroke: #333;
+            stroke-width: 3px;
+        }
+
+        .node.selected {
+            stroke: #e74c3c;
+            stroke-width: 4px;
+        }
+
+        .link {
+            stroke: #999;
+            stroke-opacity: 0.3;
+            stroke-width: 1.5px;
+            fill: none;
+        }
+
+        .link.highlighted {
+            stroke: #e74c3c;
+            stroke-opacity: 0.8;
+            stroke-width: 3px;
+        }
+
+        .node-label {
+            font-size: 10px;
+            font-weight: 600;
+            text-anchor: middle;
+            pointer-events: none;
+            fill: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .legend {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .legend h4 {
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .legend-label {
+            font-size: 0.9em;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎨 Red de Influencias entre Fotógrafos</h1>
+            <p>Visualización interactiva de relaciones de influencia en la historia de la fotografía</p>
+        </header>
+
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="filters">
+                    <h3>Filtros</h3>
+                    <label for="filter-movement">Filtrar por movimiento:</label>
+                    <select id="filter-movement">
+                        <option value="all">Todos los movimientos</option>
+                        <option value="American Realist Painter">American Realist Painter</option><option value="Art Direction">Art Direction</option><option value="Classical Painter">Classical Painter</option><option value="Color Photography">Color Photography</option><option value="Conceptual Art">Conceptual Art</option><option value="Conceptual Photography">Conceptual Photography</option><option value="Constructivist">Constructivist</option><option value="Contemporary Art">Contemporary Art</option><option value="Contemporary Documentary">Contemporary Documentary</option><option value="Contemporary Japanese">Contemporary Japanese</option><option value="Contemporary Landscape">Contemporary Landscape</option><option value="Contemporary/Digital">Contemporary/Digital</option><option value="Cubist Painter">Cubist Painter</option><option value="Dadaism">Dadaism</option><option value="Documentary Photography">Documentary Photography</option><option value="Documentary Portrait">Documentary Portrait</option><option value="Documentary/Street">Documentary/Street</option><option value="Düsseldorf School">Düsseldorf School</option><option value="FSA/Documentary">FSA/Documentary</option><option value="Fashion Photography">Fashion Photography</option><option value="Group f/64">Group f/64</option><option value="Japanese Documentary">Japanese Documentary</option><option value="Japanese Photography">Japanese Photography</option><option value="Japanese Street Photography">Japanese Street Photography</option><option value="Literary Collaboration">Literary Collaboration</option><option value="Literary Influence">Literary Influence</option><option value="Magnum Photos">Magnum Photos</option><option value="New Topographics">New Topographics</option><option value="Photography Education">Photography Education</option><option value="Pictorialism">Pictorialism</option><option value="Pioneers">Pioneers</option><option value="Provoke Movement">Provoke Movement</option><option value="Social Documentary">Social Documentary</option><option value="Straight Photography">Straight Photography</option><option value="Street Photography">Street Photography</option><option value="Surrealism">Surrealism</option><option value="Surrealism/Dadaism">Surrealism/Dadaism</option><option value="War Photography">War Photography</option>
+                    </select>
+
+                    <label for="filter-year">Filtrar por época:</label>
+                    <select id="filter-year">
+                        <option value="all">Todas las épocas</option>
+                        <option value="1850-1900">1850-1900 (Pioneros)</option>
+                        <option value="1900-1930">1900-1930 (Modernismo temprano)</option>
+                        <option value="1930-1960">1930-1960 (Vanguardias)</option>
+                        <option value="1960-2000">1960-2000 (Contemporáneo)</option>
+                        <option value="2000-2020">2000-2020 (Siglo XXI)</option>
+                    </select>
+                </div>
+
+                <svg id="graph"></svg>
+
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-nodes">0</div>
+                        <div class="stat-label">Fotógrafos</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-links">0</div>
+                        <div class="stat-label">Relaciones</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-movements">0</div>
+                        <div class="stat-label">Movimientos</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="info-card">
+                    <h3>Información del Fotógrafo</h3>
+                    <div id="info-content" class="info-placeholder">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                        </svg>
+                        <p>👆 Haz clic en un nodo para ver información del fotógrafo</p>
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <h4>Leyenda de Movimientos</h4>
+                    <div class="legend-item"><div class="legend-color" style="background-color: #FF6699;"></div><div class="legend-label">American Realist Painter</div></div><div class="legend-item"><div class="legend-color" style="background-color: #FFAA99;"></div><div class="legend-label">Art Direction</div></div><div class="legend-item"><div class="legend-color" style="background-color: #9966FF;"></div><div class="legend-label">Classical Painter</div></div><div class="legend-item"><div class="legend-color" style="background-color: #FF99FF;"></div><div class="legend-label">Color Photography</div></div><div class="legend-item"><div class="legend-color" style="background-color: #AA99FF;"></div><div class="legend-label">Conceptual Art</div></div><div class="legend-item"><div class="legend-color" style="background-color: #CCCCFF;"></div><div class="legend-label">Conceptual Photography</div></div><div class="legend-item"><div class="legend-color" style="background-color: #66CCFF;"></div><div class="legend-label">Constructivist</div></div><div class="legend-item"><div class="legend-color" style="background-color: #AA66FF;"></div><div class="legend-label">Contemporary Art</div></div><div class="legend-item"><div class="legend-color" style="background-color: #CCAAFF;"></div><div class="legend-label">Contemporary Documentary</div></div><div class="legend-item"><div class="legend-color" style="background-color: #AACCFF;"></div><div class="legend-label">Contemporary Japanese</div></div><div class="legend-item"><div class="legend-color" style="background-color: #99FFCC;"></div><div class="legend-label">Contemporary Landscape</div></div><div class="legend-item"><div class="legend-color" style="background-color: #66AAFF;"></div><div class="legend-label">Contemporary/Digital</div></div><div class="legend-item"><div class="legend-color" style="background-color: #FF9966;"></div><div class="legend-label">Cubist Painter</div></div><div class="legend-item"><div class="legend-color" style="background-color: #FFAA66;"></div><div class="legend-label">Dadaism</div></div><div class="legend-item"><div class="legend-color" style="background-color: #FF9999;"></div><div class="legend-label">Documentary Photography</div></div><div class="legend-item"><div class="legend-color" style="background-color: #FFCC99;"></div><div class="legend-label">Documentary Portrait</div></div><div class="legend-item"><div class="legend-color" style="background-color: #FFAA55;"></div><div class="legend-label">Documentary/Street</div></div><div class="legend-item"><div class="legend-color" style="background-color: #9999FF;"></div><div class="legend-label">Düsseldorf School</div></div><div class="legend-item"><div class="legend-color" style="background-color: #FFA07A;"></div><div class="legend-label">FSA/Documentary</div></div><div class="legend-item"><div class="legend-color" style="background-color: #F7DC6F;"></div><div class="legend-label">Fashion Photography</div></div><div class="legend-item"><div class="legend-color" style="background-color: #AAFFAA;"></div><div class="legend-label">Group f/64</div></div><div class="legend-item"><div class="legend-color" style="background-color: #66FF99;"></div><div class="legend-label">Japanese Documentary</div></div><div class="legend-item"><div class="legend-color" style="background-color: #CCFFCC;"></div><div class="legend-label">Japanese Photography</div></div><div class="legend-item"><div class="legend-color" style="background-color: #66CC99;"></div><div class="legend-label">Japanese Street Photography</div></div><div class="legend-item"><div class="legend-color" style="background-color: #CCFF66;"></div><div class="legend-label">Literary Collaboration</div></div><div class="legend-item"><div class="legend-color" style="background-color: #FFCC66;"></div><div class="legend-label">Literary Influence</div></div><div class="legend-item"><div class="legend-color" style="background-color: #45B7D1;"></div><div class="legend-label">Magnum Photos</div></div><div class="legend-item"><div class="legend-color" style="background-color: #85C1E2;"></div><div class="legend-label">New Topographics</div></div><div class="legend-item"><div class="legend-color" style="background-color: #FFCCAA;"></div><div class="legend-label">Photography Education</div></div><div class="legend-item"><div class="legend-color" style="background-color: #FF6B6B;"></div><div class="legend-label">Pictorialism</div></div><div class="legend-item"><div class="legend-color" style="background-color: #FFAAFF;"></div><div class="legend-label">Pioneers</div></div><div class="legend-item"><div class="legend-color" style="background-color: #99FF99;"></div><div class="legend-label">Provoke Movement</div></div><div class="legend-item"><div class="legend-color" style="background-color: #99CCFF;"></div><div class="legend-label">Social Documentary</div></div><div class="legend-item"><div class="legend-color" style="background-color: #4ECDC4;"></div><div class="legend-label">Straight Photography</div></div><div class="legend-item"><div class="legend-color" style="background-color: #98D8C8;"></div><div class="legend-label">Street Photography</div></div><div class="legend-item"><div class="legend-color" style="background-color: #66FFAA;"></div><div class="legend-label">Surrealism</div></div><div class="legend-item"><div class="legend-color" style="background-color: #BB8FCE;"></div><div class="legend-label">Surrealism/Dadaism</div></div><div class="legend-item"><div class="legend-color" style="background-color: #FF6666;"></div><div class="legend-label">War Photography</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Datos de la red
+        const graphData = {
+  "nodes": [
+    {
+      "id": "Jack Kerouac",
+      "nombre": "Jack Kerouac",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Literary Influence"
+      ],
+      "movimiento_principal": "Literary Influence",
+      "año": 1960,
+      "color": "#FFCC66",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Jack_Kerouac",
+      "google_images_url": "https://www.google.com/search?q=Jack%20Kerouac%20photographer&tbm=isch"
+    },
+    {
+      "id": "Louise Dahl-Wolfe",
+      "nombre": "Louise Dahl-Wolfe",
+      "nivel_trofico": 4.0,
+      "movimientos": [
+        "Fashion Photography"
+      ],
+      "movimiento_principal": "Fashion Photography",
+      "año": 1960,
+      "color": "#F7DC6F",
+      "influenciados": 1,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Louise_Dahl-Wolfe",
+      "google_images_url": "https://www.google.com/search?q=Louise%20Dahl-Wolfe%20photographer&tbm=isch"
+    },
+    {
+      "id": "Shomei Tomatsu",
+      "nombre": "Shomei Tomatsu",
+      "nivel_trofico": 2.0,
+      "movimientos": [
+        "Japanese Photography"
+      ],
+      "movimiento_principal": "Japanese Photography",
+      "año": 1970,
+      "color": "#CCFFCC",
+      "influenciados": 4,
+      "influenciadores": 2,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Shomei_Tomatsu",
+      "google_images_url": "https://www.google.com/search?q=Shomei%20Tomatsu%20photographer&tbm=isch"
+    },
+    {
+      "id": "Edward Hopper",
+      "nombre": "Edward Hopper",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "American Realist Painter"
+      ],
+      "movimiento_principal": "American Realist Painter",
+      "año": 1940,
+      "color": "#FF6699",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Edward_Hopper",
+      "google_images_url": "https://www.google.com/search?q=Edward%20Hopper%20photographer&tbm=isch"
+    },
+    {
+      "id": "Georgia O'Keeffe",
+      "nombre": "Georgia O'Keeffe",
+      "nivel_trofico": 3.0,
+      "movimientos": [
+        "Pictorialism"
+      ],
+      "movimiento_principal": "Pictorialism",
+      "año": 1980,
+      "color": "#FF6B6B",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Georgia_O%27Keeffe",
+      "google_images_url": "https://www.google.com/search?q=Georgia%20O%27Keeffe%20photographer&tbm=isch"
+    },
+    {
+      "id": "Ihei Kimura",
+      "nombre": "Ihei Kimura",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Japanese Street Photography"
+      ],
+      "movimiento_principal": "Japanese Street Photography",
+      "año": 1980,
+      "color": "#66CC99",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Ihei_Kimura",
+      "google_images_url": "https://www.google.com/search?q=Ihei%20Kimura%20photographer&tbm=isch"
+    },
+    {
+      "id": "Alexander Liberman",
+      "nombre": "Alexander Liberman",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Art Direction"
+      ],
+      "movimiento_principal": "Art Direction",
+      "año": 1960,
+      "color": "#FFAA99",
+      "influenciados": 3,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Alexander_Liberman",
+      "google_images_url": "https://www.google.com/search?q=Alexander%20Liberman%20photographer&tbm=isch"
+    },
+    {
+      "id": "Alfred Stieglitz",
+      "nombre": "Alfred Stieglitz",
+      "nivel_trofico": 2.0,
+      "movimientos": [
+        "Pictorialism"
+      ],
+      "movimiento_principal": "Pictorialism",
+      "año": 1880,
+      "color": "#FF6B6B",
+      "influenciados": 5,
+      "influenciadores": 2,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Alfred_Stieglitz",
+      "google_images_url": "https://www.google.com/search?q=Alfred%20Stieglitz%20photographer&tbm=isch"
+    },
+    {
+      "id": "Diego Velázquez",
+      "nombre": "Diego Velázquez",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Classical Painter"
+      ],
+      "movimiento_principal": "Classical Painter",
+      "año": 1880,
+      "color": "#9966FF",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Diego_Vel%C3%A1zquez",
+      "google_images_url": "https://www.google.com/search?q=Diego%20Vel%C3%A1zquez%20photographer&tbm=isch"
+    },
+    {
+      "id": "Harry Callahan",
+      "nombre": "Harry Callahan",
+      "nivel_trofico": 3.88,
+      "movimientos": [
+        "Straight Photography"
+      ],
+      "movimiento_principal": "Straight Photography",
+      "año": 1910,
+      "color": "#4ECDC4",
+      "influenciados": 1,
+      "influenciadores": 2,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Harry_Callahan",
+      "google_images_url": "https://www.google.com/search?q=Harry%20Callahan%20photographer&tbm=isch"
+    },
+    {
+      "id": "Susan Meiselas",
+      "nombre": "Susan Meiselas",
+      "nivel_trofico": 5.5,
+      "movimientos": [
+        "Magnum Photos"
+      ],
+      "movimiento_principal": "Magnum Photos",
+      "año": 1950,
+      "color": "#45B7D1",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Susan_Meiselas",
+      "google_images_url": "https://www.google.com/search?q=Susan%20Meiselas%20photographer&tbm=isch"
+    },
+    {
+      "id": "Collier Schorr",
+      "nombre": "Collier Schorr",
+      "nivel_trofico": 4.2,
+      "movimientos": [
+        "Contemporary Documentary"
+      ],
+      "movimiento_principal": "Contemporary Documentary",
+      "año": 1980,
+      "color": "#CCAAFF",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Collier_Schorr",
+      "google_images_url": "https://www.google.com/search?q=Collier%20Schorr%20photographer&tbm=isch"
+    },
+    {
+      "id": "Eve Arnold",
+      "nombre": "Eve Arnold",
+      "nivel_trofico": 6.0,
+      "movimientos": [
+        "Magnum Photos"
+      ],
+      "movimiento_principal": "Magnum Photos",
+      "año": 1950,
+      "color": "#45B7D1",
+      "influenciados": 1,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Eve_Arnold",
+      "google_images_url": "https://www.google.com/search?q=Eve%20Arnold%20photographer&tbm=isch"
+    },
+    {
+      "id": "Joel Sternfeld",
+      "nombre": "Joel Sternfeld",
+      "nivel_trofico": 3.85,
+      "movimientos": [
+        "Color Photography"
+      ],
+      "movimiento_principal": "Color Photography",
+      "año": 1970,
+      "color": "#FF99FF",
+      "influenciados": 0,
+      "influenciadores": 3,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Joel_Sternfeld",
+      "google_images_url": "https://www.google.com/search?q=Joel%20Sternfeld%20photographer&tbm=isch"
+    },
+    {
+      "id": "Frank Gohlke",
+      "nombre": "Frank Gohlke",
+      "nivel_trofico": 3.0,
+      "movimientos": [
+        "New Topographics"
+      ],
+      "movimiento_principal": "New Topographics",
+      "año": 1975,
+      "color": "#85C1E2",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Frank_Gohlke",
+      "google_images_url": "https://www.google.com/search?q=Frank%20Gohlke%20photographer&tbm=isch"
+    },
+    {
+      "id": "Alex Webb",
+      "nombre": "Alex Webb",
+      "nivel_trofico": 4.08,
+      "movimientos": [
+        "Magnum Photos"
+      ],
+      "movimiento_principal": "Magnum Photos",
+      "año": 1950,
+      "color": "#45B7D1",
+      "influenciados": 0,
+      "influenciadores": 4,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Alex_Webb",
+      "google_images_url": "https://www.google.com/search?q=Alex%20Webb%20photographer&tbm=isch"
+    },
+    {
+      "id": "Salvador Dalí",
+      "nombre": "Salvador Dalí",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Surrealism"
+      ],
+      "movimiento_principal": "Surrealism",
+      "año": 1980,
+      "color": "#66FFAA",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Salvador_Dal%C3%AD",
+      "google_images_url": "https://www.google.com/search?q=Salvador%20Dal%C3%AD%20photographer&tbm=isch"
+    },
+    {
+      "id": "Max Ernst",
+      "nombre": "Max Ernst",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Surrealism"
+      ],
+      "movimiento_principal": "Surrealism",
+      "año": 1980,
+      "color": "#66FFAA",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Max_Ernst",
+      "google_images_url": "https://www.google.com/search?q=Max%20Ernst%20photographer&tbm=isch"
+    },
+    {
+      "id": "Edouard Boubat",
+      "nombre": "Edouard Boubat",
+      "nivel_trofico": 2.0,
+      "movimientos": [
+        "Street Photography"
+      ],
+      "movimiento_principal": "Street Photography",
+      "año": 1960,
+      "color": "#98D8C8",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Edouard_Boubat",
+      "google_images_url": "https://www.google.com/search?q=Edouard%20Boubat%20photographer&tbm=isch"
+    },
+    {
+      "id": "Elliott Erwitt",
+      "nombre": "Elliott Erwitt",
+      "nivel_trofico": 4.0,
+      "movimientos": [
+        "Magnum Photos"
+      ],
+      "movimiento_principal": "Magnum Photos",
+      "año": 1950,
+      "color": "#45B7D1",
+      "influenciados": 2,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Elliott_Erwitt",
+      "google_images_url": "https://www.google.com/search?q=Elliott%20Erwitt%20photographer&tbm=isch"
+    },
+    {
+      "id": "Axel Hütte",
+      "nombre": "Axel Hütte",
+      "nivel_trofico": 2.0,
+      "movimientos": [
+        "Düsseldorf School"
+      ],
+      "movimiento_principal": "Düsseldorf School",
+      "año": 1980,
+      "color": "#9999FF",
+      "influenciados": 0,
+      "influenciadores": 2,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Axel_H%C3%BCtte",
+      "google_images_url": "https://www.google.com/search?q=Axel%20H%C3%BCtte%20photographer&tbm=isch"
+    },
+    {
+      "id": "Richard Avedon",
+      "nombre": "Richard Avedon",
+      "nivel_trofico": 3.5,
+      "movimientos": [
+        "Fashion Photography"
+      ],
+      "movimiento_principal": "Fashion Photography",
+      "año": 1960,
+      "color": "#F7DC6F",
+      "influenciados": 3,
+      "influenciadores": 2,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Richard_Avedon",
+      "google_images_url": "https://www.google.com/search?q=Richard%20Avedon%20photographer&tbm=isch"
+    },
+    {
+      "id": "Stephen Shore",
+      "nombre": "Stephen Shore",
+      "nivel_trofico": 3.39,
+      "movimientos": [
+        "Color Photography"
+      ],
+      "movimiento_principal": "Color Photography",
+      "año": 1970,
+      "color": "#FF99FF",
+      "influenciados": 3,
+      "influenciadores": 3,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Stephen_Shore",
+      "google_images_url": "https://www.google.com/search?q=Stephen%20Shore%20photographer&tbm=isch"
+    },
+    {
+      "id": "Paul Strand",
+      "nombre": "Paul Strand",
+      "nivel_trofico": 2.75,
+      "movimientos": [
+        "Straight Photography"
+      ],
+      "movimiento_principal": "Straight Photography",
+      "año": 1910,
+      "color": "#4ECDC4",
+      "influenciados": 2,
+      "influenciadores": 4,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Paul_Strand",
+      "google_images_url": "https://www.google.com/search?q=Paul%20Strand%20photographer&tbm=isch"
+    },
+    {
+      "id": "Thomas Struth",
+      "nombre": "Thomas Struth",
+      "nivel_trofico": 2.8,
+      "movimientos": [
+        "Düsseldorf School"
+      ],
+      "movimiento_principal": "Düsseldorf School",
+      "año": 1980,
+      "color": "#9999FF",
+      "influenciados": 0,
+      "influenciadores": 6,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Thomas_Struth",
+      "google_images_url": "https://www.google.com/search?q=Thomas%20Struth%20photographer&tbm=isch"
+    },
+    {
+      "id": "Vivian Maier",
+      "nombre": "Vivian Maier",
+      "nivel_trofico": 2.0,
+      "movimientos": [
+        "Street Photography"
+      ],
+      "movimiento_principal": "Street Photography",
+      "año": 1960,
+      "color": "#98D8C8",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Vivian_Maier",
+      "google_images_url": "https://www.google.com/search?q=Vivian%20Maier%20photographer&tbm=isch"
+    },
+    {
+      "id": "Paul Caponigro",
+      "nombre": "Paul Caponigro",
+      "nivel_trofico": 4.69,
+      "movimientos": [
+        "Photography Education"
+      ],
+      "movimiento_principal": "Photography Education",
+      "año": 1980,
+      "color": "#FFCCAA",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Paul_Caponigro",
+      "google_images_url": "https://www.google.com/search?q=Paul%20Caponigro%20photographer&tbm=isch"
+    },
+    {
+      "id": "Guy Bourdin",
+      "nombre": "Guy Bourdin",
+      "nivel_trofico": 3.12,
+      "movimientos": [
+        "Fashion Photography"
+      ],
+      "movimiento_principal": "Fashion Photography",
+      "año": 1960,
+      "color": "#F7DC6F",
+      "influenciados": 1,
+      "influenciadores": 2,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Guy_Bourdin",
+      "google_images_url": "https://www.google.com/search?q=Guy%20Bourdin%20photographer&tbm=isch"
+    },
+    {
+      "id": "Sandy Skoglund",
+      "nombre": "Sandy Skoglund",
+      "nivel_trofico": 2.0,
+      "movimientos": [
+        "Conceptual Photography"
+      ],
+      "movimiento_principal": "Conceptual Photography",
+      "año": 1980,
+      "color": "#CCCCFF",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Sandy_Skoglund",
+      "google_images_url": "https://www.google.com/search?q=Sandy%20Skoglund%20photographer&tbm=isch"
+    },
+    {
+      "id": "Alec Soth",
+      "nombre": "Alec Soth",
+      "nivel_trofico": 4.39,
+      "movimientos": [
+        "Contemporary Documentary"
+      ],
+      "movimiento_principal": "Contemporary Documentary",
+      "año": 1990,
+      "color": "#CCAAFF",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Alec_Soth",
+      "google_images_url": "https://www.google.com/search?q=Alec%20Soth%20photographer&tbm=isch"
+    },
+    {
+      "id": "Kusakabe Kimbei",
+      "nombre": "Kusakabe Kimbei",
+      "nivel_trofico": 2.0,
+      "movimientos": [
+        "Japanese Documentary"
+      ],
+      "movimiento_principal": "Japanese Documentary",
+      "año": 1980,
+      "color": "#66FF99",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Kusakabe_Kimbei",
+      "google_images_url": "https://www.google.com/search?q=Kusakabe%20Kimbei%20photographer&tbm=isch"
+    },
+    {
+      "id": "Roy Stryker",
+      "nombre": "Roy Stryker",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "FSA/Documentary"
+      ],
+      "movimiento_principal": "FSA/Documentary",
+      "año": 1940,
+      "color": "#FFA07A",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Roy_Stryker",
+      "google_images_url": "https://www.google.com/search?q=Roy%20Stryker%20photographer&tbm=isch"
+    },
+    {
+      "id": "Marc Riboud",
+      "nombre": "Marc Riboud",
+      "nivel_trofico": 6.0,
+      "movimientos": [
+        "Magnum Photos"
+      ],
+      "movimiento_principal": "Magnum Photos",
+      "año": 1950,
+      "color": "#45B7D1",
+      "influenciados": 0,
+      "influenciadores": 2,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Marc_Riboud",
+      "google_images_url": "https://www.google.com/search?q=Marc%20Riboud%20photographer&tbm=isch"
+    },
+    {
+      "id": "William Klein",
+      "nombre": "William Klein",
+      "nivel_trofico": 2.25,
+      "movimientos": [
+        "Street Photography"
+      ],
+      "movimiento_principal": "Street Photography",
+      "año": 1960,
+      "color": "#98D8C8",
+      "influenciados": 4,
+      "influenciadores": 8,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/William_Klein",
+      "google_images_url": "https://www.google.com/search?q=William%20Klein%20photographer&tbm=isch"
+    },
+    {
+      "id": "Lisette Model",
+      "nombre": "Lisette Model",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Documentary Portrait"
+      ],
+      "movimiento_principal": "Documentary Portrait",
+      "año": 1980,
+      "color": "#FFCC99",
+      "influenciados": 2,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Lisette_Model",
+      "google_images_url": "https://www.google.com/search?q=Lisette%20Model%20photographer&tbm=isch"
+    },
+    {
+      "id": "Cornell Capa",
+      "nombre": "Cornell Capa",
+      "nivel_trofico": 6.0,
+      "movimientos": [
+        "Magnum Photos"
+      ],
+      "movimiento_principal": "Magnum Photos",
+      "año": 1980,
+      "color": "#45B7D1",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Cornell_Capa",
+      "google_images_url": "https://www.google.com/search?q=Cornell%20Capa%20photographer&tbm=isch"
+    },
+    {
+      "id": "Jacob Riis",
+      "nombre": "Jacob Riis",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Social Documentary"
+      ],
+      "movimiento_principal": "Social Documentary",
+      "año": 1935,
+      "color": "#99CCFF",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Jacob_Riis",
+      "google_images_url": "https://www.google.com/search?q=Jacob%20Riis%20photographer&tbm=isch"
+    },
+    {
+      "id": "Mario Testino",
+      "nombre": "Mario Testino",
+      "nivel_trofico": 5.5,
+      "movimientos": [
+        "Fashion Photography"
+      ],
+      "movimiento_principal": "Fashion Photography",
+      "año": 1960,
+      "color": "#F7DC6F",
+      "influenciados": 0,
+      "influenciadores": 3,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Mario_Testino",
+      "google_images_url": "https://www.google.com/search?q=Mario%20Testino%20photographer&tbm=isch"
+    },
+    {
+      "id": "Imogen Cunningham",
+      "nombre": "Imogen Cunningham",
+      "nivel_trofico": 3.5,
+      "movimientos": [
+        "Group f/64"
+      ],
+      "movimiento_principal": "Group f/64",
+      "año": 1930,
+      "color": "#AAFFAA",
+      "influenciados": 1,
+      "influenciadores": 2,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Imogen_Cunningham",
+      "google_images_url": "https://www.google.com/search?q=Imogen%20Cunningham%20photographer&tbm=isch"
+    },
+    {
+      "id": "Gregory Crewdson",
+      "nombre": "Gregory Crewdson",
+      "nivel_trofico": 3.25,
+      "movimientos": [
+        "Conceptual Photography"
+      ],
+      "movimiento_principal": "Conceptual Photography",
+      "año": 1985,
+      "color": "#CCCCFF",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Gregory_Crewdson",
+      "google_images_url": "https://www.google.com/search?q=Gregory%20Crewdson%20photographer&tbm=isch"
+    },
+    {
+      "id": "William Eggleston",
+      "nombre": "William Eggleston",
+      "nivel_trofico": 2.0,
+      "movimientos": [
+        "Color Photography"
+      ],
+      "movimiento_principal": "Color Photography",
+      "año": 1970,
+      "color": "#FF99FF",
+      "influenciados": 3,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/William_Eggleston",
+      "google_images_url": "https://www.google.com/search?q=William%20Eggleston%20photographer&tbm=isch"
+    },
+    {
+      "id": "Jeff Wall",
+      "nombre": "Jeff Wall",
+      "nivel_trofico": 2.25,
+      "movimientos": [
+        "Conceptual Photography"
+      ],
+      "movimiento_principal": "Conceptual Photography",
+      "año": 1985,
+      "color": "#CCCCFF",
+      "influenciados": 2,
+      "influenciadores": 4,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Jeff_Wall",
+      "google_images_url": "https://www.google.com/search?q=Jeff%20Wall%20photographer&tbm=isch"
+    },
+    {
+      "id": "Cindy Sherman",
+      "nombre": "Cindy Sherman",
+      "nivel_trofico": 2.0,
+      "movimientos": [
+        "Conceptual Photography"
+      ],
+      "movimiento_principal": "Conceptual Photography",
+      "año": 1985,
+      "color": "#CCCCFF",
+      "influenciados": 0,
+      "influenciadores": 3,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Cindy_Sherman",
+      "google_images_url": "https://www.google.com/search?q=Cindy%20Sherman%20photographer&tbm=isch"
+    },
+    {
+      "id": "Terence Donovan",
+      "nombre": "Terence Donovan",
+      "nivel_trofico": 5.5,
+      "movimientos": [
+        "Fashion Photography"
+      ],
+      "movimiento_principal": "Fashion Photography",
+      "año": 1960,
+      "color": "#F7DC6F",
+      "influenciados": 0,
+      "influenciadores": 2,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Terence_Donovan",
+      "google_images_url": "https://www.google.com/search?q=Terence%20Donovan%20photographer&tbm=isch"
+    },
+    {
+      "id": "Larry Clark",
+      "nombre": "Larry Clark",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Contemporary Documentary"
+      ],
+      "movimiento_principal": "Contemporary Documentary",
+      "año": 1990,
+      "color": "#CCAAFF",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Larry_Clark",
+      "google_images_url": "https://www.google.com/search?q=Larry%20Clark%20photographer&tbm=isch"
+    },
+    {
+      "id": "Lee Friedlander",
+      "nombre": "Lee Friedlander",
+      "nivel_trofico": 3.94,
+      "movimientos": [
+        "Street Photography"
+      ],
+      "movimiento_principal": "Street Photography",
+      "año": 1960,
+      "color": "#98D8C8",
+      "influenciados": 2,
+      "influenciadores": 2,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Lee_Friedlander",
+      "google_images_url": "https://www.google.com/search?q=Lee%20Friedlander%20photographer&tbm=isch"
+    },
+    {
+      "id": "Nick Knight",
+      "nombre": "Nick Knight",
+      "nivel_trofico": 4.12,
+      "movimientos": [
+        "Fashion Photography"
+      ],
+      "movimiento_principal": "Fashion Photography",
+      "año": 1960,
+      "color": "#F7DC6F",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Nick_Knight",
+      "google_images_url": "https://www.google.com/search?q=Nick%20Knight%20photographer&tbm=isch"
+    },
+    {
+      "id": "Norman Parkinson",
+      "nombre": "Norman Parkinson",
+      "nivel_trofico": 5.0,
+      "movimientos": [
+        "Fashion Photography"
+      ],
+      "movimiento_principal": "Fashion Photography",
+      "año": 1960,
+      "color": "#F7DC6F",
+      "influenciados": 1,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Norman_Parkinson",
+      "google_images_url": "https://www.google.com/search?q=Norman%20Parkinson%20photographer&tbm=isch"
+    },
+    {
+      "id": "Bruce Davidson",
+      "nombre": "Bruce Davidson",
+      "nivel_trofico": 4.5,
+      "movimientos": [
+        "Magnum Photos"
+      ],
+      "movimiento_principal": "Magnum Photos",
+      "año": 1950,
+      "color": "#45B7D1",
+      "influenciados": 1,
+      "influenciadores": 2,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Bruce_Davidson",
+      "google_images_url": "https://www.google.com/search?q=Bruce%20Davidson%20photographer&tbm=isch"
+    },
+    {
+      "id": "Ansel Adams",
+      "nombre": "Ansel Adams",
+      "nivel_trofico": 3.5,
+      "movimientos": [
+        "Straight Photography"
+      ],
+      "movimiento_principal": "Straight Photography",
+      "año": 1910,
+      "color": "#4ECDC4",
+      "influenciados": 4,
+      "influenciadores": 2,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Ansel_Adams",
+      "google_images_url": "https://www.google.com/search?q=Ansel%20Adams%20photographer&tbm=isch"
+    },
+    {
+      "id": "André Kertész",
+      "nombre": "André Kertész",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Street Photography"
+      ],
+      "movimiento_principal": "Street Photography",
+      "año": 1960,
+      "color": "#98D8C8",
+      "influenciados": 3,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Andr%C3%A9_Kert%C3%A9sz",
+      "google_images_url": "https://www.google.com/search?q=Andr%C3%A9%20Kert%C3%A9sz%20photographer&tbm=isch"
+    },
+    {
+      "id": "Ed Ruscha",
+      "nombre": "Ed Ruscha",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Conceptual Art"
+      ],
+      "movimiento_principal": "Conceptual Art",
+      "año": 1980,
+      "color": "#AA99FF",
+      "influenciados": 2,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Ed_Ruscha",
+      "google_images_url": "https://www.google.com/search?q=Ed%20Ruscha%20photographer&tbm=isch"
+    },
+    {
+      "id": "Nobuyoshi Araki",
+      "nombre": "Nobuyoshi Araki",
+      "nivel_trofico": 3.0,
+      "movimientos": [
+        "Contemporary Japanese"
+      ],
+      "movimiento_principal": "Contemporary Japanese",
+      "año": 2000,
+      "color": "#AACCFF",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Nobuyoshi_Araki",
+      "google_images_url": "https://www.google.com/search?q=Nobuyoshi%20Araki%20photographer&tbm=isch"
+    },
+    {
+      "id": "Robert Doisneau",
+      "nombre": "Robert Doisneau",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Street Photography"
+      ],
+      "movimiento_principal": "Street Photography",
+      "año": 1960,
+      "color": "#98D8C8",
+      "influenciados": 2,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Robert_Doisneau",
+      "google_images_url": "https://www.google.com/search?q=Robert%20Doisneau%20photographer&tbm=isch"
+    },
+    {
+      "id": "Koji Taki",
+      "nombre": "Koji Taki",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Provoke Movement"
+      ],
+      "movimiento_principal": "Provoke Movement",
+      "año": 1980,
+      "color": "#99FF99",
+      "influenciados": 2,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Koji_Taki",
+      "google_images_url": "https://www.google.com/search?q=Koji%20Taki%20photographer&tbm=isch"
+    },
+    {
+      "id": "Lee Miller",
+      "nombre": "Lee Miller",
+      "nivel_trofico": 3.5,
+      "movimientos": [
+        "Surrealism"
+      ],
+      "movimiento_principal": "Surrealism",
+      "año": 1980,
+      "color": "#66FFAA",
+      "influenciados": 0,
+      "influenciadores": 2,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Lee_Miller",
+      "google_images_url": "https://www.google.com/search?q=Lee%20Miller%20photographer&tbm=isch"
+    },
+    {
+      "id": "Alexey Brodovitch",
+      "nombre": "Alexey Brodovitch",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Art Direction"
+      ],
+      "movimiento_principal": "Art Direction",
+      "año": 1960,
+      "color": "#FFAA99",
+      "influenciados": 3,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Alexey_Brodovitch",
+      "google_images_url": "https://www.google.com/search?q=Alexey%20Brodovitch%20photographer&tbm=isch"
+    },
+    {
+      "id": "Carl Chiarenza",
+      "nombre": "Carl Chiarenza",
+      "nivel_trofico": 4.69,
+      "movimientos": [
+        "Photography Education"
+      ],
+      "movimiento_principal": "Photography Education",
+      "año": 1980,
+      "color": "#FFCCAA",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Carl_Chiarenza",
+      "google_images_url": "https://www.google.com/search?q=Carl%20Chiarenza%20photographer&tbm=isch"
+    },
+    {
+      "id": "Willard Van Dyke",
+      "nombre": "Willard Van Dyke",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Group f/64"
+      ],
+      "movimiento_principal": "Group f/64",
+      "año": 1930,
+      "color": "#AAFFAA",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Willard_Van_Dyke",
+      "google_images_url": "https://www.google.com/search?q=Willard%20Van%20Dyke%20photographer&tbm=isch"
+    },
+    {
+      "id": "Mary Ellen Mark",
+      "nombre": "Mary Ellen Mark",
+      "nivel_trofico": 4.42,
+      "movimientos": [
+        "Magnum Photos"
+      ],
+      "movimiento_principal": "Magnum Photos",
+      "año": 1950,
+      "color": "#45B7D1",
+      "influenciados": 0,
+      "influenciadores": 3,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Mary_Ellen_Mark",
+      "google_images_url": "https://www.google.com/search?q=Mary%20Ellen%20Mark%20photographer&tbm=isch"
+    },
+    {
+      "id": "Keith Arnatt",
+      "nombre": "Keith Arnatt",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Conceptual Photography"
+      ],
+      "movimiento_principal": "Conceptual Photography",
+      "año": 1985,
+      "color": "#CCCCFF",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Keith_Arnatt",
+      "google_images_url": "https://www.google.com/search?q=Keith%20Arnatt%20photographer&tbm=isch"
+    },
+    {
+      "id": "Helmut Newton",
+      "nombre": "Helmut Newton",
+      "nivel_trofico": 3.25,
+      "movimientos": [
+        "Fashion Photography"
+      ],
+      "movimiento_principal": "Fashion Photography",
+      "año": 1960,
+      "color": "#F7DC6F",
+      "influenciados": 3,
+      "influenciadores": 2,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Helmut_Newton",
+      "google_images_url": "https://www.google.com/search?q=Helmut%20Newton%20photographer&tbm=isch"
+    },
+    {
+      "id": "Daido Moriyama",
+      "nombre": "Daido Moriyama",
+      "nivel_trofico": 2.54,
+      "movimientos": [
+        "Provoke Movement"
+      ],
+      "movimiento_principal": "Provoke Movement",
+      "año": 1970,
+      "color": "#99FF99",
+      "influenciados": 1,
+      "influenciadores": 7,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Daido_Moriyama",
+      "google_images_url": "https://www.google.com/search?q=Daido%20Moriyama%20photographer&tbm=isch"
+    },
+    {
+      "id": "Henri Cartier-Bresson",
+      "nombre": "Henri Cartier-Bresson",
+      "nivel_trofico": 3.0,
+      "movimientos": [
+        "Magnum Photos"
+      ],
+      "movimiento_principal": "Magnum Photos",
+      "año": 1950,
+      "color": "#45B7D1",
+      "influenciados": 5,
+      "influenciadores": 3,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Henri_Cartier-Bresson",
+      "google_images_url": "https://www.google.com/search?q=Henri%20Cartier-Bresson%20photographer&tbm=isch"
+    },
+    {
+      "id": "Robert Frank",
+      "nombre": "Robert Frank",
+      "nivel_trofico": 2.5,
+      "movimientos": [
+        "Documentary/Street"
+      ],
+      "movimiento_principal": "Documentary/Street",
+      "año": 1980,
+      "color": "#FFAA55",
+      "influenciados": 4,
+      "influenciadores": 2,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Robert_Frank",
+      "google_images_url": "https://www.google.com/search?q=Robert%20Frank%20photographer&tbm=isch"
+    },
+    {
+      "id": "Dorothea Lange",
+      "nombre": "Dorothea Lange",
+      "nivel_trofico": 2.25,
+      "movimientos": [
+        "FSA/Documentary"
+      ],
+      "movimiento_principal": "FSA/Documentary",
+      "año": 1940,
+      "color": "#FFA07A",
+      "influenciados": 0,
+      "influenciadores": 4,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Dorothea_Lange",
+      "google_images_url": "https://www.google.com/search?q=Dorothea%20Lange%20photographer&tbm=isch"
+    },
+    {
+      "id": "Lewis Baltz",
+      "nombre": "Lewis Baltz",
+      "nivel_trofico": 2.0,
+      "movimientos": [
+        "New Topographics"
+      ],
+      "movimiento_principal": "New Topographics",
+      "año": 1975,
+      "color": "#85C1E2",
+      "influenciados": 2,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Lewis_Baltz",
+      "google_images_url": "https://www.google.com/search?q=Lewis%20Baltz%20photographer&tbm=isch"
+    },
+    {
+      "id": "Eikoh Hosoe",
+      "nombre": "Eikoh Hosoe",
+      "nivel_trofico": 2.5,
+      "movimientos": [
+        "Japanese Photography"
+      ],
+      "movimiento_principal": "Japanese Photography",
+      "año": 1970,
+      "color": "#CCFFCC",
+      "influenciados": 1,
+      "influenciadores": 2,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Eikoh_Hosoe",
+      "google_images_url": "https://www.google.com/search?q=Eikoh%20Hosoe%20photographer&tbm=isch"
+    },
+    {
+      "id": "Weegee",
+      "nombre": "Weegee",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Street Photography"
+      ],
+      "movimiento_principal": "Street Photography",
+      "año": 1960,
+      "color": "#98D8C8",
+      "influenciados": 2,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Weegee",
+      "google_images_url": "https://www.google.com/search?q=Weegee%20photographer&tbm=isch"
+    },
+    {
+      "id": "Ellen von Unwerth",
+      "nombre": "Ellen von Unwerth",
+      "nivel_trofico": 4.25,
+      "movimientos": [
+        "Fashion Photography"
+      ],
+      "movimiento_principal": "Fashion Photography",
+      "año": 1960,
+      "color": "#F7DC6F",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Ellen_von_Unwerth",
+      "google_images_url": "https://www.google.com/search?q=Ellen%20von%20Unwerth%20photographer&tbm=isch"
+    },
+    {
+      "id": "Hiroshi Sugimoto",
+      "nombre": "Hiroshi Sugimoto",
+      "nivel_trofico": 3.25,
+      "movimientos": [
+        "Contemporary Japanese"
+      ],
+      "movimiento_principal": "Contemporary Japanese",
+      "año": 2000,
+      "color": "#AACCFF",
+      "influenciados": 0,
+      "influenciadores": 2,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Hiroshi_Sugimoto",
+      "google_images_url": "https://www.google.com/search?q=Hiroshi%20Sugimoto%20photographer&tbm=isch"
+    },
+    {
+      "id": "Bill Brandt",
+      "nombre": "Bill Brandt",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Street Photography"
+      ],
+      "movimiento_principal": "Street Photography",
+      "año": 1960,
+      "color": "#98D8C8",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Bill_Brandt",
+      "google_images_url": "https://www.google.com/search?q=Bill%20Brandt%20photographer&tbm=isch"
+    },
+    {
+      "id": "Hiroshi Hamaya",
+      "nombre": "Hiroshi Hamaya",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Japanese Documentary"
+      ],
+      "movimiento_principal": "Japanese Documentary",
+      "año": 1980,
+      "color": "#66FF99",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Hiroshi_Hamaya",
+      "google_images_url": "https://www.google.com/search?q=Hiroshi%20Hamaya%20photographer&tbm=isch"
+    },
+    {
+      "id": "Nicholas Nixon",
+      "nombre": "Nicholas Nixon",
+      "nivel_trofico": 3.0,
+      "movimientos": [
+        "New Topographics"
+      ],
+      "movimiento_principal": "New Topographics",
+      "año": 1975,
+      "color": "#85C1E2",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Nicholas_Nixon",
+      "google_images_url": "https://www.google.com/search?q=Nicholas%20Nixon%20photographer&tbm=isch"
+    },
+    {
+      "id": "Diane Arbus",
+      "nombre": "Diane Arbus",
+      "nivel_trofico": 3.25,
+      "movimientos": [
+        "Documentary Portrait"
+      ],
+      "movimiento_principal": "Documentary Portrait",
+      "año": 1980,
+      "color": "#FFCC99",
+      "influenciados": 2,
+      "influenciadores": 4,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Diane_Arbus",
+      "google_images_url": "https://www.google.com/search?q=Diane%20Arbus%20photographer&tbm=isch"
+    },
+    {
+      "id": "Bruce Gilden",
+      "nombre": "Bruce Gilden",
+      "nivel_trofico": 3.21,
+      "movimientos": [
+        "Street Photography"
+      ],
+      "movimiento_principal": "Street Photography",
+      "año": 1960,
+      "color": "#98D8C8",
+      "influenciados": 1,
+      "influenciadores": 3,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Bruce_Gilden",
+      "google_images_url": "https://www.google.com/search?q=Bruce%20Gilden%20photographer&tbm=isch"
+    },
+    {
+      "id": "Matt Stuart",
+      "nombre": "Matt Stuart",
+      "nivel_trofico": 4.21,
+      "movimientos": [
+        "Street Photography"
+      ],
+      "movimiento_principal": "Street Photography",
+      "año": 1980,
+      "color": "#98D8C8",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Matt_Stuart",
+      "google_images_url": "https://www.google.com/search?q=Matt%20Stuart%20photographer&tbm=isch"
+    },
+    {
+      "id": "Todd Hido",
+      "nombre": "Todd Hido",
+      "nivel_trofico": 4.94,
+      "movimientos": [
+        "Contemporary Landscape"
+      ],
+      "movimiento_principal": "Contemporary Landscape",
+      "año": 1980,
+      "color": "#99FFCC",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Todd_Hido",
+      "google_images_url": "https://www.google.com/search?q=Todd%20Hido%20photographer&tbm=isch"
+    },
+    {
+      "id": "Peter Lindbergh",
+      "nombre": "Peter Lindbergh",
+      "nivel_trofico": 4.25,
+      "movimientos": [
+        "Fashion Photography"
+      ],
+      "movimiento_principal": "Fashion Photography",
+      "año": 1960,
+      "color": "#F7DC6F",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Peter_Lindbergh",
+      "google_images_url": "https://www.google.com/search?q=Peter%20Lindbergh%20photographer&tbm=isch"
+    },
+    {
+      "id": "David Seymour (Chim)",
+      "nombre": "David Seymour (Chim)",
+      "nivel_trofico": 5.0,
+      "movimientos": [
+        "Magnum Photos"
+      ],
+      "movimiento_principal": "Magnum Photos",
+      "año": 1950,
+      "color": "#45B7D1",
+      "influenciados": 2,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/David_Seymour_%28Chim%29",
+      "google_images_url": "https://www.google.com/search?q=David%20Seymour%20%28Chim%29%20photographer&tbm=isch"
+    },
+    {
+      "id": "Fernand Léger",
+      "nombre": "Fernand Léger",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Cubist Painter"
+      ],
+      "movimiento_principal": "Cubist Painter",
+      "año": 1920,
+      "color": "#FF9966",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Fernand_L%C3%A9ger",
+      "google_images_url": "https://www.google.com/search?q=Fernand%20L%C3%A9ger%20photographer&tbm=isch"
+    },
+    {
+      "id": "Saul Leiter",
+      "nombre": "Saul Leiter",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Street Photography"
+      ],
+      "movimiento_principal": "Street Photography",
+      "año": 1960,
+      "color": "#98D8C8",
+      "influenciados": 2,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Saul_Leiter",
+      "google_images_url": "https://www.google.com/search?q=Saul%20Leiter%20photographer&tbm=isch"
+    },
+    {
+      "id": "David Bailey",
+      "nombre": "David Bailey",
+      "nivel_trofico": 5.0,
+      "movimientos": [
+        "Fashion Photography"
+      ],
+      "movimiento_principal": "Fashion Photography",
+      "año": 1960,
+      "color": "#F7DC6F",
+      "influenciados": 3,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/David_Bailey",
+      "google_images_url": "https://www.google.com/search?q=David%20Bailey%20photographer&tbm=isch"
+    },
+    {
+      "id": "Ryan McGinley",
+      "nombre": "Ryan McGinley",
+      "nivel_trofico": 4.53,
+      "movimientos": [
+        "Contemporary/Digital"
+      ],
+      "movimiento_principal": "Contemporary/Digital",
+      "año": 2005,
+      "color": "#66AAFF",
+      "influenciados": 0,
+      "influenciadores": 2,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Ryan_McGinley",
+      "google_images_url": "https://www.google.com/search?q=Ryan%20McGinley%20photographer&tbm=isch"
+    },
+    {
+      "id": "Edward Steichen",
+      "nombre": "Edward Steichen",
+      "nivel_trofico": 3.0,
+      "movimientos": [
+        "Pictorialism"
+      ],
+      "movimiento_principal": "Pictorialism",
+      "año": 1880,
+      "color": "#FF6B6B",
+      "influenciados": 3,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Edward_Steichen",
+      "google_images_url": "https://www.google.com/search?q=Edward%20Steichen%20photographer&tbm=isch"
+    },
+    {
+      "id": "Takahiko Okada",
+      "nombre": "Takahiko Okada",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Provoke Movement"
+      ],
+      "movimiento_principal": "Provoke Movement",
+      "año": 1980,
+      "color": "#99FF99",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Takahiko_Okada",
+      "google_images_url": "https://www.google.com/search?q=Takahiko%20Okada%20photographer&tbm=isch"
+    },
+    {
+      "id": "Candida Höfer",
+      "nombre": "Candida Höfer",
+      "nivel_trofico": 2.0,
+      "movimientos": [
+        "Düsseldorf School"
+      ],
+      "movimiento_principal": "Düsseldorf School",
+      "año": 1980,
+      "color": "#9999FF",
+      "influenciados": 0,
+      "influenciadores": 2,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Candida_H%C3%B6fer",
+      "google_images_url": "https://www.google.com/search?q=Candida%20H%C3%B6fer%20photographer&tbm=isch"
+    },
+    {
+      "id": "Robert Adams",
+      "nombre": "Robert Adams",
+      "nivel_trofico": 3.17,
+      "movimientos": [
+        "New Topographics"
+      ],
+      "movimiento_principal": "New Topographics",
+      "año": 1975,
+      "color": "#85C1E2",
+      "influenciados": 2,
+      "influenciadores": 3,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Robert_Adams",
+      "google_images_url": "https://www.google.com/search?q=Robert%20Adams%20photographer&tbm=isch"
+    },
+    {
+      "id": "Eugène Atget",
+      "nombre": "Eugène Atget",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Magnum Photos"
+      ],
+      "movimiento_principal": "Magnum Photos",
+      "año": 1980,
+      "color": "#45B7D1",
+      "influenciados": 3,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Eug%C3%A8ne_Atget",
+      "google_images_url": "https://www.google.com/search?q=Eug%C3%A8ne%20Atget%20photographer&tbm=isch"
+    },
+    {
+      "id": "Felice Beato",
+      "nombre": "Felice Beato",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Japanese Documentary"
+      ],
+      "movimiento_principal": "Japanese Documentary",
+      "año": 1980,
+      "color": "#66FF99",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Felice_Beato",
+      "google_images_url": "https://www.google.com/search?q=Felice%20Beato%20photographer&tbm=isch"
+    },
+    {
+      "id": "Irving Penn",
+      "nombre": "Irving Penn",
+      "nivel_trofico": 2.0,
+      "movimientos": [
+        "Fashion Photography"
+      ],
+      "movimiento_principal": "Fashion Photography",
+      "año": 1960,
+      "color": "#F7DC6F",
+      "influenciados": 2,
+      "influenciadores": 3,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Irving_Penn",
+      "google_images_url": "https://www.google.com/search?q=Irving%20Penn%20photographer&tbm=isch"
+    },
+    {
+      "id": "John Divola",
+      "nombre": "John Divola",
+      "nivel_trofico": 4.88,
+      "movimientos": [
+        "Straight Photography"
+      ],
+      "movimiento_principal": "Straight Photography",
+      "año": 1980,
+      "color": "#4ECDC4",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/John_Divola",
+      "google_images_url": "https://www.google.com/search?q=John%20Divola%20photographer&tbm=isch"
+    },
+    {
+      "id": "Edward Weston",
+      "nombre": "Edward Weston",
+      "nivel_trofico": 3.0,
+      "movimientos": [
+        "Straight Photography"
+      ],
+      "movimiento_principal": "Straight Photography",
+      "año": 1910,
+      "color": "#4ECDC4",
+      "influenciados": 3,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Edward_Weston",
+      "google_images_url": "https://www.google.com/search?q=Edward%20Weston%20photographer&tbm=isch"
+    },
+    {
+      "id": "Alexander Rodchenko",
+      "nombre": "Alexander Rodchenko",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Constructivist"
+      ],
+      "movimiento_principal": "Constructivist",
+      "año": 1925,
+      "color": "#66CCFF",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Alexander_Rodchenko",
+      "google_images_url": "https://www.google.com/search?q=Alexander%20Rodchenko%20photographer&tbm=isch"
+    },
+    {
+      "id": "Sebastião Salgado",
+      "nombre": "Sebastião Salgado",
+      "nivel_trofico": 2.0,
+      "movimientos": [
+        "Documentary Photography"
+      ],
+      "movimiento_principal": "Documentary Photography",
+      "año": 1950,
+      "color": "#FF9999",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Sebasti%C3%A3o_Salgado",
+      "google_images_url": "https://www.google.com/search?q=Sebasti%C3%A3o%20Salgado%20photographer&tbm=isch"
+    },
+    {
+      "id": "Joseph Nicéphore Niépce",
+      "nombre": "Joseph Nicéphore Niépce",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Pioneers"
+      ],
+      "movimiento_principal": "Pioneers",
+      "año": 1840,
+      "color": "#FFAAFF",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Joseph_Nic%C3%A9phore_Ni%C3%A9pce",
+      "google_images_url": "https://www.google.com/search?q=Joseph%20Nic%C3%A9phore%20Ni%C3%A9pce%20photographer&tbm=isch"
+    },
+    {
+      "id": "John Baldessari",
+      "nombre": "John Baldessari",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Conceptual Art"
+      ],
+      "movimiento_principal": "Conceptual Art",
+      "año": 1980,
+      "color": "#AA99FF",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/John_Baldessari",
+      "google_images_url": "https://www.google.com/search?q=John%20Baldessari%20photographer&tbm=isch"
+    },
+    {
+      "id": "Takuma Nakahira",
+      "nombre": "Takuma Nakahira",
+      "nivel_trofico": 2.5,
+      "movimientos": [
+        "Provoke Movement"
+      ],
+      "movimiento_principal": "Provoke Movement",
+      "año": 1970,
+      "color": "#99FF99",
+      "influenciados": 0,
+      "influenciadores": 2,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Takuma_Nakahira",
+      "google_images_url": "https://www.google.com/search?q=Takuma%20Nakahira%20photographer&tbm=isch"
+    },
+    {
+      "id": "Wolfgang Tillmans",
+      "nombre": "Wolfgang Tillmans",
+      "nivel_trofico": 3.85,
+      "movimientos": [
+        "Contemporary Art"
+      ],
+      "movimiento_principal": "Contemporary Art",
+      "año": 2000,
+      "color": "#AA66FF",
+      "influenciados": 1,
+      "influenciadores": 2,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Wolfgang_Tillmans",
+      "google_images_url": "https://www.google.com/search?q=Wolfgang%20Tillmans%20photographer&tbm=isch"
+    },
+    {
+      "id": "Marcel Duchamp",
+      "nombre": "Marcel Duchamp",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Dadaism"
+      ],
+      "movimiento_principal": "Dadaism",
+      "año": 1980,
+      "color": "#FFAA66",
+      "influenciados": 2,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Marcel_Duchamp",
+      "google_images_url": "https://www.google.com/search?q=Marcel%20Duchamp%20photographer&tbm=isch"
+    },
+    {
+      "id": "Garry Winogrand",
+      "nombre": "Garry Winogrand",
+      "nivel_trofico": 3.38,
+      "movimientos": [
+        "Street Photography"
+      ],
+      "movimiento_principal": "Street Photography",
+      "año": 1960,
+      "color": "#98D8C8",
+      "influenciados": 3,
+      "influenciadores": 2,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Garry_Winogrand",
+      "google_images_url": "https://www.google.com/search?q=Garry%20Winogrand%20photographer&tbm=isch"
+    },
+    {
+      "id": "André Breton",
+      "nombre": "André Breton",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Surrealism"
+      ],
+      "movimiento_principal": "Surrealism",
+      "año": 1980,
+      "color": "#66FFAA",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Andr%C3%A9_Breton",
+      "google_images_url": "https://www.google.com/search?q=Andr%C3%A9%20Breton%20photographer&tbm=isch"
+    },
+    {
+      "id": "Keizo Kitajima",
+      "nombre": "Keizo Kitajima",
+      "nivel_trofico": 3.54,
+      "movimientos": [
+        "Provoke Movement"
+      ],
+      "movimiento_principal": "Provoke Movement",
+      "año": 1980,
+      "color": "#99FF99",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Keizo_Kitajima",
+      "google_images_url": "https://www.google.com/search?q=Keizo%20Kitajima%20photographer&tbm=isch"
+    },
+    {
+      "id": "Jeanne Bertrand",
+      "nombre": "Jeanne Bertrand",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Street Photography"
+      ],
+      "movimiento_principal": "Street Photography",
+      "año": 1980,
+      "color": "#98D8C8",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Jeanne_Bertrand",
+      "google_images_url": "https://www.google.com/search?q=Jeanne%20Bertrand%20photographer&tbm=isch"
+    },
+    {
+      "id": "Takeji Iwamiya",
+      "nombre": "Takeji Iwamiya",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Provoke Movement"
+      ],
+      "movimiento_principal": "Provoke Movement",
+      "año": 1980,
+      "color": "#99FF99",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Takeji_Iwamiya",
+      "google_images_url": "https://www.google.com/search?q=Takeji%20Iwamiya%20photographer&tbm=isch"
+    },
+    {
+      "id": "Horst P. Horst",
+      "nombre": "Horst P. Horst",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Fashion Photography"
+      ],
+      "movimiento_principal": "Fashion Photography",
+      "año": 1960,
+      "color": "#F7DC6F",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Horst_P._Horst",
+      "google_images_url": "https://www.google.com/search?q=Horst%20P.%20Horst%20photographer&tbm=isch"
+    },
+    {
+      "id": "Man Ray",
+      "nombre": "Man Ray",
+      "nivel_trofico": 2.0,
+      "movimientos": [
+        "Surrealism/Dadaism"
+      ],
+      "movimiento_principal": "Surrealism/Dadaism",
+      "año": 1940,
+      "color": "#BB8FCE",
+      "influenciados": 3,
+      "influenciadores": 5,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Man_Ray",
+      "google_images_url": "https://www.google.com/search?q=Man%20Ray%20photographer&tbm=isch"
+    },
+    {
+      "id": "Dan Graham",
+      "nombre": "Dan Graham",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Conceptual Art"
+      ],
+      "movimiento_principal": "Conceptual Art",
+      "año": 1980,
+      "color": "#AA99FF",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Dan_Graham",
+      "google_images_url": "https://www.google.com/search?q=Dan%20Graham%20photographer&tbm=isch"
+    },
+    {
+      "id": "Paolo Roversi",
+      "nombre": "Paolo Roversi",
+      "nivel_trofico": 3.0,
+      "movimientos": [
+        "Fashion Photography"
+      ],
+      "movimiento_principal": "Fashion Photography",
+      "año": 1980,
+      "color": "#F7DC6F",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Paolo_Roversi",
+      "google_images_url": "https://www.google.com/search?q=Paolo%20Roversi%20photographer&tbm=isch"
+    },
+    {
+      "id": "Steve McCurry",
+      "nombre": "Steve McCurry",
+      "nivel_trofico": 4.0,
+      "movimientos": [
+        "Magnum Photos"
+      ],
+      "movimiento_principal": "Magnum Photos",
+      "año": 1980,
+      "color": "#45B7D1",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Steve_McCurry",
+      "google_images_url": "https://www.google.com/search?q=Steve%20McCurry%20photographer&tbm=isch"
+    },
+    {
+      "id": "Cecil Beaton",
+      "nombre": "Cecil Beaton",
+      "nivel_trofico": 4.0,
+      "movimientos": [
+        "Fashion Photography"
+      ],
+      "movimiento_principal": "Fashion Photography",
+      "año": 1960,
+      "color": "#F7DC6F",
+      "influenciados": 3,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Cecil_Beaton",
+      "google_images_url": "https://www.google.com/search?q=Cecil%20Beaton%20photographer&tbm=isch"
+    },
+    {
+      "id": "Berenice Abbott",
+      "nombre": "Berenice Abbott",
+      "nivel_trofico": 2.5,
+      "movimientos": [
+        "Documentary Photography"
+      ],
+      "movimiento_principal": "Documentary Photography",
+      "año": 1950,
+      "color": "#FF9999",
+      "influenciados": 1,
+      "influenciadores": 2,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Berenice_Abbott",
+      "google_images_url": "https://www.google.com/search?q=Berenice%20Abbott%20photographer&tbm=isch"
+    },
+    {
+      "id": "Lewis Hine",
+      "nombre": "Lewis Hine",
+      "nivel_trofico": 2.0,
+      "movimientos": [
+        "Social Documentary"
+      ],
+      "movimiento_principal": "Social Documentary",
+      "año": 1935,
+      "color": "#99CCFF",
+      "influenciados": 2,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Lewis_Hine",
+      "google_images_url": "https://www.google.com/search?q=Lewis%20Hine%20photographer&tbm=isch"
+    },
+    {
+      "id": "Minor White",
+      "nombre": "Minor White",
+      "nivel_trofico": 3.69,
+      "movimientos": [
+        "Photography Education"
+      ],
+      "movimiento_principal": "Photography Education",
+      "año": 1960,
+      "color": "#FFCCAA",
+      "influenciados": 2,
+      "influenciadores": 4,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Minor_White",
+      "google_images_url": "https://www.google.com/search?q=Minor%20White%20photographer&tbm=isch"
+    },
+    {
+      "id": "Francis Picabia",
+      "nombre": "Francis Picabia",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Dadaism"
+      ],
+      "movimiento_principal": "Dadaism",
+      "año": 1980,
+      "color": "#FFAA66",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Francis_Picabia",
+      "google_images_url": "https://www.google.com/search?q=Francis%20Picabia%20photographer&tbm=isch"
+    },
+    {
+      "id": "Duane Michals",
+      "nombre": "Duane Michals",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Conceptual Photography"
+      ],
+      "movimiento_principal": "Conceptual Photography",
+      "año": 1985,
+      "color": "#CCCCFF",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Duane_Michals",
+      "google_images_url": "https://www.google.com/search?q=Duane%20Michals%20photographer&tbm=isch"
+    },
+    {
+      "id": "Joel Meyerowitz",
+      "nombre": "Joel Meyerowitz",
+      "nivel_trofico": 3.5,
+      "movimientos": [
+        "Magnum Photos"
+      ],
+      "movimiento_principal": "Magnum Photos",
+      "año": 1980,
+      "color": "#45B7D1",
+      "influenciados": 0,
+      "influenciadores": 3,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Joel_Meyerowitz",
+      "google_images_url": "https://www.google.com/search?q=Joel%20Meyerowitz%20photographer&tbm=isch"
+    },
+    {
+      "id": "Eugene Smith",
+      "nombre": "Eugene Smith",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Documentary Photography"
+      ],
+      "movimiento_principal": "Documentary Photography",
+      "año": 1950,
+      "color": "#FF9999",
+      "influenciados": 3,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Eugene_Smith",
+      "google_images_url": "https://www.google.com/search?q=Eugene%20Smith%20photographer&tbm=isch"
+    },
+    {
+      "id": "Julia Margaret Cameron",
+      "nombre": "Julia Margaret Cameron",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Pioneers"
+      ],
+      "movimiento_principal": "Pioneers",
+      "año": 1840,
+      "color": "#FFAAFF",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Julia_Margaret_Cameron",
+      "google_images_url": "https://www.google.com/search?q=Julia%20Margaret%20Cameron%20photographer&tbm=isch"
+    },
+    {
+      "id": "Eleanor Antin",
+      "nombre": "Eleanor Antin",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Conceptual Art"
+      ],
+      "movimiento_principal": "Conceptual Art",
+      "año": 1980,
+      "color": "#AA99FF",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Eleanor_Antin",
+      "google_images_url": "https://www.google.com/search?q=Eleanor%20Antin%20photographer&tbm=isch"
+    },
+    {
+      "id": "Brian Duffy",
+      "nombre": "Brian Duffy",
+      "nivel_trofico": 6.0,
+      "movimientos": [
+        "Fashion Photography"
+      ],
+      "movimiento_principal": "Fashion Photography",
+      "año": 1960,
+      "color": "#F7DC6F",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Brian_Duffy",
+      "google_images_url": "https://www.google.com/search?q=Brian%20Duffy%20photographer&tbm=isch"
+    },
+    {
+      "id": "George Rodger",
+      "nombre": "George Rodger",
+      "nivel_trofico": 5.0,
+      "movimientos": [
+        "Magnum Photos"
+      ],
+      "movimiento_principal": "Magnum Photos",
+      "año": 1950,
+      "color": "#45B7D1",
+      "influenciados": 2,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/George_Rodger",
+      "google_images_url": "https://www.google.com/search?q=George%20Rodger%20photographer&tbm=isch"
+    },
+    {
+      "id": "Suzy Lake",
+      "nombre": "Suzy Lake",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Conceptual Art"
+      ],
+      "movimiento_principal": "Conceptual Art",
+      "año": 1980,
+      "color": "#AA99FF",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Suzy_Lake",
+      "google_images_url": "https://www.google.com/search?q=Suzy%20Lake%20photographer&tbm=isch"
+    },
+    {
+      "id": "Brassaï",
+      "nombre": "Brassaï",
+      "nivel_trofico": 2.0,
+      "movimientos": [
+        "Street Photography"
+      ],
+      "movimiento_principal": "Street Photography",
+      "año": 1960,
+      "color": "#98D8C8",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Brassa%C3%AF",
+      "google_images_url": "https://www.google.com/search?q=Brassa%C3%AF%20photographer&tbm=isch"
+    },
+    {
+      "id": "Nan Goldin",
+      "nombre": "Nan Goldin",
+      "nivel_trofico": 3.2,
+      "movimientos": [
+        "Contemporary Documentary"
+      ],
+      "movimiento_principal": "Contemporary Documentary",
+      "año": 1990,
+      "color": "#CCAAFF",
+      "influenciados": 3,
+      "influenciadores": 5,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Nan_Goldin",
+      "google_images_url": "https://www.google.com/search?q=Nan%20Goldin%20photographer&tbm=isch"
+    },
+    {
+      "id": "William Christenberry",
+      "nombre": "William Christenberry",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Color Photography"
+      ],
+      "movimiento_principal": "Color Photography",
+      "año": 1970,
+      "color": "#FF99FF",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/William_Christenberry",
+      "google_images_url": "https://www.google.com/search?q=William%20Christenberry%20photographer&tbm=isch"
+    },
+    {
+      "id": "Clarence White",
+      "nombre": "Clarence White",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Pictorialism"
+      ],
+      "movimiento_principal": "Pictorialism",
+      "año": 1880,
+      "color": "#FF6B6B",
+      "influenciados": 2,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Clarence_White",
+      "google_images_url": "https://www.google.com/search?q=Clarence%20White%20photographer&tbm=isch"
+    },
+    {
+      "id": "Andreas Gursky",
+      "nombre": "Andreas Gursky",
+      "nivel_trofico": 2.42,
+      "movimientos": [
+        "Düsseldorf School"
+      ],
+      "movimiento_principal": "Düsseldorf School",
+      "año": 1980,
+      "color": "#9999FF",
+      "influenciados": 1,
+      "influenciadores": 3,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Andreas_Gursky",
+      "google_images_url": "https://www.google.com/search?q=Andreas%20Gursky%20photographer&tbm=isch"
+    },
+    {
+      "id": "Paul Taylor",
+      "nombre": "Paul Taylor",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "FSA/Documentary"
+      ],
+      "movimiento_principal": "FSA/Documentary",
+      "año": 1980,
+      "color": "#FFA07A",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Paul_Taylor",
+      "google_images_url": "https://www.google.com/search?q=Paul%20Taylor%20photographer&tbm=isch"
+    },
+    {
+      "id": "Willy Ronis",
+      "nombre": "Willy Ronis",
+      "nivel_trofico": 2.0,
+      "movimientos": [
+        "Street Photography"
+      ],
+      "movimiento_principal": "Street Photography",
+      "año": 1960,
+      "color": "#98D8C8",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Willy_Ronis",
+      "google_images_url": "https://www.google.com/search?q=Willy%20Ronis%20photographer&tbm=isch"
+    },
+    {
+      "id": "Bernd Becher",
+      "nombre": "Bernd Becher",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "New Topographics"
+      ],
+      "movimiento_principal": "New Topographics",
+      "año": 1975,
+      "color": "#85C1E2",
+      "influenciados": 5,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Bernd_Becher",
+      "google_images_url": "https://www.google.com/search?q=Bernd%20Becher%20photographer&tbm=isch"
+    },
+    {
+      "id": "Yukio Mishima",
+      "nombre": "Yukio Mishima",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Literary Collaboration"
+      ],
+      "movimiento_principal": "Literary Collaboration",
+      "año": 1970,
+      "color": "#CCFF66",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Yukio_Mishima",
+      "google_images_url": "https://www.google.com/search?q=Yukio%20Mishima%20photographer&tbm=isch"
+    },
+    {
+      "id": "Arnold Genthe",
+      "nombre": "Arnold Genthe",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "Pictorialism"
+      ],
+      "movimiento_principal": "Pictorialism",
+      "año": 1880,
+      "color": "#FF6B6B",
+      "influenciados": 1,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Arnold_Genthe",
+      "google_images_url": "https://www.google.com/search?q=Arnold%20Genthe%20photographer&tbm=isch"
+    },
+    {
+      "id": "Robert Capa",
+      "nombre": "Robert Capa",
+      "nivel_trofico": 4.0,
+      "movimientos": [
+        "Magnum Photos"
+      ],
+      "movimiento_principal": "Magnum Photos",
+      "año": 1950,
+      "color": "#45B7D1",
+      "influenciados": 3,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Robert_Capa",
+      "google_images_url": "https://www.google.com/search?q=Robert%20Capa%20photographer&tbm=isch"
+    },
+    {
+      "id": "James Nachtwey",
+      "nombre": "James Nachtwey",
+      "nivel_trofico": 2.0,
+      "movimientos": [
+        "War Photography"
+      ],
+      "movimiento_principal": "War Photography",
+      "año": 1965,
+      "color": "#FF6666",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/James_Nachtwey",
+      "google_images_url": "https://www.google.com/search?q=James%20Nachtwey%20photographer&tbm=isch"
+    },
+    {
+      "id": "Rinko Kawauchi",
+      "nombre": "Rinko Kawauchi",
+      "nivel_trofico": 3.0,
+      "movimientos": [
+        "Contemporary Japanese"
+      ],
+      "movimiento_principal": "Contemporary Japanese",
+      "año": 2000,
+      "color": "#AACCFF",
+      "influenciados": 0,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Rinko_Kawauchi",
+      "google_images_url": "https://www.google.com/search?q=Rinko%20Kawauchi%20photographer&tbm=isch"
+    },
+    {
+      "id": "Thomas Ruff",
+      "nombre": "Thomas Ruff",
+      "nivel_trofico": 2.0,
+      "movimientos": [
+        "Düsseldorf School"
+      ],
+      "movimiento_principal": "Düsseldorf School",
+      "año": 1980,
+      "color": "#9999FF",
+      "influenciados": 0,
+      "influenciadores": 2,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Thomas_Ruff",
+      "google_images_url": "https://www.google.com/search?q=Thomas%20Ruff%20photographer&tbm=isch"
+    },
+    {
+      "id": "Walker Evans",
+      "nombre": "Walker Evans",
+      "nivel_trofico": 2.0,
+      "movimientos": [
+        "FSA/Documentary"
+      ],
+      "movimiento_principal": "FSA/Documentary",
+      "año": 1940,
+      "color": "#FFA07A",
+      "influenciados": 7,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Walker_Evans",
+      "google_images_url": "https://www.google.com/search?q=Walker%20Evans%20photographer&tbm=isch"
+    },
+    {
+      "id": "Gertrude Käsebier",
+      "nombre": "Gertrude Käsebier",
+      "nivel_trofico": 2.0,
+      "movimientos": [
+        "Pictorialism"
+      ],
+      "movimiento_principal": "Pictorialism",
+      "año": 1880,
+      "color": "#FF6B6B",
+      "influenciados": 2,
+      "influenciadores": 1,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Gertrude_K%C3%A4sebier",
+      "google_images_url": "https://www.google.com/search?q=Gertrude%20K%C3%A4sebier%20photographer&tbm=isch"
+    },
+    {
+      "id": "Hilla Becher",
+      "nombre": "Hilla Becher",
+      "nivel_trofico": 1.0,
+      "movimientos": [
+        "New Topographics"
+      ],
+      "movimiento_principal": "New Topographics",
+      "año": 1975,
+      "color": "#85C1E2",
+      "influenciados": 5,
+      "influenciadores": 0,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Hilla_Becher",
+      "google_images_url": "https://www.google.com/search?q=Hilla%20Becher%20photographer&tbm=isch"
+    }
+  ],
+  "links": [
+    {
+      "source": "Jack Kerouac",
+      "target": "Daido Moriyama"
+    },
+    {
+      "source": "Louise Dahl-Wolfe",
+      "target": "Richard Avedon"
+    },
+    {
+      "source": "Shomei Tomatsu",
+      "target": "Eikoh Hosoe"
+    },
+    {
+      "source": "Shomei Tomatsu",
+      "target": "Takuma Nakahira"
+    },
+    {
+      "source": "Shomei Tomatsu",
+      "target": "Daido Moriyama"
+    },
+    {
+      "source": "Shomei Tomatsu",
+      "target": "Nobuyoshi Araki"
+    },
+    {
+      "source": "Edward Hopper",
+      "target": "Jeff Wall"
+    },
+    {
+      "source": "Ihei Kimura",
+      "target": "Shomei Tomatsu"
+    },
+    {
+      "source": "Alexander Liberman",
+      "target": "Irving Penn"
+    },
+    {
+      "source": "Alexander Liberman",
+      "target": "Helmut Newton"
+    },
+    {
+      "source": "Alexander Liberman",
+      "target": "William Klein"
+    },
+    {
+      "source": "Alfred Stieglitz",
+      "target": "Edward Weston"
+    },
+    {
+      "source": "Alfred Stieglitz",
+      "target": "Ansel Adams"
+    },
+    {
+      "source": "Alfred Stieglitz",
+      "target": "Paul Strand"
+    },
+    {
+      "source": "Alfred Stieglitz",
+      "target": "Georgia O'Keeffe"
+    },
+    {
+      "source": "Alfred Stieglitz",
+      "target": "Edward Steichen"
+    },
+    {
+      "source": "Diego Velázquez",
+      "target": "Jeff Wall"
+    },
+    {
+      "source": "Harry Callahan",
+      "target": "John Divola"
+    },
+    {
+      "source": "Eve Arnold",
+      "target": "Mary Ellen Mark"
+    },
+    {
+      "source": "Salvador Dalí",
+      "target": "Man Ray"
+    },
+    {
+      "source": "Max Ernst",
+      "target": "Man Ray"
+    },
+    {
+      "source": "Elliott Erwitt",
+      "target": "Alex Webb"
+    },
+    {
+      "source": "Elliott Erwitt",
+      "target": "Bruce Davidson"
+    },
+    {
+      "source": "Richard Avedon",
+      "target": "Diane Arbus"
+    },
+    {
+      "source": "Richard Avedon",
+      "target": "Mario Testino"
+    },
+    {
+      "source": "Richard Avedon",
+      "target": "Helmut Newton"
+    },
+    {
+      "source": "Stephen Shore",
+      "target": "Joel Sternfeld"
+    },
+    {
+      "source": "Stephen Shore",
+      "target": "Alec Soth"
+    },
+    {
+      "source": "Stephen Shore",
+      "target": "Thomas Struth"
+    },
+    {
+      "source": "Paul Strand",
+      "target": "Minor White"
+    },
+    {
+      "source": "Paul Strand",
+      "target": "Harry Callahan"
+    },
+    {
+      "source": "Guy Bourdin",
+      "target": "Nick Knight"
+    },
+    {
+      "source": "Roy Stryker",
+      "target": "Dorothea Lange"
+    },
+    {
+      "source": "William Klein",
+      "target": "Daido Moriyama"
+    },
+    {
+      "source": "William Klein",
+      "target": "Bruce Gilden"
+    },
+    {
+      "source": "William Klein",
+      "target": "Garry Winogrand"
+    },
+    {
+      "source": "William Klein",
+      "target": "Nan Goldin"
+    },
+    {
+      "source": "Lisette Model",
+      "target": "Diane Arbus"
+    },
+    {
+      "source": "Lisette Model",
+      "target": "William Klein"
+    },
+    {
+      "source": "Jacob Riis",
+      "target": "Lewis Hine"
+    },
+    {
+      "source": "Imogen Cunningham",
+      "target": "Minor White"
+    },
+    {
+      "source": "William Eggleston",
+      "target": "Stephen Shore"
+    },
+    {
+      "source": "William Eggleston",
+      "target": "Joel Sternfeld"
+    },
+    {
+      "source": "William Eggleston",
+      "target": "Nan Goldin"
+    },
+    {
+      "source": "Jeff Wall",
+      "target": "Gregory Crewdson"
+    },
+    {
+      "source": "Jeff Wall",
+      "target": "Andreas Gursky"
+    },
+    {
+      "source": "Larry Clark",
+      "target": "Nan Goldin"
+    },
+    {
+      "source": "Lee Friedlander",
+      "target": "Alex Webb"
+    },
+    {
+      "source": "Lee Friedlander",
+      "target": "Todd Hido"
+    },
+    {
+      "source": "Norman Parkinson",
+      "target": "Mario Testino"
+    },
+    {
+      "source": "Bruce Davidson",
+      "target": "Susan Meiselas"
+    },
+    {
+      "source": "Ansel Adams",
+      "target": "Joel Meyerowitz"
+    },
+    {
+      "source": "Ansel Adams",
+      "target": "Minor White"
+    },
+    {
+      "source": "Ansel Adams",
+      "target": "Hiroshi Sugimoto"
+    },
+    {
+      "source": "Ansel Adams",
+      "target": "Robert Adams"
+    },
+    {
+      "source": "André Kertész",
+      "target": "Henri Cartier-Bresson"
+    },
+    {
+      "source": "André Kertész",
+      "target": "Brassaï"
+    },
+    {
+      "source": "André Kertész",
+      "target": "William Klein"
+    },
+    {
+      "source": "Ed Ruscha",
+      "target": "Lewis Baltz"
+    },
+    {
+      "source": "Ed Ruscha",
+      "target": "Robert Adams"
+    },
+    {
+      "source": "Robert Doisneau",
+      "target": "Willy Ronis"
+    },
+    {
+      "source": "Robert Doisneau",
+      "target": "Edouard Boubat"
+    },
+    {
+      "source": "Koji Taki",
+      "target": "Takuma Nakahira"
+    },
+    {
+      "source": "Koji Taki",
+      "target": "Daido Moriyama"
+    },
+    {
+      "source": "Alexey Brodovitch",
+      "target": "Richard Avedon"
+    },
+    {
+      "source": "Alexey Brodovitch",
+      "target": "Irving Penn"
+    },
+    {
+      "source": "Alexey Brodovitch",
+      "target": "Guy Bourdin"
+    },
+    {
+      "source": "Willard Van Dyke",
+      "target": "Minor White"
+    },
+    {
+      "source": "Keith Arnatt",
+      "target": "Thomas Struth"
+    },
+    {
+      "source": "Helmut Newton",
+      "target": "Guy Bourdin"
+    },
+    {
+      "source": "Helmut Newton",
+      "target": "Ellen von Unwerth"
+    },
+    {
+      "source": "Helmut Newton",
+      "target": "Peter Lindbergh"
+    },
+    {
+      "source": "Daido Moriyama",
+      "target": "Keizo Kitajima"
+    },
+    {
+      "source": "Henri Cartier-Bresson",
+      "target": "Robert Capa"
+    },
+    {
+      "source": "Henri Cartier-Bresson",
+      "target": "Steve McCurry"
+    },
+    {
+      "source": "Henri Cartier-Bresson",
+      "target": "Joel Meyerowitz"
+    },
+    {
+      "source": "Henri Cartier-Bresson",
+      "target": "Elliott Erwitt"
+    },
+    {
+      "source": "Henri Cartier-Bresson",
+      "target": "Bruce Davidson"
+    },
+    {
+      "source": "Robert Frank",
+      "target": "Nan Goldin"
+    },
+    {
+      "source": "Robert Frank",
+      "target": "Wolfgang Tillmans"
+    },
+    {
+      "source": "Robert Frank",
+      "target": "Lee Friedlander"
+    },
+    {
+      "source": "Robert Frank",
+      "target": "Garry Winogrand"
+    },
+    {
+      "source": "Lewis Baltz",
+      "target": "Frank Gohlke"
+    },
+    {
+      "source": "Lewis Baltz",
+      "target": "Nicholas Nixon"
+    },
+    {
+      "source": "Eikoh Hosoe",
+      "target": "Daido Moriyama"
+    },
+    {
+      "source": "Weegee",
+      "target": "William Klein"
+    },
+    {
+      "source": "Weegee",
+      "target": "Bruce Gilden"
+    },
+    {
+      "source": "Bill Brandt",
+      "target": "Robert Frank"
+    },
+    {
+      "source": "Hiroshi Hamaya",
+      "target": "Shomei Tomatsu"
+    },
+    {
+      "source": "Diane Arbus",
+      "target": "Nan Goldin"
+    },
+    {
+      "source": "Diane Arbus",
+      "target": "Mary Ellen Mark"
+    },
+    {
+      "source": "Bruce Gilden",
+      "target": "Matt Stuart"
+    },
+    {
+      "source": "David Seymour (Chim)",
+      "target": "Cornell Capa"
+    },
+    {
+      "source": "David Seymour (Chim)",
+      "target": "Marc Riboud"
+    },
+    {
+      "source": "Fernand Léger",
+      "target": "William Klein"
+    },
+    {
+      "source": "Saul Leiter",
+      "target": "Alex Webb"
+    },
+    {
+      "source": "Saul Leiter",
+      "target": "Joel Meyerowitz"
+    },
+    {
+      "source": "David Bailey",
+      "target": "Brian Duffy"
+    },
+    {
+      "source": "David Bailey",
+      "target": "Terence Donovan"
+    },
+    {
+      "source": "David Bailey",
+      "target": "Mario Testino"
+    },
+    {
+      "source": "Edward Steichen",
+      "target": "Lee Miller"
+    },
+    {
+      "source": "Edward Steichen",
+      "target": "Cecil Beaton"
+    },
+    {
+      "source": "Edward Steichen",
+      "target": "Louise Dahl-Wolfe"
+    },
+    {
+      "source": "Takahiko Okada",
+      "target": "Daido Moriyama"
+    },
+    {
+      "source": "Robert Adams",
+      "target": "Joel Sternfeld"
+    },
+    {
+      "source": "Robert Adams",
+      "target": "Stephen Shore"
+    },
+    {
+      "source": "Eugène Atget",
+      "target": "Henri Cartier-Bresson"
+    },
+    {
+      "source": "Eugène Atget",
+      "target": "Walker Evans"
+    },
+    {
+      "source": "Eugène Atget",
+      "target": "Berenice Abbott"
+    },
+    {
+      "source": "Felice Beato",
+      "target": "Kusakabe Kimbei"
+    },
+    {
+      "source": "Irving Penn",
+      "target": "Rinko Kawauchi"
+    },
+    {
+      "source": "Irving Penn",
+      "target": "Paolo Roversi"
+    },
+    {
+      "source": "Edward Weston",
+      "target": "Ansel Adams"
+    },
+    {
+      "source": "Edward Weston",
+      "target": "Imogen Cunningham"
+    },
+    {
+      "source": "Edward Weston",
+      "target": "Harry Callahan"
+    },
+    {
+      "source": "Alexander Rodchenko",
+      "target": "William Klein"
+    },
+    {
+      "source": "Joseph Nicéphore Niépce",
+      "target": "Alfred Stieglitz"
+    },
+    {
+      "source": "John Baldessari",
+      "target": "Cindy Sherman"
+    },
+    {
+      "source": "Wolfgang Tillmans",
+      "target": "Ryan McGinley"
+    },
+    {
+      "source": "Marcel Duchamp",
+      "target": "Man Ray"
+    },
+    {
+      "source": "Marcel Duchamp",
+      "target": "Hiroshi Sugimoto"
+    },
+    {
+      "source": "Garry Winogrand",
+      "target": "Bruce Gilden"
+    },
+    {
+      "source": "Garry Winogrand",
+      "target": "Alex Webb"
+    },
+    {
+      "source": "Garry Winogrand",
+      "target": "Lee Friedlander"
+    },
+    {
+      "source": "André Breton",
+      "target": "Man Ray"
+    },
+    {
+      "source": "Jeanne Bertrand",
+      "target": "Vivian Maier"
+    },
+    {
+      "source": "Takeji Iwamiya",
+      "target": "Daido Moriyama"
+    },
+    {
+      "source": "Horst P. Horst",
+      "target": "Irving Penn"
+    },
+    {
+      "source": "Man Ray",
+      "target": "Lee Miller"
+    },
+    {
+      "source": "Man Ray",
+      "target": "Berenice Abbott"
+    },
+    {
+      "source": "Man Ray",
+      "target": "William Klein"
+    },
+    {
+      "source": "Dan Graham",
+      "target": "Jeff Wall"
+    },
+    {
+      "source": "Cecil Beaton",
+      "target": "David Bailey"
+    },
+    {
+      "source": "Cecil Beaton",
+      "target": "Terence Donovan"
+    },
+    {
+      "source": "Cecil Beaton",
+      "target": "Norman Parkinson"
+    },
+    {
+      "source": "Berenice Abbott",
+      "target": "Diane Arbus"
+    },
+    {
+      "source": "Lewis Hine",
+      "target": "Paul Strand"
+    },
+    {
+      "source": "Lewis Hine",
+      "target": "Dorothea Lange"
+    },
+    {
+      "source": "Minor White",
+      "target": "Carl Chiarenza"
+    },
+    {
+      "source": "Minor White",
+      "target": "Paul Caponigro"
+    },
+    {
+      "source": "Francis Picabia",
+      "target": "Man Ray"
+    },
+    {
+      "source": "Duane Michals",
+      "target": "Sandy Skoglund"
+    },
+    {
+      "source": "Eugene Smith",
+      "target": "Mary Ellen Mark"
+    },
+    {
+      "source": "Eugene Smith",
+      "target": "James Nachtwey"
+    },
+    {
+      "source": "Eugene Smith",
+      "target": "Sebastião Salgado"
+    },
+    {
+      "source": "Julia Margaret Cameron",
+      "target": "Alfred Stieglitz"
+    },
+    {
+      "source": "Eleanor Antin",
+      "target": "Cindy Sherman"
+    },
+    {
+      "source": "George Rodger",
+      "target": "Marc Riboud"
+    },
+    {
+      "source": "George Rodger",
+      "target": "Eve Arnold"
+    },
+    {
+      "source": "Suzy Lake",
+      "target": "Cindy Sherman"
+    },
+    {
+      "source": "Nan Goldin",
+      "target": "Ryan McGinley"
+    },
+    {
+      "source": "Nan Goldin",
+      "target": "Wolfgang Tillmans"
+    },
+    {
+      "source": "Nan Goldin",
+      "target": "Collier Schorr"
+    },
+    {
+      "source": "William Christenberry",
+      "target": "William Eggleston"
+    },
+    {
+      "source": "Clarence White",
+      "target": "Paul Strand"
+    },
+    {
+      "source": "Clarence White",
+      "target": "Gertrude Käsebier"
+    },
+    {
+      "source": "Andreas Gursky",
+      "target": "Thomas Struth"
+    },
+    {
+      "source": "Paul Taylor",
+      "target": "Dorothea Lange"
+    },
+    {
+      "source": "Bernd Becher",
+      "target": "Andreas Gursky"
+    },
+    {
+      "source": "Bernd Becher",
+      "target": "Thomas Struth"
+    },
+    {
+      "source": "Bernd Becher",
+      "target": "Candida Höfer"
+    },
+    {
+      "source": "Bernd Becher",
+      "target": "Thomas Ruff"
+    },
+    {
+      "source": "Bernd Becher",
+      "target": "Axel Hütte"
+    },
+    {
+      "source": "Yukio Mishima",
+      "target": "Eikoh Hosoe"
+    },
+    {
+      "source": "Arnold Genthe",
+      "target": "Dorothea Lange"
+    },
+    {
+      "source": "Robert Capa",
+      "target": "Henri Cartier-Bresson"
+    },
+    {
+      "source": "Robert Capa",
+      "target": "David Seymour (Chim)"
+    },
+    {
+      "source": "Robert Capa",
+      "target": "George Rodger"
+    },
+    {
+      "source": "Walker Evans",
+      "target": "Robert Frank"
+    },
+    {
+      "source": "Walker Evans",
+      "target": "Diane Arbus"
+    },
+    {
+      "source": "Walker Evans",
+      "target": "Robert Adams"
+    },
+    {
+      "source": "Walker Evans",
+      "target": "Stephen Shore"
+    },
+    {
+      "source": "Walker Evans",
+      "target": "William Klein"
+    },
+    {
+      "source": "Walker Evans",
+      "target": "Thomas Struth"
+    },
+    {
+      "source": "Walker Evans",
+      "target": "Jeff Wall"
+    },
+    {
+      "source": "Gertrude Käsebier",
+      "target": "Paul Strand"
+    },
+    {
+      "source": "Gertrude Käsebier",
+      "target": "Imogen Cunningham"
+    },
+    {
+      "source": "Hilla Becher",
+      "target": "Andreas Gursky"
+    },
+    {
+      "source": "Hilla Becher",
+      "target": "Thomas Struth"
+    },
+    {
+      "source": "Hilla Becher",
+      "target": "Candida Höfer"
+    },
+    {
+      "source": "Hilla Becher",
+      "target": "Thomas Ruff"
+    },
+    {
+      "source": "Hilla Becher",
+      "target": "Axel Hütte"
+    }
+  ]
+};
+
+        // Variables globales
+        let simulation;
+        let selectedNode = null;
+        let currentFilter = { movement: 'all', year: 'all' };
+
+        // Función para filtrar datos
+        function filterData() {
+            let filteredNodes = graphData.nodes.filter(node => {
+                // Filtro por movimiento
+                if (currentFilter.movement !== 'all' && node.movimiento_principal !== currentFilter.movement) {
+                    return false;
+                }
+
+                // Filtro por año
+                if (currentFilter.year !== 'all' && node.año) {
+                    const [start, end] = currentFilter.year.split('-').map(Number);
+                    if (node.año < start || node.año > end) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+
+            const filteredNodeIds = new Set(filteredNodes.map(n => n.id));
+            const filteredLinks = graphData.links.filter(link => 
+                filteredNodeIds.has(link.source.id || link.source) && 
+                filteredNodeIds.has(link.target.id || link.target)
+            );
+
+            return { nodes: filteredNodes, links: filteredLinks };
+        }
+
+        // Función para mostrar información del fotógrafo
+        function showInfo(node) {
+            selectedNode = node;
+
+            const html = `
+                <div class="fotografo-nombre">${node.nombre}</div>
+
+                <div class="info-item">
+                    <div class="info-item-label">📊 Nivel Trófico</div>
+                    <div class="info-item-value nivel-trofico">${node.nivel_trofico}</div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-item-label">🎨 Movimientos</div>
+                    <div class="info-item-value">${node.movimientos.join(', ') || 'N/A'}</div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-item-label">📅 Época Activa</div>
+                    <div class="info-item-value">${node.año ? '~' + node.año : 'N/A'}</div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-item-label">👥 Influencias</div>
+                    <div class="info-item-value">
+                        ↓ Influenciados: <strong>${node.influenciados}</strong><br>
+                        ↑ Influenciadores: <strong>${node.influenciadores}</strong>
+                    </div>
+                </div>
+
+                <div class="enlaces">
+                    <a href="${node.wikipedia_url}" target="_blank">📖 Ver en Wikipedia</a>
+                    <a href="${node.google_images_url}" target="_blank">🔍 Buscar en Google Imágenes</a>
+                </div>
+            `;
+
+            document.getElementById('info-content').innerHTML = html;
+        }
+
+        // Función para actualizar estadísticas
+        function updateStats(data) {
+            document.getElementById('stat-nodes').textContent = data.nodes.length;
+            document.getElementById('stat-links').textContent = data.links.length;
+
+            const movements = new Set(data.nodes.map(n => n.movimiento_principal));
+            document.getElementById('stat-movements').textContent = movements.size;
+        }
+
+        // Función para renderizar el grafo
+        function renderGraph() {
+            const svg = d3.select('#graph');
+            svg.selectAll('*').remove();
+
+            const width = svg.node().getBoundingClientRect().width;
+            const height = svg.node().getBoundingClientRect().height;
+
+            const filteredData = filterData();
+            updateStats(filteredData);
+
+            // Crear simulación de fuerzas
+            simulation = d3.forceSimulation(filteredData.nodes)
+                .force('link', d3.forceLink(filteredData.links)
+                    .id(d => d.id)
+                    .distance(100))
+                .force('charge', d3.forceManyBody().strength(-300))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide().radius(30));
+
+            // Crear grupo para zoom
+            const g = svg.append('g');
+
+            // Añadir zoom
+            const zoom = d3.zoom()
+                .scaleExtent([0.1, 4])
+                .on('zoom', (event) => {
+                    g.attr('transform', event.transform);
+                });
+
+            svg.call(zoom);
+
+            // Añadir enlaces
+            const link = g.append('g')
+                .selectAll('path')
+                .data(filteredData.links)
+                .join('path')
+                .attr('class', 'link')
+                .attr('marker-end', 'url(#arrow)');
+
+            // Definir marcador de flecha
+            svg.append('defs').append('marker')
+                .attr('id', 'arrow')
+                .attr('viewBox', '0 -5 10 10')
+                .attr('refX', 25)
+                .attr('refY', 0)
+                .attr('markerWidth', 6)
+                .attr('markerHeight', 6)
+                .attr('orient', 'auto')
+                .append('path')
+                .attr('d', 'M0,-5L10,0L0,5')
+                .attr('fill', '#999');
+
+            // Añadir nodos
+            const node = g.append('g')
+                .selectAll('circle')
+                .data(filteredData.nodes)
+                .join('circle')
+                .attr('class', 'node')
+                .attr('r', 15)
+                .attr('fill', d => d.color)
+                .on('click', (event, d) => {
+                    event.stopPropagation();
+                    showInfo(d);
+
+                    // Resaltar nodo seleccionado
+                    node.classed('selected', n => n.id === d.id);
+
+                    // Resaltar enlaces conectados
+                    link.classed('highlighted', l => 
+                        (l.source.id || l.source) === d.id || 
+                        (l.target.id || l.target) === d.id
+                    );
+                })
+                .call(d3.drag()
+                    .on('start', dragstarted)
+                    .on('drag', dragged)
+                    .on('end', dragended));
+
+            // Añadir etiquetas
+            const label = g.append('g')
+                .selectAll('text')
+                .data(filteredData.nodes)
+                .join('text')
+                .attr('class', 'node-label')
+                .text(d => {
+                    const partes = d.nombre.split(' ');
+                    return partes[partes.length - 1];  // Último apellido
+                });
+
+
+
+            // Actualizar posiciones en cada tick
+            simulation.on('tick', () => {
+                link.attr('d', d => {
+                    const dx = d.target.x - d.source.x;
+                    const dy = d.target.y - d.source.y;
+                    const dr = Math.sqrt(dx * dx + dy * dy);
+                    return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+                });
+
+                node
+                    .attr('cx', d => d.x)
+                    .attr('cy', d => d.y);
+
+                label
+                    .attr('x', d => d.x)
+                    .attr('y', d => d.y + 4);
+            });
+
+            // Funciones de drag
+            function dragstarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+
+            function dragended(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
+        }
+
+        // Event listeners para filtros
+        document.getElementById('filter-movement').addEventListener('change', (e) => {
+            currentFilter.movement = e.target.value;
+            renderGraph();
+        });
+
+        document.getElementById('filter-year').addEventListener('change', (e) => {
+            currentFilter.year = e.target.value;
+            renderGraph();
+        });
+
+        // Renderizar inicialmente
+        renderGraph();
+
+        // Re-renderizar al cambiar tamaño de ventana
+        window.addEventListener('resize', renderGraph);
+    </script>
+</body>
+</html>
