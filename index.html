@@ -7,102 +7,147 @@
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
+
+html, body {
+    width: 100%;
+    height: 100%;
+}
+
 body {
     font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
     color:#333;
+    overflow:hidden;
 }
+
 .container {
-    max-width:1850px;
-    margin:0 auto;
+    width:100%;
+    height:100vh;
+    margin:0;
     background:#fff;
-    min-height:100vh;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
 }
+
 header {
     background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
     color:#fff;
-    padding:28px;
+    padding:14px 24px;
     text-align:center;
-    box-shadow:0 2px 10px rgba(0,0,0,.1);
+    box-shadow:0 2px 10px rgba(0,0,0,.10);
+    flex:0 0 auto;
 }
+
 header h1 {
-    font-size:2.3em;
-    margin-bottom:10px;
+    font-size:2em;
+    margin-bottom:4px;
+    line-height:1.15;
 }
+
+header p {
+    font-size:.95em;
+    opacity:.95;
+    margin:0;
+}
+
 .main-content {
     display:flex;
-    height:calc(100vh - 170px);
+    flex:1 1 auto;
+    min-height:0;
+    height:calc(100vh - 88px);
 }
+
 .left-panel {
-    flex:1;
-    padding:20px;
+    flex:1 1 auto;
+    min-width:0;
+    padding:12px;
     border-right:2px solid #e0e0e0;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    overflow:hidden;
 }
+
 .right-panel {
-    width:430px;
-    padding:20px;
+    width:340px;
+    min-width:340px;
+    padding:12px;
     background:#f8f9fa;
     overflow-y:auto;
 }
+
 .search-section, .filters, .info-card, .legend {
     background:#fff;
-    padding:20px;
+    padding:14px;
     border-radius:10px;
-    box-shadow:0 2px 8px rgba(0,0,0,.1);
-    margin-bottom:20px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    margin-bottom:0;
 }
+
 .search-section h3, .filters h3, .info-card h3, .legend h4 {
     color:#667eea;
-    margin-bottom:14px;
+    margin-bottom:10px;
+    font-size:1.02em;
 }
+
 .search-toolbar {
     display:flex;
-    gap:10px;
+    gap:8px;
     align-items:center;
     flex-wrap:wrap;
 }
+
 .search-actions {
     display:flex;
     gap:8px;
     flex-wrap:wrap;
 }
+
 #search-input {
     flex:1;
-    min-width:260px;
-    padding:14px;
-    border:3px solid #e0e0e0;
-    border-radius:24px;
-    font-size:16px;
+    min-width:220px;
+    padding:10px 14px;
+    border:2px solid #e0e0e0;
+    border-radius:22px;
+    font-size:15px;
     outline:none;
     transition:all .25s ease;
 }
+
 #search-input:focus {
     border-color:#e74c3c;
-    box-shadow:0 0 0 3px rgba(231,76,60,.1);
+    box-shadow:0 0 0 3px rgba(231,76,60,.10);
 }
+
 .toolbar-btn {
-    padding:12px 14px;
+    padding:10px 13px;
     border:none;
-    border-radius:12px;
+    border-radius:10px;
     background:#667eea;
     color:#fff;
     font-weight:600;
+    font-size:.92em;
     cursor:pointer;
+    transition:background .2s ease;
 }
+
 .toolbar-btn:hover {
     background:#5567d8;
 }
+
 #search-results {
-    margin-top:12px;
-    max-height:220px;
+    margin-top:10px;
+    max-height:180px;
     overflow-y:auto;
     background:#f8f9fa;
     border-radius:8px;
-    padding:10px;
+    padding:8px;
     display:none;
 }
+
 .search-result {
-    padding:8px 12px;
+    padding:8px 10px;
     margin-bottom:5px;
     background:#fff;
     border-radius:5px;
@@ -111,78 +156,107 @@ header h1 {
     transition:all .2s;
     border-left:4px solid #e74c3c;
 }
+
 .search-result:hover,
 .search-result.active {
     background:#e74c3c;
     color:#fff;
-    transform:translateX(5px);
+    transform:translateX(4px);
 }
+
+.filters {
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:10px 14px;
+    align-items:end;
+}
+
+.filters h3 {
+    grid-column:1 / -1;
+    margin-bottom:0;
+}
+
 .filters label {
     display:block;
-    margin-bottom:8px;
+    margin-bottom:6px;
     font-weight:600;
     color:#555;
+    font-size:.92em;
 }
+
 .filters select {
     width:100%;
-    padding:10px;
+    padding:8px 10px;
     border:2px solid #e0e0e0;
-    border-radius:5px;
+    border-radius:6px;
     font-size:14px;
-    margin-bottom:15px;
     cursor:pointer;
+    background:#fff;
 }
+
 #graph {
     width:100%;
-    height:calc(100vh - 380px);
+    flex:1 1 auto;
+    min-height:0;
     border:2px solid #e0e0e0;
     border-radius:10px;
     background:#fff;
-    box-shadow:0 2px 8px rgba(0,0,0,.1);
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
 }
+
 .node {
     cursor:pointer;
     stroke:#fff;
     stroke-width:2px;
 }
+
 .node:hover {
     stroke:#333;
     stroke-width:3px;
 }
+
 .node.selected {
     stroke:#111;
     stroke-width:5px;
 }
+
 .node.dimmed {
     opacity:.18;
 }
+
 .node.neighbor-in {
     stroke:#1f77b4;
     stroke-width:4px;
 }
+
 .node.neighbor-out {
     stroke:#e74c3c;
     stroke-width:4px;
 }
+
 .link {
     stroke:#b0b0b0;
     stroke-opacity:.18;
     stroke-width:1.3px;
     fill:none;
 }
+
 .link.incoming {
     stroke:#1f77b4;
     stroke-opacity:.9;
     stroke-width:3px;
 }
+
 .link.outgoing {
     stroke:#e74c3c;
     stroke-opacity:.9;
     stroke-width:3px;
 }
+
 .link.dimmed {
     stroke-opacity:.06;
 }
+
 .node-label {
     font-size:10px;
     font-weight:600;
@@ -191,128 +265,157 @@ header h1 {
     fill:#fff;
     text-shadow:0 1px 2px rgba(0,0,0,.5);
 }
+
 .info-placeholder {
     text-align:center;
     color:#999;
-    padding:50px 20px;
+    padding:36px 16px;
 }
+
 .fotografo-nombre {
-    font-size:1.7em;
+    font-size:1.5em;
     font-weight:bold;
     color:#333;
     text-align:center;
-    margin-bottom:20px;
+    margin-bottom:16px;
     border-bottom:3px solid #667eea;
-    padding-bottom:12px;
+    padding-bottom:10px;
 }
+
 .info-item {
-    margin-bottom:15px;
-    padding:12px;
+    margin-bottom:12px;
+    padding:10px 12px;
     background:#f8f9fa;
     border-radius:8px;
     border-left:4px solid #667eea;
 }
+
 .info-item-label {
     font-weight:600;
     color:#555;
-    font-size:.9em;
+    font-size:.82em;
     text-transform:uppercase;
-    letter-spacing:.5px;
-    margin-bottom:5px;
+    letter-spacing:.4px;
+    margin-bottom:4px;
 }
+
 .info-item-value {
     color:#333;
-    font-size:1.02em;
+    font-size:.98em;
 }
+
 .nivel-trofico {
-    font-size:1.8em;
+    font-size:1.6em;
     font-weight:bold;
     color:#e74c3c;
 }
+
 .enlaces {
-    margin-top:25px;
+    margin-top:18px;
 }
+
 .enlaces a {
     display:block;
-    padding:12px 20px;
-    margin-bottom:10px;
+    padding:10px 14px;
+    margin-bottom:8px;
     background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
     color:#fff;
     text-decoration:none;
     border-radius:8px;
     text-align:center;
     font-weight:600;
+    font-size:.95em;
 }
+
 .neighbor-block {
-    margin-top:18px;
+    margin-top:14px;
 }
+
 .neighbor-block h4 {
     margin-bottom:8px;
     color:#444;
+    font-size:.98em;
 }
+
 .neighbor-list {
-    max-height:160px;
+    max-height:130px;
     overflow:auto;
     background:#fff;
     border:1px solid #e5e5e5;
     border-radius:8px;
-    padding:8px;
+    padding:6px;
 }
+
 .neighbor-item {
     padding:6px 8px;
     border-bottom:1px solid #f0f0f0;
-    font-size:.95em;
+    font-size:.92em;
     cursor:pointer;
 }
+
 .neighbor-item:last-child {
     border-bottom:none;
 }
+
 .neighbor-item:hover {
     background:#f3f6ff;
 }
+
 .stats {
     display:flex;
     justify-content:space-around;
-    padding:20px;
+    gap:10px;
+    padding:12px;
     background:#fff;
     border-radius:10px;
-    box-shadow:0 2px 8px rgba(0,0,0,.1);
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    flex:0 0 auto;
 }
+
 .stat-item {
     text-align:center;
+    flex:1;
 }
+
 .stat-value {
-    font-size:2em;
+    font-size:1.55em;
     font-weight:bold;
     color:#667eea;
+    line-height:1.1;
 }
+
 .stat-label {
-    font-size:.9em;
+    font-size:.82em;
     color:#666;
-    margin-top:5px;
+    margin-top:4px;
 }
+
 .legend-item {
     display:flex;
     align-items:center;
     margin-bottom:8px;
 }
+
 .legend-color {
-    width:20px;
-    height:20px;
+    width:18px;
+    height:18px;
     border-radius:50%;
     margin-right:10px;
     border:2px solid #fff;
     box-shadow:0 1px 3px rgba(0,0,0,.3);
 }
+
 .legend-label {
-    font-size:.9em;
+    font-size:.88em;
     color:#555;
 }
+
 .link-legend {
     margin-top:14px;
     padding-top:14px;
     border-top:1px solid #ececec;
 }
+
 .mini-line {
     display:inline-block;
     width:22px;
@@ -320,8 +423,30 @@ header h1 {
     margin-right:8px;
     vertical-align:middle;
 }
+
 .mini-line.in { background:#1f77b4; }
 .mini-line.out { background:#e74c3c; }
+
+@media (max-width: 1100px) {
+    .main-content {
+        flex-direction:column;
+        height:auto;
+    }
+
+    .right-panel {
+        width:100%;
+        min-width:0;
+        max-height:40vh;
+    }
+
+    .filters {
+        grid-template-columns:1fr;
+    }
+
+    #graph {
+        min-height:50vh;
+    }
+}
 </style>
 </head>
 <body>
@@ -346,21 +471,26 @@ header h1 {
 
     <div class="filters">
         <h3>Filtros</h3>
-        <label for="filter-movement">Filtrar por movimiento:</label>
-        <select id="filter-movement">
-            <option value="all">Todos los movimientos</option>
-            <option value="Art Direction">Art Direction</option><option value="Conceptual Photography">Conceptual Photography</option><option value="Constructivist">Constructivist</option><option value="Contemporary Japanese">Contemporary Japanese</option><option value="Contemporary Photography">Contemporary Photography</option><option value="Documentary Photography">Documentary Photography</option><option value="Düsseldorf School">Düsseldorf School</option><option value="Fashion/Portrait Photography">Fashion/Portrait Photography</option><option value="Futurism">Futurism</option><option value="Japanese Photography">Japanese Photography</option><option value="Magnum Photos">Magnum Photos</option><option value="Modernist Photography">Modernist Photography</option><option value="New Topographics">New Topographics</option><option value="Photography Education">Photography Education</option><option value="Pictorialism">Pictorialism</option><option value="Pioneers">Pioneers</option><option value="Provoke Movement">Provoke Movement</option><option value="Straight Photography">Straight Photography</option><option value="Street Photography">Street Photography</option><option value="Surrealism/Dada">Surrealism/Dada</option>
-        </select>
 
-        <label for="filter-year">Filtrar por época:</label>
-        <select id="filter-year">
-            <option value="all">Todas las épocas</option>
-            <option value="1800-1899">1800-1899</option>
-            <option value="1900-1949">1900-1949</option>
-            <option value="1950-1979">1950-1979</option>
-            <option value="1980-1999">1980-1999</option>
-            <option value="2000-2025">2000-2025</option>
-        </select>
+        <div>
+            <label for="filter-movement">Filtrar por movimiento:</label>
+            <select id="filter-movement">
+                <option value="all">Todos los movimientos</option>
+                <option value="Art Direction">Art Direction</option><option value="Conceptual Photography">Conceptual Photography</option><option value="Constructivist">Constructivist</option><option value="Contemporary Japanese">Contemporary Japanese</option><option value="Contemporary Photography">Contemporary Photography</option><option value="Documentary Photography">Documentary Photography</option><option value="Düsseldorf School">Düsseldorf School</option><option value="Fashion/Portrait Photography">Fashion/Portrait Photography</option><option value="Futurism">Futurism</option><option value="Japanese Photography">Japanese Photography</option><option value="Magnum Photos">Magnum Photos</option><option value="Modernist Photography">Modernist Photography</option><option value="New Topographics">New Topographics</option><option value="Photography Education">Photography Education</option><option value="Pictorialism">Pictorialism</option><option value="Pioneers">Pioneers</option><option value="Provoke Movement">Provoke Movement</option><option value="Straight Photography">Straight Photography</option><option value="Street Photography">Street Photography</option><option value="Surrealism/Dada">Surrealism/Dada</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="filter-year">Filtrar por época:</label>
+            <select id="filter-year">
+                <option value="all">Todas las épocas</option>
+                <option value="1800-1899">1800-1899</option>
+                <option value="1900-1949">1900-1949</option>
+                <option value="1950-1979">1950-1979</option>
+                <option value="1980-1999">1980-1999</option>
+                <option value="2000-2025">2000-2025</option>
+            </select>
+        </div>
     </div>
 
     <svg id="graph"></svg>
