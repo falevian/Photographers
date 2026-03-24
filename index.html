@@ -92,18 +92,6 @@ header h1 {
 .toolbar-btn:hover {
     background:#5567d8;
 }
-#export-json {
-    background:#16a085;
-}
-#export-json:hover {
-    background:#138a72;
-}
-#export-csv {
-    background:#d35400;
-}
-#export-csv:hover {
-    background:#b64500;
-}
 #search-results {
     margin-top:12px;
     max-height:220px;
@@ -340,7 +328,7 @@ header h1 {
 <div class="container">
 <header>
 <h1>🎨 Red de Influencias entre Fotógrafos</h1>
-<p>HTML interactivo con autocompletado por teclado, reset de zoom y exportación de la selección actual</p>
+<p>HTML interactivo con autocompletado por teclado y reset de zoom</p>
 </header>
 
 <div class="main-content">
@@ -351,8 +339,6 @@ header h1 {
             <input type="text" id="search-input" placeholder="Escribe el nombre del fotógrafo...">
             <div class="search-actions">
                 <button id="reset-view" class="toolbar-btn" type="button">Reset</button>
-                <button id="export-json" class="toolbar-btn" type="button">Exportar JSON</button>
-                <button id="export-csv" class="toolbar-btn" type="button">Exportar CSV</button>
             </div>
         </div>
         <div id="search-results"></div>
@@ -643,70 +629,6 @@ function zoomToNode(d, scale = 1.8) {
     svgRef.transition().duration(750).call(zoomBehavior.transform, transform);
 }
 
-function downloadBlob(content, filename, type) {
-    const blob = new Blob([content], { type: type });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
-function exportCurrentSelectionJSON() {
-    if (!selectedNodeData) {
-        alert('Primero selecciona un fotógrafo.');
-        return;
-    }
-
-    const payload = {
-        seleccionado: selectedNodeData,
-        exportado_en: new Date().toISOString()
-    };
-
-    const filename = selectedNodeData.id.replace(/[^a-z0-9]+/gi, '_') + '.json';
-    downloadBlob(JSON.stringify(payload, null, 2), filename, 'application/json;charset=utf-8');
-}
-
-function escapeCsvValue(value) {
-    const str = String(value ?? '');
-    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
-        return '"' + str.replace(/"/g, '""') + '"';
-    }
-    return str;
-}
-
-function exportCurrentSelectionCSV() {
-    if (!selectedNodeData) {
-        alert('Primero selecciona un fotógrafo.');
-        return;
-    }
-
-    const row = {
-        id: selectedNodeData.id,
-        nombre: selectedNodeData.nombre,
-        nivel_trofico: selectedNodeData.nivel_trofico,
-        movimiento_principal: selectedNodeData.movimiento_principal,
-        movimientos: selectedNodeData.movimientos.join(' | '),
-        año: selectedNodeData.año ?? '',
-        influenciados: selectedNodeData.influenciados,
-        influenciadores: selectedNodeData.influenciadores,
-        vecinos_entrantes: selectedNodeData.vecinos_entrantes.join(' | '),
-        vecinos_salientes: selectedNodeData.vecinos_salientes.join(' | '),
-        wikipedia_url: selectedNodeData.wikipedia_url,
-        google_images_url: selectedNodeData.google_images_url
-    };
-
-    const headers = Object.keys(row);
-    const values = headers.map(h => escapeCsvValue(row[h]));
-    const csv = headers.join(',') + '\n' + values.join(',');
-    const filename = selectedNodeData.id.replace(/[^a-z0-9]+/gi, '_') + '.csv';
-
-    downloadBlob(csv, filename, 'text/csv;charset=utf-8');
-}
-
 function renderGraph() {
     const svg = d3.select('#graph');
     svg.selectAll('*').remove();
@@ -840,8 +762,6 @@ searchInput.addEventListener('keydown', e => {
 });
 
 document.getElementById('reset-view').addEventListener('click', resetSelectionAndZoom);
-document.getElementById('export-json').addEventListener('click', exportCurrentSelectionJSON);
-document.getElementById('export-csv').addEventListener('click', exportCurrentSelectionCSV);
 
 document.getElementById('filter-movement').addEventListener('change', e => {
     currentFilter.movement = e.target.value;
