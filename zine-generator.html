@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zine Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f5f4f0; --bg2:#eceae4; --fg:#1a1a18; --fg2:#6b6b66; --fg3:#a0a09a;
+  --border:#d4d2cc; --border2:#bfbdb8; --red:#c0392b; --green:#27704a;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:14px;min-height:100vh}
+
+header{border-bottom:1px solid var(--border);padding:1.25rem 2.5rem;display:flex;align-items:baseline;gap:1.5rem;flex-wrap:wrap}
+header h1{font-family:var(--mono);font-size:13px;font-weight:500;letter-spacing:.12em;text-transform:uppercase}
+header .tagline{font-family:var(--mono);font-size:11px;color:var(--fg3);letter-spacing:.06em}
+
+.layout{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 55px)}
+
+aside{border-right:1px solid var(--border);padding:1.75rem;display:flex;flex-direction:column;gap:1.75rem;overflow-y:auto}
+.section-label{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--fg3);margin-bottom:.65rem}
+.field{margin-bottom:.65rem}
+.field label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg2);margin-bottom:.35rem}
+.field input,.field select{width:100%;background:#fff;border:1px solid var(--border);border-radius:3px;padding:6px 9px;font-family:var(--mono);font-size:12px;color:var(--fg);outline:none;transition:border-color .15s}
+.field input:focus,.field select:focus{border-color:var(--fg2)}
+.fields-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+.spec{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:.85rem;font-family:var(--mono);font-size:9.5px;line-height:2;color:var(--fg2)}
+.spec b{color:var(--fg);font-weight:500}
+.spec .dim{color:var(--fg3)}
+.spec .highlight{color:var(--fg);background:#fff;border:1px solid var(--border);border-radius:2px;padding:1px 5px}
+
+.imposition-diagram{background:#fff;border:1px solid var(--border);border-radius:4px;padding:.85rem}
+.side-labels{display:flex;gap:4px;margin-bottom:3px;padding-left:18px}
+.side-labels .sl{font-family:var(--mono);font-size:7px;color:var(--fg3);letter-spacing:.06em;flex:1;text-align:center}
+.side-labels .sl-gap{width:10px;flex-shrink:0}
+.sheet-row{display:flex;gap:4px;margin-bottom:3px;align-items:center}
+.sheet-n{font-family:var(--mono);font-size:8px;color:var(--fg3);width:14px;text-align:right;flex-shrink:0}
+.page-slot{flex:1;height:20px;border:0.5px solid var(--border);border-radius:2px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:7px;color:var(--fg2)}
+.page-slot.cover{background:#fff;color:var(--fg);border-color:var(--fg2)}
+.page-slot.blank{background:var(--bg2);color:var(--fg3)}
+.page-slot.thumbs{background:#e6f0e6;color:#1e6b3a;border-color:#a8ccb0}
+.page-slot.photo{background:#eef0f8;color:#3a3a80;border-color:#b8bce0}
+.gap-col{width:10px;flex-shrink:0;border-left:1px dashed #d0cec8;height:20px}
+.imp-legend{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.imp-legend-item{display:flex;align-items:center;gap:3px}
+.imp-legend-sq{width:9px;height:9px;border-radius:1px;border:0.5px solid var(--border)}
+.imp-legend-sq.cover{background:#fff;border-color:var(--fg2)}
+.imp-legend-sq.blank{background:var(--bg2)}
+.imp-legend-sq.thumbs{background:#e6f0e6;border-color:#a8ccb0}
+.imp-legend-sq.photo{background:#eef0f8;border-color:#b8bce0}
+.imp-legend-lbl{font-family:var(--mono);font-size:7px;color:var(--fg3);letter-spacing:.05em}
+
+main{padding:1.75rem 2.5rem;display:flex;flex-direction:column;gap:1.25rem}
+
+#dropzone{position:relative;border:1.5px dashed var(--border2);border-radius:6px;padding:2.5rem 1.5rem;text-align:center;cursor:pointer;transition:background .15s,border-color .15s;background:#fff}
+#dropzone:hover,#dropzone.over{background:var(--bg2);border-color:var(--fg2)}
+#dropzone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+#dropzone svg{margin-bottom:.65rem;color:var(--fg3)}
+#dropzone .dz-main{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--fg2);margin-bottom:.2rem}
+#dropzone .dz-hint{font-family:var(--mono);font-size:10px;color:var(--fg3);letter-spacing:.06em}
+
+.counter-row{display:flex;align-items:center;gap:1rem}
+#counter{font-family:var(--mono);font-size:11px;color:var(--fg2);flex-shrink:0}
+#counter strong{color:var(--fg);font-weight:500}
+.bar-wrap{flex:1;height:2px;background:var(--border);border-radius:2px;overflow:hidden}
+#fill-bar{height:100%;background:var(--fg);width:0%;transition:width .2s}
+
+#thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:3px}
+#thumbs .thumb{position:relative;aspect-ratio:3/2;overflow:hidden;border-radius:2px;background:var(--bg2)}
+#thumbs .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+#thumbs .thumb .num{position:absolute;bottom:2px;right:3px;font-family:var(--mono);font-size:7.5px;color:rgba(255,255,255,.9);background:rgba(0,0,0,.45);padding:1px 3px;border-radius:2px;line-height:1.2}
+#thumbs .thumb button.rm{display:none;position:absolute;top:2px;right:2px;background:rgba(0,0,0,.55);border:none;color:#fff;cursor:pointer;border-radius:2px;width:15px;height:15px;font-size:10px;line-height:1;align-items:center;justify-content:center}
+#thumbs .thumb:hover button.rm{display:flex}
+
+.actions{display:flex;gap:.65rem;flex-wrap:wrap}
+.btn{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:8px 16px;border:1px solid var(--border2);border-radius:3px;background:transparent;color:var(--fg);cursor:pointer;transition:background .1s,border-color .1s}
+.btn:hover{background:var(--bg2);border-color:var(--fg2)}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.btn-primary:hover{background:#333;border-color:#333}
+.btn-primary:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.btn-ghost{border-color:var(--border);color:var(--fg2)}
+
+#progress-wrap{display:none;flex-direction:column;gap:.4rem}
+#progress-bar-outer{height:2px;background:var(--border);border-radius:2px;overflow:hidden}
+#progress-bar-inner{height:100%;background:var(--fg);width:0%;transition:width .12s}
+#progress-label{font-family:var(--mono);font-size:10px;color:var(--fg2);letter-spacing:.04em}
+#status{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--fg2);min-height:1.2em}
+#status.ok{color:var(--green)}
+#status.err{color:var(--red)}
+
+@media(max-width:700px){
+  .layout{grid-template-columns:1fr}
+  aside{border-right:none;border-bottom:1px solid var(--border)}
+  header,main,aside{padding:1.25rem}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Zine Generator</h1>
+  <span class="tagline" id="header-tagline">hojas dinámicas · imposición cuadernillo · fondo blanco</span>
+</header>
+
+<div class="layout">
+<aside>
+  <div>
+    <div class="section-label">Metadatos</div>
+    <div class="field"><label>Título</label><input id="f-title" type="text" placeholder="Mi zine"></div>
+    <div class="field"><label>Autor / a</label><input id="f-author" type="text" placeholder="Nombre"></div>
+    <div class="fields-2">
+      <div class="field"><label>Número</label><input id="f-issue" type="text" placeholder="01"></div>
+      <div class="field"><label>Año</label><input id="f-year" type="text" placeholder="2025"></div>
+    </div>
+    <div class="field">
+      <label>Orden de fotos</label>
+      <select id="f-order">
+        <option value="modified">Por fecha de archivo</option>
+        <option value="name">Por nombre de archivo</option>
+        <option value="drop">Orden de carga</option>
+      </select>
+    </div>
+  </div>
+
+  <div>
+    <div class="section-label">Estructura calculada</div>
+    <div class="spec" id="spec-box">
+      Carga fotos para ver la estructura
+    </div>
+  </div>
+
+  <div>
+    <div class="section-label">Imposición</div>
+    <div class="imposition-diagram">
+      <div class="side-labels">
+        <span class="sl">FRENTE</span>
+        <span class="sl-gap"></span>
+        <span class="sl">DORSO</span>
+      </div>
+      <div id="imposition-preview"><span style="font-family:var(--mono);font-size:9px;color:var(--fg3)">Carga fotos para ver</span></div>
+      <div class="imp-legend">
+        <div class="imp-legend-item"><div class="imp-legend-sq cover"></div><span class="imp-legend-lbl">PORTADA</span></div>
+        <div class="imp-legend-item"><div class="imp-legend-sq blank"></div><span class="imp-legend-lbl">BLANCO</span></div>
+        <div class="imp-legend-item"><div class="imp-legend-sq thumbs"></div><span class="imp-legend-lbl">MINIS</span></div>
+        <div class="imp-legend-item"><div class="imp-legend-sq photo"></div><span class="imp-legend-lbl">FOTO</span></div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main>
+  <div id="dropzone">
+    <input type="file" id="file-input" accept="image/jpeg,image/jpg,image/png,image/webp" multiple>
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+      <polyline points="21 15 16 10 5 21"/>
+    </svg>
+    <div class="dz-main">Suelta las fotos aquí o haz clic para seleccionar</div>
+    <div class="dz-hint">JPEG · PNG · WEBP · sin límite de fotos</div>
+  </div>
+
+  <div class="counter-row">
+    <div id="counter">Sin fotos</div>
+    <div class="bar-wrap"><div id="fill-bar"></div></div>
+  </div>
+
+  <div id="thumbs"></div>
+
+  <div class="actions">
+    <button class="btn btn-primary" id="btn-gen" disabled>Generar PDF cuadernillo</button>
+    <button class="btn btn-ghost" id="btn-clear">Limpiar</button>
+  </div>
+
+  <div id="progress-wrap">
+    <div id="progress-bar-outer"><div id="progress-bar-inner"></div></div>
+    <div id="progress-label"></div>
+  </div>
+  <div id="status"></div>
+</main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const { jsPDF } = window.jspdf;
+
+// ═══════════════════════════════════════════════════════
+//  CÁLCULO DINÁMICO DE PÁGINAS
+//
+//  Páginas fijas:
+//    1 = portada
+//    2 = blanco (interior portada)
+//    3-4 = miniaturas (2 páginas)
+//    últimas 2 = blanco (interior contra) + contraportada
+//
+//  Páginas de foto: una por foto
+//  Total bruto = 4 fijas + n_fotos + 2 finales = n_fotos + 6
+//  Se redondea al múltiplo de 4 siguiente (necesario para cuadernillo)
+//
+//  Páginas en blanco de relleno = total - (n_fotos + 6)
+//  se insertan ANTES de las páginas finales (blanco interior + contra)
+//
+//  Imposición cuadernillo para N páginas totales, hoja s (1-based):
+//    FRENTE izq = N - (s*2 - 2)
+//    FRENTE der = s*2 - 1
+//    DORSO  izq = s*2
+//    DORSO  der = N - (s*2 - 1)
+// ═══════════════════════════════════════════════════════
+
+let files = [];
+let TOTAL_PAGES = 0;
+let SHEETS = 0;
+
+function calcLayout(nPhotos) {
+  // Mínimo 4 páginas aunque no haya fotos
+  const base = nPhotos + 6; // portada + blanco + 2 minis + fotos + blanco + contra
+  const total = Math.ceil(Math.max(base, 4) / 4) * 4;
+  const sheets = total / 4;
+  const padding = total - base; // páginas en blanco extra de relleno
+  return { total, sheets, padding };
+}
+
+function imposition(sheet, N) {
+  const s = sheet;
+  return {
+    frontLeft:  N - (s * 2 - 2),
+    frontRight: s * 2 - 1,
+    backLeft:   s * 2,
+    backRight:  N - (s * 2 - 1)
+  };
+}
+
+// Mapeo de número de página → tipo de contenido
+// Depende del total de páginas y número de fotos
+function pageInfo(p, N, nPhotos) {
+  if (p === 1)   return { type: 'cover' };
+  if (p === 2)   return { type: 'blank' };
+  if (p === 3)   return { type: 'thumbs', half: 0 }; // primera mitad de miniaturas
+  if (p === 4)   return { type: 'thumbs', half: 1 }; // segunda mitad
+  // Páginas de foto: 5 hasta 4+nPhotos
+  if (p >= 5 && p <= 4 + nPhotos) return { type: 'photo', idx: p - 5 };
+  // Páginas de relleno + interior contra + contraportada
+  if (p === N)   return { type: 'backcover' };
+  if (p === N-1) return { type: 'blank' };
+  return { type: 'blank' }; // relleno
+}
+
+// ── UI: spec box y diagrama
+function updateSpec() {
+  const n = files.length;
+  const { total, sheets, padding } = calcLayout(n);
+  TOTAL_PAGES = total;
+  SHEETS = sheets;
+
+  const specEl = document.getElementById('spec-box');
+  specEl.innerHTML =
+    '<b>' + total + ' páginas · ' + sheets + ' hojas A4 dúplex</b><br>' +
+    '<span class="dim">──────────────────────</span><br>' +
+    'Pág 1 · Portada<br>' +
+    'Pág 2 · Blanco<br>' +
+    'Pág 3–4 · Miniaturas<br>' +
+    'Pág 5–' + (4 + n) + ' · <b>' + n + ' fotos</b><br>' +
+    (padding > 0 ? 'Pág ' + (5+n) + '–' + (total-2) + ' · Blanco (' + padding + ' relleno)<br>' : '') +
+    'Pág ' + (total-1) + ' · Blanco<br>' +
+    'Pág ' + total + ' · Contraportada<br>' +
+    '<span class="dim">──────────────────────</span><br>' +
+    'Dúplex A4 apaisado · volteo <b>borde largo</b><br>' +
+    'Apila en orden · encuaderna por el centro';
+
+  document.getElementById('header-tagline').textContent =
+    sheets + ' hojas · ' + total + ' páginas · cuadernillo';
+
+  buildDiagram(total, n);
+}
+
+function slotClass(p, N, nPhotos) {
+  const info = pageInfo(p, N, nPhotos);
+  return info.type === 'cover' || info.type === 'backcover' ? 'cover'
+       : info.type === 'thumbs' ? 'thumbs'
+       : info.type === 'photo'  ? 'photo'
+       : 'blank';
+}
+
+function buildDiagram(N, nPhotos) {
+  const el = document.getElementById('imposition-preview');
+  el.innerHTML = '';
+  const show = Math.min(SHEETS, 4);
+  for (let s = 1; s <= show; s++) {
+    const imp = imposition(s, N);
+    const row = document.createElement('div');
+    row.className = 'sheet-row';
+    const sn = document.createElement('div');
+    sn.className = 'sheet-n';
+    sn.textContent = s;
+    row.appendChild(sn);
+    [imp.frontLeft, imp.frontRight, null, imp.backLeft, imp.backRight].forEach(p => {
+      if (p === null) {
+        const g = document.createElement('div'); g.className = 'gap-col'; row.appendChild(g); return;
+      }
+      const d = document.createElement('div');
+      d.className = 'page-slot ' + slotClass(p, N, nPhotos);
+      d.textContent = 'p' + p;
+      d.title = 'Página ' + p + ': ' + pageInfo(p, N, nPhotos).type;
+      row.appendChild(d);
+    });
+    el.appendChild(row);
+  }
+  if (SHEETS > 4) {
+    const dots = document.createElement('div');
+    dots.style.cssText = 'font-family:var(--mono);font-size:8px;color:var(--fg3);text-align:center;padding:3px 0';
+    dots.textContent = '· · · (' + (SHEETS - 4) + ' hojas más)';
+    el.appendChild(dots);
+  }
+}
+
+// ── File handling
+const dropzone     = document.getElementById('dropzone');
+const fileInput    = document.getElementById('file-input');
+const counter      = document.getElementById('counter');
+const fillBar      = document.getElementById('fill-bar');
+const thumbsEl     = document.getElementById('thumbs');
+const btnGen       = document.getElementById('btn-gen');
+const btnClear     = document.getElementById('btn-clear');
+const statusEl     = document.getElementById('status');
+const progressWrap = document.getElementById('progress-wrap');
+const progressBar  = document.getElementById('progress-bar-inner');
+const progressLbl  = document.getElementById('progress-label');
+
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('over'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('over'));
+dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('over'); handleFiles(e.dataTransfer.files); });
+fileInput.addEventListener('change', () => { handleFiles(fileInput.files); fileInput.value = ''; });
+btnClear.addEventListener('click', clearAll);
+btnGen.addEventListener('click', generatePDF);
+document.getElementById('f-order').addEventListener('change', () => { sortFiles(); renderThumbs(); });
+
+function handleFiles(incoming) {
+  const arr = Array.from(incoming).filter(f => f.type.startsWith('image/'));
+  files = [...files, ...arr];
+  sortFiles();
+  renderThumbs();
+  updateSpec();
+}
+
+function sortFiles() {
+  const order = document.getElementById('f-order').value;
+  if (order === 'modified') files.sort((a, b) => a.lastModified - b.lastModified);
+  else if (order === 'name') files.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+}
+
+function renderThumbs() {
+  const n = files.length;
+  counter.innerHTML = '<strong>' + n + '</strong> foto' + (n !== 1 ? 's' : '');
+  fillBar.style.width = Math.min(100, (n / 52) * 100) + '%';
+  btnGen.disabled = n < 1;
+  thumbsEl.innerHTML = '';
+  files.forEach((f, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'thumb';
+    const img = new Image();
+    img.src = URL.createObjectURL(f);
+    wrap.appendChild(img);
+    const num = document.createElement('div');
+    num.className = 'num';
+    num.textContent = i + 1;
+    wrap.appendChild(num);
+    const rm = document.createElement('button');
+    rm.className = 'rm';
+    rm.innerHTML = '×';
+    rm.addEventListener('click', e => {
+      e.stopPropagation();
+      files.splice(i, 1);
+      renderThumbs();
+      updateSpec();
+    });
+    wrap.appendChild(rm);
+    thumbsEl.appendChild(wrap);
+  });
+}
+
+function clearAll() {
+  files = []; thumbsEl.innerHTML = '';
+  counter.textContent = 'Sin fotos'; fillBar.style.width = '0%';
+  btnGen.disabled = true; statusEl.textContent = ''; statusEl.className = '';
+  progressWrap.style.display = 'none';
+  TOTAL_PAGES = 0; SHEETS = 0;
+  document.getElementById('spec-box').textContent = 'Carga fotos para ver la estructura';
+  document.getElementById('imposition-preview').innerHTML =
+    '<span style="font-family:var(--mono);font-size:9px;color:var(--fg3)">Carga fotos para ver</span>';
+  document.getElementById('header-tagline').textContent = 'hojas dinámicas · imposición cuadernillo · fondo blanco';
+}
+
+function setProgress(pct, msg) {
+  progressWrap.style.display = 'flex';
+  progressBar.style.width = pct + '%';
+  progressLbl.textContent = msg;
+}
+function tick() { return new Promise(r => setTimeout(r, 0)); }
+
+function loadImage(file) {
+  return new Promise(resolve => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+    img.src = url;
+  });
+}
+
+function fitImage(img, pw, ph) {
+  const s = Math.min(pw / img.naturalWidth, ph / img.naturalHeight);
+  return { x: (pw - img.naturalWidth*s)/2, y: (ph - img.naturalHeight*s)/2, w: img.naturalWidth*s, h: img.naturalHeight*s };
+}
+
+function toJpeg(img) {
+  const c = document.createElement('canvas');
+  c.width = img.naturalWidth; c.height = img.naturalHeight;
+  c.getContext('2d').drawImage(img, 0, 0);
+  return c.toDataURL('image/jpeg', 0.88);
+}
+
+// ── Renderizadores de página
+async function renderPage(doc, p, N, nPhotos, offX, PW, PH, meta) {
+  const info = pageInfo(p, N, nPhotos);
+  const pad = 6;
+
+  // Fondo blanco siempre
+  doc.setFillColor(255, 255, 255);
+  doc.rect(offX, 0, PW, PH, 'F');
+
+  if (info.type === 'cover') {
+    renderCover(doc, offX, PW, PH, meta);
+
+  } else if (info.type === 'backcover') {
+    renderBackCover(doc, offX, PW, PH, meta);
+
+  } else if (info.type === 'blank') {
+    // Ya tiene fondo blanco, nada más
+
+  } else if (info.type === 'thumbs') {
+    await renderThumbnailPage(doc, info.half, offX, PW, PH, nPhotos);
+
+  } else if (info.type === 'photo') {
+    const idx = info.idx;
+    if (idx < files.length) {
+      const img = await loadImage(files[idx]);
+      if (img) {
+        const fit = fitImage(img, PW - pad*2, PH - pad*2 - 4);
+        doc.addImage(toJpeg(img), 'JPEG', offX + pad + fit.x, pad + fit.y, fit.w, fit.h);
+      }
+    }
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(5.5);
+    doc.setTextColor(185, 183, 176);
+    doc.text(String(p), offX + PW/2, PH - 2.5, { align: 'center' });
+  }
+}
+
+function renderCover(doc, offX, PW, PH, meta) {
+  // Fondo blanco (ya puesto), tipografía negra
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(28);
+  doc.setTextColor(20, 20, 18);
+  const lines = doc.splitTextToSize(meta.title.toUpperCase(), PW - 24);
+  doc.text(lines, offX + 12, PH/2 - 4);
+
+  doc.setDrawColor(20, 20, 18);
+  doc.setLineWidth(0.4);
+  doc.line(offX + 12, PH/2 + 5, offX + PW - 12, PH/2 + 5);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(80, 78, 72);
+  if (meta.author) doc.text(meta.author.toUpperCase(), offX + 12, PH/2 + 11);
+  doc.text('N.º ' + meta.issue + '  ·  ' + meta.year, offX + PW - 12, PH/2 + 11, { align: 'right' });
+
+  // Borde delgado como referencia de recorte
+  doc.setDrawColor(220, 218, 212);
+  doc.setLineWidth(0.15);
+  doc.rect(offX + 1, 1, PW - 2, PH - 2);
+}
+
+function renderBackCover(doc, offX, PW, PH, meta) {
+  // Fondo blanco, número de issue grande en gris muy claro
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(80);
+  doc.setTextColor(230, 228, 222);
+  doc.text(meta.issue, offX + PW - 10, PH - 6, { align: 'right' });
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(100, 98, 92);
+  doc.text(meta.title.toUpperCase(), offX + 12, PH - 12);
+  doc.text(String(meta.year), offX + 12, PH - 7);
+
+  // Borde igual que portada
+  doc.setDrawColor(220, 218, 212);
+  doc.setLineWidth(0.15);
+  doc.rect(offX + 1, 1, PW - 2, PH - 2);
+}
+
+async function renderThumbnailPage(doc, half, offX, PW, PH, nPhotos) {
+  // half=0: fotos 0..N/2-1, half=1: fotos N/2..N-1
+  // 4 cols × 7 rows = 28 por media página
+  const cols = 4, rows = 7;
+  const margin = 4, gap = 1.2;
+  const tW = (PW - margin*2 - gap*(cols-1)) / cols;
+  const tH = (PH - margin*2 - gap*(rows-1)) / rows;
+  const perPage = cols * rows; // 28
+  const startIdx = half * perPage;
+
+  for (let i = 0; i < perPage; i++) {
+    const fi = startIdx + i;
+    if (fi >= files.length) break;
+    const img = await loadImage(files[fi]);
+    if (!img) continue;
+    const col = i % cols, row = Math.floor(i / cols);
+    const x = offX + margin + col * (tW + gap);
+    const y = margin + row * (tH + gap);
+    const fit = fitImage(img, tW, tH);
+    doc.addImage(toJpeg(img), 'JPEG', x + fit.x, y + fit.y, fit.w, fit.h);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(4);
+    doc.setTextColor(170, 168, 162);
+    doc.text(String(fi + 1), x + tW, y + tH - .2, { align: 'right' });
+  }
+  doc.setFontSize(5.5);
+  doc.setTextColor(185, 183, 176);
+  doc.text(String(half === 0 ? 3 : 4), offX + PW/2, PH - 2.5, { align: 'center' });
+}
+
+function drawFoldLine(doc, PW, PH) {
+  doc.setDrawColor(210, 208, 202);
+  doc.setLineWidth(0.1);
+  for (let y = 2; y < PH - 2; y += 2.5) {
+    doc.line(PW, y, PW, Math.min(y + 1.2, PH - 2));
+  }
+  doc.setLineWidth(0.2);
+  doc.line(PW - 2.5, 1, PW + 2.5, 1);
+  doc.line(PW - 2.5, PH - 1, PW + 2.5, PH - 1);
+}
+
+// ── GENERADOR
+async function generatePDF() {
+  if (!files.length) return;
+  btnGen.disabled = true;
+  statusEl.textContent = '';
+  statusEl.className = '';
+
+  const meta = {
+    title:  document.getElementById('f-title').value.trim()  || 'ZINE',
+    author: document.getElementById('f-author').value.trim() || '',
+    issue:  document.getElementById('f-issue').value.trim()  || '01',
+    year:   document.getElementById('f-year').value.trim()   || String(new Date().getFullYear()),
+  };
+
+  const nPhotos = files.length;
+  const { total: N, sheets } = calcLayout(nPhotos);
+
+  const AW = 297, AH = 210;
+  const PW = AW / 2, PH = AH;
+
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  let firstPage = true;
+
+  for (let sheet = 1; sheet <= sheets; sheet++) {
+    const imp = imposition(sheet, N);
+    const pct = Math.round(((sheet - 1) / sheets) * 95);
+
+    // FRENTE
+    setProgress(pct, 'Hoja ' + sheet + '/' + sheets + ' · frente — p' + imp.frontLeft + ' | p' + imp.frontRight);
+    await tick();
+    if (!firstPage) doc.addPage();
+    firstPage = false;
+    await renderPage(doc, imp.frontLeft,  N, nPhotos, 0,  PW, PH, meta);
+    await renderPage(doc, imp.frontRight, N, nPhotos, PW, PW, PH, meta);
+    drawFoldLine(doc, PW, PH);
+
+    // DORSO
+    setProgress(pct + Math.round(48 / sheets), 'Hoja ' + sheet + '/' + sheets + ' · dorso — p' + imp.backLeft + ' | p' + imp.backRight);
+    await tick();
+    doc.addPage();
+    await renderPage(doc, imp.backLeft,  N, nPhotos, 0,  PW, PH, meta);
+    await renderPage(doc, imp.backRight, N, nPhotos, PW, PW, PH, meta);
+    drawFoldLine(doc, PW, PH);
+  }
+
+  setProgress(99, 'Empaquetando PDF…');
+  await tick();
+
+  const slug = meta.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  doc.save('zine-' + slug + '-' + meta.issue + '.pdf');
+
+  progressWrap.style.display = 'none';
+  statusEl.textContent = '✓ PDF listo · ' + sheets + ' hojas · ' + N + ' páginas';
+  statusEl.className = 'ok';
+  btnGen.disabled = false;
+}
+</script>
+</body>
+</html>
