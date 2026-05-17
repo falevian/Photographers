@@ -222,32 +222,41 @@ const { jsPDF } = window.jspdf;
 //  FUENTE TIPOGRÁFICA - SPECIAL ELITE
 // ═══════════════════════════════════════════════════════
 
-const FONT_URL = 'https://fonts.gstatic.com/s/specialelite/v18/9oRONYodvDEyjuhOrlHQAUEYHnIDjg.ttf';
+// Mirrors CORS-friendly. gstatic.com NO envía Access-Control-Allow-Origin,
+// así que el fetch fallaba siempre y caía al fallback Courier.
+const FONT_URLS = [
+  'https://cdn.jsdelivr.net/npm/@fontsource/special-elite@5.0.20/files/special-elite-latin-400-normal.ttf',
+  'https://cdn.jsdelivr.net/gh/google/fonts@main/apache/specialelite/SpecialElite-Regular.ttf'
+];
 let fontReady = false;
 let fontBase64 = null;
+let fontLoadPromise = null;
 
 async function loadFont() {
   const statusEl = document.getElementById('font-status');
-  try {
-    const resp = await fetch(FONT_URL);
-    if (!resp.ok) throw new Error('fetch failed');
-    const buf = await resp.arrayBuffer();
-    let binary = '';
-    const bytes = new Uint8Array(buf);
-    const chunkSize = 0x8000;
-    for (let i = 0; i < bytes.length; i += chunkSize) {
-      binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
-    }
-    fontBase64 = btoa(binary);
-    fontReady = true;
-    statusEl.textContent = '✓ tipografía cargada';
-    statusEl.className = 'ready';
-  } catch (e) {
-    statusEl.textContent = 'tipografía: usando Courier (fallback)';
-    fontReady = false;
+  let lastErr = null;
+  for (const url of FONT_URLS) {
+    try {
+      const resp = await fetch(url);
+      if (!resp.ok) { lastErr = new Error('HTTP ' + resp.status); continue; }
+      const buf = await resp.arrayBuffer();
+      let binary = '';
+      const bytes = new Uint8Array(buf);
+      const chunkSize = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunkSize) {
+        binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+      }
+      fontBase64 = btoa(binary);
+      fontReady = true;
+      statusEl.textContent = '✓ tipografía cargada';
+      statusEl.className = 'ready';
+      return;
+    } catch (e) { lastErr = e; }
   }
+  statusEl.textContent = 'tipografía: usando Courier (fallback) — ' + (lastErr ? lastErr.message : '');
+  fontReady = false;
 }
-loadFont();
+fontLoadPromise = loadFont();
 
 // ═══════════════════════════════════════════════════════
 //  ESTADO Y LÓGICA
@@ -660,6 +669,14 @@ async function generatePDF() {
   if (!items.length) return;
   btnGen.disabled = true;
   statusEl.textContent = ''; statusEl.className = '';
+
+  // Esperar a que la fuente termine de cargar (race condition si el usuario
+  // pulsa "Generar" antes de que loadFont() haya resuelto).
+  if (fontLoadPromise) {
+    setProgress(0, 'Esperando tipografía…');
+    progressWrap.style.display = 'flex';
+    try { await fontLoadPromise; } catch (_) {}
+  }
 
   const meta = {
     title:  document.getElementById('f-title').value.trim()  || 'ZINE',
