@@ -17,6 +17,7 @@ body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:14px
 
 header{border-bottom:1px solid var(--border);padding:1.25rem 2.5rem;display:flex;align-items:baseline;gap:1.5rem;flex-wrap:wrap}
 header h1{font-family:var(--typewriter);font-size:18px;font-weight:400;letter-spacing:.02em}
+header .author-name{font-family:var(--typewriter);font-size:12px;font-weight:400;color:var(--fg2);letter-spacing:.04em}
 header .tagline{font-family:var(--mono);font-size:11px;color:var(--fg3);letter-spacing:.06em}
 
 .layout{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 60px)}
@@ -119,7 +120,8 @@ main{padding:1.75rem 2.5rem;display:flex;flex-direction:column;gap:1.25rem}
 
 <header>
   <h1>Zine Generator</h1>
-  <span class="tagline" id="header-tagline">tipografía máquina de escribir · EXIF · cuadernillo</span>
+  <span class="author-name">Rafael Vida</span>
+  <span class="tagline" id="header-tagline"></span>
   <span id="font-status" style="margin-left:auto">cargando tipografía…</span>
 </header>
 
@@ -316,7 +318,7 @@ function updateSpec() {
   const specEl = document.getElementById('spec-box');
   if (n === 0) {
     specEl.textContent = 'Carga fotos para ver la estructura';
-    document.getElementById('header-tagline').textContent = 'tipografía máquina de escribir · EXIF · cuadernillo';
+    document.getElementById('header-tagline').textContent = '';
     document.getElementById('imposition-preview').innerHTML =
       '<span style="font-family:var(--mono);font-size:9px;color:var(--fg3)">Carga fotos para ver</span>';
     return;
@@ -336,7 +338,7 @@ function updateSpec() {
     'Dúplex A4 apaisado · volteo <b>borde largo</b>';
 
   document.getElementById('header-tagline').textContent =
-    sheets + ' hojas · ' + total + ' páginas · cuadernillo';
+    sheets + ' hojas · ' + total + ' páginas';
 
   buildDiagram(total, n);
 }
