@@ -555,10 +555,23 @@ function fitImage(img, pw, ph) {
   return { x: (pw - img.naturalWidth*s)/2, y: (ph - img.naturalHeight*s)/2, w: img.naturalWidth*s, h: img.naturalHeight*s };
 }
 
-function toJpeg(img, q = 0.88) {
+// Dimensión máxima (lado mayor) en píxeles para las imágenes embebidas.
+// 2480 px ≈ 210 mm a 300 ppp: suficiente para impresión, sin inflar el PDF.
+const MAX_IMG_DIM = 2480;
+
+function toJpeg(img, q = 0.88, maxDim = MAX_IMG_DIM) {
+  let w = img.naturalWidth, h = img.naturalHeight;
+  const longSide = Math.max(w, h);
+  if (longSide > maxDim) {
+    const s = maxDim / longSide;
+    w = Math.round(w * s);
+    h = Math.round(h * s);
+  }
   const c = document.createElement('canvas');
-  c.width = img.naturalWidth; c.height = img.naturalHeight;
-  c.getContext('2d').drawImage(img, 0, 0);
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(img, 0, 0, w, h);
   return c.toDataURL('image/jpeg', q);
 }
 
@@ -685,7 +698,7 @@ async function renderThumbnailPage(doc, half, offX, PW, PH) {
     const img = await loadImage(it.file);
     if (img) {
       const fit = fitImage(img, tW, tH);
-      doc.addImage(toJpeg(img, 0.7), 'JPEG', x + fit.x, y + fit.y, fit.w, fit.h);
+      doc.addImage(toJpeg(img, 0.7, 600), 'JPEG', x + fit.x, y + fit.y, fit.w, fit.h);
     }
     setTypewriter(doc, 4.5);
     doc.setTextColor(100, 100, 96);
