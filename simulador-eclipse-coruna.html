@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador de encuadre · Eclipse total · A Coruña · 12 ago 2026</title>
+<meta name="author" content="Rafael Vida">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#07070d;
+    --panel:#10111c;
+    --panel-2:#161827;
+    --line:rgba(255,255,255,0.08);
+    --line-strong:rgba(255,255,255,0.16);
+    --text:#e7e9f2;
+    --muted:#8b90a6;
+    --corona:#f6f2e6;
+    --gold:#ffcf6b;
+    --prom:#ff5b52;
+    --display:"Space Grotesk",system-ui,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,monospace;
+    --body:"Inter",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:
+      radial-gradient(1200px 700px at 78% -10%, rgba(255,207,107,0.07), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--body);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 20px 64px}
+
+  header{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+  .glyph{flex:0 0 auto;width:46px;height:46px;margin-top:4px}
+  h1{
+    font-family:var(--display);font-weight:700;
+    font-size:clamp(20px,3.2vw,29px);line-height:1.1;letter-spacing:-0.01em;margin:0;
+  }
+  .sub{color:var(--muted);font-size:13.5px;margin-top:6px;max-width:62ch}
+  .byline{margin-top:9px;font-family:var(--mono);font-size:12px;letter-spacing:0.04em;color:var(--gold)}
+  .byline::before{content:"";display:inline-block;width:18px;height:1px;background:var(--gold);
+    vertical-align:middle;margin-right:9px;opacity:0.6}
+
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:22px;align-items:start}
+  @media (max-width:880px){.grid{grid-template-columns:1fr}}
+
+  .card{
+    background:linear-gradient(180deg,var(--panel-2),var(--panel));
+    border:1px solid var(--line);border-radius:14px;padding:18px;
+  }
+  .card + .card{margin-top:16px}
+
+  /* viewfinder / hero */
+  .viewer{padding:14px}
+  .viewer svg{display:block;width:100%;height:auto;border-radius:9px;background:#04040a}
+  .verdict{
+    margin-top:14px;padding:13px 14px;border-radius:10px;
+    background:rgba(255,207,107,0.06);border:1px solid rgba(255,207,107,0.18);
+  }
+  .verdict .tag{
+    font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--gold);display:block;margin-bottom:5px;
+  }
+  .verdict p{margin:0;font-size:14px;color:var(--text)}
+
+  /* readouts row */
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:11px;overflow:hidden;margin-top:14px}
+  .stat{background:var(--panel);padding:12px 13px}
+  .stat .k{font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)}
+  .stat .v{font-family:var(--display);font-weight:600;font-size:21px;margin-top:3px;letter-spacing:-0.01em}
+  .stat .v small{font-family:var(--mono);font-weight:500;font-size:12px;color:var(--muted);letter-spacing:0}
+
+  /* controls */
+  .ctl{margin-bottom:16px}
+  .ctl:last-child{margin-bottom:0}
+  label.lab{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+    font-size:12.5px;color:var(--muted);margin-bottom:8px}
+  label.lab b{font-family:var(--mono);font-weight:600;color:var(--text);font-size:13px}
+
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:4px;
+    background:linear-gradient(90deg,var(--gold),rgba(255,207,107,0.25));outline:none;margin:6px 0 0}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:17px;height:17px;
+    border-radius:50%;background:var(--corona);border:2px solid var(--gold);cursor:pointer;
+    box-shadow:0 0 0 4px rgba(255,207,107,0.12)}
+  input[type=range]::-moz-range-thumb{width:17px;height:17px;border-radius:50%;background:var(--corona);
+    border:2px solid var(--gold);cursor:pointer}
+
+  .row{display:flex;gap:8px}
+  .num{flex:1;min-width:0}
+  input[type=number],select{
+    width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line-strong);
+    border-radius:9px;padding:9px 10px;font-family:var(--mono);font-size:13.5px;
+  }
+  input[type=number]:focus,select:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:transparent}
+  select{appearance:none;cursor:pointer;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%238b90a6' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 11px center;padding-right:30px}
+
+  .seg{display:flex;background:var(--bg);border:1px solid var(--line-strong);border-radius:9px;padding:3px;gap:3px}
+  .seg button{flex:1;background:transparent;border:0;color:var(--muted);font-family:var(--mono);
+    font-size:12.5px;padding:8px 6px;border-radius:6px;cursor:pointer}
+  .seg button[aria-pressed=true]{background:var(--gold);color:#1a1206;font-weight:600}
+
+  .hint{font-size:11.5px;color:var(--muted);margin-top:7px;line-height:1.45}
+  .hint code{font-family:var(--mono);color:var(--text)}
+
+  .custom{display:none;gap:8px;margin-top:9px}
+  .custom.on{display:flex}
+
+  /* reference table */
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+  th,td{text-align:left;padding:8px 4px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:500;font-size:11px;letter-spacing:0.08em;text-transform:uppercase}
+  td.n{font-family:var(--mono);text-align:right;color:var(--text)}
+  tr:last-child td{border-bottom:0}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;vertical-align:middle}
+
+  .ctx{font-size:13px;color:var(--muted)}
+  .ctx b{color:var(--text);font-weight:500}
+  .ctx .line{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--line)}
+  .ctx .line:last-child{border-bottom:0}
+  .ctx .line span:last-child{font-family:var(--mono);color:var(--text);white-space:nowrap}
+
+  h2{font-family:var(--display);font-weight:600;font-size:14px;letter-spacing:0.02em;margin:0 0 12px;
+    color:var(--text);display:flex;align-items:center;gap:9px}
+  h2 .pin{width:7px;height:7px;border-radius:50%;background:var(--gold)}
+
+  footer{margin-top:26px;font-size:11.5px;color:var(--muted);line-height:1.55}
+  footer a{color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <svg class="glyph" viewBox="0 0 100 100" aria-hidden="true">
+      <defs>
+        <radialGradient id="gcor" cx="50%" cy="50%" r="50%">
+          <stop offset="38%" stop-color="#f6f2e6" stop-opacity="0"/>
+          <stop offset="44%" stop-color="#f6f2e6" stop-opacity="0.9"/>
+          <stop offset="100%" stop-color="#f6f2e6" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <circle cx="50" cy="50" r="46" fill="url(#gcor)"/>
+      <circle cx="50" cy="50" r="20" fill="#04040a"/>
+      <circle cx="50" cy="50" r="20.5" fill="none" stroke="#ffcf6b" stroke-width="1"/>
+      <circle cx="69" cy="40" r="3.2" fill="#ffcf6b"/>
+    </svg>
+    <div>
+      <h1>Simulador de encuadre del eclipse total</h1>
+      <div class="sub">A Coruña, 12 de agosto de 2026. Calcula qué cabe en tu sensor (disco solar, anillo de diamantes, corona interior o penachos) según la focal y el formato de tu cámara.</div>
+      <div class="byline">Creado por Rafael Vida</div>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- HERO: viewfinder + results -->
+    <div>
+      <div class="card viewer">
+        <svg id="view" viewBox="0 0 1000 750" role="img" aria-label="Previsualización del encuadre"></svg>
+        <div class="verdict">
+          <span class="tag" id="vtag">Resultado</span>
+          <p id="vtext"></p>
+        </div>
+        <div class="stats">
+          <div class="stat"><div class="k">Focal equivalente (35 mm)</div><div class="v" id="sEq">—</div></div>
+          <div class="stat"><div class="k">Factor de recorte</div><div class="v" id="sCrop">—</div></div>
+          <div class="stat"><div class="k">Campo de visión (H × V)</div><div class="v" id="sFov">—</div></div>
+          <div class="stat"><div class="k">El disco solar ocupa</div><div class="v" id="sSun">—</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="pin"></span>Tamaños angulares de referencia</h2>
+        <table>
+          <thead><tr><th>Elemento</th><th style="text-align:right">Diámetro</th><th style="text-align:right">% del lado corto</th></tr></thead>
+          <tbody id="reftab"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2><span class="pin"></span>Horquilla de exposición</h2>
+        <p id="expIntro" class="ctx" style="margin:0 0 12px"></p>
+        <table>
+          <thead><tr><th id="expCol">Estructura</th><th style="text-align:center">Q</th><th style="text-align:right">Velocidad</th></tr></thead>
+          <tbody id="exptab"></tbody>
+        </table>
+        <div id="bracketBox" style="margin-top:14px;padding:13px 14px;border-radius:10px;background:rgba(255,207,107,0.06);border:1px solid rgba(255,207,107,0.18)">
+          <span class="tag" style="font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:6px">Secuencia sugerida</span>
+          <div id="bracketSeq" style="font-family:var(--mono);font-size:13.5px;color:var(--text);line-height:1.7"></div>
+          <div id="bracketNote" class="hint" style="margin-top:8px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTROLS -->
+    <div>
+      <div class="card">
+        <h2><span class="pin"></span>Tu equipo</h2>
+
+        <div class="ctl">
+          <label class="lab" for="focal">Focal real del objetivo <b><span id="focalv">500</span> mm</b></label>
+          <div class="row">
+            <input class="num" type="number" id="focalNum" min="5" max="6000" step="1" value="500">
+          </div>
+          <input type="range" id="focal" min="0" max="1000" value="588">
+        </div>
+
+        <div class="ctl">
+          <label class="lab" for="tc">Multiplicador (teleconvertidor)</label>
+          <select id="tc">
+            <option value="1">Sin teleconvertidor (1×)</option>
+            <option value="1.4">1,4×</option>
+            <option value="2">2×</option>
+          </select>
+        </div>
+
+        <div class="ctl">
+          <label class="lab" for="sensor">Formato del sensor</label>
+          <select id="sensor">
+            <option value="36,24,3:2">Full Frame · 36 × 24 mm</option>
+            <option value="22.3,14.9,3:2">APS-C Canon · 22,3 × 14,9 mm (1,6×)</option>
+            <option value="23.5,15.6,3:2" selected>APS-C Sony / Nikon / Fuji · 23,5 × 15,6 mm (1,5×)</option>
+            <option value="17.3,13,4:3">Micro 4/3 · 17,3 × 13 mm (2,0×)</option>
+            <option value="13.2,8.8,3:2">Tipo 1" · 13,2 × 8,8 mm (2,7×)</option>
+            <option value="custom">Personalizado…</option>
+          </select>
+          <div class="custom" id="customBox">
+            <div class="num"><input type="number" id="cw" min="3" max="80" step="0.1" value="36" placeholder="ancho mm"></div>
+            <div class="num"><input type="number" id="ch" min="3" max="80" step="0.1" value="24" placeholder="alto mm"></div>
+          </div>
+        </div>
+
+        <div class="ctl">
+          <label class="lab">Orientación</label>
+          <div class="seg" id="orient">
+            <button data-o="h" aria-pressed="true">Horizontal</button>
+            <button data-o="v" aria-pressed="false">Vertical</button>
+          </div>
+        </div>
+
+        <div class="ctl">
+          <label class="lab">Fase del eclipse</label>
+          <div class="seg" id="phase">
+            <button data-p="par" aria-pressed="false">Parcial (con filtro)</button>
+            <button data-p="tot" aria-pressed="true">Totalidad</button>
+          </div>
+          <div class="hint">En <code>Parcial</code> ves la fotosfera (el disco brillante) mordida por la Luna; necesitas filtro solar. En <code>Totalidad</code> la fotosfera queda oculta y aparecen corona y cromosfera (filtro fuera, solo 76 s).</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="pin"></span>La corona a simular</h2>
+        <div class="ctl">
+          <label class="lab" for="cor">Extensión <b><span id="corv">4,0</span> R<sub>☉</sub></b></label>
+          <input type="range" id="cor" min="15" max="80" value="40">
+          <div class="hint">Radio de la corona en radios solares. <code>2 R</code> es la corona interior brillante; <code>4 R</code> una captura fotográfica típica; <code>7–8 R</code> son los penachos largos en exposiciones prolongadas (hasta unos 3° de diámetro).</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="pin"></span>Exposición</h2>
+        <div class="ctl">
+          <label class="lab" for="iso">ISO</label>
+          <input type="number" id="iso" min="25" max="51200" step="25" value="400">
+        </div>
+        <div class="ctl">
+          <label class="lab" for="fnum">Diafragma f/</label>
+          <input type="number" id="fnum" min="1" max="64" step="0.1" value="8">
+          <div class="hint">El tiempo sale de la fórmula de Espenak: <code>t = f² / (ISO · 2^Q)</code>. Cada unidad de Q es un paso de luz, así que la horquilla recorre el rango de Q de cada estructura.</div>
+        </div>
+        <div class="ctl" id="ndCtl">
+          <label class="lab" for="nd">Filtro solar (solo fase parcial)</label>
+          <select id="nd">
+            <option value="11">ND 4,0 (≈13,3 pasos)</option>
+            <option value="8" selected>ND 5,0 (≈16,6 pasos)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="pin"></span>A Coruña · 12 ago 2026</h2>
+        <div class="ctx">
+          <div class="line"><span>Primer contacto (parcial)</span><span>19:31</span></div>
+          <div class="line"><span>Totalidad (máximo)</span><span>20:28</span></div>
+          <div class="line"><span>Duración de la totalidad</span><span>76 s</span></div>
+          <div class="line"><span>Altura del Sol</span><span>≈ 12°</span></div>
+          <div class="line"><span>Fin del eclipse</span><span>21:22</span></div>
+          <div class="line"><span>Puesta de sol</span><span>21:41</span></div>
+          <div class="hint" style="margin-top:10px">Con el Sol a solo 12° sobre el horizonte necesitas un oeste despejado. Filtro solar obligatorio en las fases parciales; retíralo únicamente durante los 76 s de totalidad.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    Simulador creado por <strong style="color:var(--text);font-weight:500">Rafael Vida</strong>. Modelo geométrico: disco solar 0,525° (Sol cerca del afelio en agosto), Luna ≈ 1,04× el disco solar, corona configurable en radios solares. El campo de visión se calcula como 2·arctan(lado / (2·focal)); la exposición sigue la guía de Fred Espenak, t = f² / (ISO · 2^Q). Datos de circunstancias locales: Instituto Geográfico Nacional (eclipses.ign.es). Estimación para planificar el encuadre y la exposición; no sustituye una prueba real con tu equipo.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // --- constantes físicas ---
+  var R_SUN = 0.2625;          // radio angular del Sol en grados (diámetro 0.525)
+  var D_SUN = 0.525;
+  var MOON_MAG = 1.04;         // la Luna aparece ~4% mayor que el Sol en este eclipse
+  var FF_DIAG = Math.sqrt(36*36 + 24*24); // 43.27 mm
+
+  // --- estado ---
+  var st = {
+    focal: 500, tc: 1,
+    sw: 23.5, sh: 15.6, ratio: "3:2", custom: false,
+    orient: "h",
+    corR: 4.0,  // radios solares (radio)
+    phase: "tot", // "tot" totalidad | "par" parcial
+    iso: 400, fnum: 8, nd: 8 // nd = Q de la fase parcial segun filtro
+  };
+
+  // --- elementos ---
+  var $ = function(id){ return document.getElementById(id); };
+  var focal = $("focal"), focalNum = $("focalNum"), focalv = $("focalv");
+  var tc = $("tc"), sensor = $("sensor"), customBox = $("customBox"), cw = $("cw"), ch = $("ch");
+  var cor = $("cor"), corv = $("corv");
+  var view = $("view");
+
+  // slider logarítmico de focal: t[0..1000] -> 10..6000 mm
+  var FMIN = 10, FMAX = 6000;
+  function tToFocal(t){ return Math.round(FMIN * Math.pow(FMAX/FMIN, t/1000)); }
+  function focalToT(f){ f = Math.max(FMIN, Math.min(FMAX, f)); return Math.round(1000 * Math.log(f/FMIN)/Math.log(FMAX/FMIN)); }
+
+  // --- cálculo ---
+  function compute(){
+    var fe = st.focal * st.tc;                 // focal efectiva del sistema
+    var w = st.sw, h = st.sh;
+    if(st.orient === "v"){ var t = w; w = h; h = t; } // intercambiar para retrato
+    var hFov = 2*Math.atan(w/(2*fe))*180/Math.PI;
+    var vFov = 2*Math.atan(h/(2*fe))*180/Math.PI;
+    var dFov = 2*Math.atan(Math.sqrt(w*w+h*h)/(2*fe))*180/Math.PI;
+    var diag = Math.sqrt(st.sw*st.sw + st.sh*st.sh);
+    var crop = FF_DIAG / diag;
+    var eq = fe * crop;
+    var corDeg = st.corR * R_SUN;              // radio de la corona en grados
+    return {fe:fe, w:w, h:h, hFov:hFov, vFov:vFov, dFov:dFov, crop:crop, eq:eq,
+            minFov: Math.min(hFov,vFov), corR_deg:corDeg, corDia: 2*corDeg};
+  }
+
+  function fmtDeg(d){
+    if(d >= 1) return d.toFixed(2).replace(".",",") + "°";
+    return Math.round(d*60) + "′"; // arcominutos para valores pequeños
+  }
+  function fmt1(n){ return n.toFixed(1).replace(".",","); }
+  function fmt2(n){ return n.toFixed(2).replace(".",","); }
+
+  // --- veredicto ---
+  function verdict(c){
+    var m = c.minFov, sun = D_SUN, inner = 2*R_SUN*2 /*1.05*/, corDia = c.corDia;
+    var tag, txt;
+
+    if(st.phase === "par"){
+      if(m < sun*0.95){
+        tag = "Fotosfera recortada";
+        txt = "El disco no entra entero. Solo encuadras un trozo de la fotosfera y del mordisco lunar; sirve para detalle de manchas, no para la fase parcial completa. Filtro solar puesto.";
+      } else if(m < sun*1.6){
+        tag = "Fotosfera llena";
+        txt = "La fotosfera llena el fotograma. Se aprecian bien las manchas y el borde de la Luna avanzando sobre el disco. Filtro solar obligatorio en toda esta fase.";
+      } else if(m < sun*4){
+        tag = "Fase parcial holgada";
+        txt = "El disco con su creciente cabe con cielo alrededor. Buen plano para seguir el avance de la Luna; ideal si quieres una secuencia o un compuesto del eclipse parcial.";
+      } else {
+        tag = "Plano amplio";
+        txt = "La fotosfera queda pequeña en el fotograma: territorio de paisaje o de secuencia múltiple. Recuerda que el Sol estará bajo, a unos 12° sobre el horizonte oeste.";
+      }
+      $("vtag").textContent = tag;
+      $("vtext").textContent = txt;
+      return;
+    }
+
+    if(m < sun*0.95){
+      tag = "Primerísimo plano";
+      txt = "Ni el disco completo entra en el encuadre. Verás con gran detalle la cromosfera, las protuberancias y las perlas de Baily, pero el Sol se sale del fotograma. Útil para el instante del contacto, no para la corona.";
+    } else if(m < sun*1.6){
+      tag = "Disco lleno";
+      txt = "El disco solar llena el encuadre. Ideal para el anillo de diamantes, las protuberancias y la cromosfera, con muy poco margen para la corona alrededor.";
+    } else if(m < inner*1.45){
+      tag = "Disco + corona interior";
+      txt = "Entran el disco y la corona interior brillante. Buen plano del anillo de diamantes y la base de la corona; los penachos largos quedan recortados en los bordes.";
+    } else if(m < corDia*1.15){
+      tag = "Corona casi completa";
+      txt = "Capturas la corona elegida casi entera; los penachos más extendidos rozan o cruzan los bordes del fotograma. Encuadre ajustado, centra bien el Sol.";
+    } else if(m < 5){
+      tag = "Corona con margen";
+      txt = "La corona cabe holgada, con cielo alrededor. Margen de sobra para componer y para no perder los penachos. Punto dulce para la totalidad.";
+    } else {
+      tag = "Plano amplio";
+      txt = "El eclipse queda pequeño dentro del fotograma: territorio de paisaje. Aprovecha que el Sol estará a solo 12° de altura para incluir el horizonte oeste y el ambiente de la totalidad.";
+    }
+    $("vtag").textContent = tag;
+    $("vtext").textContent = txt;
+  }
+
+  // --- previsualización SVG ---
+  function draw(c){
+    var W = 1000, H = 750, cx = W/2, cy = H/2;
+    // span de cielo a mostrar: que quepan fotograma y corona
+    var maxFrame = Math.max(c.hFov, c.vFov);
+    var span = Math.max(maxFrame, c.corDia) * 1.22;
+    span = Math.max(span, D_SUN * 5); // nunca dejar el Sol como un punto invisible
+    var scale = (0.9 * Math.min(W, H)) / span; // px por grado
+
+    var fw = c.hFov * scale, fh = c.vFov * scale;          // fotograma
+    var rCor = c.corR_deg * scale;                          // radio corona
+    var rInner = (2*R_SUN) * scale;                         // corona interior (2R)
+    var rSun = R_SUN * scale;
+    var rMoon = R_SUN * MOON_MAG * scale;
+
+    // escala (barra) en grados redondos
+    var nice = [0.1,0.25,0.5,1,2,5,10,20].reduce(function(p,v){
+      return Math.abs(v - span/4) < Math.abs(p - span/4) ? v : p; });
+    var barPx = nice * scale;
+
+    // estrellas tenues
+    var stars = "";
+    for(var i=0;i<26;i++){
+      var sx = (i*97 % 100)/100*W, sy = (i*61 % 100)/100*H;
+      var sr = (i%3===0)?1.2:0.7, so = (i%4===0)?0.5:0.28;
+      stars += '<circle cx="'+sx.toFixed(0)+'" cy="'+sy.toFixed(0)+'" r="'+sr+'" fill="#cfd4e6" opacity="'+so+'"/>';
+    }
+
+    var fx = cx - fw/2, fy = cy - fh/2;
+
+    var svg = ''
+    + '<defs>'
+    + '<radialGradient id="cg" cx="50%" cy="50%" r="50%">'
+    +   '<stop offset="'+(rSun/rCor*100).toFixed(1)+'%" stop-color="#f8f5ea" stop-opacity="0.95"/>'
+    +   '<stop offset="'+(rInner/rCor*100).toFixed(1)+'%" stop-color="#eef0fb" stop-opacity="0.55"/>'
+    +   '<stop offset="70%" stop-color="#cdd6f0" stop-opacity="0.18"/>'
+    +   '<stop offset="100%" stop-color="#cdd6f0" stop-opacity="0"/>'
+    + '</radialGradient>'
+    + '<radialGradient id="sg" cx="50%" cy="50%" r="50%">'
+    +   '<stop offset="60%" stop-color="#f8f5ea" stop-opacity="0.9"/>'
+    +   '<stop offset="100%" stop-color="#f8f5ea" stop-opacity="0"/>'
+    + '</radialGradient>'
+    + '<radialGradient id="pg" cx="50%" cy="50%" r="50%">'
+    +   '<stop offset="0%" stop-color="#fff1cf"/>'
+    +   '<stop offset="62%" stop-color="#ffc25a"/>'
+    +   '<stop offset="92%" stop-color="#f59121"/>'
+    +   '<stop offset="100%" stop-color="#d76c12"/>'
+    + '</radialGradient>'
+    + '<mask id="outside">'
+    +   '<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#fff"/>'
+    +   '<rect x="'+fx.toFixed(1)+'" y="'+fy.toFixed(1)+'" width="'+fw.toFixed(1)+'" height="'+fh.toFixed(1)+'" fill="#000"/>'
+    + '</mask>'
+    + '</defs>';
+
+    // cielo + estrellas
+    svg += '<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#04040a"/>' + stars;
+
+    if(st.phase === "tot"){
+      // --- TOTALIDAD: fotosfera oculta, se ve corona y cromosfera ---
+      // penachos ecuatoriales (corona alargada en horizontal)
+      svg += '<g opacity="0.5">'
+        + '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+(rCor*1.18).toFixed(1)+'" ry="'+(rCor*0.55).toFixed(1)+'" fill="url(#cg)"/>'
+        + '</g>';
+      // corona radial
+      svg += '<circle cx="'+cx+'" cy="'+cy+'" r="'+rCor.toFixed(1)+'" fill="url(#cg)"/>';
+      // halo brillante del disco
+      svg += '<circle cx="'+cx+'" cy="'+cy+'" r="'+(rSun*1.25).toFixed(1)+'" fill="url(#sg)"/>';
+      // Luna (disco negro que tapa la fotosfera)
+      svg += '<circle cx="'+cx+'" cy="'+cy+'" r="'+rMoon.toFixed(1)+'" fill="#05050b"/>';
+      // anillo de cromosfera (capa fina, exagerada para que se vea)
+      svg += '<circle cx="'+cx+'" cy="'+cy+'" r="'+rMoon.toFixed(1)+'" fill="none" stroke="#ffcf6b" stroke-width="'+Math.max(0.8,rSun*0.06).toFixed(2)+'" opacity="0.85"/>';
+      // protuberancias (dos arquitos rosados en el limbo)
+      if(rMoon > 6){
+        svg += '<circle cx="'+(cx+rMoon*0.55)+'" cy="'+(cy-rMoon*0.78)+'" r="'+(rMoon*0.10).toFixed(1)+'" fill="#ff5b52" opacity="0.85"/>';
+        svg += '<circle cx="'+(cx-rMoon*0.82)+'" cy="'+(cy+rMoon*0.42)+'" r="'+(rMoon*0.08).toFixed(1)+'" fill="#ff5b52" opacity="0.8"/>';
+      }
+    } else {
+      // --- PARCIAL: se ve la fotosfera (con filtro), mordida por la Luna ---
+      var mx = cx - rSun*0.62, my = cy - rSun*0.32; // Luna desplazada -> creciente
+      // fotosfera con oscurecimiento del limbo
+      svg += '<circle cx="'+cx+'" cy="'+cy+'" r="'+rSun.toFixed(1)+'" fill="url(#pg)"/>';
+      // manchas solares
+      if(rSun > 14){
+        svg += '<circle cx="'+(cx+rSun*0.30)+'" cy="'+(cy+rSun*0.18)+'" r="'+(rSun*0.07).toFixed(1)+'" fill="#7a3a12" opacity="0.85"/>';
+        svg += '<circle cx="'+(cx+rSun*0.42)+'" cy="'+(cy+rSun*0.22)+'" r="'+(rSun*0.04).toFixed(1)+'" fill="#7a3a12" opacity="0.8"/>';
+        svg += '<circle cx="'+(cx+rSun*0.10)+'" cy="'+(cy-rSun*0.34)+'" r="'+(rSun*0.05).toFixed(1)+'" fill="#7a3a12" opacity="0.8"/>';
+      }
+      // Luna que produce el mordisco
+      svg += '<circle cx="'+mx.toFixed(1)+'" cy="'+my.toFixed(1)+'" r="'+rMoon.toFixed(1)+'" fill="#04040a"/>';
+    }
+
+    // oscurecer todo lo que queda fuera del fotograma
+    svg += '<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#04040a" opacity="0.66" mask="url(#outside)"/>';
+
+    // marco del fotograma
+    svg += '<rect x="'+fx.toFixed(1)+'" y="'+fy.toFixed(1)+'" width="'+fw.toFixed(1)+'" height="'+fh.toFixed(1)+'" '
+        +  'fill="none" stroke="#ffcf6b" stroke-width="2.2" rx="3"/>';
+    // ticks de esquina
+    var tk = 16;
+    [[fx,fy,1,1],[fx+fw,fy,-1,1],[fx,fy+fh,1,-1],[fx+fw,fy+fh,-1,-1]].forEach(function(p){
+      svg += '<path d="M'+p[0]+' '+(p[1]+p[3]*tk)+' L'+p[0]+' '+p[1]+' L'+(p[0]+p[2]*tk)+' '+p[1]+'" stroke="#ffcf6b" stroke-width="2.2" fill="none"/>';
+    });
+    // cruz central tenue
+    svg += '<g stroke="rgba(255,207,107,0.35)" stroke-width="1">'
+        +  '<line x1="'+(cx-9)+'" y1="'+cy+'" x2="'+(cx+9)+'" y2="'+cy+'"/>'
+        +  '<line x1="'+cx+'" y1="'+(cy-9)+'" x2="'+cx+'" y2="'+(cy+9)+'"/></g>';
+
+    // barra de escala
+    var bx = 26, by = H - 30;
+    svg += '<g font-family="JetBrains Mono, monospace" font-size="20" fill="#cdd2e6">'
+        +  '<line x1="'+bx+'" y1="'+by+'" x2="'+(bx+barPx).toFixed(1)+'" y2="'+by+'" stroke="#cdd2e6" stroke-width="2"/>'
+        +  '<line x1="'+bx+'" y1="'+(by-5)+'" x2="'+bx+'" y2="'+(by+5)+'" stroke="#cdd2e6" stroke-width="2"/>'
+        +  '<line x1="'+(bx+barPx).toFixed(1)+'" y1="'+(by-5)+'" x2="'+(bx+barPx).toFixed(1)+'" y2="'+(by+5)+'" stroke="#cdd2e6" stroke-width="2"/>'
+        +  '<text x="'+(bx+barPx+10).toFixed(1)+'" y="'+(by+6)+'">'+ (nice<1? Math.round(nice*60)+"′" : fmt1(nice)+"°") +'</text></g>';
+
+    view.innerHTML = svg;
+  }
+
+  // --- tabla de referencia ---
+  function refTable(c){
+    var rows = [
+      ["#ffcf6b","Fotosfera (disco solar)", D_SUN],
+      ["#eef0fb","Corona interior (2 R☉)", 2*(2*R_SUN)],
+      ["#cdd6f0","Corona elegida ("+fmt1(st.corR)+" R☉)", c.corDia]
+    ];
+    var html = "";
+    rows.forEach(function(r){
+      var pct = (r[2]/c.minFov*100);
+      var pctTxt = pct > 999 ? "&gt;999" : Math.round(pct);
+      html += '<tr><td><span class="dot" style="background:'+r[0]+'"></span>'+r[1]+'</td>'
+            + '<td class="n">'+fmtDeg(r[2])+'</td>'
+            + '<td class="n">'+pctTxt+' %</td></tr>';
+    });
+    $("reftab").innerHTML = html;
+  }
+
+  // --- exposición (modelo de Espenak: t = f^2 / (ISO * 2^Q)) ---
+  // velocidades de obturación reales (paso 1/3), en segundos
+  var SHUT = (function(){
+    var fr = [8000,6400,5000,4000,3200,2500,2000,1600,1250,1000,800,640,500,400,320,
+              250,200,160,125,100,80,60,50,40,30,25,20,15,13,10,8,6,5,4,3,2];
+    var arr = fr.map(function(x){ return {sec:1/x, label:"1/"+x}; });
+    var secs = [1,1.3,1.6,2,2.5,3,4,5,6,8,10,13,15,20,25,30];
+    secs.forEach(function(x){ arr.push({sec:x, label:fmt1(x)+'"'}); });
+    return arr.sort(function(a,b){ return a.sec-b.sec; });
+  })();
+
+  function snapShutter(t){
+    var best = SHUT[0], bd = 1e9;
+    for(var i=0;i<SHUT.length;i++){
+      var d = Math.abs(Math.log(SHUT[i].sec) - Math.log(t));
+      if(d < bd){ bd = d; best = SHUT[i]; }
+    }
+    return best;
+  }
+
+  // Q de la corona en funcion del radio en R solares (datos Espenak + extrapolacion log)
+  function qCorona(rs){
+    var pts = [[0.1,7],[0.2,5],[0.5,3],[1.0,1],[2.0,0]];
+    if(rs <= pts[0][0]) return pts[0][1];
+    for(var i=0;i<pts.length-1;i++){
+      if(rs <= pts[i+1][0]){
+        var x0=Math.log10(pts[i][0]), x1=Math.log10(pts[i+1][0]);
+        var t=(Math.log10(rs)-x0)/(x1-x0);
+        return pts[i][1] + t*(pts[i+1][1]-pts[i][1]);
+      }
+    }
+    // mas alla de 2 R: prolongar la ultima pendiente (≈ -3,3 Q por decada)
+    return 0 + (Math.log10(rs)-Math.log10(2.0)) * (-1/ (Math.log10(2.0)-Math.log10(1.0)));
+  }
+
+  function expTime(q){ return st.fnum*st.fnum / (st.iso * Math.pow(2,q)); }
+
+  function exposure(c){
+    var col = $("expCol"), intro = $("expIntro"), tab = $("exptab");
+    var box = $("bracketBox"), seqEl = $("bracketSeq"), noteEl = $("bracketNote");
+    var rows;
+
+    if(st.phase === "par"){
+      col.textContent = "Fase parcial";
+      var qf = st.nd; // 11 (ND4) o 8 (ND5)
+      rows = [
+        ["Fotosfera (disco)", qf],
+        ["Creciente fino (+2 EV)", qf-2]
+      ];
+      intro.innerHTML = "Con filtro puesto. El brillo de la fotosfera es constante, así que una sola exposición vale para casi toda la parcial; el creciente fino pide unos dos pasos más por el oscurecimiento del limbo.";
+      box.style.display = "none";
+    } else {
+      col.textContent = "Estructura";
+      box.style.display = "block";
+      var qOuter = qCorona(st.corR);
+      rows = [
+        ["Perlas de Baily", 12],
+        ["Cromosfera", 11],
+        ["Protuberancias", 9],
+        ["Corona 0,1 R☉ (interior)", 7],
+        ["Corona 0,5 R☉", 3],
+        ["Corona 1 R☉", 1],
+        ["Corona 2 R☉", 0],
+        ["Corona "+fmt1(st.corR)+" R☉ (tu extensión)", qOuter]
+      ];
+      var span = 11 - qOuter; // pasos de cromosfera a corona elegida
+      intro.innerHTML = "Sin filtro. Entre la cromosfera y tu corona a "+fmt1(st.corR)+" R☉ hay <b>"+Math.round(span)+" pasos</b> de diferencia: es imposible en un solo disparo, de ahí la horquilla.";
+
+      // secuencia: de cromosfera (Q11) a corona elegida, en pasos de 1 EV
+      var qHi = 11, qLo = Math.floor(qOuter);
+      var seq = [], total = 0;
+      for(var q=qHi; q>=qLo; q--){
+        var s = snapShutter(expTime(q));
+        if(seq.length===0 || seq[seq.length-1].label !== s.label){
+          seq.push(s); total += s.sec + 0.4; // 0.4 s de margen por disparo
+        }
+      }
+      seqEl.innerHTML = seq.map(function(s){ return '<span style="display:inline-block;padding:2px 9px;margin:2px 4px 2px 0;border:1px solid var(--line-strong);border-radius:6px">'+s.label+'</span>'; }).join("");
+      var feas = total <= 76;
+      noteEl.innerHTML = seq.length+" disparos a f/"+fmt1(st.fnum)+" e ISO "+st.iso+", paso de 1 EV. Tiempo aproximado con margen de encuadre: ≈ "+Math.round(total)+" s "
+        + (feas ? "(cabe holgado en los 76 s; automatízala con horquillado o intervalómetro)."
+                : "(se acerca a los 76 s de totalidad; sube ISO o abre diafragma para acortar los tiempos largos).");
+    }
+
+    tab.innerHTML = rows.map(function(r){
+      var t = expTime(r[1]), s = snapShutter(t);
+      return '<tr><td>'+r[0]+'</td><td class="n" style="text-align:center">'+(r[1]>=0?"+":"")+r[1].toFixed(0).replace("-0","0")+'</td><td class="n">'+s.label+'</td></tr>';
+    }).join("");
+  }
+
+  // --- pintar todo ---
+  function render(){
+    var c = compute();
+    $("sEq").innerHTML = Math.round(c.eq) + ' <small>mm</small>';
+    $("sCrop").innerHTML = fmt2(c.crop) + ' <small>×</small>';
+    $("sFov").innerHTML = fmtDeg(c.hFov) + ' <small>×</small> ' + fmtDeg(c.vFov);
+    var sunPct = D_SUN / c.vFov * 100;
+    $("sSun").innerHTML = (sunPct>999?"&gt;999":(sunPct<1?fmt1(sunPct):Math.round(sunPct))) + ' <small>% alto</small>';
+    verdict(c);
+    refTable(c);
+    exposure(c);
+    $("ndCtl").style.opacity = (st.phase === "par") ? "1" : "0.4";
+    draw(c);
+  }
+
+  // --- eventos ---
+  focal.addEventListener("input", function(){
+    st.focal = tToFocal(+focal.value);
+    focalNum.value = st.focal; focalv.textContent = st.focal;
+    render();
+  });
+  focalNum.addEventListener("input", function(){
+    var v = Math.max(5, Math.min(6000, +focalNum.value || 5));
+    st.focal = v; focalv.textContent = v; focal.value = focalToT(v);
+    render();
+  });
+  tc.addEventListener("change", function(){ st.tc = +tc.value; render(); });
+
+  sensor.addEventListener("change", function(){
+    if(sensor.value === "custom"){
+      st.custom = true; customBox.classList.add("on");
+      st.sw = +cw.value; st.sh = +ch.value; st.ratio = "custom";
+    } else {
+      st.custom = false; customBox.classList.remove("on");
+      var p = sensor.value.split(",");
+      st.sw = +p[0]; st.sh = +p[1]; st.ratio = p[2];
+    }
+    render();
+  });
+  function customUpdate(){
+    st.sw = Math.max(3, +cw.value || 3); st.sh = Math.max(3, +ch.value || 3); render();
+  }
+  cw.addEventListener("input", customUpdate);
+  ch.addEventListener("input", customUpdate);
+
+  $("orient").addEventListener("click", function(e){
+    var b = e.target.closest("button"); if(!b) return;
+    st.orient = b.dataset.o;
+    [].forEach.call(this.querySelectorAll("button"), function(x){
+      x.setAttribute("aria-pressed", x === b ? "true" : "false");
+    });
+    render();
+  });
+
+  $("phase").addEventListener("click", function(e){
+    var b = e.target.closest("button"); if(!b) return;
+    st.phase = b.dataset.p;
+    [].forEach.call(this.querySelectorAll("button"), function(x){
+      x.setAttribute("aria-pressed", x === b ? "true" : "false");
+    });
+    render();
+  });
+
+  cor.addEventListener("input", function(){
+    st.corR = (+cor.value)/10;
+    corv.textContent = fmt1(st.corR);
+    render();
+  });
+
+  $("iso").addEventListener("input", function(){
+    st.iso = Math.max(25, +this.value || 25); render();
+  });
+  $("fnum").addEventListener("input", function(){
+    st.fnum = Math.max(1, +this.value || 1); render();
+  });
+  $("nd").addEventListener("change", function(){
+    st.nd = +this.value; render();
+  });
+
+  // init
+  focal.value = focalToT(st.focal);
+  focalNum.value = st.focal; focalv.textContent = st.focal;
+  cor.value = st.corR*10; corv.textContent = fmt1(st.corR);
+  render();
+
+})();
+</script>
+</body>
+</html>
