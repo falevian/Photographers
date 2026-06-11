@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual técnico avanzado · Simulador del eclipse · A Coruña 2026</title>
+<meta name="author" content="Rafael Vida">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#07070d; --panel:#10111c; --panel-2:#161827;
+    --line:rgba(255,255,255,0.08); --line-strong:rgba(255,255,255,0.16);
+    --text:#e7e9f2; --muted:#9398ac; --corona:#f6f2e6; --gold:#ffcf6b; --prom:#ff5b52; --blue:#8fb4ff;
+    --display:"Space Grotesk",system-ui,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,monospace;
+    --body:"Inter",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:
+      radial-gradient(1100px 640px at 82% -12%, rgba(143,180,255,0.06), transparent 60%),
+      var(--bg);
+    color:var(--text);font-family:var(--body);line-height:1.62;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:800px;margin:0 auto;padding:34px 22px 80px}
+
+  header{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-bottom:8px}
+  .glyph{flex:0 0 auto;width:50px;height:50px;margin-top:3px}
+  .eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--blue);margin-bottom:8px}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(23px,4.2vw,34px);line-height:1.08;letter-spacing:-0.015em;margin:0}
+  .lede{color:var(--muted);font-size:14.5px;margin-top:10px;max-width:64ch}
+  .byline{margin-top:12px;font-family:var(--mono);font-size:12px;letter-spacing:0.04em;color:var(--gold)}
+  .byline::before{content:"";display:inline-block;width:18px;height:1px;background:var(--gold);vertical-align:middle;margin-right:9px;opacity:0.6}
+  .navlink{flex:0 0 auto;align-self:flex-start;display:inline-flex;align-items:center;gap:8px;
+    text-decoration:none;color:var(--gold);font-family:var(--mono);font-size:12.5px;letter-spacing:0.03em;
+    border:1px solid rgba(255,207,107,0.35);border-radius:10px;padding:9px 14px;background:rgba(255,207,107,0.06);
+    transition:background .15s,border-color .15s}
+  .navlink:hover{background:rgba(255,207,107,0.14);border-color:var(--gold)}
+  .navlink svg{width:15px;height:15px;flex:0 0 auto}
+  .navrow{margin-left:auto;display:flex;flex-direction:column;gap:8px}
+  @media(max-width:620px){.navrow{margin-left:0;width:100%;flex-direction:row;flex-wrap:wrap}}
+
+  nav.toc{margin:28px 0;padding:18px 20px;background:var(--panel);border:1px solid var(--line);border-radius:13px}
+  nav.toc .t{font-family:var(--mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+  nav.toc ol{margin:0;padding:0;list-style:none;counter-reset:s;display:grid;grid-template-columns:1fr 1fr;gap:7px 22px}
+  @media(max-width:560px){nav.toc ol{grid-template-columns:1fr}}
+  nav.toc li{counter-increment:s}
+  nav.toc a{color:var(--text);text-decoration:none;font-size:14px;display:flex;gap:10px;align-items:baseline;padding:3px 0}
+  nav.toc a::before{content:counter(s,decimal-leading-zero);font-family:var(--mono);font-size:11px;color:var(--blue);flex:0 0 auto}
+  nav.toc a:hover{color:var(--blue)}
+
+  section{margin:40px 0;scroll-margin-top:18px}
+  .sec-head{display:flex;gap:12px;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:16px}
+  .sec-no{font-family:var(--mono);font-size:13px;color:var(--blue)}
+  h2{font-family:var(--display);font-weight:600;font-size:21px;letter-spacing:-0.01em;margin:0}
+  h3{font-family:var(--display);font-weight:600;font-size:15px;margin:22px 0 6px;color:var(--corona)}
+  p{margin:11px 0;font-size:15px}
+  .muted{color:var(--muted)}
+  strong{font-weight:600;color:#fff}
+  code{font-family:var(--mono);font-size:0.88em;background:rgba(255,255,255,0.06);padding:1px 6px;border-radius:5px;color:var(--blue)}
+
+  .eq{font-family:var(--mono);font-size:14.5px;color:var(--corona);background:#04040a;border:1px solid var(--line);
+    border-left:3px solid var(--blue);border-radius:9px;padding:13px 16px;margin:14px 0;overflow-x:auto;line-height:1.7}
+  .eq .c{color:var(--muted);font-size:0.86em}
+
+  ul.clean{margin:11px 0;padding:0;list-style:none}
+  ul.clean li{position:relative;padding-left:20px;margin:8px 0;font-size:14.5px}
+  ul.clean li::before{content:"";position:absolute;left:2px;top:9px;width:6px;height:6px;border-radius:50%;background:var(--blue)}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:14px 0}
+  th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:500;font-size:11px;letter-spacing:0.07em;text-transform:uppercase}
+  td.n,th.n{font-family:var(--mono);text-align:right;white-space:nowrap}
+  td.m{font-family:var(--mono);color:var(--blue)}
+  tr:last-child td{border-bottom:0}
+
+  .tip{margin:14px 0;padding:13px 15px;border-radius:11px;background:rgba(143,180,255,0.07);border:1px solid rgba(143,180,255,0.25);font-size:14px}
+  .tip b{color:var(--blue);font-weight:600}
+  .warn{margin:14px 0;padding:13px 15px;border-radius:11px;background:rgba(255,207,107,0.06);border:1px solid rgba(255,207,107,0.22);font-size:14px}
+  .warn b{color:var(--gold);font-weight:600}
+
+  footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);line-height:1.6}
+  footer a{color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <svg class="glyph" viewBox="0 0 100 100" aria-hidden="true">
+      <defs><radialGradient id="g" cx="50%" cy="50%" r="50%">
+        <stop offset="38%" stop-color="#f6f2e6" stop-opacity="0"/>
+        <stop offset="44%" stop-color="#f6f2e6" stop-opacity="0.9"/>
+        <stop offset="100%" stop-color="#f6f2e6" stop-opacity="0"/>
+      </radialGradient></defs>
+      <circle cx="50" cy="50" r="46" fill="url(#g)"/>
+      <circle cx="50" cy="50" r="20" fill="#04040a"/>
+      <circle cx="50" cy="50" r="20.5" fill="none" stroke="#8fb4ff" stroke-width="1"/>
+      <circle cx="69" cy="40" r="3.2" fill="#8fb4ff"/>
+    </svg>
+    <div style="flex:1;min-width:240px">
+      <div class="eyebrow">Manual técnico avanzado</div>
+      <h1>Fundamentos del simulador del eclipse</h1>
+      <p class="lede">Modelo, derivaciones y supuestos. Para quien domina la técnica fotográfica y maneja la física suficiente para cuestionar y afinar los resultados. Geometría del encuadre, fotometría de Espenak, extinción a baja altura, difracción y arrastre sidéreo.</p>
+      <div class="byline">Por Rafael Vida</div>
+    </div>
+    <div class="navrow">
+      <a class="navlink" href="simulador-eclipse-coruna.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Abrir simulador
+      </a>
+      <a class="navlink" href="manual-simulador-eclipse.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Manual básico
+      </a>
+    </div>
+  </header>
+
+  <nav class="toc">
+    <div class="t">Contenido</div>
+    <ol>
+      <li><a href="#modelo">Modelo y alcance</a></li>
+      <li><a href="#fov">Geometría del campo</a></li>
+      <li><a href="#angulares">Tamaños angulares</a></li>
+      <li><a href="#fotometria">Fotometría: modelo de Espenak</a></li>
+      <li><a href="#horquilla">Horquilla y rango dinámico</a></li>
+      <li><a href="#extincion">Extinción a 12° de altura</a></li>
+      <li><a href="#resolucion">Resolución y muestreo</a></li>
+      <li><a href="#arrastre">Arrastre por movimiento diurno</a></li>
+      <li><a href="#supuestos">Supuestos y límites</a></li>
+      <li><a href="#parametros">Parámetros numéricos</a></li>
+    </ol>
+  </nav>
+
+  <section id="modelo">
+    <div class="sec-head"><span class="sec-no">01</span><h2>Modelo y alcance</h2></div>
+    <p>El simulador resuelve dos problemas independientes y los presenta acoplados a las circunstancias locales de A Coruña el 12 de agosto de 2026:</p>
+    <ul class="clean">
+      <li><strong>Geometría del encuadre.</strong> Dado un sistema óptico (focal, formato, teleconvertidor, orientación), calcula el campo de visión y lo compara con los tamaños angulares de las estructuras del eclipse.</li>
+      <li><strong>Fotometría.</strong> Dado ISO y número f, deriva el tiempo de exposición de cada estructura mediante el índice de brillo Q de Espenak, y construye una horquilla en pasos de 1 EV.</li>
+    </ul>
+    <p>Todo el cálculo es de primer orden y determinista: no modela transferencia radiativa, seeing variable ni respuesta espectral del sensor. Es una herramienta de planificación, no un fotómetro. Donde el modelo simplifica, se indica en la sección de supuestos.</p>
+  </section>
+
+  <section id="fov">
+    <div class="sec-head"><span class="sec-no">02</span><h2>Geometría del campo</h2></div>
+    <p>Bajo proyección rectilínea (gnomónica), el campo de visión angular sobre un lado del sensor de longitud <code>d</code> con focal efectiva <code>f</code> es:</p>
+    <div class="eq">FOV = 2 · arctan( d / (2f) )</div>
+    <p>Se calcula por separado para el lado horizontal y el vertical del sensor. Para un motivo circular centrado (el disco y su corona), la dimensión limitante es <strong>min(FOV<sub>H</sub>, FOV<sub>V</sub>)</strong>: define el recorte más restrictivo. El veredicto del simulador se ancla a esa cota.</p>
+
+    <h3>Factor de recorte y focal equivalente</h3>
+    <p>El factor de recorte es el cociente de diagonales respecto al fotograma de 35 mm (43,27 mm):</p>
+    <div class="eq">crop = 43,27 / √(w² + h²) <span class="c">  ;  f<sub>eq</sub> = f · crop</span></div>
+    <p>La focal equivalente solo sirve para comparar encuadres entre formatos; el FOV real depende de la focal física y de las dimensiones nativas del sensor, no del equivalente.</p>
+
+    <div class="warn"><b>Teleconvertidor:</b> el simulador multiplica la focal por el factor del TC para el cálculo geométrico, lo cual es correcto. Para la fotometría, recuerda que un TC también eleva el número f efectivo (<code>N<sub>ef</sub> = N · TC</code>): un 2× cuesta dos pasos. Introduce en la sección de exposición el número f de trabajo, no el del objetivo desnudo.</div>
+
+    <div class="warn"><b>Validez:</b> la proyección rectilínea deja de describir bien objetivos muy angulares y no aplica a ojos de pez (proyección equisólida o equidistante). A las focales útiles para el eclipse esto es irrelevante, pero conviene tenerlo presente si se simula un gran angular para incluir paisaje.</div>
+  </section>
+
+  <section id="angulares">
+    <div class="sec-head"><span class="sec-no">03</span><h2>Tamaños angulares</h2></div>
+    <h3>Disco solar</h3>
+    <p>El diámetro angular es <code>θ = 2R<sub>☉</sub> / D</code>. A mediados de agosto la Tierra está cerca del afelio (distancia ≈ 1,013 UA), de modo que:</p>
+    <div class="eq">θ<sub>☉</sub> = 2 · 6,957·10⁵ km / (1,013 · 1,496·10⁸ km) ≈ 9,18·10⁻³ rad ≈ 0,526° ≈ 31,6′</div>
+    <p>El simulador usa <strong>0,525°</strong>. La variación estacional del diámetro solar es de ±1,7% sobre el año; en la ventana de agosto es despreciable frente a otras incertidumbres.</p>
+
+    <h3>Luna y magnitud</h3>
+    <p>Por ser eclipse total, el diámetro lunar aparente supera al solar. El modelo dibuja la Luna como disco opaco de <code>1,04 × θ<sub>☉</sub></code>, coherente con una magnitud de eclipse ligeramente superior a la unidad. Esto basta para el encuadre; no pretende reproducir el perfil del limbo lunar, que es lo que gobierna el instante exacto de las perlas de Baily.</p>
+
+    <h3>Corona</h3>
+    <p>La corona se parametriza por su radio en radios solares <code>R<sub>☉</sub></code>. No tiene borde físico: su brillo superficial cae de forma acusada con la distancia. La componente K (luz fotosférica dispersada por electrones, Thomson) domina el interior; la componente F (polvo, luz zodiacal) domina el exterior. La extensión visible y la simetría de los penachos dependen del momento del ciclo solar; en agosto de 2026 estaremos en la fase descendente del ciclo 25, con una corona aún estructurada. El límite práctico fotografiable ronda los 3° de diámetro.</p>
+
+    <h3>Cromosfera</h3>
+    <p>Capa de unos 2.000 km de espesor. Su extensión angular es:</p>
+    <div class="eq">Δθ ≈ (2.000 / 6,957·10⁵) · R<sub>☉,ang</sub> ≈ 0,0029 · 945″ ≈ 2,7″</div>
+    <p>Por tanto es irrelevante para encuadrar y solo se resuelve a focales largas, y solo durante el segundo o dos del flash en los contactos. Por eso el simulador la trata como un anillo de grosor exagerado y no le asigna fila en la tabla de tamaños.</p>
+  </section>
+
+  <section id="fotometria">
+    <div class="sec-head"><span class="sec-no">04</span><h2>Fotometría: modelo de Espenak</h2></div>
+    <p>El tiempo de obturación se obtiene de la relación de Espenak:</p>
+    <div class="eq">t = N² / (I · 2<sup>Q</sup>) <span class="c">  ;  N = número f, I = ISO, t en segundos</span></div>
+    <p>Es la ecuación de exposición estándar reordenada. Partiendo de <code>N²/t = L·S/K</code> (con <code>L</code> la luminancia del motivo, <code>S</code> la sensibilidad y <code>K</code> la constante del fotómetro), Espenak agrupa el brillo superficial de cada estructura en un único exponente:</p>
+    <div class="eq">Q = log₂( L / K' ) <span class="c">  →  cada unidad de Q equivale a un paso (stop)</span></div>
+    <p>Esa es la propiedad que hace operativo el modelo: como <code>t ∝ 2<sup>-Q</sup></code>, la diferencia de exposición entre dos estructuras es exactamente <code>ΔQ</code> pasos. Los valores Q son empíricos, calibrados por Espenak con placas propias y de Sky &amp; Telescope:</p>
+
+    <table>
+      <thead><tr><th>Estructura</th><th class="n">Q</th><th>Notas</th></tr></thead>
+      <tbody>
+        <tr><td>Perlas de Baily</td><td class="n">12</td><td class="muted">contactos, instantáneo</td></tr>
+        <tr><td>Cromosfera</td><td class="n">11</td><td class="muted">flash en C2/C3</td></tr>
+        <tr><td>Protuberancias</td><td class="n">9</td><td class="muted">limbo</td></tr>
+        <tr><td>Corona 0,1 R<sub>☉</sub></td><td class="n">7</td><td class="muted">interior</td></tr>
+        <tr><td>Corona 0,2 R<sub>☉</sub></td><td class="n">5</td><td></td></tr>
+        <tr><td>Corona 0,5 R<sub>☉</sub></td><td class="n">3</td><td></td></tr>
+        <tr><td>Corona 1,0 R<sub>☉</sub></td><td class="n">1</td><td></td></tr>
+        <tr><td>Corona 2,0 R<sub>☉</sub></td><td class="n">0</td><td class="muted">media</td></tr>
+        <tr><td>Parcial, filtro ND 4,0</td><td class="n">11</td><td class="muted">fotosfera</td></tr>
+        <tr><td>Parcial, filtro ND 5,0</td><td class="n">8</td><td class="muted">fotosfera</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Interpolación y extrapolación de Q</h3>
+    <p>Para una extensión arbitraria, el simulador interpola Q linealmente en <code>log₁₀(r)</code> entre los puntos tabulados. Más allá de 2,0 R<sub>☉</sub> prolonga la pendiente del último tramo (≈ −3,32 Q por década), de donde:</p>
+    <div class="eq">Q(4 R<sub>☉</sub>) ≈ −1     Q(8 R<sub>☉</sub>) ≈ −2 <span class="c">  (extrapolado, tratar como orientativo)</span></div>
+    <p>El brillo real de la corona externa no sigue una ley única, así que estos valores son una guía conservadora para fijar el extremo lento de la horquilla, no una predicción fotométrica.</p>
+
+    <div class="tip"><b>Fotosfera frente a corona:</b> la fotosfera es del orden de 10⁶ veces más brillante que la corona, unos 20 pasos. De ahí que el filtro sea innegociable en la parcial e igual de innegociable retirarlo en la totalidad. El creciente fino añade además unos dos pasos por el oscurecimiento del limbo, que el modelo aplica en la fase parcial.</div>
+  </section>
+
+  <section id="horquilla">
+    <div class="sec-head"><span class="sec-no">05</span><h2>Horquilla y rango dinámico</h2></div>
+    <p>Fijados <code>N</code> e <code>I</code>, la horquilla recorre desde la cromosfera (Q 11) hasta la corona en la extensión elegida, en pasos de 1 EV. El número de disparos es <code>span + 1</code>, con:</p>
+    <div class="eq">span = 11 − Q<sub>ext</sub> <span class="c">  (pasos)  ;  ej. 4 R<sub>☉</sub> → 11 − (−1) = 12 pasos → 13 tomas</span></div>
+    <p>Cada tiempo se redondea a la velocidad estándar más próxima en una rejilla de tercios de paso, por mínima distancia en escala logarítmica. El simulador estima el tiempo total como la suma de exposiciones más un margen fijo por disparo y avisa si se aproxima a los 76 s de totalidad.</p>
+    <p class="muted">Conviene capturar en RAW y, si la cámara lo permite, encadenar la horquilla con disparo continuo o intervalómetro para no tocar nada durante la totalidad. El apilado HDR posterior reconstruye el rango completo que ninguna toma individual abarca.</p>
+  </section>
+
+  <section id="extincion">
+    <div class="sec-head"><span class="sec-no">06</span><h2>Extinción a 12° de altura</h2></div>
+    <p>Los valores Q de Espenak no incorporan corrección de masa de aire. En A Coruña la totalidad ocurre con el Sol a unos 12°, lo que implica una masa de aire considerable. Con la formulación de Kasten y Young:</p>
+    <div class="eq">X(h) = 1 / [ sin h + 0,50572 (h + 6,07995)<sup>−1,6364</sup> ]
+<span class="c">X(12°) ≈ 4,7   ;   plano-paralelo daría sec z ≈ 4,8</span></div>
+    <p>El exceso de masa de aire respecto al cenit es de unas 3,7 unidades. Con un coeficiente de extinción visual típico <code>k ≈ 0,2</code> mag/masa de aire en aire limpio:</p>
+    <div class="eq">Δm = k · ΔX ≈ 0,2 · 3,7 ≈ 0,74 mag ≈ 1,0 paso
+<span class="c">con bruma costera (k ≈ 0,3): ≈ 1,1 mag ≈ 1,5 pasos</span></div>
+    <p>En la práctica: espera tener que <strong>alargar la exposición del orden de un paso</strong> respecto a la tabla, y más si hay calima. La extinción es además fuertemente cromática (mayor en azul), de modo que la corona aparecerá enrojecida; valóralo en el balance de blancos y en el procesado por canales.</p>
+    <div class="warn"><b>Contraste del fondo:</b> a 12° el brillo del cielo crepuscular cerca del Sol compite con la corona externa más débil. El alcance real hacia los penachos lo limitará tanto ese fondo como la propia extinción, no solo el tiempo disponible.</div>
+  </section>
+
+  <section id="resolucion">
+    <div class="sec-head"><span class="sec-no">07</span><h2>Resolución y muestreo</h2></div>
+    <h3>Escala de placa</h3>
+    <div class="eq">s = 206265 · p / f <span class="c">  [″/px]  ;  p = paso de píxel, f = focal (misma unidad)</span></div>
+    <p>Ejemplo: <code>f = 1000 mm</code>, <code>p = 4 µm</code> → <code>s ≈ 0,82″/px</code>. El disco solar (≈ 1893″) cubre entonces unos 2.300 px de diámetro.</p>
+
+    <h3>Límite de difracción</h3>
+    <p>El radio del disco de Airy en ángulo es <code>θ ≈ 1,22 λ / Dₐ</code>, con <code>Dₐ = f/N</code> el diámetro de la pupila de entrada. Para λ = 550 nm:</p>
+    <div class="eq">θ ≈ 0,138 / Dₐ(m) <span class="c">  [″]  ;  ej. f/8 a 1000 mm → Dₐ = 0,125 m → θ ≈ 1,1″</span></div>
+    <p>A números f altos el sistema se vuelve limitado por difracción antes que por el sensor. La estructura fina de la cromosfera (≈ 2,7″) solo se insinúa si el muestreo y la apertura lo permiten, y siempre limitada por el seeing, que a 12° de altura será notable.</p>
+  </section>
+
+  <section id="arrastre">
+    <div class="sec-head"><span class="sec-no">08</span><h2>Arrastre por movimiento diurno</h2></div>
+    <p>Sobre trípode fijo, el Sol deriva por la rotación terrestre a velocidad angular:</p>
+    <div class="eq">ω = 15,04″/s · cos δ <span class="c">  ;  δ(12 ago) ≈ +15° → ω ≈ 14,5″/s</span></div>
+    <p>El tiempo máximo de exposición para mantener el arrastre por debajo de un presupuesto de desenfoque <code>b</code> (en píxeles) es:</p>
+    <div class="eq">t<sub>máx</sub> = b · s / ω <span class="c">  ;  con s ≈ 0,82″/px y b = 1 px → t<sub>máx</sub> ≈ 0,055 s ≈ 1/18 s</span></div>
+    <p>Es decir, a 1000 mm sobre trípode fijo, cualquier toma de la corona más lenta que ~1/15 s ya arrastra a nivel de píxel. Las exposiciones lentas del extremo de la horquilla (corona externa, varios décimos de segundo o más) <strong>exigen seguimiento ecuatorial</strong> a focales largas. Relajar <code>b</code> a 2 o 3 px duplica o triplica el margen, útil si vas a redimensionar.</p>
+    <div class="tip"><b>Nota:</b> cerca del horizonte la trayectoria es oblicua y la refracción diferencial deforma ligeramente el disco, pero el módulo de <code>ω</code> sigue siendo buena guía para el presupuesto de arrastre.</div>
+  </section>
+
+  <section id="supuestos">
+    <div class="sec-head"><span class="sec-no">09</span><h2>Supuestos y límites</h2></div>
+    <ul class="clean">
+      <li>Proyección rectilínea; no válida para ojos de pez ni rigurosa en gran angular extremo.</li>
+      <li>Diámetro solar fijo (0,525°); se ignora la variación intramensual, del orden de décimas de por ciento.</li>
+      <li>Luna como disco opaco de 1,04 × θ<sub>☉</sub>; sin perfil de limbo, por lo que no predice la cronología exacta de perlas de Baily ni el anillo de diamantes.</li>
+      <li>Corona con simetría azimutal en el dibujo; la corona real es estructurada y dependiente del ciclo.</li>
+      <li>Valores Q empíricos y sin corrección de extinción; la sección 06 cuantifica el sesgo esperable a 12°.</li>
+      <li>Redondeo a tercios de paso; tu cámara puede estar configurada en pasos de medio EV.</li>
+      <li>Sin modelo de seeing, transparencia variable ni respuesta espectral del sensor.</li>
+    </ul>
+    <p class="muted">En conjunto, las cifras son un punto de partida sólido. La calibración final la da una sesión de pruebas con tu equipo y, a ser posible, con el Sol bajo para reproducir la masa de aire del evento.</p>
+  </section>
+
+  <section id="parametros">
+    <div class="sec-head"><span class="sec-no">10</span><h2>Parámetros numéricos</h2></div>
+    <table>
+      <thead><tr><th>Constante</th><th>Valor</th></tr></thead>
+      <tbody>
+        <tr><td>Diámetro angular solar</td><td class="m">0,525° (31,5′)</td></tr>
+        <tr><td>Radio solar angular</td><td class="m">0,2625° (945″)</td></tr>
+        <tr><td>Razón de magnitud lunar</td><td class="m">1,04 × θ<sub>☉</sub></td></tr>
+        <tr><td>Diagonal de referencia (FF)</td><td class="m">43,27 mm</td></tr>
+        <tr><td>Full Frame</td><td class="m">36 × 24 mm</td></tr>
+        <tr><td>APS-C Canon</td><td class="m">22,3 × 14,9 mm (1,6×)</td></tr>
+        <tr><td>APS-C Sony / Nikon / Fuji</td><td class="m">23,5 × 15,6 mm (1,53×)</td></tr>
+        <tr><td>Micro 4/3</td><td class="m">17,3 × 13 mm (2,0×)</td></tr>
+        <tr><td>Tipo 1"</td><td class="m">13,2 × 8,8 mm (2,7×)</td></tr>
+        <tr><td>Fórmula FOV</td><td class="m">2·arctan(d/2f)</td></tr>
+        <tr><td>Fórmula exposición</td><td class="m">t = N²/(I·2^Q)</td></tr>
+        <tr><td>Pendiente Q extrapolada</td><td class="m">≈ −3,32 Q/década</td></tr>
+      </tbody>
+    </table>
+    <h3>Circunstancias en A Coruña (12 ago 2026)</h3>
+    <table>
+      <tbody>
+        <tr><td>Primer contacto (C1)</td><td class="m">19:31</td></tr>
+        <tr><td>Totalidad (máximo)</td><td class="m">20:28</td></tr>
+        <tr><td>Duración de la totalidad</td><td class="m">76 s</td></tr>
+        <tr><td>Altura del Sol en totalidad</td><td class="m">≈ 12°</td></tr>
+        <tr><td>Último contacto / puesta</td><td class="m">21:22 / 21:41</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    Manual técnico del simulador de encuadre y exposición del eclipse total del 12 de agosto de 2026 (A Coruña). Creado por <strong style="color:var(--text);font-weight:500">Rafael Vida</strong>. Fotometría según la guía de exposición solar de Fred Espenak (NASA RP 1318 / MrEclipse). Masa de aire según Kasten y Young (1989). Circunstancias locales del Instituto Geográfico Nacional (eclipses.ign.es). Las constantes se recogen en la sección 10.
+  </footer>
+
+</div>
+</body>
+</html>

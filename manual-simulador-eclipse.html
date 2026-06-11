@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual de uso · Simulador del eclipse · A Coruña 2026</title>
+<meta name="author" content="Rafael Vida">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#07070d; --panel:#10111c; --panel-2:#161827;
+    --line:rgba(255,255,255,0.08); --line-strong:rgba(255,255,255,0.16);
+    --text:#e7e9f2; --muted:#9398ac; --corona:#f6f2e6; --gold:#ffcf6b; --prom:#ff5b52;
+    --display:"Space Grotesk",system-ui,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,monospace;
+    --body:"Inter",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:
+      radial-gradient(1100px 640px at 82% -12%, rgba(255,207,107,0.07), transparent 60%),
+      var(--bg);
+    color:var(--text);font-family:var(--body);line-height:1.62;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:780px;margin:0 auto;padding:34px 22px 80px}
+
+  /* header */
+  header{display:flex;gap:16px;align-items:flex-start;margin-bottom:8px}
+  .glyph{flex:0 0 auto;width:50px;height:50px;margin-top:3px}
+  .eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(24px,4.4vw,36px);line-height:1.08;letter-spacing:-0.015em;margin:0}
+  .lede{color:var(--muted);font-size:15px;margin-top:10px;max-width:60ch}
+  .byline{margin-top:12px;font-family:var(--mono);font-size:12px;letter-spacing:0.04em;color:var(--gold)}
+  .byline::before{content:"";display:inline-block;width:18px;height:1px;background:var(--gold);vertical-align:middle;margin-right:9px;opacity:0.6}
+  .navlink{flex:0 0 auto;align-self:flex-start;display:inline-flex;align-items:center;gap:8px;
+    text-decoration:none;color:var(--gold);font-family:var(--mono);font-size:12.5px;letter-spacing:0.03em;
+    border:1px solid rgba(255,207,107,0.35);border-radius:10px;padding:9px 14px;background:rgba(255,207,107,0.06);
+    transition:background .15s,border-color .15s}
+  .navlink:hover{background:rgba(255,207,107,0.14);border-color:var(--gold)}
+  .navlink svg{width:15px;height:15px;flex:0 0 auto}
+  .navrow{margin-left:auto;display:flex;flex-direction:column;gap:8px}
+  @media(max-width:620px){.navrow{margin-left:0;width:100%;flex-direction:row;flex-wrap:wrap;margin-top:6px}}
+
+  /* safety callout */
+  .safety{margin:26px 0;padding:16px 18px;border-radius:13px;
+    background:rgba(255,91,82,0.08);border:1px solid rgba(255,91,82,0.32)}
+  .safety .h{font-family:var(--display);font-weight:600;font-size:15px;color:#ff8a83;display:flex;align-items:center;gap:9px;margin-bottom:6px}
+  .safety p{margin:0;font-size:14px;color:#f4dad8}
+
+  /* toc */
+  nav.toc{margin:28px 0;padding:18px 20px;background:var(--panel);border:1px solid var(--line);border-radius:13px}
+  nav.toc .t{font-family:var(--mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+  nav.toc ol{margin:0;padding:0;list-style:none;counter-reset:s;display:grid;grid-template-columns:1fr 1fr;gap:7px 22px}
+  @media(max-width:560px){nav.toc ol{grid-template-columns:1fr}}
+  nav.toc li{counter-increment:s}
+  nav.toc a{color:var(--text);text-decoration:none;font-size:14px;display:flex;gap:10px;align-items:baseline;padding:3px 0}
+  nav.toc a::before{content:counter(s,decimal-leading-zero);font-family:var(--mono);font-size:11px;color:var(--gold);flex:0 0 auto}
+  nav.toc a:hover{color:var(--gold)}
+
+  section{margin:40px 0;scroll-margin-top:18px}
+  .sec-head{display:flex;gap:12px;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:16px}
+  .sec-no{font-family:var(--mono);font-size:13px;color:var(--gold)}
+  h2{font-family:var(--display);font-weight:600;font-size:21px;letter-spacing:-0.01em;margin:0}
+  h3{font-family:var(--display);font-weight:600;font-size:15px;margin:20px 0 6px;color:var(--corona)}
+  p{margin:11px 0}
+  .muted{color:var(--muted)}
+  strong{font-weight:600;color:#fff}
+  code{font-family:var(--mono);font-size:0.9em;background:rgba(255,255,255,0.06);padding:1px 6px;border-radius:5px;color:var(--gold)}
+
+  .what{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+  .what span{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;color:var(--muted);
+    border:1px solid var(--line-strong);border-radius:20px;padding:4px 12px}
+
+  ul.clean{margin:11px 0;padding:0;list-style:none}
+  ul.clean li{position:relative;padding-left:20px;margin:7px 0;font-size:14.5px}
+  ul.clean li::before{content:"";position:absolute;left:2px;top:9px;width:6px;height:6px;border-radius:50%;background:var(--gold)}
+
+  .fig{margin:18px 0;padding:14px;background:#04040a;border:1px solid var(--line);border-radius:11px}
+  .fig svg{display:block;width:100%;height:auto}
+  .cap{font-size:12.5px;color:var(--muted);margin-top:9px;text-align:center}
+
+  /* steps timeline */
+  .steps{margin:16px 0;border-left:2px solid var(--line-strong);padding-left:0}
+  .step{position:relative;padding:0 0 18px 26px}
+  .step::before{content:"";position:absolute;left:-7px;top:3px;width:12px;height:12px;border-radius:50%;background:var(--gold);border:3px solid var(--bg)}
+  .step .when{font-family:var(--mono);font-size:12px;color:var(--gold);letter-spacing:0.04em}
+  .step .title{font-family:var(--display);font-weight:600;font-size:15px;margin:2px 0 3px}
+  .step p{margin:0;font-size:14px;color:var(--muted)}
+
+  /* glossary */
+  dl{margin:14px 0}
+  dt{font-family:var(--mono);font-size:13.5px;color:var(--gold);margin-top:15px;font-weight:600}
+  dd{margin:4px 0 0;font-size:14px;color:var(--text)}
+
+  .tip{margin:14px 0;padding:13px 15px;border-radius:11px;background:rgba(255,207,107,0.06);border:1px solid rgba(255,207,107,0.2);font-size:14px}
+  .tip b{color:var(--gold);font-weight:600}
+
+  footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);line-height:1.6}
+  footer a{color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <svg class="glyph" viewBox="0 0 100 100" aria-hidden="true">
+      <defs><radialGradient id="g" cx="50%" cy="50%" r="50%">
+        <stop offset="38%" stop-color="#f6f2e6" stop-opacity="0"/>
+        <stop offset="44%" stop-color="#f6f2e6" stop-opacity="0.9"/>
+        <stop offset="100%" stop-color="#f6f2e6" stop-opacity="0"/>
+      </radialGradient></defs>
+      <circle cx="50" cy="50" r="46" fill="url(#g)"/>
+      <circle cx="50" cy="50" r="20" fill="#04040a"/>
+      <circle cx="50" cy="50" r="20.5" fill="none" stroke="#ffcf6b" stroke-width="1"/>
+      <circle cx="69" cy="40" r="3.2" fill="#ffcf6b"/>
+    </svg>
+    <div>
+      <div class="eyebrow">Manual de uso</div>
+      <h1>Cómo usar el simulador del eclipse</h1>
+      <p class="lede">Una guía sencilla para preparar tus fotos del eclipse total de Sol del 12 de agosto de 2026 desde A Coruña. Sin fórmulas: solo qué hace cada parte y cómo sacarle partido.</p>
+      <div class="byline">Por Rafael Vida</div>
+    </div>
+    <div class="navrow">
+      <a class="navlink" href="simulador-eclipse-coruna.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Abrir simulador
+      </a>
+      <a class="navlink" href="manual-tecnico-eclipse.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+        Manual técnico avanzado
+      </a>
+    </div>
+  </header>
+
+  <div class="safety">
+    <div class="h">⚠ Antes de nada: tus ojos y tu cámara</div>
+    <p>Mirar al Sol sin protección daña la vista, y apuntar la cámara sin filtro puede estropear el sensor. Usa siempre un <strong>filtro solar</strong> homologado durante toda la fase parcial. Solo se retira durante los segundos de totalidad, cuando la Luna tapa por completo el Sol. En cuanto reaparezca el primer destello de luz, el filtro vuelve a su sitio.</p>
+  </div>
+
+  <nav class="toc">
+    <div class="t">Contenido</div>
+    <ol>
+      <li><a href="#para-que">Para qué sirve</a></li>
+      <li><a href="#visor">El visor</a></li>
+      <li><a href="#datos">Los cuatro datos</a></li>
+      <li><a href="#veredicto">El veredicto</a></li>
+      <li><a href="#equipo">Tu equipo</a></li>
+      <li><a href="#corona">La corona a simular</a></li>
+      <li><a href="#exposicion">Exposición y horquilla</a></li>
+      <li><a href="#coruna">Datos de A Coruña</a></li>
+      <li><a href="#plan">Un plan para el día</a></li>
+      <li><a href="#glosario">Glosario rápido</a></li>
+    </ol>
+  </nav>
+
+  <section id="para-que">
+    <div class="sec-head"><span class="sec-no">01</span><h2>Para qué sirve</h2></div>
+    <p>Desde A Coruña, la parte mágica del eclipse (la totalidad, cuando se ve la corona) dura solo <strong>76 segundos</strong>. Es muy poco tiempo para improvisar. Este simulador sirve para llegar con los deberes hechos y responder a dos preguntas antes del día clave:</p>
+    <ul class="clean">
+      <li><strong>¿Qué saldrá en mi foto?</strong> Según el objetivo y la cámara que tengas, te enseña si captas solo el Sol, el Sol con su halo, o un plano más amplio con paisaje.</li>
+      <li><strong>¿Qué exposición pongo?</strong> Te da los tiempos de disparo para cada parte del eclipse y una secuencia lista para usar.</li>
+    </ul>
+    <p class="muted">La pantalla tiene una imagen grande a la izquierda (lo que verás por el visor) y unos paneles de ajustes a la derecha. Tú cambias los ajustes y la imagen y los datos se actualizan al momento.</p>
+  </section>
+
+  <section id="visor">
+    <div class="sec-head"><span class="sec-no">02</span><h2>El visor</h2></div>
+    <div class="what"><span>Dónde está: imagen grande</span><span>Qué responde: ¿qué cabe?</span></div>
+    <p>Es la previsualización de tu foto. El <strong style="color:var(--gold)">recuadro dorado</strong> es exactamente lo que captará tu cámara con los ajustes elegidos. Todo lo que queda <strong>oscurecido alrededor</strong> existe en el cielo, pero se queda fuera de tu encuadre.</p>
+
+    <div class="fig">
+      <svg viewBox="0 0 600 300" role="img" aria-label="Esquema del visor">
+        <defs><radialGradient id="c2" cx="50%" cy="50%" r="50%">
+          <stop offset="20%" stop-color="#f8f5ea" stop-opacity="0.95"/>
+          <stop offset="55%" stop-color="#dfe4f5" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#cdd6f0" stop-opacity="0"/>
+        </radialGradient>
+        <mask id="m2"><rect width="600" height="300" fill="#fff"/><rect x="190" y="80" width="220" height="150" fill="#000"/></mask></defs>
+        <rect width="600" height="300" fill="#04040a"/>
+        <circle cx="300" cy="155" r="120" fill="url(#c2)"/>
+        <circle cx="300" cy="155" r="26" fill="#05050b"/>
+        <circle cx="300" cy="155" r="26" fill="none" stroke="#ffcf6b" stroke-width="1.5"/>
+        <rect width="600" height="300" fill="#04040a" opacity="0.66" mask="url(#m2)"/>
+        <rect x="190" y="80" width="220" height="150" fill="none" stroke="#ffcf6b" stroke-width="2.5" rx="3"/>
+        <text x="300" y="255" fill="#ffcf6b" font-family="JetBrains Mono, monospace" font-size="13" text-anchor="middle">tu foto</text>
+        <text x="80" y="40" fill="#9398ac" font-family="JetBrains Mono, monospace" font-size="13">corona que se queda fuera</text>
+        <line x1="120" y1="46" x2="150" y2="95" stroke="#9398ac" stroke-width="1"/>
+      </svg>
+      <div class="cap">El recuadro dorado es tu foto; lo oscuro es lo que no entra.</div>
+    </div>
+
+    <h3>La barra de abajo</h3>
+    <p>La barrita blanca con un número (por ejemplo <code>1°</code>) es una <strong>regla</strong> para hacerte una idea de los tamaños. Un dato útil para situarte: la Luna llena ocupa en el cielo medio grado, y tu puño con el brazo estirado tapa unos diez grados.</p>
+    <p class="muted">La crucecita del centro marca dónde estará el Sol. Las esquinas en ángulo son solo las marcas del encuadre, como en un visor real.</p>
+  </section>
+
+  <section id="datos">
+    <div class="sec-head"><span class="sec-no">03</span><h2>Los cuatro datos</h2></div>
+    <div class="what"><span>Dónde está: bajo el visor</span><span>Qué responde: el resumen en números</span></div>
+    <p>Debajo de la imagen hay cuatro recuadros que resumen tu situación:</p>
+    <ul class="clean">
+      <li><strong>Focal equivalente.</strong> Tu objetivo "traducido" al lenguaje común de las cámaras grandes (Full Frame). Sirve para comparar peras con peras: un 300 mm en una cámara pequeña puede "ver" como un 450 mm en una grande.</li>
+      <li><strong>Factor de recorte.</strong> Cuánto recorta tu cámara respecto a una Full Frame. Si pone <code>1,5×</code>, tu sensor aprovecha una zona más pequeña, así que el motivo se ve más cerca (y el encuadre, más estrecho).</li>
+      <li><strong>Campo de visión.</strong> El ancho de cielo que cabe, medido en grados. Cuanto más pequeño, más "cerca" estás del Sol.</li>
+      <li><strong>Cuánto ocupa el disco.</strong> Qué porcentaje de la altura de tu foto llena el propio Sol. Si es bajo, el Sol sale pequeñito; si se acerca al 100%, lo llena.</li>
+    </ul>
+  </section>
+
+  <section id="veredicto">
+    <div class="sec-head"><span class="sec-no">04</span><h2>El veredicto</h2></div>
+    <div class="what"><span>Dónde está: recuadro dorado</span><span>Qué responde: ¿qué tipo de foto es?</span></div>
+    <p>Es la frase resumen, en cristiano. Sin mirar números, te dice qué clase de foto vas a conseguir: por ejemplo "el disco solar llena el encuadre", "corona con margen" o "plano amplio para incluir paisaje". Es la forma más rápida de saber si tu objetivo es el adecuado para lo que tienes en mente.</p>
+    <div class="tip"><b>Idea clave:</b> no existe un objetivo "perfecto" para todo. Uno largo te da primeros planos espectaculares del Sol; uno más corto te deja meter la corona entera y el horizonte. El veredicto te ayuda a elegir según lo que quieras contar.</div>
+  </section>
+
+  <section id="equipo">
+    <div class="sec-head"><span class="sec-no">05</span><h2>Tu equipo</h2></div>
+    <div class="what"><span>Dónde está: primer panel derecho</span><span>Qué responde: describe tu cámara</span></div>
+    <p>Aquí le dices al simulador qué vas a usar. Cada ajuste cambia al instante el visor:</p>
+    <ul class="clean">
+      <li><strong>Focal real del objetivo.</strong> Los milímetros que pone en tu objetivo (50, 200, 500…). Puedes escribirlos o moverlos con la barra. Más milímetros equivale a más zoom, a Sol más grande.</li>
+      <li><strong>Multiplicador (teleconvertidor).</strong> Si usas uno de esos accesorios que se ponen entre cámara y objetivo para alargar el alcance, elígelo aquí (<code>1,4×</code> o <code>2×</code>). Si no usas, déjalo en <code>1×</code>.</li>
+      <li><strong>Formato del sensor.</strong> El tamaño del sensor de tu cámara. Si no lo sabes seguro: las réflex y sin espejo "de gama alta" suelen ser Full Frame; muchas de aficionado son APS-C. Hay opción "Personalizado" si conoces las medidas exactas.</li>
+      <li><strong>Orientación.</strong> Foto horizontal o vertical, como girarías la cámara.</li>
+      <li><strong>Fase del eclipse.</strong> Cambia entre las dos caras del eclipse (ver más abajo).</li>
+    </ul>
+
+    <h3>Las dos fases</h3>
+    <p>El eclipse tiene dos momentos muy distintos de fotografiar:</p>
+    <ul class="clean">
+      <li><strong>Parcial:</strong> la hora larga en la que la Luna va "mordiendo" el Sol. Se fotografía <strong>con filtro</strong> y se ve el disco brillante en forma de creciente.</li>
+      <li><strong>Totalidad:</strong> los 76 segundos en los que la Luna tapa el Sol entero. Se quita el filtro y aparece la corona, ese halo blanco y nacarado. Es la foto estrella.</li>
+    </ul>
+  </section>
+
+  <section id="corona">
+    <div class="sec-head"><span class="sec-no">06</span><h2>La corona a simular</h2></div>
+    <div class="what"><span>Dónde está: panel derecho</span><span>Qué responde: ¿hasta dónde llega el halo?</span></div>
+    <p>La corona es la atmósfera del Sol: un halo de luz que solo se ve durante la totalidad. No tiene un borde fijo, se va difuminando, y sus "penachos" pueden extenderse mucho. Con esta barra decides <strong>hasta dónde quieres llegar</strong> en la simulación.</p>
+    <ul class="clean">
+      <li><strong>Valor bajo (cerca de 2):</strong> solo la corona interior, la parte más brillante y pegada al Sol.</li>
+      <li><strong>Valor medio (4):</strong> una corona "de foto" típica, como la que se ve en la mayoría de imágenes.</li>
+      <li><strong>Valor alto (7 u 8):</strong> los penachos largos que solo salen en exposiciones más prolongadas.</li>
+    </ul>
+    <p class="muted">La medida está en "radios solares", que es solo una forma de decir cuántas veces el tamaño del propio Sol se aleja el halo. No hace falta entender el número: muévelo y mira cómo crece el halo en el visor.</p>
+  </section>
+
+  <section id="exposicion">
+    <div class="sec-head"><span class="sec-no">07</span><h2>Exposición y horquilla</h2></div>
+    <div class="what"><span>Dónde está: panel y tabla inferior</span><span>Qué responde: ¿qué tiempo de disparo uso?</span></div>
+    <p>Aquí está la otra mitad del problema: <strong>cuánta luz dejar entrar</strong>. Le indicas dos cosas de tu cámara y el simulador calcula los tiempos:</p>
+    <ul class="clean">
+      <li><strong>ISO:</strong> la sensibilidad de la cámara. Más ISO equivale a más luz captada (pero algo más de "grano").</li>
+      <li><strong>Diafragma (f/):</strong> la abertura del objetivo. Es el número f que aparece al disparar, por ejemplo <code>f/8</code>.</li>
+      <li><strong>Filtro solar:</strong> solo afecta a la fase parcial, para tener en cuenta cuánta luz bloquea tu filtro.</li>
+    </ul>
+
+    <h3>Por qué una sola foto no basta</h3>
+    <p>El eclipse tiene partes con brillos disparatadamente distintos: la zona pegada al Sol es muchísimo más luminosa que los penachos exteriores. Tanto, que ninguna foto los capta bien a la vez: o quemas el centro o pierdes los bordes.</p>
+    <p>La solución de los fotógrafos de eclipses es la <strong>horquilla</strong> (o "bracketing"): disparar una ráfaga de fotos a velocidades cada vez más lentas, desde muy rápida para el centro hasta lenta para los penachos. Luego se eligen las mejores o se combinan.</p>
+
+    <h3>Lo que te da la tabla</h3>
+    <ul class="clean">
+      <li>Una <strong>velocidad recomendada</strong> para cada parte del eclipse (cromosfera, protuberancias, corona a distintas distancias…).</li>
+      <li>Una <strong>secuencia sugerida</strong>: la serie concreta de velocidades a disparar, ya calculada. Puedes programarla en el modo de horquillado de tu cámara o en un intervalómetro.</li>
+      <li>Cuántos disparos son y cuánto tardan, con un aviso si la serie se acerca a los 76 segundos disponibles.</li>
+    </ul>
+    <div class="tip"><b>Truco:</b> ensaya esa ráfaga en casa, a oscuras o con el Sol bajo, hasta que te salga sin pensar. El día del eclipse no querrás estar mirando botones.</div>
+  </section>
+
+  <section id="coruna">
+    <div class="sec-head"><span class="sec-no">08</span><h2>Datos de A Coruña</h2></div>
+    <div class="what"><span>Dónde está: panel derecho</span><span>Qué responde: cuándo y cómo será</span></div>
+    <p>Un recordatorio con los horarios reales del eclipse desde A Coruña: cuándo empieza, cuándo llega la totalidad y cuándo termina. El dato más importante para la foto es que el Sol estará <strong>muy bajo</strong>, a unos 12 grados sobre el horizonte, casi de atardecer.</p>
+    <p>Eso tiene dos consecuencias prácticas: necesitas un sitio con el <strong>horizonte oeste despejado</strong> (sin edificios ni montes que tapen), y como hay más atmósfera de por medio, puede que tengas que alargar un poco los tiempos respecto a lo que diga la tabla.</p>
+  </section>
+
+  <section id="plan">
+    <div class="sec-head"><span class="sec-no">09</span><h2>Un plan para el día</h2></div>
+    <p>Juntando todo, así sería la secuencia el 12 de agosto:</p>
+    <div class="steps">
+      <div class="step"><div class="when">Días antes</div><div class="title">Ensaya</div><p>Decide objetivo y encuadre con el simulador. Practica la ráfaga de horquilla y deja la cámara configurada.</p></div>
+      <div class="step"><div class="when">19:31 a 20:28</div><div class="title">Fase parcial, con filtro</div><p>La Luna va comiéndose el Sol. Filtro puesto. Una sola exposición vale para casi todo este rato.</p></div>
+      <div class="step"><div class="when">Segundos antes de las 20:28</div><div class="title">Anillo de diamantes</div><p>Justo cuando va a desaparecer el último trozo de Sol. Quita el filtro en ese instante.</p></div>
+      <div class="step"><div class="when">20:28, durante 76 s</div><div class="title">Totalidad</div><p>Sin filtro. Dispara la horquilla para captar la corona entera. Y reserva unos segundos para mirarlo a ojo: merece la pena.</p></div>
+      <div class="step"><div class="when">Tras la totalidad</div><div class="title">Filtro de vuelta</div><p>Al primer destello de luz, filtro puesto otra vez. Empieza la parcial de salida hasta las 21:22.</p></div>
+    </div>
+  </section>
+
+  <section id="glosario">
+    <div class="sec-head"><span class="sec-no">10</span><h2>Glosario rápido</h2></div>
+    <dl>
+      <dt>Focal</dt><dd>Los milímetros del objetivo. Más milímetros, más zoom.</dd>
+      <dt>Focal equivalente</dt><dd>La focal traducida al estándar de las cámaras grandes, para poder comparar entre cámaras distintas.</dd>
+      <dt>Factor de recorte</dt><dd>Cuánto "acerca" tu cámara por tener el sensor más pequeño que una Full Frame.</dd>
+      <dt>Full Frame / APS-C</dt><dd>Dos tamaños de sensor. Full Frame es el grande (referencia); APS-C es más pequeño y recorta la imagen.</dd>
+      <dt>Diafragma (f/)</dt><dd>La abertura del objetivo. El número f que controla cuánta luz entra.</dd>
+      <dt>ISO</dt><dd>La sensibilidad de la cámara a la luz.</dd>
+      <dt>Grado y arcominuto</dt><dd>Medidas de tamaño en el cielo. La Luna llena mide medio grado. Un grado son 60 arcominutos.</dd>
+      <dt>Corona</dt><dd>El halo de luz alrededor del Sol, visible solo en la totalidad.</dd>
+      <dt>Cromosfera</dt><dd>Un finísimo anillo rosado pegado al borde del Sol, visible un instante.</dd>
+      <dt>Protuberancias</dt><dd>Lengüetas rosadas de gas que asoman por el borde durante la totalidad.</dd>
+      <dt>Perlas de Baily y anillo de diamantes</dt><dd>Los últimos (o primeros) destellos de luz colándose por los valles de la Luna, justo al entrar y salir de la totalidad.</dd>
+      <dt>Horquilla (bracketing)</dt><dd>Disparar varias fotos seguidas a distintas exposiciones para captar partes con brillos muy diferentes.</dd>
+    </dl>
+  </section>
+
+  <div style="text-align:center;margin:44px 0 8px">
+    <a class="navlink" style="margin:0;display:inline-flex" href="simulador-eclipse-coruna.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      Abrir el simulador y probar con tu objetivo
+    </a>
+  </div>
+
+  <footer>
+    Manual del simulador de encuadre y exposición del eclipse total del 12 de agosto de 2026 (A Coruña). Creado por <strong style="color:var(--text);font-weight:500">Rafael Vida</strong>. Horarios locales según el Instituto Geográfico Nacional. Los tiempos de exposición son un punto de partida basado en la guía de Fred Espenak; conviene afinarlos con pruebas reales. Recuerda la seguridad: filtro solar siempre, salvo durante la totalidad.
+  </footer>
+
+</div>
+</body>
+</html>
