@@ -198,12 +198,13 @@
         <tr><td>Corona 1,0 R<sub>☉</sub></td><td class="n">1</td><td></td></tr>
         <tr><td>Corona 2,0 R<sub>☉</sub></td><td class="n">0</td><td class="muted">media</td></tr>
         <tr><td>Parcial, filtro ND 4,0</td><td class="n">11</td><td class="muted">fotosfera</td></tr>
-        <tr><td>Parcial, filtro ND 5,0</td><td class="n">8</td><td class="muted">fotosfera</td></tr>
+        <tr><td>Parcial, filtro ND 5,0</td><td class="n">8</td><td class="muted">fotosfera · Baader visual</td></tr>
+        <tr><td>Parcial, Baader ND 3,8</td><td class="n">12</td><td class="muted">solo fotográfico, nunca visual</td></tr>
       </tbody>
     </table>
 
     <h3>Interpolación y extrapolación de Q</h3>
-    <p>Para una extensión arbitraria, el simulador interpola Q linealmente en <code>log₁₀(r)</code> entre los puntos tabulados. Más allá de 2,0 R<sub>☉</sub> prolonga la pendiente del último tramo (≈ −3,32 Q por década), de donde:</p>
+    <p>El Q del Baader ND 3,8 se deriva de la densidad: cada 0,3 de densidad óptica es un paso, luego <code>Q(3,8) = Q(5,0) + (5,0−3,8)/0,301 ≈ 8 + 4 = 12</code>. Para una extensión de corona arbitraria, el simulador interpola Q linealmente en <code>log₁₀(r)</code> entre los puntos tabulados. Más allá de 2,0 R<sub>☉</sub> prolonga la pendiente del último tramo (≈ −3,32 Q por década), de donde:</p>
     <div class="eq">Q(4 R<sub>☉</sub>) ≈ −1     Q(8 R<sub>☉</sub>) ≈ −2 <span class="c">  (extrapolado, tratar como orientativo)</span></div>
     <p>El brillo real de la corona externa no sigue una ley única, así que estos valores son una guía conservadora para fijar el extremo lento de la horquilla, no una predicción fotométrica.</p>
 
@@ -226,7 +227,7 @@
     <p>El exceso de masa de aire respecto al cenit es de unas 3,7 unidades. Con un coeficiente de extinción visual típico <code>k ≈ 0,2</code> mag/masa de aire en aire limpio:</p>
     <div class="eq">Δm = k · ΔX ≈ 0,2 · 3,7 ≈ 0,74 mag ≈ 1,0 paso
 <span class="c">con bruma costera (k ≈ 0,3): ≈ 1,1 mag ≈ 1,5 pasos</span></div>
-    <p>En la práctica: espera tener que <strong>alargar la exposición del orden de un paso</strong> respecto a la tabla, y más si hay calima. La extinción es además fuertemente cromática (mayor en azul), de modo que la corona aparecerá enrojecida; valóralo en el balance de blancos y en el procesado por canales.</p>
+    <p>En la práctica: espera tener que <strong>alargar la exposición del orden de un paso</strong> respecto a la tabla, y más si hay calima. El simulador incorpora esta corrección como ajuste seleccionable (+1 EV cielo limpio, +1,5 EV con bruma), aplicada como <code>Q<sub>ef</sub> = Q − ΔEV</code>. La extinción es además fuertemente cromática (mayor en azul), de modo que la corona aparecerá enrojecida; valóralo en el balance de blancos y en el procesado por canales.</p>
     <div class="warn"><b>Contraste del fondo:</b> a 12° el brillo del cielo crepuscular cerca del Sol compite con la corona externa más débil. El alcance real hacia los penachos lo limitará tanto ese fondo como la propia extinción, no solo el tiempo disponible.</div>
   </section>
 
@@ -248,7 +249,7 @@
     <div class="eq">ω = 15,04″/s · cos δ <span class="c">  ;  δ(12 ago) ≈ +15° → ω ≈ 14,5″/s</span></div>
     <p>El tiempo máximo de exposición para mantener el arrastre por debajo de un presupuesto de desenfoque <code>b</code> (en píxeles) es:</p>
     <div class="eq">t<sub>máx</sub> = b · s / ω <span class="c">  ;  con s ≈ 0,82″/px y b = 1 px → t<sub>máx</sub> ≈ 0,055 s ≈ 1/18 s</span></div>
-    <p>Es decir, a 1000 mm sobre trípode fijo, cualquier toma de la corona más lenta que ~1/15 s ya arrastra a nivel de píxel. Las exposiciones lentas del extremo de la horquilla (corona externa, varios décimos de segundo o más) <strong>exigen seguimiento ecuatorial</strong> a focales largas. Relajar <code>b</code> a 2 o 3 px duplica o triplica el margen, útil si vas a redimensionar.</p>
+    <p>Es decir, a 1000 mm sobre trípode fijo, cualquier toma de la corona más lenta que ~1/15 s ya arrastra a nivel de píxel. Las exposiciones lentas del extremo de la horquilla (corona externa, varios décimos de segundo o más) <strong>exigen seguimiento ecuatorial</strong> a focales largas. Relajar <code>b</code> a 2 o 3 px duplica o triplica el margen, útil si vas a redimensionar. El simulador implementa este cálculo: a partir de los megapíxeles introducidos deriva la escala de placa y marca en rojo las velocidades de la horquilla que superan <code>t<sub>máx</sub></code> con presupuesto de 1 px, salvo que se indique montura con seguimiento.</p>
     <div class="tip"><b>Nota:</b> cerca del horizonte la trayectoria es oblicua y la refracción diferencial deforma ligeramente el disco, pero el módulo de <code>ω</code> sigue siendo buena guía para el presupuesto de arrastre.</div>
   </section>
 

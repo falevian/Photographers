@@ -124,6 +124,32 @@
   .custom{display:none;gap:8px;margin-top:9px}
   .custom.on{display:flex}
 
+  .actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+  .abtn{flex:1;min-width:200px;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;
+    background:rgba(255,207,107,0.06);border:1px solid rgba(255,207,107,0.35);border-radius:10px;color:var(--gold);
+    font-family:var(--mono);font-size:12.5px;padding:10px 12px;transition:background .15s,border-color .15s}
+  .abtn:hover{background:rgba(255,207,107,0.14);border-color:var(--gold)}
+
+  .chip{display:inline-block;padding:2px 9px;margin:2px 4px 2px 0;border:1px solid var(--line-strong);border-radius:6px}
+  .chip.seqwarn{border-color:rgba(255,91,82,0.65);color:var(--prom)}
+
+  /* ficha de campo (solo al imprimir) */
+  #printCard{display:none}
+  @media print{
+    body{background:#fff !important}
+    .wrap{display:none !important}
+    #printCard{display:block !important;color:#000;font-family:var(--body);padding:2mm;font-size:12px;line-height:1.45}
+    #printCard h1{font-family:var(--display);font-size:19px;margin:0 0 2px;color:#000}
+    #printCard .pc-sub{font-size:11px;color:#444;margin-bottom:8px}
+    #printCard table{width:100%;border-collapse:collapse;margin:6px 0}
+    #printCard th,#printCard td{border:1px solid #999;padding:4px 7px;text-align:left;font-size:11.5px;color:#000}
+    #printCard th{background:#eee}
+    #printCard .pc-chip{display:inline-block;border:1px solid #555;border-radius:4px;padding:2px 8px;margin:2px 4px 2px 0;font-family:var(--mono);font-size:11px}
+    #printCard .pc-box{border:2px solid #000;padding:6px 9px;margin:8px 0;font-weight:600}
+    #printCard .pc-sec{font-weight:700;margin:9px 0 3px;font-size:12px;letter-spacing:0.04em;text-transform:uppercase}
+    #printCard p{margin:4px 0}
+  }
+
   /* reference table */
   table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
   th,td{text-align:left;padding:8px 4px;border-bottom:1px solid var(--line)}
@@ -195,6 +221,10 @@
           <div class="stat"><div class="k">Factor de recorte</div><div class="v" id="sCrop">—</div></div>
           <div class="stat"><div class="k">Campo de visión (H × V)</div><div class="v" id="sFov">—</div></div>
           <div class="stat"><div class="k">El disco solar ocupa</div><div class="v" id="sSun">—</div></div>
+        </div>
+        <div class="actions">
+          <button class="abtn" id="btnCard" type="button">🖨 Ficha de campo imprimible</button>
+          <button class="abtn" id="btnShare" type="button">🔗 Copiar enlace de esta configuración</button>
         </div>
       </div>
 
@@ -300,9 +330,32 @@
         <div class="ctl" id="ndCtl">
           <label class="lab" for="nd">Filtro solar (solo fase parcial)</label>
           <select id="nd">
-            <option value="11">ND 4,0 (≈13,3 pasos)</option>
-            <option value="8" selected>ND 5,0 (≈16,6 pasos)</option>
+            <option value="11">ND 4,0 genérico (≈13,3 pasos)</option>
+            <option value="8" selected>ND 5,0 · Baader AstroSolar visual (≈16,6 pasos)</option>
+            <option value="12">Baader AstroSolar ND 3,8 foto (≈12,6 pasos)</option>
           </select>
+          <div class="hint">El Baader ND 3,8 es <code>solo fotográfico</code>: nunca observes ni enfoques a ojo a través de él ni del visor óptico. Para mirar, ND 5,0.</div>
+        </div>
+        <div class="ctl">
+          <label class="lab" for="mp">Resolución del sensor (Mpx)</label>
+          <input type="number" id="mp" min="2" max="200" step="1" value="24">
+          <div class="hint">Solo se usa para estimar el arrastre por la rotación de la Tierra (≈15″/s) a tu focal.</div>
+        </div>
+        <div class="ctl">
+          <label class="lab">Montura</label>
+          <div class="seg" id="track">
+            <button data-t="0" aria-pressed="true">Trípode fijo</button>
+            <button data-t="1" aria-pressed="false">Seguimiento ecuatorial</button>
+          </div>
+        </div>
+        <div class="ctl">
+          <label class="lab" for="ext">Corrección por extinción (Sol bajo)</label>
+          <select id="ext">
+            <option value="0">Sin corrección (tabla Espenak)</option>
+            <option value="1" selected>Cielo limpio a 12° (+1 EV)</option>
+            <option value="1.5">Bruma o calima (+1,5 EV)</option>
+          </select>
+          <div class="hint">A 12° de altura la luz atraviesa ≈4,7 masas de aire: la atmósfera roba en torno a un paso. La corrección alarga todos los tiempos.</div>
         </div>
       </div>
 
@@ -318,6 +371,15 @@
           <div class="hint" style="margin-top:10px">Con el Sol a solo 12° sobre el horizonte necesitas un oeste despejado. Filtro solar obligatorio en las fases parciales; retíralo únicamente durante los 76 s de totalidad.</div>
         </div>
       </div>
+
+      <div class="card">
+        <h2><span class="pin"></span>Día del eclipse · en vivo</h2>
+        <div id="edPhase" style="font-family:var(--display);font-weight:600;font-size:15px">—</div>
+        <div id="edFilter" style="font-family:var(--mono);font-size:12.5px;letter-spacing:0.08em;margin-top:3px">—</div>
+        <div id="edCount" style="font-family:var(--mono);font-size:30px;font-weight:600;margin-top:8px;letter-spacing:0.02em">—</div>
+        <div id="edNext" class="hint">—</div>
+        <div class="hint" style="margin-top:8px">Usa el reloj de tu dispositivo y la hora peninsular. Tenlo abierto en el móvil durante el eclipse: te dirá cuándo quitar y poner el filtro.</div>
+      </div>
     </div>
 
   </div>
@@ -327,6 +389,8 @@
   </footer>
 
 </div>
+
+<div id="printCard" aria-hidden="true"></div>
 
 <script>
 (function(){
@@ -345,7 +409,10 @@
     orient: "h",
     corR: 4.0,  // radios solares (radio)
     phase: "tot", // "tot" totalidad | "par" parcial
-    iso: 400, fnum: 8, nd: 8 // nd = Q de la fase parcial segun filtro
+    iso: 400, fnum: 8, nd: 8, // nd = Q de la fase parcial segun filtro
+    mp: 24,       // megapixeles (para escala de placa y arrastre)
+    track: false, // seguimiento ecuatorial
+    ext: 1        // correccion de extincion en EV
   };
 
   // --- elementos ---
@@ -601,59 +668,90 @@
     return 0 + (Math.log10(rs)-Math.log10(2.0)) * (-1/ (Math.log10(2.0)-Math.log10(1.0)));
   }
 
-  function expTime(q){ return st.fnum*st.fnum / (st.iso * Math.pow(2,q)); }
+  function expTime(q){ return st.fnum*st.fnum / (st.iso * Math.pow(2, q - st.ext)); }
+  function tLabel(t){ return t >= 1 ? fmt1(t)+'"' : "1/"+Math.round(1/t); }
+
+  // limite de arrastre sin seguimiento: deriva solar ~14,5"/s (delta +15 en agosto)
+  function driftLimit(c){
+    var nH = Math.sqrt(st.mp*1e6 * st.sw/st.sh); // pixeles horizontales
+    var p = st.sw / nH;                           // paso de pixel en mm
+    var scale = 206265 * p / c.fe;                // escala de placa, "/px
+    return { scale: scale, tmax: scale / 14.5 };  // presupuesto: 1 px
+  }
+
+  // datos de la totalidad (filas Q + secuencia de horquilla), reutilizados por la ficha
+  function totalityData(c){
+    var qOuter = qCorona(st.corR), dl = driftLimit(c);
+    var rows = [
+      ["Perlas de Baily", 12],
+      ["Cromosfera", 11],
+      ["Protuberancias", 9],
+      ["Corona 0,1 R☉ (interior)", 7],
+      ["Corona 0,5 R☉", 3],
+      ["Corona 1 R☉", 1],
+      ["Corona 2 R☉", 0],
+      ["Corona "+fmt1(st.corR)+" R☉ (tu extensión)", qOuter]
+    ];
+    var seq = [], total = 0;
+    for(var q=11; q>=Math.floor(qOuter); q--){
+      var s = snapShutter(expTime(q));
+      if(seq.length===0 || seq[seq.length-1].label !== s.label){
+        seq.push({sec:s.sec, label:s.label, warn: !st.track && s.sec > dl.tmax});
+        total += s.sec + 0.4; // margen por disparo
+      }
+    }
+    return { rows: rows, seq: seq, total: total, dl: dl, qOuter: qOuter };
+  }
 
   function exposure(c){
     var col = $("expCol"), intro = $("expIntro"), tab = $("exptab");
     var box = $("bracketBox"), seqEl = $("bracketSeq"), noteEl = $("bracketNote");
+    var dl = driftLimit(c);
+    var extTxt = st.ext > 0 ? " Corrección de extinción aplicada: +"+fmt1(st.ext)+" EV." : "";
     var rows;
+
+    function rowHtml(r){
+      var t = expTime(r[1]), s = snapShutter(t);
+      var warn = !st.track && s.sec > dl.tmax;
+      return '<tr><td>'+r[0]+'</td><td class="n" style="text-align:center">'+r[1].toFixed(0).replace("-0","0")+'</td>'
+           + '<td class="n"'+(warn?' style="color:var(--prom)"':'')+'>'+s.label+(warn?' ▲':'')+'</td></tr>';
+    }
 
     if(st.phase === "par"){
       col.textContent = "Fase parcial";
-      var qf = st.nd; // 11 (ND4) o 8 (ND5)
+      box.style.display = "none";
+      var qf = st.nd; // Q segun filtro: ND4,0=11 · ND5,0=8 · Baader ND3,8=12
       rows = [
         ["Fotosfera (disco)", qf],
         ["Creciente fino (+2 EV)", qf-2]
       ];
-      intro.innerHTML = "Con filtro puesto. El brillo de la fotosfera es constante, así que una sola exposición vale para casi toda la parcial; el creciente fino pide unos dos pasos más por el oscurecimiento del limbo.";
-      box.style.display = "none";
+      intro.innerHTML = "Con filtro puesto. El brillo de la fotosfera es constante, así que una sola exposición vale para casi toda la parcial; el creciente fino pide unos dos pasos más por el oscurecimiento del limbo." + extTxt;
     } else {
       col.textContent = "Estructura";
       box.style.display = "block";
-      var qOuter = qCorona(st.corR);
-      rows = [
-        ["Perlas de Baily", 12],
-        ["Cromosfera", 11],
-        ["Protuberancias", 9],
-        ["Corona 0,1 R☉ (interior)", 7],
-        ["Corona 0,5 R☉", 3],
-        ["Corona 1 R☉", 1],
-        ["Corona 2 R☉", 0],
-        ["Corona "+fmt1(st.corR)+" R☉ (tu extensión)", qOuter]
-      ];
-      var span = 11 - qOuter; // pasos de cromosfera a corona elegida
-      intro.innerHTML = "Sin filtro. Entre la cromosfera y tu corona a "+fmt1(st.corR)+" R☉ hay <b>"+Math.round(span)+" pasos</b> de diferencia: es imposible en un solo disparo, de ahí la horquilla.";
+      var T = totalityData(c);
+      rows = T.rows;
+      var span = 11 - T.qOuter;
+      intro.innerHTML = "Sin filtro. Entre la cromosfera y tu corona a "+fmt1(st.corR)+" R☉ hay <b>"+Math.round(span)+" pasos</b> de diferencia: es imposible en un solo disparo, de ahí la horquilla." + extTxt;
 
-      // secuencia: de cromosfera (Q11) a corona elegida, en pasos de 1 EV
-      var qHi = 11, qLo = Math.floor(qOuter);
-      var seq = [], total = 0;
-      for(var q=qHi; q>=qLo; q--){
-        var s = snapShutter(expTime(q));
-        if(seq.length===0 || seq[seq.length-1].label !== s.label){
-          seq.push(s); total += s.sec + 0.4; // 0.4 s de margen por disparo
-        }
-      }
-      seqEl.innerHTML = seq.map(function(s){ return '<span style="display:inline-block;padding:2px 9px;margin:2px 4px 2px 0;border:1px solid var(--line-strong);border-radius:6px">'+s.label+'</span>'; }).join("");
-      var feas = total <= 76;
-      noteEl.innerHTML = seq.length+" disparos a f/"+fmt1(st.fnum)+" e ISO "+st.iso+", paso de 1 EV. Tiempo aproximado con margen de encuadre: ≈ "+Math.round(total)+" s "
-        + (feas ? "(cabe holgado en los 76 s; automatízala con horquillado o intervalómetro)."
-                : "(se acerca a los 76 s de totalidad; sube ISO o abre diafragma para acortar los tiempos largos).");
+      seqEl.innerHTML = T.seq.map(function(s){
+        return '<span class="chip'+(s.warn?' seqwarn':'')+'">'+s.label+'</span>';
+      }).join("");
+
+      var lim = tLabel(dl.tmax), nWarn = 0;
+      T.seq.forEach(function(s){ if(s.warn) nWarn++; });
+      var feas = T.total <= 76;
+      noteEl.innerHTML = T.seq.length+" disparos a f/"+fmt1(st.fnum)+" e ISO "+st.iso+", paso de 1 EV. Tiempo aproximado con margen: ≈ "+Math.round(T.total)+" s "
+        + (feas ? "(cabe en los 76 s; automatízala con horquillado o intervalómetro)."
+                : "(se acerca a los 76 s de totalidad; sube ISO o abre diafragma).")
+        + (st.track
+            ? " Con seguimiento ecuatorial no hay límite de arrastre práctico en estos tiempos."
+            : (nWarn
+                ? ' <span style="color:var(--prom)">Las '+nWarn+' velocidades en rojo arrastran más de 1 px a '+Math.round(c.fe)+' mm sobre trípode fijo (límite ≈ '+lim+'): usa seguimiento, sube ISO o abre diafragma.</span>'
+                : " Límite de arrastre sin seguimiento ≈ "+lim+"; toda la serie queda por debajo."));
     }
 
-    tab.innerHTML = rows.map(function(r){
-      var t = expTime(r[1]), s = snapShutter(t);
-      return '<tr><td>'+r[0]+'</td><td class="n" style="text-align:center">'+(r[1]>=0?"+":"")+r[1].toFixed(0).replace("-0","0")+'</td><td class="n">'+s.label+'</td></tr>';
-    }).join("");
+    tab.innerHTML = rows.map(rowHtml).join("");
   }
 
   // --- pintar todo ---
@@ -669,6 +767,7 @@
     exposure(c);
     $("ndCtl").style.opacity = (st.phase === "par") ? "1" : "0.4";
     draw(c);
+    saveURL();
   }
 
   // --- eventos ---
@@ -735,11 +834,162 @@
     st.nd = +this.value; render();
   });
 
+  $("mp").addEventListener("input", function(){
+    st.mp = Math.max(2, +this.value || 2); render();
+  });
+  $("ext").addEventListener("change", function(){
+    st.ext = +this.value; render();
+  });
+  $("track").addEventListener("click", function(e){
+    var b = e.target.closest("button"); if(!b) return;
+    st.track = b.dataset.t === "1";
+    [].forEach.call(this.querySelectorAll("button"), function(x){
+      x.setAttribute("aria-pressed", x === b ? "true" : "false");
+    });
+    render();
+  });
+
+  // --- configuracion en la URL (hash, compatible con file://) ---
+  function saveURL(){
+    try{
+      var q = new URLSearchParams();
+      q.set("f", st.focal); q.set("tc", st.tc);
+      q.set("s", st.custom ? "c,"+st.sw+","+st.sh : String(sensor.selectedIndex));
+      q.set("o", st.orient); q.set("ph", st.phase); q.set("cr", st.corR);
+      q.set("iso", st.iso); q.set("fn", st.fnum); q.set("nd", st.nd);
+      q.set("mp", st.mp); q.set("tr", st.track ? 1 : 0); q.set("ex", st.ext);
+      history.replaceState(null, "", "#"+q.toString());
+    }catch(e){ /* restricciones file:// en algun navegador: se ignora */ }
+  }
+
+  function loadURL(){
+    try{
+      var h = location.hash.replace(/^#/, "");
+      if(!h) return;
+      var q = new URLSearchParams(h);
+      if(q.has("f"))  st.focal = Math.max(5, Math.min(6000, +q.get("f") || st.focal));
+      if(q.has("tc")) st.tc = +q.get("tc") || 1;
+      if(q.has("s")){
+        var sv = q.get("s");
+        if(sv.charAt(0) === "c"){
+          var pa = sv.split(",");
+          st.custom = true; st.sw = +pa[1] || 36; st.sh = +pa[2] || 24;
+        } else {
+          var idx = parseInt(sv, 10);
+          if(idx >= 0 && idx < sensor.options.length - 1){
+            sensor.selectedIndex = idx;
+            var p = sensor.value.split(",");
+            st.sw = +p[0]; st.sh = +p[1];
+          }
+        }
+      }
+      if(q.has("o"))  st.orient = q.get("o") === "v" ? "v" : "h";
+      if(q.has("ph")) st.phase = q.get("ph") === "par" ? "par" : "tot";
+      if(q.has("cr")) st.corR = Math.max(1.5, Math.min(8, +q.get("cr") || st.corR));
+      if(q.has("iso"))st.iso = Math.max(25, +q.get("iso") || st.iso);
+      if(q.has("fn")) st.fnum = Math.max(1, +q.get("fn") || st.fnum);
+      if(q.has("nd")) st.nd = +q.get("nd") || st.nd;
+      if(q.has("mp")) st.mp = Math.max(2, +q.get("mp") || st.mp);
+      if(q.has("tr")) st.track = q.get("tr") === "1";
+      if(q.has("ex")) st.ext = +q.get("ex") || 0;
+    }catch(e){}
+  }
+
+  $("btnShare").addEventListener("click", function(){
+    saveURL();
+    var url = location.href, btn = this, prev = btn.textContent;
+    function ok(){ btn.textContent = "✓ Enlace copiado"; setTimeout(function(){ btn.textContent = prev; }, 1800); }
+    function fb(){ window.prompt("Copia el enlace de esta configuración:", url); }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(ok, fb);
+    } else { fb(); }
+  });
+
+  // --- ficha de campo imprimible ---
+  $("btnCard").addEventListener("click", function(){
+    var c = compute();
+    var T = totalityData(c);
+    var lim = tLabel(T.dl.tmax);
+    var qf = st.nd;
+    var parRows = [["Fotosfera con filtro (Q "+qf+")", qf], ["Creciente fino (+2 EV)", qf-2]];
+    var rowHtml = function(r){ return '<tr><td>'+r[0]+'</td><td>'+snapShutter(expTime(r[1])).label+'</td></tr>'; };
+    var seqHtml = T.seq.map(function(s){
+      return '<span class="pc-chip">☐ '+s.label+(s.warn ? ' ▲' : '')+'</span>';
+    }).join("");
+    var ndName = {11:"ND 4,0", 8:"ND 5,0 / Baader visual", 12:"Baader ND 3,8 (solo foto)"}[st.nd] || "ND";
+
+    $("printCard").innerHTML = ''
+      + '<h1>Ficha de campo · Eclipse total de Sol · A Coruña · 12 de agosto de 2026</h1>'
+      + '<div class="pc-sub">Rafael Vida · configuración generada el '+ new Date().toLocaleDateString("es-ES") +'</div>'
+      + '<div class="pc-box">FILTRO SOLAR SIEMPRE, salvo durante los 76 s de totalidad. Al primer destello tras C3, filtro puesto de inmediato. El '+ndName+' elegido'+(st.nd===12?' NO es seguro para mirar':' ')+'.</div>'
+      + '<div class="pc-sec">Horarios (hora peninsular)</div>'
+      + '<table><tr><th>Hora</th><th>Evento</th><th>Filtro</th></tr>'
+      + '<tr><td>19:31</td><td>C1 · comienza la fase parcial</td><td>Puesto</td></tr>'
+      + '<tr><td>≈ 20:27:20</td><td>C2 · anillo de diamantes, empieza la totalidad</td><td><strong>FUERA</strong></td></tr>'
+      + '<tr><td>20:28</td><td>Máximo · Sol a 12° sobre el horizonte oeste</td><td><strong>FUERA</strong></td></tr>'
+      + '<tr><td>≈ 20:28:40</td><td>C3 · fin de la totalidad</td><td><strong>PUESTO</strong></td></tr>'
+      + '<tr><td>21:22</td><td>C4 · fin del eclipse (puesta de sol 21:41)</td><td>—</td></tr></table>'
+      + '<div class="pc-sec">Equipo</div>'
+      + '<p>'+st.focal+' mm × TC '+st.tc+'× → <strong>'+Math.round(c.fe)+' mm efectivos</strong> · sensor '+fmt1(st.sw)+' × '+fmt1(st.sh)+' mm, '+(st.orient==="h"?"horizontal":"vertical")
+      + ' · equivalente '+Math.round(c.eq)+' mm · campo '+fmtDeg(c.hFov)+' × '+fmtDeg(c.vFov)
+      + ' · montura: '+(st.track ? "seguimiento ecuatorial" : "trípode fijo")+'</p>'
+      + '<div class="pc-sec">Exposición · ISO '+st.iso+' · f/'+fmt1(st.fnum)+(st.ext>0 ? ' · extinción +'+fmt1(st.ext)+' EV aplicada' : '')+'</div>'
+      + '<table><tr><th>Fase parcial (con filtro '+ndName+')</th><th>Velocidad</th></tr>'+parRows.map(rowHtml).join("")+'</table>'
+      + '<table><tr><th>Totalidad (sin filtro)</th><th>Velocidad</th></tr>'+T.rows.map(rowHtml).join("")+'</table>'
+      + '<div class="pc-sec">Horquilla de totalidad · '+T.seq.length+' disparos · ≈ '+Math.round(T.total)+' s (marca cada uno)</div>'
+      + '<p>'+seqHtml+'</p>'
+      + '<p>Límite de arrastre sin seguimiento a esta focal ≈ '+lim+' (1 px). ▲ = velocidad que arrastra sobre trípode fijo.'+(st.ext===0?' Sin corrección de extinción: a 12° de altura espera necesitar ≈ +1 EV.':'')+'</p>';
+    window.print();
+  });
+
+  // --- dia del eclipse: cuenta atras en vivo (hora peninsular = UTC+2) ---
+  var ED = {
+    c1: Date.UTC(2026, 7, 12, 17, 31, 0),
+    c2: Date.UTC(2026, 7, 12, 18, 27, 22),
+    c3: Date.UTC(2026, 7, 12, 18, 28, 38),
+    c4: Date.UTC(2026, 7, 12, 19, 22, 0)
+  };
+  function cdown(ms){
+    var s = Math.max(0, Math.floor(ms/1000));
+    var d = Math.floor(s/86400);
+    if(d >= 2) return d + " días";
+    var h = Math.floor(s/3600), m = Math.floor((s%3600)/60), x = s%60;
+    function z(n){ return (n<10?"0":"")+n; }
+    return z(h)+":"+z(m)+":"+z(x);
+  }
+  function tick(){
+    var n = Date.now(), ph, fl, flc, cd, lab;
+    if(n < ED.c1){       ph="Antes del eclipse";  fl="PREPARA EL FILTRO"; flc="var(--muted)"; cd=ED.c1-n; lab="para el primer contacto (19:31)"; }
+    else if(n < ED.c2){  ph="Fase parcial";       fl="FILTRO PUESTO";     flc="var(--gold)";  cd=ED.c2-n; lab="para quitar el filtro (empieza la totalidad)"; }
+    else if(n < ED.c3){  ph="TOTALIDAD";          fl="FILTRO FUERA";      flc="var(--prom)";  cd=ED.c3-n; lab="hasta que vuelva el filtro: dispara la horquilla y mira"; }
+    else if(n < ED.c4){  ph="Parcial final";      fl="FILTRO PUESTO";     flc="var(--gold)";  cd=ED.c4-n; lab="para el fin del eclipse (21:22)"; }
+    else {               ph="Eclipse finalizado"; fl="—";                 flc="var(--muted)"; cd=0;       lab="el siguiente total visible en España: 2 de agosto de 2027"; }
+    $("edPhase").textContent = ph;
+    var ef = $("edFilter"); ef.textContent = fl; ef.style.color = flc;
+    $("edCount").textContent = cd > 0 ? cdown(cd) : "—";
+    $("edNext").textContent = lab;
+  }
+
   // init
+  loadURL();
   focal.value = focalToT(st.focal);
   focalNum.value = st.focal; focalv.textContent = st.focal;
+  tc.value = String(st.tc);
+  if(st.custom){ sensor.value = "custom"; customBox.classList.add("on"); cw.value = st.sw; ch.value = st.sh; }
+  [].forEach.call($("orient").querySelectorAll("button"), function(b){
+    b.setAttribute("aria-pressed", b.dataset.o === st.orient ? "true" : "false");
+  });
+  [].forEach.call($("phase").querySelectorAll("button"), function(b){
+    b.setAttribute("aria-pressed", b.dataset.p === st.phase ? "true" : "false");
+  });
+  [].forEach.call($("track").querySelectorAll("button"), function(b){
+    b.setAttribute("aria-pressed", (b.dataset.t === "1") === st.track ? "true" : "false");
+  });
   cor.value = st.corR*10; corv.textContent = fmt1(st.corR);
+  $("iso").value = st.iso; $("fnum").value = st.fnum; $("nd").value = String(st.nd);
+  $("mp").value = st.mp; $("ext").value = String(st.ext);
   render();
+  setInterval(tick, 1000); tick();
 
 })();
 </script>
