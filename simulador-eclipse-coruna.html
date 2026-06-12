@@ -191,7 +191,7 @@
     </svg>
     <div>
       <h1>Simulador de encuadre del eclipse total</h1>
-      <div class="sub">A Coruña, 12 de agosto de 2026. Calcula qué cabe en tu sensor (disco solar, anillo de diamantes, corona interior o penachos) según la focal y el formato de tu cámara.</div>
+      <div class="sub"><span id="subLoc">A Coruña</span>, 12 de agosto de 2026. Calcula qué cabe en tu sensor (disco solar, anillo de diamantes, corona interior o penachos) según la focal y el formato de tu cámara.</div>
       <div class="byline">Creado por Rafael Vida</div>
     </div>
     <div class="navrow">
@@ -303,7 +303,7 @@
             <button data-p="par" aria-pressed="false">Parcial (con filtro)</button>
             <button data-p="tot" aria-pressed="true">Totalidad</button>
           </div>
-          <div class="hint">En <code>Parcial</code> ves la fotosfera (el disco brillante) mordida por la Luna; necesitas filtro solar. En <code>Totalidad</code> la fotosfera queda oculta y aparecen corona y cromosfera (filtro fuera, solo 76 s).</div>
+          <div class="hint">En <code>Parcial</code> ves la fotosfera (el disco brillante) mordida por la Luna; necesitas filtro solar. En <code>Totalidad</code> la fotosfera queda oculta y aparecen corona y cromosfera (filtro fuera, solo durante la totalidad).</div>
         </div>
       </div>
 
@@ -352,24 +352,27 @@
           <label class="lab" for="ext">Corrección por extinción (Sol bajo)</label>
           <select id="ext">
             <option value="0">Sin corrección (tabla Espenak)</option>
-            <option value="1" selected>Cielo limpio a 12° (+1 EV)</option>
-            <option value="1.5">Bruma o calima (+1,5 EV)</option>
+            <option value="1" selected id="extOpt1">Cielo limpio (+1 EV)</option>
+            <option value="2" id="extOpt2">Bruma o calima (+1,5 EV)</option>
           </select>
-          <div class="hint">A 12° de altura la luz atraviesa ≈4,7 masas de aire: la atmósfera roba en torno a un paso. La corrección alarga todos los tiempos.</div>
+          <div class="hint" id="extHint">La corrección se calcula con la masa de aire (Kasten-Young) según la altura del Sol en el lugar elegido, y alarga todos los tiempos.</div>
         </div>
       </div>
 
       <div class="card">
-        <h2><span class="pin"></span>A Coruña · 12 ago 2026</h2>
-        <div class="ctx">
-          <div class="line"><span>Primer contacto (parcial)</span><span>19:31</span></div>
-          <div class="line"><span>Totalidad (máximo)</span><span>20:28</span></div>
-          <div class="line"><span>Duración de la totalidad</span><span>76 s</span></div>
-          <div class="line"><span>Altura del Sol</span><span>≈ 12°</span></div>
-          <div class="line"><span>Fin del eclipse</span><span>21:22</span></div>
-          <div class="line"><span>Puesta de sol</span><span>21:41</span></div>
-          <div class="hint" style="margin-top:10px">Con el Sol a solo 12° sobre el horizonte necesitas un oeste despejado. Filtro solar obligatorio en las fases parciales; retíralo únicamente durante los 76 s de totalidad.</div>
+        <h2><span class="pin"></span><span id="locTitle">A Coruña</span> · 12 ago 2026</h2>
+        <div class="ctl" style="margin-bottom:12px">
+          <label class="lab" for="loc">Lugar de observación</label>
+          <select id="loc">
+            <option value="coruna" selected>A Coruña</option>
+            <option value="oviedo">Oviedo</option>
+            <option value="leon">León</option>
+            <option value="zaragoza">Zaragoza</option>
+            <option value="valencia">Valencia</option>
+            <option value="palma">Palma de Mallorca</option>
+          </select>
         </div>
+        <div class="ctx" id="ctxBox"></div>
       </div>
 
       <div class="card">
@@ -402,6 +405,45 @@
   var MOON_MAG = 1.04;         // la Luna aparece ~4% mayor que el Sol en este eclipse
   var FF_DIAG = Math.sqrt(36*36 + 24*24); // 43.27 mm
 
+  // circunstancias locales (horas UTC = local CEST - 2). Fuentes: IGN y efemerides por municipio.
+  // c1: inicio parcial · c2/c3: totalidad · endT: ultimo momento visible · dur: totalidad en s · alt: altura del Sol en el maximo
+  var LOCS = {
+    coruna:  {name:"A Coruña", c1:[17,31,0],  c2:[18,27,22], c3:[18,28,38], endT:[19,22,0],
+              dur:76,  alt:12, set:"21:41", endLabel:"Fin del eclipse (C4)",
+              note:"El eclipse termina entero antes de la puesta de sol. Horizonte oeste despejado, imprescindible."},
+    oviedo:  {name:"Oviedo", c1:[17,32,0], c2:[18,27,5], c3:[18,28,54], endT:[19,22,0],
+              dur:109, alt:10, set:"≈ 21:31", endLabel:"Fin del eclipse (C4) ≈",
+              note:"De las grandes ciudades, la totalidad más larga: 1m49s. El eclipse acaba antes de la puesta."},
+    leon:    {name:"León", c1:[17,32,40], c2:[18,28,16], c3:[18,30,0], endT:[19,22,2],
+              dur:104, alt:10, set:"≈ 21:22", endLabel:"Fin del eclipse (C4)",
+              note:"El último contacto coincide casi con la puesta de sol: el final de la parcial será un Sol poniéndose."},
+    zaragoza:{name:"Zaragoza", c1:[17,34,37], c2:[18,28,58], c3:[18,30,22], endT:[19,4,0],
+              dur:84,  alt:6,  set:"≈ 21:04", endLabel:"Puesta de sol (aún eclipsado)",
+              note:"El Sol se pone antes del último contacto: la fase parcial final acaba con el Sol eclipsado en el horizonte."},
+    valencia:{name:"Valencia", c1:[17,38,19], c2:[18,32,25], c3:[18,33,24], endT:[18,58,0],
+              dur:59,  alt:4,  set:"≈ 20:58", endLabel:"Puesta de sol (aún eclipsado)",
+              note:"Sol a solo 4°: cualquier edificio o calima lo tapa. La playa, con puesta sobre el mar, es la mejor baza."},
+    palma:   {name:"Palma de Mallorca", c1:[17,37,58], c2:[18,31,0], c3:[18,32,36], endT:[18,49,0],
+              dur:96,  alt:2,  set:"≈ 20:49", endLabel:"Puesta de sol (aún eclipsado)",
+              note:"Sol a 2°, rozando el mar: totalidad sobre el Mediterráneo, pero sin ningún margen de horizonte. La extinción aquí es brutal."}
+  };
+  function L(){ return LOCS[st.loc]; }
+  function locUTC(t){ return Date.UTC(2026, 7, 12, t[0], t[1], t[2]); }
+  function locHHMM(t, secs){
+    function z(n){ return (n<10?"0":"")+n; }
+    var h = t[0]+2; // CEST
+    return z(h)+":"+z(t[1]) + (secs ? ":"+z(t[2]) : "");
+  }
+
+  // masa de aire (Kasten-Young 1989) y correccion de extincion dinamica
+  function airmass(h){ return 1/(Math.sin(h*Math.PI/180) + 0.50572*Math.pow(h+6.07995, -1.6364)); }
+  function extEVfor(mode, alt){
+    if(mode === 0) return 0;
+    var k = (mode === 1) ? 0.20 : 0.30; // coef. de extincion: limpio / bruma
+    return Math.round(1.327 * k * (airmass(alt)-1) * 2) / 2;
+  }
+  function extEV(){ return extEVfor(st.ext, L().alt); }
+
   // --- estado ---
   var st = {
     focal: 500, tc: 1,
@@ -412,7 +454,8 @@
     iso: 400, fnum: 8, nd: 8, // nd = Q de la fase parcial segun filtro
     mp: 24,       // megapixeles (para escala de placa y arrastre)
     track: false, // seguimiento ecuatorial
-    ext: 1        // correccion de extincion en EV
+    ext: 1,       // correccion de extincion: 0 ninguna | 1 cielo limpio | 2 bruma
+    loc: "coruna" // lugar de observacion
   };
 
   // --- elementos ---
@@ -467,7 +510,7 @@
         txt = "El disco con su creciente cabe con cielo alrededor. Buen plano para seguir el avance de la Luna; ideal si quieres una secuencia o un compuesto del eclipse parcial.";
       } else {
         tag = "Plano amplio";
-        txt = "La fotosfera queda pequeña en el fotograma: territorio de paisaje o de secuencia múltiple. Recuerda que el Sol estará bajo, a unos 12° sobre el horizonte oeste.";
+        txt = "La fotosfera queda pequeña en el fotograma: territorio de paisaje o de secuencia múltiple. Recuerda que el Sol estará bajo, a unos "+L().alt+"° sobre el horizonte oeste.";
       }
       $("vtag").textContent = tag;
       $("vtext").textContent = txt;
@@ -491,7 +534,7 @@
       txt = "La corona cabe holgada, con cielo alrededor. Margen de sobra para componer y para no perder los penachos. Punto dulce para la totalidad.";
     } else {
       tag = "Plano amplio";
-      txt = "El eclipse queda pequeño dentro del fotograma: territorio de paisaje. Aprovecha que el Sol estará a solo 12° de altura para incluir el horizonte oeste y el ambiente de la totalidad.";
+      txt = "El eclipse queda pequeño dentro del fotograma: territorio de paisaje. Aprovecha que el Sol estará a solo "+L().alt+"° de altura para incluir el horizonte oeste y el ambiente de la totalidad.";
     }
     $("vtag").textContent = tag;
     $("vtext").textContent = txt;
@@ -668,7 +711,7 @@
     return 0 + (Math.log10(rs)-Math.log10(2.0)) * (-1/ (Math.log10(2.0)-Math.log10(1.0)));
   }
 
-  function expTime(q){ return st.fnum*st.fnum / (st.iso * Math.pow(2, q - st.ext)); }
+  function expTime(q){ return st.fnum*st.fnum / (st.iso * Math.pow(2, q - extEV())); }
   function tLabel(t){ return t >= 1 ? fmt1(t)+'"' : "1/"+Math.round(1/t); }
 
   // limite de arrastre sin seguimiento: deriva solar ~14,5"/s (delta +15 en agosto)
@@ -707,7 +750,7 @@
     var col = $("expCol"), intro = $("expIntro"), tab = $("exptab");
     var box = $("bracketBox"), seqEl = $("bracketSeq"), noteEl = $("bracketNote");
     var dl = driftLimit(c);
-    var extTxt = st.ext > 0 ? " Corrección de extinción aplicada: +"+fmt1(st.ext)+" EV." : "";
+    var extTxt = st.ext > 0 ? " Corrección de extinción aplicada: +"+fmt1(extEV())+" EV (Sol a "+L().alt+"°)." : "";
     var rows;
 
     function rowHtml(r){
@@ -740,10 +783,11 @@
 
       var lim = tLabel(dl.tmax), nWarn = 0;
       T.seq.forEach(function(s){ if(s.warn) nWarn++; });
-      var feas = T.total <= 76;
+      var totDur = L().dur;
+      var feas = T.total <= totDur;
       noteEl.innerHTML = T.seq.length+" disparos a f/"+fmt1(st.fnum)+" e ISO "+st.iso+", paso de 1 EV. Tiempo aproximado con margen: ≈ "+Math.round(T.total)+" s "
-        + (feas ? "(cabe en los 76 s; automatízala con horquillado o intervalómetro)."
-                : "(se acerca a los 76 s de totalidad; sube ISO o abre diafragma).")
+        + (feas ? "(cabe en los "+totDur+" s de totalidad en "+L().name+"; automatízala con horquillado o intervalómetro)."
+                : "(se acerca a los "+totDur+" s de totalidad en "+L().name+": sube ISO o abre diafragma).")
         + (st.track
             ? " Con seguimiento ecuatorial no hay límite de arrastre práctico en estos tiempos."
             : (nWarn
@@ -754,9 +798,33 @@
     tab.innerHTML = rows.map(rowHtml).join("");
   }
 
+  // --- contexto local dinamico ---
+  function renderCtx(){
+    var d = L();
+    $("locTitle").textContent = d.name;
+    $("subLoc").textContent = d.name;
+    $("ctxBox").innerHTML = ''
+      + '<div class="line"><span>Primer contacto (parcial)</span><span>'+locHHMM(d.c1, d.c1[2]!==0)+'</span></div>'
+      + '<div class="line"><span>Totalidad (C2 → C3)</span><span>'+locHHMM(d.c2,true)+' → '+locHHMM(d.c3,true)+'</span></div>'
+      + '<div class="line"><span>Duración de la totalidad</span><span>'+d.dur+' s</span></div>'
+      + '<div class="line"><span>Altura del Sol en el máximo</span><span>≈ '+d.alt+'°</span></div>'
+      + '<div class="line"><span>'+d.endLabel+'</span><span>'+locHHMM(d.endT, false)+'</span></div>'
+      + '<div class="line"><span>Puesta de sol</span><span>'+d.set+'</span></div>'
+      + '<div class="hint" style="margin-top:10px">'+d.note+' Filtro solar obligatorio en las fases parciales; retíralo únicamente durante los '+d.dur+' s de totalidad.</div>';
+  }
+
+  function updateExtLabels(){
+    var alt = L().alt;
+    $("extOpt1").textContent = "Cielo limpio a "+alt+"° (+"+fmt1(extEVfor(1,alt))+" EV)";
+    $("extOpt2").textContent = "Bruma o calima (+"+fmt1(extEVfor(2,alt))+" EV)";
+    $("extHint").textContent = "A "+alt+"° la luz atraviesa ≈"+airmass(alt).toFixed(1)+" masas de aire (Kasten-Young). La corrección alarga todos los tiempos según el lugar elegido.";
+  }
+
   // --- pintar todo ---
   function render(){
     var c = compute();
+    renderCtx();
+    updateExtLabels();
     $("sEq").innerHTML = Math.round(c.eq) + ' <small>mm</small>';
     $("sCrop").innerHTML = fmt2(c.crop) + ' <small>×</small>';
     $("sFov").innerHTML = fmtDeg(c.hFov) + ' <small>×</small> ' + fmtDeg(c.vFov);
@@ -849,6 +917,11 @@
     render();
   });
 
+  $("loc").addEventListener("change", function(){
+    st.loc = this.value in LOCS ? this.value : "coruna";
+    render(); tick();
+  });
+
   // --- configuracion en la URL (hash, compatible con file://) ---
   function saveURL(){
     try{
@@ -858,6 +931,7 @@
       q.set("o", st.orient); q.set("ph", st.phase); q.set("cr", st.corR);
       q.set("iso", st.iso); q.set("fn", st.fnum); q.set("nd", st.nd);
       q.set("mp", st.mp); q.set("tr", st.track ? 1 : 0); q.set("ex", st.ext);
+      q.set("loc", st.loc);
       history.replaceState(null, "", "#"+q.toString());
     }catch(e){ /* restricciones file:// en algun navegador: se ignora */ }
   }
@@ -891,7 +965,8 @@
       if(q.has("nd")) st.nd = +q.get("nd") || st.nd;
       if(q.has("mp")) st.mp = Math.max(2, +q.get("mp") || st.mp);
       if(q.has("tr")) st.track = q.get("tr") === "1";
-      if(q.has("ex")) st.ext = +q.get("ex") || 0;
+      if(q.has("ex")){ var ev = +q.get("ex") || 0; st.ext = ev >= 1.5 ? 2 : (ev >= 1 ? 1 : 0); }
+      if(q.has("loc") && (q.get("loc") in LOCS)) st.loc = q.get("loc");
     }catch(e){}
   }
 
@@ -917,38 +992,32 @@
       return '<span class="pc-chip">☐ '+s.label+(s.warn ? ' ▲' : '')+'</span>';
     }).join("");
     var ndName = {11:"ND 4,0", 8:"ND 5,0 / Baader visual", 12:"Baader ND 3,8 (solo foto)"}[st.nd] || "ND";
+    var d = L();
 
     $("printCard").innerHTML = ''
-      + '<h1>Ficha de campo · Eclipse total de Sol · A Coruña · 12 de agosto de 2026</h1>'
+      + '<h1>Ficha de campo · Eclipse total de Sol · '+d.name+' · 12 de agosto de 2026</h1>'
       + '<div class="pc-sub">Rafael Vida · configuración generada el '+ new Date().toLocaleDateString("es-ES") +'</div>'
-      + '<div class="pc-box">FILTRO SOLAR SIEMPRE, salvo durante los 76 s de totalidad. Al primer destello tras C3, filtro puesto de inmediato. El '+ndName+' elegido'+(st.nd===12?' NO es seguro para mirar':' ')+'.</div>'
-      + '<div class="pc-sec">Horarios (hora peninsular)</div>'
+      + '<div class="pc-box">FILTRO SOLAR SIEMPRE, salvo durante los '+d.dur+' s de totalidad. Al primer destello tras C3, filtro puesto de inmediato. El '+ndName+' elegido'+(st.nd===12?' NO es seguro para mirar':' ')+'.</div>'
+      + '<div class="pc-sec">Horarios en '+d.name+' (hora oficial)</div>'
       + '<table><tr><th>Hora</th><th>Evento</th><th>Filtro</th></tr>'
-      + '<tr><td>19:31</td><td>C1 · comienza la fase parcial</td><td>Puesto</td></tr>'
-      + '<tr><td>≈ 20:27:20</td><td>C2 · anillo de diamantes, empieza la totalidad</td><td><strong>FUERA</strong></td></tr>'
-      + '<tr><td>20:28</td><td>Máximo · Sol a 12° sobre el horizonte oeste</td><td><strong>FUERA</strong></td></tr>'
-      + '<tr><td>≈ 20:28:40</td><td>C3 · fin de la totalidad</td><td><strong>PUESTO</strong></td></tr>'
-      + '<tr><td>21:22</td><td>C4 · fin del eclipse (puesta de sol 21:41)</td><td>—</td></tr></table>'
+      + '<tr><td>'+locHHMM(d.c1, d.c1[2]!==0)+'</td><td>C1 · comienza la fase parcial</td><td>Puesto</td></tr>'
+      + '<tr><td>'+locHHMM(d.c2,true)+'</td><td>C2 · anillo de diamantes, empieza la totalidad ('+d.dur+' s)</td><td><strong>FUERA</strong></td></tr>'
+      + '<tr><td>'+locHHMM(d.c3,true)+'</td><td>C3 · fin de la totalidad · Sol a ≈'+d.alt+'°</td><td><strong>PUESTO</strong></td></tr>'
+      + '<tr><td>'+locHHMM(d.endT,false)+'</td><td>'+d.endLabel+' (puesta de sol '+d.set+')</td><td>—</td></tr></table>'
       + '<div class="pc-sec">Equipo</div>'
       + '<p>'+st.focal+' mm × TC '+st.tc+'× → <strong>'+Math.round(c.fe)+' mm efectivos</strong> · sensor '+fmt1(st.sw)+' × '+fmt1(st.sh)+' mm, '+(st.orient==="h"?"horizontal":"vertical")
       + ' · equivalente '+Math.round(c.eq)+' mm · campo '+fmtDeg(c.hFov)+' × '+fmtDeg(c.vFov)
       + ' · montura: '+(st.track ? "seguimiento ecuatorial" : "trípode fijo")+'</p>'
-      + '<div class="pc-sec">Exposición · ISO '+st.iso+' · f/'+fmt1(st.fnum)+(st.ext>0 ? ' · extinción +'+fmt1(st.ext)+' EV aplicada' : '')+'</div>'
+      + '<div class="pc-sec">Exposición · ISO '+st.iso+' · f/'+fmt1(st.fnum)+(st.ext>0 ? ' · extinción +'+fmt1(extEV())+' EV aplicada (Sol a '+d.alt+'°)' : '')+'</div>'
       + '<table><tr><th>Fase parcial (con filtro '+ndName+')</th><th>Velocidad</th></tr>'+parRows.map(rowHtml).join("")+'</table>'
       + '<table><tr><th>Totalidad (sin filtro)</th><th>Velocidad</th></tr>'+T.rows.map(rowHtml).join("")+'</table>'
-      + '<div class="pc-sec">Horquilla de totalidad · '+T.seq.length+' disparos · ≈ '+Math.round(T.total)+' s (marca cada uno)</div>'
+      + '<div class="pc-sec">Horquilla de totalidad · '+T.seq.length+' disparos · ≈ '+Math.round(T.total)+' s de '+d.dur+' s disponibles (marca cada uno)</div>'
       + '<p>'+seqHtml+'</p>'
-      + '<p>Límite de arrastre sin seguimiento a esta focal ≈ '+lim+' (1 px). ▲ = velocidad que arrastra sobre trípode fijo.'+(st.ext===0?' Sin corrección de extinción: a 12° de altura espera necesitar ≈ +1 EV.':'')+'</p>';
+      + '<p>Límite de arrastre sin seguimiento a esta focal ≈ '+lim+' (1 px). ▲ = velocidad que arrastra sobre trípode fijo.'+(st.ext===0?' Sin corrección de extinción: a '+d.alt+'° de altura espera necesitar ≈ +'+fmt1(extEVfor(1,d.alt))+' EV.':'')+'</p>';
     window.print();
   });
 
-  // --- dia del eclipse: cuenta atras en vivo (hora peninsular = UTC+2) ---
-  var ED = {
-    c1: Date.UTC(2026, 7, 12, 17, 31, 0),
-    c2: Date.UTC(2026, 7, 12, 18, 27, 22),
-    c3: Date.UTC(2026, 7, 12, 18, 28, 38),
-    c4: Date.UTC(2026, 7, 12, 19, 22, 0)
-  };
+  // --- dia del eclipse: cuenta atras en vivo segun el lugar elegido ---
   function cdown(ms){
     var s = Math.max(0, Math.floor(ms/1000));
     var d = Math.floor(s/86400);
@@ -958,12 +1027,14 @@
     return z(h)+":"+z(m)+":"+z(x);
   }
   function tick(){
+    var d = L();
+    var c1 = locUTC(d.c1), c2 = locUTC(d.c2), c3 = locUTC(d.c3), end = locUTC(d.endT);
     var n = Date.now(), ph, fl, flc, cd, lab;
-    if(n < ED.c1){       ph="Antes del eclipse";  fl="PREPARA EL FILTRO"; flc="var(--muted)"; cd=ED.c1-n; lab="para el primer contacto (19:31)"; }
-    else if(n < ED.c2){  ph="Fase parcial";       fl="FILTRO PUESTO";     flc="var(--gold)";  cd=ED.c2-n; lab="para quitar el filtro (empieza la totalidad)"; }
-    else if(n < ED.c3){  ph="TOTALIDAD";          fl="FILTRO FUERA";      flc="var(--prom)";  cd=ED.c3-n; lab="hasta que vuelva el filtro: dispara la horquilla y mira"; }
-    else if(n < ED.c4){  ph="Parcial final";      fl="FILTRO PUESTO";     flc="var(--gold)";  cd=ED.c4-n; lab="para el fin del eclipse (21:22)"; }
-    else {               ph="Eclipse finalizado"; fl="—";                 flc="var(--muted)"; cd=0;       lab="el siguiente total visible en España: 2 de agosto de 2027"; }
+    if(n < c1){       ph="Antes del eclipse · "+d.name; fl="PREPARA EL FILTRO"; flc="var(--muted)"; cd=c1-n;  lab="para el primer contacto ("+locHHMM(d.c1,false)+")"; }
+    else if(n < c2){  ph="Fase parcial · "+d.name;      fl="FILTRO PUESTO";     flc="var(--gold)";  cd=c2-n;  lab="para quitar el filtro (totalidad a las "+locHHMM(d.c2,true)+")"; }
+    else if(n < c3){  ph="TOTALIDAD · "+d.name;         fl="FILTRO FUERA";      flc="var(--prom)";  cd=c3-n;  lab="hasta que vuelva el filtro: dispara la horquilla y mira"; }
+    else if(n < end){ ph="Parcial final · "+d.name;     fl="FILTRO PUESTO";     flc="var(--gold)";  cd=end-n; lab="hasta el final ("+d.endLabel.toLowerCase()+", "+locHHMM(d.endT,false)+")"; }
+    else {            ph="Eclipse finalizado";          fl="—";                 flc="var(--muted)"; cd=0;     lab="el siguiente total visible en España: 2 de agosto de 2027"; }
     $("edPhase").textContent = ph;
     var ef = $("edFilter"); ef.textContent = fl; ef.style.color = flc;
     $("edCount").textContent = cd > 0 ? cdown(cd) : "—";
@@ -988,6 +1059,7 @@
   cor.value = st.corR*10; corv.textContent = fmt1(st.corR);
   $("iso").value = st.iso; $("fnum").value = st.fnum; $("nd").value = String(st.nd);
   $("mp").value = st.mp; $("ext").value = String(st.ext);
+  $("loc").value = st.loc;
   render();
   setInterval(tick, 1000); tick();
 

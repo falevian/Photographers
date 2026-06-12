@@ -227,7 +227,7 @@
     <p>El exceso de masa de aire respecto al cenit es de unas 3,7 unidades. Con un coeficiente de extinción visual típico <code>k ≈ 0,2</code> mag/masa de aire en aire limpio:</p>
     <div class="eq">Δm = k · ΔX ≈ 0,2 · 3,7 ≈ 0,74 mag ≈ 1,0 paso
 <span class="c">con bruma costera (k ≈ 0,3): ≈ 1,1 mag ≈ 1,5 pasos</span></div>
-    <p>En la práctica: espera tener que <strong>alargar la exposición del orden de un paso</strong> respecto a la tabla, y más si hay calima. El simulador incorpora esta corrección como ajuste seleccionable (+1 EV cielo limpio, +1,5 EV con bruma), aplicada como <code>Q<sub>ef</sub> = Q − ΔEV</code>. La extinción es además fuertemente cromática (mayor en azul), de modo que la corona aparecerá enrojecida; valóralo en el balance de blancos y en el procesado por canales.</p>
+    <p>En la práctica: espera tener que <strong>alargar la exposición del orden de un paso</strong> respecto a la tabla, y más si hay calima. El simulador incorpora esta corrección como ajuste seleccionable y la calcula dinámicamente para el lugar elegido: <code>ΔEV = 1,327·k·(X(h)−1)</code> con k = 0,20 (limpio) o 0,30 (bruma), aplicada como <code>Q<sub>ef</sub> = Q − ΔEV</code>. A 12° (A Coruña) sale +1 EV en limpio; a 2° (Palma) llega a +5 EV. La extinción es además fuertemente cromática (mayor en azul), de modo que la corona aparecerá enrojecida; valóralo en el balance de blancos y en el procesado por canales.</p>
     <div class="warn"><b>Contraste del fondo:</b> a 12° el brillo del cielo crepuscular cerca del Sol compite con la corona externa más débil. El alcance real hacia los penachos lo limitará tanto ese fondo como la propia extinción, no solo el tiempo disponible.</div>
   </section>
 
@@ -286,16 +286,19 @@
         <tr><td>Pendiente Q extrapolada</td><td class="m">≈ −3,32 Q/década</td></tr>
       </tbody>
     </table>
-    <h3>Circunstancias en A Coruña (12 ago 2026)</h3>
+    <h3>Circunstancias locales (12 ago 2026, hora oficial)</h3>
     <table>
+      <thead><tr><th>Lugar</th><th class="n">C1</th><th class="n">Totalidad (C2→C3)</th><th class="n">Dur.</th><th class="n">h<sub>☉</sub></th><th class="n">X</th><th>Final visible</th></tr></thead>
       <tbody>
-        <tr><td>Primer contacto (C1)</td><td class="m">19:31</td></tr>
-        <tr><td>Totalidad (máximo)</td><td class="m">20:28</td></tr>
-        <tr><td>Duración de la totalidad</td><td class="m">76 s</td></tr>
-        <tr><td>Altura del Sol en totalidad</td><td class="m">≈ 12°</td></tr>
-        <tr><td>Último contacto / puesta</td><td class="m">21:22 / 21:41</td></tr>
+        <tr><td>A Coruña</td><td class="n">19:31</td><td class="n">20:27:22→20:28:38</td><td class="n">76 s</td><td class="n">12°</td><td class="n">4,7</td><td class="muted">C4 21:22 (puesta 21:41)</td></tr>
+        <tr><td>Oviedo</td><td class="n">≈19:32</td><td class="n">20:27:05→20:28:54</td><td class="n">109 s</td><td class="n">10°</td><td class="n">5,6</td><td class="muted">C4 ≈21:22 (puesta ≈21:31)</td></tr>
+        <tr><td>León</td><td class="n">19:32:40</td><td class="n">20:28:16→20:30:00</td><td class="n">104 s</td><td class="n">10°</td><td class="n">5,6</td><td class="muted">C4 21:22, coincide con la puesta</td></tr>
+        <tr><td>Zaragoza</td><td class="n">19:34:37</td><td class="n">20:28:58→20:30:22</td><td class="n">84 s</td><td class="n">6°</td><td class="n">8,8</td><td class="muted">puesta ≈21:04, aún eclipsado</td></tr>
+        <tr><td>Valencia</td><td class="n">19:38:19</td><td class="n">20:32:25→20:33:24</td><td class="n">59 s</td><td class="n">4°</td><td class="n">12,3</td><td class="muted">puesta ≈20:58, aún eclipsado</td></tr>
+        <tr><td>Palma</td><td class="n">19:37:58</td><td class="n">20:31:00→20:32:36</td><td class="n">96 s</td><td class="n">2°</td><td class="n">19,4</td><td class="muted">puesta ≈20:49, aún eclipsado</td></tr>
       </tbody>
     </table>
+    <p class="muted">X es la masa de aire de Kasten-Young a la altura del máximo. La corrección de extinción del simulador se deriva de ella por localización: ΔEV = 1,327·k·(X−1), con k = 0,20 (limpio) o 0,30 (bruma). En Palma, a 2°, eso supone del orden de +5 EV en cielo limpio: la corona saldrá fuertemente atenuada y enrojecida, y la fotometría a esa altura es intrínsecamente incierta (la refracción y los aerosoles dominan). Fuentes: IGN (eclipses.ign.es) y efemérides municipales; en Zaragoza, Valencia y Palma el cuarto contacto ocurre bajo el horizonte.</p>
   </section>
 
   <footer>
