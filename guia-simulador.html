@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guía del banco óptico de flash · Rafael Vida</title>
+<meta name="author" content="Rafael Vida">
+<meta name="description" content="Cómo usar el simulador de flash: sombras y tamaño angular, caída de luz por número guía, y obturador central frente al sol.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0c10; --panel:#13171e; --line:#222a35; --line2:#2c3644;
+    --text:#d8dde5; --head:#f3f5f8; --muted:#8a929f; --faint:#5b636f;
+    --amber:#f4b13c; --teal:#3fcab0; --red:#ef6f53; --violet:#9b8cff;
+    --sans:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+    --disp:'Space Grotesk',var(--sans);
+    --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.66;-webkit-font-smoothing:antialiased}
+  a{color:var(--teal);text-decoration:none;border-bottom:1px solid rgba(63,202,176,.35)}
+  a:hover{border-color:var(--teal)}
+  .hero{max-width:760px;margin:0 auto;padding:54px 22px 22px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal)}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(28px,5.5vw,40px);line-height:1.06;letter-spacing:-.02em;color:var(--head);margin:12px 0 8px}
+  .lede{font-size:18px;color:#aeb6c1;max-width:60ch;margin:0}
+  .byline{font-family:var(--mono);font-size:13px;color:var(--muted);margin-top:16px}
+  .cta{display:inline-block;margin-top:18px;font-family:var(--sans);font-size:14px;background:rgba(63,202,176,.12);
+       border:1px solid var(--teal);border-radius:9px;padding:9px 16px;color:var(--teal)}
+  article{max-width:760px;margin:0 auto;padding:0 22px 40px}
+  h2{font-family:var(--disp);font-weight:600;font-size:23px;color:var(--head);letter-spacing:-.01em;margin:50px 0 10px;padding-top:14px;border-top:1px solid var(--line)}
+  h3{font-family:var(--disp);font-weight:500;font-size:16px;color:var(--head);margin:24px 0 6px}
+  p{margin:0 0 15px}
+  strong{color:var(--head);font-weight:600}
+  code{font-family:var(--mono);font-size:.92em;background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:#cfd5dd}
+  ol{margin:0 0 15px;padding-left:22px}ol li{margin:6px 0}
+  .note{font-size:14.5px;color:#b9c0ca;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--amber);border-radius:0 10px 10px 0;padding:14px 16px;margin:18px 0}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+  th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line)}
+  thead th{font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--teal);border-bottom:1px solid var(--line2)}
+  td:first-child{color:var(--head)}
+  .am{color:var(--amber)}.te{color:var(--teal)}.vi{color:var(--violet)}.rd{color:var(--red)}
+  footer{max-width:760px;margin:0 auto;padding:28px 22px 70px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+  footer .c{font-family:var(--mono);color:var(--faint);margin-top:12px;font-size:12px}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="eyebrow">Banco óptico de flash · manual</div>
+  <h1>Cómo usar el simulador</h1>
+  <p class="lede">Tres bancos de pruebas sobre la misma física de la luz: la geometría de las sombras, la caída con la distancia y la lucha del flash contra el sol.</p>
+  <div class="byline">Rafael Vida</div>
+  <a class="cta" href="simulador-flash.html">Abrir el simulador ↗</a>
+</header>
+
+<article>
+  <p>El simulador no imita una foto, calcula su física. Cada lectura sale de tres relaciones: el tamaño angular de la fuente <code class="am">θ = 2·arctan(d/2L)</code>, la caída por la ley del inverso del cuadrado <code class="te">E ∝ 1/D²</code> y el número guía <code class="te">f = GN/D</code>. Todo lo demás son consecuencias.</p>
+
+  <h3>Selector de modificador</h3>
+  <p>La fila de botones de arriba es común a las tres pestañas. Cada modificador fija dos cosas: el diámetro de la fuente <code class="am">d</code> en centímetros y la pérdida de luz en pasos. Son valores típicos y aproximados, pensados como punto de partida. Puedes afinarlos a mano con los deslizadores de cada pestaña.</p>
+
+  <h2>Pestaña "Sombras"</h2>
+  <p>Estudia por qué una luz es dura o suave. El lienzo de la izquierda no es un degradado decorativo: para cada punto del fondo se calcula qué fracción de la fuente queda sin tapar por el objeto. El disco negro es la umbra (sombra plena) y el halo difuso es la penumbra real. El círculo violeta marca dónde está el objeto, para que veas cómo su sombra se desplaza. El esquema de al lado es el mismo caso visto de lado, con los rayos extremos de la fuente.</p>
+
+  <h3>Controles</h3>
+  <table>
+    <thead><tr><th>Control</th><th>Qué cambia</th></tr></thead>
+    <tbody>
+      <tr><td>Diámetro de fuente d</td><td>El tamaño físico de la luz. Es la única variable que de verdad ablanda la sombra.</td></tr>
+      <tr><td>Luz a sujeto L</td><td>Acercar la fuente la agranda angularmente y suaviza.</td></tr>
+      <tr><td>Sujeto a fondo s</td><td>Separar el fondo ensancha la penumbra proyectada.</td></tr>
+      <tr><td>Tamaño del rasgo</td><td>El detalle que arroja sombra. Una nariz ronda 3 cm, una cabeza 20 cm.</td></tr>
+      <tr><td>Ángulo y altura de la luz</td><td>Solo desplazan la sombra, no cambian su dureza. Dan los patrones de retrato.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Lecturas</h3>
+  <p>El <span class="am">tamaño angular θ</span> es el indicador de dureza: por debajo de unos 5 grados la luz es dura, por encima de unos 15 grados es suave. La <span class="te">penumbra</span> es la anchura de la transición de la sombra en el fondo, <code class="te">w = d·s/L</code>. La <span>umbra</span> desaparece cuando la fuente supera angularmente al objeto. El <span class="vi">desplazamiento</span> es cuánto se corre la sombra por el ángulo de la luz.</p>
+
+  <h3>Patrones de retrato</h3>
+  <p>Con el sujeto de frente, sube y abre la luz unos 30 a 45 grados y aparece el "lazo", la sombra corta de la nariz hacia abajo. Más lateral y alta da Rembrandt. A 90 grados, luz lateral pura. Comprueba que al mover el ángulo la penumbra apenas cambia: la suavidad la fija el tamaño, no la posición.</p>
+
+  <h2>Pestaña "Caída de luz (GN)"</h2>
+  <p>Estudia el alcance y la exposición del flash con la distancia. A potencia plena, la apertura correcta es <code class="te">f = GN/D</code>. El número guía efectivo tiene en cuenta el ISO y la pérdida del modificador: <code class="am">GN_ef = GN·√(ISO/100)·2^(−pérdida/2)</code>. Cada paso de pérdida divide el GN por raíz de dos.</p>
+  <p>La gráfica alterna entre dos lecturas. En "diafragma necesario" ves la f que expone bien a cada distancia, con un punto en tu distancia de trabajo. En "iluminancia relativa" ves la caída en pasos respecto a esa distancia, que cae como <code class="te">1/D²</code>.</p>
+  <div class="note">La lectura "caída en el fondo" es la herramienta para separar al sujeto. Como la luz cae con el cuadrado de la distancia, acercar el flash al sujeto oscurece mucho el fondo situado por detrás. Esos pasos de diferencia son los que hunden el fondo en negro.</div>
+
+  <h2>Pestaña "Vencer al sol"</h2>
+  <p>Estudia la ventaja del obturador central para imponerse a la luz del día. La idea es subexponer el ambiente brillante mientras el flash sigue exponiendo bien al sujeto.</p>
+
+  <h3>El porqué físico</h3>
+  <p>La exposición del ambiente depende del diafragma, del tiempo de obturación y del ISO. La del flash depende del diafragma, el ISO y la distancia, pero <strong>no del tiempo de obturación</strong> mientras estés dentro de la sincronización. Un obturador central, alojado en el objetivo, sincroniza con flash a todas sus velocidades. Eso te deja usar un tiempo muy rápido para apagar el ambiente sin tocar la luz del flash. Un obturador de plano focal solo sincroniza hasta su X-sync, aquí tomado como 1/200, y por encima necesita HSS, que reparte el destello en una serie de pulsos y recorta mucho su potencia útil.</p>
+
+  <h3>Controles</h3>
+  <p>La luz ambiente se da en EV a ISO 100. Pleno sol equivale a EV 15, que es la regla del 16 (f/16 a 1/125 e ISO 100). Eliges diafragma, ISO, la velocidad de sincronización del obturador central, la distancia al sujeto, el número guía y la pérdida del modificador.</p>
+
+  <h3>La gráfica y las lecturas</h3>
+  <p>El eje horizontal es la velocidad de obturación. La línea ámbar es la exposición del ambiente respecto al neutro: cuanto más rápido el tiempo, más cae por debajo de la línea de "ambiente neutro". La banda verde es el terreno que solo alcanza el obturador central, entre el X-sync del plano focal y la sincronización del central. Las cuatro lecturas resumen el caso:</p>
+  <ol>
+    <li><span class="te">Ambiente con central</span>: cuántos pasos queda el ambiente por debajo del neutro a tu velocidad de sincronización. Negativo es cielo más oscuro.</li>
+    <li><span class="rd">Ambiente con plano focal 1/200</span>: lo mismo limitado al X-sync. Suele quedarse claro o incluso sobreexpuesto.</li>
+    <li><span class="vi">Ventaja del central</span>: la diferencia entre ambos, que vale <code class="vi">log₂(sinc_central / 200)</code>.</li>
+    <li><span class="am">Margen del flash</span>: si tu flash llega a iluminar el sujeto a ese diafragma y distancia, <code class="am">2·log₂(GN_ef / (f·D))</code>. Positivo es potencia de sobra, negativo es que te falta y debes acercarte o subir ISO.</li>
+  </ol>
+  <div class="note">El tiempo de ambiente neutro que usa el modelo es <code>t_neutro = f²·100 / (ISO·2^EV)</code>. El oscurecimiento máximo del ambiente es <code>log₂(t_neutro / t_sinc)</code>. Ahí se ve por qué un central a 1/2000 gana varias paradas frente a un plano focal a 1/200.</div>
+
+  <h2>Límites del modelo</h2>
+  <p>Es un modelo geométrico de fuente extensa. La difracción es despreciable a estas escalas y no se incluye. Los diámetros y pérdidas de los modificadores son valores típicos, no medidas de tu equipo concreto, así que ajústalos si tienes datos propios. La luz ambiente parte de la regla del 16 y no modela reflejos ni contraste de la escena. Y la sombra se calcula con un objeto y una fuente circulares, suficiente para entender la física, no para predecir píxel a píxel una cara real.</p>
+</article>
+
+<footer>
+  <a href="simulador-flash.html">Volver al simulador ↗</a>
+  <div class="c">θ = 2·arctan(d/2L) · w = d·s/L · f = GN/D · E ∝ 1/D² · t_neutro = f²·100/(ISO·2^EV) · © Rafael Vida</div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Banco óptico de flash · Rafael Vida</title>
+<meta name="author" content="Rafael Vida">
+<meta name="description" content="Simulador de flash: sombras y tamaño angular, caída de luz por número guía, y obturador central frente al sol.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0c10; --panel:#13171e; --panel2:#0f131a; --line:#222a35; --line2:#2c3644;
+    --text:#d8dde5; --head:#f3f5f8; --muted:#8a929f; --faint:#5b636f;
+    --amber:#f4b13c; --teal:#3fcab0; --red:#ef6f53; --violet:#9b8cff;
+    --sans:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+    --disp:'Space Grotesk',var(--sans);
+    --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;-webkit-font-smoothing:antialiased}
+  a{color:var(--teal);text-decoration:none;border-bottom:1px solid rgba(63,202,176,.35)}
+  a:hover{border-color:var(--teal)}
+  .wrap{max-width:940px;margin:0 auto;padding:26px 20px 50px}
+  .topbar{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+  h1{font-family:var(--disp);font-weight:700;font-size:24px;letter-spacing:-.02em;color:var(--head);margin:0}
+  .topbar .meta{font-family:var(--mono);font-size:12px;color:var(--faint)}
+  .byline{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:4px}
+  .guidelink{font-family:var(--sans);font-size:13px}
+
+  .chips{display:flex;gap:7px;flex-wrap:wrap;margin:18px 0 4px}
+  .chip{font-size:12px;padding:7px 10px;border-radius:8px;cursor:pointer;background:var(--panel);
+        border:1px solid var(--line2);color:var(--muted);transition:all .12s;font-family:var(--sans)}
+  .chip .v{color:var(--faint);font-family:var(--mono);font-size:11px;margin-left:6px}
+  .chip.on{border-color:var(--amber);background:rgba(244,177,60,.12);color:var(--amber)}
+  .tabs{display:flex;gap:4px;margin:16px 0 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{font-size:13px;padding:9px 15px;cursor:pointer;background:none;border:none;color:var(--faint);
+       border-bottom:2px solid transparent;margin-bottom:-1px;font-family:var(--sans)}
+  .tab.on{color:var(--head);border-bottom-color:var(--teal)}
+
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:18px;margin-top:18px}
+  @media(max-width:700px){.grid{grid-template-columns:1fr}}
+  .vis{display:flex;gap:14px;flex-wrap:wrap}
+  figure{margin:0}
+  canvas,svg.diag{border-radius:10px;border:1px solid var(--line2);display:block;background:var(--panel2)}
+  #shadowCanvas{width:248px;height:206px}
+  figcaption{font-size:11px;color:var(--faint);margin-top:6px;font-family:var(--mono)}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+  @media(max-width:560px){.stats{grid-template-columns:repeat(2,1fr)}}
+  .stat{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+  .stat .l{font-size:10px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+  .stat .n{font-family:var(--mono);font-size:19px;margin-top:3px}
+  .stat .u{font-size:12px;color:var(--faint);margin-left:4px}
+  .stat .h{font-size:10px;color:var(--faint);margin-top:3px}
+  .controls{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .controls .ct{font-size:11px;color:var(--faint);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
+  .ctl{margin-bottom:12px}
+  .ctl .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+  .ctl .row span:first-child{font-size:12px;color:var(--muted)}
+  .ctl .row .val{font-family:var(--mono);font-size:13px}
+  .ctl .row .val em{color:var(--faint);font-style:normal;margin-left:3px}
+  input[type=range]{width:100%;cursor:pointer}
+  select{width:100%;background:var(--panel);color:var(--text);border:1px solid var(--line2);border-radius:7px;
+         padding:6px 8px;font-family:var(--mono);font-size:13px}
+  .sep{border-top:1px solid var(--line);margin:8px 0 12px}
+  .explain{font-size:13px;color:var(--muted);line-height:1.55;margin-top:14px}
+  .explain b{font-weight:500}
+  .seg{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+  .segbtn{font-size:12px;padding:6px 12px;border-radius:7px;cursor:pointer;background:none;
+          border:1px solid var(--line2);color:var(--muted);font-family:var(--sans)}
+  .segbtn.on{border-color:var(--teal);background:rgba(63,202,176,.12);color:var(--teal)}
+  #falloffCanvas,#sunCanvas{width:100%;height:300px;max-width:580px}
+  .hint{font-size:11px;color:var(--faint);line-height:1.5;border-top:1px solid var(--line);padding-top:12px;margin-top:4px}
+  footer{font-size:11px;color:var(--faint);margin-top:30px;line-height:1.5;font-family:var(--mono);border-top:1px solid var(--line);padding-top:16px}
+  .am{color:var(--amber)} .te{color:var(--teal)} .vi{color:var(--violet)} .rd{color:var(--red)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div>
+      <h1>Banco óptico de flash</h1>
+      <div class="byline">Rafael Vida · Godox iT32 · GN18</div>
+    </div>
+    <a class="guidelink" href="guia-simulador.html">Guía de uso ↗</a>
+  </div>
+
+  <div class="chips" id="chips"></div>
+  <div class="tabs">
+    <button class="tab on" data-tab="shadow">Sombras</button>
+    <button class="tab" data-tab="falloff">Caída de luz (GN)</button>
+    <button class="tab" data-tab="sun">Vencer al sol</button>
+  </div>
+
+  <!-- ===== panel sombras ===== -->
+  <div class="grid" id="panel-shadow">
+    <div>
+      <div class="vis">
+        <figure>
+          <canvas id="shadowCanvas" width="240" height="200"></canvas>
+          <figcaption>Sombra real · objeto en violeta · dirección = patrón de retrato</figcaption>
+        </figure>
+        <figure>
+          <svg class="diag" id="diag" width="240" height="150"></svg>
+          <figcaption>Esquema en el eje óptico · rayos extremos</figcaption>
+        </figure>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="l">Tamaño angular θ</div><div class="n am"><span id="st-theta">0</span><span class="u">°</span></div><div class="h" id="st-theta-h"></div></div>
+        <div class="stat"><div class="l">Penumbra</div><div class="n te"><span id="st-pen">0</span><span class="u">cm</span></div><div class="h" id="st-pen-h"></div></div>
+        <div class="stat"><div class="l">Umbra (radio)</div><div class="n"><span id="st-umbra">0</span><span class="u">cm</span></div><div class="h" id="st-umbra-h"></div></div>
+        <div class="stat"><div class="l">Desplaza. sombra</div><div class="n vi"><span id="st-shift">0</span><span class="u">cm</span></div><div class="h">por el ángulo de la luz</div></div>
+      </div>
+      <p class="explain">La suavidad la fija <b class="am">θ = 2·arctan(d/2L)</b>: el tamaño angular de la fuente vista desde el sujeto. La penumbra en el fondo vale <b class="te">w = d·s/L</b>. El ángulo de la luz no cambia la dureza, solo desplaza la sombra: ahí están los patrones de retrato.</p>
+    </div>
+    <div class="controls">
+      <div class="ct">Geometría</div>
+      <div class="ctl"><div class="row"><span>Diámetro de fuente d</span><span class="val"><span id="v-d">7</span><em>cm</em></span></div><input id="r-d" type="range" min="1" max="150" step="1" value="7"></div>
+      <div class="ctl"><div class="row"><span>Distancia luz → sujeto L</span><span class="val"><span id="v-L">150</span><em>cm</em></span></div><input id="r-L" type="range" min="30" max="400" step="5" value="150"></div>
+      <div class="ctl"><div class="row"><span>Distancia sujeto → fondo s</span><span class="val"><span id="v-s">60</span><em>cm</em></span></div><input id="r-s" type="range" min="2" max="300" step="2" value="60"></div>
+      <div class="ctl"><div class="row"><span>Tamaño del rasgo</span><span class="val"><span id="v-occ">8</span><em>cm</em></span></div><input id="r-occ" type="range" min="2" max="40" step="1" value="8"></div>
+      <div class="sep"></div>
+      <div class="ctl"><div class="row"><span>Ángulo lateral de la luz</span><span class="val"><span id="v-az">20</span><em>°</em></span></div><input id="r-az" type="range" min="-60" max="60" step="1" value="20"></div>
+      <div class="ctl"><div class="row"><span>Altura de la luz</span><span class="val"><span id="v-el">15</span><em>°</em></span></div><input id="r-el" type="range" min="-20" max="50" step="1" value="15"></div>
+      <div class="hint">El rasgo que arroja sombra: ~3 cm una nariz, ~20 cm una cabeza.</div>
+    </div>
+  </div>
+
+  <!-- ===== panel caída ===== -->
+  <div class="grid" id="panel-falloff" style="display:none">
+    <div>
+      <div class="seg">
+        <button class="segbtn on" data-metric="f">Diafragma necesario</button>
+        <button class="segbtn" data-metric="ev">Iluminancia relativa (EV)</button>
+      </div>
+      <div style="background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px">
+        <canvas id="falloffCanvas" width="580" height="300"></canvas>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="l">GN efectivo</div><div class="n am" id="st-gneff">18</div><div class="h" id="st-gneff-h"></div></div>
+        <div class="stat"><div class="l" id="st-fref-l">Diafragma</div><div class="n te" id="st-fref">f/9</div><div class="h" id="st-fref-h"></div></div>
+        <div class="stat"><div class="l">Ley del cuadrado</div><div class="n rd">−2<span class="u">EV</span></div><div class="h">al duplicar la distancia</div></div>
+        <div class="stat"><div class="l">Caída en el fondo</div><div class="n vi" id="st-bg">−2.0<span class="u">EV</span></div><div class="h" id="st-bg-h"></div></div>
+      </div>
+      <p class="explain">Exposición a potencia plena: <b class="te">f = GN/D</b>, con <b class="am">GN_ef = GN·√(ISO/100)·2^(−pérdida/2)</b>. Cada parada de pérdida divide el GN por √2. La iluminancia cae como 1/D², por eso acercar la luz oscurece el fondo y separa al sujeto.</p>
+    </div>
+    <div class="controls">
+      <div class="ct">Fotometría</div>
+      <div class="ctl"><div class="row"><span>Número guía GN</span><span class="val"><span id="v-gn">18</span></span></div><input id="r-gn" type="range" min="5" max="80" step="1" value="18"></div>
+      <div class="ctl"><div class="row"><span>ISO</span><span class="val"><span id="v-iso">100</span></span></div><input id="r-iso" type="range" min="100" max="6400" step="100" value="100"></div>
+      <div class="ctl"><div class="row"><span>Distancia de trabajo</span><span class="val"><span id="v-ref">2</span><em>m</em></span></div><input id="r-ref" type="range" min="0.5" max="8" step="0.25" value="2"></div>
+      <div class="ctl"><div class="row"><span>Fondo por detrás</span><span class="val"><span id="v-bg">2</span><em>m</em></span></div><input id="r-bg" type="range" min="0.5" max="6" step="0.25" value="2"></div>
+      <div class="ctl"><div class="row"><span>Pérdida del modificador</span><span class="val"><span id="v-loss">1</span><em>EV</em></span></div><input id="r-loss" type="range" min="0" max="3" step="0.5" value="1"></div>
+      <div class="hint">Godox iT32: GN18 (m, ISO100). El "32" del nombre no es el número guía.</div>
+    </div>
+  </div>
+
+  <!-- ===== panel vencer al sol ===== -->
+  <div class="grid" id="panel-sun" style="display:none">
+    <div>
+      <div style="background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px">
+        <canvas id="sunCanvas" width="580" height="300"></canvas>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="l">Ambiente con central</div><div class="n te" id="st-ambleaf">0</div><div class="h" id="st-ambleaf-h"></div></div>
+        <div class="stat"><div class="l">Ambiente plano focal 1/200</div><div class="n rd" id="st-ambfp">0</div><div class="h" id="st-ambfp-h"></div></div>
+        <div class="stat"><div class="l">Ventaja del central</div><div class="n vi" id="st-adv">0</div><div class="h">paradas de oscurecimiento</div></div>
+        <div class="stat"><div class="l">Margen del flash</div><div class="n am" id="st-head">0</div><div class="h" id="st-head-h"></div></div>
+      </div>
+      <p class="explain">El obturador central sincroniza a <b class="te">todas</b> sus velocidades. Eliges un tiempo rápido para subexponer el ambiente <b class="vi">log₂(t_neutro/t_sinc)</b> paradas mientras el flash sigue exponiendo el sujeto. El plano focal corta en su X-sync (aquí 1/200) y por encima necesita HSS, que recorta potencia. El flash basta cuando <b class="am">GN_ef ≥ f·D</b>, margen <b class="am">2·log₂(GN_ef / (f·D))</b>.</p>
+    </div>
+    <div class="controls">
+      <div class="ct">Luz y obturador</div>
+      <div class="ctl"><div class="row"><span>Luz ambiente (EV, ISO100)</span><span class="val"><span id="v-amb">15</span></span></div><input id="r-amb" type="range" min="12" max="16" step="0.5" value="15"></div>
+      <div class="ctl"><div class="row"><span>ISO</span><span class="val"><span id="v-siso">100</span></span></div><input id="r-siso" type="range" min="100" max="1600" step="100" value="100"></div>
+      <div class="ctl"><div class="row"><span>Diafragma</span><span class="val"><span id="v-ap">f/8</span></span></div><input id="r-ap" type="range" min="0" max="7" step="1" value="4"></div>
+      <div class="ctl"><div class="row"><span>Sincronización (central)</span></div><select id="r-sync"><option value="500">1/500</option><option value="800">1/800</option><option value="1000" selected>1/1000</option><option value="1600">1/1600</option><option value="2000">1/2000</option><option value="4000">1/4000</option></select></div>
+      <div class="sep"></div>
+      <div class="ctl"><div class="row"><span>Distancia flash</span><span class="val"><span id="v-sd">2</span><em>m</em></span></div><input id="r-sd" type="range" min="1" max="6" step="0.5" value="2"></div>
+      <div class="ctl"><div class="row"><span>Número guía GN</span><span class="val"><span id="v-sgn">18</span></span></div><input id="r-sgn" type="range" min="5" max="80" step="1" value="18"></div>
+      <div class="ctl"><div class="row"><span>Pérdida del modificador</span><span class="val"><span id="v-sloss">1</span><em>EV</em></span></div><input id="r-sloss" type="range" min="0" max="3" step="0.5" value="1"></div>
+      <div class="hint">Pleno sol ≈ EV15 (regla del 16). Plano focal de referencia: X-sync 1/200.</div>
+    </div>
+  </div>
+
+  <footer>w = d·s/L · θ = 2·arctan(d/2L) · f = GN/D · E ∝ 1/D² · t_neutro = f²·100/(ISO·2^EV) · © Rafael Vida</footer>
+</div>
+
+<script>
+"use strict";
+(function(){
+  var MODS=[
+    {k:"bare",label:"Flash desnudo",d:4,loss:0},
+    {k:"dome",label:"Domo magnético",d:7,loss:1},
+    {k:"card",label:"Tarjeta rebote",d:10,loss:1.5},
+    {k:"ceil",label:"Rebote techo",d:150,loss:2.5},
+    {k:"umb",label:"Paraguas 80",d:80,loss:1},
+    {k:"sb40",label:"Softbox 40",d:40,loss:1.5},
+    {k:"sb60",label:"Softbox 60",d:60,loss:1.5},
+    {k:"octa",label:"Octa 95",d:95,loss:2}
+  ];
+  var FSTOPS=[1,1.4,2,2.8,4,5.6,8,11,16,22,32,45];
+  var APS=[2,2.8,4,5.6,8,11,16,22];
+  function nearestF(f){return FSTOPS.reduce(function(a,b){return Math.abs(b-f)<Math.abs(a-f)?b:a;});}
+  function $(id){return document.getElementById(id);}
+  function num(id){return parseFloat($(id).value);}
+  function evStr(x){return (x>=0?"+":"−")+Math.abs(x).toFixed(1);}
+
+  var activeMod="dome",chips=$("chips");
+  MODS.forEach(function(m){
+    var b=document.createElement("button");
+    b.className="chip"+(m.k===activeMod?" on":"");
+    b.innerHTML=m.label+'<span class="v">'+m.d+'cm·−'+m.loss+'EV</span>';
+    b.onclick=function(){
+      activeMod=m.k;
+      Array.prototype.forEach.call(chips.children,function(c){c.classList.remove("on");});
+      b.classList.add("on");
+      $("r-d").value=m.d; $("v-d").textContent=m.d;
+      $("r-loss").value=m.loss; $("v-loss").textContent=m.loss;
+      $("r-sloss").value=m.loss; $("v-sloss").textContent=m.loss;
+      renderShadow(); renderFalloff(); renderSun();
+    };
+    chips.appendChild(b);
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(t){
+    t.onclick=function(){
+      document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("on");});
+      t.classList.add("on");
+      var which=t.dataset.tab;
+      $("panel-shadow").style.display=which==="shadow"?"grid":"none";
+      $("panel-falloff").style.display=which==="falloff"?"grid":"none";
+      $("panel-sun").style.display=which==="sun"?"grid":"none";
+      if(which==="shadow")renderShadow(); else if(which==="falloff")renderFalloff(); else renderSun();
+    };
+  });
+
+  [["r-d","v-d"],["r-L","v-L"],["r-s","v-s"],["r-occ","v-occ"],["r-az","v-az"],["r-el","v-el"]]
+    .forEach(function(p){$(p[0]).addEventListener("input",function(){$(p[1]).textContent=$(p[0]).value;renderShadow();});});
+  [["r-gn","v-gn"],["r-iso","v-iso"],["r-ref","v-ref"],["r-bg","v-bg"],["r-loss","v-loss"]]
+    .forEach(function(p){$(p[0]).addEventListener("input",function(){$(p[1]).textContent=$(p[0]).value;renderFalloff();});});
+  [["r-amb","v-amb"],["r-siso","v-siso"],["r-sd","v-sd"],["r-sgn","v-sgn"],["r-sloss","v-sloss"]]
+    .forEach(function(p){$(p[0]).addEventListener("input",function(){$(p[1]).textContent=$(p[0]).value;renderSun();});});
+  $("r-ap").addEventListener("input",function(){$("v-ap").textContent="f/"+APS[num("r-ap")];renderSun();});
+  $("r-sync").addEventListener("change",renderSun);
+  document.querySelectorAll(".segbtn").forEach(function(b){
+    b.onclick=function(){document.querySelectorAll(".segbtn").forEach(function(x){x.classList.remove("on");});b.classList.add("on");renderFalloff();};
+  });
+  function metric(){var on=document.querySelector(".segbtn.on");return on?on.dataset.metric:"f";}
+
+  /* ---- sombras ---- */
+  function renderShadow(){
+    var d=num("r-d"),L=num("r-L"),s=num("r-s"),occD=num("r-occ"),azim=num("r-az"),elev=num("r-el");
+    var cv=$("shadowCanvas"),ctx=cv.getContext("2d"),W=cv.width,H=cv.height;
+    var img=ctx.createImageData(W,H),data=img.data;
+    var R=d/2,occR=occD/2,Zs=L+s,u=s/Zs;
+    var az=azim*Math.PI/180,el=elev*Math.PI/180;
+    var srcX=L*Math.tan(az),srcY=-L*Math.tan(el);
+    var shiftX=-srcX*(s/L),shiftY=-srcY*(s/L);
+    var geomEdge=occR*Zs/L,penHalf=R*s/L,outerR=geomEdge+penHalf;
+    var shiftMag=Math.hypot(shiftX,shiftY);
+    var frameHalf=Math.max((shiftMag+outerR)*1.12,1);
+    var scale=(Math.min(W,H)/2)/frameHalf;
+    var N=72,g=Math.PI*(3-Math.sqrt(5)),i;
+    var scx=new Float32Array(N),scy=new Float32Array(N);
+    for(i=0;i<N;i++){var r=R*Math.sqrt((i+0.5)/N),a=i*g;scx[i]=srcX+Math.cos(a)*r;scy[i]=srcY+Math.sin(a)*r;}
+    var occR2=occR*occR,py,px,k;
+    for(py=0;py<H;py++){
+      var Ys=(py-H/2)/scale+shiftY;
+      for(px=0;px<W;px++){
+        var Xs=(px-W/2)/scale+shiftX,cnt=0;
+        for(k=0;k<N;k++){var Mx=Xs+u*(scx[k]-Xs),My=Ys+u*(scy[k]-Ys);if(Mx*Mx+My*My>=occR2)cnt++;}
+        var b=0.07+0.93*(cnt/N),idx=(py*W+px)*4;
+        data[idx]=238*b;data[idx+1]=230*b;data[idx+2]=210*b;data[idx+3]=255;
+      }
+    }
+    ctx.putImageData(img,0,0);
+    var oxp=(0-shiftX)*scale+W/2,oyp=(0-shiftY)*scale+H/2;
+    ctx.save();ctx.setLineDash([3,3]);ctx.strokeStyle="rgba(159,140,255,0.85)";ctx.lineWidth=1.2;
+    ctx.beginPath();ctx.arc(oxp,oyp,occR*scale,0,Math.PI*2);ctx.stroke();ctx.restore();
+    var slant=L/Math.max(Math.cos(az)*Math.cos(el),0.2);
+    var theta=2*Math.atan(R/slant)*180/Math.PI;
+    var pen=d*s/L,umbraR=geomEdge-pen/2,shift=s*Math.hypot(Math.tan(az),Math.tan(el));
+    $("st-theta").textContent=theta.toFixed(1);
+    $("st-theta-h").textContent=theta<5?"luz dura":theta<15?"intermedia":"luz suave";
+    $("st-pen").textContent=pen.toFixed(1);
+    $("st-pen-h").textContent=(pen*10).toFixed(0)+" mm de transición";
+    $("st-umbra").textContent=umbraR>0?umbraR.toFixed(1):"0";
+    $("st-umbra-h").textContent=umbraR>0?"sombra plena":"sin umbra";
+    $("st-shift").textContent=shift.toFixed(0);
+    renderDiag(d,L,s,occD);
+  }
+  function renderDiag(d,L,s,occD){
+    var w=240,h=150,padL=16,padR=16,Zs=L+s,x0=padL,xScr=w-padR;
+    var xOcc=x0+(L/Zs)*(xScr-x0),occR=occD/2;
+    var geomEdge=occR*Zs/L,penHalf=(d/2)*(s/L);
+    var span=Math.max(geomEdge+penHalf,d/2,occR)*2.2,vs=h/span,yc=h/2;
+    function Y(cm){return yc-cm*vs;}
+    var sT=Y(d/2),sB=Y(-d/2),oT=Y(occR),oB=Y(-occR);
+    var poT=Y(geomEdge+penHalf),piT=Y(Math.max(geomEdge-penHalf,0));
+    var poB=Y(-(geomEdge+penHalf)),piB=Y(-Math.max(geomEdge-penHalf,0));
+    var hasU=geomEdge-penHalf>0,g="";
+    g+='<polygon points="'+xOcc+','+oT+' '+xScr+','+poT+' '+xScr+','+piT+'" fill="#3fcab0" opacity="0.18"/>';
+    g+='<polygon points="'+xOcc+','+oB+' '+xScr+','+poB+' '+xScr+','+piB+'" fill="#3fcab0" opacity="0.18"/>';
+    if(hasU)g+='<polygon points="'+xOcc+','+oT+' '+xOcc+','+oB+' '+xScr+','+piB+' '+xScr+','+piT+'" fill="#000" opacity="0.5"/>';
+    g+='<line x1="'+x0+'" y1="'+sB+'" x2="'+xScr+'" y2="'+poT+'" stroke="#f4b13c" stroke-width="1" opacity="0.55"/>';
+    g+='<line x1="'+x0+'" y1="'+sT+'" x2="'+xScr+'" y2="'+piT+'" stroke="#f4b13c" stroke-width="1" opacity="0.55"/>';
+    g+='<line x1="'+x0+'" y1="'+sT+'" x2="'+xScr+'" y2="'+poB+'" stroke="#f4b13c" stroke-width="1" opacity="0.35"/>';
+    g+='<line x1="'+x0+'" y1="'+sB+'" x2="'+xScr+'" y2="'+piB+'" stroke="#f4b13c" stroke-width="1" opacity="0.35"/>';
+    g+='<line x1="'+x0+'" y1="'+sT+'" x2="'+x0+'" y2="'+sB+'" stroke="#f4b13c" stroke-width="4" stroke-linecap="round"/>';
+    g+='<line x1="'+xOcc+'" y1="'+oT+'" x2="'+xOcc+'" y2="'+oB+'" stroke="#e7eaef" stroke-width="4" stroke-linecap="round"/>';
+    g+='<line x1="'+xScr+'" y1="10" x2="'+xScr+'" y2="'+(h-10)+'" stroke="#2c3644" stroke-width="2"/>';
+    g+='<text x="'+x0+'" y="'+(h-4)+'" font-size="9" fill="#5b636f" font-family="monospace">fuente</text>';
+    g+='<text x="'+(xOcc-12)+'" y="'+(h-4)+'" font-size="9" fill="#5b636f" font-family="monospace">sujeto</text>';
+    g+='<text x="'+(xScr-28)+'" y="'+(h-4)+'" font-size="9" fill="#5b636f" font-family="monospace">fondo</text>';
+    $("diag").innerHTML=g;
+  }
+
+  /* ---- caída ---- */
+  function renderFalloff(){
+    var gn=num("r-gn"),iso=num("r-iso"),refD=num("r-ref"),bgExtra=num("r-bg"),loss=num("r-loss"),met=metric();
+    var gnEff=gn*Math.sqrt(iso/100)*Math.pow(2,-loss/2);
+    var cv=$("falloffCanvas"),ctx=cv.getContext("2d"),W=cv.width,H=cv.height;
+    ctx.clearRect(0,0,W,H);
+    var padL=46,padR=14,padT=12,padB=34,x0=padL,x1=W-padR,y0=H-padB,y1=padT;
+    var Dmin=0.5,Dmax=8,pts=[],D,v;
+    for(D=Dmin;D<=Dmax+1e-6;D+=0.1){v=met==="f"?gnEff/D:2*Math.log2(refD/D);pts.push([D,v]);}
+    var vals=pts.map(function(p){return p[1];}),ymin,ymax;
+    if(met==="f"){ymin=0;ymax=Math.max.apply(null,vals)*1.05;}
+    else{ymin=Math.min.apply(null,vals);ymax=Math.max.apply(null,vals);var pdd=(ymax-ymin)*0.08||1;ymin-=pdd;ymax+=pdd;}
+    function X(d){return x0+(d-Dmin)/(Dmax-Dmin)*(x1-x0);}
+    function Yv(val){return y0+(val-ymin)/(ymax-ymin)*(y1-y0);}
+    ctx.font="11px 'IBM Plex Mono', monospace";ctx.textAlign="center";
+    for(var gx=1;gx<=8;gx++){var px=X(gx);ctx.strokeStyle="#222a35";ctx.beginPath();ctx.moveTo(px,y1);ctx.lineTo(px,y0);ctx.stroke();ctx.fillStyle="#878f9d";ctx.fillText(gx,px,y0+18);}
+    ctx.fillStyle="#5b636f";ctx.fillText("distancia (m)",(x0+x1)/2,H-6);
+    ctx.textAlign="right";
+    for(var t=0;t<=4;t++){var yv=ymin+(ymax-ymin)*t/4,py=Yv(yv);ctx.strokeStyle="#1a212b";ctx.beginPath();ctx.moveTo(x0,py);ctx.lineTo(x1,py);ctx.stroke();ctx.fillStyle="#878f9d";ctx.fillText(yv.toFixed(1),x0-6,py+4);}
+    ctx.save();ctx.setLineDash([4,3]);ctx.strokeStyle="#f4b13c";ctx.beginPath();ctx.moveTo(X(refD),y1);ctx.lineTo(X(refD),y0);ctx.stroke();ctx.restore();
+    if(met==="ev"){ctx.strokeStyle="#2c3644";ctx.beginPath();ctx.moveTo(x0,Yv(0));ctx.lineTo(x1,Yv(0));ctx.stroke();}
+    ctx.strokeStyle=met==="f"?"#3fcab0":"#ef6f53";ctx.lineWidth=2.2;ctx.beginPath();
+    pts.forEach(function(p,i){var X1=X(p[0]),Y1=Yv(p[1]);if(i===0)ctx.moveTo(X1,Y1);else ctx.lineTo(X1,Y1);});ctx.stroke();
+    if(met==="f"){ctx.fillStyle="#f4b13c";ctx.beginPath();ctx.arc(X(refD),Yv(gnEff/refD),4,0,Math.PI*2);ctx.fill();}
+    var fRef=gnEff/refD,bgFall=2*Math.log2((refD+bgExtra)/refD);
+    $("st-gneff").textContent=gnEff.toFixed(1);
+    $("st-gneff-h").textContent="base "+gn+" · −"+loss.toFixed(1)+" EV · ISO"+iso;
+    $("st-fref-l").textContent="Diafragma a "+refD+" m";
+    $("st-fref").textContent="f/"+fRef.toFixed(1);
+    $("st-fref-h").textContent="estándar ≈ f/"+nearestF(fRef);
+    $("st-bg").innerHTML="−"+bgFall.toFixed(1)+'<span class="u">EV</span>';
+    $("st-bg-h").textContent="fondo a +"+bgExtra+" m";
+  }
+
+  /* ---- vencer al sol ---- */
+  function renderSun(){
+    var ev=num("r-amb"),iso=num("r-siso"),N=APS[num("r-ap")],leaf=parseFloat($("r-sync").value),
+        D=num("r-sd"),gn=num("r-sgn"),loss=num("r-sloss");
+    var tn=N*N/(Math.pow(2,ev)*iso/100); // tiempo de ambiente neutro (s)
+    var FP=200;
+    function amb(den){return -Math.log2(den*tn);} // EV del ambiente respecto a neutro
+    var ambLeaf=amb(leaf),ambFP=amb(FP),adv=Math.log2(leaf/FP);
+    var gnAvail=gn*Math.sqrt(iso/100)*Math.pow(2,-loss/2);
+    var head=2*Math.log2(gnAvail/(N*D));
+
+    var cv=$("sunCanvas"),ctx=cv.getContext("2d"),W=cv.width,H=cv.height;
+    ctx.clearRect(0,0,W,H);
+    var padL=44,padR=14,padT=14,padB=34,x0=padL,x1=W-padR,y0=H-padB,y1=padT;
+    var DENS=[60,125,250,500,1000,2000,4000,8000];
+    var lx0=Math.log2(50),lx1=Math.log2(9000);
+    function X(den){return x0+(Math.log2(den)-lx0)/(lx1-lx0)*(x1-x0);}
+    var yv=DENS.map(amb).concat([ambLeaf,ambFP,0]);
+    var ymin=Math.min.apply(null,yv),ymax=Math.max.apply(null,yv),pd=(ymax-ymin)*0.12||1;ymin-=pd;ymax+=pd;
+    function Y(v){return y0+(v-ymin)/(ymax-ymin)*(y1-y0);}
+    ctx.font="10px 'IBM Plex Mono', monospace";ctx.textAlign="center";
+    DENS.forEach(function(den){var px=X(den);ctx.strokeStyle="#222a35";ctx.beginPath();ctx.moveTo(px,y1);ctx.lineTo(px,y0);ctx.stroke();ctx.fillStyle="#878f9d";ctx.fillText("1/"+den,px,y0+15);});
+    ctx.fillStyle="#5b636f";ctx.fillText("velocidad de obturación",(x0+x1)/2,H-4);
+    ctx.textAlign="right";
+    for(var t=0;t<=4;t++){var v2=ymin+(ymax-ymin)*t/4,py=Y(v2);ctx.strokeStyle="#1a212b";ctx.beginPath();ctx.moveTo(x0,py);ctx.lineTo(x1,py);ctx.stroke();ctx.fillStyle="#878f9d";ctx.fillText(v2.toFixed(1),x0-6,py+4);}
+    // región extra del central
+    if(leaf>FP){ctx.fillStyle="rgba(63,202,176,0.10)";ctx.fillRect(X(FP),y1,X(leaf)-X(FP),y0-y1);}
+    // ambiente neutro
+    ctx.save();ctx.setLineDash([2,3]);ctx.strokeStyle="#3a4452";ctx.beginPath();ctx.moveTo(x0,Y(0));ctx.lineTo(x1,Y(0));ctx.stroke();ctx.restore();
+    ctx.fillStyle="#5b636f";ctx.textAlign="left";ctx.fillText("ambiente neutro",x0+4,Y(0)-4);
+    // refs FP y central
+    ctx.save();ctx.setLineDash([4,3]);
+    ctx.strokeStyle="#ef6f53";ctx.beginPath();ctx.moveTo(X(FP),y1);ctx.lineTo(X(FP),y0);ctx.stroke();
+    ctx.strokeStyle="#3fcab0";ctx.beginPath();ctx.moveTo(X(leaf),y1);ctx.lineTo(X(leaf),y0);ctx.stroke();
+    ctx.restore();
+    // curva
+    ctx.strokeStyle="#f4b13c";ctx.lineWidth=2.2;ctx.beginPath();var first=true;
+    for(var den=55;den<=9000;den*=1.04){var px=X(den),py=Y(amb(den));if(first){ctx.moveTo(px,py);first=false;}else ctx.lineTo(px,py);}
+    ctx.stroke();
+    ctx.fillStyle="#ef6f53";ctx.beginPath();ctx.arc(X(FP),Y(ambFP),4,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle="#3fcab0";ctx.beginPath();ctx.arc(X(leaf),Y(ambLeaf),4,0,Math.PI*2);ctx.fill();
+
+    $("st-ambleaf").innerHTML=evStr(ambLeaf)+'<span class="u">EV</span>';
+    $("st-ambleaf-h").textContent=ambLeaf<0?"cielo bajo neutro":"ambiente claro";
+    $("st-ambfp").innerHTML=evStr(ambFP)+'<span class="u">EV</span>';
+    $("st-ambfp-h").textContent=ambFP<0?"limitado por X-sync":"no oscurece";
+    $("st-adv").innerHTML="+"+adv.toFixed(1)+'<span class="u">EV</span>';
+    $("st-head").innerHTML=evStr(head)+'<span class="u">EV</span>';
+    $("st-head-h").textContent=head>=0?"potencia suficiente":"falta "+Math.abs(head).toFixed(1)+" EV";
+  }
+
+  function accent(id,c){var el=$(id);if(el)el.style.accentColor=c;}
+  ["r-d"].forEach(function(i){accent(i,"#f4b13c");});
+  ["r-L","r-s","r-iso","r-ref","r-gn","r-siso","r-sgn"].forEach(function(i){accent(i,"#3fcab0");});
+  ["r-az","r-el","r-bg","r-sd"].forEach(function(i){accent(i,"#9b8cff");});
+  ["r-loss","r-sloss"].forEach(function(i){accent(i,"#ef6f53");});
+  ["r-occ","r-amb","r-ap"].forEach(function(i){accent(i,"#878f9d");});
+
+  renderShadow();renderFalloff();renderSun();
+})();
+</script>
+</body>
+</html>
