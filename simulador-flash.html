@@ -74,6 +74,15 @@
   .hint{font-size:11px;color:var(--faint);line-height:1.5;border-top:1px solid var(--line);padding-top:12px;margin-top:4px}
   footer{font-size:11px;color:var(--faint);margin-top:30px;line-height:1.5;font-family:var(--mono);border-top:1px solid var(--line);padding-top:16px}
   .am{color:var(--amber)} .te{color:var(--teal)} .vi{color:var(--violet)} .rd{color:var(--red)}
+  .bbar{margin-bottom:16px}
+  .bbar .lab{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px}
+  .bbar .lab .v{font-family:var(--mono);color:var(--head)}
+  .btrack{position:relative;height:18px;background:var(--panel);border:1px solid var(--line2);border-radius:7px}
+  .bzero{position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--line2)}
+  .bfill{position:absolute;top:2px;bottom:2px;border-radius:5px;transition:all .1s}
+  .bscale{font-size:11px;color:var(--faint);text-align:center;font-family:var(--mono);margin-top:2px}
+  .bflags{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
+  .bflag{font-size:11px;padding:4px 9px;border-radius:7px;font-family:var(--sans);border:1px solid}
 </style>
 </head>
 <body>
@@ -91,6 +100,7 @@
     <button class="tab on" data-tab="shadow">Sombras</button>
     <button class="tab" data-tab="falloff">Caída de luz (GN)</button>
     <button class="tab" data-tab="sun">Vencer al sol</button>
+    <button class="tab" data-tab="balance">Balance ambiente</button>
   </div>
 
   <!-- ===== panel sombras ===== -->
@@ -184,6 +194,52 @@
     </div>
   </div>
 
+  <!-- ===== panel balance ambiente / flash ===== -->
+  <div class="grid" id="panel-balance" style="display:none">
+    <div>
+      <div class="seg" data-g="mode">
+        <button class="segbtn" data-v="manual">Manual</button>
+        <button class="segbtn on" data-v="ttl">TTL</button>
+      </div>
+      <div class="seg" data-g="shut">
+        <button class="segbtn on" data-v="leaf">Obturador central</button>
+        <button class="segbtn" data-v="fp">Plano focal</button>
+      </div>
+      <div style="background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:16px 16px 14px">
+        <div class="bbar">
+          <div class="lab"><span>Sujeto (flash)</span><span class="v" id="b-subv">0.0 EV</span></div>
+          <div class="btrack"><div class="bzero"></div><div class="bfill" id="b-subfill"></div></div>
+        </div>
+        <div class="bbar" style="margin-bottom:6px">
+          <div class="lab"><span>Fondo (ambiente)</span><span class="v" id="b-bgv">0.0 EV</span></div>
+          <div class="btrack"><div class="bzero"></div><div class="bfill" id="b-bgfill"></div></div>
+        </div>
+        <div class="bscale">−4 EV ······ 0 correcto ······ +4 EV</div>
+      </div>
+      <div class="bflags" id="b-flags"></div>
+      <div class="stats">
+        <div class="stat"><div class="l">Sujeto</div><div class="n te"><span id="b-st-sub">0</span><span class="u">EV</span></div><div class="h" id="b-st-sub-h"></div></div>
+        <div class="stat"><div class="l">Fondo</div><div class="n vi"><span id="b-st-bg">0</span><span class="u">EV</span></div><div class="h" id="b-st-bg-h"></div></div>
+        <div class="stat"><div class="l">Relación flash/amb.</div><div class="n am"><span id="b-st-ratio">0</span><span class="u">EV</span></div><div class="h" id="b-st-ratio-h"></div></div>
+        <div class="stat"><div class="l">Potencia flash</div><div class="n" id="b-st-pow">1/4</div><div class="h" id="b-st-pow-h"></div></div>
+      </div>
+      <p class="explain">Cada mando toca solo lo suyo: la <b class="am">obturación</b> es ambiente puro (no entra en el flash mientras sincronices), la <b class="te">potencia</b> y la <b class="te">distancia</b> son flash puro. En el cociente <b class="vi">flash/ambiente</b> se cancelan el ISO y el diafragma, así que el balance lo mueven el tiempo y la potencia, no la apertura, que solo te cuesta profundidad de campo. En TTL la cámara fija la potencia para clavar al sujeto, y por eso subir el ISO sube solo el fondo. El obturador central libera el tiempo hasta 1/2000 sin HSS.</p>
+    </div>
+    <div class="controls">
+      <div class="ct">Exposición</div>
+      <div class="ctl"><div class="row"><span>Luz ambiente (EV, ISO100)</span><span class="val"><span id="v-bamb">11</span></span></div><input id="r-bamb" type="range" min="5" max="16" step="0.5" value="11"></div>
+      <div class="ctl"><div class="row"><span>Obturación</span><span class="val"><span id="v-bsh">1/200</span></span></div><input id="r-bsh" type="range" min="0" max="9" step="1" value="4"></div>
+      <div class="ctl"><div class="row"><span>Diafragma</span><span class="val"><span id="v-bap">f/8</span></span></div><input id="r-bap" type="range" min="0" max="7" step="1" value="4"></div>
+      <div class="ctl"><div class="row"><span>ISO</span><span class="val"><span id="v-bis">100</span></span></div><input id="r-bis" type="range" min="0" max="6" step="1" value="0"></div>
+      <div class="sep"></div>
+      <div class="ctl" id="b-powrow"><div class="row"><span>Potencia flash</span><span class="val"><span id="v-bfp">1/4</span></span></div><input id="r-bfp" type="range" min="0" max="7" step="1" value="2"></div>
+      <div class="ctl"><div class="row"><span>Distancia flash</span><span class="val"><span id="v-bd">2</span><em>m</em></span></div><input id="r-bd" type="range" min="1" max="6" step="0.5" value="2"></div>
+      <div class="ctl"><div class="row"><span>Número guía GN</span><span class="val"><span id="v-bgn">18</span></span></div><input id="r-bgn" type="range" min="5" max="80" step="1" value="18"></div>
+      <div class="ctl"><div class="row"><span>Pérdida del modificador</span><span class="val"><span id="v-bloss">1</span><em>EV</em></span></div><input id="r-bloss" type="range" min="0" max="3" step="0.5" value="1"></div>
+      <div class="hint">En TTL la potencia la fija la cámara y el deslizador queda en gris. EV ambiente: interior ≈ 10–11, nublado ≈ 13, pleno sol = 15.</div>
+    </div>
+  </div>
+
   <footer>w = d·s/L · θ = 2·arctan(d/2L) · f = GN/D · E ∝ 1/D² · t_neutro = f²·100/(ISO·2^EV) · © Rafael Vida</footer>
 </div>
 
@@ -219,7 +275,8 @@
       $("r-d").value=m.d; $("v-d").textContent=m.d;
       $("r-loss").value=m.loss; $("v-loss").textContent=m.loss;
       $("r-sloss").value=m.loss; $("v-sloss").textContent=m.loss;
-      renderShadow(); renderFalloff(); renderSun();
+      $("r-bloss").value=m.loss; $("v-bloss").textContent=m.loss;
+      renderShadow(); renderFalloff(); renderSun(); renderBalance();
     };
     chips.appendChild(b);
   });
@@ -232,7 +289,8 @@
       $("panel-shadow").style.display=which==="shadow"?"grid":"none";
       $("panel-falloff").style.display=which==="falloff"?"grid":"none";
       $("panel-sun").style.display=which==="sun"?"grid":"none";
-      if(which==="shadow")renderShadow(); else if(which==="falloff")renderFalloff(); else renderSun();
+      $("panel-balance").style.display=which==="balance"?"grid":"none";
+      if(which==="shadow")renderShadow(); else if(which==="falloff")renderFalloff(); else if(which==="sun")renderSun(); else renderBalance();
     };
   });
 
@@ -244,10 +302,10 @@
     .forEach(function(p){$(p[0]).addEventListener("input",function(){$(p[1]).textContent=$(p[0]).value;renderSun();});});
   $("r-ap").addEventListener("input",function(){$("v-ap").textContent="f/"+APS[num("r-ap")];renderSun();});
   $("r-sync").addEventListener("change",renderSun);
-  document.querySelectorAll(".segbtn").forEach(function(b){
-    b.onclick=function(){document.querySelectorAll(".segbtn").forEach(function(x){x.classList.remove("on");});b.classList.add("on");renderFalloff();};
+  document.querySelectorAll("#panel-falloff .segbtn").forEach(function(b){
+    b.onclick=function(){document.querySelectorAll("#panel-falloff .segbtn").forEach(function(x){x.classList.remove("on");});b.classList.add("on");renderFalloff();};
   });
-  function metric(){var on=document.querySelector(".segbtn.on");return on?on.dataset.metric:"f";}
+  function metric(){var on=document.querySelector("#panel-falloff .segbtn.on");return on?on.dataset.metric:"f";}
 
   /* ---- sombras ---- */
   function renderShadow(){
@@ -402,14 +460,90 @@
     $("st-head-h").textContent=head>=0?"potencia suficiente":"falta "+Math.abs(head).toFixed(1)+" EV";
   }
 
+  /* ---- balance ambiente / flash ---- */
+  var BSH=[{t:1/2000,l:"1/2000"},{t:1/1000,l:"1/1000"},{t:1/500,l:"1/500"},{t:1/250,l:"1/250"},{t:1/200,l:"1/200"},{t:1/125,l:"1/125"},{t:1/60,l:"1/60"},{t:1/30,l:"1/30"},{t:1/15,l:"1/15"},{t:1/8,l:"1/8"}];
+  var BAP=[2,2.8,4,5.6,8,11,16,22];
+  var BIS=[100,200,400,800,1600,3200,6400];
+  var BPW=[{p:1,l:"1/1"},{p:0.5,l:"1/2"},{p:0.25,l:"1/4"},{p:0.125,l:"1/8"},{p:0.0625,l:"1/16"},{p:0.03125,l:"1/32"},{p:0.015625,l:"1/64"},{p:0.0078125,l:"1/128"}];
+  var L2=Math.log2;
+  function bSeg(g){var on=document.querySelector("#panel-balance .seg[data-g='"+g+"'] .segbtn.on");return on?on.dataset.v:"";}
+  function bColor(ev){if(ev>1)return"#ef6f53";if(ev<-1)return"#9b8cff";if(Math.abs(ev)<=0.5)return"#3fcab0";return"#f4b13c";}
+  function bBar(id,ev){var e=Math.max(-4,Math.min(4,ev)),left=50+Math.min(e,0)/4*50,w=Math.abs(e)/4*50,f=$(id);f.style.left=left+"%";f.style.width=w+"%";f.style.background=bColor(ev);}
+  function bFlag(t,c){return '<span class="bflag" style="color:'+c+';border-color:'+c+';background:'+c+'22">'+t+'</span>';}
+
+  function renderBalance(){
+    var E=num("r-bamb"),shO=BSH[num("r-bsh")],N=BAP[num("r-bap")],S=BIS[num("r-bis")],
+        fpO=BPW[num("r-bfp")],D=num("r-bd"),gn=num("r-bgn"),loss=num("r-bloss");
+    var mode=bSeg("mode"),shut=bSeg("shut");
+    $("v-bamb").textContent=E;$("v-bsh").textContent=shO.l;$("v-bap").textContent="f/"+N;
+    $("v-bis").textContent=S;$("v-bd").textContent=D;$("v-bgn").textContent=gn;$("v-bloss").textContent=loss;
+
+    var ambEV=L2(S/100)+L2(shO.t)-2*L2(N)+E;
+    var gnBase=gn*Math.sqrt(S/100)*Math.pow(2,-loss/2);
+    var powFrac,flashEV;
+    if(mode==="manual"){
+      $("r-bfp").disabled=false;$("b-powrow").style.opacity="1";
+      powFrac=fpO.p;$("v-bfp").textContent=fpO.l;
+      flashEV=2*L2(gnBase*Math.sqrt(powFrac)/(N*D));
+    } else {
+      $("r-bfp").disabled=true;$("b-powrow").style.opacity="0.45";
+      var rem=1-Math.pow(2,ambEV);
+      if(rem<=0.0009){powFrac=1/128;flashEV=-99;}
+      else{
+        var sq=(N*D/gnBase)*Math.pow(2,L2(rem)/2);
+        powFrac=Math.max(1/128,Math.min(1,sq*sq));
+        flashEV=2*L2(gnBase*Math.sqrt(powFrac)/(N*D));
+      }
+      $("v-bfp").textContent="1/"+Math.round(1/powFrac);
+    }
+
+    var subjLin=Math.pow(2,ambEV)+(flashEV<=-90?0:Math.pow(2,flashEV));
+    var subjEV=L2(subjLin),bgEV=ambEV;
+
+    $("b-subv").textContent=evStr(subjEV)+" EV";$("b-bgv").textContent=evStr(bgEV)+" EV";
+    bBar("b-subfill",subjEV);bBar("b-bgfill",bgEV);
+
+    $("b-st-sub").textContent=evStr(subjEV);
+    $("b-st-sub-h").textContent=Math.abs(subjEV)<=0.5?"bien expuesto":(subjEV>0.5?"sobreexpuesto":"oscuro");
+    $("b-st-bg").textContent=evStr(bgEV);
+    $("b-st-bg-h").textContent=bgEV<-0.5?"fondo hundido":(bgEV>0.5?"fondo claro":"fondo neutro");
+    var rel=(flashEV<=-90)?-99:(flashEV-ambEV);
+    $("b-st-ratio").textContent=(rel<=-90)?"—":evStr(rel);
+    $("b-st-ratio-h").textContent=(rel<=-90)?"solo ambiente":(rel>=0?"manda el flash":"manda el ambiente");
+    $("b-st-pow").textContent=(flashEV<=-90)?"mín":$("v-bfp").textContent;
+    $("b-st-pow-h").textContent=mode==="ttl"?"la fija el TTL":"fijada (manual)";
+
+    var fl=[];
+    if(shut==="fp"&&shO.t<1/200) fl.push(bFlag("por encima de X-sync 1/200 · necesita HSS","#ef6f53"));
+    if(shut==="leaf"&&shO.t<=1/1000&&powFrac>=0.5) fl.push(bFlag("a 1/1000+ con destello potente puede recortarse algo de flash","#f4b13c"));
+    if(subjEV>1.2) fl.push(bFlag("sujeto quemado","#ef6f53"));
+    if(bgEV>1.2) fl.push(bFlag("fondo quemado","#ef6f53"));
+    if(mode==="ttl"&&powFrac>=1&&subjEV<-0.4) fl.push(bFlag("falta potencia · acerca el flash o sube ISO","#f4b13c"));
+    if(mode==="manual"&&subjEV<-1.2) fl.push(bFlag("sujeto oscuro · sube potencia","#9b8cff"));
+    $("b-flags").innerHTML=fl.join("");
+  }
+
+  [["r-bamb","v-bamb"],["r-bd","v-bd"],["r-bgn","v-bgn"],["r-bloss","v-bloss"]]
+    .forEach(function(p){$(p[0]).addEventListener("input",function(){$(p[1]).textContent=$(p[0]).value;renderBalance();});});
+  ["r-bsh","r-bap","r-bis","r-bfp"].forEach(function(i){$(i).addEventListener("input",renderBalance);});
+  document.querySelectorAll("#panel-balance .seg").forEach(function(seg){
+    seg.querySelectorAll(".segbtn").forEach(function(b){
+      b.onclick=function(){seg.querySelectorAll(".segbtn").forEach(function(x){x.classList.remove("on");});b.classList.add("on");renderBalance();};
+    });
+  });
+
   function accent(id,c){var el=$(id);if(el)el.style.accentColor=c;}
   ["r-d"].forEach(function(i){accent(i,"#f4b13c");});
   ["r-L","r-s","r-iso","r-ref","r-gn","r-siso","r-sgn"].forEach(function(i){accent(i,"#3fcab0");});
   ["r-az","r-el","r-bg","r-sd"].forEach(function(i){accent(i,"#9b8cff");});
   ["r-loss","r-sloss"].forEach(function(i){accent(i,"#ef6f53");});
   ["r-occ","r-amb","r-ap"].forEach(function(i){accent(i,"#878f9d");});
+  ["r-bsh"].forEach(function(i){accent(i,"#f4b13c");});
+  ["r-bis","r-bgn","r-bfp","r-bd"].forEach(function(i){accent(i,"#3fcab0");});
+  ["r-bamb","r-bap"].forEach(function(i){accent(i,"#9b8cff");});
+  ["r-bloss"].forEach(function(i){accent(i,"#ef6f53");});
 
-  renderShadow();renderFalloff();renderSun();
+  renderShadow();renderFalloff();renderSun();renderBalance();
 })();
 </script>
 </body>
