@@ -129,21 +129,22 @@
       <tr><td>ISO</td><td>Ambiente y flash. Bajo TTL, en la práctica solo el fondo.</td></tr>
       <tr><td>Potencia flash</td><td>Solo flash. En TTL la fija la cámara.</td></tr>
       <tr><td>Distancia flash</td><td>Solo flash, cae con el inverso del cuadrado.</td></tr>
+      <tr><td>Duración flash (plena pot.)</td><td>El pulso a máxima potencia, 1/1000 s en el iT32. Define a partir de qué velocidad la ventana de obturación recorta el destello.</td></tr>
       <tr><td>GN y pérdida</td><td>Definen el alcance real, GN_ef. La pérdida la fija el selector de modificador, como en las demás pestañas.</td></tr>
     </tbody>
   </table>
 
   <h3>Lecturas</h3>
-  <p>Las dos barras muestran al <span class="te">sujeto</span> y al <span class="vi">fondo</span> respecto a la exposición correcta, el 0 del centro. El color marca el estado: verde correcto, ámbar desviado, rojo quemado, violeta hundido. La <span class="am">relación flash/ambiente</span> es cuántos pasos manda el flash sobre el ambiente en el sujeto; es el cociente que no depende del ISO ni del diafragma. La <span>potencia flash</span> es la resultante: en TTL la calcula la cámara, en manual es la que fijas. Los avisos saltan al pasar del X-sync con plano focal, ante el posible recorte del destello a 1/1000 o más con potencia alta en central, y cuando el sujeto o el fondo se queman o falta potencia.</p>
+  <p>Las dos barras muestran al <span class="te">sujeto</span> y al <span class="vi">fondo</span> respecto a la exposición correcta, el 0 del centro. El color marca el estado: verde correcto, ámbar desviado, rojo quemado, violeta hundido. La <span class="am">relación flash/ambiente</span> es cuántos pasos manda el flash sobre el ambiente en el sujeto; es el cociente que no depende del ISO ni del diafragma. La <span>potencia flash</span> es la resultante: en TTL la calcula la cámara, en manual es la que fijas. Los avisos saltan al pasar del X-sync con plano focal, ante el recorte del destello, cuantificado en pasos cuando la ventana de obturación queda más corta que el pulso, y cuando el sujeto o el fondo se queman o falta potencia.</p>
   <div class="note">Para alguien que no es modelo, TTL más obturador central es la pareja rápida. El TTL clava al sujeto aunque cambie la distancia, así que tú solo gobiernas el fondo con la obturación, fijada una vez y sin esperas. Como el cociente no depende del diafragma, la apertura te queda libre para la composición. Si el TTL se desvía con ropa muy clara u oscura, corrígelo con la compensación de exposición de flash.</div>
 
   <h2>Límites del modelo</h2>
-  <p>Es un modelo geométrico de fuente extensa. La difracción es despreciable a estas escalas y no se incluye. Los diámetros y pérdidas de los modificadores son valores típicos, no medidas de tu equipo concreto, así que ajústalos si tienes datos propios. La luz ambiente parte de la regla del 16 y no modela reflejos ni contraste de la escena. La sombra se calcula con un objeto y una fuente circulares, suficiente para entender la física, no para predecir píxel a píxel una cara real. Y en el balance, la independencia entre flash y ambiente se da por la sincronización: a las velocidades más altas con potencia alta el destello puede durar más que la ventana de obturación y recortarse, que es justo donde el aviso te avisa.</p>
+  <p>Es un modelo geométrico de fuente extensa. La difracción es despreciable a estas escalas y no se incluye. Los diámetros y pérdidas de los modificadores son valores típicos, no medidas de tu equipo concreto, así que ajústalos si tienes datos propios. La luz ambiente parte de la regla del 16 y no modela reflejos ni contraste de la escena. La sombra se calcula con un objeto y una fuente circulares, suficiente para entender la física, no para predecir píxel a píxel una cara real. Y en el balance, la independencia entre flash y ambiente se da por la sincronización: la fracción del destello captada es <code>mín(1, t / t_pulso)</code>, con <code>t_pulso = (1/1000)·P^0,70</code> ajustado a los dos extremos de la hoja de datos del iT32, así que a las velocidades más altas con potencia alta la ventana recorta el pulso y la pérdida aparece en pasos.</p>
 </article>
 
 <footer>
   <a href="simulador-flash.html">Volver al simulador ↗</a>
-  <div class="c">θ = 2·arctan(d/2L) · w = d·s/L · f = GN/D · E ∝ 1/D² · t_neutro = f²·100/(ISO·2^EV) · margen = 2·log₂(GN_ef·√P/(N·D)) · © Rafael Vida</div>
+  <div class="c">θ = 2·arctan(d/2L) · w = d·s/L · f = GN/D · E ∝ 1/D² · t_neutro = f²·100/(ISO·2^EV) · margen = 2·log₂(GN_ef·√P/(N·D)) · captado = mín(1, t/t_pulso) · © Rafael Vida</div>
 </footer>
 </body>
 </html>

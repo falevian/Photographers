@@ -223,7 +223,7 @@
         <div class="stat"><div class="l">Relación flash/amb.</div><div class="n am"><span id="b-st-ratio">0</span><span class="u">EV</span></div><div class="h" id="b-st-ratio-h"></div></div>
         <div class="stat"><div class="l">Potencia flash</div><div class="n" id="b-st-pow">1/4</div><div class="h" id="b-st-pow-h"></div></div>
       </div>
-      <p class="explain">Cada mando toca solo lo suyo: la <b class="am">obturación</b> es ambiente puro (no entra en el flash mientras sincronices), la <b class="te">potencia</b> y la <b class="te">distancia</b> son flash puro. En el cociente <b class="vi">flash/ambiente</b> se cancelan el ISO y el diafragma, así que el balance lo mueven el tiempo y la potencia, no la apertura, que solo te cuesta profundidad de campo. En TTL la cámara fija la potencia para clavar al sujeto, y por eso subir el ISO sube solo el fondo. El obturador central libera el tiempo hasta 1/2000 sin HSS.</p>
+      <p class="explain">Cada mando toca solo lo suyo: la <b class="am">obturación</b> es ambiente puro (no entra en el flash mientras sincronices), la <b class="te">potencia</b> y la <b class="te">distancia</b> son flash puro. En el cociente <b class="vi">flash/ambiente</b> se cancelan el ISO y el diafragma, así que el balance lo mueven el tiempo y la potencia, no la apertura, que solo te cuesta profundidad de campo. En TTL la cámara fija la potencia para clavar al sujeto, y por eso subir el ISO sube solo el fondo. El obturador central libera el tiempo hasta 1/2000 sin HSS, con un único límite: a plena potencia el destello dura ~1/1000 s, así que a las velocidades más altas la ventana de obturación recorta parte del pulso y el aviso lo cuantifica en pasos.</p>
     </div>
     <div class="controls">
       <div class="ct">Exposición</div>
@@ -234,6 +234,7 @@
       <div class="sep"></div>
       <div class="ctl" id="b-powrow"><div class="row"><span>Potencia flash</span><span class="val"><span id="v-bfp">1/4</span></span></div><input id="r-bfp" type="range" min="0" max="7" step="1" value="2"></div>
       <div class="ctl"><div class="row"><span>Distancia flash</span><span class="val"><span id="v-bd">2</span><em>m</em></span></div><input id="r-bd" type="range" min="1" max="6" step="0.5" value="2"></div>
+      <div class="ctl"><div class="row"><span>Duración flash (plena pot.)</span></div><select id="r-bdur"><option value="500">1/500</option><option value="700">1/700</option><option value="1000" selected>1/1000</option><option value="1500">1/1500</option><option value="2000">1/2000</option></select></div>
       <div class="ctl"><div class="row"><span>Número guía GN</span><span class="val"><span id="v-bgn">18</span></span></div><input id="r-bgn" type="range" min="5" max="80" step="1" value="18"></div>
       <div class="ctl"><div class="row"><span>Pérdida del modificador</span><span class="val"><span id="v-bloss">1</span><em>EV</em></span></div><input id="r-bloss" type="range" min="0" max="3" step="0.5" value="1"></div>
       <div class="hint">En TTL la potencia la fija la cámara y el deslizador queda en gris. EV ambiente: interior ≈ 10–11, nublado ≈ 13, pleno sol = 15.</div>
@@ -497,7 +498,13 @@
       $("v-bfp").textContent="1/"+Math.round(1/powFrac);
     }
 
-    var subjLin=Math.pow(2,ambEV)+(flashEV<=-90?0:Math.pow(2,flashEV));
+    var durFull=1/parseFloat($("r-bdur").value);
+    var applyClip=(shut==="leaf")||(shut==="fp"&&shO.t>=1/200);
+    var tPulse=durFull*Math.pow(Math.max(powFrac,1e-4),0.70);
+    var capt=applyClip?Math.min(1,shO.t/tPulse):1;
+    var clipLoss=-L2(capt);
+    var flashEVc=(flashEV<=-90)?flashEV:(flashEV+L2(capt));
+    var subjLin=Math.pow(2,ambEV)+(flashEVc<=-90?0:Math.pow(2,flashEVc));
     var subjEV=L2(subjLin),bgEV=ambEV;
 
     $("b-subv").textContent=evStr(subjEV)+" EV";$("b-bgv").textContent=evStr(bgEV)+" EV";
@@ -507,7 +514,7 @@
     $("b-st-sub-h").textContent=Math.abs(subjEV)<=0.5?"bien expuesto":(subjEV>0.5?"sobreexpuesto":"oscuro");
     $("b-st-bg").textContent=evStr(bgEV);
     $("b-st-bg-h").textContent=bgEV<-0.5?"fondo hundido":(bgEV>0.5?"fondo claro":"fondo neutro");
-    var rel=(flashEV<=-90)?-99:(flashEV-ambEV);
+    var rel=(flashEVc<=-90)?-99:(flashEVc-ambEV);
     $("b-st-ratio").textContent=(rel<=-90)?"—":evStr(rel);
     $("b-st-ratio-h").textContent=(rel<=-90)?"solo ambiente":(rel>=0?"manda el flash":"manda el ambiente");
     $("b-st-pow").textContent=(flashEV<=-90)?"mín":$("v-bfp").textContent;
@@ -515,7 +522,7 @@
 
     var fl=[];
     if(shut==="fp"&&shO.t<1/200) fl.push(bFlag("por encima de X-sync 1/200 · necesita HSS","#ef6f53"));
-    if(shut==="leaf"&&shO.t<=1/1000&&powFrac>=0.5) fl.push(bFlag("a 1/1000+ con destello potente puede recortarse algo de flash","#f4b13c"));
+    if(clipLoss>0.1) fl.push(bFlag("recorte del flash −"+clipLoss.toFixed(1)+" EV · pulso "+(tPulse*1000).toFixed(2)+" ms vs ventana "+(shO.t*1000).toFixed(2)+" ms",clipLoss>1?"#ef6f53":"#f4b13c"));
     if(subjEV>1.2) fl.push(bFlag("sujeto quemado","#ef6f53"));
     if(bgEV>1.2) fl.push(bFlag("fondo quemado","#ef6f53"));
     if(mode==="ttl"&&powFrac>=1&&subjEV<-0.4) fl.push(bFlag("falta potencia · acerca el flash o sube ISO","#f4b13c"));
@@ -526,6 +533,7 @@
   [["r-bamb","v-bamb"],["r-bd","v-bd"],["r-bgn","v-bgn"],["r-bloss","v-bloss"]]
     .forEach(function(p){$(p[0]).addEventListener("input",function(){$(p[1]).textContent=$(p[0]).value;renderBalance();});});
   ["r-bsh","r-bap","r-bis","r-bfp"].forEach(function(i){$(i).addEventListener("input",renderBalance);});
+  $("r-bdur").addEventListener("change",renderBalance);
   document.querySelectorAll("#panel-balance .seg").forEach(function(seg){
     seg.querySelectorAll(".segbtn").forEach(function(b){
       b.onclick=function(){seg.querySelectorAll(".segbtn").forEach(function(x){x.classList.remove("on");});b.classList.add("on");renderBalance();};
