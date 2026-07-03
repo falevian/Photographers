@@ -95,6 +95,23 @@
   svg.spine .tick-lbl{font-size:11px;}
   svg.spine .node-lbl{font-size:11.5px;font-weight:600;letter-spacing:.02em;}
 
+  /* ---- instrumentation rail ---- */
+  .rail-wrap{border-bottom:1px solid var(--rule);}
+  .rail-head{padding:12px clamp(22px,3.5vw,44px) 0;}
+  .rail-head .eyebrow{color:var(--ink);}
+  .rail{display:grid;grid-template-columns:repeat(3,1fr);padding-top:8px;}
+  .rail .cell{
+    padding:8px clamp(18px,2.2vw,26px) 15px;
+    border-right:1px solid var(--rule-soft);
+  }
+  .rail .cell:last-child{border-right:none;}
+  .rail .k{
+    font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;
+    color:var(--ink-soft);display:flex;align-items:center;gap:7px;margin-bottom:6px;
+  }
+  .rail .k .dot{width:8px;height:8px;border-radius:50%;flex:none;}
+  .rail .v{font-family:var(--mono);font-size:11.5px;line-height:1.55;color:var(--ink);}
+
   /* ---- phase columns ---- */
   .phases{
     display:grid;
@@ -154,6 +171,8 @@
   table.profiles td.mode{font-family:var(--grot);font-weight:500;}
   .lvl{font-family:var(--mono);font-size:11px;font-weight:600;text-align:center;}
   .lvl.hi{color:var(--ink);} .lvl.mid{color:var(--ink-soft);} .lvl.lo{color:#9AA3A7;}
+  td.ej{font-family:var(--serif);font-size:13px;color:var(--ink);white-space:nowrap;}
+  td.ej.neg{font-family:var(--mono);font-size:11px;color:#9AA3A7;font-style:normal;}
 
   /* ---- aparato ---- */
   .aparato{padding:clamp(20px,2.8vw,32px) clamp(22px,3.5vw,44px) clamp(10px,1.5vw,18px);}
@@ -206,6 +225,9 @@
 
   /* ---- responsive ---- */
   @media (max-width:820px){
+    .rail{grid-template-columns:1fr;}
+    .rail .cell{border-right:none;border-bottom:1px solid var(--rule-soft);}
+    .rail .cell:last-child{border-bottom:none;}
     .phases{grid-template-columns:1fr;}
     .phase{border-right:none;border-bottom:1px solid var(--rule);}
     .phase:last-child{border-bottom:none;}
@@ -287,6 +309,25 @@
     <div style="text-align:right"><span class="note mono" style="font-size:10px;color:var(--ink-soft)">— — curva esquemática de oportunidad de valor</span></div>
   </section>
 
+  <!-- ================= INSTRUMENTATION RAIL ================= -->
+  <section class="rail-wrap" aria-label="Instrumentación por fase">
+    <div class="rail-head"><span class="eyebrow">Instrumentación · qué se mide en cada fase</span></div>
+    <div class="rail">
+      <div class="cell">
+        <span class="k"><span class="dot" style="background:var(--p1)"></span>Fase 1</span>
+        <span class="v">Potenciales evocados tempranos (ERP), conductancia cutánea (EDA) y EMG facial de corrugador y cigomático. Latencia por debajo de 150 ms, previa al reporte verbal.</span>
+      </div>
+      <div class="cell">
+        <span class="k"><span class="dot" style="background:var(--p2)"></span>Fase 2</span>
+        <span class="v">Oculometría: número, duración y dispersión de las fijaciones; longitud del recorrido sacádico. Índice de exploración productiva.</span>
+      </div>
+      <div class="cell">
+        <span class="k"><span class="dot" style="background:var(--p3)"></span>Fase 3</span>
+        <span class="v">Respuestas autonómicas sostenidas y dispersión de las interpretaciones verbales entre observadores. La varianza entre observadores estima cuánta proyección admite la imagen.</span>
+      </div>
+    </div>
+  </section>
+
   <!-- ================= PHASE CARDS ================= -->
   <section class="phases">
     <article class="phase p1">
@@ -296,7 +337,6 @@
       <div class="row"><span class="k">Salida</span><span class="v">Categoría de escena y propiedades globales (apertura, profundidad, orientación dominante). Sin identificar objetos.</span></div>
       <div class="row"><span class="k">Fuente de valor</span><span class="v">Valencia pre-reconocimiento de los estadísticos globales y fluidez de procesamiento. Satura con rapidez.</span></div>
       <div class="row"><span class="k">Canal físico</span><span class="v">Baja frecuencia espacial; conducción rápida por vía magnocelular.</span></div>
-      <div class="row"><span class="k">Firma fisiológica</span><span class="v"><span class="fis">Potenciales evocados tempranos, conductancia cutánea, EMG facial &lt; 150 ms.</span></span></div>
     </article>
 
     <article class="phase p2">
@@ -306,7 +346,6 @@
       <div class="row"><span class="k">Salida</span><span class="v">Objetos, texturas, relaciones y geometría resueltas por foveación.</span></div>
       <div class="row"><span class="k">Fuente de valor</span><span class="v">Dificultad productiva: exige estructura que explorar. Signo opuesto a la fluidez de la fase 1.</span></div>
       <div class="row"><span class="k">Óptimo</span><span class="v">La preferencia máxima (U invertida de Berlyne) se sitúa entre las fases 1 y 2.</span></div>
-      <div class="row"><span class="k">Firma fisiológica</span><span class="v"><span class="fis">Estadística de fijaciones: número, duración y dispersión.</span></span></div>
     </article>
 
     <article class="phase p3">
@@ -316,7 +355,6 @@
       <div class="row"><span class="k">Salida</span><span class="v">Contexto, título, sujeto y saber previo, más inferencia proyectiva bajo subdeterminación.</span></div>
       <div class="row"><span class="k">Fuente de valor</span><span class="v">Enganche particular (<i>punctum</i>) y proyección del observador. Máxima intensidad, mínima universalidad.</span></div>
       <div class="row"><span class="k">Mecanismo</span><span class="v">El material aportado procede de la memoria de quien mira: parte de la carga no es de la imagen.</span></div>
-      <div class="row"><span class="k">Firma fisiológica</span><span class="v"><span class="fis">Respuestas autonómicas sostenidas cuando ocurre el enganche.</span></span></div>
     </article>
   </section>
 
@@ -328,12 +366,12 @@
     </div>
     <table class="profiles">
       <thead>
-        <tr><th>Modo</th><th style="text-align:center">F1</th><th style="text-align:center">F2</th><th style="text-align:center">F3</th></tr>
+        <tr><th>Modo</th><th style="text-align:center">F1</th><th style="text-align:center">F2</th><th style="text-align:center">F3</th><th>Ejemplo</th></tr>
       </thead>
       <tbody>
-        <tr><td class="mode">Descriptivo</td><td class="lvl mid">sobrio</td><td class="lvl hi">alto</td><td class="lvl mid">variable</td></tr>
-        <tr><td class="mode">Expresivo disuelto</td><td class="lvl hi">alto</td><td class="lvl lo">pobre</td><td class="lvl hi">alto</td></tr>
-        <tr><td class="mode">Cartel / impacto</td><td class="lvl hi">alto</td><td class="lvl lo">nulo</td><td class="lvl lo">nulo</td></tr>
+        <tr><td class="mode">Descriptivo</td><td class="lvl mid">sobrio</td><td class="lvl hi">alto</td><td class="lvl mid">variable</td><td class="ej">Ghirri, Shore</td></tr>
+        <tr><td class="mode">Expresivo disuelto</td><td class="lvl hi">alto</td><td class="lvl lo">pobre</td><td class="lvl hi">alto</td><td class="ej">Plossu, Mann</td></tr>
+        <tr><td class="mode">Cartel / impacto</td><td class="lvl hi">alto</td><td class="lvl lo">nulo</td><td class="lvl lo">nulo</td><td class="ej neg">contraejemplo</td></tr>
       </tbody>
     </table>
   </section>
