@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fases del juicio estético fotográfico · ficha de consulta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EEF1F2;
+    --panel:#F7F8F8;
+    --ink:#15191C;
+    --ink-soft:#4A5257;
+    --rule:#C4CDD1;
+    --rule-soft:#DBE1E3;
+    --p1:#B0742E;   /* gist  · baja frecuencia, grueso, cálido */
+    --p2:#2C7C79;   /* exploración · media */
+    --p3:#4A4A8C;   /* integración · alto nivel */
+    --p1-wash:#EFE3D3;
+    --p2-wash:#D9E8E7;
+    --p3-wash:#E0E0EE;
+    --serif:"Spectral",Georgia,serif;
+    --grot:"Space Grotesk","Helvetica Neue",Arial,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--serif);
+    line-height:1.5;
+    padding:clamp(18px,4vw,56px);
+  }
+  .sheet{
+    max-width:1180px;
+    margin:0 auto;
+    background:var(--panel);
+    border:1px solid var(--rule);
+    box-shadow:0 1px 0 #fff inset, 0 24px 60px -40px rgba(10,20,25,.5);
+  }
+
+  /* ---- shared type ---- */
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    font-weight:500;
+  }
+  .mono{font-family:var(--mono);}
+  h1,h2,h3{font-family:var(--grot);font-weight:600;margin:0;line-height:1.08;}
+
+  /* ---- header ---- */
+  .head{
+    padding:clamp(22px,3.5vw,40px) clamp(22px,3.5vw,44px) clamp(20px,2.6vw,30px);
+    border-bottom:1px solid var(--rule);
+  }
+  .head .eyebrow{margin-bottom:16px;}
+  .head h1{
+    font-size:clamp(28px,4.6vw,50px);
+    letter-spacing:-.015em;
+    max-width:20ch;
+  }
+  .head .thesis{
+    margin:16px 0 0;
+    font-size:clamp(15px,1.7vw,18px);
+    color:var(--ink-soft);
+    max-width:66ch;
+    font-weight:300;
+  }
+  .head .thesis b{color:var(--ink);font-weight:500;}
+
+  /* ---- axis spine ---- */
+  .axis-wrap{
+    padding:clamp(20px,3vw,34px) clamp(22px,3.5vw,44px) clamp(8px,1.5vw,16px);
+    border-bottom:1px solid var(--rule);
+    background:
+      linear-gradient(90deg,var(--p1-wash),var(--p2-wash) 46%,var(--p3-wash));
+    background-blend-mode:multiply;
+  }
+  .axis-label{
+    display:flex;justify-content:space-between;align-items:baseline;
+    margin-bottom:6px;
+  }
+  .axis-label .eyebrow{color:var(--ink);}
+  .axis-label span.note{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);letter-spacing:.04em;}
+  svg.spine{display:block;width:100%;height:120px;overflow:visible;}
+  svg.spine text{font-family:var(--mono);fill:var(--ink-soft);}
+  svg.spine .tick-lbl{font-size:11px;}
+  svg.spine .node-lbl{font-size:11.5px;font-weight:600;letter-spacing:.02em;}
+
+  /* ---- phase columns ---- */
+  .phases{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+  }
+  .phase{
+    padding:clamp(18px,2.4vw,28px) clamp(18px,2.2vw,26px) clamp(20px,2.6vw,30px);
+    border-right:1px solid var(--rule);
+    position:relative;
+  }
+  .phase:last-child{border-right:none;}
+  .phase .cap{
+    display:flex;align-items:center;gap:10px;
+    margin-bottom:4px;
+  }
+  .phase .dot{width:11px;height:11px;border-radius:50%;flex:none;}
+  .phase .idx{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.1em;}
+  .phase h2{font-size:clamp(19px,2.3vw,24px);letter-spacing:-.01em;margin:2px 0 2px;}
+  .phase .window{
+    font-family:var(--mono);font-size:12px;color:var(--ink-soft);
+    padding-bottom:14px;margin-bottom:14px;border-bottom:1px dashed var(--rule);
+  }
+  .row{margin:0 0 13px;}
+  .row:last-child{margin-bottom:0;}
+  .row .k{
+    font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;
+    color:var(--ink-soft);display:block;margin-bottom:3px;
+  }
+  .row .v{font-size:14.5px;color:var(--ink);}
+  .row .v .fis{font-family:var(--mono);font-size:12.5px;color:var(--ink-soft);}
+  .p1 .dot{background:var(--p1);} .p1 .idx{color:var(--p1);}
+  .p2 .dot{background:var(--p2);} .p2 .idx{color:var(--p2);}
+  .p3 .dot{background:var(--p3);} .p3 .idx{color:var(--p3);}
+
+  /* ---- thesis band ---- */
+  .tesis{
+    padding:clamp(20px,2.8vw,30px) clamp(22px,3.5vw,44px);
+    border-top:1px solid var(--rule);
+    border-bottom:1px solid var(--rule);
+    display:grid;
+    grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);
+    gap:clamp(20px,3vw,44px);
+    align-items:start;
+  }
+  .tesis h3{font-size:16px;margin-bottom:9px;letter-spacing:.01em;}
+  .tesis p{margin:0;font-size:14.5px;color:var(--ink);max-width:52ch;}
+  .tesis p b{font-weight:600;}
+  table.profiles{border-collapse:collapse;width:100%;font-size:13px;}
+  table.profiles th,table.profiles td{
+    text-align:left;padding:6px 10px;border-bottom:1px solid var(--rule-soft);
+    vertical-align:top;
+  }
+  table.profiles thead th{
+    font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink-soft);font-weight:500;border-bottom:1px solid var(--rule);
+  }
+  table.profiles td.mode{font-family:var(--grot);font-weight:500;}
+  .lvl{font-family:var(--mono);font-size:11px;font-weight:600;text-align:center;}
+  .lvl.hi{color:var(--ink);} .lvl.mid{color:var(--ink-soft);} .lvl.lo{color:#9AA3A7;}
+
+  /* ---- aparato ---- */
+  .aparato{padding:clamp(20px,2.8vw,32px) clamp(22px,3.5vw,44px) clamp(10px,1.5vw,18px);}
+  .aparato .eyebrow{margin-bottom:4px;}
+  .aparato > p.lead{margin:0 0 20px;font-size:14.5px;color:var(--ink-soft);max-width:74ch;font-weight:300;}
+  .aparato .lead b{color:var(--ink);font-weight:500;}
+  .app-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--rule);}
+  .app-col{padding:16px 18px 18px;border-right:1px solid var(--rule);}
+  .app-col:last-child{border-right:none;}
+  .app-col .h{
+    display:flex;align-items:center;gap:8px;margin-bottom:12px;
+    padding-bottom:9px;border-bottom:2px solid;
+  }
+  .app-col.a1 .h{border-color:var(--p1);}
+  .app-col.a2 .h{border-color:var(--p2);}
+  .app-col.a3 .h{border-color:var(--p3);}
+  .app-col .h span.n{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.08em;}
+  .app-col.a1 .h span.n{color:var(--p1);}
+  .app-col.a2 .h span.n{color:var(--p2);}
+  .app-col.a3 .h span.n{color:var(--p3);}
+  .app-col .h span.t{font-family:var(--grot);font-size:13px;font-weight:500;color:var(--ink);}
+  .app-col ul{margin:0;padding:0;list-style:none;}
+  .app-col li{font-size:13.5px;margin-bottom:11px;padding-left:14px;position:relative;line-height:1.4;}
+  .app-col li:last-child{margin-bottom:0;}
+  .app-col li::before{content:"";position:absolute;left:0;top:8px;width:5px;height:5px;border-radius:50%;background:var(--rule);}
+  .app-col li b{font-family:var(--grot);font-weight:500;font-size:13px;}
+  .app-col li .note{color:var(--ink-soft);font-family:var(--mono);font-size:11.5px;}
+  .band-note{
+    margin:16px 0 0;padding:13px 16px;background:var(--p3-wash);
+    border-left:3px solid var(--p3);font-size:13.5px;color:var(--ink);
+  }
+  .band-note b{font-family:var(--grot);font-weight:600;}
+
+  /* ---- limits + footer ---- */
+  .foot{
+    padding:clamp(20px,2.8vw,30px) clamp(22px,3.5vw,44px) clamp(22px,3vw,34px);
+    border-top:1px solid var(--rule);
+  }
+  .limits{display:grid;grid-template-columns:1fr 1fr;gap:clamp(18px,3vw,40px);margin-bottom:22px;}
+  .limit .eyebrow{margin-bottom:7px;}
+  .limit .n{color:var(--ink);}
+  .limit p{margin:0;font-size:13.5px;color:var(--ink);max-width:50ch;}
+  .limit p b{font-weight:600;}
+  .refs{
+    border-top:1px solid var(--rule);padding-top:16px;
+    font-family:var(--mono);font-size:11px;color:var(--ink-soft);
+    letter-spacing:.02em;line-height:1.9;
+  }
+  .refs b{color:var(--ink);font-weight:600;letter-spacing:.1em;text-transform:uppercase;font-size:10px;display:block;margin-bottom:6px;}
+
+  /* ---- responsive ---- */
+  @media (max-width:820px){
+    .phases{grid-template-columns:1fr;}
+    .phase{border-right:none;border-bottom:1px solid var(--rule);}
+    .phase:last-child{border-bottom:none;}
+    .tesis{grid-template-columns:1fr;}
+    .app-grid{grid-template-columns:1fr;}
+    .app-col{border-right:none;border-bottom:1px solid var(--rule);}
+    .app-col:last-child{border-bottom:none;}
+    .limits{grid-template-columns:1fr;}
+    svg.spine{height:150px;}
+  }
+
+  /* ---- spine draw animation ---- */
+  @media (prefers-reduced-motion:no-preference){
+    .spine .draw{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.1s ease forwards .15s;}
+    .spine .fade{opacity:0;animation:fade .5s ease forwards;}
+    .spine .n1{animation-delay:.55s;} .spine .n2{animation-delay:.8s;} .spine .n3{animation-delay:1.05s;}
+    @keyframes draw{to{stroke-dashoffset:0;}}
+    @keyframes fade{to{opacity:1;}}
+  }
+
+  @media print{
+    body{padding:0;background:#fff;}
+    .sheet{box-shadow:none;border:none;max-width:100%;}
+    .axis-wrap,.band-note{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  }
+</style>
+</head>
+<body>
+<main class="sheet">
+
+  <header class="head">
+    <div class="eyebrow">Modelo de procesamiento · ficha de consulta</div>
+    <h1>Fases del juicio estético fotográfico</h1>
+    <p class="thesis">Una imagen se juzga buena, como arte, cuando deposita valor en más de una fase y las transiciones entre ellas son coherentes. <b>La coherencia entre fases, no la suma, es la variable crítica.</b> El eje es el tiempo de procesamiento visual; sobre él se distribuyen fuentes de valor de naturaleza distinta.</p>
+  </header>
+
+  <!-- ================= AXIS SPINE ================= -->
+  <section class="axis-wrap" aria-label="Eje temporal del procesamiento">
+    <div class="axis-label">
+      <span class="eyebrow">Eje temporal (escala logarítmica)</span>
+      <span class="note">t = tiempo desde la aparición del estímulo</span>
+    </div>
+    <svg class="spine" viewBox="0 0 1000 120" preserveAspectRatio="none" role="img" aria-label="Eje logarítmico de tiempo con las tres fases">
+      <!-- log positions: 100ms=90, 150ms=190, 300ms=360, 1s=560, 3s=730, integ=930 -->
+      <!-- baseline -->
+      <line class="draw" x1="40" y1="78" x2="960" y2="78" stroke="#15191C" stroke-width="1.4" pathLength="1"/>
+      <polygon class="fade n3" points="960,78 948,73 948,83" fill="#15191C"/>
+      <!-- ticks -->
+      <g class="fade" style="animation-delay:.9s">
+        <line x1="90"  y1="72" x2="90"  y2="84" stroke="#4A5257" stroke-width="1"/>
+        <line x1="190" y1="72" x2="190" y2="84" stroke="#4A5257" stroke-width="1"/>
+        <line x1="360" y1="74" x2="360" y2="82" stroke="#9AA3A7" stroke-width="1"/>
+        <line x1="560" y1="72" x2="560" y2="84" stroke="#4A5257" stroke-width="1"/>
+        <line x1="730" y1="74" x2="730" y2="82" stroke="#9AA3A7" stroke-width="1"/>
+        <text class="tick-lbl" x="90"  y="100" text-anchor="middle">100 ms</text>
+        <text class="tick-lbl" x="190" y="100" text-anchor="middle">150 ms</text>
+        <text class="tick-lbl" x="360" y="100" text-anchor="middle">300 ms</text>
+        <text class="tick-lbl" x="560" y="100" text-anchor="middle">1 s</text>
+        <text class="tick-lbl" x="730" y="100" text-anchor="middle">3 s</text>
+        <text class="tick-lbl" x="930" y="100" text-anchor="middle">integración</text>
+      </g>
+      <!-- schematic value envelope -->
+      <path class="draw" d="M40,70 C120,20 170,22 230,52 C300,86 340,40 470,38 C650,35 720,58 960,30"
+            fill="none" stroke="#4A5257" stroke-width="1" stroke-dasharray="4 4" opacity=".55" pathLength="1"/>
+      <!-- phase nodes -->
+      <g class="fade n1">
+        <circle cx="140" cy="78" r="6.5" fill="#B0742E"/>
+        <text class="node-lbl" x="140" y="34" text-anchor="middle" fill="#B0742E">FASE 1</text>
+      </g>
+      <g class="fade n2">
+        <circle cx="440" cy="78" r="6.5" fill="#2C7C79"/>
+        <text class="node-lbl" x="440" y="34" text-anchor="middle" fill="#2C7C79">FASE 2</text>
+      </g>
+      <g class="fade n3">
+        <circle cx="800" cy="78" r="6.5" fill="#4A4A8C"/>
+        <text class="node-lbl" x="800" y="34" text-anchor="middle" fill="#4A4A8C">FASE 3</text>
+      </g>
+    </svg>
+    <div style="text-align:right"><span class="note mono" style="font-size:10px;color:var(--ink-soft)">— — curva esquemática de oportunidad de valor</span></div>
+  </section>
+
+  <!-- ================= PHASE CARDS ================= -->
+  <section class="phases">
+    <article class="phase p1">
+      <div class="cap"><span class="dot"></span><span class="idx">FASE 1</span></div>
+      <h2>Gist</h2>
+      <div class="window">≈ 100–150 ms · pasada feedforward, sin exploración ocular</div>
+      <div class="row"><span class="k">Salida</span><span class="v">Categoría de escena y propiedades globales (apertura, profundidad, orientación dominante). Sin identificar objetos.</span></div>
+      <div class="row"><span class="k">Fuente de valor</span><span class="v">Valencia pre-reconocimiento de los estadísticos globales y fluidez de procesamiento. Satura con rapidez.</span></div>
+      <div class="row"><span class="k">Canal físico</span><span class="v">Baja frecuencia espacial; conducción rápida por vía magnocelular.</span></div>
+      <div class="row"><span class="k">Firma fisiológica</span><span class="v"><span class="fis">Potenciales evocados tempranos, conductancia cutánea, EMG facial &lt; 150 ms.</span></span></div>
+    </article>
+
+    <article class="phase p2">
+      <div class="cap"><span class="dot"></span><span class="idx">FASE 2</span></div>
+      <h2>Exploración</h2>
+      <div class="window">≈ 0,3 a varios s · barrido sacádico, refinamiento parvocelular</div>
+      <div class="row"><span class="k">Salida</span><span class="v">Objetos, texturas, relaciones y geometría resueltas por foveación.</span></div>
+      <div class="row"><span class="k">Fuente de valor</span><span class="v">Dificultad productiva: exige estructura que explorar. Signo opuesto a la fluidez de la fase 1.</span></div>
+      <div class="row"><span class="k">Óptimo</span><span class="v">La preferencia máxima (U invertida de Berlyne) se sitúa entre las fases 1 y 2.</span></div>
+      <div class="row"><span class="k">Firma fisiológica</span><span class="v"><span class="fis">Estadística de fijaciones: número, duración y dispersión.</span></span></div>
+    </article>
+
+    <article class="phase p3">
+      <div class="cap"><span class="dot"></span><span class="idx">FASE 3</span></div>
+      <h2>Integración</h2>
+      <div class="window">segundos en adelante · cognitivamente penetrable</div>
+      <div class="row"><span class="k">Salida</span><span class="v">Contexto, título, sujeto y saber previo, más inferencia proyectiva bajo subdeterminación.</span></div>
+      <div class="row"><span class="k">Fuente de valor</span><span class="v">Enganche particular (<i>punctum</i>) y proyección del observador. Máxima intensidad, mínima universalidad.</span></div>
+      <div class="row"><span class="k">Mecanismo</span><span class="v">El material aportado procede de la memoria de quien mira: parte de la carga no es de la imagen.</span></div>
+      <div class="row"><span class="k">Firma fisiológica</span><span class="v"><span class="fis">Respuestas autonómicas sostenidas cuando ocurre el enganche.</span></span></div>
+    </article>
+  </section>
+
+  <!-- ================= THESIS BAND ================= -->
+  <section class="tesis">
+    <div>
+      <h3>Perfil de valor sobre las fases</h3>
+      <p>Dos modos de incoherencia degradan el juicio: el valor que se agota en la fase 1 (impacto sin recompensa a la exploración) y el detalle de fase 2 cuyo gist no promete nada, de modo que la inspección no se financia. <b>Honrar cada foto en su modo</b> equivale a evaluarla según el perfil de fase que eligió, no según otro.</p>
+    </div>
+    <table class="profiles">
+      <thead>
+        <tr><th>Modo</th><th style="text-align:center">F1</th><th style="text-align:center">F2</th><th style="text-align:center">F3</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="mode">Descriptivo</td><td class="lvl mid">sobrio</td><td class="lvl hi">alto</td><td class="lvl mid">variable</td></tr>
+        <tr><td class="mode">Expresivo disuelto</td><td class="lvl hi">alto</td><td class="lvl lo">pobre</td><td class="lvl hi">alto</td></tr>
+        <tr><td class="mode">Cartel / impacto</td><td class="lvl hi">alto</td><td class="lvl lo">nulo</td><td class="lvl lo">nulo</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ================= APARATO ================= -->
+  <section class="aparato">
+    <div class="eyebrow">El aparato · dónde actúa cada parámetro técnico</div>
+    <p class="lead">Las decisiones técnicas no son una capa separada del juicio: son el mecanismo físico que fija <b>en qué fase</b> deposita valor la imagen. Cada parámetro se ordena bajo la fase sobre la que actúa de forma dominante.</p>
+    <div class="app-grid">
+      <div class="app-col a1">
+        <div class="h"><span class="n">F1</span><span class="t">Gist · estadísticos globales</span></div>
+        <ul>
+          <li><b>Exposición y clave tonal.</b> <span class="note">Fijan la valencia global. El recorte de altas luces destruye amplitud de forma irreversible, conserva contorno.</span></li>
+          <li><b>Temperatura y balance de color.</b> <span class="note">Eje cálido-frío como estadístico global de valencia.</span></li>
+          <li><b>Perfil del sensor.</b> <span class="note">Matriz de color y curva base desplazan la distribución cromática de conjunto.</span></li>
+          <li><b>Desenfoque global (paso bajo).</b> <span class="note">Operador lineal; atenúa altas frecuencias, preserva el gist. Invertible (deconvolución).</span></li>
+        </ul>
+      </div>
+      <div class="app-col a2">
+        <div class="h"><span class="n">F2</span><span class="t">Exploración · detalle foveable</span></div>
+        <ul>
+          <li><b>Resolución y acutancia.</b> <span class="note">Determinan cuánta estructura resoluble existe. Índices: varianza del laplaciano, contraste local.</span></li>
+          <li><b>Profundidad de campo y plano de foco.</b> <span class="note">Distribuyen dónde hay detalle. Control directo en el disparo.</span></li>
+          <li><b>Textura de superficie.</b> <span class="note">Grano y ruido como información. Cuantificación: GLCM y LBP.</span></li>
+          <li><b>Carácter de la óptica.</b> <span class="note">La anisotropía del desenfoque separa el barrido del fuera de foco isótropo.</span></li>
+        </ul>
+      </div>
+      <div class="app-col a3">
+        <div class="h"><span class="n">F3</span><span class="t">Integración · proyección</span></div>
+        <ul>
+          <li><b>Control de la subdeterminación.</b> <span class="note">Desenfoque, exposición y profundidad regulan cuánta identidad del objeto se conserva, y por tanto el tamaño del hueco para la proyección.</span></li>
+          <li><b>Materialidad de la copia.</b> <span class="note">Papel, proceso y acabado admiten un tiempo de contemplación que favorece esta fase.</span></li>
+        </ul>
+        <div class="band-note"><b>Banda óptima.</b> Estructura de baja frecuencia suficiente para acotar la inferencia; ambigüedad suficiente para exigirla. Fuera de ella: exceso de nitidez (nada que proyectar) o pérdida del gist (hermetismo).</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LIMITS + REFS ================= -->
+  <footer class="foot">
+    <div class="limits">
+      <div class="limit">
+        <div class="eyebrow"><span class="n">Límite 1</span> · contenido de la fase 3</div>
+        <p>El marco predice que la fase 3 contribuye y cómo medirla, <b>no qué contendrá</b>. Las asociaciones que aporta un observador son históricas y culturales.</p>
+      </div>
+      <div class="limit">
+        <div class="eyebrow"><span class="n">Límite 2</span> · necesaria, no suficiente</div>
+        <p>Hay imágenes coherentes que no se juzgan grandes. El residuo es la originalidad, <b>propiedad de la posición en el grafo de influencias, no del nodo</b>.</p>
+      </div>
+    </div>
+    <div class="refs">
+      <b>Referencias</b>
+      Thorpe, Fize &amp; Marlot 1996 · Oliva &amp; Torralba 2001 · Schyns &amp; Oliva 1994 / Oliva &amp; Schyns 1997 · Greene &amp; Oliva 2009 · Reber, Schwarz &amp; Winkielman 2004 · Berlyne 1971 · Bar 2003 · Field 1987 · Barthes 1980
+    </div>
+  </footer>
+
+</main>
+</body>
+</html>
