@@ -359,8 +359,8 @@
       <div class="cap"><span class="dot"></span><span class="idx">FASE 1</span></div>
       <h2>Gist</h2>
       <div class="window">≈ 100–150 ms · pasada feedforward, sin exploración ocular</div>
-      <div class="row"><span class="k">Salida</span><span class="v">Categoría de escena y propiedades globales (apertura, profundidad, orientación dominante). Sin identificar objetos.</span></div>
-      <div class="row"><span class="k">Fuente de valor</span><span class="v">Valencia pre-reconocimiento de los estadísticos globales y fluidez de procesamiento. Satura con rapidez.</span></div>
+      <div class="row"><span class="k">Salida</span><span class="v">Una evaluación con signo (relevancia: peligro, interés, inocuo) y la categoría de escena, desde las propiedades globales. Sin identificar objetos.</span></div>
+      <div class="row"><span class="k">Fuente de valor</span><span class="v">Valencia previa al reconocimiento de los estadísticos globales y fluidez de procesamiento. Satura con rapidez.</span></div>
       <div class="row"><span class="k">Canal físico</span><span class="v">Baja frecuencia espacial; conducción rápida por vía magnocelular.</span></div>
     </article>
 
@@ -388,26 +388,26 @@
     <div class="infer-head">
       <span class="eyebrow">Estructura inferencial · prior y verosimilitud a través de las fases</span>
       <div class="eqs">
-        <div class="eq"><span class="lbl">Paso 1 · gist</span><span class="ex">P(escena | I<sub>baja</sub>) &#8733; P(I<sub>baja</sub> | escena) &middot; P(escena)</span></div>
-        <div class="eq"><span class="lbl">Paso 2 · detalle</span><span class="ex">P(escena | I<sub>baja</sub>, I<sub>alta</sub>) &#8733; P(I<sub>alta</sub> | escena) &middot; P(escena | I<sub>baja</sub>)</span></div>
-        <div class="eqnote">Prior y verosimilitud son roles relativos a cada inferencia, no etiquetas fijas de una señal. El gist no es el prior: es el posterior del paso 1, que en el paso 2 ocupa el lugar del prior. El prior en sentido estricto es P(escena), el término independiente de la imagen.</div>
+        <div class="eq"><span class="lbl">Paso 1 · gist</span><span class="ex">P(H | I<sub>baja</sub>) &#8733; P(I<sub>baja</sub> | H) &middot; P(H)</span></div>
+        <div class="eq"><span class="lbl">Paso 2 · detalle</span><span class="ex">P(H | I<sub>baja</sub>, I<sub>alta</sub>) &#8733; P(I<sub>alta</sub> | H) &middot; P(H | I<sub>baja</sub>)</span></div>
+        <div class="eqnote">H es la hipótesis rápida con signo (relevancia: peligro, interés, inocuo), no la identidad del objeto. Lo primero que estima el sistema es relevancia, no identidad, porque la banda baja basta y el coste de un falso negativo es asimétrico. El gist es el posterior del paso 1: <code>P(H | I<sub>baja</sub>)</code>. En el paso 2 ocupa el lugar del prior, y por eso la primera impresión ancla la lectura posterior. El prior en sentido estricto es <code>P(H)</code>, independiente de la imagen.</div>
       </div>
     </div>
     <div class="infer-cols">
       <div class="cell">
         <span class="k"><span class="dot" style="background:var(--p1)"></span>Fase 1</span>
-        <span class="v">Primer factor de verosimilitud sobre la banda baja, <code>P(I<sub>baja</sub>|escena)</code>, combinado con el prior estructural <code>P(escena)</code>. Salida: el gist, un posterior temprano.</span>
+        <span class="v">La banda baja produce una evaluación con signo, <code>P(H|I<sub>baja</sub>)</code>, combinando la verosimilitud <code>P(I<sub>baja</sub>|H)</code> con el prior estructural <code>P(H)</code>. Salida: una impresión con valencia, no una identidad.</span>
       </div>
       <div class="cell">
         <span class="k"><span class="dot" style="background:var(--p2)"></span>Fase 2</span>
-        <span class="v">Segundo factor de verosimilitud sobre la banda alta, <code>P(I<sub>alta</sub>|escena)</code>. El gist entra ahora como prior efectivo de la actualización.</span>
+        <span class="v">Las altas frecuencias, portadas por la identidad del objeto, actualizan la impresión: factor <code>P(I<sub>alta</sub>|H)</code>. El posterior del paso 1 entra como prior; la evidencia confirma o corrige.</span>
       </div>
       <div class="cell">
         <span class="k"><span class="dot" style="background:var(--p3)"></span>Fase 3</span>
         <span class="v">Integración del prior estructural y contextual del observador. Domina el posterior cuando los factores de verosimilitud previos fueron poco informativos.</span>
       </div>
     </div>
-    <div class="infer-foot"><b>Disolución y hermetismo.</b> La disolución controlada reduce la precisión de <code>P(I<sub>alta</sub>|objeto)</code> conservando <code>P(escena|I<sub>baja</sub>)</code>: el posterior mantiene varianza intermedia y ahí proyecta el observador. Si además se pierde <code>I<sub>baja</sub></code>, el gist desaparece y el posterior queda gobernado solo por <code>P(escena)</code>, prior sin verosimilitud que lo discipline. Eso es el hermetismo. La varianza entre observadores del carril de fase 3 es la varianza de ese posterior.</div>
+    <div class="infer-foot"><b>Disolución y hermetismo.</b> La disolución reduce la precisión de <code>P(I<sub>alta</sub>|H)</code> al destruir la identidad del objeto que la porta, conservando <code>P(H|I<sub>baja</sub>)</code>: la valencia queda sin confirmación, el observador permanece en la impresión inicial y la completa proyectando. Si además se pierde <code>I<sub>baja</sub></code>, ni H llega a estimarse y el posterior queda gobernado solo por <code>P(H)</code>, prior sin verosimilitud que lo discipline. Eso es el hermetismo. La varianza entre observadores del carril de fase 3 es la varianza de ese posterior.</div>
   </section>
 
   <!-- ================= THESIS BAND ================= -->
