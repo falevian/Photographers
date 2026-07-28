@@ -198,6 +198,7 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);font-fa
     <div class="cgrp" id="f-brand"><span class="lbl">Marca</span></div>
     <div class="cgrp" id="f-focal"><span class="lbl">Focal</span></div>
     <div class="cgrp" id="f-era"><span class="lbl">Época</span></div>
+    <div class="cgrp" id="f-tag"><span class="lbl">Rasgo</span></div>
     <div class="cgrp">
       <span class="lbl">Ordenar</span>
       <select id="sort" aria-label="Criterio de orden"></select>
@@ -230,6 +231,8 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);font-fa
 
     <div class="panel-bd">
       <p class="note" id="f-note">Elija un objetivo en el catálogo.</p>
+      <div class="badges" id="f-uso" style="margin-top:11px;align-items:center"></div>
+      <div id="f-estetica" style="margin-top:16px;padding-top:13px;border-top:1px solid var(--line)"></div>
     </div>
 
     <div class="panel-bd" style="border-top:1px solid var(--line)">
@@ -328,6 +331,15 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);font-fa
   <div class="panel"><div class="panel-bd mapwrap" id="mapwrap"><div id="map"></div><div class="tip" id="tip"></div></div></div>
 </section>
 
+<!-- ================= ESTÉTICAS ================= -->
+<section class="sect">
+  <div class="eyebrow">Referencias</div>
+  <h2 style="margin-bottom:4px">Estéticas y quién las ha practicado</h2>
+  <p class="meth" style="margin-bottom:6px">Las asociaciones entre fotógrafo y objetivo circulan con mucha más seguridad de la que merecen. Aquí cada referencia lleva su nivel de evidencia: si el fotógrafo o el fabricante lo han declarado, si solo consta la focal, o si únicamente hay un parecido de aspecto y ninguna afirmación sobre el equipo. Conviene además recordar que en película el laboratorio hace tanto como el vidrio: el contraste extremo de Koudelka o el grano de Frank pertenecen al revelado y al papel, no al objetivo.</p>
+  <div class="kv" id="evid-leyenda" style="margin-bottom:12px;line-height:2"></div>
+  <div class="panel"><div class="panel-bd"><table id="estetica-tabla"></table></div></div>
+</section>
+
 <!-- ================= COMPARADOR ================= -->
 <section class="sect">
   <div class="eyebrow">Confrontación directa</div>
@@ -368,6 +380,7 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);font-fa
     <div>
       <p class="meth"><b>Modelo del disco de desenfoque.</b> Con la aberración de frente de onda W(ρ) = W<sub>020</sub>ρ² + W<sub>040</sub>ρ⁴, la aberración transversal de rayo es proporcional a dW/dρ, de donde r(ρ) = aρ + bρ³. El término <i>a</i> es el desenfoque y cambia de signo entre fondo y primer plano; el término <i>b</i> es propiedad del objetivo y no cambia. Cuando ambos comparten signo el mapeo es monótono y el disco sale con núcleo brillante y borde desvanecido, que es la firma de la esfericidad subcorregida. Cuando los signos se oponen aparece una cáustica en dr/dρ = 0 y con ella el anillo brillante del bokeh nervioso. Esa es la razón por la que un objetivo clásico entrega un fondo suave y un primer plano de contornos duros: el mismo coeficiente, dos signos de desenfoque.</p>
       <p class="meth"><b>Lo que el modelo no incluye.</b> Difracción en el borde del diafragma, dispersión por rugosidad y grasa interna, reflexiones fantasma dependientes de la geometría del barril, coma de orden superior y astigmatismo oblicuo. El disco calculado reproduce la estructura radial y la forma de la pupila, no la textura completa de una escena real.</p>
+      <p class="meth"><b>Derivado por regla.</b> El contraste de baja frecuencia integra la MTF modelada a 10 y 20 lp/mm y la pondera por el contraste base: es el correlato medible de lo que se suele llamar relieve o tridimensionalidad, y no una valoración añadida. El índice clásico combina esfericidad residual, velo, cromatismo longitudinal y microcontraste en un solo escalar de 0, clínico, a 100, clásico. Los rasgos y el uso indicado se obtienen aplicando umbrales a los índices, no se asignan a mano: retrato exige focal desde 70 mm y cremosidad desde 70, astrofotografía exige coma bajo y caída de luz contenida, reproducción exige distorsión y curvatura casi nulas con borde resuelto. Las reglas son visibles y discutibles, que es la única ventaja que tienen sobre una etiqueta puesta a dedo.</p>
       <p class="meth"><b>Cobertura.</b> El catálogo recoge las familias ópticas relevantes de la montura M, incluidas las de rosca adaptables y las de terceros. No es un censo de variantes: un solo Summicron de 50 mm existe en más de una decena de series de fabricación con diferencias mecánicas que no alteran el trazado óptico.</p>
     </div>
   </div>
@@ -576,7 +589,9 @@ const MET = [
   {k:"weight",  n:"Masa",                    u:" g", raw:true},
   {k:"el",      n:"Elementos",               raw:true},
   {k:"aov",     n:"Ángulo de campo",         u:"°", raw:true},
-  {k:"pupila",  n:"Pupila de entrada",       u:" mm", raw:true}
+  {k:"pupila",  n:"Pupila de entrada",       u:" mm", raw:true},
+  {k:"pop",     n:"Contraste de baja frecuencia", d:"integral de la MTF a 10 y 20 lp/mm, proxy del relieve"},
+  {k:"clasico", n:"Índice clásico",          d:"0 clínico, 100 clásico; combinación de esfericidad, velo, cromatismo y microcontraste"}
 ];
 const RADAX = [
   ["crema","Cremosidad"],["micro","Microcontraste"],["resB","Borde"],["pureza","Pureza cromática"],
@@ -714,6 +729,48 @@ function vigModel(L){
 function shiftUm(L,st){ return 0.62*L.shift*(1-Math.pow(2,-st)); }
 function dofUm(N){ return 20*N; }
 
+/* --- índices derivados de los modelos, no valorados a mano --- */
+function popIdx(L){
+  const b=0.55*mtfTot(10,L.resC,L.fmax,0)+0.45*mtfTot(20,L.resC,L.fmax,0);
+  return Math.round(100*b*(0.75+0.25*L.contraste/100));
+}
+function clasicoIdx(L){
+  return Math.round(Math.min(100,0.42*L.absSA+0.22*L.velo+0.18*L.loca+0.18*(100-L.micro)));
+}
+const TAGDEF=[
+  ["cremoso",       L=>L.crema>=82],
+  ["clínico",       L=>L.micro>=90&&L.loca<=18],
+  ["apocromático",  L=>L.loca<=12&&L.micro>=90],
+  ["velo alto",     L=>L.velo>=55],
+  ["bokeh nervioso",L=>L.sa>=15||L.nerv>=58],
+  ["deriva de foco",L=>L.shift>=35],
+  ["ojo de gato",   L=>L.mech>=50],
+  ["campo plano",   L=>Math.abs(L.curv)<=0.05&&Math.abs(L.dist)<=0.8],
+  ["gran apertura", L=>L.fmax<=1.5],
+  ["compacto",      L=>L.weight<=230],
+  ["rizado asférico",L=>L.onion>=25]
+];
+const USODEF=[
+  ["reproducción y arquitectura", L=>Math.abs(L.dist)<=0.6&&Math.abs(L.curv)<=0.06&&L.resB>=82],
+  ["geometría sin distorsión",    L=>Math.abs(L.dist)<=0.5&&L.focal<=35],
+  ["astrofotografía",             L=>L.coma<=14&&L.vig<=2.2&&L.resB>=82],
+  ["retrato",                     L=>L.focal>=70&&L.crema>=70],
+  ["separación de planos",        L=>L.crema>=88&&L.focal>=50],
+  ["nocturna con luz disponible", L=>L.pupila>=24],
+  ["reportaje",                   L=>L.focal>=28&&L.focal<=50&&L.micro>=76&&L.weight<=300],
+  ["paisaje y viaje en gran angular", L=>L.focal<=28&&L.resB>=70],
+  ["paisaje",                     L=>L.resB>=80&&(L.vig<=2.4||L.focal<=28)],
+  ["gran angular de uso general", L=>L.focal<=28&&L.resB>=55],
+  ["blanco y negro clásico",      L=>L.velo>=45&&L.absSA>=22],
+  ["calle discreta",              L=>L.focal<=50&&L.weight<=240],
+  ["óptica de coleccionista",     L=>L.year<=1960||L.coat==="sin"]
+];
+LENSES.forEach(L=>{
+  L.pop=popIdx(L); L.clasico=clasicoIdx(L);
+  L.tags=TAGDEF.filter(t=>t[1](L)).map(t=>t[0]);
+  L.usos=USODEF.filter(u=>u[1](L)).map(u=>u[0]).slice(0,3);
+});
+
 /* ===================== 5. UTILIDADES SVG ===================== */
 const NS="http://www.w3.org/2000/svg";
 function svg(w,h){ const s=document.createElementNS(NS,"svg"); s.setAttribute("viewBox","0 0 "+w+" "+h); return s; }
@@ -825,6 +882,107 @@ function drawCurv(host,L){
   txt(s,W-mR,b0-3,fmt(umMax)+" µm","axl","end");
 }
 
+
+/* ===================== ESTÉTICAS Y REFERENCIAS =====================
+   Nivel de evidencia: 1 documentado (declaración del propio fotógrafo o del
+   fabricante), 2 parcial (focal documentada, modelo concreto sin confirmar),
+   3 afinidad de aspecto (ninguna afirmación sobre el equipo).           */
+const ESTETICA = {
+ "Velo esférico dominante":{
+  look:"Halo alrededor de las luces, escala de altas comprimida y contraste base bajo. El aspecto no procede solo del objetivo: el vidrio sin multicapa, el revelado forzado y el papel de la época actúan en la misma dirección.",
+  gente:[
+   ["Henri Cartier-Bresson",1,"Leica de rosca y M con 50 mm durante toda su carrera, con los estándares Leitz sucesivos según la época."],
+   ["Robert Frank",1,"Leica con 35 mm en The Americans. Grano grueso y contraste empujado en el laboratorio."],
+   ["Pictorialismo tardío",3,"El velo deliberado como recurso, anterior a la montura M."]]},
+ "Clásico subcorregido":{
+  look:"Transición progresiva al desenfoque, contraste medio y tonalidad cálida. Suficiente corrección para resolver, suficiente aberración para que el fondo no tenga bordes.",
+  gente:[
+   ["Josef Koudelka",1,"Leica M4 con 35 y 50 mm después de Gypsies. El 25 mm de sus primeros trabajos era un Flektogon sobre Exakta, no un objetivo M."],
+   ["Elliott Erwitt",1,"Leica con 50 mm como equipo casi único."],
+   ["Reportaje de agencia, 1950 a 1980",3,"El 35 y el 50 mm esféricos fueron el equipo estándar de Magnum durante tres décadas."]]},
+ "Transición cremosa":{
+  look:"Primer plano y fondo se disuelven sin contorno. El sujeto queda separado por gradiente, no por nitidez.",
+  gente:[
+   ["Saul Leiter",2,"Cuerpos Leica de 35 mm con focales largas, hasta 150 mm. La Fundación Leiter no documenta los modelos. Su composición se apoya en planos desenfocados en primer término, que es justo donde la esfericidad subcorregida se hace visible."],
+   ["Retrato de estudio de posguerra",3,"Summarit y Summilux abiertos, halo controlado sobre la piel."]]},
+ "Desenfoque estructurado":{
+  look:"Contornos definidos en los altos desenfocados y microcontraste elevado. El fondo permanece legible en vez de disolverse, lo que refuerza la composición por capas.",
+  gente:[
+   ["Alex Webb",1,"Leica M6 con 35 mm. Color saturado y escenas construidas por planos, donde el contraste alto es lo que mantiene separadas las capas."],
+   ["Bruce Gilden",1,"Leica con gran angular y flash directo a corta distancia."]]},
+ "Asférico de alto contraste":{
+  look:"Resolución inmediata a plena apertura, geometría limpia y separación tonal alta desde el negativo o el archivo, sin depender del laboratorio.",
+  gente:[
+   ["Ralph Gibson",1,"Sobre el Summicron-M 35 f/2 ASPH declaró que se acercó al sujeto hasta unos treinta centímetros y que le llamó la atención la ausencia de distorsión."],
+   ["Jacob Aue Sobol",2,"Usuario declarado de Leica M en blanco y negro de contraste extremo. Los modelos varían según el proyecto."]]},
+ "Apocromático clínico":{
+  look:"Sin franja de color en ningún contorno y sin necesidad de diafragmar. El desenfoque sale limpio y neutro, no cremoso: quien busque carácter tendrá que ponerlo en otro sitio.",
+  gente:[
+   ["Ralph Gibson",1,"Cita el APO-Telyt-M 135 f/3.4 y el Summarit-M 75 f/2.4 como sus focales de referencia, y añade que a estas alturas considera el 50 mm casi un gran angular."],
+   ["Sin exponente analógico",3,"La corrección apocromática llegó a la montura M en 1998, de modo que esta estética no tiene tradición en película."]]},
+ "Simétrico de campo plano":{
+  look:"Las rectas siguen rectas hasta el borde y el campo es uniforme, a cambio de una caída de luz que en digital exige corrección de perfil.",
+  gente:[
+   ["Garry Winogrand",1,"Caso en negativo: probó el 21 mm, lo consideró lo más próximo a su ángulo de atención y lo descartó por demasiado limitante, quedándose en 28 mm."],
+   ["Arquitectura y reproducción",3,"El uso para el que se calculó el trazado simétrico."]]},
+ "Foco suave por diseño":{
+  look:"La esfericidad se deja sin corregir a propósito. El halo se gradúa con el diafragma y con el disco central de densidad neutra, y no se puede reproducir después en el ordenador porque afecta a la formación de la imagen, no a su contraste.",
+  gente:[
+   ["Gertrude Käsebier",3,"Pictorialismo con objetivos de foco suave de gran formato, tres décadas antes del Thambar."],
+   ["Clarence H. White",3,"Misma escuela: el desenfoque como material, no como defecto."],
+   ["Edward Steichen",3,"Su etapa temprana, anterior al giro hacia la nitidez de los años veinte."]]},
+ "Neutro equilibrado":{
+  look:"Ningún rasgo domina. Es el objetivo que no se nota, cualidad que buena parte del reportaje ha considerado la más deseable.",
+  gente:[
+   ["Marc Riboud",3,"Leica con 35 y 50 mm, equipo estándar de agencia."],
+   ["René Burri",3,"Mismo planteamiento: la herramienta desaparece."]]}
+};
+
+/* Parejas objetivo y fotógrafo con evidencia concreta */
+const PAREJA = {
+ "Summicron 50 f/2 rígido y DR":["Ralph Gibson",1,"Declaró haber trabajado sobre todo con el Summicron 50 f/2 DR montado en una M Monochrom para el libro Mono."],
+ "Summicron-M 35 f/2 ASPH":["Ralph Gibson",1,"Trabajó con este objetivo enfocando a unos treinta centímetros y destacó que no aparecía distorsión."],
+ "Summarit-M 75 f/2.4":["Ralph Gibson",1,"Una de las dos focales que declara usar de forma habitual desde hace años."],
+ "APO-Telyt-M 135 f/3.4":["Ralph Gibson",1,"La otra. Dice haber pasado a considerar el 50 mm casi un gran angular."],
+ "Elmarit 28 f/2.8 (1ª serie)":["Garry Winogrand",2,"Trabajó con una M4 y 28 mm durante casi toda su carrera. Se le atribuye el Elmarit de esta época, pero el modelo concreto no está confirmado."],
+ "Super-Angulon-M 21 f/3.4":["Garry Winogrand",1,"Lo probó y lo rechazó. Consideraba que el 21 mm se acercaba más a su ángulo de atención que el 28, pero que resultaba demasiado limitante."],
+ "Elmar 50 f/3.5":["Henri Cartier-Bresson",2,"Estándar de sus primeras Leica de rosca. El 50 mm fue su focal durante toda la carrera; el reparto exacto entre objetivos sucesivos no está documentado."],
+ "Summitar 50 f/2":["Henri Cartier-Bresson",2,"Estándar de posguerra, mismo caso que el Elmar."],
+ "Thambar-M 90 f/2.2":["Reedición de 2017",3,"Leitz calculó el original en 1935 para el mercado del retrato de foco suave, cuando el pictorialismo ya estaba en retirada."]
+};
+const EVID=[["","",""],["documentado","var(--ok)","declaración del fotógrafo o del fabricante"],
+  ["parcial","var(--d)","focal documentada, modelo sin confirmar"],
+  ["afinidad","var(--mut)","parecido de aspecto, sin afirmación sobre el equipo"]];
+
+function pintarEstetica(L){
+  const e=ESTETICA[L.arq], p=PAREJA[L.name];
+  let h="<div class='eyebrow' style='margin-bottom:5px'>Estética · "+L.arq+"</div>";
+  h+="<p style='margin:0 0 9px;font-size:14px'>"+(e?e.look:"Sin descripción para este grupo.")+"</p>";
+  if(e) h+="<div style='display:flex;flex-direction:column;gap:6px'>"+e.gente.map(g=>
+    "<div class='kv' style='line-height:1.45'><span style='color:"+EVID[g[1]][1]+"'>■</span> <b style='font-family:var(--cond);font-size:12px;color:var(--hi);letter-spacing:.02em'>"+g[0]
+    +"</b> <span style='color:"+EVID[g[1]][1]+"'>"+EVID[g[1]][0]+"</span><br>"+g[2]+"</div>").join("")+"</div>";
+  if(p) h+="<div class='note' style='margin-top:11px;font-size:13.5px;border-color:"+EVID[p[1]][1]+"'>"
+    +"<b style='font-family:var(--cond);color:var(--hi)'>"+p[0]+"</b> <span class='kv' style='color:"+EVID[p[1]][1]+"'>"+EVID[p[1]][0]+"</span><br>"+p[2]+"</div>";
+  $("f-estetica").innerHTML=h;
+}
+
+function pintarTablaEstetica(){
+  const host=$("estetica-tabla");
+  let h="<tr><th style='width:20%'>Estética</th><th style='width:8%'>Objetivos</th><th style='width:34%'>Aspecto</th><th>Referencias</th></tr>";
+  Object.keys(ESTETICA).forEach(k=>{
+    const e=ESTETICA[k], n=LENSES.filter(l=>l.arq===k);
+    const ej=n.slice().sort((a,b)=>b.crema-a.crema).slice(0,3).map(l=>l.name).join(" · ");
+    h+="<tr><td style='vertical-align:top'><b style='font-family:var(--cond);font-size:12.5px;color:var(--hi)'>"+k+"</b>"
+      +"<div class='kv' style='margin-top:4px'>"+ej+"</div></td>"
+      +"<td class='v' style='vertical-align:top'>"+n.length+"</td>"
+      +"<td style='vertical-align:top;font-family:var(--serif);font-size:13.5px'>"+e.look+"</td>"
+      +"<td style='vertical-align:top'>"+e.gente.map(g=>"<div style='margin-bottom:5px'><span style='color:"+EVID[g[1]][1]+"'>■</span> <b style='font-family:var(--cond);font-size:12px;color:var(--hi)'>"+g[0]
+        +"</b><div class='kv' style='line-height:1.4'>"+g[2]+"</div></div>").join("")+"</td></tr>";
+  });
+  host.innerHTML=h;
+  $("evid-leyenda").innerHTML=EVID.slice(1).map(v=>"<span style='margin-right:16px'><span style='color:"+v[1]+"'>■</span> "+v[0]+": "+v[2]+"</span>").join("");
+}
+
 /* ===================== 6. FICHA ===================== */
 const $=id=>document.getElementById(id);
 let cur=LENSES[0], sim={N:0,side:"bg",field:0,blur:1,exp:0};
@@ -850,6 +1008,10 @@ function pintarFicha(L){
     "<span class='badge'>"+L.blades+" palas</span>",
     "<span class='badge'>"+L.coat+"</span>"].join("");
   $("f-note").textContent=L.nota;
+  $("f-uso").innerHTML="<span class='eyebrow'>Uso indicado por regla</span> "
+    +(L.usos.length?L.usos.map(u=>"<span class='badge k'>"+u+"</span>").join(" "):"<span class='badge'>sin coincidencia de regla</span>")
+    +"  <span class='eyebrow' style='margin-left:14px'>Rasgos</span> "
+    +(L.tags.length?L.tags.map(t=>"<span class='badge'>"+t+"</span>").join(" "):"<span class='badge'>ninguno destacado</span>");
 
   const nc=1/(LAM*L.fmax);
   $("tab-a").innerHTML="<tr class='sec'><td colspan='2'>Catalogado</td></tr>"
@@ -866,6 +1028,8 @@ function pintarFicha(L){
     +fila("Caída natural cos⁴",fmt(-4*Math.log2(Math.cos(v.th)),2)," EV")
     +fila("Exponente ajustado",fmt(v.e,2))
     +fila("Profundidad de foco",'±'+fmt(dofUm(L.fmax))," µm")
+    +fila("Contraste de baja frecuencia",fmt(L.pop))
+    +fila("Índice clásico",fmt(L.clasico))
     +fila("Hiperfocal a 30 µm",fmt(L.focal*L.focal/(L.fmax*0.03)/1000,1)," m");
 
   const grp=[[0,4],[4,10],[10,14],[14,17]], tit=["Desenfoque y velo","Definición y cromatismo","Artefactos de pupila","Geometría y campo"];
@@ -876,6 +1040,7 @@ function pintarFicha(L){
     }});
   $("tab-b").innerHTML=hb;
 
+  pintarEstetica(L);
   drawRadar($("radar"),[L],["#E8B33C"]);
   drawMTF($("mtf"),L); drawVig($("vig"),L); drawCurv($("curv"),L);
   actualizarSim();
@@ -901,10 +1066,11 @@ function actualizarSim(){
 const FB=["Todas","Leica","Zeiss","Voigtländer","Otros"];
 const FF=[["Todas",null],["≤ 21",[0,21]],["24 a 28",[22,29]],["35",[30,39]],["40 a 50",[40,59]],["75 a 90",[60,99]],["≥ 135",[100,999]]];
 const FE=[["Todas",null],["hasta 1959",[0,1959]],["1960 a 1979",[1960,1979]],["1980 a 1999",[1980,1999]],["2000 en adelante",[2000,9999]]];
-let fil={brand:"Todas",focal:null,era:null,q:"",sort:"year"};
+let fil={brand:"Todas",focal:null,era:null,tag:null,q:"",sort:"year"};
 const SORTS=[["year","Año"],["name","Nombre"],["focal","Focal"],["fmax","Apertura"],["crema","Cremosidad"],
   ["micro","Microcontraste"],["absSA","Esfericidad residual"],["velo","Velo"],["resB","Resolución de borde"],
-  ["loca","CA longitudinal"],["nerv","Nerviosismo"],["shift","Deriva de foco"],["weight","Masa"]];
+  ["loca","CA longitudinal"],["nerv","Nerviosismo"],["shift","Deriva de foco"],["weight","Masa"],
+  ["clasico","Índice clásico"],["pop","Contraste de baja frecuencia"]];
 
 function chips(host,items,onSel,active){
   items.forEach(it=>{
@@ -925,7 +1091,8 @@ function filtrar(){
     }
     if(fil.focal && (L.focal<fil.focal[0]||L.focal>fil.focal[1])) return false;
     if(fil.era && (L.year<fil.era[0]||L.year>fil.era[1])) return false;
-    if(q && (L.name+" "+L.brand+" "+L.family+" "+L.arq+" "+L.nota).toLowerCase().indexOf(q)<0) return false;
+    if(fil.tag && L.tags.indexOf(fil.tag)<0) return false;
+    if(q && (L.name+" "+L.brand+" "+L.family+" "+L.arq+" "+L.nota+" "+L.tags.join(" ")+" "+L.usos.join(" ")).toLowerCase().indexOf(q)<0) return false;
     return true;
   }).sort((a,b)=> fil.sort==="name" ? a.name.localeCompare(b.name,"es")
       : (["crema","micro","absSA","resB","nerv","shift","weight","velo","loca"].includes(fil.sort) ? b[fil.sort]-a[fil.sort] : a[fil.sort]-b[fil.sort]));
@@ -1046,12 +1213,13 @@ function init(){
   chips($("f-brand"),FB,v=>{fil.brand=v;pintarLista();drawMap();},"Todas");
   chips($("f-focal"),FF,v=>{fil.focal=v[1];pintarLista();drawMap();},"Todas");
   chips($("f-era"),FE,v=>{fil.era=v[1];pintarLista();drawMap();},"Todas");
+  chips($("f-tag"),[["Todos",null]].concat(TAGDEF.map(t=>[t[0],t[0]])),v=>{fil.tag=v[1];pintarLista();drawMap();},"Todos");
   $("sort").innerHTML=SORTS.map(s=>"<option value='"+s[0]+"'>"+s[1]+"</option>").join("");
   $("sort").onchange=e=>{fil.sort=e.target.value;pintarLista();};
   $("q").oninput=e=>{fil.q=e.target.value;pintarLista();drawMap();};
-  $("reset").onclick=()=>{ fil={brand:"Todas",focal:null,era:null,q:"",sort:"year"}; $("q").value="";
+  $("reset").onclick=()=>{ fil={brand:"Todas",focal:null,era:null,tag:null,q:"",sort:"year"}; $("q").value="";
     $("sort").value="year";
-    [["f-brand","Todas"],["f-focal","Todas"],["f-era","Todas"]].forEach(([h,a])=>{
+    [["f-brand","Todas"],["f-focal","Todas"],["f-era","Todas"],["f-tag","Todos"]].forEach(([h,a])=>{
       $(h).querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",String(c.textContent===a)));});
     pintarLista(); drawMap(); };
   let raf=0; const throttle=fn=>()=>{ if(raf) return; raf=requestAnimationFrame(()=>{raf=0;fn();}); };
@@ -1070,7 +1238,7 @@ function init(){
   ["s-cN","s-cfield"].forEach(id=>$(id).oninput=cmpT);
   pintarLista();
   pintarFicha(LENSES.find(l=>l.name==="Summilux-M 50 f/1.4 pre-ASPH E46")||LENSES[0]);
-  drawMap(); pintarBanco();
+  drawMap(); pintarBanco(); pintarTablaEstetica();
   ["Summar 50 f/2","APO-Summicron-M 50 f/2 ASPH","C-Sonnar T* 50 f/1.5 ZM"].forEach(n=>{
     const L=LENSES.find(l=>l.name===n); if(L) slots.push(L.i); });
   pintarCmp();
