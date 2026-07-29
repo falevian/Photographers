@@ -232,6 +232,8 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);font-fa
     <div class="panel-bd">
       <p class="note" id="f-note">Elija un objetivo en el catálogo.</p>
       <div class="badges" id="f-uso" style="margin-top:11px;align-items:center"></div>
+      <div id="f-contraste" style="margin-top:15px;padding-top:13px;border-top:1px solid var(--line);display:none"></div>
+      <div id="f-metrica" style="margin-top:15px;padding-top:13px;border-top:1px solid var(--line)"></div>
       <div id="f-estetica" style="margin-top:16px;padding-top:13px;border-top:1px solid var(--line)"></div>
     </div>
 
@@ -293,7 +295,7 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);font-fa
         <div>
           <h3 style="margin-bottom:9px">MTF modelada</h3>
           <div id="mtf"></div>
-          <div class="legend"><span><s style="background:var(--d)"></s>plena apertura</span><span><s style="background:var(--F)"></s>f/5,6</span><span><s style="background:var(--line2)"></s>techo por difracción</span><span>continua: centro · discontinua: borde</span></div>
+          <div class="legend"><span><s style="background:var(--d)"></s>plena apertura</span><span><s style="background:var(--F)"></s><span id="mtf-ap">f/5,6</span></span><span><s style="background:var(--line2)"></s>techo por difracción</span><span>continua: centro · discontinua: borde</span></div>
         </div>
         <div>
           <h3 style="margin-bottom:9px">Caída de iluminación</h3>
@@ -329,6 +331,38 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);font-fa
   </div>
   <div class="kv" id="maplegend" style="margin-bottom:10px;line-height:2"></div>
   <div class="panel"><div class="panel-bd mapwrap" id="mapwrap"><div id="map"></div><div class="tip" id="tip"></div></div></div>
+</section>
+
+<!-- ================= MÉTRICA ================= -->
+<section class="sect">
+  <div class="eyebrow">Formalización</div>
+  <h2 style="margin-bottom:4px">¿Es el carácter una magnitud?</h2>
+  <div class="grid2" style="margin-bottom:16px">
+    <div>
+      <p class="meth">Como escalar, no. Como vector, sí, y con una definición limpia: <b>el carácter es la desviación respecto del objetivo ideal</b>, es decir el conjunto de aberraciones que el diseño no corrigió. El origen del espacio es el sistema limitado por difracción, con todos los residuos a cero, y cada objetivo real ocupa un punto a cierta distancia de ese origen.</p>
+      <p class="meth">Se toman once generadores casi independientes, cada uno con valor ideal nulo: esfericidad residual con signo, cromatismo longitudinal y lateral, coma, curvatura de campo, distorsión, velo, recorte de pupila, rizado asférico, caída de luz por encima de la que impone cos⁴ y residuo de microcontraste. Quedan fuera cremosidad, brillo, nerviosismo y deriva de foco, que no son generadores sino <i>consecuencias</i> de los anteriores: incluirlos sería contar dos veces lo mismo.</p>
+      <p class="meth">Cada generador se divide por su dispersión en el catálogo. La distancia d(A,B) = √( (1/p)·Σ ((x<sub>i</sub><sup>A</sup> − x<sub>i</sub><sup>B</sup>)/σ<sub>i</sub>)² ) es euclídea tras un reescalado afín, de modo que cumple los cuatro axiomas de métrica por construcción, sin necesidad de demostrarlo. El módulo K = d(L, ideal) es la única parte del carácter que sí es unidimensional: cuánto, no de qué tipo.</p>
+    </div>
+    <div>
+      <p class="meth"><b>El tipo no es un ángulo.</b> Sería elegante escribir el carácter como número complejo, módulo y argumento, pero los datos no lo permiten: la primera componente principal absorbe tanta varianza que el argumento apenas se mueve. Lo que sí funciona es descomponer K² en la contribución de cada generador, igual que se descompone un frente de onda en coeficientes de Zernike. Ese espectro es el que aparece en cada ficha, y da lecturas que la intuición no anticipa: el carácter del Summicron-M 35 ASPH está dominado por el rizado del moldeo asférico y por el recorte de pupila, no por aberración de frente de onda; el del Noctilux f/0,95 es en un 59 % pura geometría de pupila.</p>
+      <p class="meth"><b>Lo que queda sin validar.</b> Que la métrica cumpla los axiomas es trivial. Lo que no es trivial es que la distancia numérica se corresponda con la diferencia percibida, y eso no se puede afirmar sin datos de observadores. El experimento que lo decidiría es sencillo: presentar pares de discos calculados en elección forzada entre dos alternativas, ajustar los pesos σ<sub>i</sub> a los juicios y comprobar si mejoran respecto de la ponderación por dispersión. Hasta entonces, los pesos son una convención razonable, no una medida.</p>
+      <p class="meth"><b>Una prueba que sí se puede hacer ahora.</b> Si la métrica captura algo real, objetivos de la misma familia óptica deberían caer cerca sin habérselo dicho. La familia no interviene en el cálculo, así que la comprobación es limpia.</p>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="panel"><div class="panel-bd">
+      <h3 style="margin-bottom:8px">Varianza explicada por componente</h3>
+      <div id="m-var"></div>
+      <div class="legend"><span><s style="background:var(--d)"></s>varianza de cada componente</span><span><s style="background:var(--F)"></s>acumulada</span></div>
+      <table id="m-cargas" style="margin-top:12px"></table>
+    </div></div>
+    <div class="panel"><div class="panel-bd">
+      <h3 style="margin-bottom:8px">Validación por recuperación de familias</h3>
+      <p class="meth" id="m-acierto" style="margin-bottom:12px"></p>
+      <table id="m-pares"></table>
+      <p class="meth" style="margin-top:10px;font-size:12.5px">Advertencia sobre el primer par: la réplica de Light Lens Lab aparece a distancia nula del Summicron rígido porque yo le asigné los mismos índices, dado que reproduce el trazado. Ese caso es una decisión de catalogación, no un hallazgo. La evidencia real son los grupos que la métrica forma sin ayuda: los cuatro Biogon, los apocromáticos de tres fabricantes distintos y los dos Summarit.</p>
+    </div></div>
+  </div>
 </section>
 
 <!-- ================= ESTÉTICAS ================= -->
@@ -379,6 +413,7 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);font-fa
     </div>
     <div>
       <p class="meth"><b>Modelo del disco de desenfoque.</b> Con la aberración de frente de onda W(ρ) = W<sub>020</sub>ρ² + W<sub>040</sub>ρ⁴, la aberración transversal de rayo es proporcional a dW/dρ, de donde r(ρ) = aρ + bρ³. El término <i>a</i> es el desenfoque y cambia de signo entre fondo y primer plano; el término <i>b</i> es propiedad del objetivo y no cambia. Cuando ambos comparten signo el mapeo es monótono y el disco sale con núcleo brillante y borde desvanecido, que es la firma de la esfericidad subcorregida. Cuando los signos se oponen aparece una cáustica en dr/dρ = 0 y con ella el anillo brillante del bokeh nervioso. Esa es la razón por la que un objetivo clásico entrega un fondo suave y un primer plano de contornos duros: el mismo coeficiente, dos signos de desenfoque.</p>
+      <p class="meth"><b>Contraste con datos publicados.</b> Un solo objetivo del catálogo trae MTF de fábrica: el Light Lens Lab 50 f/1,5 Z21. Sirve para poner el modelo a prueba, y el resultado es desigual. En el centro y a plena apertura el RMS es 0,090, con el peor residuo en +0,13 a 20 lp/mm: el modelo sobrestima el contraste en las frecuencias medias. En el borde a plena apertura falla por completo, RMS 0,353 y hasta +0,51 a 10 lp/mm, y el motivo es identificable: el modelo no tiene término de astigmatismo, y en el borde de un objetivo luminoso el astigmatismo y la curvatura de campo son justamente lo que hunde la MTF en las frecuencias bajas. A f/4 el borde ajusta bien, RMS 0,028, y el centro se queda corto en 0,21 a 40 lp/mm: el factor de mejora al diafragmar que aplico, 1,42 sobre la frecuencia característica, es menos de la mitad del que exigirían estos datos. No he reajustado el modelo con esta única serie: son curvas calculadas por el fabricante, leídas a ojo sobre un gráfico pequeño con un error de ±0,05, y ajustar once parámetros a eso sería ajustar ruido y rompería la coherencia con los otros 127 objetivos. La consecuencia práctica queda anotada: el índice de contraste de baja frecuencia es optimista, y lo es más cuanto peor corregido está el objetivo.</p>
       <p class="meth"><b>Lo que el modelo no incluye.</b> Difracción en el borde del diafragma, dispersión por rugosidad y grasa interna, reflexiones fantasma dependientes de la geometría del barril, coma de orden superior y astigmatismo oblicuo. El disco calculado reproduce la estructura radial y la forma de la pupila, no la textura completa de una escena real.</p>
       <p class="meth"><b>Derivado por regla.</b> El contraste de baja frecuencia integra la MTF modelada a 10 y 20 lp/mm y la pondera por el contraste base: es el correlato medible de lo que se suele llamar relieve o tridimensionalidad, y no una valoración añadida. El índice clásico combina esfericidad residual, velo, cromatismo longitudinal y microcontraste en un solo escalar de 0, clínico, a 100, clásico. Los rasgos y el uso indicado se obtienen aplicando umbrales a los índices, no se asignan a mano: retrato exige focal desde 70 mm y cremosidad desde 70, astrofotografía exige coma bajo y caída de luz contenida, reproducción exige distorsión y curvatura casi nulas con borde resuelto. Las reglas son visibles y discutibles, que es la única ventaja que tienen sobre una etiqueta puesta a dedo.</p>
       <p class="meth"><b>Cobertura.</b> El catálogo recoge las familias ópticas relevantes de la montura M, incluidas las de rosca adaptables y las de terceros. No es un censo de variantes: un solo Summicron de 50 mm existe en más de una decena de series de fabricación con diferencias mecánicas que no alteran el trazado óptico.</p>
@@ -521,6 +556,7 @@ Minolta M-Rokkor 40 f/2|Minolta|40|2|1973|Doble Gauss|6|4|0|10|0.8|40|185|multi|
 Minolta M-Rokkor 90 f/4|Minolta|90|4|1973|Tessar|4|4|0|10|1.0|40|340|multi|74|-14|16|26|85|91|85|22|12|12|0.05|0.2|1.0|22|0|8|30|Tele corto de cuatro elementos, ligero y nítido desde plena apertura.
 Light Lens Lab 35 f/2 (ocho elementos)|Light Lens Lab|35|2|2019|Doble Gauss|8|6|0|10|0.7|39|235|mono|78|-36|40|52|64|72|54|34|28|30|0.13|-0.7|2.0|34|0|24|28|Reproducción del trazado Summicron de 1958, incluida la tolerancia del tratamiento. Reproduce la gradación tonal del original.
 Light Lens Lab 50 f/2 (rígido)|Light Lens Lab|50|2|2021|Doble Gauss|7|6|0|10|0.9|39|280|mono|80|-32|34|46|66|76|58|36|28|30|0.12|0.3|1.8|36|0|22|24|Copia del Summicron rígido con vidrio equivalente al original. Firma clásica sin las incertidumbres de una unidad de sesenta años.
+Light Lens Lab 50 f/1.5 Z21|Light Lens Lab|50|1.5|2025|Doble Gauss|6|4|0|10|0.7|52|313|multi|88|-50|54|44|62|70|48|40|30|32|0.33|-1.2|2.4|50|0|40|24|Homenaje al Angénieux S21 de 50 mm con vidrio de lantano de alto índice y diafragma preselector. Cubre hasta 44x33 mm. La curvatura de campo y la distorsión están leídas de las curvas publicadas por el fabricante.
 Light Lens Lab 50 f/1.2 (Noctilux)|Light Lens Lab|50|1.2|2022|Gauss asférico|6|4|2|10|1.0|48|500|mono|92|-50|56|58|54|64|40|46|32|44|0.24|0.5|2.9|68|38|36|30|Reproducción del Noctilux asférico de 1966. Recupera el velo y el remolino del original, incluido su rendimiento irregular en el borde.
 MS Optics Sonnetar 50 f/1.1|MS Optics|50|1.1|2012|Sonnar|6|4|0|12|0.8|46|230|multi|90|-68|72|58|50|62|34|48|28|42|0.28|0.5|2.7|62|0|72|20|Diseño artesanal de Miyazaki con corrector de esfericidad ajustable por el usuario. Deriva de foco intensa y desenfoque muy envolvente.
 7Artisans 50 f/1.1|7Artisans|50|1.1|2017|Doble Gauss|7|4|0|13|0.7|49|380|multi|86|-60|66|70|42|54|30|48|34|46|0.26|0.5|2.8|64|0|54|24|Objetivo de coste muy bajo con carácter clásico exagerado. Velo alto y esquinas irresueltas a plena apertura.
@@ -591,6 +627,7 @@ const MET = [
   {k:"aov",     n:"Ángulo de campo",         u:"°", raw:true},
   {k:"pupila",  n:"Pupila de entrada",       u:" mm", raw:true},
   {k:"pop",     n:"Contraste de baja frecuencia", d:"integral de la MTF a 10 y 20 lp/mm, proxy del relieve"},
+  {k:"K",       n:"Módulo de carácter K",  d:"distancia al objetivo ideal en el espacio de aberraciones"},
   {k:"clasico", n:"Índice clásico",          d:"0 clínico, 100 clásico; combinación de esfericidad, velo, cromatismo y microcontraste"}
 ];
 const RADAX = [
@@ -825,8 +862,18 @@ function drawMTF(host,L){
   let d=""; for(let nu=0;nu<=80;nu+=1.6){ d+=(nu?"L":"M")+X(nu)+" "+Y(mtfDiff(nu,L.fmax)); }
   path(s,d,{stroke:"#384556","stroke-width":1,"stroke-dasharray":"1 3"});
   curve(L.resC,L.fmax,0,"#E8B33C",false); curve(L.resB,L.fmax,0,"#E8B33C",true);
-  const N2=Math.max(L.fmax,5.6), st2=2*Math.log2(N2/L.fmax);
+  const ref=MTFREF[L.name];
+  const N2=ref?ref.N2:Math.max(L.fmax,5.6), st2=2*Math.log2(N2/L.fmax);
   curve(L.resC,N2,st2,"#35B7E6",false); curve(L.resB,N2,st2,"#35B7E6",true);
+  const ap=$("mtf-ap"); if(ap) ap.textContent="f/"+fmt(N2,N2<10&&N2%1?1:0);
+  if(ref){
+    const marca=(pts,col,hueco)=>pts.forEach(pt=>{
+      if(pt[0]>80) return;
+      el(s,"circle",{cx:X(pt[0]),cy:Y(pt[1]),r:3.1,fill:hueco?"var(--ink-800)":col,stroke:col,"stroke-width":1.4});
+    });
+    marca(ref.c1,"#E8B33C",false); marca(ref.b1,"#E8B33C",true);
+    marca(ref.c2,"#35B7E6",false); marca(ref.b2,"#35B7E6",true);
+  }
 }
 
 /* ---- viñeteo ---- */
@@ -882,6 +929,193 @@ function drawCurv(host,L){
   txt(s,W-mR,b0-3,fmt(umMax)+" µm","axl","end");
 }
 
+
+
+
+/* ===== MTF publicada por el fabricante, para contrastar el modelo =====
+   Puntos leídos sobre la hoja de datos del producto. Son curvas CALCULADAS,
+   no medidas, y la lectura sobre un gráfico pequeño tiene un error de ±0,05.
+   El borde promedia las ramas tangencial y sagital, que en este objetivo se
+   separan bastante: ese promedio no es una magnitud bien definida.        */
+const MTFREF={
+ "Light Lens Lab 50 f/1.5 Z21":{
+   fuente:"Light Lens Lab · hoja de datos del producto · curvas calculadas",
+   N1:1.5, N2:4,
+   c1:[[5,.93],[10,.80],[20,.61],[40,.47]], b1:[[5,.575],[10,.315],[20,.24],[40,.20]],
+   c2:[[5,.97],[10,.95],[20,.88],[40,.76]], b2:[[5,.925],[10,.87],[20,.65],[40,.32]]}
+};
+function resImplicito(m40,N){
+  const A=m40/mtfDiff(40,N); if(A<=0||A>=1) return NaN;
+  return (40/Math.pow(-Math.log(A),1/1.6)+3.7)/0.685;
+}
+function residuoMTF(L,ref){
+  const st2=2*Math.log2(ref.N2/L.fmax), out=[];
+  [["centro a plena apertura",ref.c1,L.resC,ref.N1,0],
+   ["borde a plena apertura",ref.b1,L.resB,ref.N1,0],
+   ["centro a f/"+fmt(ref.N2),ref.c2,L.resC,ref.N2,st2],
+   ["borde a f/"+fmt(ref.N2),ref.b2,L.resB,ref.N2,st2]].forEach(g=>{
+    let s2=0,mx=0,mxn=0;
+    g[1].forEach(pt=>{ const d=mtfTot(pt[0],g[2],g[3],g[4])-pt[1];
+      s2+=d*d; if(Math.abs(d)>Math.abs(mx)){mx=d;mxn=pt[0];} });
+    out.push({n:g[0],rms:Math.sqrt(s2/g[1].length),peor:mx,nu:mxn});
+  });
+  return out;
+}
+
+/* ===================== MÉTRICA DE CARÁCTER =====================
+   El origen del espacio es el objetivo ideal: todas las aberraciones a cero.
+   Cada generador se divide por su dispersión en el catálogo, de modo que la
+   norma resultante es adimensional y ningún descriptor domina por su unidad.
+   d(A,B) = sqrt( (1/p) · Σ ((x_i^A - x_i^B)/σ_i)² )  cumple los cuatro axiomas
+   por construcción, al ser euclídea tras un reescalado afín.
+   K(L) = d(L, ideal) es el módulo: la única parte del carácter que sí es
+   unidimensional.                                                          */
+const GEN=[["sa","esfericidad residual"],["loca","CA longitudinal"],["laca","CA lateral"],
+  ["coma","coma sagital"],["curv","curvatura de campo"],["dist","distorsión"],["velo","velo"],
+  ["mech","recorte de pupila"],["onion","rizado asférico"],["vigExc","caída sobre cos⁴"],
+  ["resid","residuo de microcontraste"]];
+const NG=GEN.length;
+let SDG=[], ZM=[], PCA=null, DMAT=null;
+
+function jacobi(Ain,n){
+  const A=Ain.map(r=>r.slice()), V=[];
+  for(let i=0;i<n;i++){ V.push(new Array(n).fill(0)); V[i][i]=1; }
+  for(let sw=0;sw<80;sw++){
+    let off=0; for(let i=0;i<n;i++)for(let j=i+1;j<n;j++) off+=A[i][j]*A[i][j];
+    if(off<1e-16) break;
+    for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){
+      if(Math.abs(A[i][j])<1e-20) continue;
+      const th=0.5*Math.atan2(2*A[i][j],A[i][i]-A[j][j]), c=Math.cos(th), s=Math.sin(th);
+      for(let k=0;k<n;k++){ const a=A[i][k],b=A[j][k]; A[i][k]=c*a+s*b; A[j][k]=-s*a+c*b; }
+      for(let k=0;k<n;k++){ const a=A[k][i],b=A[k][j]; A[k][i]=c*a+s*b; A[k][j]=-s*a+c*b; }
+      for(let k=0;k<n;k++){ const a=V[k][i],b=V[k][j]; V[k][i]=c*a+s*b; V[k][j]=-s*a+c*b; }
+    }
+  }
+  const out=[]; for(let i=0;i<n;i++) out.push({v:A[i][i],vec:V.map(r=>r[i])});
+  return out.sort((a,b)=>b.v-a.v);
+}
+
+function construirMetrica(){
+  LENSES.forEach(L=>{
+    const v=vigModel(L);
+    L.vigExc=Math.max(0,L.vig+4*Math.log2(Math.cos(v.th)));
+    L.resid=100-L.micro;
+  });
+  const n=LENSES.length;
+  for(let g=0;g<NG;g++){
+    const k=GEN[g][0], m=LENSES.reduce((a,L)=>a+L[k],0)/n;
+    SDG.push(Math.sqrt(LENSES.reduce((a,L)=>a+(L[k]-m)*(L[k]-m),0)/(n-1))||1);
+  }
+  ZM=LENSES.map(L=>GEN.map((g,i)=>L[g[0]]/SDG[i]));
+  LENSES.forEach((L,i)=>{
+    const z=ZM[i], s2=z.reduce((a,x)=>a+x*x,0);
+    L.K=Math.sqrt(s2/NG);
+    L.spec=GEN.map((g,j)=>({n:g[1],f:s2?z[j]*z[j]/s2:0})).sort((a,b)=>b.f-a.f);
+  });
+  /* matriz de distancias y vecinos */
+  DMAT=LENSES.map(()=>new Float32Array(n));
+  for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){
+    let s=0; for(let g=0;g<NG;g++){ const dd=ZM[i][g]-ZM[j][g]; s+=dd*dd; }
+    const d=Math.sqrt(s/NG); DMAT[i][j]=d; DMAT[j][i]=d;
+  }
+  LENSES.forEach((L,i)=>{
+    L.vec=LENSES.map((o,j)=>({j,d:DMAT[i][j]})).filter(o=>o.j!==i).sort((a,b)=>a.d-b.d).slice(0,3);
+  });
+  /* componentes principales de la matriz de covarianza */
+  const mu=GEN.map((g,j)=>ZM.reduce((a,z)=>a+z[j],0)/n);
+  const C=[];
+  for(let a=0;a<NG;a++){ C.push([]);
+    for(let b=0;b<NG;b++){ let s=0;
+      for(let i=0;i<n;i++) s+=(ZM[i][a]-mu[a])*(ZM[i][b]-mu[b]);
+      C[a].push(s/(n-1)); } }
+  const eig=jacobi(C,NG), tot=eig.reduce((a,e)=>a+Math.max(0,e.v),0);
+  const ev=eig.map(e=>Math.max(0,e.v)/tot);
+  const H=-ev.filter(x=>x>1e-12).reduce((a,x)=>a+x*Math.log(x),0);
+  PCA={eig,ev,dimEf:Math.exp(H)};
+  /* validación: fracción de vecinos que comparten familia óptica frente al azar */
+  let ok=0; LENSES.forEach((L,i)=>{ if(LENSES[L.vec[0].j].family===L.family) ok++; });
+  let az=0, tr=40000;
+  for(let t=0;t<tr;t++){ const a=LENSES[(Math.random()*n)|0], b=LENSES[(Math.random()*n)|0];
+    if(a!==b && a.family===b.family) az++; }
+  PCA.acierto=100*ok/n; PCA.azar=100*az/tr;
+  /* pares más próximos del catálogo */
+  const pares=[];
+  for(let i=0;i<n;i++)for(let j=i+1;j<n;j++) pares.push({i,j,d:DMAT[i][j]});
+  PCA.pares=pares.sort((a,b)=>a.d-b.d).slice(0,10);
+}
+
+function pintarContraste(L){
+  const host=$("f-contraste"); if(!host) return;
+  const ref=MTFREF[L.name];
+  if(!ref){ host.innerHTML=""; host.style.display="none"; return; }
+  host.style.display="";
+  const res=residuoMTF(L,ref);
+  const iC=resImplicito(ref.c1[3][1],ref.N1), iB=resImplicito(ref.b1[3][1],ref.N1);
+  let h="<div class='eyebrow' style='margin-bottom:6px'>Contraste del modelo con datos publicados</div>";
+  h+="<p class='meth' style='font-size:13px;margin-bottom:8px'>Fuente: "+ref.fuente+". Los puntos aparecen sobre la gráfica de MTF: círculo lleno en el eje, hueco en el borde, ámbar a plena apertura y cian a f/"+fmt(ref.N2)+".</p>";
+  h+="<table style='margin-bottom:8px'><tr><th>Serie</th><th style='text-align:right'>RMS</th><th style='text-align:right'>Peor residuo</th></tr>"
+    +res.map(r=>"<tr><td>"+r.n+"</td><td class='v'>"+fmt(r.rms,3)+"</td><td class='v' style='color:"+(Math.abs(r.peor)>0.2?"var(--C)":Math.abs(r.peor)>0.1?"var(--d)":"var(--ok)")+"'>"
+    +(r.peor>0?"+":"")+fmt(r.peor,3)+" a "+fmt(r.nu)+" lp/mm</td></tr>").join("")+"</table>";
+  h+="<p class='meth' style='font-size:13px'>El punto de 40 lp/mm a plena apertura implicaría un índice de resolución de <b>"+fmt(iC)
+    +"</b> en el centro y <b>"+fmt(iB)+"</b> en el borde. Al objetivo se le han asignado <b>"+fmt(L.resC)+"</b> y <b>"+fmt(L.resB)
+    +"</b>, en la misma base que el resto del catálogo. La diferencia queda a la vista para que el lector la juzgue: una MTF calculada por el fabricante no es comparable con las de este catálogo, y con una sola muestra no hay forma de calibrar la escala.</p>";
+  host.innerHTML=h;
+}
+
+function pintarMetricaFicha(L){
+  let h="<div style='display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start'>";
+  h+="<div style='min-width:96px'><div class='eyebrow'>Módulo K</div><div class='num' style='font-size:30px;color:var(--d);line-height:1.1'>"
+    +fmt(L.K,2)+"</div><div class='kv'>0 = límite de difracción</div></div>";
+  h+="<div style='flex:1;min-width:220px'><div class='eyebrow' style='margin-bottom:5px'>Espectro de carácter · fracción de K²</div>";
+  h+=L.spec.slice(0,5).map(s=>"<div style='display:grid;grid-template-columns:1fr 42px 78px;gap:6px;align-items:center'>"
+    +"<span class='kv' style='color:var(--txt)'>"+s.n+"</span><span class='num' style='text-align:right;font-size:11px'>"
+    +fmt(100*s.f)+" %</span><div class='ibar'><i style='left:0;width:"+(100*s.f/Math.max(0.01,L.spec[0].f))+"%'></i></div></div>").join("")+"</div>";
+  h+="<div style='min-width:200px'><div class='eyebrow' style='margin-bottom:5px'>Vecinos en el espacio de carácter</div>"
+    +L.vec.map(v=>"<button class='addbtn' type='button' data-go='"+v.j+"' style='display:block;text-align:left;margin-bottom:4px;width:100%'>"
+    +LENSES[v.j].name+" · d "+fmt(v.d,2)+"</button>").join("")+"</div>";
+  h+="</div>";
+  const host=$("f-metrica"); host.innerHTML=h;
+  host.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>pintarFicha(LENSES[+b.dataset.go]));
+}
+
+function pintarSeccionMetrica(){
+  /* varianza explicada */
+  const host=$("m-var"); host.innerHTML="";
+  const W=520,H=210,mL=34,mR=10,mT=14,mB=30, s=svg(W,H); host.appendChild(s);
+  const bw=(W-mL-mR)/NG, Y=v=>mT+(1-v)*(H-mT-mB);
+  for(let g=0;g<=1.001;g+=.25){ path(s,"M"+mL+" "+Y(g)+"H"+(W-mR),{stroke:"rgba(40,50,63,.9)","stroke-width":.6});
+    txt(s,mL-5,Y(g)+3.5,fmt(g*100)+"%","axl","end"); }
+  let cum=0, dc="";
+  PCA.ev.forEach((e,i)=>{
+    el(s,"rect",{x:mL+i*bw+2,y:Y(e),width:bw-4,height:Y(0)-Y(e),fill:"var(--d)","fill-opacity":i<3?.85:.35});
+    cum+=e; dc+=(i?"L":"M")+(mL+i*bw+bw/2)+" "+Y(cum);
+    txt(s,mL+i*bw+bw/2,H-8,(i+1),"axl","middle");
+    if(i<3) txt(s,mL+i*bw+bw/2,Y(e)-5,fmt(100*e,1)+"%","axl","middle");
+  });
+  path(s,dc,{stroke:"var(--F)","stroke-width":1.6});
+  txt(s,W-mR,H-8,"componente","axl","end");
+  txt(s,mL+2,mT+10,"acumulada "+fmt(100*PCA.ev.slice(0,3).reduce((a,b)=>a+b,0),1)+" % en tres componentes","axl");
+
+  /* cargas */
+  let t="<tr><th>Generador</th><th style='text-align:right'>PC1</th><th style='text-align:right'>PC2</th><th style='text-align:right'>PC3</th><th style='text-align:right'>σ catálogo</th></tr>";
+  GEN.forEach((g,i)=>{ t+="<tr><td>"+g[1]+"</td>"
+    +[0,1,2].map(k=>{const v=PCA.eig[k].vec[i];
+      return "<td class='v' style='color:"+(Math.abs(v)>0.33?"var(--d)":"var(--txt)")+"'>"+(v>0?"+":"")+fmt(v,3)+"</td>";}).join("")
+    +"<td class='v' style='color:var(--mut)'>"+fmt(SDG[i],1)+"</td></tr>"; });
+  $("m-cargas").innerHTML=t;
+
+  /* validación */
+  let v="<tr><th>d</th><th>Par más próximo del catálogo</th><th>Familia óptica</th></tr>";
+  PCA.pares.forEach(pr=>{ const A=LENSES[pr.i], B=LENSES[pr.j];
+    v+="<tr><td class='v' style='width:44px'>"+fmt(pr.d,3)+"</td><td>"+A.name+"  +  "+B.name+"</td>"
+      +"<td style='color:"+(A.family===B.family?"var(--ok)":"var(--mut)")+"'>"+(A.family===B.family?"coincide":"distinta")+"</td></tr>"; });
+  $("m-pares").innerHTML=v;
+  $("m-acierto").innerHTML="El vecino más próximo comparte familia óptica en el <b style='color:var(--ok)'>"
+    +fmt(PCA.acierto)+" %</b> de los "+LENSES.length+" casos. Emparejando al azar la coincidencia sería del "+fmt(PCA.azar)
+    +" %. La familia óptica no entra en el cálculo de la distancia: la métrica la recupera sola, con un enriquecimiento de "
+    +fmt(PCA.acierto/PCA.azar,1)+" veces sobre el azar. Dimensión efectiva del espacio, calculada como exponencial de la entropía del espectro de varianza: <b>"
+    +fmt(PCA.dimEf,2)+"</b> de "+NG+" posibles.";
+}
 
 /* ===================== ESTÉTICAS Y REFERENCIAS =====================
    Nivel de evidencia: 1 documentado (declaración del propio fotógrafo o del
@@ -1040,9 +1274,10 @@ function pintarFicha(L){
     }});
   $("tab-b").innerHTML=hb;
 
+  pintarMetricaFicha(L);
   pintarEstetica(L);
   drawRadar($("radar"),[L],["#E8B33C"]);
-  drawMTF($("mtf"),L); drawVig($("vig"),L); drawCurv($("curv"),L);
+  drawMTF($("mtf"),L); pintarContraste(L); drawVig($("vig"),L); drawCurv($("curv"),L);
   actualizarSim();
   document.querySelectorAll(".lrow").forEach(r=>r.setAttribute("aria-selected",String(+r.dataset.i===L.i)));
 }
@@ -1070,7 +1305,7 @@ let fil={brand:"Todas",focal:null,era:null,tag:null,q:"",sort:"year"};
 const SORTS=[["year","Año"],["name","Nombre"],["focal","Focal"],["fmax","Apertura"],["crema","Cremosidad"],
   ["micro","Microcontraste"],["absSA","Esfericidad residual"],["velo","Velo"],["resB","Resolución de borde"],
   ["loca","CA longitudinal"],["nerv","Nerviosismo"],["shift","Deriva de foco"],["weight","Masa"],
-  ["clasico","Índice clásico"],["pop","Contraste de baja frecuencia"]];
+  ["clasico","Índice clásico"],["pop","Contraste de baja frecuencia"],["K","Módulo de carácter K"]];
 
 function chips(host,items,onSel,active){
   items.forEach(it=>{
@@ -1236,9 +1471,10 @@ function init(){
     $("lab").textContent=mapLab?"Ocultar":"Mostrar"; drawMap(); };
   const cmpT=throttle(pintarCmp);
   ["s-cN","s-cfield"].forEach(id=>$(id).oninput=cmpT);
+  construirMetrica();
   pintarLista();
   pintarFicha(LENSES.find(l=>l.name==="Summilux-M 50 f/1.4 pre-ASPH E46")||LENSES[0]);
-  drawMap(); pintarBanco(); pintarTablaEstetica();
+  drawMap(); pintarBanco(); pintarTablaEstetica(); pintarSeccionMetrica();
   ["Summar 50 f/2","APO-Summicron-M 50 f/2 ASPH","C-Sonnar T* 50 f/1.5 ZM"].forEach(n=>{
     const L=LENSES.find(l=>l.name===n); if(L) slots.push(L.i); });
   pintarCmp();
