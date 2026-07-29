@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portada · Photographers · Rafael Vida</title>
+<meta name="author" content="Rafael Vida">
+<meta name="description" content="Herramientas de fotografía y física de la luz que funcionan enteras en el navegador: simuladores de flash y de eclipse, carácter óptico de objetivos, redes y distancias entre fotógrafos, maquetación de zines.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0c10; --panel:#13171e; --panel2:#0f131a; --line:#222a35; --line2:#2c3644;
+    --text:#d8dde5; --head:#f3f5f8; --muted:#8a929f; --faint:#5b636f;
+    --amber:#f4b13c; --teal:#3fcab0; --red:#ef6f53; --violet:#9b8cff;
+    --cyan:#59b6e8; --sand:#bfa46f;
+    --sans:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+    --disp:'Space Grotesk',var(--sans);
+    --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:var(--teal);text-decoration:none}
+  .wrap{max-width:980px;margin:0 auto;padding:52px 22px 80px}
+
+  /* ---------- cabecera ---------- */
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal)}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(32px,6.6vw,54px);letter-spacing:-.025em;color:var(--head);margin:12px 0 10px;line-height:1.02}
+  h1 em{font-style:normal;color:var(--amber)}
+  .lede{font-size:18.5px;color:#aeb6c1;max-width:66ch;margin:0 0 14px}
+  .lede b{color:var(--head);font-weight:600}
+  .meta{font-family:var(--mono);font-size:12.5px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap;align-items:center;
+        border-top:1px solid var(--line);padding-top:14px;margin-top:20px}
+  .meta a{border-bottom:1px solid rgba(63,202,176,.35)}
+  .meta .dot{width:4px;height:4px;border-radius:50%;background:var(--faint)}
+
+  /* ---------- por dónde empezar ---------- */
+  .start{margin-top:30px;display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+  @media(max-width:720px){.start{grid-template-columns:1fr}}
+  .st{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:14px 15px}
+  .st .q{font-family:var(--disp);font-size:14px;color:var(--head);margin-bottom:4px}
+  .st .a{font-size:13.5px;color:var(--muted)}
+  .st .a a{color:var(--amber);border-bottom:1px solid rgba(244,177,60,.35)}
+
+  /* ---------- buscador ---------- */
+  .search{margin:34px 0 2px}
+  .search input{width:100%;max-width:380px;background:var(--panel2);border:1px solid var(--line2);border-radius:9px;
+                padding:10px 14px;color:var(--text);font-family:var(--sans);font-size:14px}
+  .search input::placeholder{color:var(--faint)}
+  .search input:focus{outline:2px solid rgba(63,202,176,.5);outline-offset:1px}
+
+  /* ---------- secciones ---------- */
+  section{margin-top:36px}
+  .sechead{display:flex;align-items:baseline;gap:11px;margin-bottom:6px;flex-wrap:wrap}
+  .sechead h2{font-family:var(--disp);font-weight:600;font-size:15px;letter-spacing:.03em;color:var(--head);margin:0;text-transform:uppercase}
+  .sechead .count{font-family:var(--mono);font-size:12px;color:var(--faint)}
+  .secsub{font-size:14.5px;color:var(--muted);margin:0 0 14px;max-width:70ch}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:720px){.cards{grid-template-columns:1fr}}
+  .cards.one{grid-template-columns:1fr}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--ac,var(--teal));
+        border-radius:11px;padding:16px 17px 14px;display:flex;flex-direction:column}
+  .card .fn{font-family:var(--mono);font-size:11.5px;color:var(--faint)}
+  .card h3{font-family:var(--disp);font-weight:500;font-size:18px;color:var(--head);margin:5px 0 8px;line-height:1.2}
+  .card p{font-size:14.5px;color:#a4acb8;margin:0 0 10px}
+  .can{list-style:none;margin:0 0 13px;padding:0;flex:1}
+  .can li{font-size:13.5px;color:var(--muted);padding-left:15px;position:relative;margin-bottom:5px;line-height:1.5}
+  .can li::before{content:"";position:absolute;left:2px;top:8px;width:5px;height:5px;border-radius:1px;background:var(--ac,var(--teal));opacity:.75}
+  .can li b{color:var(--text);font-weight:500}
+  .can code{font-family:var(--mono);font-size:12px;color:#c3cad3}
+  .links{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .links a{font-size:12.5px;padding:6px 11px;border-radius:7px;border:1px solid var(--line2)}
+  .links a.open{background:rgba(244,177,60,.10);border-color:rgba(244,177,60,.5);color:var(--amber)}
+  .links a.open:hover{background:rgba(244,177,60,.18)}
+  .links a.gh{color:var(--muted)}
+  .links a.gh:hover{color:var(--text);border-color:var(--muted)}
+  .links .tag{font-family:var(--mono);font-size:11px;color:var(--faint);margin-left:auto}
+
+  .acc-flash{--ac:var(--amber)} .acc-ecl{--ac:var(--teal)} .acc-net{--ac:var(--violet)}
+  .acc-zine{--ac:var(--red)} .acc-opt{--ac:var(--cyan)} .acc-jui{--ac:var(--sand)}
+
+  /* ---------- hilo común ---------- */
+  .thread{margin-top:44px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:20px 21px}
+  .thread h2{font-family:var(--disp);font-weight:600;font-size:15px;letter-spacing:.03em;text-transform:uppercase;color:var(--head);margin:0 0 9px}
+  .thread p{font-size:14.5px;color:#a4acb8;margin:0 0 12px;max-width:74ch}
+  .three{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-top:14px}
+  @media(max-width:720px){.three{grid-template-columns:1fr}}
+  .three div{border:1px solid var(--line);border-radius:9px;padding:12px 13px;background:var(--panel)}
+  .three .t{font-family:var(--mono);font-size:11.5px;color:var(--faint);margin-bottom:4px}
+  .three .m{font-family:var(--disp);font-size:14.5px;color:var(--head);margin-bottom:4px}
+  .three .d{font-size:13px;color:var(--muted)}
+
+  footer{margin-top:46px;border-top:1px solid var(--line);padding-top:20px;font-size:13.5px;color:var(--muted)}
+  footer h4{font-family:var(--disp);font-weight:600;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text);margin:0 0 8px}
+  footer p{margin:0 0 10px;max-width:78ch}
+  code{font-family:var(--mono);font-size:12.5px;background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:#cfd5dd}
+  .empty{display:none;color:var(--faint);font-family:var(--mono);font-size:13px;margin-top:16px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Repositorio · falevian / Photographers</div>
+    <h1>Fotografía calculada,<br><em>no supuesta</em></h1>
+    <p class="lede">Once documentos que resuelven cuestiones fotográficas con el modelo físico o estadístico delante, en vez de con reglas heredadas. <b>Todo el cálculo ocurre en el navegador</b>: no hay servidor, ni cuenta, ni telemetría, y cada página es un solo archivo que funciona también sin conexión una vez cargado.</p>
+    <div class="meta">
+      <a href="https://github.com/falevian/Photographers">github.com/falevian/Photographers</a>
+      <span class="dot"></span><span>11 documentos · HTML de un solo archivo</span>
+      <span class="dot"></span><span>d3 como única dependencia externa</span>
+      <span class="dot"></span><span>Rafael Vida</span>
+    </div>
+  </header>
+
+  <div class="start">
+    <div class="st">
+      <div class="q">Quiero preparar una toma concreta</div>
+      <div class="a">El <a href="./simulador-eclipse-coruna.html">simulador del eclipse</a> si es el 12 de agosto de 2026, el <a href="./simulador-flash.html">banco óptico de flash</a> para cualquier otro día.</div>
+    </div>
+    <div class="st">
+      <div class="q">Quiero entender un objetivo</div>
+      <div class="a">La <a href="./caracter-optico-leica-m.html">carta de carácter óptico</a>: 128 objetivos de montura M con su disco de desenfoque reconstruido.</div>
+    </div>
+    <div class="st">
+      <div class="q">Quiero situar a un fotógrafo</div>
+      <div class="a">La <a href="./index.html">red de influencia</a> para el linaje, el <a href="./explorador_distancias.html">explorador de distancias</a> para el parecido visual.</div>
+    </div>
+  </div>
+
+  <div class="search"><input id="q" type="search" placeholder="Filtrar por tarea, herramienta o palabra clave..." autocomplete="off" aria-label="Filtrar herramientas"></div>
+
+  <!-- ============ PLANIFICAR UNA TOMA ============ -->
+  <section data-sec>
+    <div class="sechead"><h2>Planificar una toma antes de hacerla</h2><span class="count"></span></div>
+    <p class="secsub">Dos bancos de pruebas que responden a la misma pregunta en contextos distintos: qué exposición, qué encuadre y qué calidad de luz vas a obtener, calculado en lugar de estimado.</p>
+    <div class="cards">
+
+      <div class="card acc-ecl" data-key="eclipse simulador encuadre totalidad corona sol 2026 coruna espenak exposicion horquilla trepidacion seguimiento ficha campo planificar">
+        <div class="fn">simulador-eclipse-coruna.html</div>
+        <h3>Simulador de encuadre del eclipse total</h3>
+        <p>Eclipse total de Sol del 12 de agosto de 2026. Resuelve el equipo y la exposición antes de que ocurra, porque la totalidad dura poco más de un minuto y no admite ensayo.</p>
+        <ul class="can">
+          <li>Comprobar <b>si la corona te cabe en el encuadre</b>: focal real, teleconvertidor de 1,4× o 2×, formato de sensor desde full frame hasta tipo 1 pulgada, y orientación horizontal o vertical.</li>
+          <li>Elegir hasta qué extensión de corona quieres registrar, medida en <b>radios solares</b>, y ver el tamaño angular resultante frente a referencias conocidas.</li>
+          <li>Obtener la <b>horquilla de exposición</b> por fases, con la fotometría de Espenak, incluida la fase parcial con filtro solar de densidad 4,0.</li>
+          <li>Corregir por <b>extinción atmosférica</b> con el Sol bajo, eligiendo cielo limpio o con calima.</li>
+          <li>Contrastar <b>trípode fijo frente a seguimiento ecuatorial</b> para saber cuánta velocidad necesitas y qué resolución conservas.</li>
+          <li>Cambiar de <b>lugar de observación</b> a lo largo de la banda: A Coruña, Oviedo, León, Zaragoza, Valencia, Palma.</li>
+          <li>Sacar una <b>ficha de campo imprimible</b> y copiar un enlace que conserva toda tu configuración. Y un modo en vivo para el propio día.</li>
+        </ul>
+        <div class="links">
+          <a class="open" href="./simulador-eclipse-coruna.html">Abrir ↗</a>
+          <a class="gh" href="https://github.com/falevian/Photographers/blob/main/simulador-eclipse-coruna.html">GitHub</a>
+          <span class="tag">54 KB</span>
+        </div>
+      </div>
+
+      <div class="card acc-flash" data-key="flash banco optico sombras penumbra angular numero guia gn obturador central plano focal vencer al sol balance ambiente ttl manual godox estroboscopica">
+        <div class="fn">simulador-flash.html</div>
+        <h3>Banco óptico de flash</h3>
+        <p>Cuatro pestañas sobre la misma física de la luz. La dureza de una sombra no depende de la potencia ni del ángulo, solo del tamaño angular de la fuente, y eso se puede calcular.</p>
+        <ul class="can">
+          <li><b>Sombras</b>: el tamaño angular de la fuente vista desde el sujeto, <code>θ = 2·arctan(d/2L)</code>, y la anchura de la penumbra proyectada en el fondo, <code>w = d·s/L</code>. Mover el ángulo desplaza la sombra pero no la ablanda.</li>
+          <li><b>Caída de luz</b> por número guía, <code>f = GN/D</code>, para saber a qué diafragma llegas a cada distancia.</li>
+          <li><b>Vencer al sol</b>: cuánta potencia hace falta para imponerse a la luz ambiente, con la diferencia entre obturador central y plano focal, que es lo que decide si puedes sincronizar a 1/2000 o te quedas en 1/250.</li>
+          <li><b>Balance ambiente</b>: el reparto entre flash y luz existente, y el diafragma necesario en cada caso.</li>
+        </ul>
+        <div class="links">
+          <a class="open" href="./simulador-flash.html">Abrir ↗</a>
+          <a class="gh" href="https://github.com/falevian/Photographers/blob/main/simulador-flash.html">GitHub</a>
+          <span class="tag">39 KB</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ DOCUMENTACIÓN ============ -->
+  <section data-sec>
+    <div class="sechead"><h2>Leer la letra pequeña</h2><span class="count"></span></div>
+    <p class="secsub">Cada simulador viene con su documentación separada en dos niveles: una guía de uso sin fórmulas y un manual con el modelo, las derivaciones y los supuestos, para quien quiera discutir los resultados en vez de aceptarlos.</p>
+    <div class="cards">
+
+      <div class="card acc-ecl" data-key="manual uso eclipse sencillo sin formulas guia principiante">
+        <div class="fn">manual-simulador-eclipse.html</div>
+        <h3>Eclipse · manual de uso</h3>
+        <p>Qué hace cada parte del simulador y cómo sacarle partido para preparar las fotos. Sin fórmulas.</p>
+        <div class="links">
+          <a class="open" href="./manual-simulador-eclipse.html">Abrir ↗</a>
+          <a class="gh" href="https://github.com/falevian/Photographers/blob/main/manual-simulador-eclipse.html">GitHub</a>
+        </div>
+      </div>
+
+      <div class="card acc-ecl" data-key="manual tecnico avanzado eclipse modelo derivaciones supuestos espenak extincion difraccion geometria fisica">
+        <div class="fn">manual-tecnico-eclipse.html</div>
+        <h3>Eclipse · manual técnico</h3>
+        <p>Geometría del encuadre, fotometría de Espenak, extinción a baja altura y difracción. Modelo, derivaciones y supuestos declarados, para cuestionar y afinar.</p>
+        <div class="links">
+          <a class="open" href="./manual-tecnico-eclipse.html">Abrir ↗</a>
+          <a class="gh" href="https://github.com/falevian/Photographers/blob/main/manual-tecnico-eclipse.html">GitHub</a>
+        </div>
+      </div>
+
+      <div class="card acc-flash" data-key="guia simulador flash manual como usar controles formulas salidas">
+        <div class="fn">guia-simulador.html</div>
+        <h3>Flash · guía del banco óptico</h3>
+        <p>Qué hace cada control, cómo leer las salidas y en qué fórmulas se apoyan las cuatro pestañas. Enlazada desde el propio simulador.</p>
+        <div class="links">
+          <a class="open" href="./guia-simulador.html">Abrir ↗</a>
+          <a class="gh" href="https://github.com/falevian/Photographers/blob/main/guia-simulador.html">GitHub</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ ÓPTICA ============ -->
+  <section data-sec>
+    <div class="sechead"><h2>Entender el carácter de un objetivo</h2><span class="count"></span></div>
+    <p class="secsub">El carácter de un objetivo no es folclore: es el conjunto de aberraciones que el diseñador decidió no corregir, y se puede modelar.</p>
+    <div class="cards one">
+
+      <div class="card acc-opt" data-key="carta caracter optico leica m objetivos bokeh cremosidad aberracion esfericidad velo brillo mtf vineteo deriva foco metrica zernike summicron summilux noctilux biogon sonnar apo thambar">
+        <div class="fn">caracter-optico-leica-m.html</div>
+        <h3>Carta de carácter óptico · montura M</h3>
+        <p>128 objetivos de montura Leica M, de 1925 a 2026, con 32 descriptores cada uno y separación explícita entre lo catalogado, lo derivado por cálculo exacto y lo valorado de forma ordinal.</p>
+        <ul class="can">
+          <li><b>Reconstruir el disco de desenfoque</b> de cualquiera de ellos por trazado geométrico sobre la pupila, con el polígono del diafragma, el recorte fuera del eje, el cromatismo longitudinal y el rizado del moldeo asférico.</li>
+          <li>Cambiar de <b>fondo a primer plano</b> y ver invertirse el carácter: el mismo coeficiente de esfericidad con dos signos de desenfoque produce el núcleo cremoso o la cáustica en el borde.</li>
+          <li>Consultar <b>MTF modelada, caída de iluminación</b> sobre cos⁴ y la <b>deriva de foco</b> superpuesta a la profundidad de foco, que es lo que decide si un objetivo necesita recalibrado.</li>
+          <li>Medir la <b>distancia de carácter</b> entre dos objetivos y pedir los tres vecinos más próximos. La métrica recupera las familias ópticas en el 73 % de los casos frente a un 19 % de azar, sin que la familia entre en el cálculo.</li>
+          <li>Ver el <b>espectro de carácter</b> de cada uno, la descomposición de su desviación respecto del objetivo ideal, al modo de un frente de onda en coeficientes de Zernike.</li>
+          <li>Cruzar 24 variables en un <b>mapa de dispersión</b> y comprobar qué correlaciones son reales.</li>
+        </ul>
+        <div class="links">
+          <a class="open" href="./caracter-optico-leica-m.html">Abrir ↗</a>
+          <a class="gh" href="https://github.com/falevian/Photographers/blob/main/caracter-optico-leica-m.html">GitHub</a>
+          <span class="tag">116 KB</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ FOTÓGRAFOS ============ -->
+  <section data-sec>
+    <div class="sechead"><h2>Situar a un fotógrafo entre los demás</h2><span class="count"></span></div>
+    <p class="secsub">Dos formas distintas de medir la cercanía entre autores: por quién influyó a quién y por lo que se parecen sus imágenes. No dan el mismo resultado, y ahí está lo interesante.</p>
+    <div class="cards">
+
+      <div class="card acc-net" data-key="red influencia fotografos network nodos ruta trofico grado ascendentes descendientes buscador linaje 293">
+        <div class="fn">index.html</div>
+        <h3>Red de influencia entre fotógrafos</h3>
+        <p>293 autores y 467 relaciones de influencia declaradas. Es la página raíz actual del repositorio.</p>
+        <ul class="can">
+          <li>Trazar la influencia <b>hacia arriba, hacia abajo o en ambos sentidos</b> desde cualquier autor, para separar de quién viene de a quién llega.</li>
+          <li>Buscar la <b>ruta A→B</b>: por cuántos pasos y a través de quién se conecta un fotógrafo con otro.</li>
+          <li>Dimensionar los nodos por <b>influencia, grado total o nivel trófico</b>, que es la medida que distingue a un origen de un intermediario.</li>
+          <li>Filtrar por año, por movimiento y por influencia mínima para quedarte con la estructura y descartar el ruido.</li>
+        </ul>
+        <div class="links">
+          <a class="open" href="./index.html">Abrir ↗</a>
+          <a class="gh" href="https://github.com/falevian/Photographers/blob/main/index.html">GitHub</a>
+          <span class="tag">193 KB</span>
+        </div>
+      </div>
+
+      <div class="card acc-net" data-key="explorador distancias contenido dendrograma vecinos parecido visual estilo fotos d3 fuerzas 309 percentil">
+        <div class="fn">explorador_distancias.html</div>
+        <h3>Explorador de distancias de contenido</h3>
+        <p>309 autores colocados por parecido entre sus imágenes, no por linaje. La disposición sale de las distancias del dendrograma y se reacomoda al arrastrar.</p>
+        <ul class="can">
+          <li>Pinchar un autor para ver sus <b>k vecinos por contenido</b> y un par de fotos suyas incrustadas.</li>
+          <li>Pinchar un segundo para obtener la <b>distancia de contenido</b> entre ambos, en qué percentil de cercanía caen y en qué puesto queda uno en la lista de vecinos del otro.</li>
+          <li>Y en la misma ficha, la <b>distancia en la red de influencia</b> medida en pasos, o la advertencia de que no hay camino. Comparar las dos cifras para el mismo par es la manera de preguntarse si el parecido visual sigue al linaje.</li>
+          <li>17 estilos declarados, etiquetas conmutables y aristas ocultables.</li>
+        </ul>
+        <div class="links">
+          <a class="open" href="./explorador_distancias.html">Abrir ↗</a>
+          <a class="gh" href="https://github.com/falevian/Photographers/blob/main/explorador_distancias.html">GitHub</a>
+          <span class="tag">6,4 MB</span>
+        </div>
+      </div>
+
+      <div class="card acc-net" data-key="red influencia movil ios telefono tactil network version">
+        <div class="fn">index_mobile_ios.html</div>
+        <h3>Red de influencia · versión móvil</h3>
+        <p>La misma red, adaptada a pantalla pequeña y a interacción táctil en iOS.</p>
+        <div class="links">
+          <a class="open" href="./index_mobile_ios.html">Abrir ↗</a>
+          <a class="gh" href="https://github.com/falevian/Photographers/blob/main/index_mobile_ios.html">GitHub</a>
+          <span class="tag">201 KB</span>
+        </div>
+      </div>
+
+      <div class="card acc-jui" data-key="fases juicio estetico gist exploracion integracion bayesiano prior posterior frecuencias fovea sacadas percepcion 150 ms coherencia">
+        <div class="fn">ficha-fases-juicio-estetico.html</div>
+        <h3>Fases del juicio estético</h3>
+        <p>Ficha de consulta sobre cómo se juzga una imagen a lo largo del tiempo de procesamiento visual, de los primeros 100 a 150 milisegundos en adelante.</p>
+        <ul class="can">
+          <li>Las tres fases: <b>gist</b>, la impresión global que se forma antes de cualquier exploración; <b>exploración</b>, con las sacadas y la identidad de los objetos; e <b>integración</b>.</li>
+          <li>El tratamiento como <b>actualización bayesiana</b>: el posterior de una fase entra como prior de la siguiente, y las frecuencias altas confirman o corrigen la impresión de las bajas.</li>
+          <li>El <b>perfil de valor sobre las fases</b>, con la tesis explícita: lo que decide que una imagen funcione es la coherencia entre fases, no la suma de sus valores.</li>
+        </ul>
+        <div class="links">
+          <a class="open" href="./ficha-fases-juicio-estetico.html">Abrir ↗</a>
+          <a class="gh" href="https://github.com/falevian/Photographers/blob/main/ficha-fases-juicio-estetico.html">GitHub</a>
+          <span class="tag">27 KB</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ PUBLICAR ============ -->
+  <section data-sec>
+    <div class="sechead"><h2>Publicar en papel</h2><span class="count"></span></div>
+    <p class="secsub">De la carpeta de archivos a un pliego imponado y listo para imprimir, sin salir del navegador.</p>
+    <div class="cards one">
+
+      <div class="card acc-zine" data-key="zine generator generador fanzine fotolibro maquetacion pdf cuadernillo imposicion exif orden tipografia special elite garamond">
+        <div class="fn">zine-generator.html</div>
+        <h3>Generador de zines</h3>
+        <p>Maquetación de fanzines y fotolibros a partir de tus propias imágenes, con imposición de cuadernillo resuelta.</p>
+        <ul class="can">
+          <li>Componer <b>portada, contraportada y páginas interiores</b> con vista previa, poniendo título, autoría, número y año.</li>
+          <li>Ordenar las fotos por <b>fecha EXIF de captura, fecha de archivo, nombre de archivo o a mano</b> arrastrando.</li>
+          <li>Elegir la voz tipográfica: máquina de escribir, sans neutra o serif editorial.</li>
+          <li>Exportar un <b>PDF en imposición de cuadernillo</b>, es decir con las páginas ya colocadas para plegar y grapar, no en orden de lectura.</li>
+        </ul>
+        <div class="links">
+          <a class="open" href="./zine-generator.html">Abrir ↗</a>
+          <a class="gh" href="https://github.com/falevian/Photographers/blob/main/zine-generator.html">GitHub</a>
+          <span class="tag">654 KB</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="empty" id="empty">Nada coincide con el filtro.</div>
+
+  <!-- ============ HILO COMÚN ============ -->
+  <div class="thread">
+    <h2>El hilo común</h2>
+    <p>Tres de estos documentos hacen en realidad lo mismo en dominios distintos: definen una distancia, la calculan sobre un catálogo y devuelven los vecinos más próximos. Puestos uno al lado del otro se ve que la pregunta de fondo es siempre la misma, y que las tres respuestas son comparables.</p>
+    <div class="three">
+      <div>
+        <div class="t">objetivos</div>
+        <div class="m">Distancia de carácter</div>
+        <div class="d">Once aberraciones residuales normalizadas. Recupera las familias ópticas sin conocerlas.</div>
+      </div>
+      <div>
+        <div class="t">fotógrafos</div>
+        <div class="m">Distancia de contenido</div>
+        <div class="d">Parecido entre las imágenes. Devuelve percentil y puesto en la lista de vecinos.</div>
+      </div>
+      <div>
+        <div class="t">fotógrafos</div>
+        <div class="m">Distancia de influencia</div>
+        <div class="d">Pasos en el grafo de quién influyó a quién. A veces no hay camino.</div>
+      </div>
+    </div>
+    <p style="margin-top:14px;margin-bottom:0">Las dos últimas ya se muestran juntas para cada par en el explorador de distancias. Correlacionarlas sobre los 309 autores diría algo que hasta ahora se afirma sin medir: hasta qué punto parecerse es consecuencia de descender de alguien.</p>
+  </div>
+
+  <footer>
+    <h4>Notas prácticas</h4>
+    <p>Los enlaces <b>Abrir</b> son rutas relativas: funcionan al servir el repositorio con GitHub Pages, en <code>https://falevian.github.io/Photographers/</code>, y también al abrir los archivos juntos en local. Los enlaces <b>GitHub</b> llevan al código fuente.</p>
+    <p>Para que esta página sea la de entrada, renombra <code>portada.html</code> a <code>index.html</code> y la red de influencia actual a algo como <code>red-influencia.html</code>, actualizando aquí los dos enlaces que apuntan a ella. Las demás rutas relativas siguen funcionando sin tocar nada.</p>
+    <p>El explorador de distancias pesa 6,4 MB porque lleva las fotografías incrustadas en base64 dentro del propio archivo. Es lo que le permite funcionar sin conexión y sin dependencias, pero conviene abrirlo con red decente y no es el mejor candidato para un móvil con datos.</p>
+    <p>El simulador del eclipse está calculado para el 12 de agosto de 2026. Después de esa fecha sigue sirviendo como banco de pruebas de encuadre y exposición solar, pero las efemérides dejan de corresponder a un evento próximo.</p>
+    <p><code>index-old.html</code> queda fuera de este índice a propósito: es la versión inglesa anterior de la red, conservada como histórico y superada por <code>index.html</code>.</p>
+  </footer>
+</div>
+
+<script>
+"use strict";
+(function(){
+  var q=document.getElementById("q"),
+      cards=[].slice.call(document.querySelectorAll(".card"));
+  function recuenta(){
+    document.querySelectorAll("[data-sec]").forEach(function(s){
+      var vis=s.querySelectorAll(".card:not([hidden])").length;
+      s.querySelector(".count").textContent=vis;
+      s.style.display=vis?"":"none";
+    });
+    document.getElementById("empty").style.display =
+      cards.some(function(c){return !c.hidden;}) ? "none" : "block";
+  }
+  function norm(t){
+    return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  }
+  cards.forEach(function(c){
+    c.setAttribute("data-norm", norm(c.getAttribute("data-key")+" "+c.textContent));
+  });
+  q.addEventListener("input",function(){
+    var t=norm(q.value.trim());
+    cards.forEach(function(c){
+      c.hidden = t && c.getAttribute("data-norm").indexOf(t)===-1;
+    });
+    recuenta();
+  });
+  recuenta();
+})();
+</script>
+</body>
+</html>
