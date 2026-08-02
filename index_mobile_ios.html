@@ -1,9 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
-<title>Influence Network</title>
+<title>Red de influencia · versión móvil</title>
+<meta name="description" content="Versión móvil para iPhone / iOS de la red de influencia entre fotógrafos: busca autores, filtra por movimiento y periodo, y explora sus relaciones.">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -303,17 +314,87 @@ button.secondary {
     opacity:1;
     transform:translateY(0);
 }
+
+/* ---------- conmutador de idioma ---------- */
+html[lang="es"] [data-lang="en"]{display:none!important}
+html[lang="en"] [data-lang="es"]{display:none!important}
+
+/* Va dentro de la cabecera, no flotante: la app ocupa el viewport entero,
+   y un elemento fijo se metería bajo el notch o taparía los controles. */
+.head-row {
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+}
+
+.head-text {
+    flex:1 1 auto;
+    min-width:0;
+}
+
+.langbar {
+    display:flex;
+    flex:0 0 auto;
+    background:#fff;
+    border:1px solid #d0d0d0;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.langbar button {
+    min-height:0;
+    height:34px;
+    padding:0 11px;
+    font-family:inherit;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.09em;
+    background:transparent;
+    color:#666;
+    border:0;
+    border-radius:0;
+    cursor:pointer;
+    transition:background .15s, color .15s;
+}
+
+.langbar button + button {
+    border-left:1px solid #d0d0d0;
+}
+
+.langbar button:hover {
+    color:#222;
+}
+
+.langbar button.on {
+    background:rgba(85,103,216,.12);
+    color:#5567d8;
+}
+
+.langbar button:focus-visible {
+    outline:2px solid rgba(85,103,216,.6);
+    outline-offset:-2px;
+}
 </style>
 </head>
 <body>
 <div class="app">
     <div class="topbar">
-        <div class="title">Influence Network</div>
-        <div class="subtitle">Mobile version for iPhone / iOS</div>
+        <div class="head-row">
+            <div class="head-text">
+                <div class="title" data-lang="es">Red de influencia</div>
+                <div class="title" data-lang="en">Influence Network</div>
+                <div class="subtitle" data-lang="es">Versión móvil para iPhone / iOS</div>
+                <div class="subtitle" data-lang="en">Mobile version for iPhone / iOS</div>
+            </div>
+            <div class="langbar" role="group" aria-label="Idioma / Language">
+                <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+                <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+            </div>
+        </div>
 
         <div class="row">
-            <input type="text" id="search-input" placeholder="Search photographer">
-            <button id="fit-view">Fit</button>
+            <input type="text" id="search-input" data-ph-es="Buscar fotógrafo" data-ph-en="Search photographer" placeholder="Buscar fotógrafo">
+            <button id="fit-view"><span data-lang="es">Ajustar</span><span data-lang="en">Fit</span></button>
         </div>
 
         <div id="search-results"></div>
@@ -335,8 +416,8 @@ button.secondary {
         </div>
 
         <div class="row">
-            <button id="reset-view" class="secondary">Reset</button>
-            <button id="reheat-btn" class="secondary">Recalculate</button>
+            <button id="reset-view" class="secondary"><span data-lang="es">Restablecer</span><span data-lang="en">Reset</span></button>
+            <button id="reheat-btn" class="secondary"><span data-lang="es">Recalcular</span><span data-lang="en">Recalculate</span></button>
         </div>
     </div>
 
@@ -345,13 +426,16 @@ button.secondary {
     </div>
 
     <div class="bottom-sheet">
-        <div class="section-title">Information</div>
+        <div class="section-title" data-lang="es">Información</div>
+        <div class="section-title" data-lang="en">Information</div>
         <div id="info-content" class="info-placeholder">
-            Tap a node to view information. You can also search for a photographer above.
+            <div data-lang="es">Toca un nodo para ver su información. También puedes buscar un fotógrafo arriba.</div>
+            <div data-lang="en">Tap a node to view information. You can also search for a photographer above.</div>
         </div>
 
         <div class="legend">
-            <div class="section-title">Movements</div>
+            <div class="section-title" data-lang="es">Movimientos</div>
+            <div class="section-title" data-lang="en">Movements</div>
             <div class="legend-grid">
                 <div class="legend-item"><div class="legend-color" style="background-color:#FF6B6B"></div><div class="legend-label">Art Direction</div></div><div class="legend-item"><div class="legend-color" style="background-color:#4ECDC4"></div><div class="legend-label">Conceptual Photography</div></div><div class="legend-item"><div class="legend-color" style="background-color:#45B7D1"></div><div class="legend-label">Constructivist</div></div><div class="legend-item"><div class="legend-color" style="background-color:#98D8C8"></div><div class="legend-label">Contemporary Japanese</div></div><div class="legend-item"><div class="legend-color" style="background-color:#FFA07A"></div><div class="legend-label">Contemporary Photography</div></div><div class="legend-item"><div class="legend-color" style="background-color:#F7DC6F"></div><div class="legend-label">Documentary Photography</div></div><div class="legend-item"><div class="legend-color" style="background-color:#BB8FCE"></div><div class="legend-label">Düsseldorf School</div></div><div class="legend-item"><div class="legend-color" style="background-color:#85C1E2"></div><div class="legend-label">Fashion/Portrait Photography</div></div><div class="legend-item"><div class="legend-color" style="background-color:#FF9999"></div><div class="legend-label">Futurism</div></div><div class="legend-item"><div class="legend-color" style="background-color:#FFCC99"></div><div class="legend-label">Japanese Photography</div></div><div class="legend-item"><div class="legend-color" style="background-color:#99FF99"></div><div class="legend-label">Magnum Photos</div></div><div class="legend-item"><div class="legend-color" style="background-color:#9999FF"></div><div class="legend-label">Modernist Photography</div></div><div class="legend-item"><div class="legend-color" style="background-color:#FF99FF"></div><div class="legend-label">New Topographics</div></div><div class="legend-item"><div class="legend-color" style="background-color:#CCFFCC"></div><div class="legend-label">Photography Education</div></div><div class="legend-item"><div class="legend-color" style="background-color:#CCCCFF"></div><div class="legend-label">Pictorialism</div></div><div class="legend-item"><div class="legend-color" style="background-color:#FFCCAA"></div><div class="legend-label">Pioneers</div></div><div class="legend-item"><div class="legend-color" style="background-color:#AAFFAA"></div><div class="legend-label">Provoke Movement</div></div><div class="legend-item"><div class="legend-color" style="background-color:#FFAA99"></div><div class="legend-label">Straight Photography</div></div><div class="legend-item"><div class="legend-color" style="background-color:#99CCFF"></div><div class="legend-label">Street Photography</div></div><div class="legend-item"><div class="legend-color" style="background-color:#FFAAFF"></div><div class="legend-label">Surrealism/Dada</div></div>
             </div>
@@ -372,6 +456,34 @@ let currentRadiusScale = null;
 let currentCharge = -260;
 let currentDistance = 82;
 const tooltip = document.getElementById('tooltip');
+
+/* ---------- diccionario de cadenas generadas por JS ---------- */
+const T = {
+    es: {
+        allMovements: 'Todos los movimientos', allPeriods: 'Todos los periodos',
+        movement: 'Movimiento principal', trophic: 'Nivel trófico',
+        period: 'Periodo activo', degree: 'Grado',
+        dTotal: 'Grado total', dOut: 'Influyó a', dIn: 'Influido por',
+        images: 'Imágenes', na: 'N/D',
+        tipMovement: 'Movimiento', tipPeriod: 'Periodo', tipDegree: 'Grado total'
+    },
+    en: {
+        allMovements: 'All movements', allPeriods: 'All periods',
+        movement: 'Primary movement', trophic: 'Trophic level',
+        period: 'Active period', degree: 'Degree',
+        dTotal: 'Total', dOut: 'Out-degree', dIn: 'In-degree',
+        images: 'Images', na: 'N/A',
+        tipMovement: 'Movement', tipPeriod: 'Period', tipDegree: 'Total degree'
+    }
+};
+
+function t(k) {
+    return (T[document.documentElement.lang] || T.es)[k];
+}
+
+/* Marcado bilingüe inicial del panel de información: se guarda para poder
+   restaurarlo tal cual al restablecer la vista. */
+const infoPlaceholderHTML = document.getElementById('info-content').innerHTML;
 
 function normalizeText(s) {
     return (s || '').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '');
@@ -454,32 +566,32 @@ function showInfo(node) {
         <div class="photographer-name">${node.name}</div>
 
         <div class="info-item">
-            <div class="info-item-label">Primary movement</div>
+            <div class="info-item-label">${t('movement')}</div>
             <div class="info-item-value">${node.primary_movement}</div>
         </div>
 
         <div class="info-item">
-            <div class="info-item-label">Trophic level</div>
+            <div class="info-item-label">${t('trophic')}</div>
             <div class="info-item-value">${node.trophic_level}</div>
         </div>
 
         <div class="info-item">
-            <div class="info-item-label">Active period</div>
-            <div class="info-item-value">${node.year ? '~' + node.year : 'N/A'}</div>
+            <div class="info-item-label">${t('period')}</div>
+            <div class="info-item-value">${node.year ? '~' + node.year : t('na')}</div>
         </div>
 
         <div class="info-item">
-            <div class="info-item-label">Degree</div>
+            <div class="info-item-label">${t('degree')}</div>
             <div class="info-item-value">
-                Total: <strong>${node.total_degree}</strong><br>
-                Out-degree: <strong>${node.influenced}</strong><br>
-                In-degree: <strong>${node.influencers}</strong>
+                ${t('dTotal')}: <strong>${node.total_degree}</strong><br>
+                ${t('dOut')}: <strong>${node.influenced}</strong><br>
+                ${t('dIn')}: <strong>${node.influencers}</strong>
             </div>
         </div>
 
         <div class="links-box">
             <a href="${node.wikipedia_url}" target="_blank">Wikipedia</a>
-            <a href="${node.google_images_url}" target="_blank">Images</a>
+            <a href="${node.google_images_url}" target="_blank">${t('images')}</a>
         </div>
     `;
 }
@@ -618,9 +730,9 @@ function renderGraph() {
             tooltip.classList.add('visible');
             tooltip.innerHTML = `
                 <strong>${d.name}</strong><br>
-                Movement: ${d.primary_movement}<br>
-                Period: ${d.year ? '~' + d.year : 'N/A'}<br>
-                Total degree: ${nodeDegree(d)}
+                ${t('tipMovement')}: ${d.primary_movement}<br>
+                ${t('tipPeriod')}: ${d.year ? '~' + d.year : t('na')}<br>
+                ${t('tipDegree')}: ${nodeDegree(d)}
             `;
         })
         .on('mousemove', (event) => {
@@ -724,8 +836,7 @@ document.getElementById('reset-view').addEventListener('click', () => {
     document.getElementById('filter-year').value = 'all';
     document.getElementById('search-input').value = '';
     selectedNodeData = null;
-    document.getElementById('info-content').innerHTML =
-        'Tap a node to view information. You can also search for a photographer above.';
+    document.getElementById('info-content').innerHTML = infoPlaceholderHTML;
     renderGraph();
 });
 
@@ -757,6 +868,60 @@ document.addEventListener('click', e => {
 window.addEventListener('resize', renderGraph);
 
 renderGraph();
+
+/* Repinta lo que el JS genera cuando cambia el idioma. El conmutador lo invoca
+   también en el arranque, así que comprueba antes que todo esté en su sitio. */
+window.onLangChange = function() {
+    const movAll = document.querySelector('#filter-movement option[value="all"]');
+    const yearAll = document.querySelector('#filter-year option[value="all"]');
+    if (movAll) movAll.textContent = t('allMovements');
+    if (yearAll) yearAll.textContent = t('allPeriods');
+    if (selectedNodeData) showInfo(selectedNodeData);
+};
+
+window.onLangChange();
+</script>
+
+<script>
+"use strict";
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{
+      title:"Red de influencia · versión móvil",
+      desc:"Versión móvil para iPhone / iOS de la red de influencia entre fotógrafos: busca autores, filtra por movimiento y periodo, y explora sus relaciones."
+    },
+    en:{
+      title:"Influence Network · mobile version",
+      desc:"Mobile version for iPhone / iOS of the influence network between photographers: search authors, filter by movement and period, and explore their relationships."
+    }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    /* atributos, que no admiten bloques duales */
+    [].forEach.call(document.querySelectorAll("[data-ph-"+l+"]"),function(e){
+      e.setAttribute("placeholder", e.getAttribute("data-ph-"+l));
+    });
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
 </script>
 </body>
 </html>
