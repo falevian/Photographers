@@ -583,6 +583,45 @@ body.locked .langbar{opacity:0;pointer-events:none}
     <div class="dsec"><table id="tab-b"></table></div>
   </div>
 </aside>
+
+<script>
+"use strict";
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{
+      title:"Carta de carácter óptico · montura Leica M",
+      desc:"128 objetivos de montura Leica M, de 1925 a 2026, con 32 descriptores cada uno, disco de desenfoque reconstruido y una métrica de distancia de carácter. Todo el cálculo ocurre en el navegador."
+    },
+    en:{
+      title:"Optical character chart · Leica M mount",
+      desc:"128 Leica M-mount lenses, from 1925 to 2026, with 32 descriptors each, a reconstructed defocus disc and a character-distance metric. Every calculation happens in the browser."
+    }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
+
 <script>
 /* =======================================================================
    DICCIONARIO / DICTIONARY
@@ -669,7 +708,7 @@ es:{
   sort_year:"Año", sort_name:"Nombre", sort_focal:"Focal", sort_fmax:"Apertura",
   sort_resB:"Resolución de borde",
   /* --- tratamientos --- */
-  coat_sin:"sin tratar", coat_mono:"monocapa", coat_multi:"multicapa", "coat_multi+":"multicapa+",
+  coat_sin:"sin", coat_mono:"mono", coat_multi:"multi", "coat_multi+":"multi+",
   /* --- ficha --- */
   catalogado:"Catalogado", derivado:"Derivado por cálculo",
   f_focal:"Focal", f_fmax:"Apertura máxima", f_year:"Año", f_elgr:"Elementos y grupos",
@@ -1113,8 +1152,10 @@ const BRANDCOL = {"Leica":"#E8B33C","Zeiss":"#35B7E6","Voigtländer":"#4FBF95","
   "KMZ":"#C0705A","Konica":"#7FA8C9","Minolta":"#D08FB4","Light Lens Lab":"#B8C24A","MS Optics":"#5FBFB0",
   "7Artisans":"#A08CD8","TTArtisan":"#E0745A","Thypoch":"#79C4E0","Funleader":"#8A93A0"};
 const SLOTCOL = ["#E8B33C","#35B7E6","#8A6BE0","#4FBF95"];
-const fmt = (v,d=0)=>v.toLocaleString(LOCALE(),{minimumFractionDigits:d,maximumFractionDigits:d});
-const fap = v=>"f/"+v.toLocaleString(LOCALE(),{maximumFractionDigits:2});
+/* Sin separador de millares: los años y las masas se leen como cifras, no como
+   cantidades agrupadas, y el inglés agruparía «1,930» donde el español no. */
+const fmt = (v,d=0)=>v.toLocaleString(LOCALE(),{minimumFractionDigits:d,maximumFractionDigits:d,useGrouping:false});
+const fap = v=>"f/"+v.toLocaleString(LOCALE(),{maximumFractionDigits:2,useGrouping:false});
 const APS = [0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5];
 const apLabel = (l,st)=>{const N=l.fmax*Math.pow(2,st/2); return fap(Math.round(N*10)/10);};
 
@@ -1249,33 +1290,35 @@ function popIdx(L){
 function clasicoIdx(L){
   return Math.round(Math.min(100,0.42*L.absSA+0.22*L.velo+0.18*L.loca+0.18*(100-L.micro)));
 }
+/* Rasgos y usos se guardan por CLAVE, no por rótulo: así el filtro sobrevive
+   al cambio de idioma y el texto sale siempre del diccionario. */
 const TAGDEF=[
-  ["cremoso",       L=>L.crema>=82],
-  ["clínico",       L=>L.micro>=90&&L.loca<=18],
-  ["apocromático",  L=>L.loca<=12&&L.micro>=90],
-  ["velo alto",     L=>L.velo>=55],
-  ["bokeh nervioso",L=>L.sa>=15||L.nerv>=58],
-  ["deriva de foco",L=>L.shift>=35],
-  ["ojo de gato",   L=>L.mech>=50],
-  ["campo plano",   L=>Math.abs(L.curv)<=0.05&&Math.abs(L.dist)<=0.8],
-  ["gran apertura", L=>L.fmax<=1.5],
-  ["compacto",      L=>L.weight<=230],
-  ["rizado asférico",L=>L.onion>=25]
+  ["tag_cremoso",  L=>L.crema>=82],
+  ["tag_clinico",  L=>L.micro>=90&&L.loca<=18],
+  ["tag_apo",      L=>L.loca<=12&&L.micro>=90],
+  ["tag_velo",     L=>L.velo>=55],
+  ["tag_nervioso", L=>L.sa>=15||L.nerv>=58],
+  ["tag_shift",    L=>L.shift>=35],
+  ["tag_gato",     L=>L.mech>=50],
+  ["tag_plano",    L=>Math.abs(L.curv)<=0.05&&Math.abs(L.dist)<=0.8],
+  ["tag_luminoso", L=>L.fmax<=1.5],
+  ["tag_compacto", L=>L.weight<=230],
+  ["tag_onion",    L=>L.onion>=25]
 ];
 const USODEF=[
-  ["reproducción y arquitectura", L=>Math.abs(L.dist)<=0.6&&Math.abs(L.curv)<=0.06&&L.resB>=82],
-  ["geometría sin distorsión",    L=>Math.abs(L.dist)<=0.5&&L.focal<=35],
-  ["astrofotografía",             L=>L.coma<=14&&L.vig<=2.2&&L.resB>=82],
-  ["retrato",                     L=>L.focal>=70&&L.crema>=70],
-  ["separación de planos",        L=>L.crema>=88&&L.focal>=50],
-  ["nocturna con luz disponible", L=>L.pupila>=24],
-  ["reportaje",                   L=>L.focal>=28&&L.focal<=50&&L.micro>=76&&L.weight<=300],
-  ["paisaje y viaje en gran angular", L=>L.focal<=28&&L.resB>=70],
-  ["paisaje",                     L=>L.resB>=80&&(L.vig<=2.4||L.focal<=28)],
-  ["gran angular de uso general", L=>L.focal<=28&&L.resB>=55],
-  ["blanco y negro clásico",      L=>L.velo>=45&&L.absSA>=22],
-  ["calle discreta",              L=>L.focal<=50&&L.weight<=240],
-  ["óptica de coleccionista",     L=>L.year<=1960||L.coat==="sin"]
+  ["uso_repro",     L=>Math.abs(L.dist)<=0.6&&Math.abs(L.curv)<=0.06&&L.resB>=82],
+  ["uso_geom",      L=>Math.abs(L.dist)<=0.5&&L.focal<=35],
+  ["uso_astro",     L=>L.coma<=14&&L.vig<=2.2&&L.resB>=82],
+  ["uso_retrato",   L=>L.focal>=70&&L.crema>=70],
+  ["uso_planos",    L=>L.crema>=88&&L.focal>=50],
+  ["uso_nocturna",  L=>L.pupila>=24],
+  ["uso_reportaje", L=>L.focal>=28&&L.focal<=50&&L.micro>=76&&L.weight<=300],
+  ["uso_paisajeGA", L=>L.focal<=28&&L.resB>=70],
+  ["uso_paisaje",   L=>L.resB>=80&&(L.vig<=2.4||L.focal<=28)],
+  ["uso_gaGeneral", L=>L.focal<=28&&L.resB>=55],
+  ["uso_byn",       L=>L.velo>=45&&L.absSA>=22],
+  ["uso_calle",     L=>L.focal<=50&&L.weight<=240],
+  ["uso_coleccion", L=>L.year<=1960||L.coat==="sin"]
 ];
 LENSES.forEach(L=>{
   L.pop=popIdx(L); L.clasico=clasicoIdx(L);
@@ -1360,7 +1403,7 @@ function drawVig(host,L){
   const X=y=>mL+(y/YMAX)*(W-mL-mR), Y=ev=>mT+(ev/EVM)*(H-mT-mB);
   for(let ev=0;ev<=EVM;ev++){ path(s,"M"+mL+" "+Y(ev)+"H"+(W-mR),{stroke:"rgba(40,50,63,.9)","stroke-width":.6}); txt(s,mL-5,Y(ev)+3.5,"-"+ev,"axl","end"); }
   [0,5,10,15,20].forEach(y=>{ path(s,"M"+X(y)+" "+mT+"V"+Y(EVM),{stroke:"rgba(40,50,63,.6)","stroke-width":.6}); txt(s,X(y),H-8,y,"axl","middle"); });
-  txt(s,W-mR,H-8,"mm desde el eje","axl","end");
+  txt(s,W-mR,H-8,t("mmEje"),"axl","end");
   let dn="",dt="";
   for(let y=0;y<=YMAX;y+=.5){
     const th=Math.atan(y/L.focal);
@@ -1386,9 +1429,9 @@ function drawCurv(host,L){
   let dc="";
   for(let y=0;y<=YMAX;y+=.5){ dc+=(y?"L":"M")+X(y)+" "+Yc(L.curv*Math.pow(y/YMAX,2)); }
   path(s,dc,{stroke:"#8A6BE0","stroke-width":1.8});
-  txt(s,mL,t0-1,"flecha en esquina "+fmt(L.curv*1000)+" µm","axl");
+  txt(s,mL,t0-1,t("flechaEsquina")+" "+fmt(L.curv*1000)+" µm","axl");
   [0,10,20].forEach(y=>txt(s,X(y),t1+11,y,"axl","middle"));
-  txt(s,W-mR,t1+11,"mm desde el eje","axl","end");
+  txt(s,W-mR,t1+11,t("mmEje"),"axl","end");
   /* panel inferior: deriva de foco contra profundidad de foco */
   const b0=118,b1=H-20, stMax=4.5;
   const Xs=st=>mL+(st/stMax)*(W-mL-mR);
@@ -1400,7 +1443,7 @@ function drawCurv(host,L){
   let ds=""; for(let st=0;st<=stMax;st+=.15){ ds+=(st?"L":"M")+Xs(st)+" "+Ys(shiftUm(L,st)); }
   path(s,ds,{stroke:"#DB4A3E","stroke-width":1.8});
   [0,1,2,3,4].forEach(st=>txt(s,Xs(st),b1+11,apLabel(L,st),"axl","middle"));
-  txt(s,mL,b0-3,"µm  ·  franja discontinua: profundidad de foco","axl");
+  txt(s,mL,b0-3,t("bandaDof"),"axl");
   txt(s,W-mR,b0-3,fmt(umMax)+" µm","axl","end");
 }
 
@@ -1414,7 +1457,7 @@ function drawCurv(host,L){
    separan bastante: ese promedio no es una magnitud bien definida.        */
 const MTFREF={
  "Light Lens Lab 50 f/1.5 Z21":{
-   fuente:"Light Lens Lab · hoja de datos del producto · curvas calculadas",
+   fuente:"src_lll",
    N1:1.5, N2:4,
    c1:[[5,.93],[10,.80],[20,.61],[40,.47]], b1:[[5,.575],[10,.315],[20,.24],[40,.20]],
    c2:[[5,.97],[10,.95],[20,.88],[40,.76]], b2:[[5,.925],[10,.87],[20,.65],[40,.32]]}
@@ -1425,10 +1468,10 @@ function resImplicito(m40,N){
 }
 function residuoMTF(L,ref){
   const st2=2*Math.log2(ref.N2/L.fmax), out=[];
-  [["centro a plena apertura",ref.c1,L.resC,ref.N1,0],
-   ["borde a plena apertura",ref.b1,L.resB,ref.N1,0],
-   ["centro a f/"+fmt(ref.N2),ref.c2,L.resC,ref.N2,st2],
-   ["borde a f/"+fmt(ref.N2),ref.b2,L.resB,ref.N2,st2]].forEach(g=>{
+  [[t("serCentroPlena"),ref.c1,L.resC,ref.N1,0],
+   [t("serBordePlena"),ref.b1,L.resB,ref.N1,0],
+   [t("serCentro")+fmt(ref.N2),ref.c2,L.resC,ref.N2,st2],
+   [t("serBorde")+fmt(ref.N2),ref.b2,L.resB,ref.N2,st2]].forEach(g=>{
     let s2=0,mx=0,mxn=0;
     g[1].forEach(pt=>{ const d=mtfTot(pt[0],g[2],g[3],g[4])-pt[1];
       s2+=d*d; if(Math.abs(d)>Math.abs(mx)){mx=d;mxn=pt[0];} });
@@ -1445,10 +1488,8 @@ function residuoMTF(L,ref){
    por construcción, al ser euclídea tras un reescalado afín.
    K(L) = d(L, ideal) es el módulo: la única parte del carácter que sí es
    unidimensional.                                                          */
-const GEN=[["sa","esfericidad residual"],["loca","CA longitudinal"],["laca","CA lateral"],
-  ["coma","coma sagital"],["curv","curvatura de campo"],["dist","distorsión"],["velo","velo"],
-  ["mech","recorte de pupila"],["onion","rizado asférico"],["vigExc","caída sobre cos⁴"],
-  ["resid","residuo de microcontraste"]];
+const GEN=["sa","loca","laca","coma","curv","dist","velo","mech","onion","vigExc","resid"]
+  .map(k=>[k,()=>t("gen_"+k),k]);   /* [campo, rótulo(), clave i18n] */
 const NG=GEN.length;
 let SDG=[], ZM=[], PCA=null, DMAT=null;
 
@@ -1485,7 +1526,7 @@ function construirMetrica(){
   LENSES.forEach((L,i)=>{
     const z=ZM[i], s2=z.reduce((a,x)=>a+x*x,0);
     L.K=Math.sqrt(s2/NG);
-    L.spec=GEN.map((g,j)=>({n:g[1],f:s2?z[j]*z[j]/s2:0})).sort((a,b)=>b.f-a.f);
+    L.spec=GEN.map((g,j)=>({k:g[0],f:s2?z[j]*z[j]/s2:0})).sort((a,b)=>b.f-a.f);
   });
   /* matriz de distancias y vecinos */
   DMAT=LENSES.map(()=>new Float32Array(n));
@@ -1526,22 +1567,23 @@ function pintarContraste(L){
   host.style.display="";
   const res=residuoMTF(L,ref);
   const iC=resImplicito(ref.c1[3][1],ref.N1), iB=resImplicito(ref.b1[3][1],ref.N1);
-  let h="<div class='eyebrow' style='margin-bottom:6px'>Contraste del modelo con datos publicados</div>";
-  h+="<p class='meth' style='font-size:13px;margin-bottom:8px'>Fuente: "+ref.fuente+". Los puntos aparecen sobre la gráfica de MTF: círculo lleno en el eje, hueco en el borde, ámbar a plena apertura y cian a f/"+fmt(ref.N2)+".</p>";
-  h+="<table style='margin-bottom:8px'><tr><th>Serie</th><th style='text-align:right'>RMS</th><th style='text-align:right'>Peor residuo</th></tr>"
+  let h="<div class='eyebrow' style='margin-bottom:6px'>"+t("ctrTit")+"</div>";
+  h+="<p class='meth' style='font-size:13px;margin-bottom:8px'>"+t("ctrFuente")+" "+t(ref.fuente)+". "+t("ctrPuntos")+fmt(ref.N2)+".</p>";
+  h+="<table style='margin-bottom:8px'><tr><th>"+t("thSerie")+"</th><th style='text-align:right'>RMS</th><th style='text-align:right'>"+t("thPeor")+"</th></tr>"
     +res.map(r=>"<tr><td>"+r.n+"</td><td class='v'>"+fmt(r.rms,3)+"</td><td class='v' style='color:"+(Math.abs(r.peor)>0.2?"var(--C)":Math.abs(r.peor)>0.1?"var(--d)":"var(--ok)")+"'>"
-    +(r.peor>0?"+":"")+fmt(r.peor,3)+" a "+fmt(r.nu)+" lp/mm</td></tr>").join("")+"</table>";
-  h+="<p class='meth' style='font-size:13px'>El punto de 40 lp/mm a plena apertura implicaría un índice de resolución de <b>"+fmt(iC)
-    +"</b> en el centro y <b>"+fmt(iB)+"</b> en el borde. Al objetivo se le han asignado <b>"+fmt(L.resC)+"</b> y <b>"+fmt(L.resB)
-    +"</b>, en la misma base que el resto del catálogo. La diferencia queda a la vista para que el lector la juzgue: una MTF calculada por el fabricante no es comparable con las de este catálogo, y con una sola muestra no hay forma de calibrar la escala.</p>";
+    +(r.peor>0?"+":"")+fmt(r.peor,3)+" @ "+fmt(r.nu)+" lp/mm</td></tr>").join("")+"</table>";
+  h+="<p class='meth' style='font-size:13px'>"+t("ctrA")+" <b>"+fmt(iC)
+    +"</b> "+t("ctrB")+" <b>"+fmt(iB)+"</b> "+t("ctrC")+" <b>"+fmt(L.resC)+"</b> "+t("ctrD")+" <b>"+fmt(L.resB)
+    +"</b>, "+t("ctrE")+"</p>";
   host.innerHTML=h;
 }
 
+/* [rótulo(), índices de generador, descripción()] */
 const SUB=[
-  ["Todo",                 [0,1,2,3,4,5,6,7,8,9,10], "los once generadores"],
-  ["Frente de onda",       [0,1,2,3,4,10],           "esfericidad, cromatismos, coma, curvatura y residuo de microcontraste"],
-  ["Pupila y fabricación", [7,8,9],                  "recorte de pupila, rizado asférico y caída sobre cos⁴"],
-  ["Velo y geometría",     [6,5],                    "velo y distorsión"]
+  [()=>t("sub_todo"),   [0,1,2,3,4,5,6,7,8,9,10], ()=>t("subd_todo")],
+  [()=>t("sub_onda"),   [0,1,2,3,4,10],           ()=>t("subd_onda")],
+  [()=>t("sub_pupila"), [7,8,9],                  ()=>t("subd_pupila")],
+  [()=>t("sub_velo"),   [6,5],                    ()=>t("subd_velo")]
 ];
 const PCTD={};
 
@@ -1556,7 +1598,7 @@ function pctil(v,a){ let lo=0,hi=a.length; while(lo<hi){ const m=(lo+hi)>>1; if(
 function separador(i,j,ix){
   let mx=-1,g=ix[0];
   ix.forEach(k=>{ const d=(ZM[i][k]-ZM[j][k])**2; if(d>mx){mx=d;g=k;} });
-  return GEN[g][1];
+  return GEN[g][0];   /* clave del generador */
 }
 
 /* ============================================================
@@ -1587,25 +1629,27 @@ function refrescarSel(){
 }
 function pintarDots(){
   $("dots").innerHTML=[0,1,2,3].map(k=>"<i style='background:"+(sel[k]!==undefined?SLOTCOL[k]:"transparent")+"'></i>").join("");
-  $("gocmp").textContent = sel.length ? "Comparar ("+sel.length+")" : "Comparar";
+  $("gocmp").textContent = sel.length ? t("comparar")+" ("+sel.length+")" : t("comparar");
 }
 function pintarSelbar(){
   const h=$("selbar");
-  if(!sel.length){ h.innerHTML="<span class='kv'>Sin selección. Marque la casilla de un objetivo en el catálogo, use el botón + de la tabla de vecinos o pulse puntos en el mapa.</span>"; return; }
+  if(!sel.length){ h.innerHTML="<span class='kv'>"+t("sinSel")+"</span>"; return; }
   h.innerHTML=sel.map((i,k)=>{ const L=LENSES[i];
     return "<span class='slot'><b style='background:"+SLOTCOL[k]+"'></b>"+L.name
-      +" <button type='button' data-q='"+i+"' aria-label='Quitar'>×</button></span>";}).join("");
+      +" <button type='button' data-q='"+i+"' aria-label='"+t("quitar")+"'>×</button></span>";}).join("");
   h.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>toggleSel(+b.dataset.q));
 }
 
 /* ---------- catálogo ---------- */
-const FB=["Todas","Leica","Zeiss","Voigtländer","Otros"];
-const FF=[["Todas",null],["≤ 21",[0,21]],["24 a 28",[22,29]],["35",[30,39]],["40 a 50",[40,59]],["75 a 90",[60,99]],["≥ 135",[100,999]]];
-const FE=[["Todas",null],["hasta 1959",[0,1959]],["1960 a 1979",[1960,1979]],["1980 a 1999",[1980,1999]],["2000 en adelante",[2000,9999]]];
-const SORTS=[["year","Año"],["name","Nombre"],["focal","Focal"],["fmax","Apertura"],["crema","Cremosidad"],
-  ["micro","Microcontraste"],["absSA","Esfericidad residual"],["velo","Velo"],["resB","Resolución de borde"],
-  ["loca","CA longitudinal"],["nerv","Nerviosismo"],["shift","Deriva de foco"],["weight","Masa"],
-  ["clasico","Índice clásico"],["pop","Contraste de baja frecuencia"],["K","Módulo de carácter K"]];
+/* Listas de filtro: [rótulo(), valor]. El valor nunca depende del idioma. */
+const FB=()=>[[t("todas"),"Todas"],["Leica","Leica"],["Zeiss","Zeiss"],["Voigtländer","Voigtländer"],[t("otros"),"Otros"]];
+const FF=()=>[[t("todas"),null],[t("ff1"),[0,21]],[t("ff2"),[22,29]],[t("ff3"),[30,39]],[t("ff4"),[40,59]],[t("ff5"),[60,99]],[t("ff6"),[100,999]]];
+const FE=()=>[[t("todas"),null],[t("fe1"),[0,1959]],[t("fe2"),[1960,1979]],[t("fe3"),[1980,1999]],[t("fe4"),[2000,9999]]];
+const FT=()=>[[t("todos"),null]].concat(TAGDEF.map(x=>[t(x[0]),x[0]]));
+const SORTS=()=>[["year",t("sort_year")],["name",t("sort_name")],["focal",t("sort_focal")],["fmax",t("sort_fmax")],
+  ["crema",t("met_crema")],["micro",t("met_micro")],["absSA",t("met_sa")],["velo",t("met_velo")],
+  ["resB",t("sort_resB")],["loca",t("met_loca")],["nerv",t("met_nerv")],["shift",t("met_shift")],
+  ["weight",t("met_weight")],["clasico",t("met_clasico")],["pop",t("met_pop")],["K",t("met_K")]];
 const DESC=new Set(["crema","micro","absSA","resB","nerv","shift","weight","velo","loca","clasico","pop","K"]);
 
 function filtrar(){
@@ -1617,7 +1661,8 @@ function filtrar(){
     if(fil.focal && (L.focal<fil.focal[0]||L.focal>fil.focal[1])) return false;
     if(fil.era && (L.year<fil.era[0]||L.year>fil.era[1])) return false;
     if(fil.tag && L.tags.indexOf(fil.tag)<0) return false;
-    if(q && (L.name+" "+L.brand+" "+L.family+" "+L.arq+" "+L.nota+" "+L.tags.join(" ")+" "+L.usos.join(" ")).toLowerCase().indexOf(q)<0) return false;
+    if(q && (L.name+" "+L.brand+" "+L.family+" "+arqNombre(L)+" "+L.nota+" "
+      +L.tags.map(t).join(" ")+" "+L.usos.map(t).join(" ")).toLowerCase().indexOf(q)<0) return false;
     return true;
   }).sort((a,b)=> fil.sort==="name" ? a.name.localeCompare(b.name,"es")
       : (DESC.has(fil.sort) ? b[fil.sort]-a[fil.sort] : a[fil.sort]-b[fil.sort]));
@@ -1632,8 +1677,8 @@ function pintarLista(){
     const sp=[o.crema,o.micro,o.resB,o.pureza,o.contraste].map(v=>
       "<i style='height:"+Math.max(2,v/100*20)+"px;background:"+(v>72?"var(--d)":v>45?"#8a7440":"#3A4656")+"'></i>").join("");
     r.innerHTML="<button class='pick' type='button' data-p='"+o.i+"' aria-pressed='"+(c?"true":"false")
-      +"' style='--c:"+(c||"var(--d)")+"' aria-label='Comparar "+o.name+"'></button>"
-      +"<div><button class='nm nmbtn' type='button' data-open='"+o.i+"'>"+o.name+"</button><div class='mt'>"+o.brand+" · "+o.year+" · K "+fmt(o.K,2)+" · "+o.arq+"</div></div>"
+      +"' style='--c:"+(c||"var(--d)")+"' aria-label='"+t("comparar")+" "+o.name+"'></button>"
+      +"<div><button class='nm nmbtn' type='button' data-open='"+o.i+"'>"+o.name+"</button><div class='mt'>"+o.brand+" · "+o.year+" · K "+fmt(o.K,2)+" · "+arqNombre(o)+"</div></div>"
       +"<div class='spark'>"+sp+"</div>";
     r.querySelector(".pick").onclick=e=>{ e.stopPropagation(); toggleSel(o.i); };
     r.querySelector("[data-open]").onclick=()=>abrirFicha(o);
@@ -1677,7 +1722,7 @@ function saltar(d){
 }
 function sincroAdd(){
   const en=sel.includes(cur.i);
-  $("f-add").textContent= en ? "Quitar de la comparación" : "Añadir a la comparación";
+  $("f-add").textContent= en ? t("delCmp") : t("addCmp");
   $("f-add").setAttribute("aria-pressed",String(en));
 }
 
@@ -1692,32 +1737,33 @@ function pintarFicha(L){
   $("f-brandline").textContent=L.brand+" · "+L.family+" · "+L.year;
   $("f-name").textContent=L.name;
   const v=vigModel(L), nc=1/(LAM*L.fmax);
-  $("f-badges").innerHTML=["<span class='badge k'>"+L.arq+"</span>",
+  $("f-badges").innerHTML=["<span class='badge k'>"+arqNombre(L)+"</span>",
     "<span class='badge'>"+L.el+"e / "+L.gr+"g</span>",
-    "<span class='badge'>"+(L.asph?L.asph+" asf.":"sin asf.")+"</span>",
-    "<span class='badge'>"+L.blades+" palas</span>",
-    "<span class='badge'>"+L.coat+"</span>",
+    "<span class='badge'>"+(L.asph?L.asph+" "+t("b_asf"):t("b_sinAsf"))+"</span>",
+    "<span class='badge'>"+L.blades+" "+t("b_palas")+"</span>",
+    "<span class='badge'>"+coatName(L.coat)+"</span>",
     "<span class='badge'>K "+fmt(L.K,2)+"</span>"].join("");
   $("f-note").textContent=L.nota;
-  $("f-arqdesc").textContent=ARQDESC[L.arq]||"";
-  $("f-uso").innerHTML="<span class='eyebrow'>Uso por regla</span> "
-    +(L.usos.length?L.usos.map(u=>"<span class='badge k'>"+u+"</span>").join(" "):"<span class='badge'>sin coincidencia</span>")
-    +" <span class='eyebrow' style='margin-left:10px'>Rasgos</span> "
-    +(L.tags.length?L.tags.map(t=>"<span class='badge'>"+t+"</span>").join(" "):"<span class='badge'>ninguno</span>");
-  $("tab-a").innerHTML="<tr class='sec'><td colspan='2'>Catalogado</td></tr>"
-    +fila("Focal",fmt(L.focal)," mm")+fila("Apertura máxima",fap(L.fmax))+fila("Año",fmt(L.year))
-    +fila("Elementos y grupos",L.el+" / "+L.gr)+fila("Superficies asféricas",fmt(L.asph))
-    +fila("Palas del diafragma",fmt(L.blades))+fila("Distancia mínima",fmt(L.mfd,2)," m")
-    +fila("Filtro",L.filter?fmt(L.filter)+" mm":"serie o ninguno")+fila("Masa",fmt(L.weight)," g")
-    +fila("Tratamiento",L.coat)
-    +"<tr class='sec'><td colspan='2'>Derivado por cálculo</td></tr>"
-    +fila("Ángulo de campo",fmt(L.aov,1),"°")+fila("Pupila de entrada",fmt(L.pupila,1)," mm")
-    +fila("Corte por difracción",fmt(nc)," lp/mm")+fila("Disco de Airy",fmt(2.44*LAM*L.fmax*1000,1)," µm")
-    +fila("Caída natural cos⁴",fmt(-4*Math.log2(Math.cos(v.th)),2)," EV")+fila("Exponente ajustado",fmt(v.e,2))
-    +fila("Profundidad de foco","±"+fmt(dofUm(L.fmax))," µm")
-    +fila("Contraste de baja frecuencia",fmt(L.pop))+fila("Índice clásico",fmt(L.clasico))
-    +fila("Hiperfocal a 30 µm",fmt(L.focal*L.focal/(L.fmax*0.03)/1000,1)," m");
-  const grp=[[0,4],[4,10],[10,14],[14,17]], tit=["Desenfoque y velo","Definición y cromatismo","Artefactos de pupila","Geometría y campo"];
+  $("f-arqdesc").textContent=arqDesc(L)||"";
+  $("f-uso").innerHTML="<span class='eyebrow'>"+t("usoRegla")+"</span> "
+    +(L.usos.length?L.usos.map(u=>"<span class='badge k'>"+t(u)+"</span>").join(" "):"<span class='badge'>"+t("sinCoincidencia")+"</span>")
+    +" <span class='eyebrow' style='margin-left:10px'>"+t("rasgos")+"</span> "
+    +(L.tags.length?L.tags.map(k=>"<span class='badge'>"+t(k)+"</span>").join(" "):"<span class='badge'>"+t("ninguno")+"</span>");
+  $("tab-a").innerHTML="<tr class='sec'><td colspan='2'>"+t("catalogado")+"</td></tr>"
+    +fila(t("f_focal"),fmt(L.focal)," mm")+fila(t("f_fmax"),fap(L.fmax))+fila(t("f_year"),fmt(L.year))
+    +fila(t("f_elgr"),L.el+" / "+L.gr)+fila(t("f_asph"),fmt(L.asph))
+    +fila(t("f_palas"),fmt(L.blades))+fila(t("f_mfd"),fmt(L.mfd,2)," m")
+    +fila(t("f_filtro"),L.filter?fmt(L.filter)+" mm":t("f_serie"))+fila(t("f_masa"),fmt(L.weight)," g")
+    +fila(t("f_coat"),coatName(L.coat))
+    +"<tr class='sec'><td colspan='2'>"+t("derivado")+"</td></tr>"
+    +fila(t("f_aov"),fmt(L.aov,1),"°")+fila(t("f_pupila"),fmt(L.pupila,1)," mm")
+    +fila(t("f_corte"),fmt(nc)," lp/mm")+fila(t("f_airy"),fmt(2.44*LAM*L.fmax*1000,1)," µm")
+    +fila(t("f_cos4"),fmt(-4*Math.log2(Math.cos(v.th)),2)," EV")+fila(t("f_expo"),fmt(v.e,2))
+    +fila(t("f_dof"),"±"+fmt(dofUm(L.fmax))," µm")
+    +fila(t("f_pop"),fmt(L.pop))+fila(t("f_clasico"),fmt(L.clasico))
+    +fila(t("f_hiper"),fmt(L.focal*L.focal/(L.fmax*0.03)/1000,1)," m");
+  const grp=[[0,4],[4,10],[10,14],[14,17]],
+        tit=[t("grp_desenfoque"),t("grp_definicion"),t("grp_pupila"),t("grp_geometria")];
   let hb=""; grp.forEach((g,gi)=>{ hb+="<tr class='sec'><td colspan='3'>"+tit[gi]+"</td></tr>";
     for(let i=g[0];i<g[1];i++){ const m=MET[i];
       hb += m.raw ? "<tr><td>"+m.n+"</td><td class='v'>"+(m.signed&&L[m.k]>0?"+":"")+fmt(L[m.k],Math.abs(L[m.k])<10?2:1)+(m.u||"")+"</td><td></td></tr>" : barra(m,L); }});
@@ -1737,45 +1783,39 @@ function actualizarSim(){
   $("v-blur").textContent=fmt(sim.blur,1)+"×";
   $("v-exp").textContent=(sim.exp>0?"+":"")+fmt(sim.exp,1)+" EV";
   const r=renderDisc($("bokeh"),L,sim);
-  const sgn=L.sa<0?"subcorregida":(L.sa>0?"sobrecorregida":"neutra");
-  const ef=(L.sa<0)===(sim.side==="bg")?"núcleo brillante y borde desvanecido":"cáustica en el borde";
-  $("sim-diag").textContent="Esfericidad "+sgn+" · "+ef+" · pupila transmitida "+fmt(r.T*100)+" % ("+fmt(-Math.log2(Math.max(1e-3,r.T)),2)+" EV)";
+  const sgn=L.sa<0?t("esfSub"):(L.sa>0?t("esfSobre"):t("esfNeutra"));
+  const ef=(L.sa<0)===(sim.side==="bg")?t("discoNucleo"):t("discoCaustica");
+  $("sim-diag").textContent=t("simEsf")+" "+sgn+" · "+ef+" · "+t("simPupila")+" "+fmt(r.T*100)+" % ("+fmt(-Math.log2(Math.max(1e-3,r.T)),2)+" EV)";
 }
 function pintarMetricaFicha(L){
   let h="<div style='display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start'>";
-  h+="<div style='min-width:88px'><div class='eyebrow'>Módulo K</div><div class='num' style='font-size:28px;color:var(--d);line-height:1.1'>"
-    +fmt(L.K,2)+"</div><div class='kv'>0 = difracción</div></div>";
-  h+="<div style='flex:1;min-width:200px'><div class='eyebrow' style='margin-bottom:5px'>Espectro de carácter · fracción de K²</div>";
+  h+="<div style='min-width:88px'><div class='eyebrow'>"+t("moduloK")+"</div><div class='num' style='font-size:28px;color:var(--d);line-height:1.1'>"
+    +fmt(L.K,2)+"</div><div class='kv'>"+t("ceroDifraccion")+"</div></div>";
+  h+="<div style='flex:1;min-width:200px'><div class='eyebrow' style='margin-bottom:5px'>"+t("espectro")+"</div>";
   h+=L.spec.slice(0,5).map(s=>"<div style='display:grid;grid-template-columns:1fr 40px 70px;gap:6px;align-items:center'>"
-    +"<span class='kv' style='color:var(--txt)'>"+s.n+"</span><span class='num' style='text-align:right;font-size:11px'>"+fmt(100*s.f)
+    +"<span class='kv' style='color:var(--txt)'>"+t("gen_"+s.k)+"</span><span class='num' style='text-align:right;font-size:11px'>"+fmt(100*s.f)
     +" %</span><div class='ibar'><i style='left:0;width:"+(100*s.f/Math.max(0.01,L.spec[0].f))+"%'></i></div></div>").join("")+"</div>";
   h+="</div>";
   $("f-metrica").innerHTML=h;
 }
 
 /* ---------- objetivos parecidos, dentro de la ficha ---------- */
-const GDEF={"esfericidad residual":"aberración esférica sin corregir; decide si el disco tiene núcleo o anillo",
- "CA longitudinal":"franjas de color delante y detrás del foco","CA lateral":"desplazamiento radial entre canales",
- "coma sagital":"deformación de puntos fuera del eje","curvatura de campo":"la superficie nítida no es plana",
- "distorsión":"desviación rectilínea","velo":"pérdida de contraste base por luz difusa",
- "recorte de pupila":"ojo de gato fuera del eje","rizado asférico":"anillos concéntricos del moldeo",
- "caída sobre cos⁴":"viñeteo por encima del natural","residuo de microcontraste":"lo que falta hasta la transferencia perfecta en frecuencias altas"};
-function conDef(n){ return "<span title=\'"+(GDEF[n]||"")+"\' style=\'cursor:help;border-bottom:1px dotted var(--line2)\'>"+n+"</span>"; }
+function conDef(k){ return "<span title=\'"+t("gend_"+k)+"\' style=\'cursor:help;border-bottom:1px dotted var(--line2)\'>"+t("gen_"+k)+"</span>"; }
 function pintarParecidos(L){
   const ix=SUB[0][1], arr=distr(0);
   const lista=LENSES.filter(o=>o.i!==L.i).map(o=>({o,d:dSub(L.i,o.i,ix)}))
     .sort((a,b)=>a.d-b.d).slice(0,6);
-  $("f-masparecido").innerHTML="Más parecido: <b style=\'color:var(--hi)\'>"+lista[0].o.name
-    +"</b> a d "+fmt(lista[0].d,2)+", percentil "+fmt(pctil(lista[0].d,arr))+" %";
-  let h="<h3 style=\'margin-bottom:4px\'>Objetivos parecidos</h3>"
-    +"<div class=\'kv\' style=\'margin-bottom:9px\'>Distancia sobre los once generadores. Percentil respecto de todos los pares del catálogo. Pulse el nombre para saltar a su ficha, la casilla para comparar.</div>";
-  h+="<table><tr><th style=\'width:22px\'></th><th>Objetivo</th><th style=\'text-align:right\'>d</th><th style=\'text-align:right\'>pct</th><th>Lo que más los separa</th></tr>";
+  $("f-masparecido").innerHTML=t("masParecido")+" <b style=\'color:var(--hi)\'>"+lista[0].o.name
+    +"</b> "+t("aD")+" "+fmt(lista[0].d,2)+", "+t("percentil")+" "+fmt(pctil(lista[0].d,arr))+" %";
+  let h="<h3 style=\'margin-bottom:4px\'>"+t("parecidosTit")+"</h3>"
+    +"<div class=\'kv\' style=\'margin-bottom:9px\'>"+t("parecidosSub")+"</div>";
+  h+="<table><tr><th style=\'width:22px\'></th><th>"+t("thObjetivo")+"</th><th style=\'text-align:right\'>d</th><th style=\'text-align:right\'>pct</th><th>"+t("thSepara")+"</th></tr>";
   lista.forEach(v=>{ const p=pctil(v.d,arr), c=colorDe(v.o.i);
     h+="<tr><td><button class=\'pick\' type=\'button\' data-p=\'"+v.o.i+"\' aria-pressed=\'"+(c?"true":"false")
-      +"\' style=\'--c:"+(c||"var(--d)")+"\' aria-label=\'Comparar\'></button></td>"
+      +"\' style=\'--c:"+(c||"var(--d)")+"\' aria-label=\'"+t("comparar")+"\'></button></td>"
       +"<td><span data-go=\'"+v.o.i+"\' style=\'font-family:var(--cond);font-size:12.5px;color:var(--hi);cursor:pointer\'>"+v.o.name+"</span>"
-      +(dSub(L.i,v.o.i,ix)<0.10?" <span class=\'badge\' style=\'border-color:var(--C);color:var(--C)\'>índices casi idénticos</span>":"")
-      +"<div class=\'kv\'>"+v.o.brand+" · "+v.o.year+" · "+v.o.arq+"</div></td>"
+      +(dSub(L.i,v.o.i,ix)<0.10?" <span class=\'badge\' style=\'border-color:var(--C);color:var(--C)\'>"+t("casiIdenticos")+"</span>":"")
+      +"<div class=\'kv\'>"+v.o.brand+" · "+v.o.year+" · "+arqNombre(v.o)+"</div></td>"
       +"<td class=\'v\' style=\'color:var(--d)\'>"+fmt(v.d,2)+"</td>"
       +"<td class=\'v\' style=\'color:"+(p<5?"var(--ok)":p<25?"var(--txt)":"var(--mut)")+"\'>"+fmt(p)+" %</td>"
       +"<td style=\'color:var(--mut)\'>"+conDef(separador(L.i,v.o.i,ix))+"</td></tr>"; });
@@ -1788,7 +1828,7 @@ function pintarParecidos(L){
 
 /* ---------- banco de comparación ---------- */
 function pintarBanco2(){
-  $("c-espacio").textContent=SUB[sub][2];
+  $("c-espacio").textContent=SUB[sub][2]();
   if(tab==="perf") pintarPerfiles();
   if(tab==="dist"){ pintarMatriz(); pintarPar2(); }
   if(tab==="vec")  pintarVecinos();
@@ -1797,30 +1837,30 @@ function pintarPerfiles(){
   const ls=sel.map(i=>LENSES[i]);
   drawRadar($("c-radar"),ls,SLOTCOL);
   const st=+$("s-cN").value/100*5, fd=+$("s-cfield").value/100;
-  $("v-cN").textContent=st<0.05?"plena":("+"+fmt(st,1)+" pasos");
+  $("v-cN").textContent=st<0.05?t("plena"):("+"+fmt(st,1)+" "+t("pasos"));
   $("v-cfield").textContent=fmt(fd*100)+" %";
   const dh=$("c-discs"); dh.innerHTML="";
   ls.forEach((L,k)=>{
     const w=document.createElement("div"), cv=document.createElement("canvas");
     cv.width=180; cv.height=180; w.appendChild(cv);
     const cap=document.createElement("div"); cap.className="cap";
-    cap.innerHTML="<span style='color:"+SLOTCOL[k]+"'>■</span> "+L.name+"<br>"+apLabel(L,st)+" · esf "+(L.sa>0?"+":"")+L.sa;
+    cap.innerHTML="<span style='color:"+SLOTCOL[k]+"'>■</span> "+L.name+"<br>"+apLabel(L,st)+" · "+t("esfCorta")+" "+(L.sa>0?"+":"")+L.sa;
     w.appendChild(cap); dh.appendChild(w);
     renderDisc(cv,L,{N:L.fmax*Math.pow(2,st/2),side:"bg",field:fd,blur:1,exp:0});
   });
-  const rows=[["Año","year",0],["Apertura máxima","fmax",1],["Módulo K","K",2],["Cremosidad","crema",0],
-    ["Esfericidad residual","sa",0],["Microcontraste","micro",0],["Resolución de borde","resB",0],
-    ["CA longitudinal","loca",0],["Velo","velo",0],["Nerviosismo","nerv",0],["Deriva de foco","shift",0],
-    ["Recorte de pupila","mech",0],["Caída en esquina","vig",1],["Contraste baja frecuencia","pop",0],
-    ["Índice clásico","clasico",0],["Masa","weight",0]];
+  const rows=[[t("f_year"),"year",0],[t("met_fmax"),"fmax",1],[t("moduloK"),"K",2],[t("met_crema"),"crema",0],
+    [t("met_sa"),"sa",0],[t("met_micro"),"micro",0],[t("sort_resB"),"resB",0],
+    [t("met_loca"),"loca",0],[t("met_velo"),"velo",0],[t("met_nerv"),"nerv",0],[t("met_shift"),"shift",0],
+    [t("gen_mech"),"mech",0],[t("met_vig"),"vig",1],[t("met_pop"),"pop",0],
+    [t("met_clasico"),"clasico",0],[t("met_weight"),"weight",0]];
   if(!ls.length){ $("c-tab").innerHTML=""; return; }
-  let h="<tr><th>Descriptor</th>"+ls.map((L,k)=>"<th style='text-align:right;color:"+SLOTCOL[k]+"'>"+L.name+"</th>").join("")+"</tr>";
+  let h="<tr><th>"+t("thDescriptor")+"</th>"+ls.map((L,k)=>"<th style='text-align:right;color:"+SLOTCOL[k]+"'>"+L.name+"</th>").join("")+"</tr>";
   rows.forEach(r=>{ h+="<tr><td>"+r[0]+"</td>"+ls.map(L=>"<td class='v'>"+(r[1]==="sa"&&L.sa>0?"+":"")+fmt(L[r[1]],r[2])+"</td>").join("")+"</tr>"; });
   $("c-tab").innerHTML=h;
 }
 function pintarMatriz(){
   const ls=sel.map(i=>LENSES[i]), ix=SUB[sub][1], arr=distr(sub);
-  if(ls.length<2){ $("c-mtx").innerHTML="<tr><td class='kv' style='border:0'>Seleccione al menos dos objetivos.</td></tr>"; return; }
+  if(ls.length<2){ $("c-mtx").innerHTML="<tr><td class='kv' style='border:0'>"+t("minDos")+"</td></tr>"; return; }
   let h="<tr><th></th>"+ls.map((L,k)=>"<th style='color:"+SLOTCOL[k]+"'>"+(k+1)+"</th>").join("")+"</tr>";
   ls.forEach((A,a)=>{ h+="<tr><th style='text-align:left;color:"+SLOTCOL[a]+"'>"+(a+1)+" · "+A.name+"</th>";
     ls.forEach((B,b)=>{
@@ -1837,30 +1877,29 @@ function pintarPar2(){
   const host=$("c-par");
   if(!par){ const ls=sel.map(i=>LENSES[i]);
     if(ls.length>=2) par=[ls[0].i,ls[1].i];
-    else { host.innerHTML="<div class='kv'>Seleccione dos objetivos y pulse una celda de la matriz.</div>";
+    else { host.innerHTML="<div class='kv'>"+t("parInstruccion")+"</div>";
       $("c-pardiscs").innerHTML=""; $("c-parradar").innerHTML=""; return; } }
   const A=LENSES[par[0]], B=LENSES[par[1]], ix=SUB[sub][1];
   const cs=ix.map(g=>({g,v:(ZM[A.i][g]-ZM[B.i][g])**2}));
   const tot=cs.reduce((a,c)=>a+c.v,0)||1; cs.sort((a,b)=>b.v-a.v);
   const mx=cs[0].v/tot;
-  let h="<div class='eyebrow' style='margin-bottom:6px'>Descomposición · d = "+fmt(dSub(A.i,B.i,ix),2)+" en "+SUB[sub][0].toLowerCase()+"</div>";
+  let h="<div class='eyebrow' style='margin-bottom:6px'>"+t("descomposicion")+" "+fmt(dSub(A.i,B.i,ix),2)+" "+t("enSubespacio")+" "+SUB[sub][0]().toLowerCase()+"</div>";
   h+="<div class='kv' style='margin-bottom:9px;line-height:1.5'><span style='color:var(--d)'>■</span> "+A.name
     +" &nbsp; <span style='color:var(--F)'>■</span> "+B.name+"</div>";
-  h+="<table><tr><th>Generador</th><th style='text-align:right'>d²</th><th style='width:110px'></th>"
+  h+="<table><tr><th>"+t("thGenerador")+"</th><th style='text-align:right'>d²</th><th style='width:110px'></th>"
     +"<th style='text-align:right;color:var(--d)'>A</th><th style='text-align:right;color:var(--F)'>B</th></tr>";
   cs.forEach(c=>{ const k=GEN[c.g][0], f=c.v/tot;
     const fv=x=>k==="vigExc"?fmt(x,2):fmt(x,Math.abs(x)<1?2:0);
-    h+="<tr><td>"+GEN[c.g][1]+"</td><td class='v'>"+fmt(100*f)+" %</td>"
+    h+="<tr><td>"+GEN[c.g][1]()+"</td><td class='v'>"+fmt(100*f)+" %</td>"
       +"<td style='padding-left:6px'><div class='ibar'><i style='left:0;width:"+(mx?100*f/mx:0)+"%'></i></div></td>"
       +"<td class='v'>"+fv(A[k])+"</td><td class='v'>"+fv(B[k])+"</td></tr>"; });
   h+="</table>";
   const fr=cs[0].v/tot;
   h+="<p class='meth' style='font-size:13px;margin-top:9px'>";
-  if(fr>0.55) h+="Más de la mitad de la distancia procede de un solo generador, "+GEN[cs[0].g][1]
-    +". En lo demás el par es casi coincidente, de modo que la cifra global oculta que la discrepancia está concentrada.";
-  else if(fr<0.25) h+="La distancia se reparte entre varios generadores sin que ninguno domine: el desacuerdo es general.";
-  else h+="El generador dominante es "+GEN[cs[0].g][1]+", con el "+fmt(100*fr)+" % de la distancia.";
-  if(dSub(A.i,B.i,SUB[0][1])<0.10) h+=" Aviso: a este par se le asignaron índices casi idénticos en el catálogo, así que su proximidad es una decisión de catalogación.";
+  if(fr>0.55) h+=t("parDomina")+" "+GEN[cs[0].g][1]()+t("parDominaFin");
+  else if(fr<0.25) h+=t("parReparte");
+  else h+=t("parDominante")+" "+GEN[cs[0].g][1]()+t("parDominantePct")+" "+fmt(100*fr)+" "+t("parDominanteFin");
+  if(dSub(A.i,B.i,SUB[0][1])<0.10) h+=t("parAviso");
   h+="</p>";
   host.innerHTML=h;
   drawRadar($("c-parradar"),[A,B],["#E8B33C","#35B7E6"]);
@@ -1886,15 +1925,15 @@ function pintarVecinos(){
   $("rec-ref").value=String(rec.ref);
   const lista=LENSES.filter(B=>B.i!==A.i&&pasaFiltro(A,B)).map(B=>({B,d:dSub(A.i,B.i,ix)}))
     .sort((a,b)=>a.d-b.d).slice(0,10);
-  let h="<tr><th style='width:22px'></th><th>Objetivo</th><th style='text-align:right'>d</th><th style='text-align:right'>pct</th>"
-    +"<th>Lo que más los separa</th><th style='text-align:right'>ΔK</th><th style='text-align:right'>Δaño</th></tr>";
-  if(!lista.length) h+="<tr><td colspan='7' class='kv'>Ningún objetivo cumple los filtros.</td></tr>";
+  let h="<tr><th style='width:22px'></th><th>"+t("thObjetivo")+"</th><th style='text-align:right'>d</th><th style='text-align:right'>pct</th>"
+    +"<th>"+t("thSepara")+"</th><th style='text-align:right'>ΔK</th><th style='text-align:right'>"+t("thAnio")+"</th></tr>";
+  if(!lista.length) h+="<tr><td colspan='7' class='kv'>"+t("sinVecinos")+"</td></tr>";
   lista.forEach(o=>{ const p=pctil(o.d,arr), c=colorDe(o.B.i);
     h+="<tr><td><button class='pick' type='button' data-p='"+o.B.i+"' aria-pressed='"+(c?"true":"false")
-      +"' style='--c:"+(c||"var(--d)")+"' aria-label='Comparar'></button></td>"
+      +"' style='--c:"+(c||"var(--d)")+"' aria-label='"+t("comparar")+"'></button></td>"
       +"<td><span class='nm' data-open='"+o.B.i+"' style='font-family:var(--cond);font-size:12.5px;color:var(--hi);cursor:pointer'>"+o.B.name+"</span>"
-      +(dSub(A.i,o.B.i,SUB[0][1])<0.10?" <span class='badge' style='border-color:var(--C);color:var(--C)'>índices casi idénticos</span>":"")
-      +"<div class='kv'>"+o.B.brand+" · "+o.B.year+" · "+o.B.arq+"</div></td>"
+      +(dSub(A.i,o.B.i,SUB[0][1])<0.10?" <span class='badge' style='border-color:var(--C);color:var(--C)'>"+t("casiIdenticos")+"</span>":"")
+      +"<div class='kv'>"+o.B.brand+" · "+o.B.year+" · "+arqNombre(o.B)+"</div></td>"
       +"<td class='v' style='color:var(--d)'>"+fmt(o.d,2)+"</td>"
       +"<td class='v' style='color:"+(p<5?"var(--ok)":p<25?"var(--txt)":"var(--mut)")+"'>"+fmt(p)+" %</td>"
       +"<td style='color:var(--mut)'>"+conDef(separador(A.i,o.B.i,ix))+"</td>"
@@ -1912,7 +1951,7 @@ function drawMap(){
   const W=1100,H=520,mL=54,mR=18,mT=16,mB=44;
   const s=svg(W,H); host.appendChild(s);
   let L=filtrar(); if(mapOnly) L=L.filter(o=>sel.includes(o.i));
-  if(!L.length){ txt(s,W/2,H/2,"Sin puntos con los filtros actuales","axl","middle"); return; }
+  if(!L.length){ txt(s,W/2,H/2,t("sinPuntos"),"axl","middle"); return; }
   const mx=MET.find(m=>m.k===mapX), my=MET.find(m=>m.k===mapY);
   const ex=extent(L,mapX), ey=extent(L,mapY);
   const X=v=>mL+(v-ex[0])/(ex[1]-ex[0]||1)*(W-mL-mR), Y=v=>H-mB-(v-ey[0])/(ey[1]-ey[0]||1)*(H-mT-mB);
@@ -1931,7 +1970,7 @@ function drawMap(){
       stroke:c||BRANDCOL[o.brand]||"#8A93A0","stroke-width":1.1,class:"pt"});
     p.addEventListener("mouseenter",e=>{ tip.style.opacity=1;
       tip.innerHTML=o.name+"<br>"+mx.n+" "+fmt(o[mapX],2)+"<br>"+my.n+" "+fmt(o[mapY],2)
-        +"<br><span style='color:var(--mut)'>"+(mapAcc==="sel"?"pulse para comparar":"pulse para la ficha")+"</span>";
+        +"<br><span style='color:var(--mut)'>"+(mapAcc==="sel"?t("pulseComparar"):t("pulseFicha"))+"</span>";
       const b=$("mapwrap").getBoundingClientRect();
       tip.style.left=(e.clientX-b.left+12)+"px"; tip.style.top=(e.clientY-b.top-8)+"px"; });
     p.addEventListener("mouseleave",()=>tip.style.opacity=0);
@@ -1949,7 +1988,7 @@ function pintarBanco(){
     const c=document.createElement("div"); c.className="cellb";
     const cv=document.createElement("canvas"); cv.width=168; cv.height=168; c.appendChild(cv);
     const cap=document.createElement("div"); cap.className="cap"; cap.textContent=L.name;
-    const sb=document.createElement("div"); sb.className="sub"; sb.textContent=L.year+" · esf "+(L.sa>0?"+":"")+L.sa;
+    const sb=document.createElement("div"); sb.className="sub"; sb.textContent=L.year+" · "+t("esfCorta")+" "+(L.sa>0?"+":"")+L.sa;
     c.appendChild(cap); c.appendChild(sb); host.appendChild(c);
     c.onclick=()=>abrirFicha(L);
     requestAnimationFrame(()=>renderDisc(cv,L,{N:L.fmax,side:"bg",field:0,blur:1,exp:0}));
@@ -1970,51 +2009,113 @@ function pintarSeccionMetrica(){
     txt(s,mL+i*bw+bw/2,H-8,(i+1),"axl","middle");
     if(i<3) txt(s,mL+i*bw+bw/2,Y(e)-5,fmt(100*e,1)+"%","axl","middle"); });
   path(s,dc,{stroke:"var(--F)","stroke-width":1.6});
-  txt(s,mL+2,mT+10,"acumulada "+fmt(100*PCA.ev.slice(0,3).reduce((a,b)=>a+b,0),1)+" % en tres","axl");
-  let t="<tr><th>Generador</th><th style='text-align:right'>PC1</th><th style='text-align:right'>PC2</th><th style='text-align:right'>PC3</th><th style='text-align:right'>σ</th></tr>";
-  GEN.forEach((g,i)=>{ t+="<tr><td>"+g[1]+"</td>"
+  txt(s,mL+2,mT+10,t("acumuladaTres")+" "+fmt(100*PCA.ev.slice(0,3).reduce((a,b)=>a+b,0),1)+" "+t("enTres"),"axl");
+  let tb="<tr><th>"+t("thGenerador")+"</th><th style='text-align:right'>PC1</th><th style='text-align:right'>PC2</th><th style='text-align:right'>PC3</th><th style='text-align:right'>σ</th></tr>";
+  GEN.forEach((g,i)=>{ tb+="<tr><td>"+g[1]()+"</td>"
     +[0,1,2].map(k=>{const v=PCA.eig[k].vec[i];
       return "<td class='v' style='color:"+(Math.abs(v)>0.33?"var(--d)":"var(--txt)")+"'>"+(v>0?"+":"")+fmt(v,3)+"</td>";}).join("")
     +"<td class='v' style='color:var(--mut)'>"+fmt(SDG[i],1)+"</td></tr>"; });
-  $("m-cargas").innerHTML=t;
-  let v="<tr><th>d</th><th>Par más próximo</th><th>Familia</th></tr>";
+  $("m-cargas").innerHTML=tb;
+  let v="<tr><th>d</th><th>"+t("thPar")+"</th><th>"+t("thFamilia")+"</th></tr>";
   PCA.pares.forEach(pr=>{ const A=LENSES[pr.i],B=LENSES[pr.j];
     v+="<tr><td class='v' style='width:44px'>"+fmt(pr.d,3)+"</td><td>"+A.name+" + "+B.name+"</td>"
-      +"<td style='color:"+(A.family===B.family?"var(--ok)":"var(--mut)")+"'>"+(A.family===B.family?"coincide":"distinta")+"</td></tr>"; });
+      +"<td style='color:"+(A.family===B.family?"var(--ok)":"var(--mut)")+"'>"+(A.family===B.family?t("coincide"):t("distinta"))+"</td></tr>"; });
   $("m-pares").innerHTML=v;
-  $("m-acierto").innerHTML="El vecino más próximo comparte familia óptica en el <b style='color:var(--ok)'>"+fmt(PCA.acierto)
-    +" %</b> de los "+LENSES.length+" casos, frente al "+fmt(PCA.azar)+" % que daría el azar. La familia no entra en el cálculo: la métrica la recupera sola, con un enriquecimiento de "
-    +fmt(PCA.acierto/PCA.azar,1)+" veces. Dimensión efectiva del espacio, exponencial de la entropía del espectro de varianza: <b>"+fmt(PCA.dimEf,2)+"</b> de "+NG+".";
+  $("m-acierto").innerHTML=t("aciertoA")+" <b style='color:var(--ok)'>"+fmt(PCA.acierto)
+    +" %</b> "+t("aciertoB")+" "+LENSES.length+" "+t("aciertoC")+" "+fmt(PCA.azar)+" "+t("aciertoD")+" "
+    +fmt(PCA.acierto/PCA.azar,1)+" "+t("aciertoE")+" <b>"+fmt(PCA.dimEf,2)+"</b> "+t("aciertoF")+" "+NG+".";
 }
 
 /* ---------- arranque ---------- */
-function grupo(host,items,cb,activo){
-  $(host).querySelectorAll(".chip").forEach(c=>c.remove());
-  items.forEach(it=>{
+/* Los grupos de chips se identifican por ÍNDICE, no por rótulo, para que el
+   cambio de idioma no pierda el filtro activo. */
+const act={brand:0,focal:0,era:0,tag:0,sub:0,rfocal:0,rmarca:0,repoca:0,macc:0};
+function grupo(host,items,cb,slot){
+  const H=$(host);
+  H.querySelectorAll(".chip").forEach(c=>c.remove());
+  items.forEach((it,k)=>{
     const b=document.createElement("button"); b.className="chip"; b.type="button";
-    b.textContent=Array.isArray(it)?it[0]:it;
-    b.setAttribute("aria-pressed",String((Array.isArray(it)?it[0]:it)===activo));
-    b.onclick=()=>{ $(host).querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed","false"));
-      b.setAttribute("aria-pressed","true"); cb(Array.isArray(it)?it[1]:it); };
-    $(host).appendChild(b);
+    b.textContent=it[0];
+    b.dataset.k=k;
+    b.setAttribute("aria-pressed",String(k===act[slot]));
+    b.onclick=()=>{ act[slot]=k;
+      H.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed","false"));
+      b.setAttribute("aria-pressed","true"); cb(it[1]); };
+    H.appendChild(b);
   });
 }
+/* Reconstruye todos los grupos de chips con los rótulos del idioma vigente. */
+function pintarGrupos(){
+  grupo("f-brand",FB(),v=>{fil.brand=v;pintarLista();drawMap();},"brand");
+  grupo("f-focal",FF(),v=>{fil.focal=v;pintarLista();drawMap();},"focal");
+  grupo("f-era",FE(),v=>{fil.era=v;pintarLista();drawMap();},"era");
+  grupo("f-tag",FT(),v=>{fil.tag=v;pintarLista();drawMap();},"tag");
+  grupo("c-sub",SUB.map((s,k)=>[s[0](),k]),v=>{sub=v;pintarBanco2();},"sub");
+  grupo("rec-focal",[[t("recFocalAny"),"any"],[t("recFocalSame"),"same"]],v=>{rec.focal=v;pintarVecinos();},"rfocal");
+  grupo("rec-marca",[[t("recMarcaAny"),"any"],[t("recMarcaOtra"),"otra"]],v=>{rec.marca=v;pintarVecinos();},"rmarca");
+  grupo("rec-epoca",[[t("recEpocaAny"),"any"],[t("recEpocaAntes"),"antes"],[t("recEpocaDespues"),"despues"]],v=>{rec.epoca=v;pintarVecinos();},"repoca");
+  grupo("m-accion",[[t("mapSel"),"sel"],[t("mapFicha"),"ficha"]],v=>{mapAcc=v;drawMap();},"macc");
+}
+function pintarEjes(){
+  const opts=MET.map(m=>"<option value='"+m.k+"'>"+m.n+"</option>").join("");
+  $("ax").innerHTML=opts; $("ay").innerHTML=opts; $("ax").value=mapX; $("ay").value=mapY;
+}
+function pintarLeyendaMapa(){
+  $("maplegend").innerHTML=Object.keys(BRANDCOL).map(b=>"<span style='display:inline-flex;align-items:center;gap:4px;margin-right:11px'>"
+    +"<s style='display:inline-block;width:8px;height:8px;border-radius:50%;background:"+BRANDCOL[b]+";text-decoration:none'></s>"+b+"</span>").join("")
+    +"<span>"+t("mapPie")+"</span>";
+}
+
+/* ---------- repintado al cambiar de idioma ----------
+   El conmutador llama a window.onLangChange también al arrancar, antes de que
+   init() haya corrido: de ahí la comprobación de LISTO. */
+let LISTO=false;
+function aplicarEtiquetas(){
+  /* atributos y rótulos que el marcado dual no puede cubrir */
+  $("q").placeholder=t("phBuscar"); $("q").setAttribute("aria-label",t("ariaBuscar"));
+  $("dots").title=t("ariaDots");
+  $("sort").setAttribute("aria-label",t("ariaOrden"));
+  $("rec-ref").setAttribute("aria-label",t("ariaRef"));
+  $("ax").setAttribute("aria-label",t("ariaEjeX")); $("ay").setAttribute("aria-label",t("ariaEjeY"));
+  $("drawer").setAttribute("aria-label",t("ariaFicha"));
+  $("xdrawer").setAttribute("aria-label",t("ariaCerrar"));
+  $("f-prev").setAttribute("aria-label",t("ariaAnterior"));
+  $("f-next").setAttribute("aria-label",t("ariaSiguiente"));
+  $("bokeh").setAttribute("aria-label",t("ariaDisco"));
+  $("lab").textContent=mapLab?t("ocultar"):t("mostrar");
+  if(!cur){
+    $("f-brandline").textContent=t("sinSelBreve");
+    $("f-name").textContent=t("fichaVacia");
+    $("f-add").textContent=t("addCmp");
+  }
+}
+function aplicarIdioma(){
+  aplicarEtiquetas();
+  /* listas y selectores reconstruidos con los rótulos nuevos */
+  const so=$("sort").value;
+  $("sort").innerHTML=SORTS().map(s=>"<option value='"+s[0]+"'>"+s[1]+"</option>").join("");
+  $("sort").value=so||"year";
+  pintarEjes(); pintarLeyendaMapa(); pintarGrupos();
+  /* todo lo que se dibuja desde el diccionario */
+  pintarLista(); pintarBanco(); pintarSeccionMetrica(); refrescarSel();
+  if(cur) pintarFicha(cur);
+}
+window.onLangChange=function(){ if(LISTO) aplicarIdioma(); };
+
 function init(){
   construirMetrica();
   $("stat-count").textContent=LENSES.length;
   $("stat-brands").textContent=new Set(LENSES.map(l=>l.brand)).size;
+  pintarGrupos();
 
-  grupo("f-brand",FB,v=>{fil.brand=v;pintarLista();drawMap();},"Todas");
-  grupo("f-focal",FF,v=>{fil.focal=v;pintarLista();drawMap();},"Todas");
-  grupo("f-era",FE,v=>{fil.era=v;pintarLista();drawMap();},"Todas");
-  grupo("f-tag",[["Todos",null]].concat(TAGDEF.map(t=>[t[0],t[0]])),v=>{fil.tag=v;pintarLista();drawMap();},"Todos");
-  $("sort").innerHTML=SORTS.map(s=>"<option value='"+s[0]+"'>"+s[1]+"</option>").join("");
+  $("sort").innerHTML=SORTS().map(s=>"<option value='"+s[0]+"'>"+s[1]+"</option>").join("");
   $("sort").onchange=e=>{fil.sort=e.target.value;pintarLista();};
   $("q").oninput=e=>{fil.q=e.target.value;pintarLista();drawMap();};
   $("reset").onclick=()=>{ fil={brand:"Todas",focal:null,era:null,tag:null,q:"",sort:"year"};
     $("q").value=""; $("sort").value="year";
-    [["f-brand","Todas"],["f-focal","Todas"],["f-era","Todas"],["f-tag","Todos"]].forEach(([h,a])=>
-      $(h).querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",String(c.textContent===a))));
+    act.brand=act.focal=act.era=act.tag=0;
+    ["f-brand","f-focal","f-era","f-tag"].forEach(h=>
+      $(h).querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",String(c.dataset.k==="0"))));
     pintarLista(); drawMap(); };
 
   /* cajón */
@@ -2035,7 +2136,6 @@ function init(){
     b.setAttribute("aria-pressed","true"); sim.side=b.dataset.v; actualizarSim(); });
 
   /* banco */
-  grupo("c-sub",SUB.map((s,k)=>[s[0],k]),v=>{sub=v;pintarBanco2();},"Todo");
   $("clearsel").onclick=()=>{ sel=[]; par=null; refrescarSel(); };
   $("gocmp").onclick=()=>{ cerrarFicha(); $("comparar").scrollIntoView({behavior:"smooth",block:"start"}); };
   document.querySelectorAll('.tabs [role="tab"]').forEach(b=>b.onclick=()=>{
@@ -2047,22 +2147,15 @@ function init(){
   $("rec-ref").innerHTML=LENSES.slice().sort((a,b)=>a.name.localeCompare(b.name,"es"))
     .map(L=>"<option value='"+L.i+"'>"+L.name+"</option>").join("");
   $("rec-ref").onchange=e=>{rec.ref=+e.target.value;pintarVecinos();};
-  grupo("rec-focal",[["Cualquier focal","any"],["Focal equivalente","same"]],v=>{rec.focal=v;pintarVecinos();},"Cualquier focal");
-  grupo("rec-marca",[["Cualquier fabricante","any"],["Otro fabricante","otra"]],v=>{rec.marca=v;pintarVecinos();},"Cualquier fabricante");
-  grupo("rec-epoca",[["Cualquier época","any"],["Anterior","antes"],["Posterior","despues"]],v=>{rec.epoca=v;pintarVecinos();},"Cualquier época");
 
   /* mapa */
-  const opts=MET.map(m=>"<option value='"+m.k+"'>"+m.n+"</option>").join("");
-  $("ax").innerHTML=opts; $("ay").innerHTML=opts; $("ax").value=mapX; $("ay").value=mapY;
+  pintarEjes();
   $("ax").onchange=e=>{mapX=e.target.value;drawMap();};
   $("ay").onchange=e=>{mapY=e.target.value;drawMap();};
-  grupo("m-accion",[["Añadir a comparación","sel"],["Abrir ficha","ficha"]],v=>{mapAcc=v;drawMap();},"Añadir a comparación");
   $("lab").onclick=()=>{ mapLab=!mapLab; $("lab").setAttribute("aria-pressed",String(mapLab));
-    $("lab").textContent=mapLab?"Ocultar":"Mostrar"; drawMap(); };
+    $("lab").textContent=mapLab?t("ocultar"):t("mostrar"); drawMap(); };
   $("onlysel").onclick=()=>{ mapOnly=!mapOnly; $("onlysel").setAttribute("aria-pressed",String(mapOnly)); drawMap(); };
-  $("maplegend").innerHTML=Object.keys(BRANDCOL).map(b=>"<span style='display:inline-flex;align-items:center;gap:4px;margin-right:11px'>"
-    +"<s style='display:inline-block;width:8px;height:8px;border-radius:50%;background:"+BRANDCOL[b]+";text-decoration:none'></s>"+b+"</span>").join("")
-    +"<span>· radio proporcional a la apertura máxima · anillo = en la selección</span>";
+  pintarLeyendaMapa();
 
   /* navegación activa */
   const secs=["catalogo","comparar","mapa","metodo"];
@@ -2080,6 +2173,8 @@ function init(){
     const L=LENSES.find(l=>l.name===n); if(L&&sel.length<3) sel.push(L.i); });
   rec.ref=sel[0]; refrescarSel(); pintarSeccionMetrica();
   if(mL){ const L=LENSES.find(l=>l.name===mL[1]); if(L) abrirFicha(L); }
+  aplicarEtiquetas();
+  LISTO=true;
 }
 init();
 </script>
