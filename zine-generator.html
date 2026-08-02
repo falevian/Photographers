@@ -3,7 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zine Generator · Rafael Vida</title>
+<title>Generador de zines · Rafael Vida</title>
+<meta name="author" content="Rafael Vida">
+<meta name="description" content="Maquetación de fanzines y fotolibros a partir de tus propias fotos: ordena por fecha EXIF, calcula la imposición de cuadernillo y exporta un PDF A4 dúplex listo para imprimir y plegar.">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
 <style>
 :root {
   --bg:#f5f4f0; --bg2:#eceae4; --fg:#1a1a18; --fg2:#6b6b66; --fg3:#a0a09a;
@@ -114,9 +126,33 @@ main{padding:1.75rem 2.5rem;display:flex;flex-direction:column;gap:1.25rem}
   aside{border-right:none;border-bottom:1px solid var(--border)}
   header,main,aside{padding:1.25rem}
 }
+
+/* ---------- conmutador de idioma ---------- */
+html[lang="es"] [data-lang="en"]{display:none!important}
+html[lang="en"] [data-lang="es"]{display:none!important}
+html[lang="en"] #thumbs .thumb.broken::after{content:'✕ cannot decode'}
+.langbar{position:fixed;top:14px;right:16px;z-index:100;display:flex;
+         background:rgba(255,255,255,.92);border:1px solid var(--border2);border-radius:8px;
+         overflow:hidden;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.langbar button{font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;
+                background:transparent;border:0;color:var(--fg2);padding:7px 11px;cursor:pointer;
+                transition:background .15s,color .15s}
+.langbar button+button{border-left:1px solid var(--border2)}
+.langbar button:hover{color:var(--fg)}
+.langbar button.on{background:rgba(39,112,74,.12);color:var(--green)}
+.langbar button:focus-visible{outline:2px solid rgba(39,112,74,.6);outline-offset:-2px}
+/* deja sitio a la barra para que no tape el estado de tipografías */
+header{padding-right:118px}
+@media(max-width:720px){.langbar{top:8px;right:8px}}
+@media(max-width:700px){header{padding-right:104px}}
 </style>
 </head>
 <body class="font-typewriter">
+
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
 
 <header>
   <h1>Zine Generator</h1>
@@ -128,15 +164,17 @@ main{padding:1.75rem 2.5rem;display:flex;flex-direction:column;gap:1.25rem}
 <div class="layout">
 <aside>
   <div>
-    <div class="section-label">Metadatos</div>
-    <div class="field"><label>Título</label><input id="f-title" type="text" placeholder="Mi zine"></div>
-    <div class="field"><label>Autor / a</label><input id="f-author" type="text" placeholder="Nombre"></div>
+    <div class="section-label" data-lang="es">Metadatos</div>
+    <div class="section-label" data-lang="en">Metadata</div>
+    <div class="field"><label data-lang="es">Título</label><label data-lang="en">Title</label><input id="f-title" type="text" placeholder="Mi zine" data-ph-es="Mi zine" data-ph-en="My zine"></div>
+    <div class="field"><label data-lang="es">Autor / a</label><label data-lang="en">Author</label><input id="f-author" type="text" placeholder="Nombre" data-ph-es="Nombre" data-ph-en="Name"></div>
     <div class="fields-2">
-      <div class="field"><label>Número</label><input id="f-issue" type="text" placeholder="01"></div>
-      <div class="field"><label>Año</label><input id="f-year" type="text" placeholder="2026" value="2026"></div>
+      <div class="field"><label data-lang="es">Número</label><label data-lang="en">Issue</label><input id="f-issue" type="text" placeholder="01"></div>
+      <div class="field"><label data-lang="es">Año</label><label data-lang="en">Year</label><input id="f-year" type="text" placeholder="2026" value="2026"></div>
     </div>
     <div class="field">
-      <label>Tipografía</label>
+      <label data-lang="es">Tipografía</label>
+      <label data-lang="en">Typeface</label>
       <select id="f-font">
         <option value="typewriter" selected>Special Elite · máquina de escribir</option>
         <option value="sans">Inter · sans neutra</option>
@@ -144,7 +182,8 @@ main{padding:1.75rem 2.5rem;display:flex;flex-direction:column;gap:1.25rem}
       </select>
     </div>
     <div class="field">
-      <label>Orden de fotos</label>
+      <label data-lang="es">Orden de fotos</label>
+      <label data-lang="en">Photo order</label>
       <select id="f-order">
         <option value="exif">EXIF · fecha de captura</option>
         <option value="modified">Fecha de archivo</option>
@@ -155,7 +194,8 @@ main{padding:1.75rem 2.5rem;display:flex;flex-direction:column;gap:1.25rem}
   </div>
 
   <div>
-    <div class="section-label">Vista previa portada</div>
+    <div class="section-label" data-lang="es">Vista previa portada</div>
+    <div class="section-label" data-lang="en">Front cover preview</div>
     <div class="preview" id="cover-preview">
       <div class="preview-title" id="pv-title">ZINE</div>
       <div class="preview-line"></div>
@@ -163,13 +203,15 @@ main{padding:1.75rem 2.5rem;display:flex;flex-direction:column;gap:1.25rem}
         <span id="pv-author"></span>
         <span id="pv-issue">N.º 01 · 2026</span>
       </div>
-      <div class="preview-caption">portada / contraportada</div>
+      <div class="preview-caption" data-lang="es">portada / contraportada</div>
+      <div class="preview-caption" data-lang="en">front cover / back cover</div>
     </div>
   </div>
 
   <div>
-    <div class="section-label">Estructura calculada</div>
-    <div class="spec" id="spec-box">Carga fotos para ver la estructura</div>
+    <div class="section-label" data-lang="es">Estructura calculada</div>
+    <div class="section-label" data-lang="en">Computed structure</div>
+    <div class="spec" id="spec-box"><span data-lang="es">Carga fotos para ver la estructura</span><span data-lang="en">Load photos to see the structure</span></div>
   </div>
 </aside>
 
@@ -180,24 +222,27 @@ main{padding:1.75rem 2.5rem;display:flex;flex-direction:column;gap:1.25rem}
       <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
       <polyline points="21 15 16 10 5 21"/>
     </svg>
-    <div class="dz-main">Suelta las fotos aquí o haz clic para seleccionar</div>
-    <div class="dz-hint">JPEG · PNG · WEBP · ordena por fecha EXIF automáticamente</div>
+    <div class="dz-main" data-lang="es">Suelta las fotos aquí o haz clic para seleccionar</div>
+    <div class="dz-main" data-lang="en">Drop your photos here, or click to choose them</div>
+    <div class="dz-hint" data-lang="es">JPEG · PNG · WEBP · ordena por fecha EXIF automáticamente</div>
+    <div class="dz-hint" data-lang="en">JPEG · PNG · WEBP · sorted by EXIF capture date automatically</div>
   </div>
 
   <div class="counter-row">
-    <div id="counter">Sin fotos</div>
+    <div id="counter"><span data-lang="es">Sin fotos</span><span data-lang="en">No photos</span></div>
     <div class="bar-wrap"><div id="fill-bar"></div></div>
     <div id="exif-info"></div>
   </div>
 
   <div id="thumbs-section" style="display:none">
-    <div class="thumbs-hint">Arrastra las miniaturas para reordenar · doble clic para borrar</div>
+    <div class="thumbs-hint" data-lang="es">Arrastra las miniaturas para reordenar · doble clic para borrar</div>
+    <div class="thumbs-hint" data-lang="en">Drag the thumbnails to reorder · double-click to delete</div>
     <div id="thumbs"></div>
   </div>
 
   <div class="actions">
-    <button class="btn btn-primary" id="btn-gen" disabled>Generar PDF cuadernillo</button>
-    <button class="btn btn-ghost" id="btn-clear">Limpiar</button>
+    <button class="btn btn-primary" id="btn-gen" disabled><span data-lang="es">Generar PDF cuadernillo</span><span data-lang="en">Generate booklet PDF</span></button>
+    <button class="btn btn-ghost" id="btn-clear"><span data-lang="es">Limpiar</span><span data-lang="en">Clear</span></button>
   </div>
 
   <div id="progress-wrap">
@@ -208,10 +253,146 @@ main{padding:1.75rem 2.5rem;display:flex;flex-direction:column;gap:1.25rem}
 </main>
 </div>
 
+<script>
+"use strict";
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{
+      title:"Generador de zines · Rafael Vida",
+      desc:"Maquetación de fanzines y fotolibros a partir de tus propias fotos: ordena por fecha EXIF, calcula la imposición de cuadernillo y exporta un PDF A4 dúplex listo para imprimir y plegar."
+    },
+    en:{
+      title:"Zine generator · Rafael Vida",
+      desc:"Layout for fanzines and photobooks from your own photos: sort by EXIF capture date, work out the booklet imposition and export a duplex A4 PDF ready to print and fold."
+    }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    /* atributos, que no admiten bloques duales */
+    [].forEach.call(document.querySelectorAll("[data-ph-"+l+"]"),function(e){
+      e.setAttribute("placeholder", e.getAttribute("data-ph-"+l));
+    });
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exifr@7.1.3/dist/full.umd.js"></script>
 <script>
 const { jsPDF } = window.jspdf;
+
+// ═══════════════════════════════════════════════════════
+//  DICCIONARIO DE CADENAS GENERADAS POR JS
+//  Todo lo que el JS escribe en la interfaz (o en el PDF) pasa por t().
+//  Los bloques duales data-lang sólo sirven para el texto estático.
+// ═══════════════════════════════════════════════════════
+const T = {
+  es: {
+    fontsEmbedded: '✓ tipografías embebidas',
+    loadPhotos:    'Carga fotos para ver la estructura',
+    noPhotos:      'Sin fotos',
+    photo:         ' foto',
+    photos:        ' fotos',
+    pagesDot:      ' páginas · ',
+    sheetsDuplex:  ' hojas A4 dúplex',
+    pageSg:        'Pág ',
+    pagePl:        'Pág ',
+    cover:         'Portada',
+    blank:         'Blanco',
+    thumbnails:    'Miniaturas',
+    backCover:     'Contraportada',
+    padWord:       'relleno',
+    duplexNote:    'Dúplex A4 apaisado · volteo <b>borde largo</b>',
+    colourNote:    'Color · <b>sRGB</b> gestionado',
+    wideGamut:     ' foto(s) en gama amplia → sRGB',
+    tagSheets:     ' hojas · ',
+    tagPages:      ' páginas',
+    readingExif:   'leyendo EXIF…',
+    exifRest:      ' (resto por fecha de archivo)',
+    notDecoded:    ' sin decodificar',
+    noExif:        ' · sin EXIF',
+    dragReorder:   ' · arrastra para reordenar',
+    cannotDecode:  ' · el navegador no puede decodificar esta imagen (¿HEIC?)',
+    sheetWord:     'Hoja ',
+    sideFront:     ' · anverso — p',
+    sideBack:      ' · dorso — p',
+    packing:       'Empaquetando PDF…',
+    fontError:     'Error registrando fuente, se usará Courier:',
+    undecodable:   'imagen no decodificable',
+    indexLabel:    'ÍNDICE · ',
+    issueUi:       'N.º ',
+    issuePdf:      'N.',
+    optFont:  { typewriter:'Special Elite · máquina de escribir', sans:'Inter · sans neutra', serif:'EB Garamond · serif editorial' },
+    optOrder: { exif:'EXIF · fecha de captura', modified:'Fecha de archivo', name:'Nombre de archivo', manual:'Manual · arrastrar' },
+    pdfOk: (s, n, f) => '✓ PDF listo · ' + s + ' hojas · ' + n + ' páginas · tipografía ' + f + ' embebida',
+    pdfWarn: (k, names) => '⚠ PDF generado, pero ' + k + ' imagen(es) no se pudieron decodificar y salen como hueco: ' +
+                           names + '. Si son HEIC, conviértelas a JPEG (Chrome/Firefox no decodifican HEIC).'
+  },
+  en: {
+    fontsEmbedded: '✓ fonts embedded',
+    loadPhotos:    'Load photos to see the structure',
+    noPhotos:      'No photos',
+    photo:         ' photo',
+    photos:        ' photos',
+    pagesDot:      ' pages · ',
+    sheetsDuplex:  ' duplex A4 sheets',
+    pageSg:        'p. ',
+    pagePl:        'pp. ',
+    cover:         'Front cover',
+    blank:         'Blank',
+    thumbnails:    'Thumbnails',
+    backCover:     'Back cover',
+    padWord:       'padding',
+    duplexNote:    'Landscape A4 duplex · <b>long-edge</b> flip',
+    colourNote:    'Colour · managed <b>sRGB</b>',
+    wideGamut:     ' wide-gamut photo(s) → sRGB',
+    tagSheets:     ' sheets · ',
+    tagPages:      ' pages',
+    readingExif:   'reading EXIF…',
+    exifRest:      ' (the rest by file date)',
+    notDecoded:    ' not decoded',
+    noExif:        ' · no EXIF',
+    dragReorder:   ' · drag to reorder',
+    cannotDecode:  ' · the browser cannot decode this image (HEIC?)',
+    sheetWord:     'Sheet ',
+    sideFront:     ' · front — p',
+    sideBack:      ' · back — p',
+    packing:       'Packaging the PDF…',
+    fontError:     'Could not register the font, Courier will be used instead:',
+    undecodable:   'undecodable image',
+    indexLabel:    'INDEX · ',
+    issueUi:       'No. ',
+    issuePdf:      'No.',
+    optFont:  { typewriter:'Special Elite · typewriter', sans:'Inter · neutral sans', serif:'EB Garamond · editorial serif' },
+    optOrder: { exif:'EXIF · capture date', modified:'File date', name:'File name', manual:'Manual · drag' },
+    pdfOk: (s, n, f) => '✓ PDF ready · ' + s + ' sheets · ' + n + ' pages · ' + f + ' typeface embedded',
+    pdfWarn: (k, names) => '⚠ PDF generated, but ' + k + ' image(s) could not be decoded and come out as gaps: ' +
+                           names + '. If they are HEIC, convert them to JPEG (Chrome and Firefox do not decode HEIC).'
+  }
+};
+function t(k) { return (T[document.documentElement.lang] || T.es)[k]; }
+
+// Nombres propios de las tipografías: no se traducen, sólo su descripción.
+const FONT_LABELS = { typewriter:'Special Elite', sans:'Inter', serif:'EB Garamond' };
 
 // ═══════════════════════════════════════════════════════
 //  FUENTES EMBEBIDAS EN BASE64 (definidas como data: URI en CSS arriba,
@@ -298,7 +479,7 @@ function updateSpec() {
   const thumbsSection = document.getElementById('thumbs-section');
 
   if (n === 0) {
-    specEl.textContent = 'Carga fotos para ver la estructura';
+    specEl.textContent = t('loadPhotos');
     tagEl.textContent = '';
     thumbsSection.style.display = 'none';
     return;
@@ -310,21 +491,21 @@ function updateSpec() {
   const wideGamut = items.filter(it => it.colorSpace != null && it.colorSpace !== 1).length;
 
   specEl.innerHTML =
-    '<b>' + total + ' páginas · ' + sheets + ' hojas A4 dúplex</b><br>' +
+    '<b>' + total + t('pagesDot') + sheets + t('sheetsDuplex') + '</b><br>' +
     '<span class="dim">──────────────────────</span><br>' +
-    'Pág 1 · Portada<br>' +
-    'Pág 2 · Blanco<br>' +
-    'Pág 3–4 · Miniaturas<br>' +
-    'Pág 5–' + (4 + n) + ' · <b>' + n + ' fotos</b><br>' +
-    (padding > 0 ? 'Pág ' + (5+n) + '–' + (total-2) + ' · Blanco (' + padding + ' relleno)<br>' : '') +
-    'Pág ' + (total-1) + ' · Blanco<br>' +
-    'Pág ' + total + ' · Contraportada<br>' +
+    t('pageSg') + '1 · ' + t('cover') + '<br>' +
+    t('pageSg') + '2 · ' + t('blank') + '<br>' +
+    t('pagePl') + '3–4 · ' + t('thumbnails') + '<br>' +
+    t('pagePl') + '5–' + (4 + n) + ' · <b>' + n + (n !== 1 ? t('photos') : t('photo')) + '</b><br>' +
+    (padding > 0 ? t('pagePl') + (5+n) + '–' + (total-2) + ' · ' + t('blank') + ' (' + padding + ' ' + t('padWord') + ')<br>' : '') +
+    t('pageSg') + (total-1) + ' · ' + t('blank') + '<br>' +
+    t('pageSg') + total + ' · ' + t('backCover') + '<br>' +
     '<span class="dim">──────────────────────</span><br>' +
-    'Dúplex A4 apaisado · volteo <b>borde largo</b><br>' +
-    'Color · <b>sRGB</b> gestionado' +
-    (wideGamut > 0 ? '<br><span class="dim">' + wideGamut + ' foto(s) en gama amplia → sRGB</span>' : '');
+    t('duplexNote') + '<br>' +
+    t('colourNote') +
+    (wideGamut > 0 ? '<br><span class="dim">' + wideGamut + t('wideGamut') + '</span>' : '');
 
-  tagEl.textContent = sheets + ' hojas · ' + total + ' páginas';
+  tagEl.textContent = sheets + t('tagSheets') + total + t('tagPages');
 
   thumbsSection.style.display = '';
 }
@@ -346,7 +527,7 @@ function updatePreview() {
   const m = readMeta();
   document.getElementById('pv-title').textContent = m.title.toUpperCase();
   document.getElementById('pv-author').textContent = m.author.toUpperCase();
-  document.getElementById('pv-issue').textContent = 'N.º ' + m.issue + ' · ' + m.year;
+  document.getElementById('pv-issue').textContent = t('issueUi') + m.issue + ' · ' + m.year;
 }
 ['f-title','f-author','f-issue','f-year'].forEach(id => {
   document.getElementById(id).addEventListener('input', updatePreview);
@@ -390,7 +571,7 @@ document.getElementById('f-order').addEventListener('change', () => {
 async function handleFiles(incoming) {
   const arr = Array.from(incoming).filter(f => f.type.startsWith('image/'));
   if (!arr.length) return;
-  exifInfo.innerHTML = 'leyendo EXIF…';
+  exifInfo.innerHTML = t('readingExif');
   fillBar.style.width = '0%';
 
   const newItems = [];
@@ -434,8 +615,8 @@ function refreshExifInfo() {
   const broken   = items.filter(it => it.broken).length;
   let html = (withExif === n)
     ? '<span class="ok">EXIF: ' + withExif + '/' + n + '</span>'
-    : '<span class="warn">EXIF: ' + withExif + '/' + n + ' (resto por fecha de archivo)</span>';
-  if (broken) html += ' <span class="err">· ' + broken + ' sin decodificar</span>';
+    : '<span class="warn">EXIF: ' + withExif + '/' + n + t('exifRest') + '</span>';
+  if (broken) html += ' <span class="err">· ' + broken + t('notDecoded') + '</span>';
   exifInfo.innerHTML = html;
 }
 
@@ -446,9 +627,16 @@ function refreshExifInfo() {
 
 let dragSrcIdx = null;
 
+// El contador vive fuera de renderThumbs para poder repintarlo al cambiar de idioma.
+function refreshCounter() {
+  const n = items.length;
+  if (!n) { counter.textContent = t('noPhotos'); return; }
+  counter.innerHTML = '<strong>' + n + '</strong>' + (n !== 1 ? t('photos') : t('photo'));
+}
+
 function renderThumbs() {
   const n = items.length;
-  counter.innerHTML = '<strong>' + n + '</strong> foto' + (n !== 1 ? 's' : '');
+  refreshCounter();
   btnGen.disabled = n < 1;
   thumbsEl.innerHTML = '';
 
@@ -457,13 +645,14 @@ function renderThumbs() {
     wrap.className = 'thumb';
     wrap.draggable = true;
     wrap.dataset.idx = i;
-    wrap.title = it.name + (it.exifDate ? ' · ' + it.exifDate.toLocaleString() : ' · sin EXIF') + ' · arrastra para reordenar';
+    const loc = document.documentElement.lang === 'en' ? 'en-GB' : 'es-ES';
+    wrap.title = it.name + (it.exifDate ? ' · ' + it.exifDate.toLocaleString(loc) : t('noExif')) + t('dragReorder');
 
     const img = new Image();
     img.onerror = () => {
       it.broken = true;
       wrap.classList.add('broken');
-      wrap.title = it.name + ' · el navegador no puede decodificar esta imagen (¿HEIC?)';
+      wrap.title = it.name + t('cannotDecode');
       refreshExifInfo();
     };
     img.onload = () => {
@@ -556,7 +745,7 @@ function renderThumbs() {
 
 function clearAll() {
   items = []; thumbsEl.innerHTML = '';
-  counter.textContent = 'Sin fotos'; fillBar.style.width = '0%';
+  refreshCounter(); fillBar.style.width = '0%';
   exifInfo.innerHTML = '';
   btnGen.disabled = true; statusEl.textContent = ''; statusEl.className = '';
   progressWrap.style.display = 'none';
@@ -652,7 +841,7 @@ function drawMissing(doc, offX, pad, w, h, name) {
   doc.line(x + w, y, x, y + h);
   setTypewriter(doc, 8);
   doc.setTextColor(192, 57, 43);
-  doc.text('imagen no decodificable', offX + (w + pad*2)/2, y + h/2, { align: 'center' });
+  doc.text(t('undecodable'), offX + (w + pad*2)/2, y + h/2, { align: 'center' });
   setTypewriter(doc, 6);
   doc.setTextColor(120, 118, 112);
   doc.text(doc.splitTextToSize(name, w - 6), offX + (w + pad*2)/2, y + h/2 + 6, { align: 'center' });
@@ -739,7 +928,7 @@ function renderCover(doc, offX, PW, PH, meta) {
   setTypewriter(doc, 8);
   doc.setTextColor(70, 70, 66);
   if (meta.author) doc.text(meta.author.toUpperCase(), offX + 12, PH/2 + 11);
-  doc.text('N.' + meta.issue + '  ·  ' + meta.year, offX + PW - 12, PH/2 + 11, { align: 'right' });
+  doc.text(t('issuePdf') + meta.issue + '  ·  ' + meta.year, offX + PW - 12, PH/2 + 11, { align: 'right' });
 
   // marco
   doc.setDrawColor(180, 178, 172);
@@ -770,7 +959,7 @@ async function renderThumbnailPage(doc, half, offX, PW, PH) {
 
   setTypewriter(doc, 8);
   doc.setTextColor(0, 0, 0);
-  doc.text(half === 0 ? 'ÍNDICE · I' : 'ÍNDICE · II', offX + margin, margin + 3);
+  doc.text(t('indexLabel') + (half === 0 ? 'I' : 'II'), offX + margin, margin + 3);
 
   const startIdx = half === 0 ? 0 : cols * rows;
   for (let i = 0; i < cols * rows; i++) {
@@ -828,7 +1017,7 @@ async function generatePDF() {
     doc.addFileToVFS(f.file, f.b64);
     doc.addFont(f.file, f.jsName, 'normal');
   } catch (e) {
-    console.warn('Error registrando fuente, se usará Courier:', e);
+    console.warn(t('fontError'), e);
   }
 
   let firstPage = true;
@@ -837,7 +1026,7 @@ async function generatePDF() {
     const imp = imposition(sheet, N);
     const pct = Math.round(((sheet - 1) / sheets) * 95);
 
-    setProgress(pct, 'Hoja ' + sheet + '/' + sheets + ' · anverso — p' + imp.frontLeft + ' | p' + imp.frontRight);
+    setProgress(pct, t('sheetWord') + sheet + '/' + sheets + t('sideFront') + imp.frontLeft + ' | p' + imp.frontRight);
     await tick();
     if (!firstPage) doc.addPage();
     firstPage = false;
@@ -845,7 +1034,7 @@ async function generatePDF() {
     await renderPage(doc, imp.frontRight, N, nPhotos, PW, PW, PH, meta);
     drawFoldLine(doc, PW, PH);
 
-    setProgress(pct + Math.round(48 / sheets), 'Hoja ' + sheet + '/' + sheets + ' · dorso — p' + imp.backLeft + ' | p' + imp.backRight);
+    setProgress(pct + Math.round(48 / sheets), t('sheetWord') + sheet + '/' + sheets + t('sideBack') + imp.backLeft + ' | p' + imp.backRight);
     await tick();
     doc.addPage();
     await renderPage(doc, imp.backLeft,  N, nPhotos, 0,  PW, PH, meta);
@@ -853,7 +1042,7 @@ async function generatePDF() {
     drawFoldLine(doc, PW, PH);
   }
 
-  setProgress(99, 'Empaquetando PDF…');
+  setProgress(99, t('packing'));
   await tick();
 
   const slug = meta.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
@@ -862,16 +1051,46 @@ async function generatePDF() {
   progressWrap.style.display = 'none';
   if (failedFiles.size) {
     const names = [...failedFiles].map(f => f.name).join(', ');
-    statusEl.textContent = '⚠ PDF generado, pero ' + failedFiles.size +
-      ' imagen(es) no se pudieron decodificar y salen como hueco: ' + names +
-      '. Si son HEIC, conviértelas a JPEG (Chrome/Firefox no decodifican HEIC).';
+    statusEl.textContent = t('pdfWarn')(failedFiles.size, names);
     statusEl.className = 'warn';
   } else {
-    statusEl.textContent = '✓ PDF listo · ' + sheets + ' hojas · ' + N + ' páginas · tipografía ' + currentFontKey + ' embebida';
+    statusEl.textContent = t('pdfOk')(sheets, N, FONT_LABELS[currentFontKey]);
     statusEl.className = 'ok';
   }
   btnGen.disabled = false;
 }
+
+// ═══════════════════════════════════════════════════════
+//  REPINTADO AL CAMBIAR DE IDIOMA
+//  Todo lo que el JS escribe (estructura, contador, vista previa, avisos,
+//  opciones de los selects) se vuelve a pintar desde el diccionario.
+//  Se declara al final del arranque, así que el apply() inicial del
+//  conmutador no lo encuentra todavía y no repinta una app a medio montar.
+// ═══════════════════════════════════════════════════════
+function retranslateOptions() {
+  const map = { 'f-font': t('optFont'), 'f-order': t('optOrder') };
+  Object.keys(map).forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    Array.prototype.forEach.call(sel.options, o => {
+      if (map[id][o.value]) o.textContent = map[id][o.value];
+    });
+  });
+}
+
+window.onLangChange = function () {
+  // seguro llamarlo en el arranque: si la app aún no está montada, no hace nada
+  if (!document.getElementById('spec-box')) return;
+  const fs = document.getElementById('font-status');
+  if (fs) fs.textContent = t('fontsEmbedded');
+  retranslateOptions();
+  updatePreview();
+  refreshExifInfo();
+  if (items.length) renderThumbs();   // los títulos de las miniaturas llevan texto
+  else refreshCounter();
+  updateSpec();
+};
+window.onLangChange();
 </script>
 </body>
 </html>
