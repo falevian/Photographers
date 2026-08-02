@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Manual técnico avanzado · Simulador del eclipse · A Coruña 2026</title>
 <meta name="author" content="Rafael Vida">
+<meta name="description" content="Modelo, derivaciones y supuestos del simulador del eclipse total del 12 de agosto de 2026: geometría del encuadre, fotometría de Espenak, extinción atmosférica a baja altura, difracción y arrastre sidéreo.">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -82,9 +93,31 @@
 
   footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);line-height:1.6}
   footer a{color:var(--gold)}
+
+  /* ---------- conmutador de idioma ---------- */
+  html[lang="es"] [data-lang="en"]{display:none!important}
+  html[lang="en"] [data-lang="es"]{display:none!important}
+  .langbar{position:fixed;top:14px;right:16px;z-index:100;display:flex;
+           background:rgba(7,7,13,.92);border:1px solid var(--line-strong);border-radius:8px;
+           overflow:hidden;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+  .langbar button{font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;
+                  background:transparent;border:0;color:var(--muted);padding:7px 11px;cursor:pointer;
+                  transition:background .15s,color .15s}
+  .langbar button+button{border-left:1px solid var(--line-strong)}
+  .langbar button:hover{color:var(--text)}
+  .langbar button.on{background:rgba(143,180,255,.16);color:var(--blue)}
+  .langbar button:focus-visible{outline:2px solid rgba(143,180,255,.6);outline-offset:-2px}
+  @media(max-width:720px){.langbar{top:8px;right:8px}}
+  /* deja sitio al conmutador cuando los enlaces de cabecera quedan arriba a la derecha */
+  @media(min-width:621px) and (max-width:1010px){.navrow{margin-top:36px}}
 </style>
 </head>
 <body>
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
+
 <div class="wrap">
 
   <header>
@@ -100,26 +133,39 @@
       <circle cx="69" cy="40" r="3.2" fill="#8fb4ff"/>
     </svg>
     <div style="flex:1;min-width:240px">
-      <div class="eyebrow">Manual técnico avanzado</div>
-      <h1>Fundamentos del simulador del eclipse</h1>
-      <p class="lede">Modelo, derivaciones y supuestos. Para quien domina la técnica fotográfica y maneja la física suficiente para cuestionar y afinar los resultados. Geometría del encuadre, fotometría de Espenak, extinción a baja altura, difracción y arrastre sidéreo.</p>
-      <div class="byline">Por Rafael Vida</div>
+      <div class="eyebrow" data-lang="es">Manual técnico avanzado</div>
+      <div class="eyebrow" data-lang="en">Advanced technical manual</div>
+      <h1 data-lang="es">Fundamentos del simulador del eclipse</h1>
+      <h1 data-lang="en">Foundations of the eclipse simulator</h1>
+      <p class="lede" data-lang="es">Modelo, derivaciones y supuestos. Para quien domina la técnica fotográfica y maneja la física suficiente para cuestionar y afinar los resultados. Geometría del encuadre, fotometría de Espenak, extinción a baja altura, difracción y arrastre sidéreo.</p>
+      <p class="lede" data-lang="en">Model, derivations and assumptions. For those who command the photographic technique and enough physics to question and refine the results. Framing geometry, Espenak's photometry, extinction at low altitude, diffraction and sidereal trailing.</p>
+      <div class="byline" data-lang="es">Por Rafael Vida</div>
+      <div class="byline" data-lang="en">By Rafael Vida</div>
     </div>
     <div class="navrow">
-      <a class="navlink" href="simulador-eclipse-coruna.html">
+      <a class="navlink" href="simulador-eclipse-coruna.html" data-lang="es">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
         Abrir simulador
       </a>
-      <a class="navlink" href="manual-simulador-eclipse.html">
+      <a class="navlink" href="simulador-eclipse-coruna.html" data-lang="en">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Open simulator
+      </a>
+      <a class="navlink" href="manual-simulador-eclipse.html" data-lang="es">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
         Manual básico
+      </a>
+      <a class="navlink" href="manual-simulador-eclipse.html" data-lang="en">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Basic manual
       </a>
     </div>
   </header>
 
   <nav class="toc">
-    <div class="t">Contenido</div>
-    <ol>
+    <div class="t" data-lang="es">Contenido</div>
+    <div class="t" data-lang="en">Contents</div>
+    <ol data-lang="es">
       <li><a href="#modelo">Modelo y alcance</a></li>
       <li><a href="#fov">Geometría del campo</a></li>
       <li><a href="#angulares">Tamaños angulares</a></li>
@@ -131,131 +177,189 @@
       <li><a href="#supuestos">Supuestos y límites</a></li>
       <li><a href="#parametros">Parámetros numéricos</a></li>
     </ol>
+    <ol data-lang="en">
+      <li><a href="#modelo">Model and scope</a></li>
+      <li><a href="#fov">Field geometry</a></li>
+      <li><a href="#angulares">Angular sizes</a></li>
+      <li><a href="#fotometria">Photometry: Espenak's model</a></li>
+      <li><a href="#horquilla">Exposure bracket and dynamic range</a></li>
+      <li><a href="#extincion">Extinction at 12° altitude</a></li>
+      <li><a href="#resolucion">Resolution and sampling</a></li>
+      <li><a href="#arrastre">Trailing from diurnal motion</a></li>
+      <li><a href="#supuestos">Assumptions and limits</a></li>
+      <li><a href="#parametros">Numerical parameters</a></li>
+    </ol>
   </nav>
 
   <section id="modelo">
-    <div class="sec-head"><span class="sec-no">01</span><h2>Modelo y alcance</h2></div>
-    <p>El simulador resuelve dos problemas independientes y los presenta acoplados a las circunstancias locales de A Coruña el 12 de agosto de 2026:</p>
-    <ul class="clean">
+    <div class="sec-head"><span class="sec-no">01</span><h2 data-lang="es">Modelo y alcance</h2><h2 data-lang="en">Model and scope</h2></div>
+    <p data-lang="es">El simulador resuelve dos problemas independientes y los presenta acoplados a las circunstancias locales de A Coruña el 12 de agosto de 2026:</p>
+    <p data-lang="en">The simulator solves two independent problems and presents them coupled to the local circumstances of A Coruña on 12 August 2026:</p>
+    <ul class="clean" data-lang="es">
       <li><strong>Geometría del encuadre.</strong> Dado un sistema óptico (focal, formato, teleconvertidor, orientación), calcula el campo de visión y lo compara con los tamaños angulares de las estructuras del eclipse.</li>
       <li><strong>Fotometría.</strong> Dado ISO y número f, deriva el tiempo de exposición de cada estructura mediante el índice de brillo Q de Espenak, y construye una horquilla en pasos de 1 EV.</li>
     </ul>
-    <p>Todo el cálculo es de primer orden y determinista: no modela transferencia radiativa, seeing variable ni respuesta espectral del sensor. Es una herramienta de planificación, no un fotómetro. Donde el modelo simplifica, se indica en la sección de supuestos.</p>
+    <ul class="clean" data-lang="en">
+      <li><strong>Framing geometry.</strong> Given an optical system (focal length, format, teleconverter, orientation), it computes the field of view and compares it with the angular sizes of the eclipse structures.</li>
+      <li><strong>Photometry.</strong> Given ISO and f-number, it derives the exposure time of each structure by means of Espenak's brightness index Q, and builds an exposure bracket in 1 EV steps.</li>
+    </ul>
+    <p data-lang="es">Todo el cálculo es de primer orden y determinista: no modela transferencia radiativa, seeing variable ni respuesta espectral del sensor. Es una herramienta de planificación, no un fotómetro. Donde el modelo simplifica, se indica en la sección de supuestos.</p>
+    <p data-lang="en">The whole calculation is first-order and deterministic: it models neither radiative transfer, nor variable seeing, nor the spectral response of the sensor. It is a planning tool, not a light meter. Where the model simplifies, this is stated in the section on assumptions.</p>
   </section>
 
   <section id="fov">
-    <div class="sec-head"><span class="sec-no">02</span><h2>Geometría del campo</h2></div>
-    <p>Bajo proyección rectilínea (gnomónica), el campo de visión angular sobre un lado del sensor de longitud <code>d</code> con focal efectiva <code>f</code> es:</p>
+    <div class="sec-head"><span class="sec-no">02</span><h2 data-lang="es">Geometría del campo</h2><h2 data-lang="en">Field geometry</h2></div>
+    <p data-lang="es">Bajo proyección rectilínea (gnomónica), el campo de visión angular sobre un lado del sensor de longitud <code>d</code> con focal efectiva <code>f</code> es:</p>
+    <p data-lang="en">Under rectilinear (gnomonic) projection, the angular field of view across a sensor side of length <code>d</code> with effective focal length <code>f</code> is:</p>
     <div class="eq">FOV = 2 · arctan( d / (2f) )</div>
-    <p>Se calcula por separado para el lado horizontal y el vertical del sensor. Para un motivo circular centrado (el disco y su corona), la dimensión limitante es <strong>min(FOV<sub>H</sub>, FOV<sub>V</sub>)</strong>: define el recorte más restrictivo. El veredicto del simulador se ancla a esa cota.</p>
+    <p data-lang="es">Se calcula por separado para el lado horizontal y el vertical del sensor. Para un motivo circular centrado (el disco y su corona), la dimensión limitante es <strong>min(FOV<sub>H</sub>, FOV<sub>V</sub>)</strong>: define el recorte más restrictivo. El veredicto del simulador se ancla a esa cota.</p>
+    <p data-lang="en">It is computed separately for the horizontal and the vertical side of the sensor. For a centred circular subject (the disc and its corona), the limiting dimension is <strong>min(FOV<sub>H</sub>, FOV<sub>V</sub>)</strong>: it defines the most restrictive crop. The simulator's verdict is anchored to that bound.</p>
 
-    <h3>Factor de recorte y focal equivalente</h3>
-    <p>El factor de recorte es el cociente de diagonales respecto al fotograma de 35 mm (43,27 mm):</p>
+    <h3 data-lang="es">Factor de recorte y focal equivalente</h3>
+    <h3 data-lang="en">Crop factor and equivalent focal length</h3>
+    <p data-lang="es">El factor de recorte es el cociente de diagonales respecto al fotograma de 35 mm (43,27 mm):</p>
+    <p data-lang="en">The crop factor is the ratio of diagonals with respect to the 35 mm frame (43.27 mm):</p>
     <div class="eq">crop = 43,27 / √(w² + h²) <span class="c">  ;  f<sub>eq</sub> = f · crop</span></div>
-    <p>La focal equivalente solo sirve para comparar encuadres entre formatos; el FOV real depende de la focal física y de las dimensiones nativas del sensor, no del equivalente.</p>
+    <p data-lang="es">La focal equivalente solo sirve para comparar encuadres entre formatos; el FOV real depende de la focal física y de las dimensiones nativas del sensor, no del equivalente.</p>
+    <p data-lang="en">The equivalent focal length serves only to compare framings across formats; the real FOV depends on the physical focal length and on the native dimensions of the sensor, not on the equivalent.</p>
 
-    <div class="warn"><b>Teleconvertidor:</b> el simulador multiplica la focal por el factor del TC para el cálculo geométrico, lo cual es correcto. Para la fotometría, recuerda que un TC también eleva el número f efectivo (<code>N<sub>ef</sub> = N · TC</code>): un 2× cuesta dos pasos. Introduce en la sección de exposición el número f de trabajo, no el del objetivo desnudo.</div>
+    <div class="warn" data-lang="es"><b>Teleconvertidor:</b> el simulador multiplica la focal por el factor del TC para el cálculo geométrico, lo cual es correcto. Para la fotometría, recuerda que un TC también eleva el número f efectivo (<code>N<sub>ef</sub> = N · TC</code>): un 2× cuesta dos pasos. Introduce en la sección de exposición el número f de trabajo, no el del objetivo desnudo.</div>
+    <div class="warn" data-lang="en"><b>Teleconverter:</b> the simulator multiplies the focal length by the TC factor for the geometric calculation, which is correct. For photometry, remember that a TC also raises the effective f-number (<code>N<sub>ef</sub> = N · TC</code>): a 2× costs two stops. Enter the working f-number in the exposure section, not that of the bare lens.</div>
 
-    <div class="warn"><b>Validez:</b> la proyección rectilínea deja de describir bien objetivos muy angulares y no aplica a ojos de pez (proyección equisólida o equidistante). A las focales útiles para el eclipse esto es irrelevante, pero conviene tenerlo presente si se simula un gran angular para incluir paisaje.</div>
+    <div class="warn" data-lang="es"><b>Validez:</b> la proyección rectilínea deja de describir bien objetivos muy angulares y no aplica a ojos de pez (proyección equisólida o equidistante). A las focales útiles para el eclipse esto es irrelevante, pero conviene tenerlo presente si se simula un gran angular para incluir paisaje.</div>
+    <div class="warn" data-lang="en"><b>Validity:</b> rectilinear projection ceases to describe very wide-angle lenses well and does not apply to fisheyes (equisolid or equidistant projection). At the focal lengths useful for the eclipse this is irrelevant, but it is worth bearing in mind if a wide angle is simulated in order to include landscape.</div>
   </section>
 
   <section id="angulares">
-    <div class="sec-head"><span class="sec-no">03</span><h2>Tamaños angulares</h2></div>
-    <h3>Disco solar</h3>
-    <p>El diámetro angular es <code>θ = 2R<sub>☉</sub> / D</code>. A mediados de agosto la Tierra está cerca del afelio (distancia ≈ 1,013 UA), de modo que:</p>
+    <div class="sec-head"><span class="sec-no">03</span><h2 data-lang="es">Tamaños angulares</h2><h2 data-lang="en">Angular sizes</h2></div>
+    <h3 data-lang="es">Disco solar</h3>
+    <h3 data-lang="en">Solar disc</h3>
+    <p data-lang="es">El diámetro angular es <code>θ = 2R<sub>☉</sub> / D</code>. A mediados de agosto la Tierra está cerca del afelio (distancia ≈ 1,013 UA), de modo que:</p>
+    <p data-lang="en">The angular diameter is <code>θ = 2R<sub>☉</sub> / D</code>. In mid-August the Earth is near aphelion (distance ≈ 1.013 AU), so that:</p>
     <div class="eq">θ<sub>☉</sub> = 2 · 6,957·10⁵ km / (1,013 · 1,496·10⁸ km) ≈ 9,18·10⁻³ rad ≈ 0,526° ≈ 31,6′</div>
-    <p>El simulador usa <strong>0,525°</strong>. La variación estacional del diámetro solar es de ±1,7% sobre el año; en la ventana de agosto es despreciable frente a otras incertidumbres.</p>
+    <p data-lang="es">El simulador usa <strong>0,525°</strong>. La variación estacional del diámetro solar es de ±1,7% sobre el año; en la ventana de agosto es despreciable frente a otras incertidumbres.</p>
+    <p data-lang="en">The simulator uses <strong>0.525°</strong>. The seasonal variation of the solar diameter is ±1.7% over the year; within the August window it is negligible beside other uncertainties.</p>
 
-    <h3>Luna y magnitud</h3>
-    <p>Por ser eclipse total, el diámetro lunar aparente supera al solar. El modelo dibuja la Luna como disco opaco de <code>1,04 × θ<sub>☉</sub></code>, coherente con una magnitud de eclipse ligeramente superior a la unidad. Esto basta para el encuadre; no pretende reproducir el perfil del limbo lunar, que es lo que gobierna el instante exacto de las perlas de Baily.</p>
+    <h3 data-lang="es">Luna y magnitud</h3>
+    <h3 data-lang="en">Moon and magnitude</h3>
+    <p data-lang="es">Por ser eclipse total, el diámetro lunar aparente supera al solar. El modelo dibuja la Luna como disco opaco de <code>1,04 × θ<sub>☉</sub></code>, coherente con una magnitud de eclipse ligeramente superior a la unidad. Esto basta para el encuadre; no pretende reproducir el perfil del limbo lunar, que es lo que gobierna el instante exacto de las perlas de Baily.</p>
+    <p data-lang="en">Being a total eclipse, the apparent lunar diameter exceeds the solar one. The model draws the Moon as an opaque disc of <code>1,04 × θ<sub>☉</sub></code>, consistent with an eclipse magnitude slightly greater than unity. This suffices for framing; it does not set out to reproduce the profile of the lunar limb, which is what governs the exact instant of Baily's beads.</p>
 
-    <h3>Corona</h3>
-    <p>La corona se parametriza por su radio en radios solares <code>R<sub>☉</sub></code>. No tiene borde físico: su brillo superficial cae de forma acusada con la distancia. La componente K (luz fotosférica dispersada por electrones, Thomson) domina el interior; la componente F (polvo, luz zodiacal) domina el exterior. La extensión visible y la simetría de los penachos dependen del momento del ciclo solar; en agosto de 2026 estaremos en la fase descendente del ciclo 25, con una corona aún estructurada. El límite práctico fotografiable ronda los 3° de diámetro.</p>
+    <h3 data-lang="es">Corona</h3>
+    <h3 data-lang="en">Corona</h3>
+    <p data-lang="es">La corona se parametriza por su radio en radios solares <code>R<sub>☉</sub></code>. No tiene borde físico: su brillo superficial cae de forma acusada con la distancia. La componente K (luz fotosférica dispersada por electrones, Thomson) domina el interior; la componente F (polvo, luz zodiacal) domina el exterior. La extensión visible y la simetría de los penachos dependen del momento del ciclo solar; en agosto de 2026 estaremos en la fase descendente del ciclo 25, con una corona aún estructurada. El límite práctico fotografiable ronda los 3° de diámetro.</p>
+    <p data-lang="en">The corona is parametrised by its radius in solar radii <code>R<sub>☉</sub></code>. It has no physical edge: its surface brightness falls off sharply with distance. The K component (photospheric light scattered by electrons, Thomson) dominates the inner region; the F component (dust, zodiacal light) dominates the outer one. The visible extent and the symmetry of the streamers depend on the point reached in the solar cycle; in August 2026 we shall be in the declining phase of cycle 25, with a corona still well structured. The practical photographable limit is around 3° in diameter.</p>
 
-    <h3>Cromosfera</h3>
-    <p>Capa de unos 2.000 km de espesor. Su extensión angular es:</p>
+    <h3 data-lang="es">Cromosfera</h3>
+    <h3 data-lang="en">Chromosphere</h3>
+    <p data-lang="es">Capa de unos 2.000 km de espesor. Su extensión angular es:</p>
+    <p data-lang="en">A layer some 2,000 km thick. Its angular extent is:</p>
     <div class="eq">Δθ ≈ (2.000 / 6,957·10⁵) · R<sub>☉,ang</sub> ≈ 0,0029 · 945″ ≈ 2,7″</div>
-    <p>Por tanto es irrelevante para encuadrar y solo se resuelve a focales largas, y solo durante el segundo o dos del flash en los contactos. Por eso el simulador la trata como un anillo de grosor exagerado y no le asigna fila en la tabla de tamaños.</p>
+    <p data-lang="es">Por tanto es irrelevante para encuadrar y solo se resuelve a focales largas, y solo durante el segundo o dos del flash en los contactos. Por eso el simulador la trata como un anillo de grosor exagerado y no le asigna fila en la tabla de tamaños.</p>
+    <p data-lang="en">It is therefore irrelevant for framing and is resolved only at long focal lengths, and only during the second or two of the flash at the contacts. The simulator accordingly treats it as a ring of exaggerated thickness and assigns it no row in the table of sizes.</p>
   </section>
 
   <section id="fotometria">
-    <div class="sec-head"><span class="sec-no">04</span><h2>Fotometría: modelo de Espenak</h2></div>
-    <p>El tiempo de obturación se obtiene de la relación de Espenak:</p>
-    <div class="eq">t = N² / (I · 2<sup>Q</sup>) <span class="c">  ;  N = número f, I = ISO, t en segundos</span></div>
-    <p>Es la ecuación de exposición estándar reordenada. Partiendo de <code>N²/t = L·S/K</code> (con <code>L</code> la luminancia del motivo, <code>S</code> la sensibilidad y <code>K</code> la constante del fotómetro), Espenak agrupa el brillo superficial de cada estructura en un único exponente:</p>
-    <div class="eq">Q = log₂( L / K' ) <span class="c">  →  cada unidad de Q equivale a un paso (stop)</span></div>
-    <p>Esa es la propiedad que hace operativo el modelo: como <code>t ∝ 2<sup>-Q</sup></code>, la diferencia de exposición entre dos estructuras es exactamente <code>ΔQ</code> pasos. Los valores Q son empíricos, calibrados por Espenak con placas propias y de Sky &amp; Telescope:</p>
+    <div class="sec-head"><span class="sec-no">04</span><h2 data-lang="es">Fotometría: modelo de Espenak</h2><h2 data-lang="en">Photometry: Espenak's model</h2></div>
+    <p data-lang="es">El tiempo de obturación se obtiene de la relación de Espenak:</p>
+    <p data-lang="en">The shutter time is obtained from Espenak's relation:</p>
+    <div class="eq">t = N² / (I · 2<sup>Q</sup>) <span class="c" data-lang="es">  ;  N = número f, I = ISO, t en segundos</span><span class="c" data-lang="en">  ;  N = f-number, I = ISO, t in seconds</span></div>
+    <p data-lang="es">Es la ecuación de exposición estándar reordenada. Partiendo de <code>N²/t = L·S/K</code> (con <code>L</code> la luminancia del motivo, <code>S</code> la sensibilidad y <code>K</code> la constante del fotómetro), Espenak agrupa el brillo superficial de cada estructura en un único exponente:</p>
+    <p data-lang="en">It is the standard exposure equation rearranged. Starting from <code>N²/t = L·S/K</code> (with <code>L</code> the luminance of the subject, <code>S</code> the sensitivity and <code>K</code> the meter constant), Espenak gathers the surface brightness of each structure into a single exponent:</p>
+    <div class="eq">Q = log₂( L / K' ) <span class="c" data-lang="es">  →  cada unidad de Q equivale a un paso (stop)</span><span class="c" data-lang="en">  →  each unit of Q is equivalent to one stop</span></div>
+    <p data-lang="es">Esa es la propiedad que hace operativo el modelo: como <code>t ∝ 2<sup>-Q</sup></code>, la diferencia de exposición entre dos estructuras es exactamente <code>ΔQ</code> pasos. Los valores Q son empíricos, calibrados por Espenak con placas propias y de Sky &amp; Telescope:</p>
+    <p data-lang="en">That is the property which makes the model workable: since <code>t ∝ 2<sup>-Q</sup></code>, the exposure difference between two structures is exactly <code>ΔQ</code> stops. The Q values are empirical, calibrated by Espenak with his own plates and those of Sky &amp; Telescope:</p>
 
     <table>
-      <thead><tr><th>Estructura</th><th class="n">Q</th><th>Notas</th></tr></thead>
+      <thead><tr><th data-lang="es">Estructura</th><th data-lang="en">Structure</th><th class="n">Q</th><th data-lang="es">Notas</th><th data-lang="en">Notes</th></tr></thead>
       <tbody>
-        <tr><td>Perlas de Baily</td><td class="n">12</td><td class="muted">contactos, instantáneo</td></tr>
-        <tr><td>Cromosfera</td><td class="n">11</td><td class="muted">flash en C2/C3</td></tr>
-        <tr><td>Protuberancias</td><td class="n">9</td><td class="muted">limbo</td></tr>
-        <tr><td>Corona 0,1 R<sub>☉</sub></td><td class="n">7</td><td class="muted">interior</td></tr>
-        <tr><td>Corona 0,2 R<sub>☉</sub></td><td class="n">5</td><td></td></tr>
-        <tr><td>Corona 0,5 R<sub>☉</sub></td><td class="n">3</td><td></td></tr>
-        <tr><td>Corona 1,0 R<sub>☉</sub></td><td class="n">1</td><td></td></tr>
-        <tr><td>Corona 2,0 R<sub>☉</sub></td><td class="n">0</td><td class="muted">media</td></tr>
-        <tr><td>Parcial, filtro ND 4,0</td><td class="n">11</td><td class="muted">fotosfera</td></tr>
-        <tr><td>Parcial, filtro ND 5,0</td><td class="n">8</td><td class="muted">fotosfera · Baader visual</td></tr>
-        <tr><td>Parcial, Baader ND 3,8</td><td class="n">12</td><td class="muted">solo fotográfico, nunca visual</td></tr>
+        <tr><td data-lang="es">Perlas de Baily</td><td data-lang="en">Baily's beads</td><td class="n">12</td><td class="muted" data-lang="es">contactos, instantáneo</td><td class="muted" data-lang="en">contacts, instantaneous</td></tr>
+        <tr><td data-lang="es">Cromosfera</td><td data-lang="en">Chromosphere</td><td class="n">11</td><td class="muted" data-lang="es">flash en C2/C3</td><td class="muted" data-lang="en">flash at C2/C3</td></tr>
+        <tr><td data-lang="es">Protuberancias</td><td data-lang="en">Prominences</td><td class="n">9</td><td class="muted" data-lang="es">limbo</td><td class="muted" data-lang="en">limb</td></tr>
+        <tr><td data-lang="es">Corona 0,1 R<sub>☉</sub></td><td data-lang="en">Corona 0.1 R<sub>☉</sub></td><td class="n">7</td><td class="muted" data-lang="es">interior</td><td class="muted" data-lang="en">inner</td></tr>
+        <tr><td data-lang="es">Corona 0,2 R<sub>☉</sub></td><td data-lang="en">Corona 0.2 R<sub>☉</sub></td><td class="n">5</td><td></td></tr>
+        <tr><td data-lang="es">Corona 0,5 R<sub>☉</sub></td><td data-lang="en">Corona 0.5 R<sub>☉</sub></td><td class="n">3</td><td></td></tr>
+        <tr><td data-lang="es">Corona 1,0 R<sub>☉</sub></td><td data-lang="en">Corona 1.0 R<sub>☉</sub></td><td class="n">1</td><td></td></tr>
+        <tr><td data-lang="es">Corona 2,0 R<sub>☉</sub></td><td data-lang="en">Corona 2.0 R<sub>☉</sub></td><td class="n">0</td><td class="muted" data-lang="es">media</td><td class="muted" data-lang="en">mean</td></tr>
+        <tr><td data-lang="es">Parcial, filtro ND 4,0</td><td data-lang="en">Partial, ND 4.0 filter</td><td class="n">11</td><td class="muted" data-lang="es">fotosfera</td><td class="muted" data-lang="en">photosphere</td></tr>
+        <tr><td data-lang="es">Parcial, filtro ND 5,0</td><td data-lang="en">Partial, ND 5.0 filter</td><td class="n">8</td><td class="muted" data-lang="es">fotosfera · Baader visual</td><td class="muted" data-lang="en">photosphere · Baader visual</td></tr>
+        <tr><td data-lang="es">Parcial, Baader ND 3,8</td><td data-lang="en">Partial, Baader ND 3.8</td><td class="n">12</td><td class="muted" data-lang="es">solo fotográfico, nunca visual</td><td class="muted" data-lang="en">photographic only, never visual</td></tr>
       </tbody>
     </table>
 
-    <h3>Interpolación y extrapolación de Q</h3>
-    <p>El Q del Baader ND 3,8 se deriva de la densidad: cada 0,3 de densidad óptica es un paso, luego <code>Q(3,8) = Q(5,0) + (5,0−3,8)/0,301 ≈ 8 + 4 = 12</code>. Para una extensión de corona arbitraria, el simulador interpola Q linealmente en <code>log₁₀(r)</code> entre los puntos tabulados. Más allá de 2,0 R<sub>☉</sub> prolonga la pendiente del último tramo (≈ −3,32 Q por década), de donde:</p>
-    <div class="eq">Q(4 R<sub>☉</sub>) ≈ −1     Q(8 R<sub>☉</sub>) ≈ −2 <span class="c">  (extrapolado, tratar como orientativo)</span></div>
-    <p>El brillo real de la corona externa no sigue una ley única, así que estos valores son una guía conservadora para fijar el extremo lento de la horquilla, no una predicción fotométrica.</p>
+    <h3 data-lang="es">Interpolación y extrapolación de Q</h3>
+    <h3 data-lang="en">Interpolation and extrapolation of Q</h3>
+    <p data-lang="es">El Q del Baader ND 3,8 se deriva de la densidad: cada 0,3 de densidad óptica es un paso, luego <code>Q(3,8) = Q(5,0) + (5,0−3,8)/0,301 ≈ 8 + 4 = 12</code>. Para una extensión de corona arbitraria, el simulador interpola Q linealmente en <code>log₁₀(r)</code> entre los puntos tabulados. Más allá de 2,0 R<sub>☉</sub> prolonga la pendiente del último tramo (≈ −3,32 Q por década), de donde:</p>
+    <p data-lang="en">The Q of the Baader ND 3.8 is derived from its density: every 0.3 of optical density is one stop, hence <code>Q(3,8) = Q(5,0) + (5,0−3,8)/0,301 ≈ 8 + 4 = 12</code>. For an arbitrary coronal extent, the simulator interpolates Q linearly in <code>log₁₀(r)</code> between the tabulated points. Beyond 2.0 R<sub>☉</sub> it prolongs the slope of the last segment (≈ −3.32 Q per decade), whence:</p>
+    <div class="eq">Q(4 R<sub>☉</sub>) ≈ −1     Q(8 R<sub>☉</sub>) ≈ −2 <span class="c" data-lang="es">  (extrapolado, tratar como orientativo)</span><span class="c" data-lang="en">  (extrapolated, treat as indicative)</span></div>
+    <p data-lang="es">El brillo real de la corona externa no sigue una ley única, así que estos valores son una guía conservadora para fijar el extremo lento de la horquilla, no una predicción fotométrica.</p>
+    <p data-lang="en">The actual brightness of the outer corona obeys no single law, so these values are a conservative guide for setting the slow end of the exposure bracket, not a photometric prediction.</p>
 
-    <div class="tip"><b>Fotosfera frente a corona:</b> la fotosfera es del orden de 10⁶ veces más brillante que la corona, unos 20 pasos. De ahí que el filtro sea innegociable en la parcial e igual de innegociable retirarlo en la totalidad. El creciente fino añade además unos dos pasos por el oscurecimiento del limbo, que el modelo aplica en la fase parcial.</div>
+    <div class="tip" data-lang="es"><b>Fotosfera frente a corona:</b> la fotosfera es del orden de 10⁶ veces más brillante que la corona, unos 20 pasos. De ahí que el filtro sea innegociable en la parcial e igual de innegociable retirarlo en la totalidad. El creciente fino añade además unos dos pasos por el oscurecimiento del limbo, que el modelo aplica en la fase parcial.</div>
+    <div class="tip" data-lang="en"><b>Photosphere against corona:</b> the photosphere is of the order of 10⁶ times brighter than the corona, some 20 stops. Hence the filter is non-negotiable during the partial phases, and removing it is equally non-negotiable during totality. The thin crescent adds a further two stops or so through limb darkening, which the model applies in the partial phase.</div>
   </section>
 
   <section id="horquilla">
-    <div class="sec-head"><span class="sec-no">05</span><h2>Horquilla y rango dinámico</h2></div>
-    <p>Fijados <code>N</code> e <code>I</code>, la horquilla recorre desde la cromosfera (Q 11) hasta la corona en la extensión elegida, en pasos de 1 EV. El número de disparos es <code>span + 1</code>, con:</p>
-    <div class="eq">span = 11 − Q<sub>ext</sub> <span class="c">  (pasos)  ;  ej. 4 R<sub>☉</sub> → 11 − (−1) = 12 pasos → 13 tomas</span></div>
-    <p>Cada tiempo se redondea a la velocidad estándar más próxima en una rejilla de tercios de paso, por mínima distancia en escala logarítmica. El simulador estima el tiempo total como la suma de exposiciones más un margen fijo por disparo y avisa si se aproxima a los 76 s de totalidad.</p>
-    <p class="muted">Conviene capturar en RAW y, si la cámara lo permite, encadenar la horquilla con disparo continuo o intervalómetro para no tocar nada durante la totalidad. El apilado HDR posterior reconstruye el rango completo que ninguna toma individual abarca.</p>
+    <div class="sec-head"><span class="sec-no">05</span><h2 data-lang="es">Horquilla y rango dinámico</h2><h2 data-lang="en">Exposure bracket and dynamic range</h2></div>
+    <p data-lang="es">Fijados <code>N</code> e <code>I</code>, la horquilla recorre desde la cromosfera (Q 11) hasta la corona en la extensión elegida, en pasos de 1 EV. El número de disparos es <code>span + 1</code>, con:</p>
+    <p data-lang="en">With <code>N</code> and <code>I</code> fixed, the exposure bracket runs from the chromosphere (Q 11) to the corona at the chosen extent, in 1 EV steps. The number of frames is <code>span + 1</code>, where:</p>
+    <div class="eq">span = 11 − Q<sub>ext</sub> <span class="c" data-lang="es">  (pasos)  ;  ej. 4 R<sub>☉</sub> → 11 − (−1) = 12 pasos → 13 tomas</span><span class="c" data-lang="en">  (stops)  ;  e.g. 4 R<sub>☉</sub> → 11 − (−1) = 12 stops → 13 frames</span></div>
+    <p data-lang="es">Cada tiempo se redondea a la velocidad estándar más próxima en una rejilla de tercios de paso, por mínima distancia en escala logarítmica. El simulador estima el tiempo total como la suma de exposiciones más un margen fijo por disparo y avisa si se aproxima a los 76 s de totalidad.</p>
+    <p data-lang="en">Each time is rounded to the nearest standard shutter speed on a third-stop grid, by minimum distance on a logarithmic scale. The simulator estimates the total time as the sum of the exposures plus a fixed margin per frame, and warns if it approaches the 76 s of totality.</p>
+    <p class="muted" data-lang="es">Conviene capturar en RAW y, si la cámara lo permite, encadenar la horquilla con disparo continuo o intervalómetro para no tocar nada durante la totalidad. El apilado HDR posterior reconstruye el rango completo que ninguna toma individual abarca.</p>
+    <p class="muted" data-lang="en">It is advisable to capture in RAW and, if the camera allows it, to chain the exposure bracket with continuous drive or an intervalometer so that nothing need be touched during totality. Subsequent HDR stacking reconstructs the full range that no single frame can span.</p>
   </section>
 
   <section id="extincion">
-    <div class="sec-head"><span class="sec-no">06</span><h2>Extinción a 12° de altura</h2></div>
-    <p>Los valores Q de Espenak no incorporan corrección de masa de aire. En A Coruña la totalidad ocurre con el Sol a unos 12°, lo que implica una masa de aire considerable. Con la formulación de Kasten y Young:</p>
+    <div class="sec-head"><span class="sec-no">06</span><h2 data-lang="es">Extinción a 12° de altura</h2><h2 data-lang="en">Extinction at 12° altitude</h2></div>
+    <p data-lang="es">Los valores Q de Espenak no incorporan corrección de masa de aire. En A Coruña la totalidad ocurre con el Sol a unos 12°, lo que implica una masa de aire considerable. Con la formulación de Kasten y Young:</p>
+    <p data-lang="en">Espenak's Q values incorporate no airmass correction. At A Coruña totality occurs with the Sun at some 12°, which implies a considerable airmass. With the Kasten and Young formulation:</p>
     <div class="eq">X(h) = 1 / [ sin h + 0,50572 (h + 6,07995)<sup>−1,6364</sup> ]
-<span class="c">X(12°) ≈ 4,7   ;   plano-paralelo daría sec z ≈ 4,8</span></div>
-    <p>El exceso de masa de aire respecto al cenit es de unas 3,7 unidades. Con un coeficiente de extinción visual típico <code>k ≈ 0,2</code> mag/masa de aire en aire limpio:</p>
+<span class="c" data-lang="es">X(12°) ≈ 4,7   ;   plano-paralelo daría sec z ≈ 4,8</span><span class="c" data-lang="en">X(12°) ≈ 4,7   ;   plane-parallel would give sec z ≈ 4,8</span></div>
+    <p data-lang="es">El exceso de masa de aire respecto al cenit es de unas 3,7 unidades. Con un coeficiente de extinción visual típico <code>k ≈ 0,2</code> mag/masa de aire en aire limpio:</p>
+    <p data-lang="en">The excess airmass with respect to the zenith is some 3.7 units. With a typical visual extinction coefficient <code>k ≈ 0,2</code> mag per airmass in clean air:</p>
     <div class="eq">Δm = k · ΔX ≈ 0,2 · 3,7 ≈ 0,74 mag ≈ 1,0 paso
-<span class="c">con bruma costera (k ≈ 0,3): ≈ 1,1 mag ≈ 1,5 pasos</span></div>
-    <p>En la práctica: espera tener que <strong>alargar la exposición del orden de un paso</strong> respecto a la tabla, y más si hay calima. El simulador incorpora esta corrección como ajuste seleccionable y la calcula dinámicamente para el lugar elegido: <code>ΔEV = 1,327·k·(X(h)−1)</code> con k = 0,20 (limpio) o 0,30 (bruma), aplicada como <code>Q<sub>ef</sub> = Q − ΔEV</code>. A 12° (A Coruña) sale +1 EV en limpio; a 2° (Palma) llega a +5 EV. La extinción es además fuertemente cromática (mayor en azul), de modo que la corona aparecerá enrojecida; valóralo en el balance de blancos y en el procesado por canales.</p>
-    <div class="warn"><b>Contraste del fondo:</b> a 12° el brillo del cielo crepuscular cerca del Sol compite con la corona externa más débil. El alcance real hacia los penachos lo limitará tanto ese fondo como la propia extinción, no solo el tiempo disponible.</div>
+<span class="c" data-lang="es">con bruma costera (k ≈ 0,3): ≈ 1,1 mag ≈ 1,5 pasos</span><span class="c" data-lang="en">with coastal haze (k ≈ 0,3): ≈ 1,1 mag ≈ 1,5 stops</span></div>
+    <p data-lang="es">En la práctica: espera tener que <strong>alargar la exposición del orden de un paso</strong> respecto a la tabla, y más si hay calima. El simulador incorpora esta corrección como ajuste seleccionable y la calcula dinámicamente para el lugar elegido: <code>ΔEV = 1,327·k·(X(h)−1)</code> con k = 0,20 (limpio) o 0,30 (bruma), aplicada como <code>Q<sub>ef</sub> = Q − ΔEV</code>. A 12° (A Coruña) sale +1 EV en limpio; a 2° (Palma) llega a +5 EV. La extinción es además fuertemente cromática (mayor en azul), de modo que la corona aparecerá enrojecida; valóralo en el balance de blancos y en el procesado por canales.</p>
+    <p data-lang="en">In practice: expect to have to <strong>lengthen the exposure by of the order of one stop</strong> relative to the table, and by more if there is haze. The simulator incorporates this correction as a selectable setting and computes it dynamically for the chosen site: <code>ΔEV = 1,327·k·(X(h)−1)</code> with k = 0.20 (clean) or 0.30 (haze), applied as <code>Q<sub>ef</sub> = Q − ΔEV</code>. At 12° (A Coruña) this works out at +1 EV in clean air; at 2° (Palma) it reaches +5 EV. Extinction is moreover strongly chromatic (greater in the blue), so the corona will appear reddened; allow for that in the white balance and in per-channel processing.</p>
+    <div class="warn" data-lang="es"><b>Contraste del fondo:</b> a 12° el brillo del cielo crepuscular cerca del Sol compite con la corona externa más débil. El alcance real hacia los penachos lo limitará tanto ese fondo como la propia extinción, no solo el tiempo disponible.</div>
+    <div class="warn" data-lang="en"><b>Background contrast:</b> at 12° the brightness of the twilight sky near the Sun competes with the faintest outer corona. The real reach towards the streamers will be limited as much by that background as by extinction itself, and not only by the time available.</div>
   </section>
 
   <section id="resolucion">
-    <div class="sec-head"><span class="sec-no">07</span><h2>Resolución y muestreo</h2></div>
-    <h3>Escala de placa</h3>
-    <div class="eq">s = 206265 · p / f <span class="c">  [″/px]  ;  p = paso de píxel, f = focal (misma unidad)</span></div>
-    <p>Ejemplo: <code>f = 1000 mm</code>, <code>p = 4 µm</code> → <code>s ≈ 0,82″/px</code>. El disco solar (≈ 1893″) cubre entonces unos 2.300 px de diámetro.</p>
+    <div class="sec-head"><span class="sec-no">07</span><h2 data-lang="es">Resolución y muestreo</h2><h2 data-lang="en">Resolution and sampling</h2></div>
+    <h3 data-lang="es">Escala de placa</h3>
+    <h3 data-lang="en">Plate scale</h3>
+    <div class="eq">s = 206265 · p / f <span class="c" data-lang="es">  [″/px]  ;  p = paso de píxel, f = focal (misma unidad)</span><span class="c" data-lang="en">  [″/px]  ;  p = pixel pitch, f = focal length (same unit)</span></div>
+    <p data-lang="es">Ejemplo: <code>f = 1000 mm</code>, <code>p = 4 µm</code> → <code>s ≈ 0,82″/px</code>. El disco solar (≈ 1893″) cubre entonces unos 2.300 px de diámetro.</p>
+    <p data-lang="en">Example: <code>f = 1000 mm</code>, <code>p = 4 µm</code> → <code>s ≈ 0,82″/px</code>. The solar disc (≈ 1893″) then covers some 2,300 px in diameter.</p>
 
-    <h3>Límite de difracción</h3>
-    <p>El radio del disco de Airy en ángulo es <code>θ ≈ 1,22 λ / Dₐ</code>, con <code>Dₐ = f/N</code> el diámetro de la pupila de entrada. Para λ = 550 nm:</p>
-    <div class="eq">θ ≈ 0,138 / Dₐ(m) <span class="c">  [″]  ;  ej. f/8 a 1000 mm → Dₐ = 0,125 m → θ ≈ 1,1″</span></div>
-    <p>A números f altos el sistema se vuelve limitado por difracción antes que por el sensor. La estructura fina de la cromosfera (≈ 2,7″) solo se insinúa si el muestreo y la apertura lo permiten, y siempre limitada por el seeing, que a 12° de altura será notable.</p>
+    <h3 data-lang="es">Límite de difracción</h3>
+    <h3 data-lang="en">Diffraction limit</h3>
+    <p data-lang="es">El radio del disco de Airy en ángulo es <code>θ ≈ 1,22 λ / Dₐ</code>, con <code>Dₐ = f/N</code> el diámetro de la pupila de entrada. Para λ = 550 nm:</p>
+    <p data-lang="en">The angular radius of the Airy disc is <code>θ ≈ 1,22 λ / Dₐ</code>, with <code>Dₐ = f/N</code> the diameter of the entrance pupil. For λ = 550 nm:</p>
+    <div class="eq">θ ≈ 0,138 / Dₐ(m) <span class="c" data-lang="es">  [″]  ;  ej. f/8 a 1000 mm → Dₐ = 0,125 m → θ ≈ 1,1″</span><span class="c" data-lang="en">  [″]  ;  e.g. f/8 at 1000 mm → Dₐ = 0,125 m → θ ≈ 1,1″</span></div>
+    <p data-lang="es">A números f altos el sistema se vuelve limitado por difracción antes que por el sensor. La estructura fina de la cromosfera (≈ 2,7″) solo se insinúa si el muestreo y la apertura lo permiten, y siempre limitada por el seeing, que a 12° de altura será notable.</p>
+    <p data-lang="en">At high f-numbers the system becomes limited by diffraction before it is limited by the sensor. The fine structure of the chromosphere (≈ 2.7″) is no more than hinted at if sampling and aperture allow, and is always limited by the seeing, which at 12° altitude will be appreciable.</p>
   </section>
 
   <section id="arrastre">
-    <div class="sec-head"><span class="sec-no">08</span><h2>Arrastre por movimiento diurno</h2></div>
-    <p>Sobre trípode fijo, el Sol deriva por la rotación terrestre a velocidad angular:</p>
-    <div class="eq">ω = 15,04″/s · cos δ <span class="c">  ;  δ(12 ago) ≈ +15° → ω ≈ 14,5″/s</span></div>
-    <p>El tiempo máximo de exposición para mantener el arrastre por debajo de un presupuesto de desenfoque <code>b</code> (en píxeles) es:</p>
-    <div class="eq">t<sub>máx</sub> = b · s / ω <span class="c">  ;  con s ≈ 0,82″/px y b = 1 px → t<sub>máx</sub> ≈ 0,055 s ≈ 1/18 s</span></div>
-    <p>Es decir, a 1000 mm sobre trípode fijo, cualquier toma de la corona más lenta que ~1/15 s ya arrastra a nivel de píxel. Las exposiciones lentas del extremo de la horquilla (corona externa, varios décimos de segundo o más) <strong>exigen seguimiento ecuatorial</strong> a focales largas. Relajar <code>b</code> a 2 o 3 px duplica o triplica el margen, útil si vas a redimensionar. El simulador implementa este cálculo: a partir de los megapíxeles introducidos deriva la escala de placa y marca en rojo las velocidades de la horquilla que superan <code>t<sub>máx</sub></code> con presupuesto de 1 px, salvo que se indique montura con seguimiento.</p>
-    <div class="tip"><b>Nota:</b> cerca del horizonte la trayectoria es oblicua y la refracción diferencial deforma ligeramente el disco, pero el módulo de <code>ω</code> sigue siendo buena guía para el presupuesto de arrastre.</div>
+    <div class="sec-head"><span class="sec-no">08</span><h2 data-lang="es">Arrastre por movimiento diurno</h2><h2 data-lang="en">Trailing from diurnal motion</h2></div>
+    <p data-lang="es">Sobre trípode fijo, el Sol deriva por la rotación terrestre a velocidad angular:</p>
+    <p data-lang="en">On a fixed tripod, the Sun drifts under the Earth's rotation at an angular rate of:</p>
+    <div class="eq">ω = 15,04″/s · cos δ <span class="c" data-lang="es">  ;  δ(12 ago) ≈ +15° → ω ≈ 14,5″/s</span><span class="c" data-lang="en">  ;  δ(12 Aug) ≈ +15° → ω ≈ 14,5″/s</span></div>
+    <p data-lang="es">El tiempo máximo de exposición para mantener el arrastre por debajo de un presupuesto de desenfoque <code>b</code> (en píxeles) es:</p>
+    <p data-lang="en">The maximum exposure time that keeps trailing below a blur budget <code>b</code> (in pixels) is:</p>
+    <div class="eq">t<sub>máx</sub> = b · s / ω <span class="c" data-lang="es">  ;  con s ≈ 0,82″/px y b = 1 px → t<sub>máx</sub> ≈ 0,055 s ≈ 1/18 s</span><span class="c" data-lang="en">  ;  with s ≈ 0,82″/px and b = 1 px → t<sub>máx</sub> ≈ 0,055 s ≈ 1/18 s</span></div>
+    <p data-lang="es">Es decir, a 1000 mm sobre trípode fijo, cualquier toma de la corona más lenta que ~1/15 s ya arrastra a nivel de píxel. Las exposiciones lentas del extremo de la horquilla (corona externa, varios décimos de segundo o más) <strong>exigen seguimiento ecuatorial</strong> a focales largas. Relajar <code>b</code> a 2 o 3 px duplica o triplica el margen, útil si vas a redimensionar. El simulador implementa este cálculo: a partir de los megapíxeles introducidos deriva la escala de placa y marca en rojo las velocidades de la horquilla que superan <code>t<sub>máx</sub></code> con presupuesto de 1 px, salvo que se indique montura con seguimiento.</p>
+    <p data-lang="en">That is to say, at 1000 mm on a fixed tripod, any frame of the corona slower than ~1/15 s already trails at the pixel level. The slow exposures at the far end of the bracket (outer corona, several tenths of a second or more) <strong>demand equatorial tracking</strong> at long focal lengths. Relaxing <code>b</code> to 2 or 3 px doubles or triples the margin, which is useful if the image is to be downsampled. The simulator implements this calculation: from the megapixel count entered it derives the plate scale and flags in red those bracket speeds which exceed <code>t<sub>máx</sub></code> on a 1 px budget, unless a tracking mount is specified.</p>
+    <div class="tip" data-lang="es"><b>Nota:</b> cerca del horizonte la trayectoria es oblicua y la refracción diferencial deforma ligeramente el disco, pero el módulo de <code>ω</code> sigue siendo buena guía para el presupuesto de arrastre.</div>
+    <div class="tip" data-lang="en"><b>Note:</b> near the horizon the path is oblique and differential refraction slightly deforms the disc, but the modulus of <code>ω</code> remains a good guide for the trailing budget.</div>
   </section>
 
   <section id="supuestos">
-    <div class="sec-head"><span class="sec-no">09</span><h2>Supuestos y límites</h2></div>
-    <ul class="clean">
+    <div class="sec-head"><span class="sec-no">09</span><h2 data-lang="es">Supuestos y límites</h2><h2 data-lang="en">Assumptions and limits</h2></div>
+    <ul class="clean" data-lang="es">
       <li>Proyección rectilínea; no válida para ojos de pez ni rigurosa en gran angular extremo.</li>
       <li>Diámetro solar fijo (0,525°); se ignora la variación intramensual, del orden de décimas de por ciento.</li>
       <li>Luna como disco opaco de 1,04 × θ<sub>☉</sub>; sin perfil de limbo, por lo que no predice la cronología exacta de perlas de Baily ni el anillo de diamantes.</li>
@@ -264,47 +368,98 @@
       <li>Redondeo a tercios de paso; tu cámara puede estar configurada en pasos de medio EV.</li>
       <li>Sin modelo de seeing, transparencia variable ni respuesta espectral del sensor.</li>
     </ul>
-    <p class="muted">En conjunto, las cifras son un punto de partida sólido. La calibración final la da una sesión de pruebas con tu equipo y, a ser posible, con el Sol bajo para reproducir la masa de aire del evento.</p>
+    <ul class="clean" data-lang="en">
+      <li>Rectilinear projection; not valid for fisheyes, nor rigorous at extreme wide angles.</li>
+      <li>Fixed solar diameter (0.525°); the intra-month variation, of the order of tenths of a per cent, is ignored.</li>
+      <li>Moon as an opaque disc of 1.04 × θ<sub>☉</sub>; with no limb profile, so it does not predict the exact chronology of Baily's beads or of the diamond ring.</li>
+      <li>Corona drawn with azimuthal symmetry; the real corona is structured and depends on the cycle.</li>
+      <li>Empirical Q values with no extinction correction; section 06 quantifies the bias to be expected at 12°.</li>
+      <li>Rounding to third-stops; your camera may be set to half-EV steps.</li>
+      <li>No model of seeing, of variable transparency or of the spectral response of the sensor.</li>
+    </ul>
+    <p class="muted" data-lang="es">En conjunto, las cifras son un punto de partida sólido. La calibración final la da una sesión de pruebas con tu equipo y, a ser posible, con el Sol bajo para reproducir la masa de aire del evento.</p>
+    <p class="muted" data-lang="en">Taken together, the figures are a sound point of departure. Final calibration comes from a test session with your own equipment and, if possible, with the Sun low so as to reproduce the airmass of the event.</p>
   </section>
 
   <section id="parametros">
-    <div class="sec-head"><span class="sec-no">10</span><h2>Parámetros numéricos</h2></div>
+    <div class="sec-head"><span class="sec-no">10</span><h2 data-lang="es">Parámetros numéricos</h2><h2 data-lang="en">Numerical parameters</h2></div>
     <table>
-      <thead><tr><th>Constante</th><th>Valor</th></tr></thead>
+      <thead><tr><th data-lang="es">Constante</th><th data-lang="en">Constant</th><th data-lang="es">Valor</th><th data-lang="en">Value</th></tr></thead>
       <tbody>
-        <tr><td>Diámetro angular solar</td><td class="m">0,525° (31,5′)</td></tr>
-        <tr><td>Radio solar angular</td><td class="m">0,2625° (945″)</td></tr>
-        <tr><td>Razón de magnitud lunar</td><td class="m">1,04 × θ<sub>☉</sub></td></tr>
-        <tr><td>Diagonal de referencia (FF)</td><td class="m">43,27 mm</td></tr>
-        <tr><td>Full Frame</td><td class="m">36 × 24 mm</td></tr>
-        <tr><td>APS-C Canon</td><td class="m">22,3 × 14,9 mm (1,6×)</td></tr>
-        <tr><td>APS-C Sony / Nikon / Fuji</td><td class="m">23,5 × 15,6 mm (1,53×)</td></tr>
-        <tr><td>Micro 4/3</td><td class="m">17,3 × 13 mm (2,0×)</td></tr>
-        <tr><td>Tipo 1"</td><td class="m">13,2 × 8,8 mm (2,7×)</td></tr>
-        <tr><td>Fórmula FOV</td><td class="m">2·arctan(d/2f)</td></tr>
-        <tr><td>Fórmula exposición</td><td class="m">t = N²/(I·2^Q)</td></tr>
-        <tr><td>Pendiente Q extrapolada</td><td class="m">≈ −3,32 Q/década</td></tr>
+        <tr><td data-lang="es">Diámetro angular solar</td><td data-lang="en">Solar angular diameter</td><td class="m" data-lang="es">0,525° (31,5′)</td><td class="m" data-lang="en">0.525° (31.5′)</td></tr>
+        <tr><td data-lang="es">Radio solar angular</td><td data-lang="en">Angular solar radius</td><td class="m" data-lang="es">0,2625° (945″)</td><td class="m" data-lang="en">0.2625° (945″)</td></tr>
+        <tr><td data-lang="es">Razón de magnitud lunar</td><td data-lang="en">Lunar magnitude ratio</td><td class="m" data-lang="es">1,04 × θ<sub>☉</sub></td><td class="m" data-lang="en">1.04 × θ<sub>☉</sub></td></tr>
+        <tr><td data-lang="es">Diagonal de referencia (FF)</td><td data-lang="en">Reference diagonal (FF)</td><td class="m" data-lang="es">43,27 mm</td><td class="m" data-lang="en">43.27 mm</td></tr>
+        <tr><td data-lang="es">Full Frame</td><td data-lang="en">Full frame</td><td class="m">36 × 24 mm</td></tr>
+        <tr><td data-lang="es">APS-C Canon</td><td data-lang="en">APS-C Canon</td><td class="m" data-lang="es">22,3 × 14,9 mm (1,6×)</td><td class="m" data-lang="en">22.3 × 14.9 mm (1.6×)</td></tr>
+        <tr><td data-lang="es">APS-C Sony / Nikon / Fuji</td><td data-lang="en">APS-C Sony / Nikon / Fuji</td><td class="m" data-lang="es">23,5 × 15,6 mm (1,53×)</td><td class="m" data-lang="en">23.5 × 15.6 mm (1.53×)</td></tr>
+        <tr><td data-lang="es">Micro 4/3</td><td data-lang="en">Micro 4/3</td><td class="m" data-lang="es">17,3 × 13 mm (2,0×)</td><td class="m" data-lang="en">17.3 × 13 mm (2.0×)</td></tr>
+        <tr><td data-lang="es">Tipo 1"</td><td data-lang="en">Type 1"</td><td class="m" data-lang="es">13,2 × 8,8 mm (2,7×)</td><td class="m" data-lang="en">13.2 × 8.8 mm (2.7×)</td></tr>
+        <tr><td data-lang="es">Fórmula FOV</td><td data-lang="en">FOV formula</td><td class="m">2·arctan(d/2f)</td></tr>
+        <tr><td data-lang="es">Fórmula exposición</td><td data-lang="en">Exposure formula</td><td class="m">t = N²/(I·2^Q)</td></tr>
+        <tr><td data-lang="es">Pendiente Q extrapolada</td><td data-lang="en">Extrapolated Q slope</td><td class="m" data-lang="es">≈ −3,32 Q/década</td><td class="m" data-lang="en">≈ −3.32 Q/decade</td></tr>
       </tbody>
     </table>
-    <h3>Circunstancias locales (12 ago 2026, hora oficial)</h3>
+    <h3 data-lang="es">Circunstancias locales (12 ago 2026, hora oficial)</h3>
+    <h3 data-lang="en">Local circumstances (12 Aug 2026, official time)</h3>
     <table>
-      <thead><tr><th>Lugar</th><th class="n">C1</th><th class="n">Totalidad (C2→C3)</th><th class="n">Dur.</th><th class="n">h<sub>☉</sub></th><th class="n">X</th><th>Final visible</th></tr></thead>
+      <thead><tr><th data-lang="es">Lugar</th><th data-lang="en">Place</th><th class="n">C1</th><th class="n" data-lang="es">Totalidad (C2→C3)</th><th class="n" data-lang="en">Totality (C2→C3)</th><th class="n">Dur.</th><th class="n">h<sub>☉</sub></th><th class="n">X</th><th data-lang="es">Final visible</th><th data-lang="en">Visible end</th></tr></thead>
       <tbody>
-        <tr><td>A Coruña</td><td class="n">19:31</td><td class="n">20:27:22→20:28:38</td><td class="n">76 s</td><td class="n">12°</td><td class="n">4,7</td><td class="muted">C4 21:22 (puesta 21:41)</td></tr>
-        <tr><td>Oviedo</td><td class="n">≈19:32</td><td class="n">20:27:05→20:28:54</td><td class="n">109 s</td><td class="n">10°</td><td class="n">5,6</td><td class="muted">C4 ≈21:22 (puesta ≈21:31)</td></tr>
-        <tr><td>León</td><td class="n">19:32:40</td><td class="n">20:28:16→20:30:00</td><td class="n">104 s</td><td class="n">10°</td><td class="n">5,6</td><td class="muted">C4 21:22, coincide con la puesta</td></tr>
-        <tr><td>Zaragoza</td><td class="n">19:34:37</td><td class="n">20:28:58→20:30:22</td><td class="n">84 s</td><td class="n">6°</td><td class="n">8,8</td><td class="muted">puesta ≈21:04, aún eclipsado</td></tr>
-        <tr><td>Valencia</td><td class="n">19:38:19</td><td class="n">20:32:25→20:33:24</td><td class="n">59 s</td><td class="n">4°</td><td class="n">12,3</td><td class="muted">puesta ≈20:58, aún eclipsado</td></tr>
-        <tr><td>Palma</td><td class="n">19:37:58</td><td class="n">20:31:00→20:32:36</td><td class="n">96 s</td><td class="n">2°</td><td class="n">19,4</td><td class="muted">puesta ≈20:49, aún eclipsado</td></tr>
+        <tr><td>A Coruña</td><td class="n">19:31</td><td class="n">20:27:22→20:28:38</td><td class="n">76 s</td><td class="n">12°</td><td class="n" data-lang="es">4,7</td><td class="n" data-lang="en">4.7</td><td class="muted" data-lang="es">C4 21:22 (puesta 21:41)</td><td class="muted" data-lang="en">C4 21:22 (sunset 21:41)</td></tr>
+        <tr><td>Oviedo</td><td class="n">≈19:32</td><td class="n">20:27:05→20:28:54</td><td class="n">109 s</td><td class="n">10°</td><td class="n" data-lang="es">5,6</td><td class="n" data-lang="en">5.6</td><td class="muted" data-lang="es">C4 ≈21:22 (puesta ≈21:31)</td><td class="muted" data-lang="en">C4 ≈21:22 (sunset ≈21:31)</td></tr>
+        <tr><td>León</td><td class="n">19:32:40</td><td class="n">20:28:16→20:30:00</td><td class="n">104 s</td><td class="n">10°</td><td class="n" data-lang="es">5,6</td><td class="n" data-lang="en">5.6</td><td class="muted" data-lang="es">C4 21:22, coincide con la puesta</td><td class="muted" data-lang="en">C4 21:22, coincides with sunset</td></tr>
+        <tr><td>Zaragoza</td><td class="n">19:34:37</td><td class="n">20:28:58→20:30:22</td><td class="n">84 s</td><td class="n">6°</td><td class="n" data-lang="es">8,8</td><td class="n" data-lang="en">8.8</td><td class="muted" data-lang="es">puesta ≈21:04, aún eclipsado</td><td class="muted" data-lang="en">sunset ≈21:04, still eclipsed</td></tr>
+        <tr><td>Valencia</td><td class="n">19:38:19</td><td class="n">20:32:25→20:33:24</td><td class="n">59 s</td><td class="n">4°</td><td class="n" data-lang="es">12,3</td><td class="n" data-lang="en">12.3</td><td class="muted" data-lang="es">puesta ≈20:58, aún eclipsado</td><td class="muted" data-lang="en">sunset ≈20:58, still eclipsed</td></tr>
+        <tr><td>Palma</td><td class="n">19:37:58</td><td class="n">20:31:00→20:32:36</td><td class="n">96 s</td><td class="n">2°</td><td class="n" data-lang="es">19,4</td><td class="n" data-lang="en">19.4</td><td class="muted" data-lang="es">puesta ≈20:49, aún eclipsado</td><td class="muted" data-lang="en">sunset ≈20:49, still eclipsed</td></tr>
       </tbody>
     </table>
-    <p class="muted">X es la masa de aire de Kasten-Young a la altura del máximo. La corrección de extinción del simulador se deriva de ella por localización: ΔEV = 1,327·k·(X−1), con k = 0,20 (limpio) o 0,30 (bruma). En Palma, a 2°, eso supone del orden de +5 EV en cielo limpio: la corona saldrá fuertemente atenuada y enrojecida, y la fotometría a esa altura es intrínsecamente incierta (la refracción y los aerosoles dominan). Fuentes: IGN (eclipses.ign.es) y efemérides municipales; en Zaragoza, Valencia y Palma el cuarto contacto ocurre bajo el horizonte.</p>
+    <p class="muted" data-lang="es">X es la masa de aire de Kasten-Young a la altura del máximo. La corrección de extinción del simulador se deriva de ella por localización: ΔEV = 1,327·k·(X−1), con k = 0,20 (limpio) o 0,30 (bruma). En Palma, a 2°, eso supone del orden de +5 EV en cielo limpio: la corona saldrá fuertemente atenuada y enrojecida, y la fotometría a esa altura es intrínsecamente incierta (la refracción y los aerosoles dominan). Fuentes: IGN (eclipses.ign.es) y efemérides municipales; en Zaragoza, Valencia y Palma el cuarto contacto ocurre bajo el horizonte.</p>
+    <p class="muted" data-lang="en">X is the Kasten-Young airmass at the altitude of maximum. The simulator's extinction correction is derived from it for each location: ΔEV = 1,327·k·(X−1), with k = 0.20 (clean) or 0.30 (haze). At Palma, at 2°, that amounts to the order of +5 EV under a clear sky: the corona will come out heavily attenuated and reddened, and photometry at that altitude is intrinsically uncertain (refraction and aerosols dominate). Sources: IGN (eclipses.ign.es) and municipal ephemerides; at Zaragoza, Valencia and Palma the fourth contact occurs below the horizon.</p>
   </section>
 
   <footer>
-    Manual técnico del simulador de encuadre y exposición del eclipse total del 12 de agosto de 2026 (A Coruña). Creado por <strong style="color:var(--text);font-weight:500">Rafael Vida</strong>. Fotometría según la guía de exposición solar de Fred Espenak (NASA RP 1318 / MrEclipse). Masa de aire según Kasten y Young (1989). Circunstancias locales del Instituto Geográfico Nacional (eclipses.ign.es). Las constantes se recogen en la sección 10.
+    <div data-lang="es">Manual técnico del simulador de encuadre y exposición del eclipse total del 12 de agosto de 2026 (A Coruña). Creado por <strong style="color:var(--text);font-weight:500">Rafael Vida</strong>. Fotometría según la guía de exposición solar de Fred Espenak (NASA RP 1318 / MrEclipse). Masa de aire según Kasten y Young (1989). Circunstancias locales del Instituto Geográfico Nacional (eclipses.ign.es). Las constantes se recogen en la sección 10.</div>
+    <div data-lang="en">Technical manual of the framing and exposure simulator for the total eclipse of 12 August 2026 (A Coruña). Created by <strong style="color:var(--text);font-weight:500">Rafael Vida</strong>. Photometry after Fred Espenak's solar exposure guide (NASA RP 1318 / MrEclipse). Airmass after Kasten and Young (1989). Local circumstances from the Instituto Geográfico Nacional (eclipses.ign.es). The constants are collected in section 10.</div>
   </footer>
 
 </div>
+
+<script>
+"use strict";
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{
+      title:"Manual técnico avanzado · Simulador del eclipse · A Coruña 2026",
+      desc:"Modelo, derivaciones y supuestos del simulador del eclipse total del 12 de agosto de 2026: geometría del encuadre, fotometría de Espenak, extinción atmosférica a baja altura, difracción y arrastre sidéreo."
+    },
+    en:{
+      title:"Advanced technical manual · Eclipse simulator · A Coruña 2026",
+      desc:"Model, derivations and assumptions behind the simulator for the total eclipse of 12 August 2026: framing geometry, Espenak photometry, atmospheric extinction at low altitude, diffraction and sidereal trailing."
+    }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
 </body>
 </html>

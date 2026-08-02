@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Manual de uso · Simulador del eclipse · A Coruña 2026</title>
 <meta name="author" content="Rafael Vida">
+<meta name="description" content="Manual de uso, sin fórmulas, del simulador de encuadre y exposición del eclipse total de Sol del 12 de agosto de 2026 desde A Coruña: qué hace cada control y cómo preparar la toma.">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -98,9 +109,32 @@
 
   footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);line-height:1.6}
   footer a{color:var(--gold)}
+
+  /* ---------- conmutador de idioma ---------- */
+  html[lang="es"] [data-lang="en"]{display:none!important}
+  html[lang="en"] [data-lang="es"]{display:none!important}
+  .langbar{position:fixed;top:14px;right:16px;z-index:100;display:flex;
+           background:rgba(16,17,28,.92);border:1px solid var(--line-strong);border-radius:8px;
+           overflow:hidden;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+  .langbar button{font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;
+                  background:transparent;border:0;color:var(--muted);padding:7px 11px;cursor:pointer;
+                  transition:background .15s,color .15s}
+  .langbar button+button{border-left:1px solid var(--line-strong)}
+  .langbar button:hover{color:var(--text)}
+  .langbar button.on{background:rgba(255,207,107,.14);color:var(--gold)}
+  .langbar button:focus-visible{outline:2px solid rgba(255,207,107,.6);outline-offset:-2px}
+  /* deja sitio al conmutador para que no se solape con los botones de la cabecera */
+  @media(max-width:960px){.wrap{padding-top:62px}}
+  @media(max-width:720px){.langbar{top:8px;right:8px}}
 </style>
 </head>
 <body>
+
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
+
 <div class="wrap">
 
   <header>
@@ -116,31 +150,41 @@
       <circle cx="69" cy="40" r="3.2" fill="#ffcf6b"/>
     </svg>
     <div>
-      <div class="eyebrow">Manual de uso</div>
-      <h1>Cómo usar el simulador del eclipse</h1>
-      <p class="lede">Una guía sencilla para preparar tus fotos del eclipse total de Sol del 12 de agosto de 2026 desde A Coruña. Sin fórmulas: solo qué hace cada parte y cómo sacarle partido.</p>
-      <div class="byline">Por Rafael Vida</div>
+      <div class="eyebrow" data-lang="es">Manual de uso</div>
+      <div class="eyebrow" data-lang="en">User manual</div>
+
+      <h1 data-lang="es">Cómo usar el simulador del eclipse</h1>
+      <h1 data-lang="en">How to use the eclipse simulator</h1>
+
+      <p class="lede" data-lang="es">Una guía sencilla para preparar tus fotos del eclipse total de Sol del 12 de agosto de 2026 desde A Coruña. Sin fórmulas: solo qué hace cada parte y cómo sacarle partido.</p>
+      <p class="lede" data-lang="en">A plain guide to preparing your photographs of the total solar eclipse of 12 August 2026 from A Coruña. No formulae: simply what each part does and how to make the most of it.</p>
+
+      <div class="byline" data-lang="es">Por Rafael Vida</div>
+      <div class="byline" data-lang="en">By Rafael Vida</div>
     </div>
     <div class="navrow">
       <a class="navlink" href="simulador-eclipse-coruna.html">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-        Abrir simulador
+        <span data-lang="es">Abrir simulador</span><span data-lang="en">Open simulator</span>
       </a>
       <a class="navlink" href="manual-tecnico-eclipse.html">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
-        Manual técnico avanzado
+        <span data-lang="es">Manual técnico avanzado</span><span data-lang="en">Advanced technical manual</span>
       </a>
     </div>
   </header>
 
   <div class="safety">
-    <div class="h">⚠ Antes de nada: tus ojos y tu cámara</div>
-    <p>Mirar al Sol sin protección daña la vista, y apuntar la cámara sin filtro puede estropear el sensor. Usa siempre un <strong>filtro solar</strong> homologado durante toda la fase parcial. Solo se retira durante los segundos de totalidad, cuando la Luna tapa por completo el Sol. En cuanto reaparezca el primer destello de luz, el filtro vuelve a su sitio.</p>
+    <div class="h" data-lang="es">⚠ Antes de nada: tus ojos y tu cámara</div>
+    <div class="h" data-lang="en">⚠ First of all: your eyes and your camera</div>
+    <p data-lang="es">Mirar al Sol sin protección daña la vista, y apuntar la cámara sin filtro puede estropear el sensor. Usa siempre un <strong>filtro solar</strong> homologado durante toda la fase parcial. Solo se retira durante los segundos de totalidad, cuando la Luna tapa por completo el Sol. En cuanto reaparezca el primer destello de luz, el filtro vuelve a su sitio.</p>
+    <p data-lang="en">Looking at the Sun unprotected damages your eyesight, and pointing a camera at it without a filter can ruin the sensor. Always use a certified <strong>solar filter</strong> throughout the partial phase. It comes off only during the seconds of totality, when the Moon covers the Sun completely. The moment the first flash of light returns, the filter goes back on.</p>
   </div>
 
   <nav class="toc">
-    <div class="t">Contenido</div>
-    <ol>
+    <div class="t" data-lang="es">Contenido</div>
+    <div class="t" data-lang="en">Contents</div>
+    <ol data-lang="es">
       <li><a href="#para-que">Para qué sirve</a></li>
       <li><a href="#visor">El visor</a></li>
       <li><a href="#datos">Los cuatro datos</a></li>
@@ -152,22 +196,44 @@
       <li><a href="#plan">Un plan para el día</a></li>
       <li><a href="#glosario">Glosario rápido</a></li>
     </ol>
+    <ol data-lang="en">
+      <li><a href="#para-que">What it is for</a></li>
+      <li><a href="#visor">The viewfinder</a></li>
+      <li><a href="#datos">The four figures</a></li>
+      <li><a href="#veredicto">The verdict</a></li>
+      <li><a href="#equipo">Your kit</a></li>
+      <li><a href="#corona">The corona to simulate</a></li>
+      <li><a href="#exposicion">Exposure and bracketing</a></li>
+      <li><a href="#coruna">Details of the location</a></li>
+      <li><a href="#plan">A plan for the day</a></li>
+      <li><a href="#glosario">Quick glossary</a></li>
+    </ol>
   </nav>
 
   <section id="para-que">
-    <div class="sec-head"><span class="sec-no">01</span><h2>Para qué sirve</h2></div>
-    <p>Desde A Coruña, la parte mágica del eclipse (la totalidad, cuando se ve la corona) dura solo <strong>76 segundos</strong>. Es muy poco tiempo para improvisar. Este simulador sirve para llegar con los deberes hechos y responder a dos preguntas antes del día clave:</p>
-    <ul class="clean">
+    <div class="sec-head"><span class="sec-no">01</span><h2 data-lang="es">Para qué sirve</h2><h2 data-lang="en">What it is for</h2></div>
+    <p data-lang="es">Desde A Coruña, la parte mágica del eclipse (la totalidad, cuando se ve la corona) dura solo <strong>76 segundos</strong>. Es muy poco tiempo para improvisar. Este simulador sirve para llegar con los deberes hechos y responder a dos preguntas antes del día clave:</p>
+    <p data-lang="en">From A Coruña, the magical part of the eclipse — totality, when the corona becomes visible — lasts a mere <strong>76 seconds</strong>. That is far too little time to improvise. This simulator exists so that you arrive with your homework done, having answered two questions before the day itself:</p>
+    <ul class="clean" data-lang="es">
       <li><strong>¿Qué saldrá en mi foto?</strong> Según el objetivo y la cámara que tengas, te enseña si captas solo el Sol, el Sol con su halo, o un plano más amplio con paisaje.</li>
       <li><strong>¿Qué exposición pongo?</strong> Te da los tiempos de disparo para cada parte del eclipse y una secuencia lista para usar.</li>
     </ul>
-    <p class="muted">La pantalla tiene una imagen grande a la izquierda (lo que verás por el visor) y unos paneles de ajustes a la derecha. Tú cambias los ajustes y la imagen y los datos se actualizan al momento.</p>
+    <ul class="clean" data-lang="en">
+      <li><strong>What will appear in my picture?</strong> Given your lens and camera, it shows whether you will capture the Sun alone, the Sun with its halo, or a wider view taking in the landscape.</li>
+      <li><strong>What exposure should I set?</strong> It gives you the shutter speeds for each part of the eclipse and a ready-made sequence to fire.</li>
+    </ul>
+    <p class="muted" data-lang="es">La pantalla tiene una imagen grande a la izquierda (lo que verás por el visor) y unos paneles de ajustes a la derecha. Tú cambias los ajustes y la imagen y los datos se actualizan al momento.</p>
+    <p class="muted" data-lang="en">The screen has a large image on the left — what you will see through the viewfinder — and panels of settings on the right. You change the settings, and both the image and the figures update at once.</p>
   </section>
 
   <section id="visor">
-    <div class="sec-head"><span class="sec-no">02</span><h2>El visor</h2></div>
-    <div class="what"><span>Dónde está: imagen grande</span><span>Qué responde: ¿qué cabe?</span></div>
-    <p>Es la previsualización de tu foto. El <strong style="color:var(--gold)">recuadro dorado</strong> es exactamente lo que captará tu cámara con los ajustes elegidos. Todo lo que queda <strong>oscurecido alrededor</strong> existe en el cielo, pero se queda fuera de tu encuadre.</p>
+    <div class="sec-head"><span class="sec-no">02</span><h2 data-lang="es">El visor</h2><h2 data-lang="en">The viewfinder</h2></div>
+    <div class="what">
+      <span data-lang="es">Dónde está: imagen grande</span><span data-lang="en">Where it is: the large image</span>
+      <span data-lang="es">Qué responde: ¿qué cabe?</span><span data-lang="en">What it answers: what fits in?</span>
+    </div>
+    <p data-lang="es">Es la previsualización de tu foto. El <strong style="color:var(--gold)">recuadro dorado</strong> es exactamente lo que captará tu cámara con los ajustes elegidos. Todo lo que queda <strong>oscurecido alrededor</strong> existe en el cielo, pero se queda fuera de tu encuadre.</p>
+    <p data-lang="en">This is the preview of your photograph. The <strong style="color:var(--gold)">golden frame</strong> is exactly what your camera will record with the settings you have chosen. Everything <strong>darkened around it</strong> is there in the sky, but falls outside your framing.</p>
 
     <div class="fig">
       <svg viewBox="0 0 600 300" role="img" aria-label="Esquema del visor">
@@ -183,116 +249,196 @@
         <circle cx="300" cy="155" r="26" fill="none" stroke="#ffcf6b" stroke-width="1.5"/>
         <rect width="600" height="300" fill="#04040a" opacity="0.66" mask="url(#m2)"/>
         <rect x="190" y="80" width="220" height="150" fill="none" stroke="#ffcf6b" stroke-width="2.5" rx="3"/>
-        <text x="300" y="255" fill="#ffcf6b" font-family="JetBrains Mono, monospace" font-size="13" text-anchor="middle">tu foto</text>
-        <text x="80" y="40" fill="#9398ac" font-family="JetBrains Mono, monospace" font-size="13">corona que se queda fuera</text>
+        <text x="300" y="255" fill="#ffcf6b" font-family="JetBrains Mono, monospace" font-size="13" text-anchor="middle" data-lang="es">tu foto</text>
+        <text x="300" y="255" fill="#ffcf6b" font-family="JetBrains Mono, monospace" font-size="13" text-anchor="middle" data-lang="en">your photo</text>
+        <text x="80" y="40" fill="#9398ac" font-family="JetBrains Mono, monospace" font-size="13" data-lang="es">corona que se queda fuera</text>
+        <text x="80" y="40" fill="#9398ac" font-family="JetBrains Mono, monospace" font-size="13" data-lang="en">corona left outside</text>
         <line x1="120" y1="46" x2="150" y2="95" stroke="#9398ac" stroke-width="1"/>
       </svg>
-      <div class="cap">El recuadro dorado es tu foto; lo oscuro es lo que no entra.</div>
+      <div class="cap" data-lang="es">El recuadro dorado es tu foto; lo oscuro es lo que no entra.</div>
+      <div class="cap" data-lang="en">The golden frame is your photograph; the darkened area is what does not fit.</div>
     </div>
 
-    <h3>La barra de abajo</h3>
-    <p>La barrita blanca con un número (por ejemplo <code>1°</code>) es una <strong>regla</strong> para hacerte una idea de los tamaños. Un dato útil para situarte: la Luna llena ocupa en el cielo medio grado, y tu puño con el brazo estirado tapa unos diez grados.</p>
-    <p class="muted">La crucecita del centro marca dónde estará el Sol. Las esquinas en ángulo son solo las marcas del encuadre, como en un visor real.</p>
+    <h3 data-lang="es">La barra de abajo</h3>
+    <h3 data-lang="en">The bar along the bottom</h3>
+    <p data-lang="es">La barrita blanca con un número (por ejemplo <code>1°</code>) es una <strong>regla</strong> para hacerte una idea de los tamaños. Un dato útil para situarte: la Luna llena ocupa en el cielo medio grado, y tu puño con el brazo estirado tapa unos diez grados.</p>
+    <p data-lang="en">The small white bar with a figure beside it (<code>1°</code>, for instance) is a <strong>ruler</strong> to give you a sense of scale. A useful benchmark: the full Moon spans half a degree of sky, and your fist at arm's length covers some ten degrees.</p>
+    <p class="muted" data-lang="es">La crucecita del centro marca dónde estará el Sol. Las esquinas en ángulo son solo las marcas del encuadre, como en un visor real.</p>
+    <p class="muted" data-lang="en">The small cross at the centre marks where the Sun will be. The angled corners are merely framing marks, as in a real viewfinder.</p>
   </section>
 
   <section id="datos">
-    <div class="sec-head"><span class="sec-no">03</span><h2>Los cuatro datos</h2></div>
-    <div class="what"><span>Dónde está: bajo el visor</span><span>Qué responde: el resumen en números</span></div>
-    <p>Debajo de la imagen hay cuatro recuadros que resumen tu situación:</p>
-    <ul class="clean">
+    <div class="sec-head"><span class="sec-no">03</span><h2 data-lang="es">Los cuatro datos</h2><h2 data-lang="en">The four figures</h2></div>
+    <div class="what">
+      <span data-lang="es">Dónde está: bajo el visor</span><span data-lang="en">Where it is: beneath the viewfinder</span>
+      <span data-lang="es">Qué responde: el resumen en números</span><span data-lang="en">What it answers: the summary in numbers</span>
+    </div>
+    <p data-lang="es">Debajo de la imagen hay cuatro recuadros que resumen tu situación:</p>
+    <p data-lang="en">Below the image there are four boxes summarising your situation:</p>
+    <ul class="clean" data-lang="es">
       <li><strong>Focal equivalente.</strong> Tu objetivo "traducido" al lenguaje común de las cámaras grandes (Full Frame). Sirve para comparar peras con peras: un 300 mm en una cámara pequeña puede "ver" como un 450 mm en una grande.</li>
       <li><strong>Factor de recorte.</strong> Cuánto recorta tu cámara respecto a una Full Frame. Si pone <code>1,5×</code>, tu sensor aprovecha una zona más pequeña, así que el motivo se ve más cerca (y el encuadre, más estrecho).</li>
       <li><strong>Campo de visión.</strong> El ancho de cielo que cabe, medido en grados. Cuanto más pequeño, más "cerca" estás del Sol.</li>
       <li><strong>Cuánto ocupa el disco.</strong> Qué porcentaje de la altura de tu foto llena el propio Sol. Si es bajo, el Sol sale pequeñito; si se acerca al 100%, lo llena.</li>
     </ul>
+    <ul class="clean" data-lang="en">
+      <li><strong>Equivalent focal length.</strong> Your lens 'translated' into the common language of large cameras (full frame). It lets you compare like with like: a 300 mm on a small camera may 'see' like a 450 mm on a large one.</li>
+      <li><strong>Crop factor.</strong> How much your camera crops relative to full frame. If it reads <code>1.5×</code>, your sensor uses a smaller area, so the subject appears closer (and the framing tighter).</li>
+      <li><strong>Field of view.</strong> The width of sky that fits, measured in degrees. The smaller it is, the 'closer' you are to the Sun.</li>
+      <li><strong>How much of the frame the disc fills.</strong> What percentage of your picture's height the Sun itself occupies. If it is low, the Sun comes out tiny; as it approaches 100%, it fills the frame.</li>
+    </ul>
   </section>
 
   <section id="veredicto">
-    <div class="sec-head"><span class="sec-no">04</span><h2>El veredicto</h2></div>
-    <div class="what"><span>Dónde está: recuadro dorado</span><span>Qué responde: ¿qué tipo de foto es?</span></div>
-    <p>Es la frase resumen, en cristiano. Sin mirar números, te dice qué clase de foto vas a conseguir: por ejemplo "el disco solar llena el encuadre", "corona con margen" o "plano amplio para incluir paisaje". Es la forma más rápida de saber si tu objetivo es el adecuado para lo que tienes en mente.</p>
-    <div class="tip"><b>Idea clave:</b> no existe un objetivo "perfecto" para todo. Uno largo te da primeros planos espectaculares del Sol; uno más corto te deja meter la corona entera y el horizonte. El veredicto te ayuda a elegir según lo que quieras contar.</div>
+    <div class="sec-head"><span class="sec-no">04</span><h2 data-lang="es">El veredicto</h2><h2 data-lang="en">The verdict</h2></div>
+    <div class="what">
+      <span data-lang="es">Dónde está: recuadro dorado</span><span data-lang="en">Where it is: the golden box</span>
+      <span data-lang="es">Qué responde: ¿qué tipo de foto es?</span><span data-lang="en">What it answers: what kind of photograph is this?</span>
+    </div>
+    <p data-lang="es">Es la frase resumen, en cristiano. Sin mirar números, te dice qué clase de foto vas a conseguir: por ejemplo "el disco solar llena el encuadre", "corona con margen" o "plano amplio para incluir paisaje". Es la forma más rápida de saber si tu objetivo es el adecuado para lo que tienes en mente.</p>
+    <p data-lang="en">This is the summary in plain words. Without looking at a single figure, it tells you what sort of photograph you will get: 'the solar disc fills the frame', say, or 'corona with room to spare', or 'wide view taking in the landscape'. It is the quickest way to know whether your lens suits what you have in mind.</p>
+    <div class="tip" data-lang="es"><b>Idea clave:</b> no existe un objetivo "perfecto" para todo. Uno largo te da primeros planos espectaculares del Sol; uno más corto te deja meter la corona entera y el horizonte. El veredicto te ayuda a elegir según lo que quieras contar.</div>
+    <div class="tip" data-lang="en"><b>Key idea:</b> there is no lens that is 'perfect' for everything. A long one gives you spectacular close-ups of the Sun; a shorter one lets you take in the whole corona and the horizon. The verdict helps you choose according to what you want to say.</div>
   </section>
 
   <section id="equipo">
-    <div class="sec-head"><span class="sec-no">05</span><h2>Tu equipo</h2></div>
-    <div class="what"><span>Dónde está: primer panel derecho</span><span>Qué responde: describe tu cámara</span></div>
-    <p>Aquí le dices al simulador qué vas a usar. Cada ajuste cambia al instante el visor:</p>
-    <ul class="clean">
+    <div class="sec-head"><span class="sec-no">05</span><h2 data-lang="es">Tu equipo</h2><h2 data-lang="en">Your kit</h2></div>
+    <div class="what">
+      <span data-lang="es">Dónde está: primer panel derecho</span><span data-lang="en">Where it is: first panel on the right</span>
+      <span data-lang="es">Qué responde: describe tu cámara</span><span data-lang="en">What it answers: it describes your camera</span>
+    </div>
+    <p data-lang="es">Aquí le dices al simulador qué vas a usar. Cada ajuste cambia al instante el visor:</p>
+    <p data-lang="en">Here you tell the simulator what you will be using. Every setting changes the viewfinder at once:</p>
+    <ul class="clean" data-lang="es">
       <li><strong>Focal real del objetivo.</strong> Los milímetros que pone en tu objetivo (50, 200, 500…). Puedes escribirlos o moverlos con la barra. Más milímetros equivale a más zoom, a Sol más grande.</li>
       <li><strong>Multiplicador (teleconvertidor).</strong> Si usas uno de esos accesorios que se ponen entre cámara y objetivo para alargar el alcance, elígelo aquí (<code>1,4×</code> o <code>2×</code>). Si no usas, déjalo en <code>1×</code>.</li>
       <li><strong>Formato del sensor.</strong> El tamaño del sensor de tu cámara. Si no lo sabes seguro: las réflex y sin espejo "de gama alta" suelen ser Full Frame; muchas de aficionado son APS-C. Hay opción "Personalizado" si conoces las medidas exactas.</li>
       <li><strong>Orientación.</strong> Foto horizontal o vertical, como girarías la cámara.</li>
       <li><strong>Fase del eclipse.</strong> Cambia entre las dos caras del eclipse (ver más abajo).</li>
     </ul>
+    <ul class="clean" data-lang="en">
+      <li><strong>Actual focal length of the lens.</strong> The millimetres printed on your lens (50, 200, 500…). You can type them in or move the slider. More millimetres means more magnification, and a larger Sun.</li>
+      <li><strong>Multiplier (teleconverter).</strong> If you use one of those accessories fitted between camera and lens to extend the reach, choose it here (<code>1.4×</code> or <code>2×</code>). If you do not, leave it at <code>1×</code>.</li>
+      <li><strong>Sensor format.</strong> The size of your camera's sensor. If you are not certain: 'higher-end' SLRs and mirrorless bodies are usually full frame; many amateur models are APS-C. There is a 'Custom' option if you know the exact dimensions.</li>
+      <li><strong>Orientation.</strong> Landscape or portrait, just as you would turn the camera.</li>
+      <li><strong>Eclipse phase.</strong> Switches between the two faces of the eclipse (see below).</li>
+    </ul>
 
-    <h3>Las dos fases</h3>
-    <p>El eclipse tiene dos momentos muy distintos de fotografiar:</p>
-    <ul class="clean">
+    <h3 data-lang="es">Las dos fases</h3>
+    <h3 data-lang="en">The two phases</h3>
+    <p data-lang="es">El eclipse tiene dos momentos muy distintos de fotografiar:</p>
+    <p data-lang="en">The eclipse offers two very different moments to photograph:</p>
+    <ul class="clean" data-lang="es">
       <li><strong>Parcial:</strong> la hora larga en la que la Luna va "mordiendo" el Sol. Se fotografía <strong>con filtro</strong> y se ve el disco brillante en forma de creciente.</li>
       <li><strong>Totalidad:</strong> los 76 segundos en los que la Luna tapa el Sol entero. Se quita el filtro y aparece la corona, ese halo blanco y nacarado. Es la foto estrella.</li>
+    </ul>
+    <ul class="clean" data-lang="en">
+      <li><strong>Partial:</strong> the long hour during which the Moon gradually 'bites into' the Sun. It is photographed <strong>with the filter on</strong>, and the bright disc is seen as a crescent.</li>
+      <li><strong>Totality:</strong> the 76 seconds in which the Moon covers the Sun entirely. The filter comes off and the corona appears, that pearly white halo. This is the photograph everyone is after.</li>
     </ul>
   </section>
 
   <section id="corona">
-    <div class="sec-head"><span class="sec-no">06</span><h2>La corona a simular</h2></div>
-    <div class="what"><span>Dónde está: panel derecho</span><span>Qué responde: ¿hasta dónde llega el halo?</span></div>
-    <p>La corona es la atmósfera del Sol: un halo de luz que solo se ve durante la totalidad. No tiene un borde fijo, se va difuminando, y sus "penachos" pueden extenderse mucho. Con esta barra decides <strong>hasta dónde quieres llegar</strong> en la simulación.</p>
-    <ul class="clean">
+    <div class="sec-head"><span class="sec-no">06</span><h2 data-lang="es">La corona a simular</h2><h2 data-lang="en">The corona to simulate</h2></div>
+    <div class="what">
+      <span data-lang="es">Dónde está: panel derecho</span><span data-lang="en">Where it is: right-hand panel</span>
+      <span data-lang="es">Qué responde: ¿hasta dónde llega el halo?</span><span data-lang="en">What it answers: how far does the halo reach?</span>
+    </div>
+    <p data-lang="es">La corona es la atmósfera del Sol: un halo de luz que solo se ve durante la totalidad. No tiene un borde fijo, se va difuminando, y sus "penachos" pueden extenderse mucho. Con esta barra decides <strong>hasta dónde quieres llegar</strong> en la simulación.</p>
+    <p data-lang="en">The corona is the Sun's atmosphere: a halo of light visible only during totality. It has no fixed edge — it simply fades away — and its 'streamers' can extend a very long way. With this slider you decide <strong>how far you wish to go</strong> in the simulation.</p>
+    <ul class="clean" data-lang="es">
       <li><strong>Valor bajo (cerca de 2):</strong> solo la corona interior, la parte más brillante y pegada al Sol.</li>
       <li><strong>Valor medio (4):</strong> una corona "de foto" típica, como la que se ve en la mayoría de imágenes.</li>
       <li><strong>Valor alto (7 u 8):</strong> los penachos largos que solo salen en exposiciones más prolongadas.</li>
     </ul>
-    <p class="muted">La medida está en "radios solares", que es solo una forma de decir cuántas veces el tamaño del propio Sol se aleja el halo. No hace falta entender el número: muévelo y mira cómo crece el halo en el visor.</p>
+    <ul class="clean" data-lang="en">
+      <li><strong>Low value (close to 2):</strong> the inner corona alone, the brightest part, hugging the Sun.</li>
+      <li><strong>Middle value (4):</strong> a typical 'photographic' corona, of the sort seen in most images.</li>
+      <li><strong>High value (7 or 8):</strong> the long streamers that emerge only in more prolonged exposures.</li>
+    </ul>
+    <p class="muted" data-lang="es">La medida está en "radios solares", que es solo una forma de decir cuántas veces el tamaño del propio Sol se aleja el halo. No hace falta entender el número: muévelo y mira cómo crece el halo en el visor.</p>
+    <p class="muted" data-lang="en">The measurement is given in "solar radii", which is merely a way of saying how many times the Sun's own size the halo extends outwards. There is no need to grasp the figure: move it and watch the halo grow in the viewfinder.</p>
   </section>
 
   <section id="exposicion">
-    <div class="sec-head"><span class="sec-no">07</span><h2>Exposición y horquilla</h2></div>
-    <div class="what"><span>Dónde está: panel y tabla inferior</span><span>Qué responde: ¿qué tiempo de disparo uso?</span></div>
-    <p>Aquí está la otra mitad del problema: <strong>cuánta luz dejar entrar</strong>. Le indicas dos cosas de tu cámara y el simulador calcula los tiempos:</p>
-    <ul class="clean">
+    <div class="sec-head"><span class="sec-no">07</span><h2 data-lang="es">Exposición y horquilla</h2><h2 data-lang="en">Exposure and bracketing</h2></div>
+    <div class="what">
+      <span data-lang="es">Dónde está: panel y tabla inferior</span><span data-lang="en">Where it is: panel and table below</span>
+      <span data-lang="es">Qué responde: ¿qué tiempo de disparo uso?</span><span data-lang="en">What it answers: which shutter speed do I use?</span>
+    </div>
+    <p data-lang="es">Aquí está la otra mitad del problema: <strong>cuánta luz dejar entrar</strong>. Le indicas dos cosas de tu cámara y el simulador calcula los tiempos:</p>
+    <p data-lang="en">Here is the other half of the problem: <strong>how much light to let in</strong>. You tell it two things about your camera and the simulator works out the times:</p>
+    <ul class="clean" data-lang="es">
       <li><strong>ISO:</strong> la sensibilidad de la cámara. Más ISO equivale a más luz captada (pero algo más de "grano").</li>
       <li><strong>Diafragma (f/):</strong> la abertura del objetivo. Es el número f que aparece al disparar, por ejemplo <code>f/8</code>.</li>
       <li><strong>Filtro solar:</strong> solo afecta a la fase parcial, para tener en cuenta cuánta luz bloquea tu filtro.</li>
     </ul>
+    <ul class="clean" data-lang="en">
+      <li><strong>ISO:</strong> the camera's sensitivity. A higher ISO means more light recorded (but rather more 'grain').</li>
+      <li><strong>Aperture (f/):</strong> the opening of the lens. It is the f-number shown as you shoot, <code>f/8</code> for instance.</li>
+      <li><strong>Solar filter:</strong> this affects the partial phase alone, taking account of how much light your filter blocks.</li>
+    </ul>
 
-    <h3>Por qué una sola foto no basta</h3>
-    <p>El eclipse tiene partes con brillos disparatadamente distintos: la zona pegada al Sol es muchísimo más luminosa que los penachos exteriores. Tanto, que ninguna foto los capta bien a la vez: o quemas el centro o pierdes los bordes.</p>
-    <p>La solución de los fotógrafos de eclipses es la <strong>horquilla</strong> (o "bracketing"): disparar una ráfaga de fotos a velocidades cada vez más lentas, desde muy rápida para el centro hasta lenta para los penachos. Luego se eligen las mejores o se combinan.</p>
+    <h3 data-lang="es">Por qué una sola foto no basta</h3>
+    <h3 data-lang="en">Why a single photograph is not enough</h3>
+    <p data-lang="es">El eclipse tiene partes con brillos disparatadamente distintos: la zona pegada al Sol es muchísimo más luminosa que los penachos exteriores. Tanto, que ninguna foto los capta bien a la vez: o quemas el centro o pierdes los bordes.</p>
+    <p data-lang="en">The eclipse holds regions of wildly different brightness: the zone hugging the Sun is vastly brighter than the outer streamers. So much so that no single photograph records both well: either you burn out the centre or you lose the outer edges.</p>
+    <p data-lang="es">La solución de los fotógrafos de eclipses es la <strong>horquilla</strong> (o "bracketing"): disparar una ráfaga de fotos a velocidades cada vez más lentas, desde muy rápida para el centro hasta lenta para los penachos. Luego se eligen las mejores o se combinan.</p>
+    <p data-lang="en">The solution eclipse photographers adopt is the <strong>exposure bracket</strong>: firing a burst of frames at progressively slower speeds, from very fast for the centre to slow for the streamers. Afterwards you pick the best of them, or combine them.</p>
 
-    <h3>Lo que te da la tabla</h3>
-    <ul class="clean">
+    <h3 data-lang="es">Lo que te da la tabla</h3>
+    <h3 data-lang="en">What the table gives you</h3>
+    <ul class="clean" data-lang="es">
       <li>Una <strong>velocidad recomendada</strong> para cada parte del eclipse (cromosfera, protuberancias, corona a distintas distancias…).</li>
       <li>Una <strong>secuencia sugerida</strong>: la serie concreta de velocidades a disparar, ya calculada. Puedes programarla en el modo de horquillado de tu cámara o en un intervalómetro.</li>
       <li>Cuántos disparos son y cuánto tardan, con un aviso si la serie se acerca a los 76 segundos disponibles.</li>
     </ul>
-    <div class="tip"><b>Truco:</b> ensaya esa ráfaga en casa, a oscuras o con el Sol bajo, hasta que te salga sin pensar. El día del eclipse no querrás estar mirando botones.</div>
-    <div class="tip"><b>Tres ajustes más</b> que afinan los tiempos: el desplegable de <b>filtro</b> incluye los Baader AstroSolar (ojo: el ND 3,8 es solo para fotografiar, nunca para mirar); la <b>corrección por extinción</b> alarga los tiempos porque el Sol estará muy bajo y la atmósfera roba luz; y si indicas los <b>megapíxeles</b> de tu cámara, el simulador marca en rojo las velocidades que saldrían movidas por el giro de la Tierra si no usas montura con seguimiento.</div>
+    <ul class="clean" data-lang="en">
+      <li>A <strong>recommended shutter speed</strong> for each part of the eclipse (chromosphere, prominences, corona at various distances…).</li>
+      <li>A <strong>suggested sequence</strong>: the actual series of speeds to fire, already worked out. You can programme it into your camera's bracketing mode or into an intervalometer.</li>
+      <li>How many frames it comes to and how long they take, with a warning should the series approach the 76 seconds available.</li>
+    </ul>
+    <div class="tip" data-lang="es"><b>Truco:</b> ensaya esa ráfaga en casa, a oscuras o con el Sol bajo, hasta que te salga sin pensar. El día del eclipse no querrás estar mirando botones.</div>
+    <div class="tip" data-lang="en"><b>Tip:</b> rehearse that burst at home, in the dark or with the Sun low, until it comes without thinking. On the day of the eclipse you will not want to be hunting for buttons.</div>
+    <div class="tip" data-lang="es"><b>Tres ajustes más</b> que afinan los tiempos: el desplegable de <b>filtro</b> incluye los Baader AstroSolar (ojo: el ND 3,8 es solo para fotografiar, nunca para mirar); la <b>corrección por extinción</b> alarga los tiempos porque el Sol estará muy bajo y la atmósfera roba luz; y si indicas los <b>megapíxeles</b> de tu cámara, el simulador marca en rojo las velocidades que saldrían movidas por el giro de la Tierra si no usas montura con seguimiento.</div>
+    <div class="tip" data-lang="en"><b>Three further settings</b> that fine-tune the times: the <b>filter</b> drop-down includes the Baader AstroSolar films (note: the ND 3.8 is for photography only, never for looking through); the <b>atmospheric extinction correction</b> lengthens the times because the Sun will be very low and the air steals light; and if you enter your camera's <b>megapixels</b>, the simulator marks in red those speeds that would come out blurred by the Earth's rotation unless you use a mount with equatorial tracking.</div>
   </section>
 
   <section id="coruna">
-    <div class="sec-head"><span class="sec-no">08</span><h2>Datos del lugar (A Coruña y más ciudades)</h2></div>
-    <div class="what"><span>Dónde está: panel derecho</span><span>Qué responde: cuándo y cómo será</span></div>
-    <p>Un recordatorio con los horarios reales del eclipse. Por defecto muestra A Coruña, pero hay un <strong>desplegable de lugar</strong> con otras ciudades dentro de la franja de totalidad (Oviedo, León, Zaragoza, Valencia y Palma de Mallorca). Al cambiar de ciudad se recalcula todo: horarios al segundo, duración de la totalidad, la cuenta atrás del día del eclipse, la ficha de campo y hasta los tiempos de exposición.</p>
-    <p>¿Por qué cambian los tiempos de exposición según la ciudad? Porque el Sol estará a distinta altura en cada una: a 12° en A Coruña, pero a solo 2° en Palma. Cuanto más bajo está el Sol, más atmósfera atraviesa su luz y más se atenúa, así que el simulador alarga las exposiciones automáticamente si tienes activada la corrección. En Palma esa atenuación es enorme (varios pasos), y en todas partes vale la misma regla: necesitas un <strong>horizonte oeste despejado</strong>, y cuanto más al este estés, más crítico es, porque en Zaragoza, Valencia y Palma el Sol se pone todavía eclipsado.</p>
+    <div class="sec-head"><span class="sec-no">08</span><h2 data-lang="es">Datos del lugar (A Coruña y más ciudades)</h2><h2 data-lang="en">Details of the location (A Coruña and other cities)</h2></div>
+    <div class="what">
+      <span data-lang="es">Dónde está: panel derecho</span><span data-lang="en">Where it is: right-hand panel</span>
+      <span data-lang="es">Qué responde: cuándo y cómo será</span><span data-lang="en">What it answers: when and how it will happen</span>
+    </div>
+    <p data-lang="es">Un recordatorio con los horarios reales del eclipse. Por defecto muestra A Coruña, pero hay un <strong>desplegable de lugar</strong> con otras ciudades dentro de la franja de totalidad (Oviedo, León, Zaragoza, Valencia y Palma de Mallorca). Al cambiar de ciudad se recalcula todo: horarios al segundo, duración de la totalidad, la cuenta atrás del día del eclipse, la ficha de campo y hasta los tiempos de exposición.</p>
+    <p data-lang="en">A reminder of the eclipse's actual timings. It shows A Coruña by default, but there is a <strong>location drop-down</strong> with other cities inside the band of totality (Oviedo, León, Zaragoza, Valencia and Palma de Mallorca). Changing city recalculates everything: timings to the second, the duration of totality, the eclipse-day countdown, the field sheet and even the exposure times.</p>
+    <p data-lang="es">¿Por qué cambian los tiempos de exposición según la ciudad? Porque el Sol estará a distinta altura en cada una: a 12° en A Coruña, pero a solo 2° en Palma. Cuanto más bajo está el Sol, más atmósfera atraviesa su luz y más se atenúa, así que el simulador alarga las exposiciones automáticamente si tienes activada la corrección. En Palma esa atenuación es enorme (varios pasos), y en todas partes vale la misma regla: necesitas un <strong>horizonte oeste despejado</strong>, y cuanto más al este estés, más crítico es, porque en Zaragoza, Valencia y Palma el Sol se pone todavía eclipsado.</p>
+    <p data-lang="en">Why do the exposure times change from one city to another? Because the Sun will stand at a different altitude in each: 12° at A Coruña, but a mere 2° at Palma. The lower the Sun, the more atmosphere its light must cross and the more it is dimmed, so the simulator lengthens the exposures automatically whenever the correction is switched on. At Palma that dimming is enormous (several stops), and everywhere the same rule holds: you need a <strong>clear western horizon</strong>, and the further east you are the more critical it becomes, because at Zaragoza, Valencia and Palma the Sun sets while still eclipsed.</p>
   </section>
 
   <section id="plan">
-    <div class="sec-head"><span class="sec-no">09</span><h2>Un plan para el día</h2></div>
-    <p>Juntando todo, así sería la secuencia el 12 de agosto:</p>
-    <div class="tip"><b>Dos ayudas del simulador para ese día:</b> el botón <b>Ficha de campo imprimible</b> genera una hoja con tus horarios, ajustes y la lista de disparos para pegarla al trípode; y el panel <b>Día del eclipse</b> es una cuenta atrás en vivo que te avisa de cuándo quitar y poner el filtro. El botón <b>Copiar enlace</b> guarda tu configuración para compartirla o recuperarla.</div>
+    <div class="sec-head"><span class="sec-no">09</span><h2 data-lang="es">Un plan para el día</h2><h2 data-lang="en">A plan for the day</h2></div>
+    <p data-lang="es">Juntando todo, así sería la secuencia el 12 de agosto:</p>
+    <p data-lang="en">Putting it all together, this is how 12 August would unfold:</p>
+    <div class="tip" data-lang="es"><b>Dos ayudas del simulador para ese día:</b> el botón <b>Ficha de campo imprimible</b> genera una hoja con tus horarios, ajustes y la lista de disparos para pegarla al trípode; y el panel <b>Día del eclipse</b> es una cuenta atrás en vivo que te avisa de cuándo quitar y poner el filtro. El botón <b>Copiar enlace</b> guarda tu configuración para compartirla o recuperarla.</div>
+    <div class="tip" data-lang="en"><b>Two aids the simulator offers for the day:</b> the <b>Printable field sheet</b> button produces a sheet with your timings, settings and shot list to tape to the tripod; and the <b>Eclipse day</b> panel is a live countdown that tells you when to take the filter off and put it back on. The <b>Copy link</b> button saves your configuration so that you can share it or return to it.</div>
     <div class="steps">
-      <div class="step"><div class="when">Días antes</div><div class="title">Ensaya</div><p>Decide objetivo y encuadre con el simulador. Practica la ráfaga de horquilla y deja la cámara configurada.</p></div>
-      <div class="step"><div class="when">19:31 a 20:28</div><div class="title">Fase parcial, con filtro</div><p>La Luna va comiéndose el Sol. Filtro puesto. Una sola exposición vale para casi todo este rato.</p></div>
-      <div class="step"><div class="when">Segundos antes de las 20:28</div><div class="title">Anillo de diamantes</div><p>Justo cuando va a desaparecer el último trozo de Sol. Quita el filtro en ese instante.</p></div>
-      <div class="step"><div class="when">20:28, durante 76 s</div><div class="title">Totalidad</div><p>Sin filtro. Dispara la horquilla para captar la corona entera. Y reserva unos segundos para mirarlo a ojo: merece la pena.</p></div>
-      <div class="step"><div class="when">Tras la totalidad</div><div class="title">Filtro de vuelta</div><p>Al primer destello de luz, filtro puesto otra vez. Empieza la parcial de salida hasta las 21:22.</p></div>
+      <div class="step" data-lang="es"><div class="when">Días antes</div><div class="title">Ensaya</div><p>Decide objetivo y encuadre con el simulador. Practica la ráfaga de horquilla y deja la cámara configurada.</p></div>
+      <div class="step" data-lang="en"><div class="when">Days before</div><div class="title">Rehearse</div><p>Settle on lens and framing with the simulator. Practise the exposure bracket and leave the camera set up.</p></div>
+      <div class="step" data-lang="es"><div class="when">19:31 a 20:28</div><div class="title">Fase parcial, con filtro</div><p>La Luna va comiéndose el Sol. Filtro puesto. Una sola exposición vale para casi todo este rato.</p></div>
+      <div class="step" data-lang="en"><div class="when">19:31 to 20:28</div><div class="title">Partial phase, filter on</div><p>The Moon steadily eats into the Sun. Filter on. A single exposure will serve for almost all of this stretch.</p></div>
+      <div class="step" data-lang="es"><div class="when">Segundos antes de las 20:28</div><div class="title">Anillo de diamantes</div><p>Justo cuando va a desaparecer el último trozo de Sol. Quita el filtro en ese instante.</p></div>
+      <div class="step" data-lang="en"><div class="when">Seconds before 20:28</div><div class="title">Diamond ring</div><p>Just as the last sliver of Sun is about to vanish. Take the filter off at that instant.</p></div>
+      <div class="step" data-lang="es"><div class="when">20:28, durante 76 s</div><div class="title">Totalidad</div><p>Sin filtro. Dispara la horquilla para captar la corona entera. Y reserva unos segundos para mirarlo a ojo: merece la pena.</p></div>
+      <div class="step" data-lang="en"><div class="when">20:28, for 76 s</div><div class="title">Totality</div><p>No filter. Fire the exposure bracket to capture the whole corona. And keep a few seconds back to look at it with your own eyes: it is worth it.</p></div>
+      <div class="step" data-lang="es"><div class="when">Tras la totalidad</div><div class="title">Filtro de vuelta</div><p>Al primer destello de luz, filtro puesto otra vez. Empieza la parcial de salida hasta las 21:22.</p></div>
+      <div class="step" data-lang="en"><div class="when">After totality</div><div class="title">Filter back on</div><p>At the first flash of light, the filter goes back on. The closing partial phase begins, and runs until 21:22.</p></div>
     </div>
   </section>
 
   <section id="glosario">
-    <div class="sec-head"><span class="sec-no">10</span><h2>Glosario rápido</h2></div>
-    <dl>
+    <div class="sec-head"><span class="sec-no">10</span><h2 data-lang="es">Glosario rápido</h2><h2 data-lang="en">Quick glossary</h2></div>
+    <dl data-lang="es">
       <dt>Focal</dt><dd>Los milímetros del objetivo. Más milímetros, más zoom.</dd>
       <dt>Focal equivalente</dt><dd>La focal traducida al estándar de las cámaras grandes, para poder comparar entre cámaras distintas.</dd>
       <dt>Factor de recorte</dt><dd>Cuánto "acerca" tu cámara por tener el sensor más pequeño que una Full Frame.</dd>
@@ -306,19 +452,78 @@
       <dt>Perlas de Baily y anillo de diamantes</dt><dd>Los últimos (o primeros) destellos de luz colándose por los valles de la Luna, justo al entrar y salir de la totalidad.</dd>
       <dt>Horquilla (bracketing)</dt><dd>Disparar varias fotos seguidas a distintas exposiciones para captar partes con brillos muy diferentes.</dd>
     </dl>
+    <dl data-lang="en">
+      <dt>Focal length</dt><dd>The millimetres of the lens. More millimetres, more magnification.</dd>
+      <dt>Equivalent focal length</dt><dd>The focal length translated into the standard of large cameras, so that different cameras can be compared.</dd>
+      <dt>Crop factor</dt><dd>How much your camera 'brings things closer' by having a sensor smaller than full frame.</dd>
+      <dt>Full frame / APS-C</dt><dd>Two sensor sizes. Full frame is the large one (the reference); APS-C is smaller and crops the image.</dd>
+      <dt>Aperture (f/)</dt><dd>The opening of the lens. The f-number that governs how much light enters.</dd>
+      <dt>ISO</dt><dd>The camera's sensitivity to light.</dd>
+      <dt>Degree and arcminute</dt><dd>Measures of size on the sky. The full Moon is half a degree across. One degree is 60 arcminutes.</dd>
+      <dt>Corona</dt><dd>The halo of light around the Sun, visible only during totality.</dd>
+      <dt>Chromosphere</dt><dd>A very thin pink ring against the edge of the Sun, visible for an instant.</dd>
+      <dt>Prominences</dt><dd>Pink tongues of gas that jut out beyond the edge during totality.</dd>
+      <dt>Baily's beads and the diamond ring</dt><dd>The last (or first) flashes of light slipping through the valleys of the Moon, just as totality begins and ends.</dd>
+      <dt>Exposure bracket</dt><dd>Firing several frames in succession at different exposures, in order to capture parts of very different brightness.</dd>
+    </dl>
   </section>
 
   <div style="text-align:center;margin:44px 0 8px">
     <a class="navlink" style="margin:0;display:inline-flex" href="simulador-eclipse-coruna.html">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-      Abrir el simulador y probar con tu objetivo
+      <span data-lang="es">Abrir el simulador y probar con tu objetivo</span><span data-lang="en">Open the simulator and try it with your own lens</span>
     </a>
   </div>
 
-  <footer>
+  <footer data-lang="es">
     Manual del simulador de encuadre y exposición del eclipse total del 12 de agosto de 2026 (A Coruña). Creado por <strong style="color:var(--text);font-weight:500">Rafael Vida</strong>. Horarios locales según el Instituto Geográfico Nacional. Los tiempos de exposición son un punto de partida basado en la guía de Fred Espenak; conviene afinarlos con pruebas reales. Recuerda la seguridad: filtro solar siempre, salvo durante la totalidad.
+  </footer>
+  <footer data-lang="en">
+    Manual for the framing and exposure simulator of the total solar eclipse of 12 August 2026 (A Coruña). Created by <strong style="color:var(--text);font-weight:500">Rafael Vida</strong>. Local timings after the Instituto Geográfico Nacional. The exposure times are a starting point based on Fred Espenak's guide; they are worth refining with real tests. Remember the safety rule: solar filter at all times, except during totality.
   </footer>
 
 </div>
+
+<script>
+"use strict";
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{
+      title:"Manual de uso · Simulador del eclipse · A Coruña 2026",
+      desc:"Manual de uso, sin fórmulas, del simulador de encuadre y exposición del eclipse total de Sol del 12 de agosto de 2026 desde A Coruña: qué hace cada control y cómo preparar la toma.",
+      fig:"Esquema del visor"
+    },
+    en:{
+      title:"User manual · Eclipse simulator · A Coruña 2026",
+      desc:"A formula-free user manual for the framing and exposure simulator of the total solar eclipse of 12 August 2026 seen from A Coruña: what each control does and how to prepare the shot.",
+      fig:"Diagram of the viewfinder"
+    }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    var f=document.querySelector('.fig svg[role="img"]');
+    if(f) f.setAttribute("aria-label",META[l].fig);
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
 </body>
 </html>

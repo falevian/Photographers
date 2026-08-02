@@ -4,6 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fases del juicio estético fotográfico · ficha de consulta</title>
+<meta name="author" content="Rafael Vida">
+<meta name="description" content="Ficha de consulta sobre las tres fases del juicio estético fotográfico —gist, exploración e integración—, su estructura inferencial bayesiana y los parámetros técnicos que actúan sobre cada una.">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -277,25 +289,55 @@
     body{padding:0;background:#fff;}
     .sheet{box-shadow:none;border:none;max-width:100%;}
     .axis-wrap,.band-note{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .langbar{display:none!important;}
   }
+
+  /* ---------- conmutador de idioma ---------- */
+  html[lang="es"] [data-lang="en"]{display:none!important}
+  html[lang="en"] [data-lang="es"]{display:none!important}
+  .langbar{position:fixed;top:14px;right:16px;z-index:50;display:flex;
+           background:rgba(247,248,248,.92);border:1px solid var(--rule);border-radius:8px;
+           overflow:hidden;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+           box-shadow:0 2px 10px -6px rgba(10,20,25,.45)}
+  .langbar button{font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;
+                  background:transparent;border:0;color:var(--ink-soft);padding:7px 11px;cursor:pointer;
+                  transition:background .15s,color .15s}
+  .langbar button+button{border-left:1px solid var(--rule)}
+  .langbar button:hover{color:var(--ink)}
+  .langbar button.on{background:var(--p2-wash);color:var(--p2)}
+  .langbar button:focus-visible{outline:2px solid rgba(44,124,121,.6);outline-offset:-2px}
+  @media(max-width:720px){.langbar{top:8px;right:8px}}
 </style>
 </head>
 <body>
+
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
+
 <main class="sheet">
 
   <header class="head">
-    <div class="eyebrow">Modelo de procesamiento · ficha de consulta</div>
-    <h1>Fases del juicio estético fotográfico</h1>
-    <p class="thesis">Una imagen se juzga buena, como arte, cuando deposita valor en más de una fase y las transiciones entre ellas son coherentes. <b>La coherencia entre fases, no la suma, es la variable crítica.</b> El eje es el tiempo de procesamiento visual; sobre él se distribuyen fuentes de valor de naturaleza distinta.</p>
+    <div class="eyebrow" data-lang="es">Modelo de procesamiento · ficha de consulta</div>
+    <div class="eyebrow" data-lang="en">Processing model · reference sheet</div>
+    <h1 data-lang="es">Fases del juicio estético fotográfico</h1>
+    <h1 data-lang="en">Phases of photographic aesthetic judgement</h1>
+    <p class="thesis" data-lang="es">Una imagen se juzga buena, como arte, cuando deposita valor en más de una fase y las transiciones entre ellas son coherentes. <b>La coherencia entre fases, no la suma, es la variable crítica.</b> El eje es el tiempo de procesamiento visual; sobre él se distribuyen fuentes de valor de naturaleza distinta.</p>
+    <p class="thesis" data-lang="en">An image is judged good, as art, when it deposits value in more than one phase and the transitions between them are coherent. <b>Coherence between phases, not their sum, is the critical variable.</b> The axis is visual processing time; along it are distributed sources of value of quite different natures.</p>
   </header>
 
   <!-- ================= AXIS SPINE ================= -->
-  <section class="axis-wrap" aria-label="Eje temporal del procesamiento">
+  <section class="axis-wrap" aria-label="Eje temporal del procesamiento"
+           data-aria-es="Eje temporal del procesamiento" data-aria-en="Processing time axis">
     <div class="axis-label">
-      <span class="eyebrow">Eje temporal (escala logarítmica)</span>
-      <span class="note">t = tiempo desde la aparición del estímulo</span>
+      <span class="eyebrow" data-lang="es">Eje temporal (escala logarítmica)</span>
+      <span class="eyebrow" data-lang="en">Time axis (logarithmic scale)</span>
+      <span class="note" data-lang="es">t = tiempo desde la aparición del estímulo</span>
+      <span class="note" data-lang="en">t = time from stimulus onset</span>
     </div>
-    <svg class="spine" viewBox="0 0 1000 120" preserveAspectRatio="none" role="img" aria-label="Eje logarítmico de tiempo con las tres fases">
+    <svg class="spine" viewBox="0 0 1000 120" preserveAspectRatio="none" role="img" aria-label="Eje logarítmico de tiempo con las tres fases"
+         data-aria-es="Eje logarítmico de tiempo con las tres fases" data-aria-en="Logarithmic time axis with the three phases">
       <!-- log positions: 100ms=90, 150ms=190, 300ms=360, 1s=560, 3s=730, integ=930 -->
       <!-- baseline -->
       <line class="draw" x1="40" y1="78" x2="960" y2="78" stroke="#15191C" stroke-width="1.4" pathLength="1"/>
@@ -312,7 +354,8 @@
         <text class="tick-lbl" x="360" y="100" text-anchor="middle">300 ms</text>
         <text class="tick-lbl" x="560" y="100" text-anchor="middle">1 s</text>
         <text class="tick-lbl" x="730" y="100" text-anchor="middle">3 s</text>
-        <text class="tick-lbl" x="930" y="100" text-anchor="middle">integración</text>
+        <text class="tick-lbl" x="930" y="100" text-anchor="middle" data-lang="es">integración</text>
+        <text class="tick-lbl" x="930" y="100" text-anchor="middle" data-lang="en">integration</text>
       </g>
       <!-- schematic value envelope -->
       <path class="draw" d="M40,70 C120,20 170,22 230,52 C300,86 340,40 470,38 C650,35 720,58 960,30"
@@ -320,35 +363,42 @@
       <!-- phase nodes -->
       <g class="fade n1">
         <circle cx="140" cy="78" r="6.5" fill="#B0742E"/>
-        <text class="node-lbl" x="140" y="34" text-anchor="middle" fill="#B0742E">FASE 1</text>
+        <text class="node-lbl" x="140" y="34" text-anchor="middle" fill="#B0742E" data-lang="es">FASE 1</text>
+        <text class="node-lbl" x="140" y="34" text-anchor="middle" fill="#B0742E" data-lang="en">PHASE 1</text>
       </g>
       <g class="fade n2">
         <circle cx="440" cy="78" r="6.5" fill="#2C7C79"/>
-        <text class="node-lbl" x="440" y="34" text-anchor="middle" fill="#2C7C79">FASE 2</text>
+        <text class="node-lbl" x="440" y="34" text-anchor="middle" fill="#2C7C79" data-lang="es">FASE 2</text>
+        <text class="node-lbl" x="440" y="34" text-anchor="middle" fill="#2C7C79" data-lang="en">PHASE 2</text>
       </g>
       <g class="fade n3">
         <circle cx="800" cy="78" r="6.5" fill="#4A4A8C"/>
-        <text class="node-lbl" x="800" y="34" text-anchor="middle" fill="#4A4A8C">FASE 3</text>
+        <text class="node-lbl" x="800" y="34" text-anchor="middle" fill="#4A4A8C" data-lang="es">FASE 3</text>
+        <text class="node-lbl" x="800" y="34" text-anchor="middle" fill="#4A4A8C" data-lang="en">PHASE 3</text>
       </g>
     </svg>
-    <div style="text-align:right"><span class="note mono" style="font-size:10px;color:var(--ink-soft)">— — curva esquemática de oportunidad de valor</span></div>
+    <div style="text-align:right"><span class="note mono" style="font-size:10px;color:var(--ink-soft)" data-lang="es">— — curva esquemática de oportunidad de valor</span><span class="note mono" style="font-size:10px;color:var(--ink-soft)" data-lang="en">— — schematic curve of value opportunity</span></div>
   </section>
 
   <!-- ================= INSTRUMENTATION RAIL ================= -->
-  <section class="rail-wrap" aria-label="Instrumentación por fase">
-    <div class="rail-head"><span class="eyebrow">Instrumentación · qué se mide en cada fase</span></div>
+  <section class="rail-wrap" aria-label="Instrumentación por fase"
+           data-aria-es="Instrumentación por fase" data-aria-en="Instrumentation by phase">
+    <div class="rail-head"><span class="eyebrow" data-lang="es">Instrumentación · qué se mide en cada fase</span><span class="eyebrow" data-lang="en">Instrumentation · what is measured in each phase</span></div>
     <div class="rail">
       <div class="cell">
-        <span class="k"><span class="dot" style="background:var(--p1)"></span>Fase 1</span>
-        <span class="v">Potenciales evocados tempranos (ERP), conductancia cutánea (EDA) y EMG facial de corrugador y cigomático. Latencia por debajo de 150 ms, previa al reporte verbal.</span>
+        <span class="k"><span class="dot" style="background:var(--p1)"></span><span data-lang="es">Fase 1</span><span data-lang="en">Phase 1</span></span>
+        <span class="v" data-lang="es">Potenciales evocados tempranos (ERP), conductancia cutánea (EDA) y EMG facial de corrugador y cigomático. Latencia por debajo de 150 ms, previa al reporte verbal.</span>
+        <span class="v" data-lang="en">Early event-related potentials (ERP), skin conductance (EDA) and facial EMG of corrugator and zygomaticus. Latency below 150 ms, prior to verbal report.</span>
       </div>
       <div class="cell">
-        <span class="k"><span class="dot" style="background:var(--p2)"></span>Fase 2</span>
-        <span class="v">Oculometría: número, duración y dispersión de las fijaciones; longitud del recorrido sacádico. Índice de exploración productiva.</span>
+        <span class="k"><span class="dot" style="background:var(--p2)"></span><span data-lang="es">Fase 2</span><span data-lang="en">Phase 2</span></span>
+        <span class="v" data-lang="es">Oculometría: número, duración y dispersión de las fijaciones; longitud del recorrido sacádico. Índice de exploración productiva.</span>
+        <span class="v" data-lang="en">Eye tracking: number, duration and dispersion of the fixations; length of the saccadic path. An index of productive exploration.</span>
       </div>
       <div class="cell">
-        <span class="k"><span class="dot" style="background:var(--p3)"></span>Fase 3</span>
-        <span class="v">Respuestas autonómicas sostenidas y dispersión de las interpretaciones verbales entre observadores. La varianza entre observadores estima cuánta proyección admite la imagen.</span>
+        <span class="k"><span class="dot" style="background:var(--p3)"></span><span data-lang="es">Fase 3</span><span data-lang="en">Phase 3</span></span>
+        <span class="v" data-lang="es">Respuestas autonómicas sostenidas y dispersión de las interpretaciones verbales entre observadores. La varianza entre observadores estima cuánta proyección admite la imagen.</span>
+        <span class="v" data-lang="en">Sustained autonomic responses and dispersion of the verbal interpretations across observers. Between-observer variance estimates how much projection the image admits.</span>
       </div>
     </div>
   </section>
@@ -356,108 +406,145 @@
   <!-- ================= PHASE CARDS ================= -->
   <section class="phases">
     <article class="phase p1">
-      <div class="cap"><span class="dot"></span><span class="idx">FASE 1</span></div>
+      <div class="cap"><span class="dot"></span><span class="idx"><span data-lang="es">FASE 1</span><span data-lang="en">PHASE 1</span></span></div>
       <h2>Gist</h2>
-      <div class="window">≈ 100–150 ms · pasada feedforward, sin exploración ocular</div>
-      <div class="row"><span class="k">Salida</span><span class="v">Una evaluación con signo (relevancia: peligro, interés, inocuo) y la categoría de escena, desde las propiedades globales. Sin identificar objetos.</span></div>
-      <div class="row"><span class="k">Fuente de valor</span><span class="v">Valencia previa al reconocimiento de los estadísticos globales y fluidez de procesamiento. Satura con rapidez.</span></div>
-      <div class="row"><span class="k">Canal físico</span><span class="v">Baja frecuencia espacial; conducción rápida por vía magnocelular.</span></div>
+      <div class="window" data-lang="es">≈ 100–150 ms · pasada feedforward, sin exploración ocular</div>
+      <div class="window" data-lang="en">≈ 100–150 ms · feedforward pass, no ocular exploration</div>
+      <div class="row"><span class="k" data-lang="es">Salida</span><span class="k" data-lang="en">Output</span><span class="v" data-lang="es">Una evaluación con signo (relevancia: peligro, interés, inocuo) y la categoría de escena, desde las propiedades globales. Sin identificar objetos.</span><span class="v" data-lang="en">A signed evaluation (relevance: threat, interest, innocuous) and the scene category, drawn from global properties. No objects identified.</span></div>
+      <div class="row"><span class="k" data-lang="es">Fuente de valor</span><span class="k" data-lang="en">Source of value</span><span class="v" data-lang="es">Valencia previa al reconocimiento de los estadísticos globales y fluidez de procesamiento. Satura con rapidez.</span><span class="v" data-lang="en">Pre-recognition valence drawn from global statistics, and processing fluency. Saturates rapidly.</span></div>
+      <div class="row"><span class="k" data-lang="es">Canal físico</span><span class="k" data-lang="en">Physical channel</span><span class="v" data-lang="es">Baja frecuencia espacial; conducción rápida por vía magnocelular.</span><span class="v" data-lang="en">Low spatial frequencies; fast conduction along the magnocellular pathway.</span></div>
     </article>
 
     <article class="phase p2">
-      <div class="cap"><span class="dot"></span><span class="idx">FASE 2</span></div>
-      <h2>Exploración</h2>
-      <div class="window">≈ 0,3 a varios s · barrido sacádico, refinamiento parvocelular</div>
-      <div class="row"><span class="k">Salida</span><span class="v">Objetos, texturas, relaciones y geometría resueltas por foveación.</span></div>
-      <div class="row"><span class="k">Fuente de valor</span><span class="v">Dificultad productiva: exige estructura que explorar. Signo opuesto a la fluidez de la fase 1.</span></div>
-      <div class="row"><span class="k">Óptimo</span><span class="v">La preferencia máxima (U invertida de Berlyne) se sitúa entre las fases 1 y 2.</span></div>
+      <div class="cap"><span class="dot"></span><span class="idx"><span data-lang="es">FASE 2</span><span data-lang="en">PHASE 2</span></span></div>
+      <h2 data-lang="es">Exploración</h2>
+      <h2 data-lang="en">Exploration</h2>
+      <div class="window" data-lang="es">≈ 0,3 a varios s · barrido sacádico, refinamiento parvocelular</div>
+      <div class="window" data-lang="en">≈ 0.3 to several s · saccadic scanning, parvocellular refinement</div>
+      <div class="row"><span class="k" data-lang="es">Salida</span><span class="k" data-lang="en">Output</span><span class="v" data-lang="es">Objetos, texturas, relaciones y geometría resueltas por foveación.</span><span class="v" data-lang="en">Objects, textures, relations and geometry resolved by foveation.</span></div>
+      <div class="row"><span class="k" data-lang="es">Fuente de valor</span><span class="k" data-lang="en">Source of value</span><span class="v" data-lang="es">Dificultad productiva: exige estructura que explorar. Signo opuesto a la fluidez de la fase 1.</span><span class="v" data-lang="en">Productive difficulty: it requires structure to explore. Opposite in sign to the fluency of phase 1.</span></div>
+      <div class="row"><span class="k" data-lang="es">Óptimo</span><span class="k" data-lang="en">Optimum</span><span class="v" data-lang="es">La preferencia máxima (U invertida de Berlyne) se sitúa entre las fases 1 y 2.</span><span class="v" data-lang="en">Maximum preference (Berlyne's inverted U) falls between phases 1 and 2.</span></div>
     </article>
 
     <article class="phase p3">
-      <div class="cap"><span class="dot"></span><span class="idx">FASE 3</span></div>
-      <h2>Integración</h2>
-      <div class="window">segundos en adelante · cognitivamente penetrable</div>
-      <div class="row"><span class="k">Salida</span><span class="v">Contexto, título, sujeto y saber previo, más inferencia proyectiva bajo subdeterminación.</span></div>
-      <div class="row"><span class="k">Fuente de valor</span><span class="v">Enganche particular (<i>punctum</i>) y proyección del observador. Máxima intensidad, mínima universalidad.</span></div>
-      <div class="row"><span class="k">Mecanismo</span><span class="v">El material aportado procede de la memoria de quien mira: parte de la carga no es de la imagen.</span></div>
+      <div class="cap"><span class="dot"></span><span class="idx"><span data-lang="es">FASE 3</span><span data-lang="en">PHASE 3</span></span></div>
+      <h2 data-lang="es">Integración</h2>
+      <h2 data-lang="en">Integration</h2>
+      <div class="window" data-lang="es">segundos en adelante · cognitivamente penetrable</div>
+      <div class="window" data-lang="en">seconds onwards · cognitively penetrable</div>
+      <div class="row"><span class="k" data-lang="es">Salida</span><span class="k" data-lang="en">Output</span><span class="v" data-lang="es">Contexto, título, sujeto y saber previo, más inferencia proyectiva bajo subdeterminación.</span><span class="v" data-lang="en">Context, title, subject and prior knowledge, plus projective inference under underdetermination.</span></div>
+      <div class="row"><span class="k" data-lang="es">Fuente de valor</span><span class="k" data-lang="en">Source of value</span><span class="v" data-lang="es">Enganche particular (<i>punctum</i>) y proyección del observador. Máxima intensidad, mínima universalidad.</span><span class="v" data-lang="en">Particular snag (<i>punctum</i>) and projection by the observer. Maximum intensity, minimum universality.</span></div>
+      <div class="row"><span class="k" data-lang="es">Mecanismo</span><span class="k" data-lang="en">Mechanism</span><span class="v" data-lang="es">El material aportado procede de la memoria de quien mira: parte de la carga no es de la imagen.</span><span class="v" data-lang="en">The material supplied comes from the memory of the viewer: part of the load is not the image's.</span></div>
     </article>
   </section>
 
   <!-- ================= INFERENCE BAND ================= -->
-  <section class="infer" aria-label="Estructura inferencial">
+  <section class="infer" aria-label="Estructura inferencial"
+           data-aria-es="Estructura inferencial" data-aria-en="Inferential structure">
     <div class="infer-head">
-      <span class="eyebrow">Estructura inferencial · prior y verosimilitud a través de las fases</span>
+      <span class="eyebrow" data-lang="es">Estructura inferencial · prior y verosimilitud a través de las fases</span>
+      <span class="eyebrow" data-lang="en">Inferential structure · prior and likelihood across the phases</span>
       <div class="eqs">
-        <div class="eq"><span class="lbl">Paso 1 · gist</span><span class="ex">P(H | I<sub>baja</sub>) &#8733; P(I<sub>baja</sub> | H) &middot; P(H)</span></div>
-        <div class="eq"><span class="lbl">Paso 2 · detalle</span><span class="ex">P(H | I<sub>baja</sub>, I<sub>alta</sub>) &#8733; P(I<sub>alta</sub> | H) &middot; P(H | I<sub>baja</sub>)</span></div>
-        <div class="eqnote">H es la hipótesis rápida con signo (relevancia: peligro, interés, inocuo), no la identidad del objeto. Lo primero que estima el sistema es relevancia, no identidad, porque la banda baja basta y el coste de un falso negativo es asimétrico. El gist es el posterior del paso 1: <code>P(H | I<sub>baja</sub>)</code>. En el paso 2 ocupa el lugar del prior, y por eso la primera impresión ancla la lectura posterior. El prior en sentido estricto es <code>P(H)</code>, independiente de la imagen.</div>
+        <div class="eq"><span class="lbl" data-lang="es">Paso 1 · gist</span><span class="lbl" data-lang="en">Step 1 · gist</span><span class="ex" data-lang="es">P(H | I<sub>baja</sub>) &#8733; P(I<sub>baja</sub> | H) &middot; P(H)</span><span class="ex" data-lang="en">P(H | I<sub>low</sub>) &#8733; P(I<sub>low</sub> | H) &middot; P(H)</span></div>
+        <div class="eq"><span class="lbl" data-lang="es">Paso 2 · detalle</span><span class="lbl" data-lang="en">Step 2 · detail</span><span class="ex" data-lang="es">P(H | I<sub>baja</sub>, I<sub>alta</sub>) &#8733; P(I<sub>alta</sub> | H) &middot; P(H | I<sub>baja</sub>)</span><span class="ex" data-lang="en">P(H | I<sub>low</sub>, I<sub>high</sub>) &#8733; P(I<sub>high</sub> | H) &middot; P(H | I<sub>low</sub>)</span></div>
+        <div class="eqnote" data-lang="es">H es la hipótesis rápida con signo (relevancia: peligro, interés, inocuo), no la identidad del objeto. Lo primero que estima el sistema es relevancia, no identidad, porque la banda baja basta y el coste de un falso negativo es asimétrico. El gist es el posterior del paso 1: <code>P(H | I<sub>baja</sub>)</code>. En el paso 2 ocupa el lugar del prior, y por eso la primera impresión ancla la lectura posterior. El prior en sentido estricto es <code>P(H)</code>, independiente de la imagen.</div>
+        <div class="eqnote" data-lang="en">H is the fast signed hypothesis (relevance: threat, interest, innocuous), not the identity of the object. What the system estimates first is relevance, not identity, because the low band suffices and the cost of a false negative is asymmetric. The gist is the posterior of step 1: <code>P(H | I<sub>low</sub>)</code>. In step 2 it takes the place of the prior, which is why the first impression anchors the later reading. The prior in the strict sense is <code>P(H)</code>, independent of the image.</div>
       </div>
     </div>
     <div class="infer-cols">
       <div class="cell">
-        <span class="k"><span class="dot" style="background:var(--p1)"></span>Fase 1</span>
-        <span class="v">La banda baja produce una evaluación con signo, <code>P(H|I<sub>baja</sub>)</code>, combinando la verosimilitud <code>P(I<sub>baja</sub>|H)</code> con el prior estructural <code>P(H)</code>. Salida: una impresión con valencia, no una identidad.</span>
+        <span class="k"><span class="dot" style="background:var(--p1)"></span><span data-lang="es">Fase 1</span><span data-lang="en">Phase 1</span></span>
+        <span class="v" data-lang="es">La banda baja produce una evaluación con signo, <code>P(H|I<sub>baja</sub>)</code>, combinando la verosimilitud <code>P(I<sub>baja</sub>|H)</code> con el prior estructural <code>P(H)</code>. Salida: una impresión con valencia, no una identidad.</span>
+        <span class="v" data-lang="en">The low band yields a signed evaluation, <code>P(H|I<sub>low</sub>)</code>, combining the likelihood <code>P(I<sub>low</sub>|H)</code> with the structural prior <code>P(H)</code>. Output: an impression carrying valence, not an identity.</span>
       </div>
       <div class="cell">
-        <span class="k"><span class="dot" style="background:var(--p2)"></span>Fase 2</span>
-        <span class="v">Las altas frecuencias, portadas por la identidad del objeto, actualizan la impresión: factor <code>P(I<sub>alta</sub>|H)</code>. El posterior del paso 1 entra como prior; la evidencia confirma o corrige.</span>
+        <span class="k"><span class="dot" style="background:var(--p2)"></span><span data-lang="es">Fase 2</span><span data-lang="en">Phase 2</span></span>
+        <span class="v" data-lang="es">Las altas frecuencias, portadas por la identidad del objeto, actualizan la impresión: factor <code>P(I<sub>alta</sub>|H)</code>. El posterior del paso 1 entra como prior; la evidencia confirma o corrige.</span>
+        <span class="v" data-lang="en">The high frequencies, which carry the identity of the object, update the impression: factor <code>P(I<sub>high</sub>|H)</code>. The posterior of step 1 enters as the prior; the evidence confirms it or corrects it.</span>
       </div>
       <div class="cell">
-        <span class="k"><span class="dot" style="background:var(--p3)"></span>Fase 3</span>
-        <span class="v">Integración del prior estructural y contextual del observador. Domina el posterior cuando los factores de verosimilitud previos fueron poco informativos.</span>
+        <span class="k"><span class="dot" style="background:var(--p3)"></span><span data-lang="es">Fase 3</span><span data-lang="en">Phase 3</span></span>
+        <span class="v" data-lang="es">Integración del prior estructural y contextual del observador. Domina el posterior cuando los factores de verosimilitud previos fueron poco informativos.</span>
+        <span class="v" data-lang="en">Integration of the observer's structural and contextual prior. It dominates the posterior whenever the preceding likelihood factors were uninformative.</span>
       </div>
     </div>
-    <div class="infer-foot"><b>Disolución y hermetismo.</b> La disolución reduce la precisión de <code>P(I<sub>alta</sub>|H)</code> al destruir la identidad del objeto que la porta, conservando <code>P(H|I<sub>baja</sub>)</code>: la valencia queda sin confirmación, el observador permanece en la impresión inicial y la completa proyectando. Si además se pierde <code>I<sub>baja</sub></code>, ni H llega a estimarse y el posterior queda gobernado solo por <code>P(H)</code>, prior sin verosimilitud que lo discipline. Eso es el hermetismo. La varianza entre observadores del carril de fase 3 es la varianza de ese posterior.</div>
+    <div class="infer-foot" data-lang="es"><b>Disolución y hermetismo.</b> La disolución reduce la precisión de <code>P(I<sub>alta</sub>|H)</code> al destruir la identidad del objeto que la porta, conservando <code>P(H|I<sub>baja</sub>)</code>: la valencia queda sin confirmación, el observador permanece en la impresión inicial y la completa proyectando. Si además se pierde <code>I<sub>baja</sub></code>, ni H llega a estimarse y el posterior queda gobernado solo por <code>P(H)</code>, prior sin verosimilitud que lo discipline. Eso es el hermetismo. La varianza entre observadores del carril de fase 3 es la varianza de ese posterior.</div>
+    <div class="infer-foot" data-lang="en"><b>Dissolution and hermeticism.</b> Dissolution lowers the precision of <code>P(I<sub>high</sub>|H)</code> by destroying the identity of the object that carries it, while preserving <code>P(H|I<sub>low</sub>)</code>: the valence is left unconfirmed, the observer stays with the initial impression and completes it by projection. If <code>I<sub>low</sub></code> is lost as well, H is never even estimated and the posterior is governed by <code>P(H)</code> alone, a prior with no likelihood to discipline it. That is hermeticism. The between-observer variance in the phase 3 rail is the variance of that posterior.</div>
   </section>
 
   <!-- ================= THESIS BAND ================= -->
   <section class="tesis">
     <div>
-      <h3>Perfil de valor sobre las fases</h3>
-      <p>Dos modos de incoherencia degradan el juicio: el valor que se agota en la fase 1 (impacto sin recompensa a la exploración) y el detalle de fase 2 cuyo gist no promete nada, de modo que la inspección no se financia. <b>Honrar cada foto en su modo</b> equivale a evaluarla según el perfil de fase que eligió, no según otro.</p>
+      <h3 data-lang="es">Perfil de valor sobre las fases</h3>
+      <h3 data-lang="en">Value profile across the phases</h3>
+      <p data-lang="es">Dos modos de incoherencia degradan el juicio: el valor que se agota en la fase 1 (impacto sin recompensa a la exploración) y el detalle de fase 2 cuyo gist no promete nada, de modo que la inspección no se financia. <b>Honrar cada foto en su modo</b> equivale a evaluarla según el perfil de fase que eligió, no según otro.</p>
+      <p data-lang="en">Two modes of incoherence degrade the judgement: value that is exhausted in phase 1 (impact with no reward for exploration), and phase 2 detail whose gist promises nothing, so that the inspection is never funded. <b>Honouring each photograph in its own mode</b> amounts to assessing it by the phase profile it chose, and not by another.</p>
     </div>
     <table class="profiles">
       <thead>
-        <tr><th>Modo</th><th style="text-align:center">F1</th><th style="text-align:center">F2</th><th style="text-align:center">F3</th><th>Ejemplo</th></tr>
+        <tr data-lang="es"><th>Modo</th><th style="text-align:center">F1</th><th style="text-align:center">F2</th><th style="text-align:center">F3</th><th>Ejemplo</th></tr>
+        <tr data-lang="en"><th>Mode</th><th style="text-align:center">P1</th><th style="text-align:center">P2</th><th style="text-align:center">P3</th><th>Example</th></tr>
       </thead>
       <tbody>
-        <tr><td class="mode">Descriptivo</td><td class="lvl mid">sobrio</td><td class="lvl hi">alto</td><td class="lvl mid">variable</td><td class="ej">Ghirri, Shore</td></tr>
-        <tr><td class="mode">Expresivo disuelto</td><td class="lvl hi">alto</td><td class="lvl lo">pobre</td><td class="lvl hi">alto</td><td class="ej">Plossu, Mann</td></tr>
-        <tr><td class="mode">Cartel / impacto</td><td class="lvl hi">alto</td><td class="lvl lo">nulo</td><td class="lvl lo">nulo</td><td class="ej neg">contraejemplo</td></tr>
+        <tr data-lang="es"><td class="mode">Descriptivo</td><td class="lvl mid">sobrio</td><td class="lvl hi">alto</td><td class="lvl mid">variable</td><td class="ej">Ghirri, Shore</td></tr>
+        <tr data-lang="en"><td class="mode">Descriptive</td><td class="lvl mid">restrained</td><td class="lvl hi">high</td><td class="lvl mid">variable</td><td class="ej">Ghirri, Shore</td></tr>
+        <tr data-lang="es"><td class="mode">Expresivo disuelto</td><td class="lvl hi">alto</td><td class="lvl lo">pobre</td><td class="lvl hi">alto</td><td class="ej">Plossu, Mann</td></tr>
+        <tr data-lang="en"><td class="mode">Dissolved expressive</td><td class="lvl hi">high</td><td class="lvl lo">poor</td><td class="lvl hi">high</td><td class="ej">Plossu, Mann</td></tr>
+        <tr data-lang="es"><td class="mode">Cartel / impacto</td><td class="lvl hi">alto</td><td class="lvl lo">nulo</td><td class="lvl lo">nulo</td><td class="ej neg">contraejemplo</td></tr>
+        <tr data-lang="en"><td class="mode">Poster / impact</td><td class="lvl hi">high</td><td class="lvl lo">none</td><td class="lvl lo">none</td><td class="ej neg">counterexample</td></tr>
       </tbody>
     </table>
   </section>
 
   <!-- ================= APARATO ================= -->
   <section class="aparato">
-    <div class="eyebrow">El aparato · dónde actúa cada parámetro técnico</div>
-    <p class="lead">Las decisiones técnicas no son una capa separada del juicio: son el mecanismo físico que fija <b>en qué fase</b> deposita valor la imagen. Cada parámetro se ordena bajo la fase sobre la que actúa de forma dominante.</p>
+    <div class="eyebrow" data-lang="es">El aparato · dónde actúa cada parámetro técnico</div>
+    <div class="eyebrow" data-lang="en">The apparatus · where each technical parameter acts</div>
+    <p class="lead" data-lang="es">Las decisiones técnicas no son una capa separada del juicio: son el mecanismo físico que fija <b>en qué fase</b> deposita valor la imagen. Cada parámetro se ordena bajo la fase sobre la que actúa de forma dominante.</p>
+    <p class="lead" data-lang="en">Technical decisions are not a layer separate from the judgement: they are the physical mechanism that fixes <b>in which phase</b> the image deposits value. Each parameter is filed under the phase on which it acts predominantly.</p>
     <div class="app-grid">
       <div class="app-col a1">
-        <div class="h"><span class="n">F1</span><span class="t">Gist · estadísticos globales</span></div>
-        <ul>
+        <div class="h"><span class="n"><span data-lang="es">F1</span><span data-lang="en">P1</span></span><span class="t" data-lang="es">Gist · estadísticos globales</span><span class="t" data-lang="en">Gist · global statistics</span></div>
+        <ul data-lang="es">
           <li><b>Exposición y clave tonal.</b> <span class="note">Fijan la valencia global. El recorte de altas luces destruye amplitud de forma irreversible, conserva contorno.</span></li>
           <li><b>Temperatura y balance de color.</b> <span class="note">Eje cálido-frío como estadístico global de valencia.</span></li>
           <li><b>Perfil del sensor.</b> <span class="note">Matriz de color y curva base desplazan la distribución cromática de conjunto.</span></li>
           <li><b>Desenfoque global (paso bajo).</b> <span class="note">Operador lineal; atenúa altas frecuencias, preserva el gist. Invertible (deconvolución).</span></li>
         </ul>
+        <ul data-lang="en">
+          <li><b>Exposure and tonal key.</b> <span class="note">They fix the global valence. Highlight clipping destroys amplitude irreversibly, yet preserves contour.</span></li>
+          <li><b>Colour temperature and balance.</b> <span class="note">The warm–cool axis as a global statistic of valence.</span></li>
+          <li><b>Sensor profile.</b> <span class="note">Colour matrix and base curve displace the overall chromatic distribution.</span></li>
+          <li><b>Global blur (low-pass).</b> <span class="note">A linear operator; it attenuates high frequencies and preserves the gist. Invertible (deconvolution).</span></li>
+        </ul>
       </div>
       <div class="app-col a2">
-        <div class="h"><span class="n">F2</span><span class="t">Exploración · detalle foveable</span></div>
-        <ul>
+        <div class="h"><span class="n"><span data-lang="es">F2</span><span data-lang="en">P2</span></span><span class="t" data-lang="es">Exploración · detalle foveable</span><span class="t" data-lang="en">Exploration · foveatable detail</span></div>
+        <ul data-lang="es">
           <li><b>Resolución y acutancia.</b> <span class="note">Determinan cuánta estructura resoluble existe. Índices: varianza del laplaciano, contraste local.</span></li>
           <li><b>Profundidad de campo y plano de foco.</b> <span class="note">Distribuyen dónde hay detalle. Control directo en el disparo.</span></li>
           <li><b>Textura de superficie.</b> <span class="note">Grano y ruido como información. Cuantificación: GLCM y LBP.</span></li>
           <li><b>Carácter de la óptica.</b> <span class="note">La anisotropía del desenfoque separa el barrido del fuera de foco isótropo.</span></li>
         </ul>
+        <ul data-lang="en">
+          <li><b>Resolution and acutance.</b> <span class="note">They determine how much resolvable structure exists. Indices: variance of the Laplacian, local contrast.</span></li>
+          <li><b>Depth of field and plane of focus.</b> <span class="note">They distribute where the detail lies. Direct control at the moment of exposure.</span></li>
+          <li><b>Surface texture.</b> <span class="note">Grain and noise as information. Quantification: GLCM and LBP.</span></li>
+          <li><b>Optical character.</b> <span class="note">The anisotropy of the blur separates swirl from isotropic out-of-focus rendering.</span></li>
+        </ul>
       </div>
       <div class="app-col a3">
-        <div class="h"><span class="n">F3</span><span class="t">Integración · proyección</span></div>
-        <ul>
+        <div class="h"><span class="n"><span data-lang="es">F3</span><span data-lang="en">P3</span></span><span class="t" data-lang="es">Integración · proyección</span><span class="t" data-lang="en">Integration · projection</span></div>
+        <ul data-lang="es">
           <li><b>Control de la subdeterminación.</b> <span class="note">Desenfoque, exposición y profundidad regulan cuánta identidad del objeto se conserva, y por tanto el tamaño del hueco para la proyección.</span></li>
           <li><b>Materialidad de la copia.</b> <span class="note">Papel, proceso y acabado admiten un tiempo de contemplación que favorece esta fase.</span></li>
         </ul>
-        <div class="band-note"><b>Banda óptima.</b> Estructura de baja frecuencia suficiente para acotar la inferencia; ambigüedad suficiente para exigirla. Fuera de ella: exceso de nitidez (nada que proyectar) o pérdida del gist (hermetismo).</div>
+        <ul data-lang="en">
+          <li><b>Control of underdetermination.</b> <span class="note">Blur, exposure and depth regulate how much of the object's identity is preserved, and hence the size of the gap left for projection.</span></li>
+          <li><b>Materiality of the print.</b> <span class="note">Paper, process and finish sustain a contemplation time that favours this phase.</span></li>
+        </ul>
+        <div class="band-note" data-lang="es"><b>Banda óptima.</b> Estructura de baja frecuencia suficiente para acotar la inferencia; ambigüedad suficiente para exigirla. Fuera de ella: exceso de nitidez (nada que proyectar) o pérdida del gist (hermetismo).</div>
+        <div class="band-note" data-lang="en"><b>Optimal band.</b> Enough low-frequency structure to constrain the inference; enough ambiguity to demand it. Outside it: excess sharpness (nothing to project onto) or loss of the gist (hermeticism).</div>
       </div>
     </div>
   </section>
@@ -466,20 +553,67 @@
   <footer class="foot">
     <div class="limits">
       <div class="limit">
-        <div class="eyebrow"><span class="n">Límite 1</span> · contenido de la fase 3</div>
-        <p>El marco predice que la fase 3 contribuye y cómo medirla, <b>no qué contendrá</b>. Las asociaciones que aporta un observador son históricas y culturales.</p>
+        <div class="eyebrow" data-lang="es"><span class="n">Límite 1</span> · contenido de la fase 3</div>
+        <div class="eyebrow" data-lang="en"><span class="n">Limit 1</span> · content of phase 3</div>
+        <p data-lang="es">El marco predice que la fase 3 contribuye y cómo medirla, <b>no qué contendrá</b>. Las asociaciones que aporta un observador son históricas y culturales.</p>
+        <p data-lang="en">The framework predicts that phase 3 contributes, and how to measure it, <b>not what it will contain</b>. The associations an observer brings to it are historical and cultural.</p>
       </div>
       <div class="limit">
-        <div class="eyebrow"><span class="n">Límite 2</span> · necesaria, no suficiente</div>
-        <p>Hay imágenes coherentes que no se juzgan grandes. El residuo es la originalidad, <b>propiedad de la posición en el grafo de influencias, no del nodo</b>.</p>
+        <div class="eyebrow" data-lang="es"><span class="n">Límite 2</span> · necesaria, no suficiente</div>
+        <div class="eyebrow" data-lang="en"><span class="n">Limit 2</span> · necessary, not sufficient</div>
+        <p data-lang="es">Hay imágenes coherentes que no se juzgan grandes. El residuo es la originalidad, <b>propiedad de la posición en el grafo de influencias, no del nodo</b>.</p>
+        <p data-lang="en">There are coherent images that are not judged great. The residue is originality, <b>a property of the position within the influence graph, not of the node</b>.</p>
       </div>
     </div>
     <div class="refs">
-      <b>Referencias</b>
+      <b data-lang="es">Referencias</b>
+      <b data-lang="en">References</b>
       Thorpe, Fize &amp; Marlot 1996 · Oliva &amp; Torralba 2001 · Schyns &amp; Oliva 1994 / Oliva &amp; Schyns 1997 · Greene &amp; Oliva 2009 · Reber, Schwarz &amp; Winkielman 2004 · Berlyne 1971 · Bar 2003 · Field 1987 · Barthes 1980
     </div>
   </footer>
 
 </main>
+
+<script>
+"use strict";
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{
+      title:"Fases del juicio estético fotográfico · ficha de consulta",
+      desc:"Ficha de consulta sobre las tres fases del juicio estético fotográfico —gist, exploración e integración—, su estructura inferencial bayesiana y los parámetros técnicos que actúan sobre cada una."
+    },
+    en:{
+      title:"Phases of photographic aesthetic judgement · reference sheet",
+      desc:"Reference sheet on the three phases of photographic aesthetic judgement — gist, exploration and integration — their Bayesian inferential structure and the technical parameters that act on each."
+    }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    [].forEach.call(document.querySelectorAll("[data-aria-"+l+"]"),function(e){
+      e.setAttribute("aria-label",e.getAttribute("data-aria-"+l));
+    });
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
+
 </body>
 </html>

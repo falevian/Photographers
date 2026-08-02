@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Simulador de encuadre · Eclipse total · A Coruña · 12 ago 2026</title>
 <meta name="author" content="Rafael Vida">
+<meta name="description" content="Simulador de encuadre y exposición del eclipse total de Sol del 12 de agosto de 2026: calcula qué cabe en tu sensor según la focal y el formato, y genera la horquilla de exposición y una ficha de campo imprimible.">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
@@ -170,9 +181,31 @@
 
   footer{margin-top:26px;font-size:11.5px;color:var(--muted);line-height:1.55}
   footer a{color:var(--gold)}
+
+  /* ---------- conmutador de idioma ---------- */
+  html[lang="es"] [data-lang="en"]{display:none!important}
+  html[lang="en"] [data-lang="es"]{display:none!important}
+  .langbar{position:fixed;top:14px;right:16px;z-index:100;display:flex;
+           background:rgba(16,17,28,.92);border:1px solid var(--line-strong);border-radius:8px;
+           overflow:hidden;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+  .langbar button{font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;
+                  background:transparent;border:0;color:var(--muted);padding:7px 11px;cursor:pointer;
+                  transition:background .15s,color .15s}
+  .langbar button+button{border-left:1px solid var(--line-strong)}
+  .langbar button:hover{color:var(--text)}
+  .langbar button.on{background:rgba(255,207,107,.14);color:var(--gold)}
+  .langbar button:focus-visible{outline:2px solid rgba(255,207,107,.6);outline-offset:-2px}
+  @media(max-width:720px){.langbar{top:8px;right:8px}}
+  @media print{.langbar{display:none!important}}
 </style>
 </head>
 <body>
+
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
+
 <div class="wrap">
 
   <header>
@@ -190,18 +223,29 @@
       <circle cx="69" cy="40" r="3.2" fill="#ffcf6b"/>
     </svg>
     <div>
-      <h1>Simulador de encuadre del eclipse total</h1>
-      <div class="sub"><span id="subLoc">A Coruña</span>, 12 de agosto de 2026. Calcula qué cabe en tu sensor (disco solar, anillo de diamantes, corona interior o penachos) según la focal y el formato de tu cámara.</div>
-      <div class="byline">Creado por Rafael Vida</div>
+      <h1 data-lang="es">Simulador de encuadre del eclipse total</h1>
+      <h1 data-lang="en">Total eclipse framing simulator</h1>
+      <div class="sub" data-lang="es"><span class="locName">A Coruña</span>, 12 de agosto de 2026. Calcula qué cabe en tu sensor (disco solar, anillo de diamantes, corona interior o penachos) según la focal y el formato de tu cámara.</div>
+      <div class="sub" data-lang="en"><span class="locName">A Coruña</span>, 12 August 2026. Works out what fits on your sensor (solar disc, diamond ring, inner corona or streamers) for the focal length and format of your camera.</div>
+      <div class="byline" data-lang="es">Creado por Rafael Vida</div>
+      <div class="byline" data-lang="en">Created by Rafael Vida</div>
     </div>
     <div class="navrow">
-      <a class="navlink" href="manual-simulador-eclipse.html">
+      <a class="navlink" href="manual-simulador-eclipse.html" data-lang="es">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
         Manual de uso
       </a>
-      <a class="navlink" href="manual-tecnico-eclipse.html">
+      <a class="navlink" href="manual-simulador-eclipse.html" data-lang="en">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        User manual
+      </a>
+      <a class="navlink" href="manual-tecnico-eclipse.html" data-lang="es">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
         Manual técnico avanzado
+      </a>
+      <a class="navlink" href="manual-tecnico-eclipse.html" data-lang="en">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+        Advanced technical manual
       </a>
     </div>
   </header>
@@ -217,10 +261,10 @@
           <p id="vtext"></p>
         </div>
         <div class="stats">
-          <div class="stat"><div class="k">Focal equivalente (35 mm)</div><div class="v" id="sEq">—</div></div>
-          <div class="stat"><div class="k">Factor de recorte</div><div class="v" id="sCrop">—</div></div>
-          <div class="stat"><div class="k">Campo de visión (H × V)</div><div class="v" id="sFov">—</div></div>
-          <div class="stat"><div class="k">El disco solar ocupa</div><div class="v" id="sSun">—</div></div>
+          <div class="stat"><div class="k" data-lang="es">Focal equivalente (35 mm)</div><div class="k" data-lang="en">Equivalent focal length (35 mm)</div><div class="v" id="sEq">—</div></div>
+          <div class="stat"><div class="k" data-lang="es">Factor de recorte</div><div class="k" data-lang="en">Crop factor</div><div class="v" id="sCrop">—</div></div>
+          <div class="stat"><div class="k" data-lang="es">Campo de visión (H × V)</div><div class="k" data-lang="en">Field of view (H × V)</div><div class="v" id="sFov">—</div></div>
+          <div class="stat"><div class="k" data-lang="es">El disco solar ocupa</div><div class="k" data-lang="en">The solar disc occupies</div><div class="v" id="sSun">—</div></div>
         </div>
         <div class="actions">
           <button class="abtn" id="btnCard" type="button">🖨 Ficha de campo imprimible</button>
@@ -229,22 +273,30 @@
       </div>
 
       <div class="card">
-        <h2><span class="pin"></span>Tamaños angulares de referencia</h2>
+        <h2 data-lang="es"><span class="pin"></span>Tamaños angulares de referencia</h2>
+        <h2 data-lang="en"><span class="pin"></span>Reference angular sizes</h2>
         <table>
-          <thead><tr><th>Elemento</th><th style="text-align:right">Diámetro</th><th style="text-align:right">% del lado corto</th></tr></thead>
+          <thead><tr>
+            <th data-lang="es">Elemento</th><th data-lang="en">Element</th>
+            <th style="text-align:right" data-lang="es">Diámetro</th><th style="text-align:right" data-lang="en">Diameter</th>
+            <th style="text-align:right" data-lang="es">% del lado corto</th><th style="text-align:right" data-lang="en">% of short side</th>
+          </tr></thead>
           <tbody id="reftab"></tbody>
         </table>
       </div>
 
       <div class="card">
-        <h2><span class="pin"></span>Horquilla de exposición</h2>
+        <h2 data-lang="es"><span class="pin"></span>Horquilla de exposición</h2>
+        <h2 data-lang="en"><span class="pin"></span>Exposure bracket</h2>
         <p id="expIntro" class="ctx" style="margin:0 0 12px"></p>
         <table>
-          <thead><tr><th id="expCol">Estructura</th><th style="text-align:center">Q</th><th style="text-align:right">Velocidad</th></tr></thead>
+          <thead><tr><th id="expCol">Estructura</th><th style="text-align:center">Q</th>
+            <th style="text-align:right" data-lang="es">Velocidad</th><th style="text-align:right" data-lang="en">Shutter speed</th></tr></thead>
           <tbody id="exptab"></tbody>
         </table>
         <div id="bracketBox" style="margin-top:14px;padding:13px 14px;border-radius:10px;background:rgba(255,207,107,0.06);border:1px solid rgba(255,207,107,0.18)">
-          <span class="tag" style="font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:6px">Secuencia sugerida</span>
+          <span class="tag" style="font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:6px" data-lang="es">Secuencia sugerida</span>
+          <span class="tag" style="font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:6px" data-lang="en">Suggested sequence</span>
           <div id="bracketSeq" style="font-family:var(--mono);font-size:13.5px;color:var(--text);line-height:1.7"></div>
           <div id="bracketNote" class="hint" style="margin-top:8px"></div>
         </div>
@@ -254,10 +306,11 @@
     <!-- CONTROLS -->
     <div>
       <div class="card">
-        <h2><span class="pin"></span>Tu equipo</h2>
+        <h2 data-lang="es"><span class="pin"></span>Tu equipo</h2>
+        <h2 data-lang="en"><span class="pin"></span>Your kit</h2>
 
         <div class="ctl">
-          <label class="lab" for="focal">Focal real del objetivo <b><span id="focalv">500</span> mm</b></label>
+          <label class="lab" for="focal"><span data-lang="es">Focal real del objetivo</span><span data-lang="en">Actual focal length of the lens</span> <b><span id="focalv">500</span> mm</b></label>
           <div class="row">
             <input class="num" type="number" id="focalNum" min="5" max="6000" step="1" value="500">
           </div>
@@ -265,7 +318,8 @@
         </div>
 
         <div class="ctl">
-          <label class="lab" for="tc">Multiplicador (teleconvertidor)</label>
+          <label class="lab" for="tc" data-lang="es">Multiplicador (teleconvertidor)</label>
+          <label class="lab" for="tc" data-lang="en">Multiplier (teleconverter)</label>
           <select id="tc">
             <option value="1">Sin teleconvertidor (1×)</option>
             <option value="1.4">1,4×</option>
@@ -274,7 +328,8 @@
         </div>
 
         <div class="ctl">
-          <label class="lab" for="sensor">Formato del sensor</label>
+          <label class="lab" for="sensor" data-lang="es">Formato del sensor</label>
+          <label class="lab" for="sensor" data-lang="en">Sensor format</label>
           <select id="sensor">
             <option value="36,24,3:2">Full Frame · 36 × 24 mm</option>
             <option value="22.3,14.9,3:2">APS-C Canon · 22,3 × 14,9 mm (1,6×)</option>
@@ -290,7 +345,8 @@
         </div>
 
         <div class="ctl">
-          <label class="lab">Orientación</label>
+          <label class="lab" data-lang="es">Orientación</label>
+          <label class="lab" data-lang="en">Orientation</label>
           <div class="seg" id="orient">
             <button data-o="h" aria-pressed="true">Horizontal</button>
             <button data-o="v" aria-pressed="false">Vertical</button>
@@ -298,60 +354,73 @@
         </div>
 
         <div class="ctl">
-          <label class="lab">Fase del eclipse</label>
+          <label class="lab" data-lang="es">Fase del eclipse</label>
+          <label class="lab" data-lang="en">Eclipse phase</label>
           <div class="seg" id="phase">
             <button data-p="par" aria-pressed="false">Parcial (con filtro)</button>
             <button data-p="tot" aria-pressed="true">Totalidad</button>
           </div>
-          <div class="hint">En <code>Parcial</code> ves la fotosfera (el disco brillante) mordida por la Luna; necesitas filtro solar. En <code>Totalidad</code> la fotosfera queda oculta y aparecen corona y cromosfera (filtro fuera, solo durante la totalidad).</div>
+          <div class="hint" data-lang="es">En <code>Parcial</code> ves la fotosfera (el disco brillante) mordida por la Luna; necesitas filtro solar. En <code>Totalidad</code> la fotosfera queda oculta y aparecen corona y cromosfera (filtro fuera, solo durante la totalidad).</div>
+          <div class="hint" data-lang="en">In the <code>partial</code> phase you see the photosphere (the bright disc) bitten into by the Moon; a solar filter is needed. In <code>totality</code> the photosphere is hidden and the corona and chromosphere appear (filter off, during totality only).</div>
         </div>
       </div>
 
       <div class="card">
-        <h2><span class="pin"></span>La corona a simular</h2>
+        <h2 data-lang="es"><span class="pin"></span>La corona a simular</h2>
+        <h2 data-lang="en"><span class="pin"></span>The corona to simulate</h2>
         <div class="ctl">
-          <label class="lab" for="cor">Extensión <b><span id="corv">4,0</span> R<sub>☉</sub></b></label>
+          <label class="lab" for="cor"><span data-lang="es">Extensión</span><span data-lang="en">Extent</span> <b><span id="corv">4,0</span> R<sub>☉</sub></b></label>
           <input type="range" id="cor" min="15" max="80" value="40">
-          <div class="hint">Radio de la corona en radios solares. <code>2 R</code> es la corona interior brillante; <code>4 R</code> una captura fotográfica típica; <code>7–8 R</code> son los penachos largos en exposiciones prolongadas (hasta unos 3° de diámetro).</div>
+          <div class="hint" data-lang="es">Radio de la corona en radios solares. <code>2 R</code> es la corona interior brillante; <code>4 R</code> una captura fotográfica típica; <code>7–8 R</code> son los penachos largos en exposiciones prolongadas (hasta unos 3° de diámetro).</div>
+          <div class="hint" data-lang="en">Radius of the corona in solar radii. <code>2 R</code> is the bright inner corona; <code>4 R</code> a typical photographic capture; <code>7–8 R</code> are the long streamers in extended exposures (up to about 3° across).</div>
         </div>
       </div>
 
       <div class="card">
-        <h2><span class="pin"></span>Exposición</h2>
+        <h2 data-lang="es"><span class="pin"></span>Exposición</h2>
+        <h2 data-lang="en"><span class="pin"></span>Exposure</h2>
         <div class="ctl">
           <label class="lab" for="iso">ISO</label>
           <input type="number" id="iso" min="25" max="51200" step="25" value="400">
         </div>
         <div class="ctl">
-          <label class="lab" for="fnum">Diafragma f/</label>
+          <label class="lab" for="fnum" data-lang="es">Diafragma f/</label>
+          <label class="lab" for="fnum" data-lang="en">Aperture f/</label>
           <input type="number" id="fnum" min="1" max="64" step="0.1" value="8">
-          <div class="hint">El tiempo sale de la fórmula de Espenak: <code>t = f² / (ISO · 2^Q)</code>. Cada unidad de Q es un paso de luz, así que la horquilla recorre el rango de Q de cada estructura.</div>
+          <div class="hint" data-lang="es">El tiempo sale de la fórmula de Espenak: <code>t = f² / (ISO · 2^Q)</code>. Cada unidad de Q es un paso de luz, así que la horquilla recorre el rango de Q de cada estructura.</div>
+          <div class="hint" data-lang="en">The time comes from Espenak's formula: <code>t = f² / (ISO · 2^Q)</code>. Each unit of Q is one stop of light, so the exposure bracket runs through the range of Q of each structure.</div>
         </div>
         <div class="ctl" id="ndCtl">
-          <label class="lab" for="nd">Filtro solar (solo fase parcial)</label>
+          <label class="lab" for="nd" data-lang="es">Filtro solar (solo fase parcial)</label>
+          <label class="lab" for="nd" data-lang="en">Solar filter (partial phase only)</label>
           <select id="nd">
             <option value="11">ND 4,0 genérico (≈13,3 pasos)</option>
             <option value="8" selected>ND 5,0 · Baader AstroSolar visual (≈16,6 pasos)</option>
             <option value="12">Baader AstroSolar ND 3,8 foto (≈12,6 pasos)</option>
           </select>
-          <div class="hint">El Baader ND 3,8 es <code>solo fotográfico</code>: nunca observes ni enfoques a ojo a través de él ni del visor óptico. Para mirar, ND 5,0.</div>
+          <div class="hint" data-lang="es">El Baader ND 3,8 es <code>solo fotográfico</code>: nunca observes ni enfoques a ojo a través de él ni del visor óptico. Para mirar, ND 5,0.</div>
+          <div class="hint" data-lang="en">The Baader ND 3.8 is <code>photographic only</code>: never observe or focus by eye through it or through the optical viewfinder. To look, use ND 5.0.</div>
         </div>
         <div class="ctl">
-          <label class="lab" for="mp">Resolución del sensor (Mpx)</label>
+          <label class="lab" for="mp" data-lang="es">Resolución del sensor (Mpx)</label>
+          <label class="lab" for="mp" data-lang="en">Sensor resolution (MP)</label>
           <input type="number" id="mp" min="2" max="200" step="1" value="24">
-          <div class="hint">Solo se usa para estimar el arrastre por la rotación de la Tierra (≈15″/s) a tu focal.</div>
+          <div class="hint" data-lang="es">Solo se usa para estimar el arrastre por la rotación de la Tierra (≈15″/s) a tu focal.</div>
+          <div class="hint" data-lang="en">Used only to estimate the trailing caused by the Earth's rotation (≈15″/s) at your focal length.</div>
         </div>
         <div class="ctl">
-          <label class="lab">Montura</label>
+          <label class="lab" data-lang="es">Montura</label>
+          <label class="lab" data-lang="en">Mount</label>
           <div class="seg" id="track">
             <button data-t="0" aria-pressed="true">Trípode fijo</button>
             <button data-t="1" aria-pressed="false">Seguimiento ecuatorial</button>
           </div>
         </div>
         <div class="ctl">
-          <label class="lab" for="ext">Corrección por extinción (Sol bajo)</label>
+          <label class="lab" for="ext" data-lang="es">Corrección por extinción (Sol bajo)</label>
+          <label class="lab" for="ext" data-lang="en">Extinction correction (low Sun)</label>
           <select id="ext">
-            <option value="0">Sin corrección (tabla Espenak)</option>
+            <option value="0" id="extOpt0">Sin corrección (tabla Espenak)</option>
             <option value="1" selected id="extOpt1">Cielo limpio (+1 EV)</option>
             <option value="2" id="extOpt2">Bruma o calima (+1,5 EV)</option>
           </select>
@@ -360,9 +429,11 @@
       </div>
 
       <div class="card">
-        <h2><span class="pin"></span><span id="locTitle">A Coruña</span> · 12 ago 2026</h2>
+        <h2 data-lang="es"><span class="pin"></span><span class="locName">A Coruña</span> · 12 ago 2026</h2>
+        <h2 data-lang="en"><span class="pin"></span><span class="locName">A Coruña</span> · 12 Aug 2026</h2>
         <div class="ctl" style="margin-bottom:12px">
-          <label class="lab" for="loc">Lugar de observación</label>
+          <label class="lab" for="loc" data-lang="es">Lugar de observación</label>
+          <label class="lab" for="loc" data-lang="en">Observation site</label>
           <select id="loc">
             <option value="coruna" selected>A Coruña</option>
             <option value="oviedo">Oviedo</option>
@@ -376,19 +447,24 @@
       </div>
 
       <div class="card">
-        <h2><span class="pin"></span>Día del eclipse · en vivo</h2>
+        <h2 data-lang="es"><span class="pin"></span>Día del eclipse · en vivo</h2>
+        <h2 data-lang="en"><span class="pin"></span>Eclipse day · live</h2>
         <div id="edPhase" style="font-family:var(--display);font-weight:600;font-size:15px">—</div>
         <div id="edFilter" style="font-family:var(--mono);font-size:12.5px;letter-spacing:0.08em;margin-top:3px">—</div>
         <div id="edCount" style="font-family:var(--mono);font-size:30px;font-weight:600;margin-top:8px;letter-spacing:0.02em">—</div>
         <div id="edNext" class="hint">—</div>
-        <div class="hint" style="margin-top:8px">Usa el reloj de tu dispositivo y la hora peninsular. Tenlo abierto en el móvil durante el eclipse: te dirá cuándo quitar y poner el filtro.</div>
+        <div class="hint" style="margin-top:8px" data-lang="es">Usa el reloj de tu dispositivo y la hora peninsular. Tenlo abierto en el móvil durante el eclipse: te dirá cuándo quitar y poner el filtro.</div>
+        <div class="hint" style="margin-top:8px" data-lang="en">It uses your device clock and mainland Spanish time. Keep it open on your phone during the eclipse: it will tell you when to take the filter off and put it back on.</div>
       </div>
     </div>
 
   </div>
 
-  <footer>
+  <footer data-lang="es">
     Simulador creado por <strong style="color:var(--text);font-weight:500">Rafael Vida</strong>. Modelo geométrico: disco solar 0,525° (Sol cerca del afelio en agosto), Luna ≈ 1,04× el disco solar, corona configurable en radios solares. El campo de visión se calcula como 2·arctan(lado / (2·focal)); la exposición sigue la guía de Fred Espenak, t = f² / (ISO · 2^Q). Datos de circunstancias locales: Instituto Geográfico Nacional (eclipses.ign.es). Estimación para planificar el encuadre y la exposición; no sustituye una prueba real con tu equipo.
+  </footer>
+  <footer data-lang="en">
+    Simulator created by <strong style="color:var(--text);font-weight:500">Rafael Vida</strong>. Geometric model: solar disc 0.525° (the Sun near aphelion in August), Moon ≈ 1.04× the solar disc, corona adjustable in solar radii. The field of view is computed as 2·arctan(side / (2·focal length)); the exposure follows Fred Espenak's guide, t = f² / (ISO · 2^Q). Local circumstances: Instituto Geográfico Nacional (eclipses.ign.es). An estimate for planning framing and exposure; it is no substitute for a real test with your own kit.
   </footer>
 
 </div>
@@ -396,8 +472,301 @@
 <div id="printCard" aria-hidden="true"></div>
 
 <script>
+"use strict";
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{
+      title:"Simulador de encuadre · Eclipse total · A Coruña · 12 ago 2026",
+      desc:"Simulador de encuadre y exposición del eclipse total de Sol del 12 de agosto de 2026: calcula qué cabe en tu sensor según la focal y el formato, y genera la horquilla de exposición y una ficha de campo imprimible."
+    },
+    en:{
+      title:"Framing simulator · Total eclipse · A Coruña · 12 Aug 2026",
+      desc:"Framing and exposure simulator for the total solar eclipse of 12 August 2026: works out what fits on your sensor for a given focal length and format, and builds the exposure bracket and a printable field sheet."
+    }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
+
+<script>
 (function(){
   "use strict";
+
+  // ---------- diccionario de cadenas generadas por JS / JS-generated strings ----------
+  var TR = {
+  es:{
+    ariaView:"Previsualización del encuadre",
+    sunUnit:"% alto",
+    btnCard:"🖨 Ficha de campo imprimible",
+    btnShare:"🔗 Copiar enlace de esta configuración",
+    btnCopied:"✓ Enlace copiado",
+    promptCopy:"Copia el enlace de esta configuración:",
+    segH:"Horizontal", segV:"Vertical",
+    segPar:"Parcial (con filtro)", segTot:"Totalidad",
+    segFixed:"Trípode fijo", segTrack:"Seguimiento ecuatorial",
+    tcOpts:["Sin teleconvertidor (1×)","1,4×","2×"],
+    sensorOpts:["Full Frame · 36 × 24 mm",
+                "APS-C Canon · 22,3 × 14,9 mm (1,6×)",
+                "APS-C Sony / Nikon / Fuji · 23,5 × 15,6 mm (1,5×)",
+                "Micro 4/3 · 17,3 × 13 mm (2,0×)",
+                "Tipo 1\" · 13,2 × 8,8 mm (2,7×)",
+                "Personalizado…"],
+    ndOpts:["ND 4,0 genérico (≈13,3 pasos)",
+            "ND 5,0 · Baader AstroSolar visual (≈16,6 pasos)",
+            "Baader AstroSolar ND 3,8 foto (≈12,6 pasos)"],
+    phW:"ancho mm", phH:"alto mm",
+
+    vp1t:"Fotosfera recortada",
+    vp1x:"El disco no entra entero. Solo encuadras un trozo de la fotosfera y del mordisco lunar; sirve para detalle de manchas, no para la fase parcial completa. Filtro solar puesto.",
+    vp2t:"Fotosfera llena",
+    vp2x:"La fotosfera llena el fotograma. Se aprecian bien las manchas y el borde de la Luna avanzando sobre el disco. Filtro solar obligatorio en toda esta fase.",
+    vp3t:"Fase parcial holgada",
+    vp3x:"El disco con su creciente cabe con cielo alrededor. Buen plano para seguir el avance de la Luna; ideal si quieres una secuencia o un compuesto del eclipse parcial.",
+    vp4t:"Plano amplio",
+    vp4x:"La fotosfera queda pequeña en el fotograma: territorio de paisaje o de secuencia múltiple. Recuerda que el Sol estará bajo, a unos {alt}° sobre el horizonte oeste.",
+    vt1t:"Primerísimo plano",
+    vt1x:"Ni el disco completo entra en el encuadre. Verás con gran detalle la cromosfera, las protuberancias y las perlas de Baily, pero el Sol se sale del fotograma. Útil para el instante del contacto, no para la corona.",
+    vt2t:"Disco lleno",
+    vt2x:"El disco solar llena el encuadre. Ideal para el anillo de diamantes, las protuberancias y la cromosfera, con muy poco margen para la corona alrededor.",
+    vt3t:"Disco + corona interior",
+    vt3x:"Entran el disco y la corona interior brillante. Buen plano del anillo de diamantes y la base de la corona; los penachos largos quedan recortados en los bordes.",
+    vt4t:"Corona casi completa",
+    vt4x:"Capturas la corona elegida casi entera; los penachos más extendidos rozan o cruzan los bordes del fotograma. Encuadre ajustado, centra bien el Sol.",
+    vt5t:"Corona con margen",
+    vt5x:"La corona cabe holgada, con cielo alrededor. Margen de sobra para componer y para no perder los penachos. Punto dulce para la totalidad.",
+    vt6t:"Plano amplio",
+    vt6x:"El eclipse queda pequeño dentro del fotograma: territorio de paisaje. Aprovecha que el Sol estará a solo {alt}° de altura para incluir el horizonte oeste y el ambiente de la totalidad.",
+
+    refPhoto:"Fotosfera (disco solar)",
+    refInner:"Corona interior (2 R☉)",
+    refChosen:"Corona elegida ({r} R☉)",
+
+    colStruct:"Estructura", colPartial:"Fase parcial",
+    rowPhot:"Fotosfera (disco)", rowCresc:"Creciente fino (+2 EV)",
+    rowBaily:"Perlas de Baily", rowChromo:"Cromosfera", rowProm:"Protuberancias",
+    rowCor01:"Corona 0,1 R☉ (interior)", rowCor05:"Corona 0,5 R☉",
+    rowCor1:"Corona 1 R☉", rowCor2:"Corona 2 R☉",
+    rowCorYours:"Corona {r} R☉ (tu extensión)",
+
+    expIntroPar:"Con filtro puesto. El brillo de la fotosfera es constante, así que una sola exposición vale para casi toda la parcial; el creciente fino pide unos dos pasos más por el oscurecimiento del limbo.",
+    expIntroTot:"Sin filtro. Entre la cromosfera y tu corona a {r} R☉ hay <b>{n} pasos</b> de diferencia: es imposible en un solo disparo, de ahí la horquilla.",
+    extApplied:" Corrección de extinción aplicada: +{ev} EV (Sol a {alt}°).",
+
+    seqNote:"{n} disparos a f/{f} e ISO {iso}, paso de 1 EV. Tiempo aproximado con margen: ≈ {s} s ",
+    seqFits:"(cabe en los {d} s de totalidad en {loc}; automatízala con horquillado o intervalómetro).",
+    seqTight:"(se acerca a los {d} s de totalidad en {loc}: sube ISO o abre diafragma).",
+    seqTrack:" Con seguimiento ecuatorial no hay límite de arrastre práctico en estos tiempos.",
+    seqWarn:" <span style=\"color:var(--prom)\">Las {n} velocidades en rojo arrastran más de 1 px a {fe} mm sobre trípode fijo (límite ≈ {lim}): usa seguimiento, sube ISO o abre diafragma.</span>",
+    seqOk:" Límite de arrastre sin seguimiento ≈ {lim}; toda la serie queda por debajo.",
+
+    ctxC1:"Primer contacto (parcial)", ctxTot:"Totalidad (C2 → C3)",
+    ctxDur:"Duración de la totalidad", ctxAlt:"Altura del Sol en el máximo",
+    ctxSet:"Puesta de sol",
+    ctxFilter:" Filtro solar obligatorio en las fases parciales; retíralo únicamente durante los {d} s de totalidad.",
+
+    endC4:"Fin del eclipse (C4)", endC4a:"Fin del eclipse (C4) ≈",
+    endSet:"Puesta de sol (aún eclipsado)",
+    noteCoruna:"El eclipse termina entero antes de la puesta de sol. Horizonte oeste despejado, imprescindible.",
+    noteOviedo:"De las grandes ciudades, la totalidad más larga: 1m49s. El eclipse acaba antes de la puesta.",
+    noteLeon:"El último contacto coincide casi con la puesta de sol: el final de la parcial será un Sol poniéndose.",
+    noteZaragoza:"El Sol se pone antes del último contacto: la fase parcial final acaba con el Sol eclipsado en el horizonte.",
+    noteValencia:"Sol a solo 4°: cualquier edificio o calima lo tapa. La playa, con puesta sobre el mar, es la mejor baza.",
+    notePalma:"Sol a 2°, rozando el mar: totalidad sobre el Mediterráneo, pero sin ningún margen de horizonte. La extinción aquí es brutal.",
+
+    extOpt0:"Sin corrección (tabla Espenak)",
+    extClean:"Cielo limpio a {alt}° (+{ev} EV)",
+    extHaze:"Bruma o calima (+{ev} EV)",
+    extHint:"A {alt}° la luz atraviesa ≈{am} masas de aire (Kasten-Young). La corrección alarga todos los tiempos según el lugar elegido.",
+
+    edBefore:"Antes del eclipse · {loc}", edPartial:"Fase parcial · {loc}",
+    edTotality:"TOTALIDAD · {loc}", edFinal:"Parcial final · {loc}",
+    edDone:"Eclipse finalizado",
+    flPrep:"PREPARA EL FILTRO", flOn:"FILTRO PUESTO", flOff:"FILTRO FUERA",
+    labC1:"para el primer contacto ({t})",
+    labC2:"para quitar el filtro (totalidad a las {t})",
+    labC3:"hasta que vuelva el filtro: dispara la horquilla y mira",
+    labEnd:"hasta el final ({e}, {t})",
+    labNext:"el siguiente total visible en España: 2 de agosto de 2027",
+    days:"días",
+
+    ndName11:"ND 4,0", ndName8:"ND 5,0 / Baader visual", ndName12:"Baader ND 3,8 (solo foto)",
+    pcTitle:"Ficha de campo · Eclipse total de Sol · {loc} · 12 de agosto de 2026",
+    pcSub:"Rafael Vida · configuración generada el {d}",
+    pcWarn:"FILTRO SOLAR SIEMPRE, salvo durante los {d} s de totalidad. Al primer destello tras C3, filtro puesto de inmediato. El {nd} elegido{safe}.",
+    pcUnsafe:" NO es seguro para mirar",
+    pcTimes:"Horarios en {loc} (hora oficial)",
+    pcThTime:"Hora", pcThEvent:"Evento", pcThFilter:"Filtro",
+    pcC1:"C1 · comienza la fase parcial",
+    pcC2:"C2 · anillo de diamantes, empieza la totalidad ({d} s)",
+    pcC3:"C3 · fin de la totalidad · Sol a ≈{alt}°",
+    pcEndRow:"{e} (puesta de sol {s})",
+    pcOn:"Puesto", pcOffStrong:"FUERA", pcOnStrong:"PUESTO",
+    pcKit:"Equipo",
+    pcKitLine:"{f} mm × TC {tc}× → <strong>{fe} mm efectivos</strong> · sensor {sw} × {sh} mm, {orient} · equivalente {eq} mm · campo {hf} × {vf} · montura: {mount}",
+    orientH:"horizontal", orientV:"vertical",
+    mountTrack:"seguimiento ecuatorial", mountFixed:"trípode fijo",
+    pcExp:"Exposición · ISO {iso} · f/{f}{ext}",
+    pcExtApplied:" · extinción +{ev} EV aplicada (Sol a {alt}°)",
+    pcThPartial:"Fase parcial (con filtro {nd})", pcThSpeed:"Velocidad",
+    pcThTot:"Totalidad (sin filtro)",
+    pcPhotFilter:"Fotosfera con filtro (Q {q})",
+    pcBracket:"Horquilla de totalidad · {n} disparos · ≈ {s} s de {d} s disponibles (marca cada uno)",
+    pcDrift:"Límite de arrastre sin seguimiento a esta focal ≈ {lim} (1 px). ▲ = velocidad que arrastra sobre trípode fijo.",
+    pcNoExt:" Sin corrección de extinción: a {alt}° de altura espera necesitar ≈ +{ev} EV.",
+    dateLocale:"es-ES"
+  },
+  en:{
+    ariaView:"Framing preview",
+    sunUnit:"% of height",
+    btnCard:"🖨 Printable field sheet",
+    btnShare:"🔗 Copy a link to this setup",
+    btnCopied:"✓ Link copied",
+    promptCopy:"Copy the link to this setup:",
+    segH:"Landscape", segV:"Portrait",
+    segPar:"Partial (with filter)", segTot:"Totality",
+    segFixed:"Fixed tripod", segTrack:"Equatorial tracking",
+    tcOpts:["No teleconverter (1×)","1.4×","2×"],
+    sensorOpts:["Full frame · 36 × 24 mm",
+                "APS-C Canon · 22.3 × 14.9 mm (1.6×)",
+                "APS-C Sony / Nikon / Fuji · 23.5 × 15.6 mm (1.5×)",
+                "Micro 4/3 · 17.3 × 13 mm (2.0×)",
+                "Type 1\" · 13.2 × 8.8 mm (2.7×)",
+                "Custom…"],
+    ndOpts:["Generic ND 4.0 (≈13.3 stops)",
+            "ND 5.0 · Baader AstroSolar visual (≈16.6 stops)",
+            "Baader AstroSolar ND 3.8 photographic (≈12.6 stops)"],
+    phW:"width mm", phH:"height mm",
+
+    vp1t:"Photosphere cropped",
+    vp1x:"The disc does not fit whole. You are framing only a piece of the photosphere and of the lunar bite; useful for sunspot detail, not for the complete partial phase. Solar filter on.",
+    vp2t:"Photosphere fills the frame",
+    vp2x:"The photosphere fills the frame. Sunspots and the Moon's limb advancing across the disc both read clearly. A solar filter is mandatory throughout this phase.",
+    vp3t:"Roomy partial phase",
+    vp3x:"The disc and its crescent fit with sky around them. A good frame for following the Moon's progress; ideal if you want a sequence or a composite of the partial eclipse.",
+    vp4t:"Wide shot",
+    vp4x:"The photosphere sits small in the frame: landscape or multiple-sequence territory. Remember that the Sun will be low, some {alt}° above the western horizon.",
+    vt1t:"Extreme close-up",
+    vt1x:"Not even the whole disc fits the frame. You will see the chromosphere, the prominences and Baily's beads in great detail, but the Sun spills out of the frame. Useful for the instant of contact, not for the corona.",
+    vt2t:"Disc fills the frame",
+    vt2x:"The solar disc fills the frame. Ideal for the diamond ring, the prominences and the chromosphere, with very little room for the corona around it.",
+    vt3t:"Disc + inner corona",
+    vt3x:"The disc and the bright inner corona both fit. A good frame for the diamond ring and the base of the corona; the long streamers are clipped at the edges.",
+    vt4t:"Corona almost complete",
+    vt4x:"You capture almost the whole of your chosen corona; the most extended streamers graze or cross the edges of the frame. A tight framing — centre the Sun carefully.",
+    vt5t:"Corona with room to spare",
+    vt5x:"The corona fits comfortably, with sky around it. Ample margin to compose and to keep the streamers. The sweet spot for totality.",
+    vt6t:"Wide shot",
+    vt6x:"The eclipse sits small within the frame: landscape territory. Make the most of the Sun being only {alt}° high to take in the western horizon and the atmosphere of totality.",
+
+    refPhoto:"Photosphere (solar disc)",
+    refInner:"Inner corona (2 R☉)",
+    refChosen:"Chosen corona ({r} R☉)",
+
+    colStruct:"Structure", colPartial:"Partial phase",
+    rowPhot:"Photosphere (disc)", rowCresc:"Thin crescent (+2 EV)",
+    rowBaily:"Baily's beads", rowChromo:"Chromosphere", rowProm:"Prominences",
+    rowCor01:"Corona 0.1 R☉ (inner)", rowCor05:"Corona 0.5 R☉",
+    rowCor1:"Corona 1 R☉", rowCor2:"Corona 2 R☉",
+    rowCorYours:"Corona {r} R☉ (your extent)",
+
+    expIntroPar:"Filter on. The brightness of the photosphere is constant, so a single exposure serves for almost the whole partial phase; the thin crescent asks for about two stops more because of limb darkening.",
+    expIntroTot:"No filter. Between the chromosphere and your corona at {r} R☉ there are <b>{n} stops</b> of difference: impossible in a single frame, hence the exposure bracket.",
+    extApplied:" Atmospheric extinction correction applied: +{ev} EV (Sun at {alt}°).",
+
+    seqNote:"{n} frames at f/{f} and ISO {iso}, in 1 EV steps. Approximate time including margin: ≈ {s} s ",
+    seqFits:"(it fits within the {d} s of totality at {loc}; automate it with auto-bracketing or an intervalometer).",
+    seqTight:"(it comes close to the {d} s of totality at {loc}: raise the ISO or open up the aperture).",
+    seqTrack:" With equatorial tracking there is no practical trailing limit at these speeds.",
+    seqWarn:" <span style=\"color:var(--prom)\">The {n} speeds in red trail more than 1 px at {fe} mm on a fixed tripod (limit ≈ {lim}): use tracking, raise the ISO or open up the aperture.</span>",
+    seqOk:" Trailing limit without tracking ≈ {lim}; the whole series stays below it.",
+
+    ctxC1:"First contact (partial)", ctxTot:"Totality (C2 → C3)",
+    ctxDur:"Duration of totality", ctxAlt:"Altitude of the Sun at maximum",
+    ctxSet:"Sunset",
+    ctxFilter:" A solar filter is mandatory during the partial phases; remove it only during the {d} s of totality.",
+
+    endC4:"End of the eclipse (fourth contact)", endC4a:"End of the eclipse (fourth contact) ≈",
+    endSet:"Sunset (still eclipsed)",
+    noteCoruna:"The eclipse ends in full before sunset. A clear western horizon is indispensable.",
+    noteOviedo:"The longest totality of the large cities: 1m 49s. The eclipse ends before sunset.",
+    noteLeon:"Fourth contact almost coincides with sunset: the end of the partial phase will be a setting Sun.",
+    noteZaragoza:"The Sun sets before fourth contact: the final partial phase ends with an eclipsed Sun on the horizon.",
+    noteValencia:"The Sun only 4° up: any building or haze will hide it. The beach, with the Sun setting over the sea, is the best bet.",
+    notePalma:"The Sun at 2°, grazing the sea: totality over the Mediterranean, but with no horizon margin at all. Atmospheric extinction here is brutal.",
+
+    extOpt0:"No correction (Espenak table)",
+    extClean:"Clear sky at {alt}° (+{ev} EV)",
+    extHaze:"Haze or dust (+{ev} EV)",
+    extHint:"At {alt}° the light crosses ≈{am} air masses (Kasten-Young). The correction lengthens all the exposure times according to the site chosen.",
+
+    edBefore:"Before the eclipse · {loc}", edPartial:"Partial phase · {loc}",
+    edTotality:"TOTALITY · {loc}", edFinal:"Final partial phase · {loc}",
+    edDone:"Eclipse over",
+    flPrep:"READY THE FILTER", flOn:"FILTER ON", flOff:"FILTER OFF",
+    labC1:"to first contact ({t})",
+    labC2:"until the filter comes off (totality at {t})",
+    labC3:"until the filter goes back on: shoot the bracket and look",
+    labEnd:"until the end ({e}, {t})",
+    labNext:"the next total eclipse visible from Spain: 2 August 2027",
+    days:"days",
+
+    ndName11:"ND 4.0", ndName8:"ND 5.0 / Baader visual", ndName12:"Baader ND 3.8 (photo only)",
+    pcTitle:"Field sheet · Total solar eclipse · {loc} · 12 August 2026",
+    pcSub:"Rafael Vida · configuration generated on {d}",
+    pcWarn:"SOLAR FILTER AT ALL TIMES, except during the {d} s of totality. At the first flash after third contact, filter back on immediately. The {nd} you have chosen{safe}.",
+    pcUnsafe:" is NOT safe to look through",
+    pcTimes:"Timings at {loc} (official local time)",
+    pcThTime:"Time", pcThEvent:"Event", pcThFilter:"Filter",
+    pcC1:"C1 · the partial phase begins",
+    pcC2:"C2 · diamond ring, totality begins ({d} s)",
+    pcC3:"C3 · end of totality · Sun at ≈{alt}°",
+    pcEndRow:"{e} (sunset {s})",
+    pcOn:"On", pcOffStrong:"OFF", pcOnStrong:"ON",
+    pcKit:"Kit",
+    pcKitLine:"{f} mm × TC {tc}× → <strong>{fe} mm effective</strong> · sensor {sw} × {sh} mm, {orient} · equivalent {eq} mm · field {hf} × {vf} · mount: {mount}",
+    orientH:"landscape", orientV:"portrait",
+    mountTrack:"equatorial tracking", mountFixed:"fixed tripod",
+    pcExp:"Exposure · ISO {iso} · f/{f}{ext}",
+    pcExtApplied:" · extinction +{ev} EV applied (Sun at {alt}°)",
+    pcThPartial:"Partial phase (with {nd} filter)", pcThSpeed:"Shutter speed",
+    pcThTot:"Totality (no filter)",
+    pcPhotFilter:"Photosphere with filter (Q {q})",
+    pcBracket:"Totality bracket · {n} frames · ≈ {s} s of the {d} s available (tick each one)",
+    pcDrift:"Trailing limit without tracking at this focal length ≈ {lim} (1 px). ▲ = speed that trails on a fixed tripod.",
+    pcNoExt:" No extinction correction: at {alt}° of altitude expect to need ≈ +{ev} EV.",
+    dateLocale:"en-GB"
+  }};
+
+  var inited = false;   // la app no está montada hasta el final de este script
+  function lang(){ return document.documentElement.lang === "en" ? "en" : "es"; }
+  function t(k, v){
+    var s = (TR[lang()] || TR.es)[k];
+    if(s == null) return "";
+    if(v) for(var p in v){ if(Object.prototype.hasOwnProperty.call(v,p)) s = s.split("{"+p+"}").join(v[p]); }
+    return s;
+  }
+  function tArr(k){ return (TR[lang()] || TR.es)[k]; }
 
   // --- constantes físicas ---
   var R_SUN = 0.2625;          // radio angular del Sol en grados (diámetro 0.525)
@@ -409,25 +778,20 @@
   // c1: inicio parcial · c2/c3: totalidad · endT: ultimo momento visible · dur: totalidad en s · alt: altura del Sol en el maximo
   var LOCS = {
     coruna:  {name:"A Coruña", c1:[17,31,0],  c2:[18,27,22], c3:[18,28,38], endT:[19,22,0],
-              dur:76,  alt:12, set:"21:41", endLabel:"Fin del eclipse (C4)",
-              note:"El eclipse termina entero antes de la puesta de sol. Horizonte oeste despejado, imprescindible."},
+              dur:76,  alt:12, set:"21:41", endKey:"endC4", noteKey:"noteCoruna"},
     oviedo:  {name:"Oviedo", c1:[17,32,0], c2:[18,27,5], c3:[18,28,54], endT:[19,22,0],
-              dur:109, alt:10, set:"≈ 21:31", endLabel:"Fin del eclipse (C4) ≈",
-              note:"De las grandes ciudades, la totalidad más larga: 1m49s. El eclipse acaba antes de la puesta."},
+              dur:109, alt:10, set:"≈ 21:31", endKey:"endC4a", noteKey:"noteOviedo"},
     leon:    {name:"León", c1:[17,32,40], c2:[18,28,16], c3:[18,30,0], endT:[19,22,2],
-              dur:104, alt:10, set:"≈ 21:22", endLabel:"Fin del eclipse (C4)",
-              note:"El último contacto coincide casi con la puesta de sol: el final de la parcial será un Sol poniéndose."},
+              dur:104, alt:10, set:"≈ 21:22", endKey:"endC4", noteKey:"noteLeon"},
     zaragoza:{name:"Zaragoza", c1:[17,34,37], c2:[18,28,58], c3:[18,30,22], endT:[19,4,0],
-              dur:84,  alt:6,  set:"≈ 21:04", endLabel:"Puesta de sol (aún eclipsado)",
-              note:"El Sol se pone antes del último contacto: la fase parcial final acaba con el Sol eclipsado en el horizonte."},
+              dur:84,  alt:6,  set:"≈ 21:04", endKey:"endSet", noteKey:"noteZaragoza"},
     valencia:{name:"Valencia", c1:[17,38,19], c2:[18,32,25], c3:[18,33,24], endT:[18,58,0],
-              dur:59,  alt:4,  set:"≈ 20:58", endLabel:"Puesta de sol (aún eclipsado)",
-              note:"Sol a solo 4°: cualquier edificio o calima lo tapa. La playa, con puesta sobre el mar, es la mejor baza."},
+              dur:59,  alt:4,  set:"≈ 20:58", endKey:"endSet", noteKey:"noteValencia"},
     palma:   {name:"Palma de Mallorca", c1:[17,37,58], c2:[18,31,0], c3:[18,32,36], endT:[18,49,0],
-              dur:96,  alt:2,  set:"≈ 20:49", endLabel:"Puesta de sol (aún eclipsado)",
-              note:"Sol a 2°, rozando el mar: totalidad sobre el Mediterráneo, pero sin ningún margen de horizonte. La extinción aquí es brutal."}
+              dur:96,  alt:2,  set:"≈ 20:49", endKey:"endSet", noteKey:"notePalma"}
   };
   function L(){ return LOCS[st.loc]; }
+  function endLabel(){ return t(L().endKey); }
   function locUTC(t){ return Date.UTC(2026, 7, 12, t[0], t[1], t[2]); }
   function locHHMM(t, secs){
     function z(n){ return (n<10?"0":"")+n; }
@@ -486,12 +850,14 @@
             minFov: Math.min(hFov,vFov), corR_deg:corDeg, corDia: 2*corDeg};
   }
 
+  // el separador decimal sigue al idioma: coma en español, punto en inglés
+  function dec(s){ return lang() === "en" ? s : s.replace(".", ","); }
   function fmtDeg(d){
-    if(d >= 1) return d.toFixed(2).replace(".",",") + "°";
+    if(d >= 1) return dec(d.toFixed(2)) + "°";
     return Math.round(d*60) + "′"; // arcominutos para valores pequeños
   }
-  function fmt1(n){ return n.toFixed(1).replace(".",","); }
-  function fmt2(n){ return n.toFixed(2).replace(".",","); }
+  function fmt1(n){ return dec(n.toFixed(1)); }
+  function fmt2(n){ return dec(n.toFixed(2)); }
 
   // --- veredicto ---
   function verdict(c){
@@ -500,17 +866,13 @@
 
     if(st.phase === "par"){
       if(m < sun*0.95){
-        tag = "Fotosfera recortada";
-        txt = "El disco no entra entero. Solo encuadras un trozo de la fotosfera y del mordisco lunar; sirve para detalle de manchas, no para la fase parcial completa. Filtro solar puesto.";
+        tag = t("vp1t"); txt = t("vp1x");
       } else if(m < sun*1.6){
-        tag = "Fotosfera llena";
-        txt = "La fotosfera llena el fotograma. Se aprecian bien las manchas y el borde de la Luna avanzando sobre el disco. Filtro solar obligatorio en toda esta fase.";
+        tag = t("vp2t"); txt = t("vp2x");
       } else if(m < sun*4){
-        tag = "Fase parcial holgada";
-        txt = "El disco con su creciente cabe con cielo alrededor. Buen plano para seguir el avance de la Luna; ideal si quieres una secuencia o un compuesto del eclipse parcial.";
+        tag = t("vp3t"); txt = t("vp3x");
       } else {
-        tag = "Plano amplio";
-        txt = "La fotosfera queda pequeña en el fotograma: territorio de paisaje o de secuencia múltiple. Recuerda que el Sol estará bajo, a unos "+L().alt+"° sobre el horizonte oeste.";
+        tag = t("vp4t"); txt = t("vp4x", {alt:L().alt});
       }
       $("vtag").textContent = tag;
       $("vtext").textContent = txt;
@@ -518,23 +880,17 @@
     }
 
     if(m < sun*0.95){
-      tag = "Primerísimo plano";
-      txt = "Ni el disco completo entra en el encuadre. Verás con gran detalle la cromosfera, las protuberancias y las perlas de Baily, pero el Sol se sale del fotograma. Útil para el instante del contacto, no para la corona.";
+      tag = t("vt1t"); txt = t("vt1x");
     } else if(m < sun*1.6){
-      tag = "Disco lleno";
-      txt = "El disco solar llena el encuadre. Ideal para el anillo de diamantes, las protuberancias y la cromosfera, con muy poco margen para la corona alrededor.";
+      tag = t("vt2t"); txt = t("vt2x");
     } else if(m < inner*1.45){
-      tag = "Disco + corona interior";
-      txt = "Entran el disco y la corona interior brillante. Buen plano del anillo de diamantes y la base de la corona; los penachos largos quedan recortados en los bordes.";
+      tag = t("vt3t"); txt = t("vt3x");
     } else if(m < corDia*1.15){
-      tag = "Corona casi completa";
-      txt = "Capturas la corona elegida casi entera; los penachos más extendidos rozan o cruzan los bordes del fotograma. Encuadre ajustado, centra bien el Sol.";
+      tag = t("vt4t"); txt = t("vt4x");
     } else if(m < 5){
-      tag = "Corona con margen";
-      txt = "La corona cabe holgada, con cielo alrededor. Margen de sobra para componer y para no perder los penachos. Punto dulce para la totalidad.";
+      tag = t("vt5t"); txt = t("vt5x");
     } else {
-      tag = "Plano amplio";
-      txt = "El eclipse queda pequeño dentro del fotograma: territorio de paisaje. Aprovecha que el Sol estará a solo "+L().alt+"° de altura para incluir el horizonte oeste y el ambiente de la totalidad.";
+      tag = t("vt6t"); txt = t("vt6x", {alt:L().alt});
     }
     $("vtag").textContent = tag;
     $("vtext").textContent = txt;
@@ -661,9 +1017,9 @@
   // --- tabla de referencia ---
   function refTable(c){
     var rows = [
-      ["#ffcf6b","Fotosfera (disco solar)", D_SUN],
-      ["#eef0fb","Corona interior (2 R☉)", 2*(2*R_SUN)],
-      ["#cdd6f0","Corona elegida ("+fmt1(st.corR)+" R☉)", c.corDia]
+      ["#ffcf6b", t("refPhoto"), D_SUN],
+      ["#eef0fb", t("refInner"), 2*(2*R_SUN)],
+      ["#cdd6f0", t("refChosen", {r:fmt1(st.corR)}), c.corDia]
     ];
     var html = "";
     rows.forEach(function(r){
@@ -683,9 +1039,11 @@
               250,200,160,125,100,80,60,50,40,30,25,20,15,13,10,8,6,5,4,3,2];
     var arr = fr.map(function(x){ return {sec:1/x, label:"1/"+x}; });
     var secs = [1,1.3,1.6,2,2.5,3,4,5,6,8,10,13,15,20,25,30];
-    secs.forEach(function(x){ arr.push({sec:x, label:fmt1(x)+'"'}); });
+    // etiqueta nula: se genera al vuelo, porque el separador decimal depende del idioma
+    secs.forEach(function(x){ arr.push({sec:x, label:null}); });
     return arr.sort(function(a,b){ return a.sec-b.sec; });
   })();
+  function shutLabel(s){ return s.label !== null ? s.label : fmt1(s.sec)+'"'; }
 
   function snapShutter(t){
     var best = SHUT[0], bd = 1e9;
@@ -726,20 +1084,20 @@
   function totalityData(c){
     var qOuter = qCorona(st.corR), dl = driftLimit(c);
     var rows = [
-      ["Perlas de Baily", 12],
-      ["Cromosfera", 11],
-      ["Protuberancias", 9],
-      ["Corona 0,1 R☉ (interior)", 7],
-      ["Corona 0,5 R☉", 3],
-      ["Corona 1 R☉", 1],
-      ["Corona 2 R☉", 0],
-      ["Corona "+fmt1(st.corR)+" R☉ (tu extensión)", qOuter]
+      [t("rowBaily"), 12],
+      [t("rowChromo"), 11],
+      [t("rowProm"), 9],
+      [t("rowCor01"), 7],
+      [t("rowCor05"), 3],
+      [t("rowCor1"), 1],
+      [t("rowCor2"), 0],
+      [t("rowCorYours", {r:fmt1(st.corR)}), qOuter]
     ];
     var seq = [], total = 0;
     for(var q=11; q>=Math.floor(qOuter); q--){
-      var s = snapShutter(expTime(q));
-      if(seq.length===0 || seq[seq.length-1].label !== s.label){
-        seq.push({sec:s.sec, label:s.label, warn: !st.track && s.sec > dl.tmax});
+      var s = snapShutter(expTime(q)), lb = shutLabel(s);
+      if(seq.length===0 || seq[seq.length-1].label !== lb){
+        seq.push({sec:s.sec, label:lb, warn: !st.track && s.sec > dl.tmax});
         total += s.sec + 0.4; // margen por disparo
       }
     }
@@ -750,32 +1108,32 @@
     var col = $("expCol"), intro = $("expIntro"), tab = $("exptab");
     var box = $("bracketBox"), seqEl = $("bracketSeq"), noteEl = $("bracketNote");
     var dl = driftLimit(c);
-    var extTxt = st.ext > 0 ? " Corrección de extinción aplicada: +"+fmt1(extEV())+" EV (Sol a "+L().alt+"°)." : "";
+    var extTxt = st.ext > 0 ? t("extApplied", {ev:fmt1(extEV()), alt:L().alt}) : "";
     var rows;
 
     function rowHtml(r){
-      var t = expTime(r[1]), s = snapShutter(t);
+      var s = snapShutter(expTime(r[1]));
       var warn = !st.track && s.sec > dl.tmax;
       return '<tr><td>'+r[0]+'</td><td class="n" style="text-align:center">'+r[1].toFixed(0).replace("-0","0")+'</td>'
-           + '<td class="n"'+(warn?' style="color:var(--prom)"':'')+'>'+s.label+(warn?' ▲':'')+'</td></tr>';
+           + '<td class="n"'+(warn?' style="color:var(--prom)"':'')+'>'+shutLabel(s)+(warn?' ▲':'')+'</td></tr>';
     }
 
     if(st.phase === "par"){
-      col.textContent = "Fase parcial";
+      col.textContent = t("colPartial");
       box.style.display = "none";
       var qf = st.nd; // Q segun filtro: ND4,0=11 · ND5,0=8 · Baader ND3,8=12
       rows = [
-        ["Fotosfera (disco)", qf],
-        ["Creciente fino (+2 EV)", qf-2]
+        [t("rowPhot"), qf],
+        [t("rowCresc"), qf-2]
       ];
-      intro.innerHTML = "Con filtro puesto. El brillo de la fotosfera es constante, así que una sola exposición vale para casi toda la parcial; el creciente fino pide unos dos pasos más por el oscurecimiento del limbo." + extTxt;
+      intro.innerHTML = t("expIntroPar") + extTxt;
     } else {
-      col.textContent = "Estructura";
+      col.textContent = t("colStruct");
       box.style.display = "block";
       var T = totalityData(c);
       rows = T.rows;
       var span = 11 - T.qOuter;
-      intro.innerHTML = "Sin filtro. Entre la cromosfera y tu corona a "+fmt1(st.corR)+" R☉ hay <b>"+Math.round(span)+" pasos</b> de diferencia: es imposible en un solo disparo, de ahí la horquilla." + extTxt;
+      intro.innerHTML = t("expIntroTot", {r:fmt1(st.corR), n:Math.round(span)}) + extTxt;
 
       seqEl.innerHTML = T.seq.map(function(s){
         return '<span class="chip'+(s.warn?' seqwarn':'')+'">'+s.label+'</span>';
@@ -785,14 +1143,14 @@
       T.seq.forEach(function(s){ if(s.warn) nWarn++; });
       var totDur = L().dur;
       var feas = T.total <= totDur;
-      noteEl.innerHTML = T.seq.length+" disparos a f/"+fmt1(st.fnum)+" e ISO "+st.iso+", paso de 1 EV. Tiempo aproximado con margen: ≈ "+Math.round(T.total)+" s "
-        + (feas ? "(cabe en los "+totDur+" s de totalidad en "+L().name+"; automatízala con horquillado o intervalómetro)."
-                : "(se acerca a los "+totDur+" s de totalidad en "+L().name+": sube ISO o abre diafragma).")
+      noteEl.innerHTML = t("seqNote", {n:T.seq.length, f:fmt1(st.fnum), iso:st.iso, s:Math.round(T.total)})
+        + (feas ? t("seqFits",  {d:totDur, loc:L().name})
+                : t("seqTight", {d:totDur, loc:L().name}))
         + (st.track
-            ? " Con seguimiento ecuatorial no hay límite de arrastre práctico en estos tiempos."
+            ? t("seqTrack")
             : (nWarn
-                ? ' <span style="color:var(--prom)">Las '+nWarn+' velocidades en rojo arrastran más de 1 px a '+Math.round(c.fe)+' mm sobre trípode fijo (límite ≈ '+lim+'): usa seguimiento, sube ISO o abre diafragma.</span>'
-                : " Límite de arrastre sin seguimiento ≈ "+lim+"; toda la serie queda por debajo."));
+                ? t("seqWarn", {n:nWarn, fe:Math.round(c.fe), lim:lim})
+                : t("seqOk", {lim:lim})));
     }
 
     tab.innerHTML = rows.map(rowHtml).join("");
@@ -801,23 +1159,46 @@
   // --- contexto local dinamico ---
   function renderCtx(){
     var d = L();
-    $("locTitle").textContent = d.name;
-    $("subLoc").textContent = d.name;
+    [].forEach.call(document.querySelectorAll(".locName"), function(el){ el.textContent = d.name; });
     $("ctxBox").innerHTML = ''
-      + '<div class="line"><span>Primer contacto (parcial)</span><span>'+locHHMM(d.c1, d.c1[2]!==0)+'</span></div>'
-      + '<div class="line"><span>Totalidad (C2 → C3)</span><span>'+locHHMM(d.c2,true)+' → '+locHHMM(d.c3,true)+'</span></div>'
-      + '<div class="line"><span>Duración de la totalidad</span><span>'+d.dur+' s</span></div>'
-      + '<div class="line"><span>Altura del Sol en el máximo</span><span>≈ '+d.alt+'°</span></div>'
-      + '<div class="line"><span>'+d.endLabel+'</span><span>'+locHHMM(d.endT, false)+'</span></div>'
-      + '<div class="line"><span>Puesta de sol</span><span>'+d.set+'</span></div>'
-      + '<div class="hint" style="margin-top:10px">'+d.note+' Filtro solar obligatorio en las fases parciales; retíralo únicamente durante los '+d.dur+' s de totalidad.</div>';
+      + '<div class="line"><span>'+t("ctxC1")+'</span><span>'+locHHMM(d.c1, d.c1[2]!==0)+'</span></div>'
+      + '<div class="line"><span>'+t("ctxTot")+'</span><span>'+locHHMM(d.c2,true)+' → '+locHHMM(d.c3,true)+'</span></div>'
+      + '<div class="line"><span>'+t("ctxDur")+'</span><span>'+d.dur+' s</span></div>'
+      + '<div class="line"><span>'+t("ctxAlt")+'</span><span>≈ '+d.alt+'°</span></div>'
+      + '<div class="line"><span>'+endLabel()+'</span><span>'+locHHMM(d.endT, false)+'</span></div>'
+      + '<div class="line"><span>'+t("ctxSet")+'</span><span>'+d.set+'</span></div>'
+      + '<div class="hint" style="margin-top:10px">'+t(d.noteKey)+t("ctxFilter", {d:d.dur})+'</div>';
   }
 
   function updateExtLabels(){
     var alt = L().alt;
-    $("extOpt1").textContent = "Cielo limpio a "+alt+"° (+"+fmt1(extEVfor(1,alt))+" EV)";
-    $("extOpt2").textContent = "Bruma o calima (+"+fmt1(extEVfor(2,alt))+" EV)";
-    $("extHint").textContent = "A "+alt+"° la luz atraviesa ≈"+airmass(alt).toFixed(1)+" masas de aire (Kasten-Young). La corrección alarga todos los tiempos según el lugar elegido.";
+    $("extOpt0").textContent = t("extOpt0");
+    $("extOpt1").textContent = t("extClean", {alt:alt, ev:fmt1(extEVfor(1,alt))});
+    $("extOpt2").textContent = t("extHaze",  {ev:fmt1(extEVfor(2,alt))});
+    $("extHint").textContent = t("extHint",  {alt:alt, am:fmt1(airmass(alt))});
+  }
+
+  // etiquetas estáticas que el JS posee (selects, botones, placeholders)
+  function updateStaticStrings(){
+    view.setAttribute("aria-label", t("ariaView"));
+    $("btnCard").textContent = t("btnCard");
+    $("btnShare").textContent = t("btnShare");
+    cw.placeholder = t("phW"); ch.placeholder = t("phH");
+    function setOpts(sel, arr){
+      [].forEach.call(sel.options, function(o,i){ if(arr[i] != null) o.textContent = arr[i]; });
+    }
+    setOpts(tc, tArr("tcOpts"));
+    setOpts(sensor, tArr("sensorOpts"));
+    setOpts($("nd"), tArr("ndOpts"));
+    var segs = [["orient","o",{h:"segH", v:"segV"}],
+                ["phase","p",{par:"segPar", tot:"segTot"}],
+                ["track","t",{"0":"segFixed", "1":"segTrack"}]];
+    segs.forEach(function(g){
+      [].forEach.call($(g[0]).querySelectorAll("button"), function(b){
+        var k = g[2][b.getAttribute("data-"+g[1])];
+        if(k) b.textContent = t(k);
+      });
+    });
   }
 
   // --- pintar todo ---
@@ -829,7 +1210,7 @@
     $("sCrop").innerHTML = fmt2(c.crop) + ' <small>×</small>';
     $("sFov").innerHTML = fmtDeg(c.hFov) + ' <small>×</small> ' + fmtDeg(c.vFov);
     var sunPct = D_SUN / c.vFov * 100;
-    $("sSun").innerHTML = (sunPct>999?"&gt;999":(sunPct<1?fmt1(sunPct):Math.round(sunPct))) + ' <small>% alto</small>';
+    $("sSun").innerHTML = (sunPct>999?"&gt;999":(sunPct<1?fmt1(sunPct):Math.round(sunPct))) + ' <small>'+t("sunUnit")+'</small>';
     verdict(c);
     refTable(c);
     exposure(c);
@@ -972,9 +1353,9 @@
 
   $("btnShare").addEventListener("click", function(){
     saveURL();
-    var url = location.href, btn = this, prev = btn.textContent;
-    function ok(){ btn.textContent = "✓ Enlace copiado"; setTimeout(function(){ btn.textContent = prev; }, 1800); }
-    function fb(){ window.prompt("Copia el enlace de esta configuración:", url); }
+    var url = location.href, btn = this;
+    function ok(){ btn.textContent = t("btnCopied"); setTimeout(function(){ btn.textContent = t("btnShare"); }, 1800); }
+    function fb(){ window.prompt(t("promptCopy"), url); }
     if(navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(url).then(ok, fb);
     } else { fb(); }
@@ -986,34 +1367,41 @@
     var T = totalityData(c);
     var lim = tLabel(T.dl.tmax);
     var qf = st.nd;
-    var parRows = [["Fotosfera con filtro (Q "+qf+")", qf], ["Creciente fino (+2 EV)", qf-2]];
-    var rowHtml = function(r){ return '<tr><td>'+r[0]+'</td><td>'+snapShutter(expTime(r[1])).label+'</td></tr>'; };
+    var parRows = [[t("pcPhotFilter", {q:qf}), qf], [t("rowCresc"), qf-2]];
+    var rowHtml = function(r){ return '<tr><td>'+r[0]+'</td><td>'+shutLabel(snapShutter(expTime(r[1])))+'</td></tr>'; };
     var seqHtml = T.seq.map(function(s){
       return '<span class="pc-chip">☐ '+s.label+(s.warn ? ' ▲' : '')+'</span>';
     }).join("");
-    var ndName = {11:"ND 4,0", 8:"ND 5,0 / Baader visual", 12:"Baader ND 3,8 (solo foto)"}[st.nd] || "ND";
+    var ndName = t({11:"ndName11", 8:"ndName8", 12:"ndName12"}[st.nd] || "ndName8");
     var d = L();
 
     $("printCard").innerHTML = ''
-      + '<h1>Ficha de campo · Eclipse total de Sol · '+d.name+' · 12 de agosto de 2026</h1>'
-      + '<div class="pc-sub">Rafael Vida · configuración generada el '+ new Date().toLocaleDateString("es-ES") +'</div>'
-      + '<div class="pc-box">FILTRO SOLAR SIEMPRE, salvo durante los '+d.dur+' s de totalidad. Al primer destello tras C3, filtro puesto de inmediato. El '+ndName+' elegido'+(st.nd===12?' NO es seguro para mirar':' ')+'.</div>'
-      + '<div class="pc-sec">Horarios en '+d.name+' (hora oficial)</div>'
-      + '<table><tr><th>Hora</th><th>Evento</th><th>Filtro</th></tr>'
-      + '<tr><td>'+locHHMM(d.c1, d.c1[2]!==0)+'</td><td>C1 · comienza la fase parcial</td><td>Puesto</td></tr>'
-      + '<tr><td>'+locHHMM(d.c2,true)+'</td><td>C2 · anillo de diamantes, empieza la totalidad ('+d.dur+' s)</td><td><strong>FUERA</strong></td></tr>'
-      + '<tr><td>'+locHHMM(d.c3,true)+'</td><td>C3 · fin de la totalidad · Sol a ≈'+d.alt+'°</td><td><strong>PUESTO</strong></td></tr>'
-      + '<tr><td>'+locHHMM(d.endT,false)+'</td><td>'+d.endLabel+' (puesta de sol '+d.set+')</td><td>—</td></tr></table>'
-      + '<div class="pc-sec">Equipo</div>'
-      + '<p>'+st.focal+' mm × TC '+st.tc+'× → <strong>'+Math.round(c.fe)+' mm efectivos</strong> · sensor '+fmt1(st.sw)+' × '+fmt1(st.sh)+' mm, '+(st.orient==="h"?"horizontal":"vertical")
-      + ' · equivalente '+Math.round(c.eq)+' mm · campo '+fmtDeg(c.hFov)+' × '+fmtDeg(c.vFov)
-      + ' · montura: '+(st.track ? "seguimiento ecuatorial" : "trípode fijo")+'</p>'
-      + '<div class="pc-sec">Exposición · ISO '+st.iso+' · f/'+fmt1(st.fnum)+(st.ext>0 ? ' · extinción +'+fmt1(extEV())+' EV aplicada (Sol a '+d.alt+'°)' : '')+'</div>'
-      + '<table><tr><th>Fase parcial (con filtro '+ndName+')</th><th>Velocidad</th></tr>'+parRows.map(rowHtml).join("")+'</table>'
-      + '<table><tr><th>Totalidad (sin filtro)</th><th>Velocidad</th></tr>'+T.rows.map(rowHtml).join("")+'</table>'
-      + '<div class="pc-sec">Horquilla de totalidad · '+T.seq.length+' disparos · ≈ '+Math.round(T.total)+' s de '+d.dur+' s disponibles (marca cada uno)</div>'
+      + '<h1>'+t("pcTitle", {loc:d.name})+'</h1>'
+      + '<div class="pc-sub">'+t("pcSub", {d:new Date().toLocaleDateString(t("dateLocale"))})+'</div>'
+      + '<div class="pc-box">'+t("pcWarn", {d:d.dur, nd:ndName, safe:(st.nd===12 ? t("pcUnsafe") : "")})+'</div>'
+      + '<div class="pc-sec">'+t("pcTimes", {loc:d.name})+'</div>'
+      + '<table><tr><th>'+t("pcThTime")+'</th><th>'+t("pcThEvent")+'</th><th>'+t("pcThFilter")+'</th></tr>'
+      + '<tr><td>'+locHHMM(d.c1, d.c1[2]!==0)+'</td><td>'+t("pcC1")+'</td><td>'+t("pcOn")+'</td></tr>'
+      + '<tr><td>'+locHHMM(d.c2,true)+'</td><td>'+t("pcC2", {d:d.dur})+'</td><td><strong>'+t("pcOffStrong")+'</strong></td></tr>'
+      + '<tr><td>'+locHHMM(d.c3,true)+'</td><td>'+t("pcC3", {alt:d.alt})+'</td><td><strong>'+t("pcOnStrong")+'</strong></td></tr>'
+      + '<tr><td>'+locHHMM(d.endT,false)+'</td><td>'+t("pcEndRow", {e:endLabel(), s:d.set})+'</td><td>—</td></tr></table>'
+      + '<div class="pc-sec">'+t("pcKit")+'</div>'
+      + '<p>'+t("pcKitLine", {
+            f:st.focal, tc:st.tc, fe:Math.round(c.fe),
+            sw:fmt1(st.sw), sh:fmt1(st.sh),
+            orient:(st.orient==="h" ? t("orientH") : t("orientV")),
+            eq:Math.round(c.eq), hf:fmtDeg(c.hFov), vf:fmtDeg(c.vFov),
+            mount:(st.track ? t("mountTrack") : t("mountFixed"))
+          })+'</p>'
+      + '<div class="pc-sec">'+t("pcExp", {
+            iso:st.iso, f:fmt1(st.fnum),
+            ext:(st.ext>0 ? t("pcExtApplied", {ev:fmt1(extEV()), alt:d.alt}) : "")
+          })+'</div>'
+      + '<table><tr><th>'+t("pcThPartial", {nd:ndName})+'</th><th>'+t("pcThSpeed")+'</th></tr>'+parRows.map(rowHtml).join("")+'</table>'
+      + '<table><tr><th>'+t("pcThTot")+'</th><th>'+t("pcThSpeed")+'</th></tr>'+T.rows.map(rowHtml).join("")+'</table>'
+      + '<div class="pc-sec">'+t("pcBracket", {n:T.seq.length, s:Math.round(T.total), d:d.dur})+'</div>'
       + '<p>'+seqHtml+'</p>'
-      + '<p>Límite de arrastre sin seguimiento a esta focal ≈ '+lim+' (1 px). ▲ = velocidad que arrastra sobre trípode fijo.'+(st.ext===0?' Sin corrección de extinción: a '+d.alt+'° de altura espera necesitar ≈ +'+fmt1(extEVfor(1,d.alt))+' EV.':'')+'</p>';
+      + '<p>'+t("pcDrift", {lim:lim})+(st.ext===0 ? t("pcNoExt", {alt:d.alt, ev:fmt1(extEVfor(1,d.alt))}) : "")+'</p>';
     window.print();
   });
 
@@ -1021,7 +1409,7 @@
   function cdown(ms){
     var s = Math.max(0, Math.floor(ms/1000));
     var d = Math.floor(s/86400);
-    if(d >= 2) return d + " días";
+    if(d >= 2) return d + " " + t("days");
     var h = Math.floor(s/3600), m = Math.floor((s%3600)/60), x = s%60;
     function z(n){ return (n<10?"0":"")+n; }
     return z(h)+":"+z(m)+":"+z(x);
@@ -1030,11 +1418,11 @@
     var d = L();
     var c1 = locUTC(d.c1), c2 = locUTC(d.c2), c3 = locUTC(d.c3), end = locUTC(d.endT);
     var n = Date.now(), ph, fl, flc, cd, lab;
-    if(n < c1){       ph="Antes del eclipse · "+d.name; fl="PREPARA EL FILTRO"; flc="var(--muted)"; cd=c1-n;  lab="para el primer contacto ("+locHHMM(d.c1,false)+")"; }
-    else if(n < c2){  ph="Fase parcial · "+d.name;      fl="FILTRO PUESTO";     flc="var(--gold)";  cd=c2-n;  lab="para quitar el filtro (totalidad a las "+locHHMM(d.c2,true)+")"; }
-    else if(n < c3){  ph="TOTALIDAD · "+d.name;         fl="FILTRO FUERA";      flc="var(--prom)";  cd=c3-n;  lab="hasta que vuelva el filtro: dispara la horquilla y mira"; }
-    else if(n < end){ ph="Parcial final · "+d.name;     fl="FILTRO PUESTO";     flc="var(--gold)";  cd=end-n; lab="hasta el final ("+d.endLabel.toLowerCase()+", "+locHHMM(d.endT,false)+")"; }
-    else {            ph="Eclipse finalizado";          fl="—";                 flc="var(--muted)"; cd=0;     lab="el siguiente total visible en España: 2 de agosto de 2027"; }
+    if(n < c1){       ph=t("edBefore",{loc:d.name});   fl=t("flPrep"); flc="var(--muted)"; cd=c1-n;  lab=t("labC1",{t:locHHMM(d.c1,false)}); }
+    else if(n < c2){  ph=t("edPartial",{loc:d.name});  fl=t("flOn");   flc="var(--gold)";  cd=c2-n;  lab=t("labC2",{t:locHHMM(d.c2,true)}); }
+    else if(n < c3){  ph=t("edTotality",{loc:d.name}); fl=t("flOff");  flc="var(--prom)";  cd=c3-n;  lab=t("labC3"); }
+    else if(n < end){ ph=t("edFinal",{loc:d.name});    fl=t("flOn");   flc="var(--gold)";  cd=end-n; lab=t("labEnd",{e:endLabel().toLowerCase(), t:locHHMM(d.endT,false)}); }
+    else {            ph=t("edDone");                  fl="—";         flc="var(--muted)"; cd=0;     lab=t("labNext"); }
     $("edPhase").textContent = ph;
     var ef = $("edFilter"); ef.textContent = fl; ef.style.color = flc;
     $("edCount").textContent = cd > 0 ? cdown(cd) : "—";
@@ -1060,8 +1448,18 @@
   $("iso").value = st.iso; $("fnum").value = st.fnum; $("nd").value = String(st.nd);
   $("mp").value = st.mp; $("ext").value = String(st.ext);
   $("loc").value = st.loc;
+  updateStaticStrings();
   render();
   setInterval(tick, 1000); tick();
+
+  inited = true;
+  // repintado al cambiar de idioma; seguro aunque se llame antes de inicializar
+  window.onLangChange = function(){
+    if(!inited) return;          // la app aún no está montada: nada que repintar
+    updateStaticStrings();
+    render();
+    tick();
+  };
 
 })();
 </script>

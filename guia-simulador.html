@@ -6,6 +6,16 @@
 <title>Guía del banco óptico de flash · Rafael Vida</title>
 <meta name="author" content="Rafael Vida">
 <meta name="description" content="Cómo usar el simulador de flash: sombras y tamaño angular, caída de luz por número guía, obturador central frente al sol, y el balance entre flash y ambiente.">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -44,107 +54,233 @@
   .am{color:var(--amber)}.te{color:var(--teal)}.vi{color:var(--violet)}.rd{color:var(--red)}
   footer{max-width:760px;margin:0 auto;padding:28px 22px 70px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
   footer .c{font-family:var(--mono);color:var(--faint);margin-top:12px;font-size:12px}
+
+  /* ---------- conmutador de idioma ---------- */
+  html[lang="es"] [data-lang="en"]{display:none!important}
+  html[lang="en"] [data-lang="es"]{display:none!important}
+  .langbar{position:fixed;top:14px;right:16px;z-index:50;display:flex;
+           background:rgba(15,19,26,.92);border:1px solid var(--line2);border-radius:8px;
+           overflow:hidden;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+  .langbar button{font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;
+                  background:transparent;border:0;color:var(--muted);padding:7px 11px;cursor:pointer;
+                  transition:background .15s,color .15s}
+  .langbar button+button{border-left:1px solid var(--line2)}
+  .langbar button:hover{color:var(--text)}
+  .langbar button.on{background:rgba(63,202,176,.14);color:var(--teal)}
+  .langbar button:focus-visible{outline:2px solid rgba(63,202,176,.6);outline-offset:-2px}
+  @media(max-width:720px){.langbar{top:8px;right:8px}}
 </style>
 </head>
 <body>
 
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
+
 <header class="hero">
-  <div class="eyebrow">Banco óptico de flash · manual</div>
-  <h1>Cómo usar el simulador</h1>
-  <p class="lede">Cuatro bancos de pruebas sobre la misma física de la luz: la geometría de las sombras, la caída con la distancia, la lucha del flash contra el sol y el reparto entre flash y ambiente.</p>
+  <div class="eyebrow" data-lang="es">Banco óptico de flash · manual</div>
+  <div class="eyebrow" data-lang="en">Flash optical bench · manual</div>
+  <h1 data-lang="es">Cómo usar el simulador</h1>
+  <h1 data-lang="en">How to use the simulator</h1>
+  <p class="lede" data-lang="es">Cuatro bancos de pruebas sobre la misma física de la luz: la geometría de las sombras, la caída con la distancia, la lucha del flash contra el sol y el reparto entre flash y ambiente.</p>
+  <p class="lede" data-lang="en">Four test benches over one and the same physics of light: the geometry of shadows, the falloff with distance, the flash's struggle against the sun and the division between flash and ambient.</p>
   <div class="byline">Rafael Vida</div>
-  <a class="cta" href="simulador-flash.html">Abrir el simulador ↗</a>
+  <a class="cta" href="simulador-flash.html" data-lang="es">Abrir el simulador ↗</a>
+  <a class="cta" href="simulador-flash.html" data-lang="en">Open the simulator ↗</a>
 </header>
 
 <article>
-  <p>El simulador no imita una foto, calcula su física. Cada lectura sale de tres relaciones: el tamaño angular de la fuente <code class="am">θ = 2·arctan(d/2L)</code>, la caída por la ley del inverso del cuadrado <code class="te">E ∝ 1/D²</code> y el número guía <code class="te">f = GN/D</code>. Todo lo demás son consecuencias.</p>
+  <p data-lang="es">El simulador no imita una foto, calcula su física. Cada lectura sale de tres relaciones: el tamaño angular de la fuente <code class="am">θ = 2·arctan(d/2L)</code>, la caída por la ley del inverso del cuadrado <code class="te">E ∝ 1/D²</code> y el número guía <code class="te">f = GN/D</code>. Todo lo demás son consecuencias.</p>
+  <p data-lang="en">The simulator does not imitate a photograph, it computes its physics. Every reading follows from three relations: the angular size of the source <code class="am">θ = 2·arctan(d/2L)</code>, the falloff given by the inverse-square law <code class="te">E ∝ 1/D²</code> and the guide number <code class="te">f = GN/D</code>. Everything else is a consequence.</p>
 
-  <h3>Selector de modificador</h3>
-  <p>La fila de botones de arriba es común a las cuatro pestañas. Cada modificador fija dos cosas: el diámetro de la fuente <code class="am">d</code> en centímetros y la pérdida de luz en pasos. Son valores típicos y aproximados, pensados como punto de partida. Puedes afinarlos a mano con los deslizadores de cada pestaña.</p>
+  <h3 data-lang="es">Selector de modificador</h3>
+  <h3 data-lang="en">Modifier selector</h3>
+  <p data-lang="es">La fila de botones de arriba es común a las cuatro pestañas. Cada modificador fija dos cosas: el diámetro de la fuente <code class="am">d</code> en centímetros y la pérdida de luz en pasos. Son valores típicos y aproximados, pensados como punto de partida. Puedes afinarlos a mano con los deslizadores de cada pestaña.</p>
+  <p data-lang="en">The row of buttons at the top is common to all four tabs. Each modifier fixes two things: the diameter of the source <code class="am">d</code> in centimetres and the light loss in stops. These are typical, approximate figures, meant as a point of departure. You can refine them by hand with the sliders on each tab.</p>
 
-  <h2>Pestaña "Sombras"</h2>
-  <p>Estudia por qué una luz es dura o suave. El lienzo de la izquierda no es un degradado decorativo: para cada punto del fondo se calcula qué fracción de la fuente queda sin tapar por el objeto. El disco negro es la umbra (sombra plena) y el halo difuso es la penumbra real. El círculo violeta marca dónde está el objeto, para que veas cómo su sombra se desplaza. El esquema de al lado es el mismo caso visto de lado, con los rayos extremos de la fuente.</p>
+  <h2 data-lang="es">Pestaña "Sombras"</h2>
+  <h2 data-lang="en">The "Shadows" tab</h2>
+  <p data-lang="es">Estudia por qué una luz es dura o suave. El lienzo de la izquierda no es un degradado decorativo: para cada punto del fondo se calcula qué fracción de la fuente queda sin tapar por el objeto. El disco negro es la umbra (sombra plena) y el halo difuso es la penumbra real. El círculo violeta marca dónde está el objeto, para que veas cómo su sombra se desplaza. El esquema de al lado es el mismo caso visto de lado, con los rayos extremos de la fuente.</p>
+  <p data-lang="en">It examines why a light is hard or soft. The canvas on the left is not a decorative gradient: for every point of the background it works out what fraction of the source remains unobstructed by the object. The black disc is the umbra (full shadow) and the diffuse halo is the true penumbra. The violet circle marks where the object stands, so that you can see how its shadow travels. The diagram beside it is the same case seen from the side, with the extreme rays of the source.</p>
 
-  <h3>Controles</h3>
+  <h3 data-lang="es">Controles</h3>
+  <h3 data-lang="en">Controls</h3>
   <table>
-    <thead><tr><th>Control</th><th>Qué cambia</th></tr></thead>
+    <thead>
+      <tr data-lang="es"><th>Control</th><th>Qué cambia</th></tr>
+      <tr data-lang="en"><th>Control</th><th>What it changes</th></tr>
+    </thead>
     <tbody>
-      <tr><td>Diámetro de fuente d</td><td>El tamaño físico de la luz. Es la única variable que de verdad ablanda la sombra.</td></tr>
-      <tr><td>Luz a sujeto L</td><td>Acercar la fuente la agranda angularmente y suaviza.</td></tr>
-      <tr><td>Sujeto a fondo s</td><td>Separar el fondo ensancha la penumbra proyectada.</td></tr>
-      <tr><td>Tamaño del rasgo</td><td>El detalle que arroja sombra. Una nariz ronda 3 cm, una cabeza 20 cm.</td></tr>
-      <tr><td>Ángulo y altura de la luz</td><td>Solo desplazan la sombra, no cambian su dureza. Dan los patrones de retrato.</td></tr>
+      <tr data-lang="es"><td>Diámetro de fuente d</td><td>El tamaño físico de la luz. Es la única variable que de verdad ablanda la sombra.</td></tr>
+      <tr data-lang="en"><td>Source diameter d</td><td>The physical size of the light. It is the only variable that genuinely softens the shadow.</td></tr>
+      <tr data-lang="es"><td>Luz a sujeto L</td><td>Acercar la fuente la agranda angularmente y suaviza.</td></tr>
+      <tr data-lang="en"><td>Light to subject L</td><td>Bringing the source closer enlarges it angularly and softens.</td></tr>
+      <tr data-lang="es"><td>Sujeto a fondo s</td><td>Separar el fondo ensancha la penumbra proyectada.</td></tr>
+      <tr data-lang="en"><td>Subject to background s</td><td>Moving the background away widens the cast penumbra.</td></tr>
+      <tr data-lang="es"><td>Tamaño del rasgo</td><td>El detalle que arroja sombra. Una nariz ronda 3 cm, una cabeza 20 cm.</td></tr>
+      <tr data-lang="en"><td>Feature size</td><td>The detail that casts the shadow. A nose is about 3 cm, a head 20 cm.</td></tr>
+      <tr data-lang="es"><td>Ángulo y altura de la luz</td><td>Solo desplazan la sombra, no cambian su dureza. Dan los patrones de retrato.</td></tr>
+      <tr data-lang="en"><td>Angle and height of the light</td><td>They only shift the shadow, they do not change its hardness. They give the portrait patterns.</td></tr>
     </tbody>
   </table>
 
-  <h3>Lecturas</h3>
-  <p>El <span class="am">tamaño angular θ</span> es el indicador de dureza: por debajo de unos 5 grados la luz es dura, por encima de unos 15 grados es suave. La <span class="te">penumbra</span> es la anchura de la transición de la sombra en el fondo, <code class="te">w = d·s/L</code>. La <span>umbra</span> desaparece cuando la fuente supera angularmente al objeto. El <span class="vi">desplazamiento</span> es cuánto se corre la sombra por el ángulo de la luz.</p>
+  <h3 data-lang="es">Lecturas</h3>
+  <h3 data-lang="en">Readings</h3>
+  <p data-lang="es">El <span class="am">tamaño angular θ</span> es el indicador de dureza: por debajo de unos 5 grados la luz es dura, por encima de unos 15 grados es suave. La <span class="te">penumbra</span> es la anchura de la transición de la sombra en el fondo, <code class="te">w = d·s/L</code>. La <span>umbra</span> desaparece cuando la fuente supera angularmente al objeto. El <span class="vi">desplazamiento</span> es cuánto se corre la sombra por el ángulo de la luz.</p>
+  <p data-lang="en">The <span class="am">angular size θ</span> is the indicator of hardness: below some 5 degrees the light is hard, above some 15 degrees it is soft. The <span class="te">penumbra</span> is the width of the shadow's transition on the background, <code class="te">w = d·s/L</code>. The <span>umbra</span> disappears once the source exceeds the object in angular size. The <span class="vi">displacement</span> is how far the shadow travels on account of the angle of the light.</p>
 
-  <h3>Patrones de retrato</h3>
-  <p>Con el sujeto de frente, sube y abre la luz unos 30 a 45 grados y aparece el "lazo", la sombra corta de la nariz hacia abajo. Más lateral y alta da Rembrandt. A 90 grados, luz lateral pura. Comprueba que al mover el ángulo la penumbra apenas cambia: la suavidad la fija el tamaño, no la posición.</p>
+  <h3 data-lang="es">Patrones de retrato</h3>
+  <h3 data-lang="en">Portrait patterns</h3>
+  <p data-lang="es">Con el sujeto de frente, sube y abre la luz unos 30 a 45 grados y aparece el "lazo", la sombra corta de la nariz hacia abajo. Más lateral y alta da Rembrandt. A 90 grados, luz lateral pura. Comprueba que al mover el ángulo la penumbra apenas cambia: la suavidad la fija el tamaño, no la posición.</p>
+  <p data-lang="en">With the subject facing the camera, raise the light and swing it out some 30 to 45 degrees and the "loop" appears, the short shadow running down from the nose. Further round and higher gives Rembrandt. At 90 degrees, pure side light. Note that moving the angle barely alters the penumbra: softness is set by size, not by position.</p>
 
-  <h2>Pestaña "Caída de luz (GN)"</h2>
-  <p>Estudia el alcance y la exposición del flash con la distancia. A potencia plena, la apertura correcta es <code class="te">f = GN/D</code>. El número guía efectivo tiene en cuenta el ISO y la pérdida del modificador: <code class="am">GN_ef = GN·√(ISO/100)·2^(−pérdida/2)</code>. Cada paso de pérdida divide el GN por raíz de dos.</p>
-  <p>La gráfica alterna entre dos lecturas. En "diafragma necesario" ves la f que expone bien a cada distancia, con un punto en tu distancia de trabajo. En "iluminancia relativa" ves la caída en pasos respecto a esa distancia, que cae como <code class="te">1/D²</code>.</p>
-  <div class="note">La lectura "caída en el fondo" es la herramienta para separar al sujeto. Como la luz cae con el cuadrado de la distancia, acercar el flash al sujeto oscurece mucho el fondo situado por detrás. Esos pasos de diferencia son los que hunden el fondo en negro.</div>
+  <h2 data-lang="es">Pestaña "Caída de luz (GN)"</h2>
+  <h2 data-lang="en">The "Light falloff (GN)" tab</h2>
+  <p data-lang="es">Estudia el alcance y la exposición del flash con la distancia. A potencia plena, la apertura correcta es <code class="te">f = GN/D</code>. El número guía efectivo tiene en cuenta el ISO y la pérdida del modificador: <code class="am">GN_ef = GN·√(ISO/100)·2^(−pérdida/2)</code>. Cada paso de pérdida divide el GN por raíz de dos.</p>
+  <p data-lang="en">It examines the reach and the exposure of the flash with distance. At full power, the correct aperture is <code class="te">f = GN/D</code>. The effective guide number takes the ISO and the modifier's loss into account: <code class="am">GN_ef = GN·√(ISO/100)·2^(−pérdida/2)</code>. Each stop of loss divides the GN by the square root of two.</p>
+  <p data-lang="es">La gráfica alterna entre dos lecturas. En "diafragma necesario" ves la f que expone bien a cada distancia, con un punto en tu distancia de trabajo. En "iluminancia relativa" ves la caída en pasos respecto a esa distancia, que cae como <code class="te">1/D²</code>.</p>
+  <p data-lang="en">The graph alternates between two readings. Under "aperture required" you see the f-number that exposes correctly at each distance, with a marker at your working distance. Under "relative illuminance" you see the falloff in stops with respect to that distance, which drops as <code class="te">1/D²</code>.</p>
+  <div class="note" data-lang="es">La lectura "caída en el fondo" es la herramienta para separar al sujeto. Como la luz cae con el cuadrado de la distancia, acercar el flash al sujeto oscurece mucho el fondo situado por detrás. Esos pasos de diferencia son los que hunden el fondo en negro.</div>
+  <div class="note" data-lang="en">The "background falloff" reading is the tool for separating the subject. Since light falls with the square of the distance, bringing the flash closer to the subject darkens the background behind it considerably. Those stops of difference are what sink the background into black.</div>
 
-  <h2>Pestaña "Vencer al sol"</h2>
-  <p>Estudia la ventaja del obturador central para imponerse a la luz del día. La idea es subexponer el ambiente brillante mientras el flash sigue exponiendo bien al sujeto.</p>
+  <h2 data-lang="es">Pestaña "Vencer al sol"</h2>
+  <h2 data-lang="en">The "Overpowering the sun" tab</h2>
+  <p data-lang="es">Estudia la ventaja del obturador central para imponerse a la luz del día. La idea es subexponer el ambiente brillante mientras el flash sigue exponiendo bien al sujeto.</p>
+  <p data-lang="en">It examines the advantage of the leaf shutter in prevailing over daylight. The idea is to underexpose the bright ambient while the flash goes on exposing the subject correctly.</p>
 
-  <h3>El porqué físico</h3>
-  <p>La exposición del ambiente depende del diafragma, del tiempo de obturación y del ISO. La del flash depende del diafragma, el ISO y la distancia, pero <strong>no del tiempo de obturación</strong> mientras estés dentro de la sincronización. Un obturador central, alojado en el objetivo, sincroniza con flash a todas sus velocidades. Eso te deja usar un tiempo muy rápido para apagar el ambiente sin tocar la luz del flash. Un obturador de plano focal solo sincroniza hasta su X-sync, aquí tomado como 1/200, y por encima necesita HSS, que reparte el destello en una serie de pulsos y recorta mucho su potencia útil.</p>
+  <h3 data-lang="es">El porqué físico</h3>
+  <h3 data-lang="en">The physical reason</h3>
+  <p data-lang="es">La exposición del ambiente depende del diafragma, del tiempo de obturación y del ISO. La del flash depende del diafragma, el ISO y la distancia, pero <strong>no del tiempo de obturación</strong> mientras estés dentro de la sincronización. Un obturador central, alojado en el objetivo, sincroniza con flash a todas sus velocidades. Eso te deja usar un tiempo muy rápido para apagar el ambiente sin tocar la luz del flash. Un obturador de plano focal solo sincroniza hasta su X-sync, aquí tomado como 1/200, y por encima necesita HSS, que reparte el destello en una serie de pulsos y recorta mucho su potencia útil.</p>
+  <p data-lang="en">Ambient exposure depends on the aperture, the shutter speed and the ISO. Flash exposure depends on the aperture, the ISO and the distance, but <strong>not on the shutter speed</strong> so long as you stay within sync. A leaf shutter, housed in the lens, synchronises with flash at every one of its speeds. That lets you use a very fast time to extinguish the ambient without touching the flash's light. A focal-plane shutter synchronises only up to its X-sync, taken here as 1/200, and above that it needs HSS, which spreads the burst into a train of pulses and cuts its useful power sharply.</p>
 
-  <h3>Controles</h3>
-  <p>La luz ambiente se da en EV a ISO 100. Pleno sol equivale a EV 15, que es la regla del 16 (f/16 a 1/125 e ISO 100). Eliges diafragma, ISO, la velocidad de sincronización del obturador central, la distancia al sujeto, el número guía y la pérdida del modificador.</p>
+  <h3 data-lang="es">Controles</h3>
+  <h3 data-lang="en">Controls</h3>
+  <p data-lang="es">La luz ambiente se da en EV a ISO 100. Pleno sol equivale a EV 15, que es la regla del 16 (f/16 a 1/125 e ISO 100). Eliges diafragma, ISO, la velocidad de sincronización del obturador central, la distancia al sujeto, el número guía y la pérdida del modificador.</p>
+  <p data-lang="en">Ambient light is given in EV at ISO 100. Full sun corresponds to EV 15, which is the sunny 16 rule (f/16 at 1/125 and ISO 100). You choose the aperture, the ISO, the leaf shutter's sync speed, the distance to the subject, the guide number and the modifier's loss.</p>
 
-  <h3>La gráfica y las lecturas</h3>
-  <p>El eje horizontal es la velocidad de obturación. La línea ámbar es la exposición del ambiente respecto al neutro: cuanto más rápido el tiempo, más cae por debajo de la línea de "ambiente neutro". La banda verde es el terreno que solo alcanza el obturador central, entre el X-sync del plano focal y la sincronización del central. Las cuatro lecturas resumen el caso:</p>
-  <ol>
+  <h3 data-lang="es">La gráfica y las lecturas</h3>
+  <h3 data-lang="en">The graph and the readings</h3>
+  <p data-lang="es">El eje horizontal es la velocidad de obturación. La línea ámbar es la exposición del ambiente respecto al neutro: cuanto más rápido el tiempo, más cae por debajo de la línea de "ambiente neutro". La banda verde es el terreno que solo alcanza el obturador central, entre el X-sync del plano focal y la sincronización del central. Las cuatro lecturas resumen el caso:</p>
+  <p data-lang="en">The horizontal axis is the shutter speed. The amber line is the ambient exposure with respect to neutral: the faster the time, the further it falls below the "neutral ambient" line. The green band is the ground that only the leaf shutter reaches, between the focal-plane X-sync and the leaf shutter's own sync. The four readings sum up the case:</p>
+  <ol data-lang="es">
     <li><span class="te">Ambiente con central</span>: cuántos pasos queda el ambiente por debajo del neutro a tu velocidad de sincronización. Negativo es cielo más oscuro.</li>
     <li><span class="rd">Ambiente con plano focal 1/200</span>: lo mismo limitado al X-sync. Suele quedarse claro o incluso sobreexpuesto.</li>
     <li><span class="vi">Ventaja del central</span>: la diferencia entre ambos, que vale <code class="vi">log₂(sinc_central / 200)</code>.</li>
     <li><span class="am">Margen del flash</span>: si tu flash llega a iluminar el sujeto a ese diafragma y distancia, <code class="am">2·log₂(GN_ef / (f·D))</code>. Positivo es potencia de sobra, negativo es que te falta y debes acercarte o subir ISO.</li>
   </ol>
-  <div class="note">El tiempo de ambiente neutro que usa el modelo es <code>t_neutro = f²·100 / (ISO·2^EV)</code>. El oscurecimiento máximo del ambiente es <code>log₂(t_neutro / t_sinc)</code>. Ahí se ve por qué un central a 1/2000 gana varias paradas frente a un plano focal a 1/200.</div>
+  <ol data-lang="en">
+    <li><span class="te">Ambient with the leaf shutter</span>: how many stops the ambient sits below neutral at your sync speed. Negative means a darker sky.</li>
+    <li><span class="rd">Ambient with a focal-plane shutter at 1/200</span>: the same thing capped at the X-sync. It usually stays bright or even overexposed.</li>
+    <li><span class="vi">Leaf shutter advantage</span>: the difference between the two, which comes to <code class="vi">log₂(sinc_central / 200)</code>.</li>
+    <li><span class="am">Flash headroom</span>: whether your flash reaches the subject at that aperture and distance, <code class="am">2·log₂(GN_ef / (f·D))</code>. Positive means power to spare; negative means you fall short and must move closer or raise the ISO.</li>
+  </ol>
+  <div class="note" data-lang="es">El tiempo de ambiente neutro que usa el modelo es <code>t_neutro = f²·100 / (ISO·2^EV)</code>. El oscurecimiento máximo del ambiente es <code>log₂(t_neutro / t_sinc)</code>. Ahí se ve por qué un central a 1/2000 gana varias paradas frente a un plano focal a 1/200.</div>
+  <div class="note" data-lang="en">The neutral-ambient time used by the model is <code>t_neutro = f²·100 / (ISO·2^EV)</code>. The greatest darkening of the ambient is <code>log₂(t_neutro / t_sinc)</code>. That is where you see why a leaf shutter at 1/2000 gains several stops over a focal-plane shutter at 1/200.</div>
 
-  <h2>Pestaña "Balance ambiente"</h2>
-  <p>Estudia cómo se reparte la luz entre el sujeto, iluminado por el flash, y el fondo, iluminado por el ambiente, y sobre todo qué mando mueve cada cosa. La exposición de cada punto es la suma de dos fuentes independientes: la luz continua, que se acumula durante todo el tiempo de obturación, y el destello, que es un pulso muy breve y deposita su energía entera de golpe.</p>
+  <h2 data-lang="es">Pestaña "Balance ambiente"</h2>
+  <h2 data-lang="en">The "Ambient balance" tab</h2>
+  <p data-lang="es">Estudia cómo se reparte la luz entre el sujeto, iluminado por el flash, y el fondo, iluminado por el ambiente, y sobre todo qué mando mueve cada cosa. La exposición de cada punto es la suma de dos fuentes independientes: la luz continua, que se acumula durante todo el tiempo de obturación, y el destello, que es un pulso muy breve y deposita su energía entera de golpe.</p>
+  <p data-lang="en">It examines how light is divided between the subject, lit by the flash, and the background, lit by the ambient, and above all which control moves what. The exposure at any point is the sum of two independent sources: the continuous light, which accumulates throughout the shutter time, and the burst, a very brief pulse that deposits its whole energy at once.</p>
 
-  <h3>El porqué físico</h3>
-  <p>El ambiente, en pasos respecto a la exposición correcta, vale <code class="am">a = log₂(ISO/100) + log₂(t) − 2·log₂(N) + EV</code>, donde <code>EV</code> es la luz de la escena a ISO 100 según la regla del 16. El flash sobre el sujeto se mide con el número guía: su margen es <code class="te">2·log₂(GN_ef·√P / (N·D))</code>, con <code class="te">GN_ef = GN·√(ISO/100)·2^(−pérdida/2)</code> y <code>P</code> la fracción de potencia, donde la plena vale 1. Media parada de potencia divide el alcance por raíz de dos, igual que la pérdida del modificador. La clave es que <strong>el tiempo de obturación no entra en el flash</strong> mientras sincronices: el destello ya ha volcado toda su luz. Por eso la obturación es ambiente puro.</p>
-  <p>El balance es el cociente entre las dos exposiciones, y al restarlas <strong>se cancelan el ISO y el diafragma</strong>. Solo lo mueven el tiempo, por el lado del ambiente, y la potencia y la distancia, por el lado del flash. El diafragma es el peor mando para balancear: en manual ni siquiera cambia el cociente y siempre te cuesta profundidad de campo.</p>
+  <h3 data-lang="es">El porqué físico</h3>
+  <h3 data-lang="en">The physical reason</h3>
+  <p data-lang="es">El ambiente, en pasos respecto a la exposición correcta, vale <code class="am">a = log₂(ISO/100) + log₂(t) − 2·log₂(N) + EV</code>, donde <code>EV</code> es la luz de la escena a ISO 100 según la regla del 16. El flash sobre el sujeto se mide con el número guía: su margen es <code class="te">2·log₂(GN_ef·√P / (N·D))</code>, con <code class="te">GN_ef = GN·√(ISO/100)·2^(−pérdida/2)</code> y <code>P</code> la fracción de potencia, donde la plena vale 1. Media parada de potencia divide el alcance por raíz de dos, igual que la pérdida del modificador. La clave es que <strong>el tiempo de obturación no entra en el flash</strong> mientras sincronices: el destello ya ha volcado toda su luz. Por eso la obturación es ambiente puro.</p>
+  <p data-lang="en">The ambient, in stops with respect to correct exposure, comes to <code class="am">a = log₂(ISO/100) + log₂(t) − 2·log₂(N) + EV</code>, where <code>EV</code> is the light of the scene at ISO 100 according to the sunny 16 rule. The flash on the subject is measured with the guide number: its headroom is <code class="te">2·log₂(GN_ef·√P / (N·D))</code>, with <code class="te">GN_ef = GN·√(ISO/100)·2^(−pérdida/2)</code> and <code>P</code> the fraction of power, full power being 1. Half a stop of power divides the reach by the square root of two, exactly as the modifier's loss does. The crux is that <strong>the shutter speed does not enter into the flash</strong> so long as you synchronise: the burst has already poured out all its light. That is why the shutter is pure ambient.</p>
+  <p data-lang="es">El balance es el cociente entre las dos exposiciones, y al restarlas <strong>se cancelan el ISO y el diafragma</strong>. Solo lo mueven el tiempo, por el lado del ambiente, y la potencia y la distancia, por el lado del flash. El diafragma es el peor mando para balancear: en manual ni siquiera cambia el cociente y siempre te cuesta profundidad de campo.</p>
+  <p data-lang="en">The balance is the ratio between the two exposures, and on subtracting them <strong>the ISO and the aperture cancel out</strong>. It is moved only by the time, on the ambient side, and by the power and the distance, on the flash side. The aperture is the worst control for balancing: in manual it does not even change the ratio, and it always costs you depth of field.</p>
 
-  <h3>Manual frente a TTL</h3>
-  <p>En manual fijas tú la potencia, así que subir el ISO o abrir el diafragma sube el sujeto y el fondo a la vez. En TTL la cámara ajusta la potencia disparo a disparo para clavar al sujeto. Con ese lazo cerrado sobre el sujeto, el ISO se convierte en un mando de fondo: al subirlo, la cámara recorta la potencia para dejar el sujeto igual mientras el fondo sube. Es la razón física del consejo de "subir el ISO para meter ambiente", y solo se cumple en TTL.</p>
+  <h3 data-lang="es">Manual frente a TTL</h3>
+  <h3 data-lang="en">Manual versus TTL</h3>
+  <p data-lang="es">En manual fijas tú la potencia, así que subir el ISO o abrir el diafragma sube el sujeto y el fondo a la vez. En TTL la cámara ajusta la potencia disparo a disparo para clavar al sujeto. Con ese lazo cerrado sobre el sujeto, el ISO se convierte en un mando de fondo: al subirlo, la cámara recorta la potencia para dejar el sujeto igual mientras el fondo sube. Es la razón física del consejo de "subir el ISO para meter ambiente", y solo se cumple en TTL.</p>
+  <p data-lang="en">In manual you set the power yourself, so raising the ISO or opening the aperture lifts subject and background together. In TTL the camera adjusts the power shot by shot to hold the subject exactly. With that loop closed around the subject, the ISO becomes a background control: as you raise it, the camera trims the power to leave the subject unchanged while the background rises. This is the physical reason behind the advice to "raise the ISO to bring in ambient", and it holds in TTL alone.</p>
 
-  <h3>Controles</h3>
+  <h3 data-lang="es">Controles</h3>
+  <h3 data-lang="en">Controls</h3>
   <table>
-    <thead><tr><th>Control</th><th>Qué cambia</th></tr></thead>
+    <thead>
+      <tr data-lang="es"><th>Control</th><th>Qué cambia</th></tr>
+      <tr data-lang="en"><th>Control</th><th>What it changes</th></tr>
+    </thead>
     <tbody>
-      <tr><td>Manual / TTL</td><td>Quién fija la potencia. En TTL la calcula la cámara y el deslizador de potencia queda en gris.</td></tr>
-      <tr><td>Central / Plano focal</td><td>El techo de sincronización. El central llega a 1/2000 sin HSS; el plano focal corta en 1/200.</td></tr>
-      <tr><td>Luz ambiente (EV)</td><td>El brillo de la escena a ISO 100. Interior con luz ≈ 10 a 11, nublado ≈ 13, pleno sol = 15.</td></tr>
-      <tr><td>Obturación</td><td>El único mando de ambiente puro. No toca el flash mientras sincronices.</td></tr>
-      <tr><td>Diafragma</td><td>Ambiente y flash a la vez, y cambia la profundidad de campo. No sirve para balancear.</td></tr>
-      <tr><td>ISO</td><td>Ambiente y flash. Bajo TTL, en la práctica solo el fondo.</td></tr>
-      <tr><td>Potencia flash</td><td>Solo flash. En TTL la fija la cámara.</td></tr>
-      <tr><td>Distancia flash</td><td>Solo flash, cae con el inverso del cuadrado.</td></tr>
-      <tr><td>Duración flash (plena pot.)</td><td>El pulso a máxima potencia, 1/1000 s en el iT32. Define a partir de qué velocidad la ventana de obturación recorta el destello.</td></tr>
-      <tr><td>GN y pérdida</td><td>Definen el alcance real, GN_ef. La pérdida la fija el selector de modificador, como en las demás pestañas.</td></tr>
+      <tr data-lang="es"><td>Manual / TTL</td><td>Quién fija la potencia. En TTL la calcula la cámara y el deslizador de potencia queda en gris.</td></tr>
+      <tr data-lang="en"><td>Manual / TTL</td><td>Who sets the power. In TTL the camera works it out and the power slider is greyed out.</td></tr>
+      <tr data-lang="es"><td>Central / Plano focal</td><td>El techo de sincronización. El central llega a 1/2000 sin HSS; el plano focal corta en 1/200.</td></tr>
+      <tr data-lang="en"><td>Leaf / Focal-plane</td><td>The sync ceiling. The leaf shutter reaches 1/2000 without HSS; the focal-plane shutter stops at 1/200.</td></tr>
+      <tr data-lang="es"><td>Luz ambiente (EV)</td><td>El brillo de la escena a ISO 100. Interior con luz ≈ 10 a 11, nublado ≈ 13, pleno sol = 15.</td></tr>
+      <tr data-lang="en"><td>Ambient light (EV)</td><td>The brightness of the scene at ISO 100. A lit interior ≈ 10 to 11, overcast ≈ 13, full sun = 15.</td></tr>
+      <tr data-lang="es"><td>Obturación</td><td>El único mando de ambiente puro. No toca el flash mientras sincronices.</td></tr>
+      <tr data-lang="en"><td>Shutter speed</td><td>The one pure ambient control. It does not touch the flash so long as you synchronise.</td></tr>
+      <tr data-lang="es"><td>Diafragma</td><td>Ambiente y flash a la vez, y cambia la profundidad de campo. No sirve para balancear.</td></tr>
+      <tr data-lang="en"><td>Aperture</td><td>Ambient and flash at once, and it changes the depth of field. No use for balancing.</td></tr>
+      <tr data-lang="es"><td>ISO</td><td>Ambiente y flash. Bajo TTL, en la práctica solo el fondo.</td></tr>
+      <tr data-lang="en"><td>ISO</td><td>Ambient and flash. Under TTL, in practice the background only.</td></tr>
+      <tr data-lang="es"><td>Potencia flash</td><td>Solo flash. En TTL la fija la cámara.</td></tr>
+      <tr data-lang="en"><td>Flash power</td><td>Flash only. In TTL the camera sets it.</td></tr>
+      <tr data-lang="es"><td>Distancia flash</td><td>Solo flash, cae con el inverso del cuadrado.</td></tr>
+      <tr data-lang="en"><td>Flash distance</td><td>Flash only; it falls with the inverse square.</td></tr>
+      <tr data-lang="es"><td>Duración flash (plena pot.)</td><td>El pulso a máxima potencia, 1/1000 s en el iT32. Define a partir de qué velocidad la ventana de obturación recorta el destello.</td></tr>
+      <tr data-lang="en"><td>Flash duration (full power)</td><td>The pulse at maximum power, 1/1000 s on the iT32. It sets the speed above which the shutter window clips the burst.</td></tr>
+      <tr data-lang="es"><td>GN y pérdida</td><td>Definen el alcance real, GN_ef. La pérdida la fija el selector de modificador, como en las demás pestañas.</td></tr>
+      <tr data-lang="en"><td>GN and loss</td><td>They define the real reach, GN_ef. The loss is set by the modifier selector, as on the other tabs.</td></tr>
     </tbody>
   </table>
 
-  <h3>Lecturas</h3>
-  <p>Las dos barras muestran al <span class="te">sujeto</span> y al <span class="vi">fondo</span> respecto a la exposición correcta, el 0 del centro. El color marca el estado: verde correcto, ámbar desviado, rojo quemado, violeta hundido. La <span class="am">relación flash/ambiente</span> es cuántos pasos manda el flash sobre el ambiente en el sujeto; es el cociente que no depende del ISO ni del diafragma. La <span>potencia flash</span> es la resultante: en TTL la calcula la cámara, en manual es la que fijas. Los avisos saltan al pasar del X-sync con plano focal, ante el recorte del destello, cuantificado en pasos cuando la ventana de obturación queda más corta que el pulso, y cuando el sujeto o el fondo se queman o falta potencia.</p>
-  <div class="note">Para alguien que no es modelo, TTL más obturador central es la pareja rápida. El TTL clava al sujeto aunque cambie la distancia, así que tú solo gobiernas el fondo con la obturación, fijada una vez y sin esperas. Como el cociente no depende del diafragma, la apertura te queda libre para la composición. Si el TTL se desvía con ropa muy clara u oscura, corrígelo con la compensación de exposición de flash.</div>
+  <h3 data-lang="es">Lecturas</h3>
+  <h3 data-lang="en">Readings</h3>
+  <p data-lang="es">Las dos barras muestran al <span class="te">sujeto</span> y al <span class="vi">fondo</span> respecto a la exposición correcta, el 0 del centro. El color marca el estado: verde correcto, ámbar desviado, rojo quemado, violeta hundido. La <span class="am">relación flash/ambiente</span> es cuántos pasos manda el flash sobre el ambiente en el sujeto; es el cociente que no depende del ISO ni del diafragma. La <span>potencia flash</span> es la resultante: en TTL la calcula la cámara, en manual es la que fijas. Los avisos saltan al pasar del X-sync con plano focal, ante el recorte del destello, cuantificado en pasos cuando la ventana de obturación queda más corta que el pulso, y cuando el sujeto o el fondo se queman o falta potencia.</p>
+  <p data-lang="en">The two bars show the <span class="te">subject</span> and the <span class="vi">background</span> with respect to correct exposure, the 0 at the centre. The colour marks the state: green correct, amber adrift, red blown, violet sunk. The <span class="am">flash/ambient ratio</span> is how many stops the flash commands over the ambient on the subject; it is the ratio that depends on neither the ISO nor the aperture. The <span>flash power</span> is the outcome: in TTL the camera works it out, in manual it is the one you set. The warnings fire on going past the X-sync with a focal-plane shutter, on the clipping of the burst, quantified in stops once the shutter window falls shorter than the pulse, and when the subject or the background blows out or the power falls short.</p>
+  <div class="note" data-lang="es">Para alguien que no es modelo, TTL más obturador central es la pareja rápida. El TTL clava al sujeto aunque cambie la distancia, así que tú solo gobiernas el fondo con la obturación, fijada una vez y sin esperas. Como el cociente no depende del diafragma, la apertura te queda libre para la composición. Si el TTL se desvía con ropa muy clara u oscura, corrígelo con la compensación de exposición de flash.</div>
+  <div class="note" data-lang="en">For someone who is not a model, TTL plus a leaf shutter is the quick pairing. TTL holds the subject exactly even as the distance changes, so you govern the background alone with the shutter speed, set once and with no waiting. Since the ratio does not depend on the aperture, the aperture is left free for the composition. If TTL drifts with very light or very dark clothing, correct it with flash exposure compensation.</div>
 
-  <h2>Límites del modelo</h2>
-  <p>Es un modelo geométrico de fuente extensa. La difracción es despreciable a estas escalas y no se incluye. Los diámetros y pérdidas de los modificadores son valores típicos, no medidas de tu equipo concreto, así que ajústalos si tienes datos propios. La luz ambiente parte de la regla del 16 y no modela reflejos ni contraste de la escena. La sombra se calcula con un objeto y una fuente circulares, suficiente para entender la física, no para predecir píxel a píxel una cara real. Y en el balance, la independencia entre flash y ambiente se da por la sincronización: la fracción del destello captada es <code>mín(1, t / t_pulso)</code>, con <code>t_pulso = (1/1000)·P^0,70</code> ajustado a los dos extremos de la hoja de datos del iT32, así que a las velocidades más altas con potencia alta la ventana recorta el pulso y la pérdida aparece en pasos.</p>
+  <h2 data-lang="es">Límites del modelo</h2>
+  <h2 data-lang="en">Limits of the model</h2>
+  <p data-lang="es">Es un modelo geométrico de fuente extensa. La difracción es despreciable a estas escalas y no se incluye. Los diámetros y pérdidas de los modificadores son valores típicos, no medidas de tu equipo concreto, así que ajústalos si tienes datos propios. La luz ambiente parte de la regla del 16 y no modela reflejos ni contraste de la escena. La sombra se calcula con un objeto y una fuente circulares, suficiente para entender la física, no para predecir píxel a píxel una cara real. Y en el balance, la independencia entre flash y ambiente se da por la sincronización: la fracción del destello captada es <code>mín(1, t / t_pulso)</code>, con <code>t_pulso = (1/1000)·P^0,70</code> ajustado a los dos extremos de la hoja de datos del iT32, así que a las velocidades más altas con potencia alta la ventana recorta el pulso y la pérdida aparece en pasos.</p>
+  <p data-lang="en">It is a geometrical model of an extended source. Diffraction is negligible at these scales and is not included. The diameters and losses of the modifiers are typical figures, not measurements of your own equipment, so adjust them if you have data of your own. The ambient light starts from the sunny 16 rule and models neither reflections nor the contrast of the scene. The shadow is computed with a circular object and a circular source, enough to understand the physics, not to predict a real face pixel by pixel. And in the balance, the independence of flash and ambient is granted by synchronisation: the fraction of the burst captured is <code>mín(1, t / t_pulso)</code>, with <code>t_pulso = (1/1000)·P^0,70</code> fitted to the two extremes of the iT32 data sheet, so that at the highest speeds with high power the window clips the pulse and the loss shows up in stops.</p>
 </article>
 
 <footer>
-  <a href="simulador-flash.html">Volver al simulador ↗</a>
+  <a href="simulador-flash.html" data-lang="es">Volver al simulador ↗</a>
+  <a href="simulador-flash.html" data-lang="en">Back to the simulator ↗</a>
   <div class="c">θ = 2·arctan(d/2L) · w = d·s/L · f = GN/D · E ∝ 1/D² · t_neutro = f²·100/(ISO·2^EV) · margen = 2·log₂(GN_ef·√P/(N·D)) · captado = mín(1, t/t_pulso) · © Rafael Vida</div>
 </footer>
+
+<script>
+"use strict";
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{
+      title:"Guía del banco óptico de flash · Rafael Vida",
+      desc:"Cómo usar el simulador de flash: sombras y tamaño angular, caída de luz por número guía, obturador central frente al sol, y el balance entre flash y ambiente."
+    },
+    en:{
+      title:"Guide to the flash optical bench · Rafael Vida",
+      desc:"How to use the flash simulator: shadows and angular size, light falloff from the guide number, the leaf shutter against the sun, and the balance between flash and ambient."
+    }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
 </body>
 </html>

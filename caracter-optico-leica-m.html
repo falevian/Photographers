@@ -4,6 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Carta de carácter óptico · montura Leica M</title>
+<meta name="author" content="Rafael Vida">
+<meta name="description" content="128 objetivos de montura Leica M, de 1925 a 2026, con 32 descriptores cada uno, disco de desenfoque reconstruido y una métrica de distancia de carácter. Todo el cálculo ocurre en el navegador.">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
@@ -216,18 +228,49 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-fa
   .navsel{width:100%;margin-left:0}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ---------- conmutador de idioma ---------- */
+html[lang="es"] [data-lang="en"]{display:none!important}
+html[lang="en"] [data-lang="es"]{display:none!important}
+.langbar{position:fixed;top:14px;right:16px;z-index:90;display:flex;
+         background:rgba(16,21,29,.92);border:1px solid var(--line2);border-radius:8px;
+         overflow:hidden;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.langbar button{font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;
+                background:transparent;border:0;color:var(--mut);padding:7px 11px;cursor:pointer;
+                transition:background .15s,color .15s}
+.langbar button+button{border-left:1px solid var(--line2)}
+.langbar button:hover{color:var(--hi)}
+.langbar button.on{background:rgba(232,179,60,.14);color:var(--d)}
+.langbar button:focus-visible{outline:2px solid rgba(232,179,60,.6);outline-offset:-2px}
+/* la cabecera es sticky y el cajón se abre por la derecha: se reserva sitio y se
+   retira el conmutador mientras la ficha está abierta, para no tapar ningún control */
+@media (max-width:1470px){.topnav-in{padding-right:106px}}
+body.locked .langbar{opacity:0;pointer-events:none}
+@media(max-width:720px){.langbar{top:8px;right:8px}}
 </style>
 </head>
 <body>
 
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
+
 <nav class="topnav">
   <div class="topnav-in">
-    <span class="brand">Carácter <b>óptico</b> · montura M</span>
-    <div class="navlinks">
+    <span class="brand" data-lang="es">Carácter <b>óptico</b> · montura M</span>
+    <span class="brand" data-lang="en">Optical <b>character</b> · M mount</span>
+    <div class="navlinks" data-lang="es">
       <a href="#catalogo" data-nav>Catálogo</a>
       <a href="#comparar" data-nav>Comparar</a>
       <a href="#mapa" data-nav>Mapa</a>
       <a href="#metodo" data-nav>Método</a>
+    </div>
+    <div class="navlinks" data-lang="en">
+      <a href="#catalogo" data-nav>Catalogue</a>
+      <a href="#comparar" data-nav>Compare</a>
+      <a href="#mapa" data-nav>Map</a>
+      <a href="#metodo" data-nav>Method</a>
     </div>
     <div class="navsel">
       <input class="navq" type="search" id="q" placeholder="buscar objetivo…" aria-label="Buscar objetivo">
@@ -242,19 +285,26 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-fa
 <header class="top">
   <div class="top-grid">
     <div>
-      <div class="eyebrow">Metrología del carácter óptico · 1925 a 2026</div>
-      <h1>Carta de<br>carácter <span class="lux">óptico</span></h1>
-      <div class="stamp"><span id="stat-count">0</span> objetivos · <span id="stat-brands">0</span> fabricantes · 32 descriptores · modelo de óptica geométrica en el navegador</div>
+      <div class="eyebrow" data-lang="es">Metrología del carácter óptico · 1925 a 2026</div>
+      <div class="eyebrow" data-lang="en">Optical character metrology · 1925 to 2026</div>
+      <h1 data-lang="es">Carta de<br>carácter <span class="lux">óptico</span></h1>
+      <h1 data-lang="en">Optical<br>character <span class="lux">chart</span></h1>
+      <div class="stamp"><span id="stat-count">0</span>
+        <span data-lang="es">objetivos</span><span data-lang="en">lenses</span> · <span id="stat-brands">0</span>
+        <span data-lang="es">fabricantes · 32 descriptores · modelo de óptica geométrica en el navegador</span><span data-lang="en">manufacturers · 32 descriptors · geometrical-optics model in the browser</span></div>
     </div>
     <div>
-      <p class="lede">Lo que se reconoce como <em>carácter</em> de un objetivo es el conjunto de aberraciones residuales que el diseñador decidió no corregir: esfericidad sin compensar, cromatismo longitudinal, curvatura de campo, viñeteo mecánico. Este catálogo separa lo catalogado de lo derivado y de lo valorado, reconstruye el disco de desenfoque de cada objetivo a partir de sus coeficientes y define una distancia entre ellos.</p>
+      <p class="lede" data-lang="es">Lo que se reconoce como <em>carácter</em> de un objetivo es el conjunto de aberraciones residuales que el diseñador decidió no corregir: esfericidad sin compensar, cromatismo longitudinal, curvatura de campo, viñeteo mecánico. Este catálogo separa lo catalogado de lo derivado y de lo valorado, reconstruye el disco de desenfoque de cada objetivo a partir de sus coeficientes y define una distancia entre ellos.</p>
+      <p class="lede" data-lang="en">What is recognised as the <em>character</em> of a lens is the set of residual aberrations its designer chose not to correct: uncompensated spherical aberration, longitudinal chromatism, field curvature, mechanical vignetting. This catalogue keeps what is catalogued apart from what is derived and from what is rated, reconstructs the defocus disc of every lens from its coefficients and defines a distance between them.</p>
     </div>
   </div>
 
   <div class="bench">
     <div class="bench-hd">
-      <div class="eyebrow">Placa comparativa · desenfoque de fondo a plena apertura</div>
-      <div class="kv">pulse cualquiera para abrir su ficha</div>
+      <div class="eyebrow" data-lang="es">Placa comparativa · desenfoque de fondo a plena apertura</div>
+      <div class="eyebrow" data-lang="en">Comparative plate · background defocus at full aperture</div>
+      <div class="kv" data-lang="es">pulse cualquiera para abrir su ficha</div>
+      <div class="kv" data-lang="en">click any of them to open its lens sheet</div>
     </div>
     <div class="bench-row" id="bench"></div>
   </div>
@@ -262,69 +312,80 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-fa
 
 <!-- ==================== CATÁLOGO ==================== -->
 <section id="catalogo">
-  <div class="sechd"><span class="n">01</span><h2>Catálogo</h2><span class="kv"><span id="n-shown">0</span> visibles · pulse el nombre para la ficha, la casilla para comparar</span></div>
+  <div class="sechd"><span class="n">01</span>
+    <h2 data-lang="es">Catálogo</h2><h2 data-lang="en">Catalogue</h2>
+    <span class="kv"><span id="n-shown">0</span>
+      <span data-lang="es">visibles · pulse el nombre para la ficha, la casilla para comparar</span><span data-lang="en">visible · click the name for the sheet, the box to compare</span></span></div>
   <div class="crow" style="margin-bottom:10px">
-    <div class="cgrp" id="f-brand"><span class="lbl">Marca</span></div>
-    <div class="cgrp" id="f-focal"><span class="lbl">Focal</span></div>
+    <div class="cgrp" id="f-brand"><span class="lbl" data-lang="es">Marca</span><span class="lbl" data-lang="en">Brand</span></div>
+    <div class="cgrp" id="f-focal"><span class="lbl" data-lang="es">Focal</span><span class="lbl" data-lang="en">Focal length</span></div>
   </div>
   <div class="crow" style="margin-bottom:10px">
-    <div class="cgrp" id="f-era"><span class="lbl">Época</span></div>
-    <div class="cgrp" id="f-tag"><span class="lbl">Rasgo</span></div>
+    <div class="cgrp" id="f-era"><span class="lbl" data-lang="es">Época</span><span class="lbl" data-lang="en">Era</span></div>
+    <div class="cgrp" id="f-tag"><span class="lbl" data-lang="es">Rasgo</span><span class="lbl" data-lang="en">Trait</span></div>
   </div>
   <div class="crow" style="margin-bottom:12px">
-    <div class="cgrp"><span class="lbl">Ordenar</span><select id="sort" aria-label="Criterio de orden"></select></div>
-    <button class="chip" id="reset" type="button">Restablecer filtros</button>
-    <span class="kv">Barras: cremosidad · microcontraste · borde · pureza cromática · contraste base</span>
+    <div class="cgrp"><span class="lbl" data-lang="es">Ordenar</span><span class="lbl" data-lang="en">Sort by</span><select id="sort" aria-label="Criterio de orden"></select></div>
+    <button class="chip" id="reset" type="button"><span data-lang="es">Restablecer filtros</span><span data-lang="en">Reset filters</span></button>
+    <span class="kv" data-lang="es">Barras: cremosidad · microcontraste · borde · pureza cromática · contraste base</span>
+    <span class="kv" data-lang="en">Bars: creaminess · microcontrast · edge · chromatic purity · base contrast</span>
   </div>
   <div class="panel"><div class="catlist" id="list" role="list"></div></div>
 </section>
 
 <!-- ==================== BANCO DE COMPARACIÓN ==================== -->
 <section id="comparar">
-  <div class="sechd"><span class="n">02</span><h2>Banco de comparación</h2></div>
-  <p class="meth" style="margin-bottom:12px">Un solo módulo para las tres operaciones. La selección de hasta cuatro objetivos alimenta los tres paneles, y el subespacio elegido gobierna todas las distancias que aparecen en ellos: dos objetivos pueden ser gemelos en geometría de pupila y opuestos en frente de onda, de modo que <b>parecido solo significa algo indicando respecto a qué</b>.</p>
+  <div class="sechd"><span class="n">02</span>
+    <h2 data-lang="es">Banco de comparación</h2><h2 data-lang="en">Comparison bench</h2></div>
+  <p class="meth" style="margin-bottom:12px" data-lang="es">Un solo módulo para las tres operaciones. La selección de hasta cuatro objetivos alimenta los tres paneles, y el subespacio elegido gobierna todas las distancias que aparecen en ellos: dos objetivos pueden ser gemelos en geometría de pupila y opuestos en frente de onda, de modo que <b>parecido solo significa algo indicando respecto a qué</b>.</p>
+  <p class="meth" style="margin-bottom:12px" data-lang="en">A single module for all three operations. A selection of up to four lenses feeds the three panels, and the chosen subspace governs every distance that appears in them: two lenses may be twins in pupil geometry and opposites in wavefront, so that <b>alike means nothing until you state alike in what</b>.</p>
   <div class="selbar" id="selbar"></div>
   <div class="crow" style="margin-bottom:12px">
-    <div class="cgrp" id="c-sub"><span class="lbl">Subespacio</span></div>
-    <button class="chip" id="clearsel" type="button">Vaciar</button>
+    <div class="cgrp" id="c-sub"><span class="lbl" data-lang="es">Subespacio</span><span class="lbl" data-lang="en">Subspace</span></div>
+    <button class="chip" id="clearsel" type="button"><span data-lang="es">Vaciar</span><span data-lang="en">Clear</span></button>
   </div>
-  <div class="kv" style="margin-bottom:12px">Distancia sobre <span id="c-espacio"></span>.</div>
+  <div class="kv" style="margin-bottom:12px"><span data-lang="es">Distancia sobre</span><span data-lang="en">Distance over</span> <span id="c-espacio"></span>.</div>
 
   <div class="tabs" role="tablist">
-    <button role="tab" data-tab="vec"  aria-selected="true">Parecidos</button>
-    <button role="tab" data-tab="perf" aria-selected="false">Perfiles</button>
-    <button role="tab" data-tab="dist" aria-selected="false">Distancias</button>
+    <button role="tab" data-tab="vec"  aria-selected="true"><span data-lang="es">Parecidos</span><span data-lang="en">Nearest</span></button>
+    <button role="tab" data-tab="perf" aria-selected="false"><span data-lang="es">Perfiles</span><span data-lang="en">Profiles</span></button>
+    <button role="tab" data-tab="dist" aria-selected="false"><span data-lang="es">Distancias</span><span data-lang="en">Distances</span></button>
   </div>
 
   <!-- vecinos -->
   <div class="tabpane" id="pane-vec">
-    <p class="meth" style="margin-bottom:10px">Los diez objetivos más próximos a la referencia. Con el filtro de otro fabricante la tabla responde a la pregunta de qué objetivo de otra marca ocupa el lugar de este.</p>
+    <p class="meth" style="margin-bottom:10px" data-lang="es">Los diez objetivos más próximos a la referencia. Con el filtro de otro fabricante la tabla responde a la pregunta de qué objetivo de otra marca ocupa el lugar de este.</p>
+    <p class="meth" style="margin-bottom:10px" data-lang="en">The ten lenses closest to the reference. With the other-manufacturer filter on, the table answers the question of which lens from another brand stands in for this one.</p>
     <div class="crow" style="margin-bottom:8px">
-      <div class="cgrp"><span class="lbl">Referencia</span>
+      <div class="cgrp"><span class="lbl" data-lang="es">Referencia</span><span class="lbl" data-lang="en">Reference</span>
         <select id="rec-ref" aria-label="Objetivo de referencia" style="max-width:270px"></select></div>
     </div>
     <div class="crow" style="margin-bottom:12px">
-      <div class="cgrp" id="rec-focal"><span class="lbl">Focal</span></div>
-      <div class="cgrp" id="rec-marca"><span class="lbl">Marca</span></div>
-      <div class="cgrp" id="rec-epoca"><span class="lbl">Época</span></div>
+      <div class="cgrp" id="rec-focal"><span class="lbl" data-lang="es">Focal</span><span class="lbl" data-lang="en">Focal length</span></div>
+      <div class="cgrp" id="rec-marca"><span class="lbl" data-lang="es">Marca</span><span class="lbl" data-lang="en">Brand</span></div>
+      <div class="cgrp" id="rec-epoca"><span class="lbl" data-lang="es">Época</span><span class="lbl" data-lang="en">Era</span></div>
     </div>
     <div class="panel"><div class="panel-bd">
       <div class="tscroll"><table id="rec-tabla"></table></div>
-      <div class="kv" style="margin-top:9px">Columna pct: percentil de esa distancia entre todos los pares del catálogo. El botón + añade a la selección; el nombre abre la ficha.</div>
+      <div class="kv" style="margin-top:9px" data-lang="es">Columna pct: percentil de esa distancia entre todos los pares del catálogo. El botón + añade a la selección; el nombre abre la ficha.</div>
+      <div class="kv" style="margin-top:9px" data-lang="en">Column pct: the percentile of that distance among all pairs in the catalogue. The + button adds to the selection; the name opens the sheet.</div>
     </div></div>
   </div>
   <!-- perfiles -->
   <div class="tabpane" id="pane-perf" hidden>
     <div class="grid2">
       <div class="panel"><div class="panel-bd">
-        <h3 style="margin-bottom:8px">Perfil de carácter superpuesto</h3>
+        <h3 style="margin-bottom:8px" data-lang="es">Perfil de carácter superpuesto</h3>
+        <h3 style="margin-bottom:8px" data-lang="en">Overlaid character profile</h3>
         <div id="c-radar"></div>
-        <div class="kv" style="margin-top:4px">Radio creciente indica mayor corrección o mayor suavidad según el eje. La forma, no el área, identifica a un objetivo.</div>
+        <div class="kv" style="margin-top:4px" data-lang="es">Radio creciente indica mayor corrección o mayor suavidad según el eje. La forma, no el área, identifica a un objetivo.</div>
+        <div class="kv" style="margin-top:4px" data-lang="en">A larger radius means better correction or greater smoothness, depending on the axis. It is the shape, not the area, that identifies a lens.</div>
       </div></div>
       <div class="panel"><div class="panel-bd">
-        <h3 style="margin-bottom:8px">Discos reconstruidos</h3>
-        <div class="ctl"><label>Apertura relativa <b id="v-cN">plena</b></label><input type="range" id="s-cN" min="0" max="100" value="0"></div>
-        <div class="ctl"><label>Posición en el campo <b id="v-cfield">0 %</b></label><input type="range" id="s-cfield" min="0" max="100" value="0"></div>
+        <h3 style="margin-bottom:8px" data-lang="es">Discos reconstruidos</h3>
+        <h3 style="margin-bottom:8px" data-lang="en">Reconstructed discs</h3>
+        <div class="ctl"><label><span data-lang="es">Apertura relativa</span><span data-lang="en">Relative aperture</span> <b id="v-cN">plena</b></label><input type="range" id="s-cN" min="0" max="100" value="0"></div>
+        <div class="ctl"><label><span data-lang="es">Posición en el campo</span><span data-lang="en">Field position</span> <b id="v-cfield">0 %</b></label><input type="range" id="s-cfield" min="0" max="100" value="0"></div>
         <div class="discs" id="c-discs"></div>
       </div></div>
     </div>
@@ -335,17 +396,24 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-fa
   <div class="tabpane" id="pane-dist" hidden>
     <div class="grid2">
       <div class="panel"><div class="panel-bd">
-        <h3 style="margin-bottom:9px">Matriz de distancias de la selección</h3>
+        <h3 style="margin-bottom:9px" data-lang="es">Matriz de distancias de la selección</h3>
+        <h3 style="margin-bottom:9px" data-lang="en">Distance matrix of the selection</h3>
         <div class="tscroll"><table class="mtx" id="c-mtx"></table></div>
-        <div class="kv" style="margin-top:8px">Pulse una celda para descomponer ese par. Entre paréntesis, el percentil de la distancia entre todos los pares del catálogo.</div>
+        <div class="kv" style="margin-top:8px" data-lang="es">Pulse una celda para descomponer ese par. Entre paréntesis, el percentil de la distancia entre todos los pares del catálogo.</div>
+        <div class="kv" style="margin-top:8px" data-lang="en">Click a cell to decompose that pair. In brackets, the percentile of the distance among all pairs in the catalogue.</div>
       </div></div>
       <div class="panel"><div class="panel-bd" id="c-par"></div></div>
     </div>
     <div class="panel" style="margin-top:18px"><div class="panel-bd">
       <div class="grid2">
-        <div><h3 style="margin-bottom:8px">Par enfrentado</h3><div id="c-pardiscs" class="discs"></div>
-          <div class="kv" style="margin-top:6px">Plena apertura y 75 % del campo, donde el recorte de pupila ya actúa.</div></div>
-        <div><h3 style="margin-bottom:8px">Perfiles del par</h3><div id="c-parradar"></div></div>
+        <div><h3 style="margin-bottom:8px" data-lang="es">Par enfrentado</h3>
+          <h3 style="margin-bottom:8px" data-lang="en">Pair head to head</h3>
+          <div id="c-pardiscs" class="discs"></div>
+          <div class="kv" style="margin-top:6px" data-lang="es">Plena apertura y 75 % del campo, donde el recorte de pupila ya actúa.</div>
+          <div class="kv" style="margin-top:6px" data-lang="en">Full aperture and 75 % of the field, where pupil clipping is already at work.</div></div>
+        <div><h3 style="margin-bottom:8px" data-lang="es">Perfiles del par</h3>
+          <h3 style="margin-bottom:8px" data-lang="en">Profiles of the pair</h3>
+          <div id="c-parradar"></div></div>
       </div>
     </div></div>
   </div>
@@ -354,16 +422,18 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-fa
 
 <!-- ==================== MAPA ==================== -->
 <section id="mapa">
-  <div class="sechd"><span class="n">03</span><h2>Mapa de dispersión</h2></div>
-  <p class="meth" style="margin-bottom:12px">Cada punto es un objetivo; los seleccionados llevan anillo. Elija los ejes para comprobar qué correlaciones son reales: la cremosidad frente al microcontraste describe casi por completo la frontera entre el diseño clásico y el asférico, mientras que la resolución de borde apenas predice el carácter del desenfoque.</p>
+  <div class="sechd"><span class="n">03</span>
+    <h2 data-lang="es">Mapa de dispersión</h2><h2 data-lang="en">Scatter map</h2></div>
+  <p class="meth" style="margin-bottom:12px" data-lang="es">Cada punto es un objetivo; los seleccionados llevan anillo. Elija los ejes para comprobar qué correlaciones son reales: la cremosidad frente al microcontraste describe casi por completo la frontera entre el diseño clásico y el asférico, mientras que la resolución de borde apenas predice el carácter del desenfoque.</p>
+  <p class="meth" style="margin-bottom:12px" data-lang="en">Every point is a lens; the selected ones carry a ring. Choose the axes to check which correlations are real: creaminess against microcontrast describes almost the whole boundary between classical and aspheric design, whereas edge resolution barely predicts the character of the defocus.</p>
   <div class="crow" style="margin-bottom:10px">
-    <div class="cgrp"><span class="lbl">Eje X</span><select id="ax" aria-label="Eje X"></select></div>
-    <div class="cgrp"><span class="lbl">Eje Y</span><select id="ay" aria-label="Eje Y"></select></div>
+    <div class="cgrp"><span class="lbl" data-lang="es">Eje X</span><span class="lbl" data-lang="en">X axis</span><select id="ax" aria-label="Eje X"></select></div>
+    <div class="cgrp"><span class="lbl" data-lang="es">Eje Y</span><span class="lbl" data-lang="en">Y axis</span><select id="ay" aria-label="Eje Y"></select></div>
   </div>
   <div class="crow" style="margin-bottom:10px">
-    <div class="cgrp" id="m-accion"><span class="lbl">Al pulsar</span></div>
-    <div class="cgrp"><span class="lbl">Etiquetas</span><button class="chip" id="lab" type="button" aria-pressed="false">Mostrar</button></div>
-    <div class="cgrp"><span class="lbl">Ver</span><button class="chip" id="onlysel" type="button" aria-pressed="false">Solo la selección</button></div>
+    <div class="cgrp" id="m-accion"><span class="lbl" data-lang="es">Al pulsar</span><span class="lbl" data-lang="en">On click</span></div>
+    <div class="cgrp"><span class="lbl" data-lang="es">Etiquetas</span><span class="lbl" data-lang="en">Labels</span><button class="chip" id="lab" type="button" aria-pressed="false">Mostrar</button></div>
+    <div class="cgrp"><span class="lbl" data-lang="es">Ver</span><span class="lbl" data-lang="en">View</span><button class="chip" id="onlysel" type="button" aria-pressed="false"><span data-lang="es">Solo la selección</span><span data-lang="en">Selection only</span></button></div>
   </div>
   <div class="kv" id="maplegend" style="margin-bottom:10px;line-height:2"></div>
   <div class="panel"><div class="panel-bd mapwrap" id="mapwrap"><div id="map"></div><div class="tip" id="tip"></div></div></div>
@@ -371,49 +441,68 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-fa
 
 <!-- ==================== MÉTODO ==================== -->
 <section id="metodo">
-  <div class="sechd"><span class="n">04</span><h2>Método, métrica y límites</h2></div>
+  <div class="sechd"><span class="n">04</span>
+    <h2 data-lang="es">Método, métrica y límites</h2><h2 data-lang="en">Method, metric and limits</h2></div>
   <details class="met">
-    <summary>Procedencia de los datos y modelo del disco</summary>
+    <summary data-lang="es">Procedencia de los datos y modelo del disco</summary>
+    <summary data-lang="en">Provenance of the data and model of the disc</summary>
     <div class="metbd">
       <div class="grid2">
         <div>
-          <p class="meth"><b>Catalogado.</b> Focal, apertura máxima, año, elementos y grupos, superficies asféricas, palas, distancia mínima, filtro y masa, de las fichas del fabricante.</p>
-          <p class="meth"><b>Derivado.</b> Ángulo de campo, pupila de entrada, corte por difracción ν<sub>c</sub> = 1/(λN) con λ = 550 nm, disco de Airy 2,44λN y caída natural cos⁴θ. Cálculo exacto sobre el bloque anterior, sin ajuste.</p>
-          <p class="meth"><b>Índices ordinales.</b> Cremosidad, esfericidad residual con signo, velo, brillo, microcontraste, resolución, cromatismos, coma, viñeteo mecánico, rizado asférico, deriva de foco y nerviosismo, en escala 0 a 100, construidos a partir de curvas MTF publicadas, secciones de diseño y coincidencia sostenida entre observadores. No son medidas de laboratorio.</p>
-          <p class="meth"><b>Derivado por regla.</b> El contraste de baja frecuencia integra la MTF modelada a 10 y 20 lp/mm ponderada por el contraste base: es el correlato medible del relieve. El índice clásico combina esfericidad, velo, cromatismo y microcontraste en un escalar de 0 a 100. Rasgos y uso indicado se obtienen aplicando umbrales, no se asignan a mano.</p>
+          <p class="meth" data-lang="es"><b>Catalogado.</b> Focal, apertura máxima, año, elementos y grupos, superficies asféricas, palas, distancia mínima, filtro y masa, de las fichas del fabricante.</p>
+          <p class="meth" data-lang="en"><b>Catalogued.</b> Focal length, maximum aperture, year, elements and groups, aspheric surfaces, blades, minimum focusing distance, filter and mass, taken from the manufacturer's data sheets.</p>
+          <p class="meth" data-lang="es"><b>Derivado.</b> Ángulo de campo, pupila de entrada, corte por difracción ν<sub>c</sub> = 1/(λN) con λ = 550 nm, disco de Airy 2,44λN y caída natural cos⁴θ. Cálculo exacto sobre el bloque anterior, sin ajuste.</p>
+          <p class="meth" data-lang="en"><b>Derived.</b> Angle of view, entrance pupil, diffraction cut-off ν<sub>c</sub> = 1/(λN) with λ = 550 nm, Airy disc 2.44λN and natural cos⁴θ falloff. Exact calculation over the block above, with nothing fitted.</p>
+          <p class="meth" data-lang="es"><b>Índices ordinales.</b> Cremosidad, esfericidad residual con signo, velo, brillo, microcontraste, resolución, cromatismos, coma, viñeteo mecánico, rizado asférico, deriva de foco y nerviosismo, en escala 0 a 100, construidos a partir de curvas MTF publicadas, secciones de diseño y coincidencia sostenida entre observadores. No son medidas de laboratorio.</p>
+          <p class="meth" data-lang="en"><b>Ordinal indices.</b> Creaminess, signed residual spherical aberration, veiling glare, glow, microcontrast, resolution, chromatisms, coma, mechanical vignetting, aspheric onion ripple, focus shift and nervousness, on a 0 to 100 scale, built from published MTF curves, design cross-sections and sustained agreement between observers. They are not laboratory measurements.</p>
+          <p class="meth" data-lang="es"><b>Derivado por regla.</b> El contraste de baja frecuencia integra la MTF modelada a 10 y 20 lp/mm ponderada por el contraste base: es el correlato medible del relieve. El índice clásico combina esfericidad, velo, cromatismo y microcontraste en un escalar de 0 a 100. Rasgos y uso indicado se obtienen aplicando umbrales, no se asignan a mano.</p>
+          <p class="meth" data-lang="en"><b>Derived by rule.</b> Low-frequency contrast integrates the modelled MTF at 10 and 20 lp/mm weighted by the base contrast: it is the measurable correlate of what photographers call relief. The classical index combines spherical aberration, veiling glare, chromatism and microcontrast into a single 0 to 100 scalar. Traits and suggested uses follow from thresholds; none of them is assigned by hand.</p>
         </div>
         <div>
-          <p class="meth"><b>Modelo del disco.</b> Con W(ρ) = W<sub>020</sub>ρ² + W<sub>040</sub>ρ⁴, la aberración transversal es proporcional a dW/dρ, de donde r(ρ) = aρ + bρ³. El término <i>a</i> es el desenfoque y cambia de signo entre fondo y primer plano; <i>b</i> es propiedad del objetivo y no cambia. Cuando comparten signo el mapeo es monótono y el disco sale con núcleo brillante y borde desvanecido, firma de la esfericidad subcorregida. Cuando se oponen aparece una cáustica en dr/dρ = 0 y con ella el anillo del bokeh nervioso. Por eso un objetivo clásico entrega fondo suave y primer plano de contornos duros: el mismo coeficiente, dos signos de desenfoque.</p>
-          <p class="meth">El cromatismo longitudinal se modela como desplazamiento fijo de foco por canal, de donde salen solos el ribete verde en el fondo y el magenta en el primer plano. El recorte de pupila está calibrado en transmitancia, no solo en forma.</p>
-          <p class="meth"><b>Lo que no incluye.</b> Difracción en el borde del diafragma, dispersión por rugosidad interna, reflexiones fantasma, coma de orden superior y astigmatismo oblicuo. El disco reproduce la estructura radial y la forma de la pupila, no la textura completa de una escena.</p>
-          <p class="meth"><b>Cobertura.</b> Las familias ópticas relevantes de la montura M, incluidas las de rosca adaptables y las de terceros. No es un censo de variantes de fabricación.</p>
+          <p class="meth" data-lang="es"><b>Modelo del disco.</b> Con W(ρ) = W<sub>020</sub>ρ² + W<sub>040</sub>ρ⁴, la aberración transversal es proporcional a dW/dρ, de donde r(ρ) = aρ + bρ³. El término <i>a</i> es el desenfoque y cambia de signo entre fondo y primer plano; <i>b</i> es propiedad del objetivo y no cambia. Cuando comparten signo el mapeo es monótono y el disco sale con núcleo brillante y borde desvanecido, firma de la esfericidad subcorregida. Cuando se oponen aparece una cáustica en dr/dρ = 0 y con ella el anillo del bokeh nervioso. Por eso un objetivo clásico entrega fondo suave y primer plano de contornos duros: el mismo coeficiente, dos signos de desenfoque.</p>
+          <p class="meth" data-lang="en"><b>Model of the disc.</b> With W(ρ) = W<sub>020</sub>ρ² + W<sub>040</sub>ρ⁴, the transverse aberration is proportional to dW/dρ, whence r(ρ) = aρ + bρ³. The term <i>a</i> is the defocus and changes sign between background and foreground; <i>b</i> belongs to the lens and never changes. When the two share a sign the mapping is monotonic and the disc comes out with a bright core and a faded rim, the signature of undercorrected spherical aberration. When they oppose, a caustic appears at dr/dρ = 0 and with it the ring of nervous bokeh. That is why a classical lens delivers a soft background and a hard-edged foreground: one coefficient, two signs of defocus.</p>
+          <p class="meth" data-lang="es">El cromatismo longitudinal se modela como desplazamiento fijo de foco por canal, de donde salen solos el ribete verde en el fondo y el magenta en el primer plano. El recorte de pupila está calibrado en transmitancia, no solo en forma.</p>
+          <p class="meth" data-lang="en">Longitudinal chromatism is modelled as a fixed focus offset per channel, from which the green fringe behind and the magenta fringe in front follow on their own. Pupil clipping is calibrated in transmittance, not in shape alone.</p>
+          <p class="meth" data-lang="es"><b>Lo que no incluye.</b> Difracción en el borde del diafragma, dispersión por rugosidad interna, reflexiones fantasma, coma de orden superior y astigmatismo oblicuo. El disco reproduce la estructura radial y la forma de la pupila, no la textura completa de una escena.</p>
+          <p class="meth" data-lang="en"><b>What it leaves out.</b> Diffraction at the diaphragm edge, scattering from internal roughness, ghost reflections, higher-order coma and oblique astigmatism. The disc reproduces the radial structure and the shape of the pupil, not the full texture of a scene.</p>
+          <p class="meth" data-lang="es"><b>Cobertura.</b> Las familias ópticas relevantes de la montura M, incluidas las de rosca adaptables y las de terceros. No es un censo de variantes de fabricación.</p>
+          <p class="meth" data-lang="en"><b>Coverage.</b> The optical families that matter on the M mount, including adaptable screw-mount designs and third-party ones. It is not a census of production variants.</p>
         </div>
       </div>
     </div>
   </details>
 
   <details class="met" style="margin-top:12px">
-    <summary>La métrica de carácter y su validación</summary>
+    <summary data-lang="es">La métrica de carácter y su validación</summary>
+    <summary data-lang="en">The character metric and its validation</summary>
     <div class="metbd">
       <div class="grid2">
         <div>
-          <p class="meth">Como escalar el carácter no funciona; como vector sí. El origen del espacio es el objetivo ideal, con todas las aberraciones a cero. Se toman once generadores casi independientes: esfericidad residual con signo, cromatismo longitudinal y lateral, coma, curvatura, distorsión, velo, recorte de pupila, rizado asférico, caída sobre cos⁴ y residuo de microcontraste. Quedan fuera cremosidad, brillo, nerviosismo y deriva de foco, que son consecuencias de los anteriores.</p>
-          <p class="meth">Cada generador se divide por su dispersión en el catálogo. La distancia d(A,B) = √( (1/p)·Σ ((x<sub>i</sub><sup>A</sup> − x<sub>i</sub><sup>B</sup>)/σ<sub>i</sub>)² ) es euclídea tras un reescalado afín y cumple los cuatro axiomas por construcción. El módulo K = d(L, ideal) es la única parte del carácter que sí es unidimensional.</p>
-          <p class="meth">La forma polar sería elegante pero los datos no la permiten: la primera componente absorbe tanta varianza que el argumento apenas se mueve. Lo que funciona es descomponer K² por generador, igual que un frente de onda en coeficientes de Zernike.</p>
-          <p class="meth"><b>Sin validar.</b> Que cumpla los axiomas es trivial. Que la distancia numérica se corresponda con la diferencia percibida no lo es, y eso exige datos de observadores: pares de discos en elección forzada y ajuste de los pesos a los juicios. Hasta entonces los pesos son una convención razonable.</p>
+          <p class="meth" data-lang="es">Como escalar el carácter no funciona; como vector sí. El origen del espacio es el objetivo ideal, con todas las aberraciones a cero. Se toman once generadores casi independientes: esfericidad residual con signo, cromatismo longitudinal y lateral, coma, curvatura, distorsión, velo, recorte de pupila, rizado asférico, caída sobre cos⁴ y residuo de microcontraste. Quedan fuera cremosidad, brillo, nerviosismo y deriva de foco, que son consecuencias de los anteriores.</p>
+          <p class="meth" data-lang="en">Character does not work as a scalar; as a vector it does. The origin of the space is the ideal lens, with every aberration at zero. Eleven nearly independent generators are taken: signed residual spherical aberration, longitudinal and lateral chromatism, coma, curvature, distortion, veiling glare, pupil clipping, aspheric onion ripple, falloff beyond cos⁴ and the microcontrast residual. Creaminess, glow, nervousness and focus shift are left out, being consequences of the rest.</p>
+          <p class="meth" data-lang="es">Cada generador se divide por su dispersión en el catálogo. La distancia d(A,B) = √( (1/p)·Σ ((x<sub>i</sub><sup>A</sup> − x<sub>i</sub><sup>B</sup>)/σ<sub>i</sub>)² ) es euclídea tras un reescalado afín y cumple los cuatro axiomas por construcción. El módulo K = d(L, ideal) es la única parte del carácter que sí es unidimensional.</p>
+          <p class="meth" data-lang="en">Each generator is divided by its spread across the catalogue. The distance d(A,B) = √( (1/p)·Σ ((x<sub>i</sub><sup>A</sup> − x<sub>i</sub><sup>B</sup>)/σ<sub>i</sub>)² ) is Euclidean after an affine rescaling and satisfies the four axioms by construction. The modulus K = d(L, ideal) is the one part of character that genuinely is one-dimensional.</p>
+          <p class="meth" data-lang="es">La forma polar sería elegante pero los datos no la permiten: la primera componente absorbe tanta varianza que el argumento apenas se mueve. Lo que funciona es descomponer K² por generador, igual que un frente de onda en coeficientes de Zernike.</p>
+          <p class="meth" data-lang="en">A polar form would be elegant, but the data will not have it: the first component absorbs so much variance that the argument barely moves. What does work is decomposing K² generator by generator, much as a wavefront is decomposed into Zernike coefficients.</p>
+          <p class="meth" data-lang="es"><b>Sin validar.</b> Que cumpla los axiomas es trivial. Que la distancia numérica se corresponda con la diferencia percibida no lo es, y eso exige datos de observadores: pares de discos en elección forzada y ajuste de los pesos a los juicios. Hasta entonces los pesos son una convención razonable.</p>
+          <p class="meth" data-lang="en"><b>Unvalidated.</b> Satisfying the axioms is trivial. That the numerical distance should match the perceived difference is not, and settling it needs observer data: pairs of discs in forced choice and the weights fitted to the judgements. Until then the weights are a reasonable convention.</p>
         </div>
         <div>
           <div class="panel"><div class="panel-bd">
-            <h3 style="margin-bottom:8px">Varianza explicada por componente</h3>
+            <h3 style="margin-bottom:8px" data-lang="es">Varianza explicada por componente</h3>
+            <h3 style="margin-bottom:8px" data-lang="en">Variance explained per component</h3>
             <div id="m-var"></div>
-            <div class="legend"><span><s style="background:var(--d)"></s>por componente</span><span><s style="background:var(--F)"></s>acumulada</span></div>
+            <div class="legend" data-lang="es"><span><s style="background:var(--d)"></s>por componente</span><span><s style="background:var(--F)"></s>acumulada</span></div>
+            <div class="legend" data-lang="en"><span><s style="background:var(--d)"></s>per component</span><span><s style="background:var(--F)"></s>cumulative</span></div>
             <table id="m-cargas" style="margin-top:12px"></table>
           </div></div>
           <div class="panel" style="margin-top:12px"><div class="panel-bd">
-            <h3 style="margin-bottom:8px">Validación por recuperación de familias</h3>
+            <h3 style="margin-bottom:8px" data-lang="es">Validación por recuperación de familias</h3>
+            <h3 style="margin-bottom:8px" data-lang="en">Validation by family recovery</h3>
             <p class="meth" id="m-acierto" style="margin-bottom:10px"></p>
             <table id="m-pares"></table>
-            <p class="meth" style="margin-top:9px;font-size:12.5px">Sobre el primer par: la réplica de Light Lens Lab aparece a distancia nula del Summicron rígido porque se le asignaron los mismos índices, dado que reproduce el trazado. Es una decisión de catalogación, no un hallazgo. La evidencia real son los grupos que la métrica forma sin ayuda.</p>
+            <p class="meth" style="margin-top:9px;font-size:12.5px" data-lang="es">Sobre el primer par: la réplica de Light Lens Lab aparece a distancia nula del Summicron rígido porque se le asignaron los mismos índices, dado que reproduce el trazado. Es una decisión de catalogación, no un hallazgo. La evidencia real son los grupos que la métrica forma sin ayuda.</p>
+            <p class="meth" style="margin-top:9px;font-size:12.5px" data-lang="en">On the first pair: the Light Lens Lab replica sits at zero distance from the rigid Summicron because it was given the same indices, since it reproduces the design. That is a cataloguing decision, not a finding. The real evidence lies in the groupings the metric forms unaided.</p>
           </div></div>
         </div>
       </div>
@@ -421,14 +510,17 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-fa
   </details>
 
   <details class="met" style="margin-top:12px">
-    <summary>Contraste del modelo con MTF publicada</summary>
+    <summary data-lang="es">Contraste del modelo con MTF publicada</summary>
+    <summary data-lang="en">The model checked against published MTF</summary>
     <div class="metbd">
-      <p class="meth">Un solo objetivo del catálogo trae MTF de fábrica, el Light Lens Lab 50 f/1,5 Z21, y el modelo sale desigual. En el centro y a plena apertura el RMS es 0,090 con el peor residuo en +0,13 a 20 lp/mm. En el borde a plena apertura falla por completo, RMS 0,353 y hasta +0,51 a 10 lp/mm, con causa identificable: el modelo no tiene término de astigmatismo, y en el borde de un objetivo luminoso el astigmatismo y la curvatura de campo son lo que hunde la MTF en frecuencias bajas. A f/4 el borde ajusta bien, RMS 0,028, y el centro se queda corto en 0,21 a 40 lp/mm: el factor de mejora al diafragmar que aplico, 1,42 sobre la frecuencia característica, es menos de la mitad del que exigirían esos datos. No he reajustado el modelo con una única serie de curvas calculadas por el fabricante y leídas a ojo con error de ±0,05: sería ajustar ruido. Consecuencia anotada: el contraste de baja frecuencia es optimista, y más cuanto peor corregido está el objetivo. La ficha del Z21 muestra los puntos publicados sobre la curva modelada.</p>
+      <p class="meth" data-lang="es">Un solo objetivo del catálogo trae MTF de fábrica, el Light Lens Lab 50 f/1,5 Z21, y el modelo sale desigual. En el centro y a plena apertura el RMS es 0,090 con el peor residuo en +0,13 a 20 lp/mm. En el borde a plena apertura falla por completo, RMS 0,353 y hasta +0,51 a 10 lp/mm, con causa identificable: el modelo no tiene término de astigmatismo, y en el borde de un objetivo luminoso el astigmatismo y la curvatura de campo son lo que hunde la MTF en frecuencias bajas. A f/4 el borde ajusta bien, RMS 0,028, y el centro se queda corto en 0,21 a 40 lp/mm: el factor de mejora al diafragmar que aplico, 1,42 sobre la frecuencia característica, es menos de la mitad del que exigirían esos datos. No he reajustado el modelo con una única serie de curvas calculadas por el fabricante y leídas a ojo con error de ±0,05: sería ajustar ruido. Consecuencia anotada: el contraste de baja frecuencia es optimista, y más cuanto peor corregido está el objetivo. La ficha del Z21 muestra los puntos publicados sobre la curva modelada.</p>
+      <p class="meth" data-lang="en">A single lens in the catalogue comes with factory MTF, the Light Lens Lab 50 f/1.5 Z21, and the model performs unevenly against it. On axis at full aperture the RMS is 0.090, with the worst residual at +0.13 at 20 lp/mm. At the edge at full aperture it fails outright, RMS 0.353 and as much as +0.51 at 10 lp/mm, and the cause is identifiable: the model carries no astigmatism term, and at the edge of a fast lens it is astigmatism and field curvature that sink the MTF at low frequencies. At f/4 the edge fits well, RMS 0.028, while the centre falls short by 0.21 at 40 lp/mm: the improvement factor I apply on stopping down, 1.42 on the characteristic frequency, is less than half what those data would demand. I have not refitted the model to a single set of curves calculated by the manufacturer and read off a small plot with an error of ±0.05: that would be fitting noise. Consequence, noted: low-frequency contrast is optimistic, and the more so the worse corrected the lens. The Z21 sheet shows the published points over the modelled curve.</p>
     </div>
   </details>
 </section>
 
-<footer>Cálculo íntegro en el navegador, sin dependencias externas salvo las tipografías. Los índices ordinales son interpretativos.</footer>
+<footer data-lang="es">Cálculo íntegro en el navegador, sin dependencias externas salvo las tipografías. Los índices ordinales son interpretativos.</footer>
+<footer data-lang="en">All computation in the browser, with no external dependencies beyond the typefaces. The ordinal indices are interpretative.</footer>
 </div>
 
 <!-- ==================== CAJÓN LATERAL ==================== -->
@@ -446,8 +538,8 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-fa
     <div class="kv" id="f-masparecido" style="margin-top:7px;line-height:1.45"></div>
     <div class="dnav">
       <button class="chip" id="f-add" type="button">Añadir a la comparación</button>
-      <button class="chip" id="f-prev" type="button" aria-label="Anterior">‹</button>
-      <button class="chip" id="f-next" type="button" aria-label="Siguiente">›</button>
+      <button class="chip" id="f-prev" type="button" aria-label="Anterior">&#8249;</button>
+      <button class="chip" id="f-next" type="button" aria-label="Siguiente">&#8250;</button>
     </div>
   </div>
   <div class="drawer-bd">
@@ -456,7 +548,8 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-fa
       <div class="badges" id="f-uso" style="margin-top:11px;align-items:center"></div></div>
     <div class="dsec" id="f-parecidos"></div>
     <div class="dsec">
-      <h3 style="margin-bottom:9px">Disco de desenfoque reconstruido</h3>
+      <h3 style="margin-bottom:9px" data-lang="es">Disco de desenfoque reconstruido</h3>
+      <h3 style="margin-bottom:9px" data-lang="en">Reconstructed defocus disc</h3>
       <div class="sim">
         <div>
           <canvas id="bokeh" width="280" height="280" aria-label="Simulación del disco de desenfoque"></canvas>
@@ -464,29 +557,343 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-fa
           <div class="kv" id="sim-diag" style="margin-top:5px;line-height:1.45"></div>
         </div>
         <div>
-          <div class="ctl"><label>Apertura <b id="v-N">f/1.4</b></label><input type="range" id="s-N" min="0" max="100" value="0"></div>
-          <div class="ctl"><label>Lado del foco</label>
-            <div class="toggle" id="t-side"><button type="button" data-v="bg" aria-pressed="true">Fondo</button><button type="button" data-v="fg" aria-pressed="false">Primer plano</button></div></div>
-          <div class="ctl"><label>Campo <b id="v-field">0 %</b></label><input type="range" id="s-field" min="0" max="100" value="0"></div>
-          <div class="ctl"><label>Desenfoque <b id="v-blur">1,0×</b></label><input type="range" id="s-blur" min="40" max="170" value="100"></div>
-          <div class="ctl"><label>Exposición <b id="v-exp">0,0 EV</b></label><input type="range" id="s-exp" min="-30" max="30" value="0"></div>
+          <div class="ctl"><label><span data-lang="es">Apertura</span><span data-lang="en">Aperture</span> <b id="v-N">f/1.4</b></label><input type="range" id="s-N" min="0" max="100" value="0"></div>
+          <div class="ctl"><label><span data-lang="es">Lado del foco</span><span data-lang="en">Side of focus</span></label>
+            <div class="toggle" id="t-side"><button type="button" data-v="bg" aria-pressed="true"><span data-lang="es">Fondo</span><span data-lang="en">Background</span></button><button type="button" data-v="fg" aria-pressed="false"><span data-lang="es">Primer plano</span><span data-lang="en">Foreground</span></button></div></div>
+          <div class="ctl"><label><span data-lang="es">Campo</span><span data-lang="en">Field</span> <b id="v-field">0 %</b></label><input type="range" id="s-field" min="0" max="100" value="0"></div>
+          <div class="ctl"><label><span data-lang="es">Desenfoque</span><span data-lang="en">Defocus</span> <b id="v-blur">1,0×</b></label><input type="range" id="s-blur" min="40" max="170" value="100"></div>
+          <div class="ctl"><label><span data-lang="es">Exposición</span><span data-lang="en">Exposure</span> <b id="v-exp">0,0 EV</b></label><input type="range" id="s-exp" min="-30" max="30" value="0"></div>
         </div>
       </div>
     </div>
-    <div class="dsec"><h3 style="margin-bottom:9px">Perfil de carácter</h3><div id="radar"></div></div>
+    <div class="dsec"><h3 style="margin-bottom:9px" data-lang="es">Perfil de carácter</h3>
+      <h3 style="margin-bottom:9px" data-lang="en">Character profile</h3><div id="radar"></div></div>
     <div class="dsec" id="f-metrica"></div>
-    <div class="dsec"><h3 style="margin-bottom:9px">MTF modelada</h3><div id="mtf"></div>
-      <div class="legend"><span><s style="background:var(--d)"></s>plena apertura</span><span><s style="background:var(--F)"></s><span id="mtf-ap">f/5,6</span></span><span><s style="background:var(--line2)"></s>difracción</span><span>continua centro · discontinua borde</span></div></div>
+    <div class="dsec"><h3 style="margin-bottom:9px" data-lang="es">MTF modelada</h3>
+      <h3 style="margin-bottom:9px" data-lang="en">Modelled MTF</h3><div id="mtf"></div>
+      <div class="legend"><span><s style="background:var(--d)"></s><span data-lang="es">plena apertura</span><span data-lang="en">full aperture</span></span><span><s style="background:var(--F)"></s><span id="mtf-ap">f/5,6</span></span><span><s style="background:var(--line2)"></s><span data-lang="es">difracción</span><span data-lang="en">diffraction</span></span><span data-lang="es">continua centro · discontinua borde</span><span data-lang="en">solid centre · dashed edge</span></div></div>
     <div class="dsec" id="f-contraste" style="display:none"></div>
-    <div class="dsec"><h3 style="margin-bottom:9px">Caída de iluminación</h3><div id="vig"></div>
-      <div class="legend"><span><s style="background:var(--d)"></s>total a plena apertura</span><span><s style="background:var(--line2)"></s>cos⁴ natural</span></div></div>
-    <div class="dsec"><h3 style="margin-bottom:9px">Superficie focal y deriva</h3><div id="curv"></div>
-      <div class="legend"><span><s style="background:var(--g)"></s>curvatura de campo</span><span><s style="background:var(--C)"></s>deriva al diafragmar</span></div></div>
+    <div class="dsec"><h3 style="margin-bottom:9px" data-lang="es">Caída de iluminación</h3>
+      <h3 style="margin-bottom:9px" data-lang="en">Illumination falloff</h3><div id="vig"></div>
+      <div class="legend"><span><s style="background:var(--d)"></s><span data-lang="es">total a plena apertura</span><span data-lang="en">total at full aperture</span></span><span><s style="background:var(--line2)"></s><span data-lang="es">cos⁴ natural</span><span data-lang="en">natural cos⁴</span></span></div></div>
+    <div class="dsec"><h3 style="margin-bottom:9px" data-lang="es">Superficie focal y deriva</h3>
+      <h3 style="margin-bottom:9px" data-lang="en">Focal surface and shift</h3><div id="curv"></div>
+      <div class="legend"><span><s style="background:var(--g)"></s><span data-lang="es">curvatura de campo</span><span data-lang="en">field curvature</span></span><span><s style="background:var(--C)"></s><span data-lang="es">deriva al diafragmar</span><span data-lang="en">shift on stopping down</span></span></div></div>
     <div class="dsec"><table id="tab-a"></table></div>
     <div class="dsec"><table id="tab-b"></table></div>
   </div>
 </aside>
 <script>
+/* =======================================================================
+   DICCIONARIO / DICTIONARY
+   Todo el texto que el JavaScript construye en caliente. Los nombres de los
+   objetivos, las familias ópticas y las cifras del catálogo no se traducen.
+   ======================================================================= */
+const T = {
+es:{
+  /* --- interfaz general --- */
+  comparar:"Comparar", quitar:"Quitar", ninguno:"ninguno", sinCoincidencia:"sin coincidencia",
+  sinSel:"Sin selección. Marque la casilla de un objetivo en el catálogo, use el botón + de la tabla de vecinos o pulse puntos en el mapa.",
+  addCmp:"Añadir a la comparación", delCmp:"Quitar de la comparación",
+  mostrar:"Mostrar", ocultar:"Ocultar",
+  fichaVacia:"Ficha", sinSelBreve:"Sin selección",
+  /* --- filtros --- */
+  todas:"Todas", todos:"Todos", otros:"Otros",
+  ff1:"≤ 21", ff2:"24 a 28", ff3:"35", ff4:"40 a 50", ff5:"75 a 90", ff6:"≥ 135",
+  fe1:"hasta 1959", fe2:"1960 a 1979", fe3:"1980 a 1999", fe4:"2000 en adelante",
+  recFocalAny:"Cualquier focal", recFocalSame:"Focal equivalente",
+  recMarcaAny:"Cualquier fabricante", recMarcaOtra:"Otro fabricante",
+  recEpocaAny:"Cualquier época", recEpocaAntes:"Anterior", recEpocaDespues:"Posterior",
+  mapSel:"Añadir a comparación", mapFicha:"Abrir ficha",
+  /* --- arquetipos --- */
+  arq_soft:"Foco suave por diseño", arq_apo:"Apocromático clínico",
+  arq_veil:"Velo esférico dominante", arq_under:"Clásico subcorregido",
+  arq_struct:"Desenfoque estructurado", arq_creamy:"Transición cremosa",
+  arq_sym:"Simétrico de campo plano", arq_asph:"Asférico de alto contraste",
+  arq_period:"Moderado de época", arq_wide:"Gran angular de campo",
+  arq_fast:"Luminoso equilibrado", arq_gentle:"Suave contenido", arq_neutral:"Neutro moderno",
+  arqd_soft:"La esfericidad se deja sin corregir a propósito y el halo se gradúa con el diafragma.",
+  arqd_apo:"Sin franja de color en ningún contorno y sin necesidad de diafragmar. El desenfoque sale limpio y neutro.",
+  arqd_veil:"Esfericidad muy subcorregida: halo sobre las luces, altas comprimidas y contraste base bajo a plena apertura.",
+  arqd_under:"Transición progresiva al desenfoque y contraste medio. Suficiente corrección para resolver, suficiente aberración para que el fondo no tenga bordes.",
+  arqd_struct:"Esfericidad sobrecorregida o nervio alto: contornos definidos en los altos desenfocados que mantienen el fondo legible.",
+  arqd_creamy:"Los planos se disuelven sin contorno. El sujeto queda separado por gradiente, no por nitidez.",
+  arqd_sym:"Las rectas siguen rectas hasta el borde y el campo es uniforme, a cambio de una caída de luz acusada.",
+  arqd_asph:"Resolución inmediata a plena apertura y separación tonal alta desde el archivo, con el desenfoque algo perfilado.",
+  arqd_period:"Trazados de tratamiento antiguo o contraste bajo: velo apreciable y microcontraste limitado que se cierran al diafragmar.",
+  arqd_wide:"Corrección de campo y geometría como prioridad. A estas focales y aperturas apenas hay desenfoque que caracterizar.",
+  arqd_fast:"Gran apertura con corrección alta: el desenfoque es amplio pero contenido, sin llegar ni al velo clásico ni a la cremosidad extrema.",
+  arqd_gentle:"Dibujo amable con corrección moderna: la transición es agradable sin dominar la imagen. La virtud del grupo es no hacerse notar.",
+  arqd_neutral:"Ningún rasgo domina y ninguno falta. El objetivo que desaparece detrás de la fotografía.",
+  /* --- descriptores --- */
+  met_crema:"Cremosidad", met_sa:"Esfericidad residual", met_glow:"Brillo o halo", met_velo:"Velo",
+  met_micro:"Microcontraste", met_resC:"Resolución en el centro", met_resB:"Resolución en el borde",
+  met_loca:"CA longitudinal", met_laca:"CA lateral", met_coma:"Coma sagital",
+  met_mech:"Viñeteo mecánico", met_onion:"Rizado asférico", met_shift:"Deriva de foco",
+  met_nerv:"Nerviosismo", met_vig:"Caída en esquina", met_curv:"Curvatura de campo",
+  met_dist:"Distorsión", met_focal:"Focal", met_fmax:"Apertura máxima", met_year:"Año de introducción",
+  met_weight:"Masa", met_el:"Elementos", met_aov:"Ángulo de campo", met_pupila:"Pupila de entrada",
+  met_pop:"Contraste de baja frecuencia", met_K:"Módulo de carácter K", met_clasico:"Índice clásico",
+  /* --- ejes del radar --- */
+  rad_crema:"Cremosidad", rad_micro:"Microcontraste", rad_resB:"Borde", rad_pureza:"Pureza cromática",
+  rad_antiComa:"Control de coma", rad_plano:"Uniformidad de campo", rad_contraste:"Contraste base",
+  rad_suavidad:"Transición suave",
+  /* --- generadores de la métrica --- */
+  gen_sa:"esfericidad residual", gen_loca:"CA longitudinal", gen_laca:"CA lateral",
+  gen_coma:"coma sagital", gen_curv:"curvatura de campo", gen_dist:"distorsión", gen_velo:"velo",
+  gen_mech:"recorte de pupila", gen_onion:"rizado asférico", gen_vigExc:"caída sobre cos⁴",
+  gen_resid:"residuo de microcontraste",
+  gend_sa:"aberración esférica sin corregir; decide si el disco tiene núcleo o anillo",
+  gend_loca:"franjas de color delante y detrás del foco", gend_laca:"desplazamiento radial entre canales",
+  gend_coma:"deformación de puntos fuera del eje", gend_curv:"la superficie nítida no es plana",
+  gend_dist:"desviación rectilínea", gend_velo:"pérdida de contraste base por luz difusa",
+  gend_mech:"ojo de gato fuera del eje", gend_onion:"anillos concéntricos del moldeo",
+  gend_vigExc:"viñeteo por encima del natural",
+  gend_resid:"lo que falta hasta la transferencia perfecta en frecuencias altas",
+  /* --- rasgos y usos --- */
+  tag_cremoso:"cremoso", tag_clinico:"clínico", tag_apo:"apocromático", tag_velo:"velo alto",
+  tag_nervioso:"bokeh nervioso", tag_shift:"deriva de foco", tag_gato:"ojo de gato",
+  tag_plano:"campo plano", tag_luminoso:"gran apertura", tag_compacto:"compacto", tag_onion:"rizado asférico",
+  uso_repro:"reproducción y arquitectura", uso_geom:"geometría sin distorsión", uso_astro:"astrofotografía",
+  uso_retrato:"retrato", uso_planos:"separación de planos", uso_nocturna:"nocturna con luz disponible",
+  uso_reportaje:"reportaje", uso_paisajeGA:"paisaje y viaje en gran angular", uso_paisaje:"paisaje",
+  uso_gaGeneral:"gran angular de uso general", uso_byn:"blanco y negro clásico",
+  uso_calle:"calle discreta", uso_coleccion:"óptica de coleccionista",
+  /* --- subespacios --- */
+  sub_todo:"Todo", sub_onda:"Frente de onda", sub_pupila:"Pupila y fabricación", sub_velo:"Velo y geometría",
+  subd_todo:"los once generadores",
+  subd_onda:"esfericidad, cromatismos, coma, curvatura y residuo de microcontraste",
+  subd_pupila:"recorte de pupila, rizado asférico y caída sobre cos⁴",
+  subd_velo:"velo y distorsión",
+  /* --- criterios de orden --- */
+  sort_year:"Año", sort_name:"Nombre", sort_focal:"Focal", sort_fmax:"Apertura",
+  sort_resB:"Resolución de borde",
+  /* --- tratamientos --- */
+  coat_sin:"sin tratar", coat_mono:"monocapa", coat_multi:"multicapa", "coat_multi+":"multicapa+",
+  /* --- ficha --- */
+  catalogado:"Catalogado", derivado:"Derivado por cálculo",
+  f_focal:"Focal", f_fmax:"Apertura máxima", f_year:"Año", f_elgr:"Elementos y grupos",
+  f_asph:"Superficies asféricas", f_palas:"Palas del diafragma", f_mfd:"Distancia mínima",
+  f_filtro:"Filtro", f_serie:"serie o ninguno", f_masa:"Masa", f_coat:"Tratamiento",
+  f_aov:"Ángulo de campo", f_pupila:"Pupila de entrada", f_corte:"Corte por difracción",
+  f_airy:"Disco de Airy", f_cos4:"Caída natural cos⁴", f_expo:"Exponente ajustado",
+  f_dof:"Profundidad de foco", f_pop:"Contraste de baja frecuencia", f_clasico:"Índice clásico",
+  f_hiper:"Hiperfocal a 30 µm",
+  grp_desenfoque:"Desenfoque y velo", grp_definicion:"Definición y cromatismo",
+  grp_pupila:"Artefactos de pupila", grp_geometria:"Geometría y campo",
+  b_asf:"asf.", b_sinAsf:"sin asf.", b_palas:"palas",
+  usoRegla:"Uso por regla", rasgos:"Rasgos",
+  moduloK:"Módulo K", ceroDifraccion:"0 = difracción", espectro:"Espectro de carácter · fracción de K²",
+  /* --- simulador --- */
+  esfSub:"subcorregida", esfSobre:"sobrecorregida", esfNeutra:"neutra",
+  discoNucleo:"núcleo brillante y borde desvanecido", discoCaustica:"cáustica en el borde",
+  simEsf:"Esfericidad", simPupila:"pupila transmitida",
+  plena:"plena", pasos:"pasos", esfCorta:"esf",
+  /* --- objetivos parecidos --- */
+  masParecido:"Más parecido:", aD:"a d", percentil:"percentil",
+  parecidosTit:"Objetivos parecidos",
+  parecidosSub:"Distancia sobre los once generadores. Percentil respecto de todos los pares del catálogo. Pulse el nombre para saltar a su ficha, la casilla para comparar.",
+  thObjetivo:"Objetivo", thSepara:"Lo que más los separa", thDescriptor:"Descriptor",
+  thGenerador:"Generador", thSerie:"Serie", thPeor:"Peor residuo", thPar:"Par más próximo",
+  thFamilia:"Familia", thAnio:"Δaño",
+  casiIdenticos:"índices casi idénticos", coincide:"coincide", distinta:"distinta",
+  /* --- banco de comparación --- */
+  minDos:"Seleccione al menos dos objetivos.",
+  parInstruccion:"Seleccione dos objetivos y pulse una celda de la matriz.",
+  descomposicion:"Descomposición · d =", enSubespacio:"en",
+  parDomina:"Más de la mitad de la distancia procede de un solo generador,",
+  parDominaFin:". En lo demás el par es casi coincidente, de modo que la cifra global oculta que la discrepancia está concentrada.",
+  parReparte:"La distancia se reparte entre varios generadores sin que ninguno domine: el desacuerdo es general.",
+  parDominante:"El generador dominante es", parDominantePct:", con el",
+  parDominanteFin:"% de la distancia.",
+  parAviso:" Aviso: a este par se le asignaron índices casi idénticos en el catálogo, así que su proximidad es una decisión de catalogación.",
+  sinVecinos:"Ningún objetivo cumple los filtros.",
+  /* --- mapa --- */
+  sinPuntos:"Sin puntos con los filtros actuales",
+  pulseComparar:"pulse para comparar", pulseFicha:"pulse para la ficha",
+  mapPie:"· radio proporcional a la apertura máxima · anillo = en la selección",
+  /* --- gráficas --- */
+  mmEje:"mm desde el eje", flechaEsquina:"flecha en esquina",
+  bandaDof:"µm  ·  franja discontinua: profundidad de foco",
+  /* --- sección de método --- */
+  acumuladaTres:"acumulada", enTres:"% en tres",
+  aciertoA:"El vecino más próximo comparte familia óptica en el",
+  aciertoB:"de los", aciertoC:"casos, frente al",
+  aciertoD:"% que daría el azar. La familia no entra en el cálculo: la métrica la recupera sola, con un enriquecimiento de",
+  aciertoE:"veces. Dimensión efectiva del espacio, exponencial de la entropía del espectro de varianza:",
+  aciertoF:"de",
+  /* --- contraste con MTF publicada --- */
+  src_lll:"Light Lens Lab · hoja de datos del producto · curvas calculadas",
+  ctrTit:"Contraste del modelo con datos publicados", ctrFuente:"Fuente:",
+  ctrPuntos:"Los puntos aparecen sobre la gráfica de MTF: círculo lleno en el eje, hueco en el borde, ámbar a plena apertura y cian a f/",
+  serCentroPlena:"centro a plena apertura", serBordePlena:"borde a plena apertura",
+  serCentro:"centro a f/", serBorde:"borde a f/",
+  ctrA:"El punto de 40 lp/mm a plena apertura implicaría un índice de resolución de",
+  ctrB:"en el centro y", ctrC:"en el borde. Al objetivo se le han asignado",
+  ctrD:"y", ctrE:"en la misma base que el resto del catálogo. La diferencia queda a la vista para que el lector la juzgue: una MTF calculada por el fabricante no es comparable con las de este catálogo, y con una sola muestra no hay forma de calibrar la escala.",
+  /* --- atributos --- */
+  ariaBuscar:"Buscar objetivo", phBuscar:"buscar objetivo…",
+  ariaDots:"Selección para comparar", ariaOrden:"Criterio de orden",
+  ariaRef:"Objetivo de referencia", ariaEjeX:"Eje X", ariaEjeY:"Eje Y",
+  ariaFicha:"Ficha del objetivo", ariaCerrar:"Cerrar ficha",
+  ariaAnterior:"Anterior", ariaSiguiente:"Siguiente", ariaDisco:"Simulación del disco de desenfoque"
+},
+en:{
+  /* --- general interface --- */
+  comparar:"Compare", quitar:"Remove", ninguno:"none", sinCoincidencia:"no match",
+  sinSel:"Nothing selected. Tick the box of a lens in the catalogue, use the + button in the neighbours table, or click points on the map.",
+  addCmp:"Add to comparison", delCmp:"Remove from comparison",
+  mostrar:"Show", ocultar:"Hide",
+  fichaVacia:"Lens sheet", sinSelBreve:"Nothing selected",
+  /* --- filters --- */
+  todas:"All", todos:"All", otros:"Others",
+  ff1:"≤ 21", ff2:"24 to 28", ff3:"35", ff4:"40 to 50", ff5:"75 to 90", ff6:"≥ 135",
+  fe1:"up to 1959", fe2:"1960 to 1979", fe3:"1980 to 1999", fe4:"2000 onwards",
+  recFocalAny:"Any focal length", recFocalSame:"Equivalent focal length",
+  recMarcaAny:"Any manufacturer", recMarcaOtra:"Another manufacturer",
+  recEpocaAny:"Any era", recEpocaAntes:"Earlier", recEpocaDespues:"Later",
+  mapSel:"Add to comparison", mapFicha:"Open lens sheet",
+  /* --- archetypes --- */
+  arq_soft:"Soft focus by design", arq_apo:"Clinical apochromat",
+  arq_veil:"Dominant spherical veil", arq_under:"Undercorrected classic",
+  arq_struct:"Structured defocus", arq_creamy:"Creamy transition",
+  arq_sym:"Flat-field symmetrical", arq_asph:"High-contrast aspheric",
+  arq_period:"Moderate period design", arq_wide:"Field wide-angle",
+  arq_fast:"Balanced fast lens", arq_gentle:"Restrained softness", arq_neutral:"Modern neutral",
+  arqd_soft:"Spherical aberration is deliberately left uncorrected and the halo is graded with the diaphragm.",
+  arqd_apo:"No colour fringe on any contour and no need to stop down. The defocus comes out clean and neutral.",
+  arqd_veil:"Heavily undercorrected spherical aberration: a halo over the highlights, compressed high tones and low base contrast at full aperture.",
+  arqd_under:"A gradual transition into the defocus and moderate contrast. Correction enough to resolve, aberration enough to leave the background without edges.",
+  arqd_struct:"Overcorrected spherical aberration or high nervousness: defined contours in the defocused highlights that keep the background legible.",
+  arqd_creamy:"The planes dissolve without an outline. The subject is separated by gradient, not by sharpness.",
+  arqd_sym:"Straight lines stay straight out to the corner and the field is uniform, at the price of pronounced illumination falloff.",
+  arqd_asph:"Immediate resolution at full aperture and high tonal separation straight from the file, with the defocus a little outlined.",
+  arqd_period:"Designs with early coating or low contrast: appreciable veiling glare and limited microcontrast, both of which close up on stopping down.",
+  arqd_wide:"Field correction and geometry come first. At these focal lengths and apertures there is hardly any defocus to characterise.",
+  arqd_fast:"A large aperture with high correction: the defocus is broad but contained, reaching neither the classical veil nor extreme creaminess.",
+  arqd_gentle:"An agreeable rendering with modern correction: the transition is pleasant without dominating the image. The virtue of this group is not being noticed.",
+  arqd_neutral:"No trait dominates and none is missing. The lens that disappears behind the photograph.",
+  /* --- descriptors --- */
+  met_crema:"Creaminess", met_sa:"Residual spherical aberration", met_glow:"Glow or halo",
+  met_velo:"Veiling glare", met_micro:"Microcontrast", met_resC:"Resolution at the centre",
+  met_resB:"Resolution at the edge", met_loca:"Longitudinal CA", met_laca:"Lateral CA",
+  met_coma:"Sagittal coma", met_mech:"Mechanical vignetting", met_onion:"Aspheric onion ripple",
+  met_shift:"Focus shift", met_nerv:"Nervousness", met_vig:"Corner falloff",
+  met_curv:"Field curvature", met_dist:"Distortion", met_focal:"Focal length",
+  met_fmax:"Maximum aperture", met_year:"Year of introduction", met_weight:"Mass",
+  met_el:"Elements", met_aov:"Angle of view", met_pupila:"Entrance pupil",
+  met_pop:"Low-frequency contrast", met_K:"Character modulus K", met_clasico:"Classical index",
+  /* --- radar axes --- */
+  rad_crema:"Creaminess", rad_micro:"Microcontrast", rad_resB:"Edge", rad_pureza:"Chromatic purity",
+  rad_antiComa:"Coma control", rad_plano:"Field uniformity", rad_contraste:"Base contrast",
+  rad_suavidad:"Smooth transition",
+  /* --- metric generators --- */
+  gen_sa:"residual spherical aberration", gen_loca:"longitudinal CA", gen_laca:"lateral CA",
+  gen_coma:"sagittal coma", gen_curv:"field curvature", gen_dist:"distortion", gen_velo:"veiling glare",
+  gen_mech:"pupil clipping", gen_onion:"aspheric onion ripple", gen_vigExc:"falloff beyond cos⁴",
+  gen_resid:"microcontrast residual",
+  gend_sa:"uncorrected spherical aberration; it decides whether the disc has a core or a ring",
+  gend_loca:"colour fringes in front of and behind the plane of focus",
+  gend_laca:"radial displacement between channels",
+  gend_coma:"deformation of off-axis points", gend_curv:"the sharp surface is not flat",
+  gend_dist:"departure from rectilinearity", gend_velo:"loss of base contrast to scattered light",
+  gend_mech:"cat's eye off axis", gend_onion:"concentric rings from the moulding",
+  gend_vigExc:"vignetting beyond the natural falloff",
+  gend_resid:"what is missing from perfect transfer at high frequencies",
+  /* --- traits and uses --- */
+  tag_cremoso:"creamy", tag_clinico:"clinical", tag_apo:"apochromatic", tag_velo:"high veiling glare",
+  tag_nervioso:"nervous bokeh", tag_shift:"focus shift", tag_gato:"cat's eye",
+  tag_plano:"flat field", tag_luminoso:"fast aperture", tag_compacto:"compact", tag_onion:"onion ripple",
+  uso_repro:"reproduction and architecture", uso_geom:"geometry without distortion",
+  uso_astro:"astrophotography", uso_retrato:"portraiture", uso_planos:"separation of planes",
+  uso_nocturna:"night work by available light", uso_reportaje:"reportage",
+  uso_paisajeGA:"wide-angle landscape and travel", uso_paisaje:"landscape",
+  uso_gaGeneral:"general-purpose wide angle", uso_byn:"classical black and white",
+  uso_calle:"discreet street work", uso_coleccion:"collector's optic",
+  /* --- subspaces --- */
+  sub_todo:"All", sub_onda:"Wavefront", sub_pupila:"Pupil and manufacture", sub_velo:"Veiling glare and geometry",
+  subd_todo:"the eleven generators",
+  subd_onda:"spherical aberration, chromatisms, coma, curvature and the microcontrast residual",
+  subd_pupila:"pupil clipping, aspheric onion ripple and falloff beyond cos⁴",
+  subd_velo:"veiling glare and distortion",
+  /* --- sort criteria --- */
+  sort_year:"Year", sort_name:"Name", sort_focal:"Focal length", sort_fmax:"Aperture",
+  sort_resB:"Edge resolution",
+  /* --- coatings --- */
+  coat_sin:"uncoated", coat_mono:"single-coated", coat_multi:"multicoated", "coat_multi+":"multicoated+",
+  /* --- lens sheet --- */
+  catalogado:"Catalogued", derivado:"Derived by calculation",
+  f_focal:"Focal length", f_fmax:"Maximum aperture", f_year:"Year", f_elgr:"Elements and groups",
+  f_asph:"Aspheric surfaces", f_palas:"Diaphragm blades", f_mfd:"Minimum focusing distance",
+  f_filtro:"Filter", f_serie:"series or none", f_masa:"Mass", f_coat:"Coating",
+  f_aov:"Angle of view", f_pupila:"Entrance pupil", f_corte:"Diffraction cut-off",
+  f_airy:"Airy disc", f_cos4:"Natural cos⁴ falloff", f_expo:"Fitted exponent",
+  f_dof:"Depth of focus", f_pop:"Low-frequency contrast", f_clasico:"Classical index",
+  f_hiper:"Hyperfocal at 30 µm",
+  grp_desenfoque:"Defocus and veiling glare", grp_definicion:"Definition and chromatism",
+  grp_pupila:"Pupil artefacts", grp_geometria:"Geometry and field",
+  b_asf:"asph.", b_sinAsf:"no asph.", b_palas:"blades",
+  usoRegla:"Use by rule", rasgos:"Traits",
+  moduloK:"Modulus K", ceroDifraccion:"0 = diffraction", espectro:"Character spectrum · fraction of K²",
+  /* --- simulator --- */
+  esfSub:"undercorrected", esfSobre:"overcorrected", esfNeutra:"neutral",
+  discoNucleo:"bright core and faded rim", discoCaustica:"caustic at the rim",
+  simEsf:"Spherical aberration", simPupila:"pupil transmitted",
+  plena:"full", pasos:"stops", esfCorta:"sph",
+  /* --- similar lenses --- */
+  masParecido:"Closest:", aD:"at d", percentil:"percentile",
+  parecidosTit:"Similar lenses",
+  parecidosSub:"Distance over the eleven generators. Percentile against all pairs in the catalogue. Click the name to jump to its sheet, the box to compare.",
+  thObjetivo:"Lens", thSepara:"What separates them most", thDescriptor:"Descriptor",
+  thGenerador:"Generator", thSerie:"Series", thPeor:"Worst residual", thPar:"Closest pair",
+  thFamilia:"Family", thAnio:"Δyear",
+  casiIdenticos:"near-identical indices", coincide:"matches", distinta:"differs",
+  /* --- comparison bench --- */
+  minDos:"Select at least two lenses.",
+  parInstruccion:"Select two lenses and click a cell in the matrix.",
+  descomposicion:"Decomposition · d =", enSubespacio:"over",
+  parDomina:"More than half the distance comes from a single generator,",
+  parDominaFin:". In everything else the pair almost coincides, so the overall figure hides the fact that the discrepancy is concentrated.",
+  parReparte:"The distance is spread across several generators with none dominating: the disagreement is general.",
+  parDominante:"The dominant generator is", parDominantePct:", with",
+  parDominanteFin:"% of the distance.",
+  parAviso:" Note: this pair was given near-identical indices in the catalogue, so its closeness is a cataloguing decision.",
+  sinVecinos:"No lens meets the filters.",
+  /* --- map --- */
+  sinPuntos:"No points under the current filters",
+  pulseComparar:"click to compare", pulseFicha:"click for the lens sheet",
+  mapPie:"· radius proportional to maximum aperture · ring = in the selection",
+  /* --- charts --- */
+  mmEje:"mm from the axis", flechaEsquina:"corner sag",
+  bandaDof:"µm  ·  dashed band: depth of focus",
+  /* --- method section --- */
+  acumuladaTres:"cumulative", enTres:"% in three",
+  aciertoA:"The nearest neighbour shares an optical family in",
+  aciertoB:"of the", aciertoC:"cases, against the",
+  aciertoD:"% that chance would give. The family never enters the calculation: the metric recovers it unaided, with an enrichment of",
+  aciertoE:"times. Effective dimension of the space, the exponential of the entropy of the variance spectrum:",
+  aciertoF:"out of",
+  /* --- check against published MTF --- */
+  src_lll:"Light Lens Lab · product data sheet · calculated curves",
+  ctrTit:"The model checked against published data", ctrFuente:"Source:",
+  ctrPuntos:"The points appear over the MTF plot: filled circle on axis, hollow at the edge, amber at full aperture and cyan at f/",
+  serCentroPlena:"centre at full aperture", serBordePlena:"edge at full aperture",
+  serCentro:"centre at f/", serBorde:"edge at f/",
+  ctrA:"The 40 lp/mm point at full aperture would imply a resolution index of",
+  ctrB:"at the centre and", ctrC:"at the edge. The lens has been assigned",
+  ctrD:"and", ctrE:"on the same basis as the rest of the catalogue. The difference is left in plain sight for the reader to judge: an MTF calculated by the manufacturer is not comparable with those in this catalogue, and with a single sample there is no way to calibrate the scale.",
+  /* --- attributes --- */
+  ariaBuscar:"Search for a lens", phBuscar:"search a lens…",
+  ariaDots:"Selection for comparison", ariaOrden:"Sort criterion",
+  ariaRef:"Reference lens", ariaEjeX:"X axis", ariaEjeY:"Y axis",
+  ariaFicha:"Lens sheet", ariaCerrar:"Close lens sheet",
+  ariaAnterior:"Previous", ariaSiguiente:"Next", ariaDisco:"Simulation of the defocus disc"
+}
+};
+const LANG = ()=> document.documentElement.lang==="en" ? "en" : "es";
+const LOCALE = ()=> LANG()==="en" ? "en-GB" : "es-ES";
+function t(k){ const D=T[LANG()]||T.es; return D[k]!==undefined ? D[k] : (T.es[k]!==undefined?T.es[k]:k); }
+
 /* =======================================================================
    Catálogo. Campos:
    0 nombre |1 marca |2 focal |3 f máx |4 año |5 familia óptica |6 elementos
@@ -648,78 +1055,66 @@ const LENSES = RAW.trim().split("\n").filter(s=>s.trim()).map((line,i)=>{
   return o;
 });
 
+/* Devuelve la CLAVE del arquetipo; el rótulo y la descripción salen del diccionario. */
 function arquetipo(l){
-  if(l.family.indexOf("Foco suave")===0) return "Foco suave por diseño";
-  if(l.loca<=12 && l.micro>=90) return "Apocromático clínico";
-  if(l.sa<=-60) return "Velo esférico dominante";
-  if(l.sa<=-30) return "Clásico subcorregido";
-  if(l.sa>=15 || l.nerv>=60) return "Desenfoque estructurado";
-  if(l.crema>=80) return "Transición cremosa";
-  if(l.family.indexOf("Biogon")>=0) return "Simétrico de campo plano";
-  if(l.asph>0 && l.micro>=86) return "Asférico de alto contraste";
-  if(l.velo>=38 || l.micro<70) return "Moderado de época";
-  if((l.focal<=24 && l.fmax>=2.8) || l.family.indexOf("Zoom")===0) return "Gran angular de campo";
-  if(l.fmax<=1.6) return "Luminoso equilibrado";
-  if(l.crema>=70) return "Suave contenido";
-  return "Neutro moderno";
+  if(l.family.indexOf("Foco suave")===0) return "soft";
+  if(l.loca<=12 && l.micro>=90) return "apo";
+  if(l.sa<=-60) return "veil";
+  if(l.sa<=-30) return "under";
+  if(l.sa>=15 || l.nerv>=60) return "struct";
+  if(l.crema>=80) return "creamy";
+  if(l.family.indexOf("Biogon")>=0) return "sym";
+  if(l.asph>0 && l.micro>=86) return "asph";
+  if(l.velo>=38 || l.micro<70) return "period";
+  if((l.focal<=24 && l.fmax>=2.8) || l.family.indexOf("Zoom")===0) return "wide";
+  if(l.fmax<=1.6) return "fast";
+  if(l.crema>=70) return "gentle";
+  return "neutral";
 }
-/* Descripciones de las estéticas, para la ficha */
-const ARQDESC={
- "Foco suave por diseño":"La esfericidad se deja sin corregir a propósito y el halo se gradúa con el diafragma.",
- "Apocromático clínico":"Sin franja de color en ningún contorno y sin necesidad de diafragmar. El desenfoque sale limpio y neutro.",
- "Velo esférico dominante":"Esfericidad muy subcorregida: halo sobre las luces, altas comprimidas y contraste base bajo a plena apertura.",
- "Clásico subcorregido":"Transición progresiva al desenfoque y contraste medio. Suficiente corrección para resolver, suficiente aberración para que el fondo no tenga bordes.",
- "Desenfoque estructurado":"Esfericidad sobrecorregida o nervio alto: contornos definidos en los altos desenfocados que mantienen el fondo legible.",
- "Transición cremosa":"Los planos se disuelven sin contorno. El sujeto queda separado por gradiente, no por nitidez.",
- "Simétrico de campo plano":"Las rectas siguen rectas hasta el borde y el campo es uniforme, a cambio de una caída de luz acusada.",
- "Asférico de alto contraste":"Resolución inmediata a plena apertura y separación tonal alta desde el archivo, con el desenfoque algo perfilado.",
- "Moderado de época":"Trazados de tratamiento antiguo o contraste bajo: velo apreciable y microcontraste limitado que se cierran al diafragmar.",
- "Gran angular de campo":"Corrección de campo y geometría como prioridad. A estas focales y aperturas apenas hay desenfoque que caracterizar.",
- "Luminoso equilibrado":"Gran apertura con corrección alta: el desenfoque es amplio pero contenido, sin llegar ni al velo clásico ni a la cremosidad extrema.",
- "Suave contenido":"Dibujo amable con corrección moderna: la transición es agradable sin dominar la imagen. La virtud del grupo es no hacerse notar.",
- "Neutro moderno":"Ningún rasgo domina y ninguno falta. El objetivo que desaparece detrás de la fotografía."
-};
+const arqNombre = L=>t("arq_"+L.arq);
+const arqDesc   = L=>t("arqd_"+L.arq);
+const coatName  = c=>{ const k="coat_"+c; return t(k)===k ? c : t(k); };
 
 /* ===================== 2. MÉTRICAS ===================== */
+/* El nombre visible de cada descriptor sale del diccionario: MET.n es una función. */
 const MET = [
-  {k:"crema",   n:"Cremosidad",              d:"suavidad del gradiente hacia el desenfoque"},
-  {k:"sa",      n:"Esfericidad residual",    d:"negativo subcorregido, positivo sobrecorregido", signed:true},
-  {k:"glow",    n:"Brillo o halo",           d:"velo esférico sobre las luces a plena apertura"},
-  {k:"velo",    n:"Velo",                    d:"pérdida de contraste base por luz difusa"},
-  {k:"micro",   n:"Microcontraste",          d:"transferencia de modulación en frecuencias altas"},
-  {k:"resC",    n:"Resolución en el centro", d:""},
-  {k:"resB",    n:"Resolución en el borde",  d:""},
-  {k:"loca",    n:"CA longitudinal",         d:"franjas de color delante y detrás del plano de foco"},
-  {k:"laca",    n:"CA lateral",              d:"desplazamiento radial entre canales"},
-  {k:"coma",    n:"Coma sagital",            d:"deformación de fuentes puntuales fuera del eje"},
-  {k:"mech",    n:"Viñeteo mecánico",        d:"recorte de la pupila fuera del eje"},
-  {k:"onion",   n:"Rizado asférico",         d:"anillos concéntricos en las luces desenfocadas"},
-  {k:"shift",   n:"Deriva de foco",          d:"desplazamiento del plano nítido al diafragmar"},
-  {k:"nerv",    n:"Nerviosismo",             d:"contornos duros en los altos desenfocados"},
-  {k:"vig",     n:"Caída en esquina",        d:"pasos de luz perdidos a plena apertura", u:" EV", raw:true},
-  {k:"curv",    n:"Curvatura de campo",      d:"flecha de la superficie focal en la esquina", u:" mm", raw:true},
-  {k:"dist",    n:"Distorsión",              d:"desviación rectilínea", u:" %", raw:true, signed:true},
-  {k:"focal",   n:"Focal",                   u:" mm", raw:true},
-  {k:"fmax",    n:"Apertura máxima",         raw:true},
-  {k:"year",    n:"Año de introducción",     raw:true},
-  {k:"weight",  n:"Masa",                    u:" g", raw:true},
-  {k:"el",      n:"Elementos",               raw:true},
-  {k:"aov",     n:"Ángulo de campo",         u:"°", raw:true},
-  {k:"pupila",  n:"Pupila de entrada",       u:" mm", raw:true},
-  {k:"pop",     n:"Contraste de baja frecuencia", d:"integral de la MTF a 10 y 20 lp/mm, proxy del relieve"},
-  {k:"K",       n:"Módulo de carácter K",  d:"distancia al objetivo ideal en el espacio de aberraciones"},
-  {k:"clasico", n:"Índice clásico",          d:"0 clínico, 100 clásico; combinación de esfericidad, velo, cromatismo y microcontraste"}
+  {k:"crema"},
+  {k:"sa",      signed:true},
+  {k:"glow"},
+  {k:"velo"},
+  {k:"micro"},
+  {k:"resC"},
+  {k:"resB"},
+  {k:"loca"},
+  {k:"laca"},
+  {k:"coma"},
+  {k:"mech"},
+  {k:"onion"},
+  {k:"shift"},
+  {k:"nerv"},
+  {k:"vig",     u:" EV", raw:true},
+  {k:"curv",    u:" mm", raw:true},
+  {k:"dist",    u:" %", raw:true, signed:true},
+  {k:"focal",   u:" mm", raw:true},
+  {k:"fmax",    raw:true},
+  {k:"year",    raw:true},
+  {k:"weight",  u:" g", raw:true},
+  {k:"el",      raw:true},
+  {k:"aov",     u:"°", raw:true},
+  {k:"pupila",  u:" mm", raw:true},
+  {k:"pop"},
+  {k:"K"},
+  {k:"clasico"}
 ];
-const RADAX = [
-  ["crema","Cremosidad"],["micro","Microcontraste"],["resB","Borde"],["pureza","Pureza cromática"],
-  ["antiComa","Control de coma"],["plano","Uniformidad de campo"],["contraste","Contraste base"],["suavidad","Transición suave"]
-];
+MET.forEach(m=>Object.defineProperty(m,"n",{get(){ return t("met_"+this.k); }}));
+const RADAX = ["crema","micro","resB","pureza","antiComa","plano","contraste","suavidad"]
+  .map(k=>[k,()=>t("rad_"+k)]);
 const BRANDCOL = {"Leica":"#E8B33C","Zeiss":"#35B7E6","Voigtländer":"#4FBF95","Canon":"#DB4A3E","Nikon":"#8A6BE0",
   "KMZ":"#C0705A","Konica":"#7FA8C9","Minolta":"#D08FB4","Light Lens Lab":"#B8C24A","MS Optics":"#5FBFB0",
   "7Artisans":"#A08CD8","TTArtisan":"#E0745A","Thypoch":"#79C4E0","Funleader":"#8A93A0"};
 const SLOTCOL = ["#E8B33C","#35B7E6","#8A6BE0","#4FBF95"];
-const fmt = (v,d=0)=>v.toLocaleString("es-ES",{minimumFractionDigits:d,maximumFractionDigits:d});
-const fap = v=>"f/"+v.toLocaleString("es-ES",{maximumFractionDigits:2});
+const fmt = (v,d=0)=>v.toLocaleString(LOCALE(),{minimumFractionDigits:d,maximumFractionDigits:d});
+const fap = v=>"f/"+v.toLocaleString(LOCALE(),{maximumFractionDigits:2});
 const APS = [0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5];
 const apLabel = (l,st)=>{const N=l.fmax*Math.pow(2,st/2); return fap(Math.round(N*10)/10);};
 
@@ -910,7 +1305,7 @@ function drawRadar(host, list, cols){
     const A=-Math.PI/2+i*2*Math.PI/n;
     path(s,"M"+cx+" "+cy+"L"+(cx+R*Math.cos(A))+" "+(cy+R*Math.sin(A)),{stroke:"rgba(56,69,86,.7)","stroke-width":.6});
     const lx=cx+(R+16)*Math.cos(A), ly=cy+(R+16)*Math.sin(A)+3.5;
-    txt(s,lx,ly,ax[1],"axl",Math.abs(Math.cos(A))<.3?"middle":(Math.cos(A)>0?"start":"end"));
+    txt(s,lx,ly,ax[1](),"axl",Math.abs(Math.cos(A))<.3?"middle":(Math.cos(A)>0?"start":"end"));
   });
   list.forEach((L,li)=>{
     let d="";

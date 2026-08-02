@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Red de influencia entre fotógrafos · Rafael Vida</title>
 <meta name="description" content="Atlas interactivo de la influencia entre fotógrafos: 293 autores y 467 relaciones. Traza linajes, filtra por movimiento y año, encuentra rutas de influencia.">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -118,22 +128,48 @@
     header .byline{display:none}
     .stage-ctrl{bottom:auto;top:12px;right:12px;left:auto}
   }
+
+  /* ---------- conmutador de idioma ---------- */
+  html[lang="es"] [data-lang="en"]{display:none!important}
+  html[lang="en"] [data-lang="es"]{display:none!important}
+  /* Va dentro de la cabecera, no flotante: la app ocupa el viewport entero
+     y un elemento fijo chocaría con la firma y con el botón de controles. */
+  .langbar{display:flex;flex:0 0 auto;border:1px solid var(--line2);border-radius:7px;overflow:hidden}
+  .langbar button{font-family:var(--mono);font-size:11px;letter-spacing:.09em;
+                  background:transparent;border:0;color:var(--muted);padding:4px 9px;cursor:pointer;
+                  transition:background .15s,color .15s}
+  .langbar button+button{border-left:1px solid var(--line2)}
+  .langbar button:hover{color:var(--text)}
+  .langbar button.on{background:rgba(63,202,176,.14);color:var(--teal)}
+  .langbar button:focus-visible{outline:2px solid rgba(63,202,176,.6);outline-offset:-2px}
 </style>
 </head>
 <body>
 <div class="app">
   <header>
-    <h1>Red de influencia entre fotógrafos</h1>
-    <span class="sub" id="hsub">293 autores · 467 relaciones</span>
+    <h1 data-lang="es">Red de influencia entre fotógrafos</h1>
+    <h1 data-lang="en">Influence network between photographers</h1>
+    <span class="sub" id="hsub">
+      <span data-lang="es">293 autores · 467 relaciones</span>
+      <span data-lang="en">293 authors · 467 relationships</span>
+    </span>
     <span class="spacer"></span>
     <span class="byline">Rafael Vida</span>
+    <div class="langbar" role="group" aria-label="Idioma / Language">
+      <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+      <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+    </div>
   </header>
 
   <div class="stage">
     <svg class="net" id="net"></svg>
     <div class="stage-ctrl">
-      <button class="btn" id="fit" title="Ajustar a la vista">Ajustar</button>
-      <button class="btn" id="reset" title="Limpiar selección">Limpiar</button>
+      <button class="btn" id="fit" data-title-es="Ajustar a la vista" data-title-en="Fit to view">
+        <span data-lang="es">Ajustar</span><span data-lang="en">Fit</span>
+      </button>
+      <button class="btn" id="reset" data-title-es="Limpiar selección" data-title-en="Clear selection">
+        <span data-lang="es">Limpiar</span><span data-lang="en">Clear</span>
+      </button>
     </div>
   </div>
 
@@ -143,48 +179,57 @@
 
     <!-- buscador + modo -->
     <div class="card">
-      <h3>Buscar y explorar</h3>
-      <div class="row"><input id="search" type="search" placeholder="Nombre del fotógrafo..." autocomplete="off"></div>
+      <h3 data-lang="es">Buscar y explorar</h3>
+      <h3 data-lang="en">Search and explore</h3>
+      <div class="row"><input id="search" type="search" data-ph-es="Nombre del fotógrafo..." data-ph-en="Photographer's name..." autocomplete="off"></div>
       <div id="results"></div>
-      <label class="fld">Modo</label>
+      <label class="fld" data-lang="es">Modo</label>
+      <label class="fld" data-lang="en">Mode</label>
       <div class="seg" id="mode">
-        <button class="btn on" data-mode="explore">Explorar</button>
-        <button class="btn" data-mode="path">Ruta A→B</button>
+        <button class="btn on" data-mode="explore"><span data-lang="es">Explorar</span><span data-lang="en">Explore</span></button>
+        <button class="btn" data-mode="path"><span data-lang="es">Ruta A→B</span><span data-lang="en">Route A→B</span></button>
       </div>
-      <label class="fld">Trazar influencia</label>
+      <label class="fld" data-lang="es">Trazar influencia</label>
+      <label class="fld" data-lang="en">Trace influence</label>
       <div class="seg" id="dir">
-        <button class="btn" data-dir="up">Ascendentes</button>
-        <button class="btn on" data-dir="both">Ambos</button>
-        <button class="btn" data-dir="down">Descendientes</button>
+        <button class="btn" data-dir="up"><span data-lang="es">Ascendentes</span><span data-lang="en">Upstream</span></button>
+        <button class="btn on" data-dir="both"><span data-lang="es">Ambos</span><span data-lang="en">Both</span></button>
+        <button class="btn" data-dir="down"><span data-lang="es">Descendientes</span><span data-lang="en">Downstream</span></button>
       </div>
       <div class="hint" id="pathhint" style="display:none;margin-top:8px"></div>
     </div>
 
     <!-- análisis -->
     <div class="card">
-      <h3>Análisis</h3>
-      <label class="fld">Tamaño del nodo según</label>
+      <h3 data-lang="es">Análisis</h3>
+      <h3 data-lang="en">Analysis</h3>
+      <label class="fld" data-lang="es">Tamaño del nodo según</label>
+      <label class="fld" data-lang="en">Node size by</label>
       <div class="seg" id="size">
-        <button class="btn on" data-size="influenced">Influencia</button>
-        <button class="btn" data-size="total_degree">Grado total</button>
-        <button class="btn" data-size="trophic_level">Nivel trófico</button>
+        <button class="btn on" data-size="influenced"><span data-lang="es">Influencia</span><span data-lang="en">Influence</span></button>
+        <button class="btn" data-size="total_degree"><span data-lang="es">Grado total</span><span data-lang="en">Total degree</span></button>
+        <button class="btn" data-size="trophic_level"><span data-lang="es">Nivel trófico</span><span data-lang="en">Trophic level</span></button>
       </div>
-      <label class="fld" id="yrlab">Año</label>
+      <label class="fld" id="yrlab"><span data-lang="es">Año</span><span data-lang="en">Year</span></label>
       <div class="rng"><input id="ymin" type="range"><span id="yminv"></span></div>
       <div class="rng"><input id="ymax" type="range"><span id="ymaxv"></span></div>
-      <label class="fld" id="inflab">Influencia mínima</label>
+      <label class="fld" id="inflab"><span data-lang="es">Influencia mínima</span><span data-lang="en">Minimum influence</span></label>
       <div class="rng"><input id="minf" type="range" min="0" max="20" value="0"><span id="minfv">0</span></div>
-      <label class="fld">Etiquetas</label>
+      <label class="fld" data-lang="es">Etiquetas</label>
+      <label class="fld" data-lang="en">Labels</label>
       <div class="seg" id="labels">
-        <button class="btn" data-lab="none">Ninguna</button>
-        <button class="btn on" data-lab="few">Principales</button>
-        <button class="btn" data-lab="all">Todas</button>
+        <button class="btn" data-lab="none"><span data-lang="es">Ninguna</span><span data-lang="en">None</span></button>
+        <button class="btn on" data-lab="few"><span data-lang="es">Principales</span><span data-lang="en">Main ones</span></button>
+        <button class="btn" data-lab="all"><span data-lang="es">Todas</span><span data-lang="en">All</span></button>
       </div>
     </div>
 
     <!-- leyenda / filtro por movimiento -->
     <div class="card">
-      <h3 style="display:flex;justify-content:space-between;align-items:center">Movimiento <button class="btn" id="allmov" style="padding:4px 8px">Todos</button></h3>
+      <h3 style="display:flex;justify-content:space-between;align-items:center">
+        <span data-lang="es">Movimiento</span><span data-lang="en">Movement</span>
+        <button class="btn" id="allmov" style="padding:4px 8px"><span data-lang="es">Todos</span><span data-lang="en">All</span></button>
+      </h3>
       <div class="legend" id="legend"></div>
     </div>
 
@@ -216,6 +261,26 @@
 
   var years=nodes.map(function(n){return +n.year||0;}).filter(function(y){return y>0;});
   var yMin=Math.min.apply(null,years), yMax=Math.max.apply(null,years);
+
+
+  /* ---------- diccionario de cadenas generadas por JS ---------- */
+  var T={
+    es:{lblInfluenced:"influyó a", lblInfluencedBy:"influido por", lblDegree:"grado total",
+        hUpstream:"Le influyeron", hDownstream:"Influyó a", trophic:"nivel trófico",
+        none:"ninguno", origin:"Origen", dest:"Destino",
+        pickNode:"elige un nodo", pickOther:"elige otro",
+        noPath:"No hay ruta de influencia dirigida entre ellos.",
+        route:"Ruta", steps:"pasos", upTo:"influyó hasta",
+        close:"Cerrar", controls:"Controles", images:"Imágenes"},
+    en:{lblInfluenced:"influenced", lblInfluencedBy:"influenced by", lblDegree:"total degree",
+        hUpstream:"Influenced by", hDownstream:"Influenced", trophic:"trophic level",
+        none:"none", origin:"Source", dest:"Target",
+        pickNode:"pick a node", pickOther:"pick another",
+        noPath:"There is no directed influence route between them.",
+        route:"Route", steps:"steps", upTo:"influenced as far as",
+        close:"Close", controls:"Controls", images:"Images"}
+  };
+  function t(k){ return (T[document.documentElement.lang]||T.es)[k]; }
 
   // estado
   var st={mode:"explore",dir:"both",size:"influenced",labels:"few",
@@ -394,15 +459,15 @@
     var p=shortestPath(st.pathA,st.pathB), rev=false;
     if(!p){p=shortestPath(st.pathB,st.pathA); if(p){rev=true;}}
     st._path=p?p.slice():null;
-    if(!p){updatePathHint("No hay ruta de influencia dirigida entre ellos.");nodeSel.classed("dim",false);linkSel.attr("class","link").attr("marker-end","url(#arrow)");highlightPath();applyLabels();return;}
+    if(!p){updatePathHint(t("noPath"));nodeSel.classed("dim",false);linkSel.attr("class","link").attr("marker-end","url(#arrow)");highlightPath();applyLabels();return;}
     var set=new Set(p), edgeSet=new Set();
     for(var i=0;i<p.length-1;i++)edgeSet.add(p[i]+"→"+p[i+1]);
     nodeSel.classed("dim",function(n){return !set.has(n.id);}).classed("focus",function(n){return set.has(n.id);});
     linkSel.attr("class","link").classed("dim",function(l){return !(edgeSet.has(l.source.id+"→"+l.target.id));})
       .classed("path",function(l){return edgeSet.has(l.source.id+"→"+l.target.id);})
       .attr("marker-end",function(l){return edgeSet.has(l.source.id+"→"+l.target.id)?"url(#arrow-path)":"url(#arrow)";});
-    var dirTxt=rev?(st.pathB+" influyó hasta "+st.pathA):(st.pathA+" influyó hasta "+st.pathB);
-    updatePathHint("Ruta ("+(p.length-1)+" pasos): "+p.join(" → ")+". "+dirTxt+".");
+    var dirTxt=rev?(st.pathB+" "+t("upTo")+" "+st.pathA):(st.pathA+" "+t("upTo")+" "+st.pathB);
+    updatePathHint(t("route")+" ("+(p.length-1)+" "+t("steps")+"): "+p.join(" → ")+". "+dirTxt+".");
     applyLabels();
   }
   function updatePathHint(msg){
@@ -410,24 +475,24 @@
     if(st.mode!=="path"){el.style("display","none");return;}
     el.style("display","block");
     if(msg){el.text(msg);return;}
-    el.html("Origen: <b style='color:var(--head)'>"+(st.pathA||"elige un nodo")+"</b><br>Destino: <b style='color:var(--head)'>"+(st.pathB||"elige otro")+"</b>");
+    el.html(t("origin")+": <b style='color:var(--head)'>"+(st.pathA||t("pickNode"))+"</b><br>"+t("dest")+": <b style='color:var(--head)'>"+(st.pathB||t("pickOther"))+"</b>");
   }
 
   // ---- info ----
   function showInfo(d){
     var c=color(d.primary_movement||"—");
     var up=(inAdj[d.id]||[]), down=(outAdj[d.id]||[]);
-    function chips(arr){return arr.length?arr.map(function(x){return "<span class='chip' data-go='"+x.replace(/'/g,"&#39;")+"'>"+x+"</span>";}).join(""):"<span class='hint'>ninguno</span>";}
+    function chips(arr){return arr.length?arr.map(function(x){return "<span class='chip' data-go='"+x.replace(/'/g,"&#39;")+"'>"+x+"</span>";}).join(""):"<span class='hint'>"+t('none')+"</span>";}
     d3.select("#info").style("display","block").html(
       "<div class='name'>"+d.name+"</div>"+
-      "<div class='meta'>"+(d.year||"—")+" · nivel trófico "+(d.trophic_level||"—")+"</div>"+
+      "<div class='meta'>"+(d.year||"—")+" · "+t('trophic')+" "+(d.trophic_level||"—")+"</div>"+
       "<span class='badge' style='background:"+c+"'>"+(d.primary_movement||"—")+"</span>"+
-      "<div class='nums'><div class='n'><div class='v'>"+(d.influenced||0)+"</div><div class='l'>influyó a</div></div>"+
-      "<div class='n'><div class='v'>"+(d.influencers||0)+"</div><div class='l'>influido por</div></div>"+
-      "<div class='n'><div class='v'>"+(d.total_degree||0)+"</div><div class='l'>grado total</div></div></div>"+
-      "<div class='lst up'><h4>Le influyeron</h4>"+chips(up)+"</div>"+
-      "<div class='lst down'><h4>Influyó a</h4>"+chips(down)+"</div>"+
-      (d.wikipedia_url||d.google_images_url?"<div class='ext'>"+(d.wikipedia_url?"<a href='"+d.wikipedia_url+"' target='_blank' rel='noopener'>Wikipedia</a>":"")+(d.google_images_url?"<a href='"+d.google_images_url+"' target='_blank' rel='noopener'>Imágenes</a>":"")+"</div>":"")
+      "<div class='nums'><div class='n'><div class='v'>"+(d.influenced||0)+"</div><div class='l'>"+t('lblInfluenced')+"</div></div>"+
+      "<div class='n'><div class='v'>"+(d.influencers||0)+"</div><div class='l'>"+t('lblInfluencedBy')+"</div></div>"+
+      "<div class='n'><div class='v'>"+(d.total_degree||0)+"</div><div class='l'>"+t('lblDegree')+"</div></div></div>"+
+      "<div class='lst up'><h4>"+t('hUpstream')+"</h4>"+chips(up)+"</div>"+
+      "<div class='lst down'><h4>"+t('hDownstream')+"</h4>"+chips(down)+"</div>"+
+      (d.wikipedia_url||d.google_images_url?"<div class='ext'>"+(d.wikipedia_url?"<a href='"+d.wikipedia_url+"' target='_blank' rel='noopener'>Wikipedia</a>":"")+(d.google_images_url?"<a href='"+d.google_images_url+"' target='_blank' rel='noopener'>"+t('images')+"</a>":"")+"</div>":"")
     );
     d3.select("#info").selectAll(".chip").on("click",function(){var id=this.getAttribute("data-go");if(byId[id]){zoomToNode(byId[id]);selectNode(byId[id]);}});
   }
@@ -503,7 +568,7 @@
 
   // panel móvil
   var panel=document.getElementById("panel"),ptoggle=document.getElementById("ptoggle");
-  ptoggle.onclick=function(){panel.classList.toggle("open");ptoggle.textContent=panel.classList.contains("open")?"Cerrar":"Controles";};
+  ptoggle.onclick=function(){panel.classList.toggle("open");ptoggle.textContent=panel.classList.contains("open")?t("close"):t("controls");};
 
   // resize
   function onResize(){W=stage.clientWidth;H=stage.clientHeight;sim.force("center",d3.forceCenter(W/2,H/2));sim.alpha(.2).restart();}
@@ -516,6 +581,62 @@
   applyFilters();
   applyLabels();
   fit();
+
+  /* Repinta lo que el JS genera cuando cambia el idioma. Se declara al final
+     del arranque, así que el apply() inicial del conmutador no lo encuentra
+     todavía y no intenta repintar una app a medio construir. */
+  window.onLangChange=function(){
+    ptoggle.textContent = panel.classList.contains("open") ? t("close") : t("controls");
+    updatePathHint();
+    if(st.mode==="path" && st.pathA && st.pathB) computePath();
+    if(st.sel) showInfo(st.sel);
+  };
+  window.onLangChange();
+})();
+</script>
+
+<script>
+"use strict";
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{
+      title:"Red de influencia entre fotógrafos · Rafael Vida",
+      desc:"Atlas interactivo de la influencia entre fotógrafos: 293 autores y 467 relaciones. Traza linajes, filtra por movimiento y año, encuentra rutas de influencia."
+    },
+    en:{
+      title:"Influence network between photographers · Rafael Vida",
+      desc:"Interactive atlas of influence between photographers: 293 authors and 467 relationships. Trace lineages, filter by movement and year, find routes of influence."
+    }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    /* atributos, que no admiten bloques duales */
+    [].forEach.call(document.querySelectorAll("[data-title-"+l+"]"),function(e){
+      e.setAttribute("title", e.getAttribute("data-title-"+l));
+    });
+    [].forEach.call(document.querySelectorAll("[data-ph-"+l+"]"),function(e){
+      e.setAttribute("placeholder", e.getAttribute("data-ph-"+l));
+    });
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
 })();
 </script>
 </body>

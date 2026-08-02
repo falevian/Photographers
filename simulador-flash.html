@@ -6,6 +6,16 @@
 <title>Banco óptico de flash · Rafael Vida</title>
 <meta name="author" content="Rafael Vida">
 <meta name="description" content="Simulador de flash: sombras y tamaño angular, caída de luz por número guía, y obturador central frente al sol.">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -83,24 +93,52 @@
   .bscale{font-size:11px;color:var(--faint);text-align:center;font-family:var(--mono);margin-top:2px}
   .bflags{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
   .bflag{font-size:11px;padding:4px 9px;border-radius:7px;font-family:var(--sans);border:1px solid}
+
+  /* ---------- conmutador de idioma ---------- */
+  html[lang="es"] [data-lang="en"]{display:none!important}
+  html[lang="en"] [data-lang="es"]{display:none!important}
+  .langbar{position:fixed;top:14px;right:16px;z-index:100;display:flex;
+           background:rgba(15,19,26,.92);border:1px solid var(--line2);border-radius:8px;
+           overflow:hidden;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+  .langbar button{font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;
+                  background:transparent;border:0;color:var(--muted);padding:7px 11px;cursor:pointer;
+                  transition:background .15s,color .15s}
+  .langbar button+button{border-left:1px solid var(--line2)}
+  .langbar button:hover{color:var(--text)}
+  .langbar button.on{background:rgba(63,202,176,.14);color:var(--teal)}
+  .langbar button:focus-visible{outline:2px solid rgba(63,202,176,.6);outline-offset:-2px}
+  @media(max-width:720px){.langbar{top:8px;right:8px}}
+  /* hueco reservado para que el conmutador no tape el enlace de la guía */
+  .topbar{padding-right:96px}
+  @media(max-width:720px){.topbar{padding-right:84px}}
+  /* la etiqueta del control deja de ser :first-child al duplicarse */
+  .ctl .row>span[data-lang]{font-size:12px;color:var(--muted)}
 </style>
 </head>
 <body>
+
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
+
 <div class="wrap">
   <div class="topbar">
     <div>
-      <h1>Banco óptico de flash</h1>
+      <h1 data-lang="es">Banco óptico de flash</h1>
+      <h1 data-lang="en">Flash optical bench</h1>
       <div class="byline">Rafael Vida · Godox iT32 · GN18</div>
     </div>
-    <a class="guidelink" href="guia-simulador.html">Guía de uso ↗</a>
+    <a class="guidelink" href="guia-simulador.html" data-lang="es">Guía de uso ↗</a>
+    <a class="guidelink" href="guia-simulador.html" data-lang="en">User guide ↗</a>
   </div>
 
   <div class="chips" id="chips"></div>
   <div class="tabs">
-    <button class="tab on" data-tab="shadow">Sombras</button>
-    <button class="tab" data-tab="falloff">Caída de luz (GN)</button>
-    <button class="tab" data-tab="sun">Vencer al sol</button>
-    <button class="tab" data-tab="balance">Balance ambiente</button>
+    <button class="tab on" data-tab="shadow"><span data-lang="es">Sombras</span><span data-lang="en">Shadows</span></button>
+    <button class="tab" data-tab="falloff"><span data-lang="es">Caída de luz (GN)</span><span data-lang="en">Light falloff (GN)</span></button>
+    <button class="tab" data-tab="sun"><span data-lang="es">Vencer al sol</span><span data-lang="en">Overpowering the sun</span></button>
+    <button class="tab" data-tab="balance"><span data-lang="es">Balance ambiente</span><span data-lang="en">Ambient balance</span></button>
   </div>
 
   <!-- ===== panel sombras ===== -->
@@ -109,31 +147,36 @@
       <div class="vis">
         <figure>
           <canvas id="shadowCanvas" width="240" height="200"></canvas>
-          <figcaption>Sombra real · objeto en violeta · dirección = patrón de retrato</figcaption>
+          <figcaption data-lang="es">Sombra real · objeto en violeta · dirección = patrón de retrato</figcaption>
+          <figcaption data-lang="en">Actual shadow · object in violet · direction = portrait pattern</figcaption>
         </figure>
         <figure>
           <svg class="diag" id="diag" width="240" height="150"></svg>
-          <figcaption>Esquema en el eje óptico · rayos extremos</figcaption>
+          <figcaption data-lang="es">Esquema en el eje óptico · rayos extremos</figcaption>
+          <figcaption data-lang="en">Diagram along the optical axis · marginal rays</figcaption>
         </figure>
       </div>
       <div class="stats">
-        <div class="stat"><div class="l">Tamaño angular θ</div><div class="n am"><span id="st-theta">0</span><span class="u">°</span></div><div class="h" id="st-theta-h"></div></div>
-        <div class="stat"><div class="l">Penumbra</div><div class="n te"><span id="st-pen">0</span><span class="u">cm</span></div><div class="h" id="st-pen-h"></div></div>
-        <div class="stat"><div class="l">Umbra (radio)</div><div class="n"><span id="st-umbra">0</span><span class="u">cm</span></div><div class="h" id="st-umbra-h"></div></div>
-        <div class="stat"><div class="l">Desplaza. sombra</div><div class="n vi"><span id="st-shift">0</span><span class="u">cm</span></div><div class="h">por el ángulo de la luz</div></div>
+        <div class="stat"><div class="l" data-lang="es">Tamaño angular θ</div><div class="l" data-lang="en">Angular size θ</div><div class="n am"><span id="st-theta">0</span><span class="u">°</span></div><div class="h" id="st-theta-h"></div></div>
+        <div class="stat"><div class="l" data-lang="es">Penumbra</div><div class="l" data-lang="en">Penumbra</div><div class="n te"><span id="st-pen">0</span><span class="u">cm</span></div><div class="h" id="st-pen-h"></div></div>
+        <div class="stat"><div class="l" data-lang="es">Umbra (radio)</div><div class="l" data-lang="en">Umbra (radius)</div><div class="n"><span id="st-umbra">0</span><span class="u">cm</span></div><div class="h" id="st-umbra-h"></div></div>
+        <div class="stat"><div class="l" data-lang="es">Desplaza. sombra</div><div class="l" data-lang="en">Shadow shift</div><div class="n vi"><span id="st-shift">0</span><span class="u">cm</span></div><div class="h" data-lang="es">por el ángulo de la luz</div><div class="h" data-lang="en">due to the light angle</div></div>
       </div>
-      <p class="explain">La suavidad la fija <b class="am">θ = 2·arctan(d/2L)</b>: el tamaño angular de la fuente vista desde el sujeto. La penumbra en el fondo vale <b class="te">w = d·s/L</b>. El ángulo de la luz no cambia la dureza, solo desplaza la sombra: ahí están los patrones de retrato.</p>
+      <p class="explain" data-lang="es">La suavidad la fija <b class="am">θ = 2·arctan(d/2L)</b>: el tamaño angular de la fuente vista desde el sujeto. La penumbra en el fondo vale <b class="te">w = d·s/L</b>. El ángulo de la luz no cambia la dureza, solo desplaza la sombra: ahí están los patrones de retrato.</p>
+      <p class="explain" data-lang="en">Softness is set by <b class="am">θ = 2·arctan(d/2L)</b>: the angular size of the source as seen from the subject. The penumbra on the background measures <b class="te">w = d·s/L</b>. The angle of the light does not change its hardness, it only displaces the shadow: that is where the portrait patterns live.</p>
     </div>
     <div class="controls">
-      <div class="ct">Geometría</div>
-      <div class="ctl"><div class="row"><span>Diámetro de fuente d</span><span class="val"><span id="v-d">7</span><em>cm</em></span></div><input id="r-d" type="range" min="1" max="150" step="1" value="7"></div>
-      <div class="ctl"><div class="row"><span>Distancia luz → sujeto L</span><span class="val"><span id="v-L">150</span><em>cm</em></span></div><input id="r-L" type="range" min="30" max="400" step="5" value="150"></div>
-      <div class="ctl"><div class="row"><span>Distancia sujeto → fondo s</span><span class="val"><span id="v-s">60</span><em>cm</em></span></div><input id="r-s" type="range" min="2" max="300" step="2" value="60"></div>
-      <div class="ctl"><div class="row"><span>Tamaño del rasgo</span><span class="val"><span id="v-occ">8</span><em>cm</em></span></div><input id="r-occ" type="range" min="2" max="40" step="1" value="8"></div>
+      <div class="ct" data-lang="es">Geometría</div>
+      <div class="ct" data-lang="en">Geometry</div>
+      <div class="ctl"><div class="row"><span data-lang="es">Diámetro de fuente d</span><span data-lang="en">Source diameter d</span><span class="val"><span id="v-d">7</span><em>cm</em></span></div><input id="r-d" type="range" min="1" max="150" step="1" value="7"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Distancia luz → sujeto L</span><span data-lang="en">Light → subject distance L</span><span class="val"><span id="v-L">150</span><em>cm</em></span></div><input id="r-L" type="range" min="30" max="400" step="5" value="150"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Distancia sujeto → fondo s</span><span data-lang="en">Subject → background distance s</span><span class="val"><span id="v-s">60</span><em>cm</em></span></div><input id="r-s" type="range" min="2" max="300" step="2" value="60"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Tamaño del rasgo</span><span data-lang="en">Feature size</span><span class="val"><span id="v-occ">8</span><em>cm</em></span></div><input id="r-occ" type="range" min="2" max="40" step="1" value="8"></div>
       <div class="sep"></div>
-      <div class="ctl"><div class="row"><span>Ángulo lateral de la luz</span><span class="val"><span id="v-az">20</span><em>°</em></span></div><input id="r-az" type="range" min="-60" max="60" step="1" value="20"></div>
-      <div class="ctl"><div class="row"><span>Altura de la luz</span><span class="val"><span id="v-el">15</span><em>°</em></span></div><input id="r-el" type="range" min="-20" max="50" step="1" value="15"></div>
-      <div class="hint">El rasgo que arroja sombra: ~3 cm una nariz, ~20 cm una cabeza.</div>
+      <div class="ctl"><div class="row"><span data-lang="es">Ángulo lateral de la luz</span><span data-lang="en">Lateral angle of the light</span><span class="val"><span id="v-az">20</span><em>°</em></span></div><input id="r-az" type="range" min="-60" max="60" step="1" value="20"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Altura de la luz</span><span data-lang="en">Height of the light</span><span class="val"><span id="v-el">15</span><em>°</em></span></div><input id="r-el" type="range" min="-20" max="50" step="1" value="15"></div>
+      <div class="hint" data-lang="es">El rasgo que arroja sombra: ~3 cm una nariz, ~20 cm una cabeza.</div>
+      <div class="hint" data-lang="en">The feature casting the shadow: ~3 cm for a nose, ~20 cm for a head.</div>
     </div>
   </div>
 
@@ -141,28 +184,31 @@
   <div class="grid" id="panel-falloff" style="display:none">
     <div>
       <div class="seg">
-        <button class="segbtn on" data-metric="f">Diafragma necesario</button>
-        <button class="segbtn" data-metric="ev">Iluminancia relativa (EV)</button>
+        <button class="segbtn on" data-metric="f"><span data-lang="es">Diafragma necesario</span><span data-lang="en">Aperture required</span></button>
+        <button class="segbtn" data-metric="ev"><span data-lang="es">Iluminancia relativa (EV)</span><span data-lang="en">Relative illuminance (EV)</span></button>
       </div>
       <div style="background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px">
         <canvas id="falloffCanvas" width="580" height="300"></canvas>
       </div>
       <div class="stats">
-        <div class="stat"><div class="l">GN efectivo</div><div class="n am" id="st-gneff">18</div><div class="h" id="st-gneff-h"></div></div>
+        <div class="stat"><div class="l" data-lang="es">GN efectivo</div><div class="l" data-lang="en">Effective GN</div><div class="n am" id="st-gneff">18</div><div class="h" id="st-gneff-h"></div></div>
         <div class="stat"><div class="l" id="st-fref-l">Diafragma</div><div class="n te" id="st-fref">f/9</div><div class="h" id="st-fref-h"></div></div>
-        <div class="stat"><div class="l">Ley del cuadrado</div><div class="n rd">−2<span class="u">EV</span></div><div class="h">al duplicar la distancia</div></div>
-        <div class="stat"><div class="l">Caída en el fondo</div><div class="n vi" id="st-bg">−2.0<span class="u">EV</span></div><div class="h" id="st-bg-h"></div></div>
+        <div class="stat"><div class="l" data-lang="es">Ley del cuadrado</div><div class="l" data-lang="en">Inverse-square law</div><div class="n rd">−2<span class="u">EV</span></div><div class="h" data-lang="es">al duplicar la distancia</div><div class="h" data-lang="en">on doubling the distance</div></div>
+        <div class="stat"><div class="l" data-lang="es">Caída en el fondo</div><div class="l" data-lang="en">Falloff at the background</div><div class="n vi" id="st-bg">−2.0<span class="u">EV</span></div><div class="h" id="st-bg-h"></div></div>
       </div>
-      <p class="explain">Exposición a potencia plena: <b class="te">f = GN/D</b>, con <b class="am">GN_ef = GN·√(ISO/100)·2^(−pérdida/2)</b>. Cada parada de pérdida divide el GN por √2. La iluminancia cae como 1/D², por eso acercar la luz oscurece el fondo y separa al sujeto.</p>
+      <p class="explain" data-lang="es">Exposición a potencia plena: <b class="te">f = GN/D</b>, con <b class="am">GN_ef = GN·√(ISO/100)·2^(−pérdida/2)</b>. Cada parada de pérdida divide el GN por √2. La iluminancia cae como 1/D², por eso acercar la luz oscurece el fondo y separa al sujeto.</p>
+      <p class="explain" data-lang="en">Exposure at full power: <b class="te">f = GN/D</b>, with <b class="am">GN_ef = GN·√(ISO/100)·2^(−loss/2)</b>. Every stop of loss divides the guide number by √2. Illuminance falls as 1/D², which is why bringing the light closer darkens the background and separates the subject.</p>
     </div>
     <div class="controls">
-      <div class="ct">Fotometría</div>
-      <div class="ctl"><div class="row"><span>Número guía GN</span><span class="val"><span id="v-gn">18</span></span></div><input id="r-gn" type="range" min="5" max="80" step="1" value="18"></div>
-      <div class="ctl"><div class="row"><span>ISO</span><span class="val"><span id="v-iso">100</span></span></div><input id="r-iso" type="range" min="100" max="6400" step="100" value="100"></div>
-      <div class="ctl"><div class="row"><span>Distancia de trabajo</span><span class="val"><span id="v-ref">2</span><em>m</em></span></div><input id="r-ref" type="range" min="0.5" max="8" step="0.25" value="2"></div>
-      <div class="ctl"><div class="row"><span>Fondo por detrás</span><span class="val"><span id="v-bg">2</span><em>m</em></span></div><input id="r-bg" type="range" min="0.5" max="6" step="0.25" value="2"></div>
-      <div class="ctl"><div class="row"><span>Pérdida del modificador</span><span class="val"><span id="v-loss">1</span><em>EV</em></span></div><input id="r-loss" type="range" min="0" max="3" step="0.5" value="1"></div>
-      <div class="hint">Godox iT32: GN18 (m, ISO100). El "32" del nombre no es el número guía.</div>
+      <div class="ct" data-lang="es">Fotometría</div>
+      <div class="ct" data-lang="en">Photometry</div>
+      <div class="ctl"><div class="row"><span data-lang="es">Número guía GN</span><span data-lang="en">Guide number GN</span><span class="val"><span id="v-gn">18</span></span></div><input id="r-gn" type="range" min="5" max="80" step="1" value="18"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">ISO</span><span data-lang="en">ISO</span><span class="val"><span id="v-iso">100</span></span></div><input id="r-iso" type="range" min="100" max="6400" step="100" value="100"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Distancia de trabajo</span><span data-lang="en">Working distance</span><span class="val"><span id="v-ref">2</span><em>m</em></span></div><input id="r-ref" type="range" min="0.5" max="8" step="0.25" value="2"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Fondo por detrás</span><span data-lang="en">Background behind</span><span class="val"><span id="v-bg">2</span><em>m</em></span></div><input id="r-bg" type="range" min="0.5" max="6" step="0.25" value="2"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Pérdida del modificador</span><span data-lang="en">Modifier loss</span><span class="val"><span id="v-loss">1</span><em>EV</em></span></div><input id="r-loss" type="range" min="0" max="3" step="0.5" value="1"></div>
+      <div class="hint" data-lang="es">Godox iT32: GN18 (m, ISO100). El "32" del nombre no es el número guía.</div>
+      <div class="hint" data-lang="en">Godox iT32: GN18 (m, ISO100). The "32" in the name is not the guide number.</div>
     </div>
   </div>
 
@@ -173,24 +219,27 @@
         <canvas id="sunCanvas" width="580" height="300"></canvas>
       </div>
       <div class="stats">
-        <div class="stat"><div class="l">Ambiente con central</div><div class="n te" id="st-ambleaf">0</div><div class="h" id="st-ambleaf-h"></div></div>
-        <div class="stat"><div class="l">Ambiente plano focal 1/200</div><div class="n rd" id="st-ambfp">0</div><div class="h" id="st-ambfp-h"></div></div>
-        <div class="stat"><div class="l">Ventaja del central</div><div class="n vi" id="st-adv">0</div><div class="h">paradas de oscurecimiento</div></div>
-        <div class="stat"><div class="l">Margen del flash</div><div class="n am" id="st-head">0</div><div class="h" id="st-head-h"></div></div>
+        <div class="stat"><div class="l" data-lang="es">Ambiente con central</div><div class="l" data-lang="en">Ambient with leaf shutter</div><div class="n te" id="st-ambleaf">0</div><div class="h" id="st-ambleaf-h"></div></div>
+        <div class="stat"><div class="l" data-lang="es">Ambiente plano focal 1/200</div><div class="l" data-lang="en">Ambient, focal-plane 1/200</div><div class="n rd" id="st-ambfp">0</div><div class="h" id="st-ambfp-h"></div></div>
+        <div class="stat"><div class="l" data-lang="es">Ventaja del central</div><div class="l" data-lang="en">Leaf-shutter advantage</div><div class="n vi" id="st-adv">0</div><div class="h" data-lang="es">paradas de oscurecimiento</div><div class="h" data-lang="en">stops of darkening</div></div>
+        <div class="stat"><div class="l" data-lang="es">Margen del flash</div><div class="l" data-lang="en">Flash headroom</div><div class="n am" id="st-head">0</div><div class="h" id="st-head-h"></div></div>
       </div>
-      <p class="explain">El obturador central sincroniza a <b class="te">todas</b> sus velocidades. Eliges un tiempo rápido para subexponer el ambiente <b class="vi">log₂(t_neutro/t_sinc)</b> paradas mientras el flash sigue exponiendo el sujeto. El plano focal corta en su X-sync (aquí 1/200) y por encima necesita HSS, que recorta potencia. El flash basta cuando <b class="am">GN_ef ≥ f·D</b>, margen <b class="am">2·log₂(GN_ef / (f·D))</b>.</p>
+      <p class="explain" data-lang="es">El obturador central sincroniza a <b class="te">todas</b> sus velocidades. Eliges un tiempo rápido para subexponer el ambiente <b class="vi">log₂(t_neutro/t_sinc)</b> paradas mientras el flash sigue exponiendo el sujeto. El plano focal corta en su X-sync (aquí 1/200) y por encima necesita HSS, que recorta potencia. El flash basta cuando <b class="am">GN_ef ≥ f·D</b>, margen <b class="am">2·log₂(GN_ef / (f·D))</b>.</p>
+      <p class="explain" data-lang="en">A leaf shutter synchronises at <b class="te">every</b> one of its speeds. You pick a fast time to underexpose the ambient by <b class="vi">log₂(t_neutro/t_sinc)</b> stops while the flash carries on exposing the subject. A focal-plane shutter stops at its X-sync (1/200 here) and above it needs HSS, which costs power. The flash suffices when <b class="am">GN_ef ≥ f·D</b>, with headroom <b class="am">2·log₂(GN_ef / (f·D))</b>.</p>
     </div>
     <div class="controls">
-      <div class="ct">Luz y obturador</div>
-      <div class="ctl"><div class="row"><span>Luz ambiente (EV, ISO100)</span><span class="val"><span id="v-amb">15</span></span></div><input id="r-amb" type="range" min="12" max="16" step="0.5" value="15"></div>
-      <div class="ctl"><div class="row"><span>ISO</span><span class="val"><span id="v-siso">100</span></span></div><input id="r-siso" type="range" min="100" max="1600" step="100" value="100"></div>
-      <div class="ctl"><div class="row"><span>Diafragma</span><span class="val"><span id="v-ap">f/8</span></span></div><input id="r-ap" type="range" min="0" max="7" step="1" value="4"></div>
-      <div class="ctl"><div class="row"><span>Sincronización (central)</span></div><select id="r-sync"><option value="500">1/500</option><option value="800">1/800</option><option value="1000" selected>1/1000</option><option value="1600">1/1600</option><option value="2000">1/2000</option><option value="4000">1/4000</option></select></div>
+      <div class="ct" data-lang="es">Luz y obturador</div>
+      <div class="ct" data-lang="en">Light and shutter</div>
+      <div class="ctl"><div class="row"><span data-lang="es">Luz ambiente (EV, ISO100)</span><span data-lang="en">Ambient light (EV, ISO100)</span><span class="val"><span id="v-amb">15</span></span></div><input id="r-amb" type="range" min="12" max="16" step="0.5" value="15"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">ISO</span><span data-lang="en">ISO</span><span class="val"><span id="v-siso">100</span></span></div><input id="r-siso" type="range" min="100" max="1600" step="100" value="100"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Diafragma</span><span data-lang="en">Aperture</span><span class="val"><span id="v-ap">f/8</span></span></div><input id="r-ap" type="range" min="0" max="7" step="1" value="4"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Sincronización (central)</span><span data-lang="en">Sync speed (leaf shutter)</span></div><select id="r-sync"><option value="500">1/500</option><option value="800">1/800</option><option value="1000" selected>1/1000</option><option value="1600">1/1600</option><option value="2000">1/2000</option><option value="4000">1/4000</option></select></div>
       <div class="sep"></div>
-      <div class="ctl"><div class="row"><span>Distancia flash</span><span class="val"><span id="v-sd">2</span><em>m</em></span></div><input id="r-sd" type="range" min="1" max="6" step="0.5" value="2"></div>
-      <div class="ctl"><div class="row"><span>Número guía GN</span><span class="val"><span id="v-sgn">18</span></span></div><input id="r-sgn" type="range" min="5" max="80" step="1" value="18"></div>
-      <div class="ctl"><div class="row"><span>Pérdida del modificador</span><span class="val"><span id="v-sloss">1</span><em>EV</em></span></div><input id="r-sloss" type="range" min="0" max="3" step="0.5" value="1"></div>
-      <div class="hint">Pleno sol ≈ EV15 (regla del 16). Plano focal de referencia: X-sync 1/200.</div>
+      <div class="ctl"><div class="row"><span data-lang="es">Distancia flash</span><span data-lang="en">Flash distance</span><span class="val"><span id="v-sd">2</span><em>m</em></span></div><input id="r-sd" type="range" min="1" max="6" step="0.5" value="2"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Número guía GN</span><span data-lang="en">Guide number GN</span><span class="val"><span id="v-sgn">18</span></span></div><input id="r-sgn" type="range" min="5" max="80" step="1" value="18"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Pérdida del modificador</span><span data-lang="en">Modifier loss</span><span class="val"><span id="v-sloss">1</span><em>EV</em></span></div><input id="r-sloss" type="range" min="0" max="3" step="0.5" value="1"></div>
+      <div class="hint" data-lang="es">Pleno sol ≈ EV15 (regla del 16). Plano focal de referencia: X-sync 1/200.</div>
+      <div class="hint" data-lang="en">Full sun ≈ EV15 (sunny 16 rule). Reference focal-plane shutter: X-sync 1/200.</div>
     </div>
   </div>
 
@@ -202,42 +251,46 @@
         <button class="segbtn on" data-v="ttl">TTL</button>
       </div>
       <div class="seg" data-g="shut">
-        <button class="segbtn on" data-v="leaf">Obturador central</button>
-        <button class="segbtn" data-v="fp">Plano focal</button>
+        <button class="segbtn on" data-v="leaf"><span data-lang="es">Obturador central</span><span data-lang="en">Leaf shutter</span></button>
+        <button class="segbtn" data-v="fp"><span data-lang="es">Plano focal</span><span data-lang="en">Focal-plane shutter</span></button>
       </div>
       <div style="background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:16px 16px 14px">
         <div class="bbar">
-          <div class="lab"><span>Sujeto (flash)</span><span class="v" id="b-subv">0.0 EV</span></div>
+          <div class="lab"><span data-lang="es">Sujeto (flash)</span><span data-lang="en">Subject (flash)</span><span class="v" id="b-subv">0.0 EV</span></div>
           <div class="btrack"><div class="bzero"></div><div class="bfill" id="b-subfill"></div></div>
         </div>
         <div class="bbar" style="margin-bottom:6px">
-          <div class="lab"><span>Fondo (ambiente)</span><span class="v" id="b-bgv">0.0 EV</span></div>
+          <div class="lab"><span data-lang="es">Fondo (ambiente)</span><span data-lang="en">Background (ambient)</span><span class="v" id="b-bgv">0.0 EV</span></div>
           <div class="btrack"><div class="bzero"></div><div class="bfill" id="b-bgfill"></div></div>
         </div>
-        <div class="bscale">−4 EV ······ 0 correcto ······ +4 EV</div>
+        <div class="bscale" data-lang="es">−4 EV ······ 0 correcto ······ +4 EV</div>
+        <div class="bscale" data-lang="en">−4 EV ······ 0 correct ······ +4 EV</div>
       </div>
       <div class="bflags" id="b-flags"></div>
       <div class="stats">
-        <div class="stat"><div class="l">Sujeto</div><div class="n te"><span id="b-st-sub">0</span><span class="u">EV</span></div><div class="h" id="b-st-sub-h"></div></div>
-        <div class="stat"><div class="l">Fondo</div><div class="n vi"><span id="b-st-bg">0</span><span class="u">EV</span></div><div class="h" id="b-st-bg-h"></div></div>
-        <div class="stat"><div class="l">Relación flash/amb.</div><div class="n am"><span id="b-st-ratio">0</span><span class="u">EV</span></div><div class="h" id="b-st-ratio-h"></div></div>
-        <div class="stat"><div class="l">Potencia flash</div><div class="n" id="b-st-pow">1/4</div><div class="h" id="b-st-pow-h"></div></div>
+        <div class="stat"><div class="l" data-lang="es">Sujeto</div><div class="l" data-lang="en">Subject</div><div class="n te"><span id="b-st-sub">0</span><span class="u">EV</span></div><div class="h" id="b-st-sub-h"></div></div>
+        <div class="stat"><div class="l" data-lang="es">Fondo</div><div class="l" data-lang="en">Background</div><div class="n vi"><span id="b-st-bg">0</span><span class="u">EV</span></div><div class="h" id="b-st-bg-h"></div></div>
+        <div class="stat"><div class="l" data-lang="es">Relación flash/amb.</div><div class="l" data-lang="en">Flash/ambient ratio</div><div class="n am"><span id="b-st-ratio">0</span><span class="u">EV</span></div><div class="h" id="b-st-ratio-h"></div></div>
+        <div class="stat"><div class="l" data-lang="es">Potencia flash</div><div class="l" data-lang="en">Flash power</div><div class="n" id="b-st-pow">1/4</div><div class="h" id="b-st-pow-h"></div></div>
       </div>
-      <p class="explain">Cada mando toca solo lo suyo: la <b class="am">obturación</b> es ambiente puro (no entra en el flash mientras sincronices), la <b class="te">potencia</b> y la <b class="te">distancia</b> son flash puro. En el cociente <b class="vi">flash/ambiente</b> se cancelan el ISO y el diafragma, así que el balance lo mueven el tiempo y la potencia, no la apertura, que solo te cuesta profundidad de campo. En TTL la cámara fija la potencia para clavar al sujeto, y por eso subir el ISO sube solo el fondo. El obturador central libera el tiempo hasta 1/2000 sin HSS, con un único límite: a plena potencia el destello dura ~1/1000 s, así que a las velocidades más altas la ventana de obturación recorta parte del pulso y el aviso lo cuantifica en pasos.</p>
+      <p class="explain" data-lang="es">Cada mando toca solo lo suyo: la <b class="am">obturación</b> es ambiente puro (no entra en el flash mientras sincronices), la <b class="te">potencia</b> y la <b class="te">distancia</b> son flash puro. En el cociente <b class="vi">flash/ambiente</b> se cancelan el ISO y el diafragma, así que el balance lo mueven el tiempo y la potencia, no la apertura, que solo te cuesta profundidad de campo. En TTL la cámara fija la potencia para clavar al sujeto, y por eso subir el ISO sube solo el fondo. El obturador central libera el tiempo hasta 1/2000 sin HSS, con un único límite: a plena potencia el destello dura ~1/1000 s, así que a las velocidades más altas la ventana de obturación recorta parte del pulso y el aviso lo cuantifica en pasos.</p>
+      <p class="explain" data-lang="en">Each control touches only its own share: the <b class="am">shutter speed</b> is pure ambient (it does not reach the flash as long as you stay in sync), while <b class="te">power</b> and <b class="te">distance</b> are pure flash. ISO and aperture cancel out in the <b class="vi">flash/ambient</b> quotient, so the balance is moved by time and power, not by the aperture, which merely costs you depth of field. In TTL the camera sets the power to nail the subject, which is why raising the ISO lifts the background alone. A leaf shutter frees the shutter speed up to 1/2000 without HSS, with a single limit: at full power the burst lasts ~1/1000 s, so at the highest speeds the shutter window clips part of the pulse, and the warning quantifies that in stops.</p>
     </div>
     <div class="controls">
-      <div class="ct">Exposición</div>
-      <div class="ctl"><div class="row"><span>Luz ambiente (EV, ISO100)</span><span class="val"><span id="v-bamb">11</span></span></div><input id="r-bamb" type="range" min="5" max="16" step="0.5" value="11"></div>
-      <div class="ctl"><div class="row"><span>Obturación</span><span class="val"><span id="v-bsh">1/200</span></span></div><input id="r-bsh" type="range" min="0" max="9" step="1" value="4"></div>
-      <div class="ctl"><div class="row"><span>Diafragma</span><span class="val"><span id="v-bap">f/8</span></span></div><input id="r-bap" type="range" min="0" max="7" step="1" value="4"></div>
-      <div class="ctl"><div class="row"><span>ISO</span><span class="val"><span id="v-bis">100</span></span></div><input id="r-bis" type="range" min="0" max="6" step="1" value="0"></div>
+      <div class="ct" data-lang="es">Exposición</div>
+      <div class="ct" data-lang="en">Exposure</div>
+      <div class="ctl"><div class="row"><span data-lang="es">Luz ambiente (EV, ISO100)</span><span data-lang="en">Ambient light (EV, ISO100)</span><span class="val"><span id="v-bamb">11</span></span></div><input id="r-bamb" type="range" min="5" max="16" step="0.5" value="11"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Obturación</span><span data-lang="en">Shutter speed</span><span class="val"><span id="v-bsh">1/200</span></span></div><input id="r-bsh" type="range" min="0" max="9" step="1" value="4"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Diafragma</span><span data-lang="en">Aperture</span><span class="val"><span id="v-bap">f/8</span></span></div><input id="r-bap" type="range" min="0" max="7" step="1" value="4"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">ISO</span><span data-lang="en">ISO</span><span class="val"><span id="v-bis">100</span></span></div><input id="r-bis" type="range" min="0" max="6" step="1" value="0"></div>
       <div class="sep"></div>
-      <div class="ctl" id="b-powrow"><div class="row"><span>Potencia flash</span><span class="val"><span id="v-bfp">1/4</span></span></div><input id="r-bfp" type="range" min="0" max="7" step="1" value="2"></div>
-      <div class="ctl"><div class="row"><span>Distancia flash</span><span class="val"><span id="v-bd">2</span><em>m</em></span></div><input id="r-bd" type="range" min="1" max="6" step="0.5" value="2"></div>
-      <div class="ctl"><div class="row"><span>Duración flash (plena pot.)</span></div><select id="r-bdur"><option value="500">1/500</option><option value="700">1/700</option><option value="1000" selected>1/1000</option><option value="1500">1/1500</option><option value="2000">1/2000</option></select></div>
-      <div class="ctl"><div class="row"><span>Número guía GN</span><span class="val"><span id="v-bgn">18</span></span></div><input id="r-bgn" type="range" min="5" max="80" step="1" value="18"></div>
-      <div class="ctl"><div class="row"><span>Pérdida del modificador</span><span class="val"><span id="v-bloss">1</span><em>EV</em></span></div><input id="r-bloss" type="range" min="0" max="3" step="0.5" value="1"></div>
-      <div class="hint">En TTL la potencia la fija la cámara y el deslizador queda en gris. EV ambiente: interior ≈ 10–11, nublado ≈ 13, pleno sol = 15.</div>
+      <div class="ctl" id="b-powrow"><div class="row"><span data-lang="es">Potencia flash</span><span data-lang="en">Flash power</span><span class="val"><span id="v-bfp">1/4</span></span></div><input id="r-bfp" type="range" min="0" max="7" step="1" value="2"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Distancia flash</span><span data-lang="en">Flash distance</span><span class="val"><span id="v-bd">2</span><em>m</em></span></div><input id="r-bd" type="range" min="1" max="6" step="0.5" value="2"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Duración flash (plena pot.)</span><span data-lang="en">Flash duration (full power)</span></div><select id="r-bdur"><option value="500">1/500</option><option value="700">1/700</option><option value="1000" selected>1/1000</option><option value="1500">1/1500</option><option value="2000">1/2000</option></select></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Número guía GN</span><span data-lang="en">Guide number GN</span><span class="val"><span id="v-bgn">18</span></span></div><input id="r-bgn" type="range" min="5" max="80" step="1" value="18"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Pérdida del modificador</span><span data-lang="en">Modifier loss</span><span class="val"><span id="v-bloss">1</span><em>EV</em></span></div><input id="r-bloss" type="range" min="0" max="3" step="0.5" value="1"></div>
+      <div class="hint" data-lang="es">En TTL la potencia la fija la cámara y el deslizador queda en gris. EV ambiente: interior ≈ 10–11, nublado ≈ 13, pleno sol = 15.</div>
+      <div class="hint" data-lang="en">In TTL the camera sets the power and the slider greys out. Ambient EV: indoors ≈ 10–11, overcast ≈ 13, full sun = 15.</div>
     </div>
   </div>
 
@@ -246,16 +299,103 @@
 
 <script>
 "use strict";
+/* ---------- conmutador de idioma / language switch ---------- */
 (function(){
+  var KEY="pn-lang";
+  var META={
+    es:{
+      title:"Banco óptico de flash · Rafael Vida",
+      desc:"Simulador de flash: sombras y tamaño angular, caída de luz por número guía, y obturador central frente al sol."
+    },
+    en:{
+      title:"Flash optical bench · Rafael Vida",
+      desc:"Flash simulator: shadows and angular size, light falloff from the guide number, and the leaf shutter against the sun."
+    }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
+
+<script>
+"use strict";
+(function(){
+  /* ---------- cadenas generadas desde JS / JS-generated strings ---------- */
+  var T={
+    es:{
+      mBare:"Flash desnudo", mDome:"Domo magnético", mCard:"Tarjeta rebote", mCeil:"Rebote techo",
+      mUmb:"Paraguas 80", mSb40:"Softbox 40", mSb60:"Softbox 60", mOcta:"Octa 95",
+      hard:"luz dura", mid:"intermedia", soft:"luz suave",
+      transition:" mm de transición", fullShadow:"sombra plena", noUmbra:"sin umbra",
+      dSource:"fuente", dSubject:"sujeto", dBackground:"fondo",
+      axDist:"distancia (m)", axShutter:"velocidad de obturación", neutralAmb:"ambiente neutro",
+      base:"base ", apertureAt:"Diafragma a ", metres:" m",
+      standard:"estándar ≈ f/", bgAt:"fondo a +",
+      skyUnder:"cielo bajo neutro", brightAmb:"ambiente claro",
+      xsyncLimited:"limitado por X-sync", noDarkening:"no oscurece",
+      enoughPower:"potencia suficiente", shortBy:"falta ", evUnit:" EV",
+      wellExposed:"bien expuesto", overexposed:"sobreexpuesto", darkSubject:"oscuro",
+      bgSunk:"fondo hundido", bgBright:"fondo claro", bgNeutral:"fondo neutro",
+      ambientOnly:"solo ambiente", flashLeads:"manda el flash", ambientLeads:"manda el ambiente",
+      minPow:"mín", setByTtl:"la fija el TTL", setManual:"fijada (manual)",
+      fAboveSync:"por encima de X-sync 1/200 · necesita HSS",
+      fClipA:"recorte del flash −", fClipB:" EV · pulso ", fClipC:" ms vs ventana ", fClipD:" ms",
+      fSubjBlown:"sujeto quemado", fBgBlown:"fondo quemado",
+      fNoPower:"falta potencia · acerca el flash o sube ISO",
+      fSubjDark:"sujeto oscuro · sube potencia"
+    },
+    en:{
+      mBare:"Bare bulb", mDome:"Magnetic dome", mCard:"Bounce card", mCeil:"Ceiling bounce",
+      mUmb:"Umbrella 80", mSb40:"Softbox 40", mSb60:"Softbox 60", mOcta:"Octa 95",
+      hard:"hard light", mid:"intermediate", soft:"soft light",
+      transition:" mm of transition", fullShadow:"full shadow", noUmbra:"no umbra",
+      dSource:"source", dSubject:"subject", dBackground:"backgr.",
+      axDist:"distance (m)", axShutter:"shutter speed", neutralAmb:"neutral ambient",
+      base:"base ", apertureAt:"Aperture at ", metres:" m",
+      standard:"standard ≈ f/", bgAt:"background at +",
+      skyUnder:"sky below neutral", brightAmb:"bright ambient",
+      xsyncLimited:"limited by X-sync", noDarkening:"no darkening",
+      enoughPower:"power to spare", shortBy:"short by ", evUnit:" EV",
+      wellExposed:"well exposed", overexposed:"overexposed", darkSubject:"dark",
+      bgSunk:"background sunk", bgBright:"bright background", bgNeutral:"neutral background",
+      ambientOnly:"ambient only", flashLeads:"flash dominates", ambientLeads:"ambient dominates",
+      minPow:"min", setByTtl:"set by TTL", setManual:"set manually",
+      fAboveSync:"above X-sync 1/200 · HSS required",
+      fClipA:"flash clipping −", fClipB:" EV · pulse ", fClipC:" ms vs window ", fClipD:" ms",
+      fSubjBlown:"subject blown", fBgBlown:"background blown",
+      fNoPower:"not enough power · move the flash closer or raise the ISO",
+      fSubjDark:"subject dark · raise the power"
+    }
+  };
+  function t(k){ return (T[document.documentElement.lang]||T.es)[k]; }
+
   var MODS=[
-    {k:"bare",label:"Flash desnudo",d:4,loss:0},
-    {k:"dome",label:"Domo magnético",d:7,loss:1},
-    {k:"card",label:"Tarjeta rebote",d:10,loss:1.5},
-    {k:"ceil",label:"Rebote techo",d:150,loss:2.5},
-    {k:"umb",label:"Paraguas 80",d:80,loss:1},
-    {k:"sb40",label:"Softbox 40",d:40,loss:1.5},
-    {k:"sb60",label:"Softbox 60",d:60,loss:1.5},
-    {k:"octa",label:"Octa 95",d:95,loss:2}
+    {k:"bare",tk:"mBare",d:4,loss:0},
+    {k:"dome",tk:"mDome",d:7,loss:1},
+    {k:"card",tk:"mCard",d:10,loss:1.5},
+    {k:"ceil",tk:"mCeil",d:150,loss:2.5},
+    {k:"umb",tk:"mUmb",d:80,loss:1},
+    {k:"sb40",tk:"mSb40",d:40,loss:1.5},
+    {k:"sb60",tk:"mSb60",d:60,loss:1.5},
+    {k:"octa",tk:"mOcta",d:95,loss:2}
   ];
   var FSTOPS=[1,1.4,2,2.8,4,5.6,8,11,16,22,32,45];
   var APS=[2,2.8,4,5.6,8,11,16,22];
@@ -264,11 +404,14 @@
   function num(id){return parseFloat($(id).value);}
   function evStr(x){return (x>=0?"+":"−")+Math.abs(x).toFixed(1);}
 
-  var activeMod="dome",chips=$("chips");
+  var activeMod="dome",chips=$("chips"),chipBtns=[];
+  function chipHTML(m){return t(m.tk)+'<span class="v">'+m.d+'cm·−'+m.loss+'EV</span>';}
+  function relabelChips(){chipBtns.forEach(function(o){o.b.innerHTML=chipHTML(o.m);});}
   MODS.forEach(function(m){
     var b=document.createElement("button");
     b.className="chip"+(m.k===activeMod?" on":"");
-    b.innerHTML=m.label+'<span class="v">'+m.d+'cm·−'+m.loss+'EV</span>';
+    b.innerHTML=chipHTML(m);
+    chipBtns.push({b:b,m:m});
     b.onclick=function(){
       activeMod=m.k;
       Array.prototype.forEach.call(chips.children,function(c){c.classList.remove("on");});
@@ -282,11 +425,11 @@
     chips.appendChild(b);
   });
 
-  Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(t){
-    t.onclick=function(){
+  Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(tb){
+    tb.onclick=function(){
       document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("on");});
-      t.classList.add("on");
-      var which=t.dataset.tab;
+      tb.classList.add("on");
+      var which=tb.dataset.tab;
       $("panel-shadow").style.display=which==="shadow"?"grid":"none";
       $("panel-falloff").style.display=which==="falloff"?"grid":"none";
       $("panel-sun").style.display=which==="sun"?"grid":"none";
@@ -342,11 +485,11 @@
     var theta=2*Math.atan(R/slant)*180/Math.PI;
     var pen=d*s/L,umbraR=geomEdge-pen/2,shift=s*Math.hypot(Math.tan(az),Math.tan(el));
     $("st-theta").textContent=theta.toFixed(1);
-    $("st-theta-h").textContent=theta<5?"luz dura":theta<15?"intermedia":"luz suave";
+    $("st-theta-h").textContent=theta<5?t("hard"):theta<15?t("mid"):t("soft");
     $("st-pen").textContent=pen.toFixed(1);
-    $("st-pen-h").textContent=(pen*10).toFixed(0)+" mm de transición";
+    $("st-pen-h").textContent=(pen*10).toFixed(0)+t("transition");
     $("st-umbra").textContent=umbraR>0?umbraR.toFixed(1):"0";
-    $("st-umbra-h").textContent=umbraR>0?"sombra plena":"sin umbra";
+    $("st-umbra-h").textContent=umbraR>0?t("fullShadow"):t("noUmbra");
     $("st-shift").textContent=shift.toFixed(0);
     renderDiag(d,L,s,occD);
   }
@@ -370,9 +513,9 @@
     g+='<line x1="'+x0+'" y1="'+sT+'" x2="'+x0+'" y2="'+sB+'" stroke="#f4b13c" stroke-width="4" stroke-linecap="round"/>';
     g+='<line x1="'+xOcc+'" y1="'+oT+'" x2="'+xOcc+'" y2="'+oB+'" stroke="#e7eaef" stroke-width="4" stroke-linecap="round"/>';
     g+='<line x1="'+xScr+'" y1="10" x2="'+xScr+'" y2="'+(h-10)+'" stroke="#2c3644" stroke-width="2"/>';
-    g+='<text x="'+x0+'" y="'+(h-4)+'" font-size="9" fill="#5b636f" font-family="monospace">fuente</text>';
-    g+='<text x="'+(xOcc-12)+'" y="'+(h-4)+'" font-size="9" fill="#5b636f" font-family="monospace">sujeto</text>';
-    g+='<text x="'+(xScr-28)+'" y="'+(h-4)+'" font-size="9" fill="#5b636f" font-family="monospace">fondo</text>';
+    g+='<text x="'+x0+'" y="'+(h-4)+'" font-size="9" fill="#5b636f" font-family="monospace">'+t("dSource")+'</text>';
+    g+='<text x="'+(xOcc-12)+'" y="'+(h-4)+'" font-size="9" fill="#5b636f" font-family="monospace">'+t("dSubject")+'</text>';
+    g+='<text x="'+(xScr-28)+'" y="'+(h-4)+'" font-size="9" fill="#5b636f" font-family="monospace">'+t("dBackground")+'</text>';
     $("diag").innerHTML=g;
   }
 
@@ -392,9 +535,9 @@
     function Yv(val){return y0+(val-ymin)/(ymax-ymin)*(y1-y0);}
     ctx.font="11px 'IBM Plex Mono', monospace";ctx.textAlign="center";
     for(var gx=1;gx<=8;gx++){var px=X(gx);ctx.strokeStyle="#222a35";ctx.beginPath();ctx.moveTo(px,y1);ctx.lineTo(px,y0);ctx.stroke();ctx.fillStyle="#878f9d";ctx.fillText(gx,px,y0+18);}
-    ctx.fillStyle="#5b636f";ctx.fillText("distancia (m)",(x0+x1)/2,H-6);
+    ctx.fillStyle="#5b636f";ctx.fillText(t("axDist"),(x0+x1)/2,H-6);
     ctx.textAlign="right";
-    for(var t=0;t<=4;t++){var yv=ymin+(ymax-ymin)*t/4,py=Yv(yv);ctx.strokeStyle="#1a212b";ctx.beginPath();ctx.moveTo(x0,py);ctx.lineTo(x1,py);ctx.stroke();ctx.fillStyle="#878f9d";ctx.fillText(yv.toFixed(1),x0-6,py+4);}
+    for(var gy=0;gy<=4;gy++){var yv=ymin+(ymax-ymin)*gy/4,py=Yv(yv);ctx.strokeStyle="#1a212b";ctx.beginPath();ctx.moveTo(x0,py);ctx.lineTo(x1,py);ctx.stroke();ctx.fillStyle="#878f9d";ctx.fillText(yv.toFixed(1),x0-6,py+4);}
     ctx.save();ctx.setLineDash([4,3]);ctx.strokeStyle="#f4b13c";ctx.beginPath();ctx.moveTo(X(refD),y1);ctx.lineTo(X(refD),y0);ctx.stroke();ctx.restore();
     if(met==="ev"){ctx.strokeStyle="#2c3644";ctx.beginPath();ctx.moveTo(x0,Yv(0));ctx.lineTo(x1,Yv(0));ctx.stroke();}
     ctx.strokeStyle=met==="f"?"#3fcab0":"#ef6f53";ctx.lineWidth=2.2;ctx.beginPath();
@@ -402,12 +545,12 @@
     if(met==="f"){ctx.fillStyle="#f4b13c";ctx.beginPath();ctx.arc(X(refD),Yv(gnEff/refD),4,0,Math.PI*2);ctx.fill();}
     var fRef=gnEff/refD,bgFall=2*Math.log2((refD+bgExtra)/refD);
     $("st-gneff").textContent=gnEff.toFixed(1);
-    $("st-gneff-h").textContent="base "+gn+" · −"+loss.toFixed(1)+" EV · ISO"+iso;
-    $("st-fref-l").textContent="Diafragma a "+refD+" m";
+    $("st-gneff-h").textContent=t("base")+gn+" · −"+loss.toFixed(1)+" EV · ISO"+iso;
+    $("st-fref-l").textContent=t("apertureAt")+refD+t("metres");
     $("st-fref").textContent="f/"+fRef.toFixed(1);
-    $("st-fref-h").textContent="estándar ≈ f/"+nearestF(fRef);
+    $("st-fref-h").textContent=t("standard")+nearestF(fRef);
     $("st-bg").innerHTML="−"+bgFall.toFixed(1)+'<span class="u">EV</span>';
-    $("st-bg-h").textContent="fondo a +"+bgExtra+" m";
+    $("st-bg-h").textContent=t("bgAt")+bgExtra+t("metres");
   }
 
   /* ---- vencer al sol ---- */
@@ -432,14 +575,14 @@
     function Y(v){return y0+(v-ymin)/(ymax-ymin)*(y1-y0);}
     ctx.font="10px 'IBM Plex Mono', monospace";ctx.textAlign="center";
     DENS.forEach(function(den){var px=X(den);ctx.strokeStyle="#222a35";ctx.beginPath();ctx.moveTo(px,y1);ctx.lineTo(px,y0);ctx.stroke();ctx.fillStyle="#878f9d";ctx.fillText("1/"+den,px,y0+15);});
-    ctx.fillStyle="#5b636f";ctx.fillText("velocidad de obturación",(x0+x1)/2,H-4);
+    ctx.fillStyle="#5b636f";ctx.fillText(t("axShutter"),(x0+x1)/2,H-4);
     ctx.textAlign="right";
-    for(var t=0;t<=4;t++){var v2=ymin+(ymax-ymin)*t/4,py=Y(v2);ctx.strokeStyle="#1a212b";ctx.beginPath();ctx.moveTo(x0,py);ctx.lineTo(x1,py);ctx.stroke();ctx.fillStyle="#878f9d";ctx.fillText(v2.toFixed(1),x0-6,py+4);}
+    for(var gy=0;gy<=4;gy++){var v2=ymin+(ymax-ymin)*gy/4,py=Y(v2);ctx.strokeStyle="#1a212b";ctx.beginPath();ctx.moveTo(x0,py);ctx.lineTo(x1,py);ctx.stroke();ctx.fillStyle="#878f9d";ctx.fillText(v2.toFixed(1),x0-6,py+4);}
     // región extra del central
     if(leaf>FP){ctx.fillStyle="rgba(63,202,176,0.10)";ctx.fillRect(X(FP),y1,X(leaf)-X(FP),y0-y1);}
     // ambiente neutro
     ctx.save();ctx.setLineDash([2,3]);ctx.strokeStyle="#3a4452";ctx.beginPath();ctx.moveTo(x0,Y(0));ctx.lineTo(x1,Y(0));ctx.stroke();ctx.restore();
-    ctx.fillStyle="#5b636f";ctx.textAlign="left";ctx.fillText("ambiente neutro",x0+4,Y(0)-4);
+    ctx.fillStyle="#5b636f";ctx.textAlign="left";ctx.fillText(t("neutralAmb"),x0+4,Y(0)-4);
     // refs FP y central
     ctx.save();ctx.setLineDash([4,3]);
     ctx.strokeStyle="#ef6f53";ctx.beginPath();ctx.moveTo(X(FP),y1);ctx.lineTo(X(FP),y0);ctx.stroke();
@@ -453,12 +596,12 @@
     ctx.fillStyle="#3fcab0";ctx.beginPath();ctx.arc(X(leaf),Y(ambLeaf),4,0,Math.PI*2);ctx.fill();
 
     $("st-ambleaf").innerHTML=evStr(ambLeaf)+'<span class="u">EV</span>';
-    $("st-ambleaf-h").textContent=ambLeaf<0?"cielo bajo neutro":"ambiente claro";
+    $("st-ambleaf-h").textContent=ambLeaf<0?t("skyUnder"):t("brightAmb");
     $("st-ambfp").innerHTML=evStr(ambFP)+'<span class="u">EV</span>';
-    $("st-ambfp-h").textContent=ambFP<0?"limitado por X-sync":"no oscurece";
+    $("st-ambfp-h").textContent=ambFP<0?t("xsyncLimited"):t("noDarkening");
     $("st-adv").innerHTML="+"+adv.toFixed(1)+'<span class="u">EV</span>';
     $("st-head").innerHTML=evStr(head)+'<span class="u">EV</span>';
-    $("st-head-h").textContent=head>=0?"potencia suficiente":"falta "+Math.abs(head).toFixed(1)+" EV";
+    $("st-head-h").textContent=head>=0?t("enoughPower"):t("shortBy")+Math.abs(head).toFixed(1)+t("evUnit");
   }
 
   /* ---- balance ambiente / flash ---- */
@@ -511,22 +654,22 @@
     bBar("b-subfill",subjEV);bBar("b-bgfill",bgEV);
 
     $("b-st-sub").textContent=evStr(subjEV);
-    $("b-st-sub-h").textContent=Math.abs(subjEV)<=0.5?"bien expuesto":(subjEV>0.5?"sobreexpuesto":"oscuro");
+    $("b-st-sub-h").textContent=Math.abs(subjEV)<=0.5?t("wellExposed"):(subjEV>0.5?t("overexposed"):t("darkSubject"));
     $("b-st-bg").textContent=evStr(bgEV);
-    $("b-st-bg-h").textContent=bgEV<-0.5?"fondo hundido":(bgEV>0.5?"fondo claro":"fondo neutro");
+    $("b-st-bg-h").textContent=bgEV<-0.5?t("bgSunk"):(bgEV>0.5?t("bgBright"):t("bgNeutral"));
     var rel=(flashEVc<=-90)?-99:(flashEVc-ambEV);
     $("b-st-ratio").textContent=(rel<=-90)?"—":evStr(rel);
-    $("b-st-ratio-h").textContent=(rel<=-90)?"solo ambiente":(rel>=0?"manda el flash":"manda el ambiente");
-    $("b-st-pow").textContent=(flashEV<=-90)?"mín":$("v-bfp").textContent;
-    $("b-st-pow-h").textContent=mode==="ttl"?"la fija el TTL":"fijada (manual)";
+    $("b-st-ratio-h").textContent=(rel<=-90)?t("ambientOnly"):(rel>=0?t("flashLeads"):t("ambientLeads"));
+    $("b-st-pow").textContent=(flashEV<=-90)?t("minPow"):$("v-bfp").textContent;
+    $("b-st-pow-h").textContent=mode==="ttl"?t("setByTtl"):t("setManual");
 
     var fl=[];
-    if(shut==="fp"&&shO.t<1/200) fl.push(bFlag("por encima de X-sync 1/200 · necesita HSS","#ef6f53"));
-    if(clipLoss>0.1) fl.push(bFlag("recorte del flash −"+clipLoss.toFixed(1)+" EV · pulso "+(tPulse*1000).toFixed(2)+" ms vs ventana "+(shO.t*1000).toFixed(2)+" ms",clipLoss>1?"#ef6f53":"#f4b13c"));
-    if(subjEV>1.2) fl.push(bFlag("sujeto quemado","#ef6f53"));
-    if(bgEV>1.2) fl.push(bFlag("fondo quemado","#ef6f53"));
-    if(mode==="ttl"&&powFrac>=1&&subjEV<-0.4) fl.push(bFlag("falta potencia · acerca el flash o sube ISO","#f4b13c"));
-    if(mode==="manual"&&subjEV<-1.2) fl.push(bFlag("sujeto oscuro · sube potencia","#9b8cff"));
+    if(shut==="fp"&&shO.t<1/200) fl.push(bFlag(t("fAboveSync"),"#ef6f53"));
+    if(clipLoss>0.1) fl.push(bFlag(t("fClipA")+clipLoss.toFixed(1)+t("fClipB")+(tPulse*1000).toFixed(2)+t("fClipC")+(shO.t*1000).toFixed(2)+t("fClipD"),clipLoss>1?"#ef6f53":"#f4b13c"));
+    if(subjEV>1.2) fl.push(bFlag(t("fSubjBlown"),"#ef6f53"));
+    if(bgEV>1.2) fl.push(bFlag(t("fBgBlown"),"#ef6f53"));
+    if(mode==="ttl"&&powFrac>=1&&subjEV<-0.4) fl.push(bFlag(t("fNoPower"),"#f4b13c"));
+    if(mode==="manual"&&subjEV<-1.2) fl.push(bFlag(t("fSubjDark"),"#9b8cff"));
     $("b-flags").innerHTML=fl.join("");
   }
 
@@ -552,6 +695,15 @@
   ["r-bloss"].forEach(function(i){accent(i,"#ef6f53");});
 
   renderShadow();renderFalloff();renderSun();renderBalance();
+
+  /* Repinta lo que depende de t() al cambiar de idioma. Es seguro llamarlo antes
+     de que la aplicación esté lista: el guardián corta la ejecución. */
+  var ready=true;
+  window.onLangChange=function(){
+    if(!ready) return;
+    relabelChips();
+    renderShadow();renderFalloff();renderSun();renderBalance();
+  };
 })();
 </script>
 </body>
