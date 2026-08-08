@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Simulador de encuadre · Eclipse total · A Coruña · 12 ago 2026</title>
 <meta name="author" content="Rafael Vida">
-<meta name="description" content="Simulador de encuadre y exposición del eclipse total de Sol del 12 de agosto de 2026: calcula qué cabe en tu sensor según la focal y el formato, y genera la horquilla de exposición y una ficha de campo imprimible.">
+<meta name="theme-color" content="#07070d">
+<meta name="description" content="Simulador de encuadre y exposición del eclipse total de Sol del 12 de agosto de 2026: geometría real instante a instante, horquilla de exposición con extinción variable y ficha de campo imprimible.">
 <script>
 /* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
 (function(){
@@ -31,6 +32,7 @@
     --corona:#f6f2e6;
     --gold:#ffcf6b;
     --prom:#ff5b52;
+    --ok:#6fe3a6;
     --display:"Space Grotesk",system-ui,sans-serif;
     --mono:"JetBrains Mono",ui-monospace,monospace;
     --body:"Inter",system-ui,sans-serif;
@@ -77,7 +79,7 @@
   }
   .card + .card{margin-top:16px}
 
-  /* viewfinder / hero */
+  /* visor */
   .viewer{padding:14px}
   .viewer svg{display:block;width:100%;height:auto;border-radius:9px;background:#04040a}
   .verdict{
@@ -90,7 +92,6 @@
   }
   .verdict p{margin:0;font-size:14px;color:var(--text)}
 
-  /* readouts row */
   .stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);
     border:1px solid var(--line);border-radius:11px;overflow:hidden;margin-top:14px}
   .stat{background:var(--panel);padding:12px 13px}
@@ -98,7 +99,7 @@
   .stat .v{font-family:var(--display);font-weight:600;font-size:21px;margin-top:3px;letter-spacing:-0.01em}
   .stat .v small{font-family:var(--mono);font-weight:500;font-size:12px;color:var(--muted);letter-spacing:0}
 
-  /* controls */
+  /* controles */
   .ctl{margin-bottom:16px}
   .ctl:last-child{margin-bottom:0}
   label.lab{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
@@ -112,6 +113,7 @@
     box-shadow:0 0 0 4px rgba(255,207,107,0.12)}
   input[type=range]::-moz-range-thumb{width:17px;height:17px;border-radius:50%;background:var(--corona);
     border:2px solid var(--gold);cursor:pointer}
+  input[type=range]:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
 
   .row{display:flex;gap:8px}
   .num{flex:1;min-width:0}
@@ -128,6 +130,9 @@
   .seg button{flex:1;background:transparent;border:0;color:var(--muted);font-family:var(--mono);
     font-size:12.5px;padding:8px 6px;border-radius:6px;cursor:pointer}
   .seg button[aria-pressed=true]{background:var(--gold);color:#1a1206;font-weight:600}
+  .seg button:focus-visible,.qbtn:focus-visible,.abtn:focus-visible,.navlink:focus-visible{
+    outline:2px solid var(--gold);outline-offset:2px}
+  .seg.tri button{font-size:11.5px}
 
   .hint{font-size:11.5px;color:var(--muted);margin-top:7px;line-height:1.45}
   .hint code{font-family:var(--mono);color:var(--text)}
@@ -143,12 +148,58 @@
 
   .chip{display:inline-block;padding:2px 9px;margin:2px 4px 2px 0;border:1px solid var(--line-strong);border-radius:6px}
   .chip.seqwarn{border-color:rgba(255,91,82,0.65);color:var(--prom)}
+  .chip.seqrange{border-color:rgba(255,207,107,0.65);color:var(--gold)}
+
+  /* linea de tiempo del eclipse */
+  .tl{margin-top:2px}
+  .tlbar{position:relative;height:26px;margin:10px 0 6px;border-radius:6px;overflow:hidden;
+    background:linear-gradient(90deg,rgba(255,207,107,0.10),rgba(255,207,107,0.22));border:1px solid var(--line-strong)}
+  .tltot{position:absolute;top:0;bottom:0;background:rgba(255,91,82,0.55);box-shadow:0 0 0 1px rgba(255,91,82,0.8)}
+  .tlnow{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--corona)}
+  .tlticks{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--muted)}
+  .qrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+  .qbtn{background:var(--bg);border:1px solid var(--line-strong);color:var(--muted);border-radius:7px;
+    font-family:var(--mono);font-size:11.5px;padding:6px 9px;cursor:pointer}
+  .qbtn:hover{border-color:var(--gold);color:var(--gold)}
+  .qbtn.on{background:var(--gold);color:#1a1206;border-color:var(--gold);font-weight:600}
+  .clock{font-family:var(--mono);font-size:20px;font-weight:600;letter-spacing:0.02em}
+  .clock small{font-size:12px;color:var(--muted);font-weight:400}
+
+  /* tabla */
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+  th,td{text-align:left;padding:8px 4px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:500;font-size:11px;letter-spacing:0.08em;text-transform:uppercase}
+  td.n{font-family:var(--mono);text-align:right;color:var(--text)}
+  tr:last-child td{border-bottom:0}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;vertical-align:middle}
+  td.warn,span.warn{color:var(--prom)}
+
+  .ctx{font-size:13px;color:var(--muted)}
+  .ctx b{color:var(--text);font-weight:500}
+  .ctx .line{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--line)}
+  .ctx .line:last-child{border-bottom:0}
+  .ctx .line span:last-child{font-family:var(--mono);color:var(--text);white-space:nowrap}
+
+  h2{font-family:var(--display);font-weight:600;font-size:14px;letter-spacing:0.02em;margin:0 0 12px;
+    color:var(--text);display:flex;align-items:center;gap:9px}
+  h2 .pin{width:7px;height:7px;border-radius:50%;background:var(--gold)}
+
+  .box{margin-top:14px;padding:13px 14px;border-radius:10px;
+    background:rgba(255,207,107,0.06);border:1px solid rgba(255,207,107,0.18)}
+  .box .tag{font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--gold);display:block;margin-bottom:6px}
+  .box.alert{background:rgba(255,91,82,0.08);border-color:rgba(255,91,82,0.35)}
+  .box.alert .tag{color:var(--prom)}
+
+  footer{margin-top:26px;font-size:11.5px;color:var(--muted);line-height:1.55}
+  footer a{color:var(--gold)}
 
   /* ficha de campo (solo al imprimir) */
   #printCard{display:none}
   @media print{
     body{background:#fff !important}
     .wrap{display:none !important}
+    .langbar{display:none!important}
     #printCard{display:block !important;color:#000;font-family:var(--body);padding:2mm;font-size:12px;line-height:1.45}
     #printCard h1{font-family:var(--display);font-size:19px;margin:0 0 2px;color:#000}
     #printCard .pc-sub{font-size:11px;color:#444;margin-bottom:8px}
@@ -161,28 +212,11 @@
     #printCard p{margin:4px 0}
   }
 
-  /* reference table */
-  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
-  th,td{text-align:left;padding:8px 4px;border-bottom:1px solid var(--line)}
-  th{color:var(--muted);font-weight:500;font-size:11px;letter-spacing:0.08em;text-transform:uppercase}
-  td.n{font-family:var(--mono);text-align:right;color:var(--text)}
-  tr:last-child td{border-bottom:0}
-  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;vertical-align:middle}
+  @media (prefers-reduced-motion:reduce){
+    *{transition-duration:0.01ms !important;animation-duration:0.01ms !important}
+  }
 
-  .ctx{font-size:13px;color:var(--muted)}
-  .ctx b{color:var(--text);font-weight:500}
-  .ctx .line{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--line)}
-  .ctx .line:last-child{border-bottom:0}
-  .ctx .line span:last-child{font-family:var(--mono);color:var(--text);white-space:nowrap}
-
-  h2{font-family:var(--display);font-weight:600;font-size:14px;letter-spacing:0.02em;margin:0 0 12px;
-    color:var(--text);display:flex;align-items:center;gap:9px}
-  h2 .pin{width:7px;height:7px;border-radius:50%;background:var(--gold)}
-
-  footer{margin-top:26px;font-size:11.5px;color:var(--muted);line-height:1.55}
-  footer a{color:var(--gold)}
-
-  /* ---------- conmutador de idioma ---------- */
+  /* conmutador de idioma */
   html[lang="es"] [data-lang="en"]{display:none!important}
   html[lang="en"] [data-lang="es"]{display:none!important}
   .langbar{position:fixed;top:14px;right:16px;z-index:100;display:flex;
@@ -196,7 +230,6 @@
   .langbar button.on{background:rgba(255,207,107,.14);color:var(--gold)}
   .langbar button:focus-visible{outline:2px solid rgba(255,207,107,.6);outline-offset:-2px}
   @media(max-width:720px){.langbar{top:8px;right:8px}}
-  @media print{.langbar{display:none!important}}
 </style>
 </head>
 <body>
@@ -225,10 +258,10 @@
     <div>
       <h1 data-lang="es">Simulador de encuadre del eclipse total</h1>
       <h1 data-lang="en">Total eclipse framing simulator</h1>
-      <div class="sub" data-lang="es"><span class="locName">A Coruña</span>, 12 de agosto de 2026. Calcula qué cabe en tu sensor (disco solar, anillo de diamantes, corona interior o penachos) según la focal y el formato de tu cámara.</div>
-      <div class="sub" data-lang="en"><span class="locName">A Coruña</span>, 12 August 2026. Works out what fits on your sensor (solar disc, diamond ring, inner corona or streamers) for the focal length and format of your camera.</div>
-      <div class="byline" data-lang="es">Creado por Rafael Vida</div>
-      <div class="byline" data-lang="en">Created by Rafael Vida</div>
+      <div class="sub" data-lang="es"><span class="locName">A Coruña</span>, 12 de agosto de 2026. Calcula qué cabe en tu sensor instante a instante, con la geometría real del eclipse, la extinción atmosférica variable y la deriva sobre trípode fijo.</div>
+      <div class="sub" data-lang="en"><span class="locName">A Coruña</span>, 12 August 2026. Works out what fits on your sensor instant by instant, with the real eclipse geometry, variable atmospheric extinction and drift on a fixed tripod.</div>
+      <div class="byline" data-lang="es">Creado por Rafael Vida · circunstancias locales del IGN</div>
+      <div class="byline" data-lang="en">Created by Rafael Vida · local circumstances from the IGN</div>
     </div>
     <div class="navrow">
       <a class="navlink" href="manual-simulador-eclipse.html" data-lang="es">
@@ -252,7 +285,7 @@
 
   <div class="grid">
 
-    <!-- HERO: viewfinder + results -->
+    <!-- VISOR -->
     <div>
       <div class="card viewer">
         <svg id="view" viewBox="0 0 1000 750" role="img" aria-label="Previsualización del encuadre"></svg>
@@ -265,11 +298,41 @@
           <div class="stat"><div class="k" data-lang="es">Factor de recorte</div><div class="k" data-lang="en">Crop factor</div><div class="v" id="sCrop">—</div></div>
           <div class="stat"><div class="k" data-lang="es">Campo de visión (H × V)</div><div class="k" data-lang="en">Field of view (H × V)</div><div class="v" id="sFov">—</div></div>
           <div class="stat"><div class="k" data-lang="es">El disco solar ocupa</div><div class="k" data-lang="en">The solar disc occupies</div><div class="v" id="sSun">—</div></div>
+          <div class="stat"><div class="k" data-lang="es">Escala de placa</div><div class="k" data-lang="en">Plate scale</div><div class="v" id="sScale">—</div></div>
+          <div class="stat"><div class="k" data-lang="es">Deriva en la totalidad</div><div class="k" data-lang="en">Drift during totality</div><div class="v" id="sDrift">—</div></div>
         </div>
         <div class="actions">
           <button class="abtn" id="btnCard" type="button">🖨 Ficha de campo imprimible</button>
           <button class="abtn" id="btnShare" type="button">🔗 Copiar enlace de esta configuración</button>
         </div>
+      </div>
+
+      <!-- INSTANTE -->
+      <div class="card tl">
+        <h2 data-lang="es"><span class="pin"></span>Instante del eclipse</h2>
+        <h2 data-lang="en"><span class="pin"></span>Instant of the eclipse</h2>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
+          <div class="clock" id="tClock">—</div>
+          <div class="ctx" style="text-align:right;font-family:var(--mono);font-size:12px" id="tState">—</div>
+        </div>
+        <div class="tlbar" id="tlbar"><div class="tltot" id="tltot"></div><div class="tlnow" id="tlnow"></div></div>
+        <div class="tlticks"><span id="tkA">C1</span><span id="tkB">C2</span><span id="tkC">C4</span></div>
+        <input type="range" id="inst" min="0" max="1000" value="500" aria-label="Instante">
+        <div class="qrow" id="qrow">
+          <button class="qbtn" type="button" data-q="c1">C1</button>
+          <button class="qbtn" type="button" data-q="half" data-lang="es">Parcial 50 %</button>
+          <button class="qbtn" type="button" data-q="half" data-lang="en">Partial 50%</button>
+          <button class="qbtn" type="button" data-q="c2" data-lang="es">C2 · anillo</button>
+          <button class="qbtn" type="button" data-q="c2" data-lang="en">C2 · ring</button>
+          <button class="qbtn" type="button" data-q="max" data-lang="es">Máximo</button>
+          <button class="qbtn" type="button" data-q="max" data-lang="en">Maximum</button>
+          <button class="qbtn" type="button" data-q="c3">C3</button>
+          <button class="qbtn" type="button" data-q="end" data-lang="es">Final</button>
+          <button class="qbtn" type="button" data-q="end" data-lang="en">End</button>
+          <button class="qbtn" type="button" data-q="live" data-lang="es">⏱ En vivo</button>
+          <button class="qbtn" type="button" data-q="live" data-lang="en">⏱ Live</button>
+        </div>
+        <div class="hint" id="instHint"></div>
       </div>
 
       <div class="card">
@@ -279,7 +342,7 @@
           <thead><tr>
             <th data-lang="es">Elemento</th><th data-lang="en">Element</th>
             <th style="text-align:right" data-lang="es">Diámetro</th><th style="text-align:right" data-lang="en">Diameter</th>
-            <th style="text-align:right" data-lang="es">% del lado corto</th><th style="text-align:right" data-lang="en">% of short side</th>
+            <th style="text-align:right" id="thShort">% del lado corto</th>
           </tr></thead>
           <tbody id="reftab"></tbody>
         </table>
@@ -294,27 +357,43 @@
             <th style="text-align:right" data-lang="es">Velocidad</th><th style="text-align:right" data-lang="en">Shutter speed</th></tr></thead>
           <tbody id="exptab"></tbody>
         </table>
-        <div id="bracketBox" style="margin-top:14px;padding:13px 14px;border-radius:10px;background:rgba(255,207,107,0.06);border:1px solid rgba(255,207,107,0.18)">
-          <span class="tag" style="font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:6px" data-lang="es">Secuencia sugerida</span>
-          <span class="tag" style="font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:6px" data-lang="en">Suggested sequence</span>
+        <div class="box" id="bracketBox">
+          <span class="tag" data-lang="es">Secuencia sugerida</span>
+          <span class="tag" data-lang="en">Suggested sequence</span>
           <div id="bracketSeq" style="font-family:var(--mono);font-size:13.5px;color:var(--text);line-height:1.7"></div>
           <div id="bracketNote" class="hint" style="margin-top:8px"></div>
         </div>
       </div>
+
+      <div class="card" id="parPlanCard">
+        <h2 data-lang="es"><span class="pin"></span>Exposición de la parcial minuto a minuto</h2>
+        <h2 data-lang="en"><span class="pin"></span>Partial-phase exposure minute by minute</h2>
+        <p class="ctx" style="margin:0 0 10px" id="parPlanIntro"></p>
+        <table>
+          <thead><tr>
+            <th data-lang="es">Hora</th><th data-lang="en">Time</th>
+            <th style="text-align:right" data-lang="es">Altura</th><th style="text-align:right" data-lang="en">Altitude</th>
+            <th style="text-align:right" data-lang="es">Masa de aire</th><th style="text-align:right" data-lang="en">Air mass</th>
+            <th style="text-align:right" data-lang="es">Extinción</th><th style="text-align:right" data-lang="en">Extinction</th>
+            <th style="text-align:right" data-lang="es">Velocidad</th><th style="text-align:right" data-lang="en">Shutter</th>
+          </tr></thead>
+          <tbody id="parPlan"></tbody>
+        </table>
+      </div>
     </div>
 
-    <!-- CONTROLS -->
+    <!-- CONTROLES -->
     <div>
       <div class="card">
         <h2 data-lang="es"><span class="pin"></span>Tu equipo</h2>
         <h2 data-lang="en"><span class="pin"></span>Your kit</h2>
 
         <div class="ctl">
-          <label class="lab" for="focal"><span data-lang="es">Focal real del objetivo</span><span data-lang="en">Actual focal length of the lens</span> <b><span id="focalv">500</span> mm</b></label>
+          <label class="lab" for="focalNum"><span data-lang="es">Focal real del objetivo</span><span data-lang="en">Actual focal length of the lens</span> <b><span id="focalv">500</span> mm</b></label>
           <div class="row">
-            <input class="num" type="number" id="focalNum" min="5" max="6000" step="1" value="500">
+            <input class="num" type="number" id="focalNum" min="10" max="6000" step="1" value="500">
           </div>
-          <input type="range" id="focal" min="0" max="1000" value="588">
+          <input type="range" id="focal" min="0" max="1000" value="612" aria-label="Focal">
         </div>
 
         <div class="ctl">
@@ -331,6 +410,7 @@
           <label class="lab" for="sensor" data-lang="es">Formato del sensor</label>
           <label class="lab" for="sensor" data-lang="en">Sensor format</label>
           <select id="sensor">
+            <option value="43.8,32.9,4:3">Medio formato · 43,8 × 32,9 mm</option>
             <option value="36,24,3:2">Full Frame · 36 × 24 mm</option>
             <option value="22.3,14.9,3:2">APS-C Canon · 22,3 × 14,9 mm (1,6×)</option>
             <option value="23.5,15.6,3:2" selected>APS-C Sony / Nikon / Fuji · 23,5 × 15,6 mm (1,5×)</option>
@@ -347,21 +427,21 @@
         <div class="ctl">
           <label class="lab" data-lang="es">Orientación</label>
           <label class="lab" data-lang="en">Orientation</label>
-          <div class="seg" id="orient">
-            <button data-o="h" aria-pressed="true">Horizontal</button>
-            <button data-o="v" aria-pressed="false">Vertical</button>
+          <div class="seg" id="orient" role="group">
+            <button type="button" data-o="h" aria-pressed="true">Horizontal</button>
+            <button type="button" data-o="v" aria-pressed="false">Vertical</button>
           </div>
         </div>
 
         <div class="ctl">
-          <label class="lab" data-lang="es">Fase del eclipse</label>
-          <label class="lab" data-lang="en">Eclipse phase</label>
-          <div class="seg" id="phase">
-            <button data-p="par" aria-pressed="false">Parcial (con filtro)</button>
-            <button data-p="tot" aria-pressed="true">Totalidad</button>
+          <label class="lab" data-lang="es">Encuadre del visor</label>
+          <label class="lab" data-lang="en">Viewfinder framing</label>
+          <div class="seg" id="zoom" role="group">
+            <button type="button" data-z="fit" aria-pressed="true">Fotograma</button>
+            <button type="button" data-z="sky" aria-pressed="false">Cielo</button>
           </div>
-          <div class="hint" data-lang="es">En <code>Parcial</code> ves la fotosfera (el disco brillante) mordida por la Luna; necesitas filtro solar. En <code>Totalidad</code> la fotosfera queda oculta y aparecen corona y cromosfera (filtro fuera, solo durante la totalidad).</div>
-          <div class="hint" data-lang="en">In the <code>partial</code> phase you see the photosphere (the bright disc) bitten into by the Moon; a solar filter is needed. In <code>totality</code> the photosphere is hidden and the corona and chromosphere appear (filter off, during totality only).</div>
+          <div class="hint" data-lang="es"><code>Fotograma</code> llena el visor con lo que grabará el sensor. <code>Cielo</code> aleja la vista para ver qué queda fuera.</div>
+          <div class="hint" data-lang="en"><code>Frame</code> fills the viewer with what the sensor will record. <code>Sky</code> pulls back to show what falls outside.</div>
         </div>
       </div>
 
@@ -371,8 +451,8 @@
         <div class="ctl">
           <label class="lab" for="cor"><span data-lang="es">Extensión</span><span data-lang="en">Extent</span> <b><span id="corv">4,0</span> R<sub>☉</sub></b></label>
           <input type="range" id="cor" min="15" max="80" value="40">
-          <div class="hint" data-lang="es">Radio de la corona en radios solares. <code>2 R</code> es la corona interior brillante; <code>4 R</code> una captura fotográfica típica; <code>7–8 R</code> son los penachos largos en exposiciones prolongadas (hasta unos 3° de diámetro).</div>
-          <div class="hint" data-lang="en">Radius of the corona in solar radii. <code>2 R</code> is the bright inner corona; <code>4 R</code> a typical photographic capture; <code>7–8 R</code> are the long streamers in extended exposures (up to about 3° across).</div>
+          <div class="hint" data-lang="es">Radio de la corona en radios solares. <code>2 R</code> es la corona interior brillante; <code>4 R</code> una captura fotográfica típica; <code>7–8 R</code> los penachos largos en exposiciones prolongadas. En 2026 el Sol está cerca del máximo de actividad: corona casi simétrica y con penachos en todas las latitudes.</div>
+          <div class="hint" data-lang="en">Radius of the corona in solar radii. <code>2 R</code> is the bright inner corona; <code>4 R</code> a typical photographic capture; <code>7–8 R</code> the long streamers in extended exposures. In 2026 the Sun is near activity maximum: an almost symmetric corona with streamers at all latitudes.</div>
         </div>
       </div>
 
@@ -387,16 +467,16 @@
           <label class="lab" for="fnum" data-lang="es">Diafragma f/</label>
           <label class="lab" for="fnum" data-lang="en">Aperture f/</label>
           <input type="number" id="fnum" min="1" max="64" step="0.1" value="8">
-          <div class="hint" data-lang="es">El tiempo sale de la fórmula de Espenak: <code>t = f² / (ISO · 2^Q)</code>. Cada unidad de Q es un paso de luz, así que la horquilla recorre el rango de Q de cada estructura.</div>
-          <div class="hint" data-lang="en">The time comes from Espenak's formula: <code>t = f² / (ISO · 2^Q)</code>. Each unit of Q is one stop of light, so the exposure bracket runs through the range of Q of each structure.</div>
+          <div class="hint" data-lang="es">El tiempo sale de la fórmula de Espenak: <code>t = f² / (ISO · 2^Q)</code>. Cada unidad de Q es un paso de luz.</div>
+          <div class="hint" data-lang="en">The time comes from Espenak's formula: <code>t = f² / (ISO · 2^Q)</code>. Each unit of Q is one stop of light.</div>
         </div>
         <div class="ctl" id="ndCtl">
           <label class="lab" for="nd" data-lang="es">Filtro solar (solo fase parcial)</label>
           <label class="lab" for="nd" data-lang="en">Solar filter (partial phase only)</label>
           <select id="nd">
-            <option value="11">ND 4,0 genérico (≈13,3 pasos)</option>
-            <option value="8" selected>ND 5,0 · Baader AstroSolar visual (≈16,6 pasos)</option>
-            <option value="12">Baader AstroSolar ND 3,8 foto (≈12,6 pasos)</option>
+            <option value="11.3">ND 4,0 genérico (13,3 pasos)</option>
+            <option value="8" selected>ND 5,0 · Baader AstroSolar visual (16,6 pasos)</option>
+            <option value="12">Baader AstroSolar ND 3,8 foto (12,6 pasos)</option>
           </select>
           <div class="hint" data-lang="es">El Baader ND 3,8 es <code>solo fotográfico</code>: nunca observes ni enfoques a ojo a través de él ni del visor óptico. Para mirar, ND 5,0.</div>
           <div class="hint" data-lang="en">The Baader ND 3.8 is <code>photographic only</code>: never observe or focus by eye through it or through the optical viewfinder. To look, use ND 5.0.</div>
@@ -405,26 +485,34 @@
           <label class="lab" for="mp" data-lang="es">Resolución del sensor (Mpx)</label>
           <label class="lab" for="mp" data-lang="en">Sensor resolution (MP)</label>
           <input type="number" id="mp" min="2" max="200" step="1" value="24">
-          <div class="hint" data-lang="es">Solo se usa para estimar el arrastre por la rotación de la Tierra (≈15″/s) a tu focal.</div>
-          <div class="hint" data-lang="en">Used only to estimate the trailing caused by the Earth's rotation (≈15″/s) at your focal length.</div>
         </div>
         <div class="ctl">
           <label class="lab" data-lang="es">Montura</label>
           <label class="lab" data-lang="en">Mount</label>
-          <div class="seg" id="track">
-            <button data-t="0" aria-pressed="true">Trípode fijo</button>
-            <button data-t="1" aria-pressed="false">Seguimiento ecuatorial</button>
+          <div class="seg" id="track" role="group">
+            <button type="button" data-t="0" aria-pressed="true">Trípode fijo</button>
+            <button type="button" data-t="1" aria-pressed="false">Seguimiento ecuatorial</button>
           </div>
         </div>
         <div class="ctl">
-          <label class="lab" for="ext" data-lang="es">Corrección por extinción (Sol bajo)</label>
-          <label class="lab" for="ext" data-lang="en">Extinction correction (low Sun)</label>
+          <label class="lab" data-lang="es">Presupuesto de arrastre</label>
+          <label class="lab" data-lang="en">Trailing budget</label>
+          <div class="seg tri" id="dpx" role="group">
+            <button type="button" data-d="1" aria-pressed="true">1 px</button>
+            <button type="button" data-d="2" aria-pressed="false">2 px</button>
+            <button type="button" data-d="3" aria-pressed="false">3 px</button>
+          </div>
+          <div class="hint" id="dpxHint"></div>
+        </div>
+        <div class="ctl">
+          <label class="lab" for="ext" data-lang="es">Corrección por extinción</label>
+          <label class="lab" for="ext" data-lang="en">Extinction correction</label>
           <select id="ext">
             <option value="0" id="extOpt0">Sin corrección (tabla Espenak)</option>
-            <option value="1" selected id="extOpt1">Cielo limpio (+1 EV)</option>
-            <option value="2" id="extOpt2">Bruma o calima (+1,5 EV)</option>
+            <option value="1" selected id="extOpt1">Cielo limpio</option>
+            <option value="2" id="extOpt2">Bruma o calima</option>
           </select>
-          <div class="hint" id="extHint">La corrección se calcula con la masa de aire (Kasten-Young) según la altura del Sol en el lugar elegido, y alarga todos los tiempos.</div>
+          <div class="hint" id="extHint"></div>
         </div>
       </div>
 
@@ -436,14 +524,29 @@
           <label class="lab" for="loc" data-lang="en">Observation site</label>
           <select id="loc">
             <option value="coruna" selected>A Coruña</option>
+            <option value="cedeira">Cedeira</option>
+            <option value="ferrol">Ferrol</option>
+            <option value="lugo">Lugo</option>
             <option value="oviedo">Oviedo</option>
             <option value="leon">León</option>
+            <option value="burgos">Burgos</option>
             <option value="zaragoza">Zaragoza</option>
-            <option value="valencia">Valencia</option>
+            <option value="valencia">València</option>
             <option value="palma">Palma de Mallorca</option>
           </select>
         </div>
         <div class="ctx" id="ctxBox"></div>
+      </div>
+
+      <div class="card">
+        <h2 data-lang="es"><span class="pin"></span>Atmósfera y horizonte</h2>
+        <h2 data-lang="en"><span class="pin"></span>Atmosphere and horizon</h2>
+        <div class="ctx" id="atmBox"></div>
+        <div class="ctl" style="margin-top:12px">
+          <label class="lab" for="obst"><span data-lang="es">Altura del obstáculo al oeste</span><span data-lang="en">Height of the obstacle to the west</span> <b><span id="obstv">15</span> m</b></label>
+          <input type="number" id="obst" min="1" max="500" step="1" value="15">
+          <div class="hint" id="obstHint"></div>
+        </div>
       </div>
 
       <div class="card">
@@ -453,18 +556,31 @@
         <div id="edFilter" style="font-family:var(--mono);font-size:12.5px;letter-spacing:0.08em;margin-top:3px">—</div>
         <div id="edCount" style="font-family:var(--mono);font-size:30px;font-weight:600;margin-top:8px;letter-spacing:0.02em">—</div>
         <div id="edNext" class="hint">—</div>
-        <div class="hint" style="margin-top:8px" data-lang="es">Usa el reloj de tu dispositivo y la hora peninsular. Tenlo abierto en el móvil durante el eclipse: te dirá cuándo quitar y poner el filtro.</div>
-        <div class="hint" style="margin-top:8px" data-lang="en">It uses your device clock and mainland Spanish time. Keep it open on your phone during the eclipse: it will tell you when to take the filter off and put it back on.</div>
+        <div class="ctl" style="margin-top:14px">
+          <label class="lab" data-lang="es">Avisos de campo</label>
+          <label class="lab" data-lang="en">Field alerts</label>
+          <div class="seg" id="alerts" role="group">
+            <button type="button" data-a="0" aria-pressed="true">Apagados</button>
+            <button type="button" data-a="1" aria-pressed="false">Encendidos</button>
+          </div>
+          <div class="hint" id="alertHint"></div>
+        </div>
+        <div class="ctl">
+          <label class="lab" for="clockOff"><span data-lang="es">Corrección del reloj</span><span data-lang="en">Clock correction</span> <b><span id="clockOffv">0</span> s</b></label>
+          <input type="number" id="clockOff" min="-300" max="300" step="1" value="0">
+          <div class="hint" data-lang="es">Si el reloj del móvil va adelantado o atrasado, ajústalo aquí. Comprueba la hora contra una fuente sincronizada antes de salir: un error de 20 s es un cuarto de la totalidad en <span class="locName">A Coruña</span>.</div>
+          <div class="hint" data-lang="en">If your phone clock runs fast or slow, correct it here. Check the time against a synchronised source before you leave: a 20 s error is a quarter of totality at <span class="locName">A Coruña</span>.</div>
+        </div>
       </div>
     </div>
 
   </div>
 
   <footer data-lang="es">
-    Simulador creado por <strong style="color:var(--text);font-weight:500">Rafael Vida</strong>. Modelo geométrico: disco solar 0,525° (Sol cerca del afelio en agosto), Luna ≈ 1,04× el disco solar, corona configurable en radios solares. El campo de visión se calcula como 2·arctan(lado / (2·focal)); la exposición sigue la guía de Fred Espenak, t = f² / (ISO · 2^Q). Datos de circunstancias locales: Instituto Geográfico Nacional (eclipses.ign.es). Estimación para planificar el encuadre y la exposición; no sustituye una prueba real con tu equipo.
+    Simulador creado por <strong style="color:var(--text);font-weight:500">Rafael Vida</strong>. Circunstancias locales: tabla municipal del <a href="https://eclipses.ign.es/">Instituto Geográfico Nacional</a> (contactos al segundo, altura y azimut del Sol, puesta de sol). Modelo: disco solar 0,5261° para una distancia de 1,0133 UA, magnitud del eclipse 1,03 según el IGN, separación de centros ajustada a los instantes de C1 y C2 del lugar elegido, campo de visión 2·arctan(lado / 2·focal), exposición según la guía de Fred Espenak t = f² / (ISO · 2^Q), extinción con la masa de aire de Kasten y Young recalculada para cada instante, refracción de Bennett, deriva sidérea 15,04″/s·cos δ. Estimación para planificar; no sustituye una prueba real con tu equipo.
   </footer>
   <footer data-lang="en">
-    Simulator created by <strong style="color:var(--text);font-weight:500">Rafael Vida</strong>. Geometric model: solar disc 0.525° (the Sun near aphelion in August), Moon ≈ 1.04× the solar disc, corona adjustable in solar radii. The field of view is computed as 2·arctan(side / (2·focal length)); the exposure follows Fred Espenak's guide, t = f² / (ISO · 2^Q). Local circumstances: Instituto Geográfico Nacional (eclipses.ign.es). An estimate for planning framing and exposure; it is no substitute for a real test with your own kit.
+    Simulator created by <strong style="color:var(--text);font-weight:500">Rafael Vida</strong>. Local circumstances: municipal table of the Spanish <a href="https://eclipses.ign.es/">Instituto Geográfico Nacional</a> (contacts to the second, solar altitude and azimuth, sunset). Model: solar disc 0.5261° for a distance of 1.0133 AU, eclipse magnitude 1.03 after the IGN, centre separation fitted to the C1 and C2 instants of the chosen site, field of view 2·arctan(side / 2·focal length), exposure after Fred Espenak's guide t = f² / (ISO · 2^Q), extinction from the Kasten and Young air mass recomputed for every instant, Bennett refraction, sidereal drift 15.04″/s·cos δ. An estimate for planning; it is no substitute for a real test with your own kit.
   </footer>
 
 </div>
@@ -472,19 +588,14 @@
 <div id="printCard" aria-hidden="true"></div>
 
 <script>
-"use strict";
 /* ---------- conmutador de idioma / language switch ---------- */
 (function(){
   var KEY="pn-lang";
   var META={
-    es:{
-      title:"Simulador de encuadre · Eclipse total · A Coruña · 12 ago 2026",
-      desc:"Simulador de encuadre y exposición del eclipse total de Sol del 12 de agosto de 2026: calcula qué cabe en tu sensor según la focal y el formato, y genera la horquilla de exposición y una ficha de campo imprimible."
-    },
-    en:{
-      title:"Framing simulator · Total eclipse · A Coruña · 12 Aug 2026",
-      desc:"Framing and exposure simulator for the total solar eclipse of 12 August 2026: works out what fits on your sensor for a given focal length and format, and builds the exposure bracket and a printable field sheet."
-    }
+    es:{title:"Simulador de encuadre · Eclipse total · A Coruña · 12 ago 2026",
+        desc:"Simulador de encuadre y exposición del eclipse total de Sol del 12 de agosto de 2026: geometría real instante a instante, extinción variable y ficha de campo imprimible."},
+    en:{title:"Framing simulator · Total eclipse · A Coruña · 12 Aug 2026",
+        desc:"Framing and exposure simulator for the total solar eclipse of 12 August 2026: real geometry instant by instant, variable extinction and a printable field sheet."}
   };
   function apply(l){
     document.documentElement.lang=l;
@@ -513,91 +624,126 @@
 (function(){
   "use strict";
 
-  // ---------- diccionario de cadenas generadas por JS / JS-generated strings ----------
+  /* =========================================================================
+     1. CADENAS / STRINGS
+     ========================================================================= */
   var TR = {
   es:{
     ariaView:"Previsualización del encuadre",
-    sunUnit:"% alto",
+    sunUnit:"% alto", pxUnit:"″/px",
     btnCard:"🖨 Ficha de campo imprimible",
     btnShare:"🔗 Copiar enlace de esta configuración",
     btnCopied:"✓ Enlace copiado",
     promptCopy:"Copia el enlace de esta configuración:",
     segH:"Horizontal", segV:"Vertical",
-    segPar:"Parcial (con filtro)", segTot:"Totalidad",
+    segFit:"Fotograma", segSky:"Cielo",
     segFixed:"Trípode fijo", segTrack:"Seguimiento ecuatorial",
+    segOff:"Apagados", segOn:"Encendidos",
     tcOpts:["Sin teleconvertidor (1×)","1,4×","2×"],
-    sensorOpts:["Full Frame · 36 × 24 mm",
+    sensorOpts:["Medio formato · 43,8 × 32,9 mm",
+                "Full Frame · 36 × 24 mm",
                 "APS-C Canon · 22,3 × 14,9 mm (1,6×)",
                 "APS-C Sony / Nikon / Fuji · 23,5 × 15,6 mm (1,5×)",
                 "Micro 4/3 · 17,3 × 13 mm (2,0×)",
                 "Tipo 1\" · 13,2 × 8,8 mm (2,7×)",
                 "Personalizado…"],
-    ndOpts:["ND 4,0 genérico (≈13,3 pasos)",
-            "ND 5,0 · Baader AstroSolar visual (≈16,6 pasos)",
-            "Baader AstroSolar ND 3,8 foto (≈12,6 pasos)"],
+    ndOpts:["ND 4,0 genérico (13,3 pasos)",
+            "ND 5,0 · Baader AstroSolar visual (16,6 pasos)",
+            "Baader AstroSolar ND 3,8 foto (12,6 pasos)"],
     phW:"ancho mm", phH:"alto mm",
+    thShort:"% del lado corto",
 
+    /* veredictos: parcial */
     vp1t:"Fotosfera recortada",
     vp1x:"El disco no entra entero. Solo encuadras un trozo de la fotosfera y del mordisco lunar; sirve para detalle de manchas, no para la fase parcial completa. Filtro solar puesto.",
     vp2t:"Fotosfera llena",
     vp2x:"La fotosfera llena el fotograma. Se aprecian bien las manchas y el borde de la Luna avanzando sobre el disco. Filtro solar obligatorio en toda esta fase.",
     vp3t:"Fase parcial holgada",
-    vp3x:"El disco con su creciente cabe con cielo alrededor. Buen plano para seguir el avance de la Luna; ideal si quieres una secuencia o un compuesto del eclipse parcial.",
+    vp3x:"El disco con su creciente cabe con cielo alrededor. Buen plano para seguir el avance de la Luna; ideal para una secuencia o un compuesto.",
     vp4t:"Plano amplio",
-    vp4x:"La fotosfera queda pequeña en el fotograma: territorio de paisaje o de secuencia múltiple. Recuerda que el Sol estará bajo, a unos {alt}° sobre el horizonte oeste.",
+    vp4x:"La fotosfera queda pequeña en el fotograma: territorio de paisaje o de secuencia múltiple. El Sol está a {alt}° sobre el horizonte oeste.",
+    /* veredictos: totalidad */
     vt1t:"Primerísimo plano",
-    vt1x:"Ni el disco completo entra en el encuadre. Verás con gran detalle la cromosfera, las protuberancias y las perlas de Baily, pero el Sol se sale del fotograma. Útil para el instante del contacto, no para la corona.",
+    vt1x:"Ni el disco completo entra en el encuadre. Verás con gran detalle la cromosfera, las protuberancias y las perlas de Baily, pero el Sol se sale del fotograma.",
     vt2t:"Disco lleno",
-    vt2x:"El disco solar llena el encuadre. Ideal para el anillo de diamantes, las protuberancias y la cromosfera, con muy poco margen para la corona alrededor.",
+    vt2x:"El disco solar llena el encuadre. Ideal para el anillo de diamantes, las protuberancias y la cromosfera, con muy poco margen para la corona.",
     vt3t:"Disco + corona interior",
-    vt3x:"Entran el disco y la corona interior brillante. Buen plano del anillo de diamantes y la base de la corona; los penachos largos quedan recortados en los bordes.",
+    vt3x:"Entran el disco y la corona interior brillante. Buen plano del anillo de diamantes y la base de la corona; los penachos largos quedan recortados.",
     vt4t:"Corona casi completa",
-    vt4x:"Capturas la corona elegida casi entera; los penachos más extendidos rozan o cruzan los bordes del fotograma. Encuadre ajustado, centra bien el Sol.",
+    vt4x:"Capturas la corona elegida casi entera; los penachos más extendidos rozan los bordes. Encuadre ajustado, centra bien el Sol.",
     vt5t:"Corona con margen",
-    vt5x:"La corona cabe holgada, con cielo alrededor. Margen de sobra para componer y para no perder los penachos. Punto dulce para la totalidad.",
+    vt5x:"La corona cabe holgada, con cielo alrededor. Margen de sobra para componer y para no perder los penachos.",
     vt6t:"Plano amplio",
-    vt6x:"El eclipse queda pequeño dentro del fotograma: territorio de paisaje. Aprovecha que el Sol estará a solo {alt}° de altura para incluir el horizonte oeste y el ambiente de la totalidad.",
+    vt6x:"El eclipse queda pequeño dentro del fotograma: territorio de paisaje. Con el Sol a {alt}° cabe el horizonte oeste en la misma toma.",
+    vAddDrift:" Ojo: sobre trípode fijo el Sol se desplaza {d} durante la totalidad, un {p} % del lado corto. Colócalo descentrado hacia arriba y a la izquierda.",
+    vAddHorizon:" El horizonte entra en el fotograma: composición de paisaje disponible.",
 
     refPhoto:"Fotosfera (disco solar)",
+    refMoon:"Disco lunar (1,03 ×)",
     refInner:"Corona interior (2 R☉)",
     refChosen:"Corona elegida ({r} R☉)",
+    refDrift:"Deriva en la totalidad ({d} s)",
 
     colStruct:"Estructura", colPartial:"Fase parcial",
     rowPhot:"Fotosfera (disco)", rowCresc:"Creciente fino (+2 EV)",
-    rowBaily:"Perlas de Baily", rowChromo:"Cromosfera", rowProm:"Protuberancias",
+    rowDiamond:"Anillo de diamantes", rowBaily:"Perlas de Baily",
+    rowChromo:"Cromosfera", rowProm:"Protuberancias",
     rowCor01:"Corona 0,1 R☉ (interior)", rowCor05:"Corona 0,5 R☉",
     rowCor1:"Corona 1 R☉", rowCor2:"Corona 2 R☉",
     rowCorYours:"Corona {r} R☉ (tu extensión)",
 
-    expIntroPar:"Con filtro puesto. El brillo de la fotosfera es constante, así que una sola exposición vale para casi toda la parcial; el creciente fino pide unos dos pasos más por el oscurecimiento del limbo.",
+    expIntroPar:"Con filtro puesto. El brillo de la fotosfera es constante, pero la extinción no: el Sol baja de {a1}° a {a2}° entre C1 y el final, así que la exposición se alarga sobre la marcha. La tabla de abajo da el detalle minuto a minuto.",
     expIntroTot:"Sin filtro. Entre la cromosfera y tu corona a {r} R☉ hay <b>{n} pasos</b> de diferencia: es imposible en un solo disparo, de ahí la horquilla.",
-    extApplied:" Corrección de extinción aplicada: +{ev} EV (Sol a {alt}°).",
+    extApplied:" Corrección de extinción aplicada en este instante: +{ev} EV (Sol a {alt}°, {am} masas de aire).",
+    parPlanIntro:"Velocidades con filtro {nd}, ISO {iso} y f/{f}, recalculando la masa de aire en cada instante. Entre C1 y el final del eclipse la corrección crece {dev} EV: si dejas la exposición fija en C1, el Sol acabará subexpuesto.",
 
     seqNote:"{n} disparos a f/{f} e ISO {iso}, paso de 1 EV. Tiempo aproximado con margen: ≈ {s} s ",
     seqFits:"(cabe en los {d} s de totalidad en {loc}; automatízala con horquillado o intervalómetro).",
     seqTight:"(se acerca a los {d} s de totalidad en {loc}: sube ISO o abre diafragma).",
+    seqOver:"(no cabe en los {d} s de totalidad en {loc}: recorta la horquilla, sube ISO o abre diafragma).",
     seqTrack:" Con seguimiento ecuatorial no hay límite de arrastre práctico en estos tiempos.",
-    seqWarn:" <span style=\"color:var(--prom)\">Las {n} velocidades en rojo arrastran más de 1 px a {fe} mm sobre trípode fijo (límite ≈ {lim}): usa seguimiento, sube ISO o abre diafragma.</span>",
+    seqWarn:" <span class=\"warn\">Las {n} velocidades en rojo arrastran más de {b} px a {fe} mm sobre trípode fijo (límite ≈ {lim}): usa seguimiento, sube ISO o abre diafragma.</span>",
     seqOk:" Límite de arrastre sin seguimiento ≈ {lim}; toda la serie queda por debajo.",
+    seqRange:" Los valores en ámbar salen de la escala de la cámara (más de 30 s o más rápido que 1/8000): usa bulb, cambia el ISO o el diafragma.",
 
-    ctxC1:"Primer contacto (parcial)", ctxTot:"Totalidad (C2 → C3)",
-    ctxDur:"Duración de la totalidad", ctxAlt:"Altura del Sol en el máximo",
-    ctxSet:"Puesta de sol",
+    ctxC1:"Primer contacto (C1)", ctxTot:"Totalidad (C2 → C3)",
+    ctxDur:"Duración de la totalidad", ctxMax:"Máximo",
+    ctxAlt:"Altura aparente en el máximo", ctxAz:"Azimut en el máximo",
+    ctxSet:"Puesta de sol", ctxMag:"Magnitud del eclipse",
     ctxFilter:" Filtro solar obligatorio en las fases parciales; retíralo únicamente durante los {d} s de totalidad.",
+    ctxSrc:"Contactos, altura y azimut: tabla municipal del IGN.",
 
-    endC4:"Fin del eclipse (C4)", endC4a:"Fin del eclipse (C4) ≈",
-    endSet:"Puesta de sol (aún eclipsado)",
+    endC4:"Fin del eclipse (C4)", endSet:"Puesta de sol (aún eclipsado)",
     noteCoruna:"El eclipse termina entero antes de la puesta de sol. Horizonte oeste despejado, imprescindible.",
-    noteOviedo:"De las grandes ciudades, la totalidad más larga: 1m49s. El eclipse acaba antes de la puesta.",
-    noteLeon:"El último contacto coincide casi con la puesta de sol: el final de la parcial será un Sol poniéndose.",
+    noteCedeira:"Una de las totalidades más largas de la costa gallega, 100 s, y horizonte atlántico limpio.",
+    noteFerrol:"89 s de totalidad, con la ría abierta al oeste como línea de horizonte.",
+    noteLugo:"85 s de totalidad tierra adentro: el relieve al oeste decide más que en la costa.",
+    noteOviedo:"De las grandes ciudades, la totalidad más larga: 1m48s. El eclipse acaba antes de la puesta.",
+    noteLeon:"105 s de totalidad. El cuarto contacto llega 6 minutos antes de la puesta, con el Sol ya en el suelo.",
+    noteBurgos:"103 s de totalidad. El Sol se pone antes del cuarto contacto: la parcial final termina en el horizonte.",
     noteZaragoza:"El Sol se pone antes del último contacto: la fase parcial final acaba con el Sol eclipsado en el horizonte.",
-    noteValencia:"Sol a solo 4°: cualquier edificio o calima lo tapa. La playa, con puesta sobre el mar, es la mejor baza.",
-    notePalma:"Sol a 2°, rozando el mar: totalidad sobre el Mediterráneo, pero sin ningún margen de horizonte. La extinción aquí es brutal.",
+    noteValencia:"Sol a solo 5°: cualquier edificio o calima lo tapa. La playa, con puesta sobre el mar, es la mejor baza.",
+    notePalma:"Sol a 3°, rozando el mar: totalidad sobre el Mediterráneo, pero sin ningún margen de horizonte. La extinción aquí es brutal.",
 
     extOpt0:"Sin corrección (tabla Espenak)",
-    extClean:"Cielo limpio a {alt}° (+{ev} EV)",
-    extHaze:"Bruma o calima (+{ev} EV)",
-    extHint:"A {alt}° la luz atraviesa ≈{am} masas de aire (Kasten-Young). La corrección alarga todos los tiempos según el lugar elegido.",
+    extClean:"Cielo limpio (k = 0,20)",
+    extHaze:"Bruma o calima (k = 0,30)",
+    extHint:"La corrección se recalcula en cada instante con la masa de aire de Kasten y Young sobre la altura aparente. Ahora mismo: {am} masas de aire, +{ev} EV.",
+
+    dpxHint:"Presupuesto de desenfoque por arrastre. A esta focal la escala es {s}″/px y el seeing a {am} masas de aire ronda {see}″, es decir {sp} px: exigir 1 px es más estricto que la propia atmósfera.",
+
+    atmAirmass:"Masa de aire (Kasten y Young)", atmExt:"Extinción",
+    atmRefr:"Refracción", atmFlat:"Achatamiento del disco",
+    atmDisp:"Dispersión 400–700 nm", atmSee:"Seeing estimado",
+    atmNote:"El achatamiento y la dispersión son consecuencia directa de la refracción diferencial: a esta altura el disco se comprime en vertical y cada canal de color se separa del vecino. Dispara en RAW y corrige la aberración cromática lateral por canal.",
+    obstHint:"Con el Sol a {alt}°, un obstáculo de {h} m tapa el eclipse si está a menos de <b>{d} m</b> hacia el azimut {az}°. Comprueba el perfil real del horizonte antes del día 12.",
+
+    tState:"{ph} · {ob} % de la fotosfera cubierta",
+    tsBefore:"Antes de C1", tsPartial:"Parcial", tsTotal:"TOTALIDAD",
+    tsFinal:"Parcial final", tsAfter:"Eclipse terminado", tsSet:"Sol bajo el horizonte",
+    instHintPar:"Arrastra para recorrer el eclipse. El dibujo usa la separación real de centros ajustada a los contactos del IGN. Filtro puesto en este instante.",
+    instHintTot:"Estás en la totalidad: filtro fuera. Quedan {r} s hasta C3. El anillo de diamantes de C2 aparece en el cuadrante izquierdo del fotograma y el de C3 en el opuesto.",
+    instLive:"Siguiendo el reloj del dispositivo, con la corrección de {off} s aplicada.",
 
     edBefore:"Antes del eclipse · {loc}", edPartial:"Fase parcial · {loc}",
     edTotality:"TOTALIDAD · {loc}", edFinal:"Parcial final · {loc}",
@@ -609,116 +755,154 @@
     labEnd:"hasta el final ({e}, {t})",
     labNext:"el siguiente total visible en España: 2 de agosto de 2027",
     days:"días",
+    alertHint:"Con los avisos encendidos, el navegador emite un pitido y vibra 30 s antes de C2 y 15 s antes de C3, y mantiene la pantalla despierta. Requiere un toque previo en la página.",
+    alertOnMsg:"Avisos activos. Pantalla mantenida despierta mientras esta pestaña esté visible.",
+    alertNoWake:"Avisos activos. Este navegador no permite mantener la pantalla despierta.",
+    alertC2:"Fuera el filtro en 30 segundos",
+    alertC3:"Filtro puesto en 15 segundos",
 
     ndName11:"ND 4,0", ndName8:"ND 5,0 / Baader visual", ndName12:"Baader ND 3,8 (solo foto)",
     pcTitle:"Ficha de campo · Eclipse total de Sol · {loc} · 12 de agosto de 2026",
-    pcSub:"Rafael Vida · configuración generada el {d}",
+    pcSub:"Rafael Vida · configuración generada el {d} · horarios del IGN",
     pcWarn:"FILTRO SOLAR SIEMPRE, salvo durante los {d} s de totalidad. Al primer destello tras C3, filtro puesto de inmediato. El {nd} elegido{safe}.",
     pcUnsafe:" NO es seguro para mirar",
     pcTimes:"Horarios en {loc} (hora oficial)",
     pcThTime:"Hora", pcThEvent:"Evento", pcThFilter:"Filtro",
-    pcC1:"C1 · comienza la fase parcial",
+    pcC1:"C1 · comienza la fase parcial · Sol a {alt}°",
     pcC2:"C2 · anillo de diamantes, empieza la totalidad ({d} s)",
-    pcC3:"C3 · fin de la totalidad · Sol a ≈{alt}°",
-    pcEndRow:"{e} (puesta de sol {s})",
+    pcMax:"Máximo del eclipse",
+    pcC3:"C3 · fin de la totalidad · Sol a {alt}°",
+    pcEndRow:"{e}",
+    pcSetRow:"Puesta de sol",
     pcOn:"Puesto", pcOffStrong:"FUERA", pcOnStrong:"PUESTO",
     pcKit:"Equipo",
-    pcKitLine:"{f} mm × TC {tc}× → <strong>{fe} mm efectivos</strong> · sensor {sw} × {sh} mm, {orient} · equivalente {eq} mm · campo {hf} × {vf} · montura: {mount}",
+    pcKitLine:"{f} mm × TC {tc}× → <strong>{fe} mm efectivos</strong> · sensor {sw} × {sh} mm, {orient} · equivalente {eq} mm · campo {hf} × {vf} · escala {sc}″/px · montura: {mount}",
     orientH:"horizontal", orientV:"vertical",
     mountTrack:"seguimiento ecuatorial", mountFixed:"trípode fijo",
-    pcExp:"Exposición · ISO {iso} · f/{f}{ext}",
-    pcExtApplied:" · extinción +{ev} EV aplicada (Sol a {alt}°)",
-    pcThPartial:"Fase parcial (con filtro {nd})", pcThSpeed:"Velocidad",
+    pcExp:"Exposición · ISO {iso} · f/{f}",
+    pcThPartial:"Fase parcial con filtro {nd}", pcThSpeed:"Velocidad",
     pcThTot:"Totalidad (sin filtro)",
     pcPhotFilter:"Fotosfera con filtro (Q {q})",
     pcBracket:"Horquilla de totalidad · {n} disparos · ≈ {s} s de {d} s disponibles (marca cada uno)",
-    pcDrift:"Límite de arrastre sin seguimiento a esta focal ≈ {lim} (1 px). ▲ = velocidad que arrastra sobre trípode fijo.",
-    pcNoExt:" Sin corrección de extinción: a {alt}° de altura espera necesitar ≈ +{ev} EV.",
+    pcDrift:"Límite de arrastre sin seguimiento a esta focal ≈ {lim} ({b} px). ▲ = velocidad que arrastra sobre trípode fijo. En los {d} s de totalidad el Sol se desplaza {dr} sobre trípode fijo.",
+    pcAtm:"Atmósfera en el máximo: {am} masas de aire, extinción +{ev} EV, dispersión {disp}″, achatamiento {flat} %.",
+    pcHorizon:"Sol a {alt}° y azimut {az}°: un obstáculo de {h} m debe quedar a más de {d} m.",
     dateLocale:"es-ES"
   },
   en:{
     ariaView:"Framing preview",
-    sunUnit:"% of height",
+    sunUnit:"% of height", pxUnit:"″/px",
     btnCard:"🖨 Printable field sheet",
     btnShare:"🔗 Copy a link to this setup",
     btnCopied:"✓ Link copied",
     promptCopy:"Copy the link to this setup:",
     segH:"Landscape", segV:"Portrait",
-    segPar:"Partial (with filter)", segTot:"Totality",
+    segFit:"Frame", segSky:"Sky",
     segFixed:"Fixed tripod", segTrack:"Equatorial tracking",
+    segOff:"Off", segOn:"On",
     tcOpts:["No teleconverter (1×)","1.4×","2×"],
-    sensorOpts:["Full frame · 36 × 24 mm",
+    sensorOpts:["Medium format · 43.8 × 32.9 mm",
+                "Full frame · 36 × 24 mm",
                 "APS-C Canon · 22.3 × 14.9 mm (1.6×)",
                 "APS-C Sony / Nikon / Fuji · 23.5 × 15.6 mm (1.5×)",
                 "Micro 4/3 · 17.3 × 13 mm (2.0×)",
                 "Type 1\" · 13.2 × 8.8 mm (2.7×)",
                 "Custom…"],
-    ndOpts:["Generic ND 4.0 (≈13.3 stops)",
-            "ND 5.0 · Baader AstroSolar visual (≈16.6 stops)",
-            "Baader AstroSolar ND 3.8 photographic (≈12.6 stops)"],
+    ndOpts:["Generic ND 4.0 (13.3 stops)",
+            "ND 5.0 · Baader AstroSolar visual (16.6 stops)",
+            "Baader AstroSolar ND 3.8 photographic (12.6 stops)"],
     phW:"width mm", phH:"height mm",
+    thShort:"% of short side",
 
     vp1t:"Photosphere cropped",
     vp1x:"The disc does not fit whole. You are framing only a piece of the photosphere and of the lunar bite; useful for sunspot detail, not for the complete partial phase. Solar filter on.",
     vp2t:"Photosphere fills the frame",
     vp2x:"The photosphere fills the frame. Sunspots and the Moon's limb advancing across the disc both read clearly. A solar filter is mandatory throughout this phase.",
     vp3t:"Roomy partial phase",
-    vp3x:"The disc and its crescent fit with sky around them. A good frame for following the Moon's progress; ideal if you want a sequence or a composite of the partial eclipse.",
+    vp3x:"The disc and its crescent fit with sky around them. A good frame for following the Moon's progress; ideal for a sequence or a composite.",
     vp4t:"Wide shot",
-    vp4x:"The photosphere sits small in the frame: landscape or multiple-sequence territory. Remember that the Sun will be low, some {alt}° above the western horizon.",
+    vp4x:"The photosphere sits small in the frame: landscape or multiple-sequence territory. The Sun is {alt}° above the western horizon.",
     vt1t:"Extreme close-up",
-    vt1x:"Not even the whole disc fits the frame. You will see the chromosphere, the prominences and Baily's beads in great detail, but the Sun spills out of the frame. Useful for the instant of contact, not for the corona.",
+    vt1x:"Not even the whole disc fits the frame. You will see the chromosphere, the prominences and Baily's beads in great detail, but the Sun spills out of the frame.",
     vt2t:"Disc fills the frame",
-    vt2x:"The solar disc fills the frame. Ideal for the diamond ring, the prominences and the chromosphere, with very little room for the corona around it.",
+    vt2x:"The solar disc fills the frame. Ideal for the diamond ring, the prominences and the chromosphere, with very little room for the corona.",
     vt3t:"Disc + inner corona",
-    vt3x:"The disc and the bright inner corona both fit. A good frame for the diamond ring and the base of the corona; the long streamers are clipped at the edges.",
+    vt3x:"The disc and the bright inner corona both fit. A good frame for the diamond ring and the base of the corona; the long streamers are clipped.",
     vt4t:"Corona almost complete",
-    vt4x:"You capture almost the whole of your chosen corona; the most extended streamers graze or cross the edges of the frame. A tight framing — centre the Sun carefully.",
+    vt4x:"You capture almost the whole of your chosen corona; the most extended streamers graze the edges. A tight framing, so centre the Sun carefully.",
     vt5t:"Corona with room to spare",
-    vt5x:"The corona fits comfortably, with sky around it. Ample margin to compose and to keep the streamers. The sweet spot for totality.",
+    vt5x:"The corona fits comfortably, with sky around it. Ample margin to compose and to keep the streamers.",
     vt6t:"Wide shot",
-    vt6x:"The eclipse sits small within the frame: landscape territory. Make the most of the Sun being only {alt}° high to take in the western horizon and the atmosphere of totality.",
+    vt6x:"The eclipse sits small within the frame: landscape territory. With the Sun at {alt}° the western horizon fits in the same shot.",
+    vAddDrift:" Note: on a fixed tripod the Sun moves {d} during totality, {p}% of the short side. Offset it up and to the left.",
+    vAddHorizon:" The horizon falls inside the frame: a landscape composition is available.",
 
     refPhoto:"Photosphere (solar disc)",
+    refMoon:"Lunar disc (1.03 ×)",
     refInner:"Inner corona (2 R☉)",
     refChosen:"Chosen corona ({r} R☉)",
+    refDrift:"Drift during totality ({d} s)",
 
     colStruct:"Structure", colPartial:"Partial phase",
     rowPhot:"Photosphere (disc)", rowCresc:"Thin crescent (+2 EV)",
-    rowBaily:"Baily's beads", rowChromo:"Chromosphere", rowProm:"Prominences",
+    rowDiamond:"Diamond ring", rowBaily:"Baily's beads",
+    rowChromo:"Chromosphere", rowProm:"Prominences",
     rowCor01:"Corona 0.1 R☉ (inner)", rowCor05:"Corona 0.5 R☉",
     rowCor1:"Corona 1 R☉", rowCor2:"Corona 2 R☉",
     rowCorYours:"Corona {r} R☉ (your extent)",
 
-    expIntroPar:"Filter on. The brightness of the photosphere is constant, so a single exposure serves for almost the whole partial phase; the thin crescent asks for about two stops more because of limb darkening.",
+    expIntroPar:"Filter on. The brightness of the photosphere is constant, but the extinction is not: the Sun drops from {a1}° to {a2}° between first contact and the end, so the exposure lengthens as you go. The table below gives the detail minute by minute.",
     expIntroTot:"No filter. Between the chromosphere and your corona at {r} R☉ there are <b>{n} stops</b> of difference: impossible in a single frame, hence the exposure bracket.",
-    extApplied:" Atmospheric extinction correction applied: +{ev} EV (Sun at {alt}°).",
+    extApplied:" Extinction correction applied at this instant: +{ev} EV (Sun at {alt}°, {am} air masses).",
+    parPlanIntro:"Shutter speeds with the {nd} filter, ISO {iso} and f/{f}, recomputing the air mass at every instant. Between first contact and the end of the eclipse the correction grows by {dev} EV: leave the exposure fixed at C1 and the Sun ends up underexposed.",
 
     seqNote:"{n} frames at f/{f} and ISO {iso}, in 1 EV steps. Approximate time including margin: ≈ {s} s ",
     seqFits:"(it fits within the {d} s of totality at {loc}; automate it with auto-bracketing or an intervalometer).",
     seqTight:"(it comes close to the {d} s of totality at {loc}: raise the ISO or open up the aperture).",
+    seqOver:"(it does not fit in the {d} s of totality at {loc}: trim the bracket, raise the ISO or open up).",
     seqTrack:" With equatorial tracking there is no practical trailing limit at these speeds.",
-    seqWarn:" <span style=\"color:var(--prom)\">The {n} speeds in red trail more than 1 px at {fe} mm on a fixed tripod (limit ≈ {lim}): use tracking, raise the ISO or open up the aperture.</span>",
+    seqWarn:" <span class=\"warn\">The {n} speeds in red trail more than {b} px at {fe} mm on a fixed tripod (limit ≈ {lim}): use tracking, raise the ISO or open up.</span>",
     seqOk:" Trailing limit without tracking ≈ {lim}; the whole series stays below it.",
+    seqRange:" The amber values fall outside the camera scale (longer than 30 s or faster than 1/8000): use bulb, or change ISO or aperture.",
 
-    ctxC1:"First contact (partial)", ctxTot:"Totality (C2 → C3)",
-    ctxDur:"Duration of totality", ctxAlt:"Altitude of the Sun at maximum",
-    ctxSet:"Sunset",
+    ctxC1:"First contact (C1)", ctxTot:"Totality (C2 → C3)",
+    ctxDur:"Duration of totality", ctxMax:"Maximum",
+    ctxAlt:"Apparent altitude at maximum", ctxAz:"Azimuth at maximum",
+    ctxSet:"Sunset", ctxMag:"Eclipse magnitude",
     ctxFilter:" A solar filter is mandatory during the partial phases; remove it only during the {d} s of totality.",
+    ctxSrc:"Contacts, altitude and azimuth: municipal table of the IGN.",
 
-    endC4:"End of the eclipse (fourth contact)", endC4a:"End of the eclipse (fourth contact) ≈",
-    endSet:"Sunset (still eclipsed)",
+    endC4:"End of the eclipse (C4)", endSet:"Sunset (still eclipsed)",
     noteCoruna:"The eclipse ends in full before sunset. A clear western horizon is indispensable.",
-    noteOviedo:"The longest totality of the large cities: 1m 49s. The eclipse ends before sunset.",
-    noteLeon:"Fourth contact almost coincides with sunset: the end of the partial phase will be a setting Sun.",
+    noteCedeira:"One of the longest totalities on the Galician coast, 100 s, with a clean Atlantic horizon.",
+    noteFerrol:"89 s of totality, with the estuary opening west as the horizon line.",
+    noteLugo:"85 s of totality inland: the relief to the west matters more than on the coast.",
+    noteOviedo:"The longest totality of the large cities: 1m 48s. The eclipse ends before sunset.",
+    noteLeon:"105 s of totality. Fourth contact comes 6 minutes before sunset, with the Sun already on the ground.",
+    noteBurgos:"103 s of totality. The Sun sets before fourth contact: the final partial phase ends on the horizon.",
     noteZaragoza:"The Sun sets before fourth contact: the final partial phase ends with an eclipsed Sun on the horizon.",
-    noteValencia:"The Sun only 4° up: any building or haze will hide it. The beach, with the Sun setting over the sea, is the best bet.",
-    notePalma:"The Sun at 2°, grazing the sea: totality over the Mediterranean, but with no horizon margin at all. Atmospheric extinction here is brutal.",
+    noteValencia:"The Sun only 5° up: any building or haze will hide it. The beach, with the Sun setting over the sea, is the best bet.",
+    notePalma:"The Sun at 3°, grazing the sea: totality over the Mediterranean, but with no horizon margin at all. Extinction here is brutal.",
 
     extOpt0:"No correction (Espenak table)",
-    extClean:"Clear sky at {alt}° (+{ev} EV)",
-    extHaze:"Haze or dust (+{ev} EV)",
-    extHint:"At {alt}° the light crosses ≈{am} air masses (Kasten-Young). The correction lengthens all the exposure times according to the site chosen.",
+    extClean:"Clear sky (k = 0.20)",
+    extHaze:"Haze or dust (k = 0.30)",
+    extHint:"The correction is recomputed at every instant from the Kasten and Young air mass on the apparent altitude. Right now: {am} air masses, +{ev} EV.",
+
+    dpxHint:"Blur budget from trailing. At this focal length the scale is {s}″/px and the seeing at {am} air masses is around {see}″, that is {sp} px: demanding 1 px is stricter than the atmosphere itself.",
+
+    atmAirmass:"Air mass (Kasten and Young)", atmExt:"Extinction",
+    atmRefr:"Refraction", atmFlat:"Flattening of the disc",
+    atmDisp:"Dispersion 400–700 nm", atmSee:"Estimated seeing",
+    atmNote:"Flattening and dispersion follow directly from differential refraction: at this altitude the disc is compressed vertically and each colour channel separates from its neighbour. Shoot RAW and correct lateral chromatic aberration channel by channel.",
+    obstHint:"With the Sun at {alt}°, an obstacle {h} m high hides the eclipse if it stands closer than <b>{d} m</b> toward azimuth {az}°. Check the real horizon profile before the 12th.",
+
+    tState:"{ph} · {ob}% of the photosphere covered",
+    tsBefore:"Before C1", tsPartial:"Partial", tsTotal:"TOTALITY",
+    tsFinal:"Final partial", tsAfter:"Eclipse over", tsSet:"Sun below the horizon",
+    instHintPar:"Drag to run through the eclipse. The drawing uses the real centre separation fitted to the IGN contacts. Filter on at this instant.",
+    instHintTot:"You are in totality: filter off. {r} s left to third contact. The C2 diamond ring appears in the left quadrant of the frame and the C3 one opposite it.",
+    instLive:"Following the device clock, with the {off} s correction applied.",
 
     edBefore:"Before the eclipse · {loc}", edPartial:"Partial phase · {loc}",
     edTotality:"TOTALITY · {loc}", edFinal:"Final partial phase · {loc}",
@@ -730,737 +914,1056 @@
     labEnd:"until the end ({e}, {t})",
     labNext:"the next total eclipse visible from Spain: 2 August 2027",
     days:"days",
+    alertHint:"With alerts on, the browser beeps and vibrates 30 s before second contact and 15 s before third contact, and keeps the screen awake. It needs one tap on the page first.",
+    alertOnMsg:"Alerts active. Screen kept awake while this tab is visible.",
+    alertNoWake:"Alerts active. This browser will not keep the screen awake.",
+    alertC2:"Filter off in 30 seconds",
+    alertC3:"Filter back on in 15 seconds",
 
     ndName11:"ND 4.0", ndName8:"ND 5.0 / Baader visual", ndName12:"Baader ND 3.8 (photo only)",
     pcTitle:"Field sheet · Total solar eclipse · {loc} · 12 August 2026",
-    pcSub:"Rafael Vida · configuration generated on {d}",
+    pcSub:"Rafael Vida · configuration generated on {d} · timings from the IGN",
     pcWarn:"SOLAR FILTER AT ALL TIMES, except during the {d} s of totality. At the first flash after third contact, filter back on immediately. The {nd} you have chosen{safe}.",
     pcUnsafe:" is NOT safe to look through",
     pcTimes:"Timings at {loc} (official local time)",
     pcThTime:"Time", pcThEvent:"Event", pcThFilter:"Filter",
-    pcC1:"C1 · the partial phase begins",
+    pcC1:"C1 · the partial phase begins · Sun at {alt}°",
     pcC2:"C2 · diamond ring, totality begins ({d} s)",
-    pcC3:"C3 · end of totality · Sun at ≈{alt}°",
-    pcEndRow:"{e} (sunset {s})",
+    pcMax:"Maximum of the eclipse",
+    pcC3:"C3 · end of totality · Sun at {alt}°",
+    pcEndRow:"{e}",
+    pcSetRow:"Sunset",
     pcOn:"On", pcOffStrong:"OFF", pcOnStrong:"ON",
     pcKit:"Kit",
-    pcKitLine:"{f} mm × TC {tc}× → <strong>{fe} mm effective</strong> · sensor {sw} × {sh} mm, {orient} · equivalent {eq} mm · field {hf} × {vf} · mount: {mount}",
+    pcKitLine:"{f} mm × TC {tc}× → <strong>{fe} mm effective</strong> · sensor {sw} × {sh} mm, {orient} · equivalent {eq} mm · field {hf} × {vf} · scale {sc}″/px · mount: {mount}",
     orientH:"landscape", orientV:"portrait",
     mountTrack:"equatorial tracking", mountFixed:"fixed tripod",
-    pcExp:"Exposure · ISO {iso} · f/{f}{ext}",
-    pcExtApplied:" · extinction +{ev} EV applied (Sun at {alt}°)",
-    pcThPartial:"Partial phase (with {nd} filter)", pcThSpeed:"Shutter speed",
+    pcExp:"Exposure · ISO {iso} · f/{f}",
+    pcThPartial:"Partial phase with the {nd} filter", pcThSpeed:"Shutter speed",
     pcThTot:"Totality (no filter)",
     pcPhotFilter:"Photosphere with filter (Q {q})",
     pcBracket:"Totality bracket · {n} frames · ≈ {s} s of the {d} s available (tick each one)",
-    pcDrift:"Trailing limit without tracking at this focal length ≈ {lim} (1 px). ▲ = speed that trails on a fixed tripod.",
-    pcNoExt:" No extinction correction: at {alt}° of altitude expect to need ≈ +{ev} EV.",
+    pcDrift:"Trailing limit without tracking at this focal length ≈ {lim} ({b} px). ▲ = speed that trails on a fixed tripod. During the {d} s of totality the Sun moves {dr} on a fixed tripod.",
+    pcAtm:"Atmosphere at maximum: {am} air masses, extinction +{ev} EV, dispersion {disp}″, flattening {flat}%.",
+    pcHorizon:"Sun at {alt}° and azimuth {az}°: an obstacle {h} m high must stand more than {d} m away.",
     dateLocale:"en-GB"
   }};
 
-  var inited = false;   // la app no está montada hasta el final de este script
-  function lang(){ return document.documentElement.lang === "en" ? "en" : "es"; }
-  function t(k, v){
-    var s = (TR[lang()] || TR.es)[k];
-    if(s == null) return "";
-    if(v) for(var p in v){ if(Object.prototype.hasOwnProperty.call(v,p)) s = s.split("{"+p+"}").join(v[p]); }
+  var inited=false;
+  function lang(){ return document.documentElement.lang==="en"?"en":"es"; }
+  function t(k,v){
+    var s=(TR[lang()]||TR.es)[k];
+    if(s==null) return "";
+    if(v) for(var p in v){ if(Object.prototype.hasOwnProperty.call(v,p)) s=s.split("{"+p+"}").join(v[p]); }
     return s;
   }
-  function tArr(k){ return (TR[lang()] || TR.es)[k]; }
+  function tArr(k){ return (TR[lang()]||TR.es)[k]; }
+  function dec(s){ return lang()==="en"?s:String(s).replace(".",","); }
+  function f1(n){ return dec(n.toFixed(1)); }
+  function f2(n){ return dec(n.toFixed(2)); }
+  function fN(n){ return dec(Math.abs(n-Math.round(n))<0.05?String(Math.round(n)):n.toFixed(1)); }
 
-  // --- constantes físicas ---
-  var R_SUN = 0.2625;          // radio angular del Sol en grados (diámetro 0.525)
-  var D_SUN = 0.525;
-  var MOON_MAG = 1.04;         // la Luna aparece ~4% mayor que el Sol en este eclipse
-  var FF_DIAG = Math.sqrt(36*36 + 24*24); // 43.27 mm
+  /* =========================================================================
+     2. ASTRONOMÍA
+     ========================================================================= */
+  var D2R=Math.PI/180, R2D=180/Math.PI;
+  var D_SUN=0.5261;            // diámetro solar el 12 ago 2026 (d = 1,0133 UA)
+  var R_SUN=D_SUN/2;
+  var MAG=1.03;                // magnitud del eclipse en España según el IGN
+  var R_MOON=R_SUN*MAG;
+  var FF_DIAG=Math.sqrt(36*36+24*24);
+  var DRIFT=14.54;             // ″/s : 15,041 · cos(14,79°)
 
-  // circunstancias locales (horas UTC = local CEST - 2). Fuentes: IGN y efemerides por municipio.
-  // c1: inicio parcial · c2/c3: totalidad · endT: ultimo momento visible · dur: totalidad en s · alt: altura del Sol en el maximo
-  var LOCS = {
-    coruna:  {name:"A Coruña", c1:[17,31,0],  c2:[18,27,22], c3:[18,28,38], endT:[19,22,0],
-              dur:76,  alt:12, set:"21:41", endKey:"endC4", noteKey:"noteCoruna"},
-    oviedo:  {name:"Oviedo", c1:[17,32,0], c2:[18,27,5], c3:[18,28,54], endT:[19,22,0],
-              dur:109, alt:10, set:"≈ 21:31", endKey:"endC4a", noteKey:"noteOviedo"},
-    leon:    {name:"León", c1:[17,32,40], c2:[18,28,16], c3:[18,30,0], endT:[19,22,2],
-              dur:104, alt:10, set:"≈ 21:22", endKey:"endC4", noteKey:"noteLeon"},
-    zaragoza:{name:"Zaragoza", c1:[17,34,37], c2:[18,28,58], c3:[18,30,22], endT:[19,4,0],
-              dur:84,  alt:6,  set:"≈ 21:04", endKey:"endSet", noteKey:"noteZaragoza"},
-    valencia:{name:"Valencia", c1:[17,38,19], c2:[18,32,25], c3:[18,33,24], endT:[18,58,0],
-              dur:59,  alt:4,  set:"≈ 20:58", endKey:"endSet", noteKey:"noteValencia"},
-    palma:   {name:"Palma de Mallorca", c1:[17,37,58], c2:[18,31,0], c3:[18,32,36], endT:[18,49,0],
-              dur:96,  alt:2,  set:"≈ 20:49", endKey:"endSet", noteKey:"notePalma"}
+  function jdOf(ms){ return ms/86400000+2440587.5; }
+  function sunEcl(J){
+    var T=(J-2451545.0)/36525.0;
+    var L=(280.46646+36000.76983*T)%360, M=(357.52911+35999.05029*T)%360, Mr=M*D2R;
+    var C=(1.914602-0.004817*T)*Math.sin(Mr)+0.019993*Math.sin(2*Mr)+0.000289*Math.sin(3*Mr);
+    var om=125.04-1934.136*T;
+    return { lam:L+C-0.00569-0.00478*Math.sin(om*D2R),
+             eps:23+26/60+21.448/3600-(46.8150*T)/3600+0.00256*Math.cos(om*D2R) };
+  }
+  function gmst(J){
+    var T=(J-2451545.0)/36525.0;
+    return (280.46061837+360.98564736629*(J-2451545.0)+0.000387933*T*T)%360;
+  }
+  // altura geométrica y azimut del Sol (grados) para un instante en ms
+  function sunAltAz(ms,lat,lon){
+    var J=jdOf(ms), e=sunEcl(J), lr=e.lam*D2R, er=e.eps*D2R;
+    var ra=Math.atan2(Math.cos(er)*Math.sin(lr),Math.cos(lr))*R2D;
+    var dec=Math.asin(Math.sin(er)*Math.sin(lr))*R2D;
+    var H=((gmst(J)+lon-ra)%360+360)%360*D2R, p=lat*D2R, d=dec*D2R;
+    var alt=Math.asin(Math.sin(p)*Math.sin(d)+Math.cos(p)*Math.cos(d)*Math.cos(H))*R2D;
+    var az=(Math.atan2(Math.sin(H),Math.cos(H)*Math.sin(p)-Math.tan(d)*Math.cos(p))*R2D+180)%360;
+    return {alt:alt, az:az, dec:dec};
+  }
+  function refrMin(h){ // refracción de Bennett en minutos de arco
+    var x=h+10.3/(h+5.11);
+    if(x<=0.5) x=0.5;
+    return 1.02/Math.tan(x*D2R);
+  }
+  function appAlt(h){ return h+refrMin(h)/60; }
+  function airmass(happ){
+    var h=Math.max(happ,-0.5);
+    return 1/(Math.sin(h*D2R)+0.50572*Math.pow(h+6.07995,-1.6364));
+  }
+  // extinción en pasos: ΔEV = 1,327 · k · (X − 1)
+  function extEVraw(mode,happ){
+    if(!mode) return 0;
+    var k=(mode===1)?0.20:0.30;
+    return 1.327*k*(airmass(happ)-1);
+  }
+  // achatamiento vertical del disco por refracción diferencial (fracción)
+  function flattening(h){
+    return Math.max(0,(refrMin(h-R_SUN)-refrMin(h+R_SUN))/60/D_SUN);
+  }
+  // dispersión atmosférica 400–700 nm en segundos de arco
+  function dispersionArcsec(h){
+    var z=(90-Math.max(h,0.2))*D2R;
+    return (2.833e-4-2.762e-4)*Math.tan(z)*206265;
+  }
+  function seeingArcsec(X){ return 2.0*Math.pow(X,0.6); }
+
+  /* =========================================================================
+     3. CIRCUNSTANCIAS LOCALES · tabla municipal del IGN (hora oficial CEST)
+        eclipses.ign.es · contactos al segundo. Puestas de sol: IGN cuando el
+        eclipse acaba después, calculadas (±3 s) en el resto.
+     ========================================================================= */
+  function T2(s){ var p=s.split(":"); return Date.UTC(2026,7,12,+p[0]-2,+p[1],+p[2]); }
+  var LOCS={
+    coruna:{name:"A Coruña", lat:43.3623, lon:-8.4115,
+      c1:"19:30:58", c2:"20:27:41", cx:"20:28:20", c3:"20:28:59", c4:"21:22:01", set:"21:41:16",
+      endKey:"endC4", noteKey:"noteCoruna"},
+    cedeira:{name:"Cedeira", lat:43.6606, lon:-8.0600,
+      c1:"19:30:30", c2:"20:26:58", cx:"20:27:49", c3:"20:28:38", c4:"21:21:27", set:"21:40:31",
+      endKey:"endC4", noteKey:"noteCedeira"},
+    ferrol:{name:"Ferrol", lat:43.4840, lon:-8.2340,
+      c1:"19:30:47", c2:"20:27:23", cx:"20:28:08", c3:"20:28:52", c4:"21:21:47", set:"21:40:49",
+      endKey:"endC4", noteKey:"noteFerrol"},
+    lugo:{name:"Lugo", lat:43.0097, lon:-7.5567,
+      c1:"19:31:46", c2:"20:28:08", cx:"20:28:51", c3:"20:29:33", c4:"21:22:16", set:"21:37:06",
+      endKey:"endC4", noteKey:"noteLugo"},
+    oviedo:{name:"Oviedo", lat:43.3619, lon:-5.8494,
+      c1:"19:31:22", c2:"20:27:07", cx:"20:28:01", c3:"20:28:55", c4:"21:21:06", set:"21:31:02",
+      endKey:"endC4", noteKey:"noteOviedo"},
+    leon:{name:"León", lat:42.5987, lon:-5.5671,
+      c1:"19:32:46", c2:"20:28:22", cx:"20:29:14", c3:"20:30:07", c4:"21:22:08", set:"21:28:17",
+      endKey:"endC4", noteKey:"noteLeon"},
+    burgos:{name:"Burgos", lat:42.3439, lon:-3.6969,
+      c1:"19:33:24", c2:"20:28:27", cx:"20:29:19", c3:"20:30:10", c4:null, set:"21:20:16",
+      endKey:"endSet", noteKey:"noteBurgos"},
+    zaragoza:{name:"Zaragoza", lat:41.6488, lon:-0.8891,
+      c1:"19:34:42", c2:"20:29:04", cx:"20:29:45", c3:"20:30:27", c4:null, set:"21:07:35",
+      endKey:"endSet", noteKey:"noteZaragoza"},
+    valencia:{name:"València", lat:39.4699, lon:-0.3763,
+      c1:"19:38:25", c2:"20:32:30", cx:"20:33:00", c3:"20:33:31", c4:null, set:"21:01:18",
+      endKey:"endSet", noteKey:"noteValencia"},
+    palma:{name:"Palma de Mallorca", lat:39.5696, lon:2.6502,
+      c1:"19:38:05", c2:"20:31:06", cx:"20:31:54", c3:"20:32:42", c4:null, set:"20:49:23",
+      endKey:"endSet", noteKey:"notePalma"}
   };
+  // asimetría media C4−máx frente a máx−C1 medida en las seis ciudades con C4 publicado
+  var ASYM=0.937;
+  (function prep(){
+    for(var k in LOCS){
+      var L=LOCS[k];
+      L.tC1=T2(L.c1); L.tC2=T2(L.c2); L.tCX=T2(L.cx); L.tC3=T2(L.c3); L.tSet=T2(L.set);
+      L.tC4=L.c4?T2(L.c4):Math.round(L.tCX+ASYM*(L.tCX-L.tC1));
+      L.c4est=!L.c4;
+      L.dur=Math.round((L.tC3-L.tC2)/1000);
+      L.tEnd=Math.min(L.tC4,L.tSet);
+      var aa=sunAltAz(L.tCX,L.lat,L.lon);
+      L.alt=aa.alt; L.altApp=appAlt(aa.alt); L.az=aa.az;
+      // ---- geometría: separación de centros ajustada a los contactos ----
+      var Rs=R_SUN, Rm=R_MOON, sum=Rs+Rm, dif=Rm-Rs;
+      function branch(tOut,tIn){                 // tOut: C1 o C4 ; tIn: C2 o C3
+        var a=Math.abs(L.tCX-tOut)/1000, b=Math.abs(tIn-L.tCX)/1000;
+        var v2=(sum*sum-dif*dif)/(a*a-b*b);      // (°/s)²
+        var d2=Math.max(0,dif*dif-v2*b*b);
+        return {v:Math.sqrt(v2), d:Math.sqrt(d2)};
+      }
+      L.gIn=branch(L.tC1,L.tC2);
+      L.gEg=branch(L.tC4,L.tC3);
+      // dirección aparente del movimiento lunar respecto al Sol (PA desde arriba, +derecha)
+      L.paMoon=lunarPA(L);
+      L.paDrift=driftPA(L);
+      L.paNorth=northPA(L.az,L.altApp);
+    }
+  })();
+
+  // ángulos de posición en el marco de la imagen (cámara nivelada)
+  function northPA(az,alt){
+    var A=az*D2R,h=alt*D2R;
+    return (Math.atan2(-Math.sin(A),-Math.cos(A)*Math.sin(h))*R2D+360)%360;
+  }
+  function driftPA(L){
+    var a=sunAltAz(L.tCX,L.lat,L.lon), b=sunAltAz(L.tCX+60000,L.lat,L.lon);
+    var dAz=(b.az-a.az)*Math.cos(a.alt*D2R), dAlt=b.alt-a.alt;
+    return (Math.atan2(dAz,dAlt)*R2D+360)%360;
+  }
+  // velocidad relativa Luna-Sol ≈ 0,499°/h hacia el este eclíptico menos 0,179°/h·cos φ hacia el este local
+  function lunarPA(L){
+    var J=jdOf(L.tCX), e=sunEcl(J), th=(gmst(J)+L.lon)%360;
+    function ecl2eq(lam){
+      var lr=lam*D2R, er=e.eps*D2R;
+      return [Math.cos(lr), Math.sin(lr)*Math.cos(er), Math.sin(lr)*Math.sin(er)];
+    }
+    var tt=th*D2R, p=L.lat*D2R;
+    var U=[Math.cos(p)*Math.cos(tt),Math.cos(p)*Math.sin(tt),Math.sin(p)];
+    var N=[-Math.sin(p)*Math.cos(tt),-Math.sin(p)*Math.sin(tt),Math.cos(p)];
+    var E=[-Math.sin(tt),Math.cos(tt),0];
+    function loc(v){ return [v[0]*E[0]+v[1]*E[1]+v[2]*E[2],
+                             v[0]*N[0]+v[1]*N[1]+v[2]*N[2],
+                             v[0]*U[0]+v[1]*U[1]+v[2]*U[2]]; }
+    var S=loc(ecl2eq(e.lam)), T=loc(ecl2eq(e.lam+90));
+    var kv=0.499, ko=0.179*Math.cos(p)/Math.cos(43.3623*D2R);
+    var V=[kv*T[0]-ko*1, kv*T[1], kv*T[2]];
+    var d=V[0]*S[0]+V[1]*S[1]+V[2]*S[2];
+    var Vp=[V[0]-d*S[0],V[1]-d*S[1],V[2]-d*S[2]];
+    var alt=Math.asin(S[2]), az=Math.atan2(S[0],S[1]);
+    var er=[Math.cos(az),-Math.sin(az),0];
+    var eu=[-Math.sin(az)*Math.sin(alt),-Math.cos(az)*Math.sin(alt),Math.cos(alt)];
+    var xr=Vp[0]*er[0]+Vp[1]*er[1]+Vp[2]*er[2];
+    var yu=Vp[0]*eu[0]+Vp[1]*eu[1]+Vp[2]*eu[2];
+    return (Math.atan2(xr,yu)*R2D+360)%360;
+  }
+
+  // posición del centro lunar respecto al centro solar, en grados, marco imagen
+  function moonOffset(L,ms){
+    var g=(ms<=L.tCX)?L.gIn:L.gEg;
+    var dt=(ms-L.tCX)/1000;                        // negativo antes del máximo
+    var along=g.v*dt;                              // + en el sentido del movimiento
+    var pa=L.paMoon*D2R;
+    var u=[Math.sin(pa),-Math.cos(pa)];            // (x derecha, y abajo) en el plano imagen
+    // perpendicular elegida del lado del norte proyectado
+    var p1=(L.paMoon+90)%360, p2=(L.paMoon+270)%360;
+    function ang(a,b){ var d=Math.abs(a-b)%360; return d>180?360-d:d; }
+    var pp=(ang(p1,L.paNorth)<ang(p2,L.paNorth)?p1:p2)*D2R;
+    var w=[Math.sin(pp),-Math.cos(pp)];
+    return { x:u[0]*along+w[0]*g.d, y:u[1]*along+w[1]*g.d,
+             sep:Math.sqrt(along*along+g.d*g.d) };
+  }
+  // fracción de la fotosfera cubierta
+  function obscuration(sep){
+    var r=R_SUN, R=R_MOON;
+    if(sep>=r+R) return 0;
+    if(sep<=R-r) return 1;
+    var a=(sep*sep+r*r-R*R)/(2*sep*r), b=(sep*sep+R*R-r*r)/(2*sep*R);
+    a=Math.max(-1,Math.min(1,a)); b=Math.max(-1,Math.min(1,b));
+    var A=r*r*Math.acos(a)+R*R*Math.acos(b)
+        -0.5*Math.sqrt(Math.max(0,(-sep+r+R)*(sep+r-R)*(sep-r+R)*(sep+r+R)));
+    return Math.min(1,A/(Math.PI*r*r));
+  }
+
+  /* =========================================================================
+     4. ESTADO
+     ========================================================================= */
+  var st={
+    focal:500, tc:1,
+    sw:23.5, sh:15.6, custom:false,
+    orient:"h", zoom:"fit",
+    corR:4.0,
+    iso:400, fnum:8, nd:8, mp:24,
+    track:false, dpx:1, ext:1,
+    loc:"coruna",
+    inst:null,        // ms del instante mostrado; null = mitad de la totalidad
+    live:false,
+    alerts:false, clockOff:0
+  };
+  var $=function(id){ return document.getElementById(id); };
   function L(){ return LOCS[st.loc]; }
-  function endLabel(){ return t(L().endKey); }
-  function locUTC(t){ return Date.UTC(2026, 7, 12, t[0], t[1], t[2]); }
-  function locHHMM(t, secs){
+  function nowMs(){ return Date.now()+st.clockOff*1000; }
+  function instMs(){
+    var l=L();
+    if(st.live) return Math.max(l.tC1,Math.min(l.tEnd,nowMs()));
+    if(st.inst==null) return Math.round((l.tC2+l.tC3)/2);
+    return Math.max(l.tC1,Math.min(l.tEnd,st.inst));
+  }
+  function isTotal(ms){ var l=L(); return ms>=l.tC2&&ms<=l.tC3; }
+  function hhmm(ms,secs){
+    var d=new Date(ms+2*3600000);
     function z(n){ return (n<10?"0":"")+n; }
-    var h = t[0]+2; // CEST
-    return z(h)+":"+z(t[1]) + (secs ? ":"+z(t[2]) : "");
+    return z(d.getUTCHours())+":"+z(d.getUTCMinutes())+(secs?":"+z(d.getUTCSeconds()):"");
   }
 
-  // masa de aire (Kasten-Young 1989) y correccion de extincion dinamica
-  function airmass(h){ return 1/(Math.sin(h*Math.PI/180) + 0.50572*Math.pow(h+6.07995, -1.6364)); }
-  function extEVfor(mode, alt){
-    if(mode === 0) return 0;
-    var k = (mode === 1) ? 0.20 : 0.30; // coef. de extincion: limpio / bruma
-    return Math.round(1.327 * k * (airmass(alt)-1) * 2) / 2;
-  }
-  function extEV(){ return extEVfor(st.ext, L().alt); }
+  /* =========================================================================
+     5. ENCUADRE
+     ========================================================================= */
+  var FMIN=10,FMAX=6000;
+  function tToFocal(x){ return Math.round(FMIN*Math.pow(FMAX/FMIN,x/1000)); }
+  function focalToT(f){ f=Math.max(FMIN,Math.min(FMAX,f)); return Math.round(1000*Math.log(f/FMIN)/Math.log(FMAX/FMIN)); }
 
-  // --- estado ---
-  var st = {
-    focal: 500, tc: 1,
-    sw: 23.5, sh: 15.6, ratio: "3:2", custom: false,
-    orient: "h",
-    corR: 4.0,  // radios solares (radio)
-    phase: "tot", // "tot" totalidad | "par" parcial
-    iso: 400, fnum: 8, nd: 8, // nd = Q de la fase parcial segun filtro
-    mp: 24,       // megapixeles (para escala de placa y arrastre)
-    track: false, // seguimiento ecuatorial
-    ext: 1,       // correccion de extincion: 0 ninguna | 1 cielo limpio | 2 bruma
-    loc: "coruna" // lugar de observacion
-  };
-
-  // --- elementos ---
-  var $ = function(id){ return document.getElementById(id); };
-  var focal = $("focal"), focalNum = $("focalNum"), focalv = $("focalv");
-  var tc = $("tc"), sensor = $("sensor"), customBox = $("customBox"), cw = $("cw"), ch = $("ch");
-  var cor = $("cor"), corv = $("corv");
-  var view = $("view");
-
-  // slider logarítmico de focal: t[0..1000] -> 10..6000 mm
-  var FMIN = 10, FMAX = 6000;
-  function tToFocal(t){ return Math.round(FMIN * Math.pow(FMAX/FMIN, t/1000)); }
-  function focalToT(f){ f = Math.max(FMIN, Math.min(FMAX, f)); return Math.round(1000 * Math.log(f/FMIN)/Math.log(FMAX/FMIN)); }
-
-  // --- cálculo ---
   function compute(){
-    var fe = st.focal * st.tc;                 // focal efectiva del sistema
-    var w = st.sw, h = st.sh;
-    if(st.orient === "v"){ var t = w; w = h; h = t; } // intercambiar para retrato
-    var hFov = 2*Math.atan(w/(2*fe))*180/Math.PI;
-    var vFov = 2*Math.atan(h/(2*fe))*180/Math.PI;
-    var dFov = 2*Math.atan(Math.sqrt(w*w+h*h)/(2*fe))*180/Math.PI;
-    var diag = Math.sqrt(st.sw*st.sw + st.sh*st.sh);
-    var crop = FF_DIAG / diag;
-    var eq = fe * crop;
-    var corDeg = st.corR * R_SUN;              // radio de la corona en grados
-    return {fe:fe, w:w, h:h, hFov:hFov, vFov:vFov, dFov:dFov, crop:crop, eq:eq,
-            minFov: Math.min(hFov,vFov), corR_deg:corDeg, corDia: 2*corDeg};
+    var fe=st.focal*st.tc, w=st.sw, h=st.sh;
+    if(st.orient==="v"){ var tmp=w; w=h; h=tmp; }
+    var hFov=2*Math.atan(w/(2*fe))*R2D, vFov=2*Math.atan(h/(2*fe))*R2D;
+    var diag=Math.sqrt(st.sw*st.sw+st.sh*st.sh), crop=FF_DIAG/diag;
+    var nH=Math.sqrt(st.mp*1e6*st.sw/st.sh);
+    var scale=206265*(st.sw/nH)/fe;                   // ″/px
+    return { fe:fe, w:w, h:h, hFov:hFov, vFov:vFov, crop:crop, eq:fe*crop,
+             minFov:Math.min(hFov,vFov), corR_deg:st.corR*R_SUN, corDia:2*st.corR*R_SUN,
+             scale:scale, tmax:st.dpx*scale/DRIFT };
+  }
+  function fmtDeg(d){ return d>=1?dec(d.toFixed(2))+"°":Math.round(d*60)+"′"; }
+  function fmtArc(d){ // grados -> ° o ′
+    return d>=1?dec(d.toFixed(2))+"°":(d*60>=1?f1(d*60)+"′":Math.round(d*3600)+"″");
   }
 
-  // el separador decimal sigue al idioma: coma en español, punto en inglés
-  function dec(s){ return lang() === "en" ? s : s.replace(".", ","); }
-  function fmtDeg(d){
-    if(d >= 1) return dec(d.toFixed(2)) + "°";
-    return Math.round(d*60) + "′"; // arcominutos para valores pequeños
-  }
-  function fmt1(n){ return dec(n.toFixed(1)); }
-  function fmt2(n){ return dec(n.toFixed(2)); }
-
-  // --- veredicto ---
-  function verdict(c){
-    var m = c.minFov, sun = D_SUN, inner = 2*R_SUN*2 /*1.05*/, corDia = c.corDia;
-    var tag, txt;
-
-    if(st.phase === "par"){
-      if(m < sun*0.95){
-        tag = t("vp1t"); txt = t("vp1x");
-      } else if(m < sun*1.6){
-        tag = t("vp2t"); txt = t("vp2x");
-      } else if(m < sun*4){
-        tag = t("vp3t"); txt = t("vp3x");
-      } else {
-        tag = t("vp4t"); txt = t("vp4x", {alt:L().alt});
-      }
-      $("vtag").textContent = tag;
-      $("vtext").textContent = txt;
-      return;
-    }
-
-    if(m < sun*0.95){
-      tag = t("vt1t"); txt = t("vt1x");
-    } else if(m < sun*1.6){
-      tag = t("vt2t"); txt = t("vt2x");
-    } else if(m < inner*1.45){
-      tag = t("vt3t"); txt = t("vt3x");
-    } else if(m < corDia*1.15){
-      tag = t("vt4t"); txt = t("vt4x");
-    } else if(m < 5){
-      tag = t("vt5t"); txt = t("vt5x");
-    } else {
-      tag = t("vt6t"); txt = t("vt6x", {alt:L().alt});
-    }
-    $("vtag").textContent = tag;
-    $("vtext").textContent = txt;
-  }
-
-  // --- previsualización SVG ---
-  function draw(c){
-    var W = 1000, H = 750, cx = W/2, cy = H/2;
-    // span de cielo a mostrar: que quepan fotograma y corona
-    var maxFrame = Math.max(c.hFov, c.vFov);
-    var span = Math.max(maxFrame, c.corDia) * 1.22;
-    span = Math.max(span, D_SUN * 5); // nunca dejar el Sol como un punto invisible
-    var scale = (0.9 * Math.min(W, H)) / span; // px por grado
-
-    var fw = c.hFov * scale, fh = c.vFov * scale;          // fotograma
-    var rCor = c.corR_deg * scale;                          // radio corona
-    var rInner = (2*R_SUN) * scale;                         // corona interior (2R)
-    var rSun = R_SUN * scale;
-    var rMoon = R_SUN * MOON_MAG * scale;
-
-    // escala (barra) en grados redondos
-    var nice = [0.1,0.25,0.5,1,2,5,10,20].reduce(function(p,v){
-      return Math.abs(v - span/4) < Math.abs(p - span/4) ? v : p; });
-    var barPx = nice * scale;
-
-    // estrellas tenues
-    var stars = "";
-    for(var i=0;i<26;i++){
-      var sx = (i*97 % 100)/100*W, sy = (i*61 % 100)/100*H;
-      var sr = (i%3===0)?1.2:0.7, so = (i%4===0)?0.5:0.28;
-      stars += '<circle cx="'+sx.toFixed(0)+'" cy="'+sy.toFixed(0)+'" r="'+sr+'" fill="#cfd4e6" opacity="'+so+'"/>';
-    }
-
-    var fx = cx - fw/2, fy = cy - fh/2;
-
-    var svg = ''
-    + '<defs>'
-    + '<radialGradient id="cg" cx="50%" cy="50%" r="50%">'
-    +   '<stop offset="'+(rSun/rCor*100).toFixed(1)+'%" stop-color="#f8f5ea" stop-opacity="0.95"/>'
-    +   '<stop offset="'+(rInner/rCor*100).toFixed(1)+'%" stop-color="#eef0fb" stop-opacity="0.55"/>'
-    +   '<stop offset="70%" stop-color="#cdd6f0" stop-opacity="0.18"/>'
-    +   '<stop offset="100%" stop-color="#cdd6f0" stop-opacity="0"/>'
-    + '</radialGradient>'
-    + '<radialGradient id="sg" cx="50%" cy="50%" r="50%">'
-    +   '<stop offset="60%" stop-color="#f8f5ea" stop-opacity="0.9"/>'
-    +   '<stop offset="100%" stop-color="#f8f5ea" stop-opacity="0"/>'
-    + '</radialGradient>'
-    + '<radialGradient id="pg" cx="50%" cy="50%" r="50%">'
-    +   '<stop offset="0%" stop-color="#fff1cf"/>'
-    +   '<stop offset="62%" stop-color="#ffc25a"/>'
-    +   '<stop offset="92%" stop-color="#f59121"/>'
-    +   '<stop offset="100%" stop-color="#d76c12"/>'
-    + '</radialGradient>'
-    + '<mask id="outside">'
-    +   '<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#fff"/>'
-    +   '<rect x="'+fx.toFixed(1)+'" y="'+fy.toFixed(1)+'" width="'+fw.toFixed(1)+'" height="'+fh.toFixed(1)+'" fill="#000"/>'
-    + '</mask>'
-    + '</defs>';
-
-    // cielo + estrellas
-    svg += '<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#04040a"/>' + stars;
-
-    if(st.phase === "tot"){
-      // --- TOTALIDAD: fotosfera oculta, se ve corona y cromosfera ---
-      // penachos ecuatoriales (corona alargada en horizontal)
-      svg += '<g opacity="0.5">'
-        + '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+(rCor*1.18).toFixed(1)+'" ry="'+(rCor*0.55).toFixed(1)+'" fill="url(#cg)"/>'
-        + '</g>';
-      // corona radial
-      svg += '<circle cx="'+cx+'" cy="'+cy+'" r="'+rCor.toFixed(1)+'" fill="url(#cg)"/>';
-      // halo brillante del disco
-      svg += '<circle cx="'+cx+'" cy="'+cy+'" r="'+(rSun*1.25).toFixed(1)+'" fill="url(#sg)"/>';
-      // Luna (disco negro que tapa la fotosfera)
-      svg += '<circle cx="'+cx+'" cy="'+cy+'" r="'+rMoon.toFixed(1)+'" fill="#05050b"/>';
-      // anillo de cromosfera (capa fina, exagerada para que se vea)
-      svg += '<circle cx="'+cx+'" cy="'+cy+'" r="'+rMoon.toFixed(1)+'" fill="none" stroke="#ffcf6b" stroke-width="'+Math.max(0.8,rSun*0.06).toFixed(2)+'" opacity="0.85"/>';
-      // protuberancias (dos arquitos rosados en el limbo)
-      if(rMoon > 6){
-        svg += '<circle cx="'+(cx+rMoon*0.55)+'" cy="'+(cy-rMoon*0.78)+'" r="'+(rMoon*0.10).toFixed(1)+'" fill="#ff5b52" opacity="0.85"/>';
-        svg += '<circle cx="'+(cx-rMoon*0.82)+'" cy="'+(cy+rMoon*0.42)+'" r="'+(rMoon*0.08).toFixed(1)+'" fill="#ff5b52" opacity="0.8"/>';
-      }
-    } else {
-      // --- PARCIAL: se ve la fotosfera (con filtro), mordida por la Luna ---
-      var mx = cx - rSun*0.62, my = cy - rSun*0.32; // Luna desplazada -> creciente
-      // fotosfera con oscurecimiento del limbo
-      svg += '<circle cx="'+cx+'" cy="'+cy+'" r="'+rSun.toFixed(1)+'" fill="url(#pg)"/>';
-      // manchas solares
-      if(rSun > 14){
-        svg += '<circle cx="'+(cx+rSun*0.30)+'" cy="'+(cy+rSun*0.18)+'" r="'+(rSun*0.07).toFixed(1)+'" fill="#7a3a12" opacity="0.85"/>';
-        svg += '<circle cx="'+(cx+rSun*0.42)+'" cy="'+(cy+rSun*0.22)+'" r="'+(rSun*0.04).toFixed(1)+'" fill="#7a3a12" opacity="0.8"/>';
-        svg += '<circle cx="'+(cx+rSun*0.10)+'" cy="'+(cy-rSun*0.34)+'" r="'+(rSun*0.05).toFixed(1)+'" fill="#7a3a12" opacity="0.8"/>';
-      }
-      // Luna que produce el mordisco
-      svg += '<circle cx="'+mx.toFixed(1)+'" cy="'+my.toFixed(1)+'" r="'+rMoon.toFixed(1)+'" fill="#04040a"/>';
-    }
-
-    // oscurecer todo lo que queda fuera del fotograma
-    svg += '<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#04040a" opacity="0.66" mask="url(#outside)"/>';
-
-    // marco del fotograma
-    svg += '<rect x="'+fx.toFixed(1)+'" y="'+fy.toFixed(1)+'" width="'+fw.toFixed(1)+'" height="'+fh.toFixed(1)+'" '
-        +  'fill="none" stroke="#ffcf6b" stroke-width="2.2" rx="3"/>';
-    // ticks de esquina
-    var tk = 16;
-    [[fx,fy,1,1],[fx+fw,fy,-1,1],[fx,fy+fh,1,-1],[fx+fw,fy+fh,-1,-1]].forEach(function(p){
-      svg += '<path d="M'+p[0]+' '+(p[1]+p[3]*tk)+' L'+p[0]+' '+p[1]+' L'+(p[0]+p[2]*tk)+' '+p[1]+'" stroke="#ffcf6b" stroke-width="2.2" fill="none"/>';
-    });
-    // cruz central tenue
-    svg += '<g stroke="rgba(255,207,107,0.35)" stroke-width="1">'
-        +  '<line x1="'+(cx-9)+'" y1="'+cy+'" x2="'+(cx+9)+'" y2="'+cy+'"/>'
-        +  '<line x1="'+cx+'" y1="'+(cy-9)+'" x2="'+cx+'" y2="'+(cy+9)+'"/></g>';
-
-    // barra de escala
-    var bx = 26, by = H - 30;
-    svg += '<g font-family="JetBrains Mono, monospace" font-size="20" fill="#cdd2e6">'
-        +  '<line x1="'+bx+'" y1="'+by+'" x2="'+(bx+barPx).toFixed(1)+'" y2="'+by+'" stroke="#cdd2e6" stroke-width="2"/>'
-        +  '<line x1="'+bx+'" y1="'+(by-5)+'" x2="'+bx+'" y2="'+(by+5)+'" stroke="#cdd2e6" stroke-width="2"/>'
-        +  '<line x1="'+(bx+barPx).toFixed(1)+'" y1="'+(by-5)+'" x2="'+(bx+barPx).toFixed(1)+'" y2="'+(by+5)+'" stroke="#cdd2e6" stroke-width="2"/>'
-        +  '<text x="'+(bx+barPx+10).toFixed(1)+'" y="'+(by+6)+'">'+ (nice<1? Math.round(nice*60)+"′" : fmt1(nice)+"°") +'</text></g>';
-
-    view.innerHTML = svg;
-  }
-
-  // --- tabla de referencia ---
-  function refTable(c){
-    var rows = [
-      ["#ffcf6b", t("refPhoto"), D_SUN],
-      ["#eef0fb", t("refInner"), 2*(2*R_SUN)],
-      ["#cdd6f0", t("refChosen", {r:fmt1(st.corR)}), c.corDia]
-    ];
-    var html = "";
-    rows.forEach(function(r){
-      var pct = (r[2]/c.minFov*100);
-      var pctTxt = pct > 999 ? "&gt;999" : Math.round(pct);
-      html += '<tr><td><span class="dot" style="background:'+r[0]+'"></span>'+r[1]+'</td>'
-            + '<td class="n">'+fmtDeg(r[2])+'</td>'
-            + '<td class="n">'+pctTxt+' %</td></tr>';
-    });
-    $("reftab").innerHTML = html;
-  }
-
-  // --- exposición (modelo de Espenak: t = f^2 / (ISO * 2^Q)) ---
-  // velocidades de obturación reales (paso 1/3), en segundos
-  var SHUT = (function(){
-    var fr = [8000,6400,5000,4000,3200,2500,2000,1600,1250,1000,800,640,500,400,320,
-              250,200,160,125,100,80,60,50,40,30,25,20,15,13,10,8,6,5,4,3,2];
-    var arr = fr.map(function(x){ return {sec:1/x, label:"1/"+x}; });
-    var secs = [1,1.3,1.6,2,2.5,3,4,5,6,8,10,13,15,20,25,30];
-    // etiqueta nula: se genera al vuelo, porque el separador decimal depende del idioma
-    secs.forEach(function(x){ arr.push({sec:x, label:null}); });
+  /* =========================================================================
+     6. EXPOSICIÓN
+     ========================================================================= */
+  var SHUT=(function(){
+    var fr=[8000,6400,5000,4000,3200,2500,2000,1600,1250,1000,800,640,500,400,320,
+            250,200,160,125,100,80,60,50,40,30,25,20,15,13,10,8,6,5,4,3,2];
+    var arr=fr.map(function(x){ return {sec:1/x,label:"1/"+x}; });
+    [1,1.3,1.6,2,2.5,3,4,5,6,8,10,13,15,20,25,30].forEach(function(x){ arr.push({sec:x,label:null}); });
     return arr.sort(function(a,b){ return a.sec-b.sec; });
   })();
-  function shutLabel(s){ return s.label !== null ? s.label : fmt1(s.sec)+'"'; }
-
-  function snapShutter(t){
-    var best = SHUT[0], bd = 1e9;
+  var SHUT_MIN=SHUT[0].sec, SHUT_MAX=SHUT[SHUT.length-1].sec;
+  function shutLabel(s){ return s.label!==null?s.label:f1(s.sec)+'"'; }
+  function snapShutter(x){
+    var best=SHUT[0],bd=1e9;
     for(var i=0;i<SHUT.length;i++){
-      var d = Math.abs(Math.log(SHUT[i].sec) - Math.log(t));
-      if(d < bd){ bd = d; best = SHUT[i]; }
+      var d=Math.abs(Math.log(SHUT[i].sec)-Math.log(x));
+      if(d<bd){ bd=d; best=SHUT[i]; }
     }
     return best;
   }
-
-  // Q de la corona en funcion del radio en R solares (datos Espenak + extrapolacion log)
+  // devuelve etiqueta + aviso de fuera de escala
+  function shutFor(x){
+    if(x>SHUT_MAX) return {label:(x<60?f1(x):Math.round(x))+'" bulb', sec:x, out:true};
+    if(x<SHUT_MIN) return {label:"< 1/8000", sec:x, out:true};
+    var s=snapShutter(x);
+    return {label:shutLabel(s), sec:s.sec, out:false};
+  }
   function qCorona(rs){
-    var pts = [[0.1,7],[0.2,5],[0.5,3],[1.0,1],[2.0,0]];
-    if(rs <= pts[0][0]) return pts[0][1];
+    var pts=[[0.1,7],[0.2,5],[0.5,3],[1.0,1],[2.0,0]];
+    if(rs<=pts[0][0]) return pts[0][1];
     for(var i=0;i<pts.length-1;i++){
-      if(rs <= pts[i+1][0]){
-        var x0=Math.log10(pts[i][0]), x1=Math.log10(pts[i+1][0]);
-        var t=(Math.log10(rs)-x0)/(x1-x0);
-        return pts[i][1] + t*(pts[i+1][1]-pts[i][1]);
+      if(rs<=pts[i+1][0]){
+        var x0=Math.log(pts[i][0])/Math.LN10, x1=Math.log(pts[i+1][0])/Math.LN10;
+        var u=(Math.log(rs)/Math.LN10-x0)/(x1-x0);
+        return pts[i][1]+u*(pts[i+1][1]-pts[i][1]);
       }
     }
-    // mas alla de 2 R: prolongar la ultima pendiente (≈ -3,3 Q por decada)
-    return 0 + (Math.log10(rs)-Math.log10(2.0)) * (-1/ (Math.log10(2.0)-Math.log10(1.0)));
+    return -(Math.log(rs/2)/Math.LN10)/(Math.log(2)/Math.LN10);
   }
-
-  function expTime(q){ return st.fnum*st.fnum / (st.iso * Math.pow(2, q - extEV())); }
-  function tLabel(t){ return t >= 1 ? fmt1(t)+'"' : "1/"+Math.round(1/t); }
-
-  // limite de arrastre sin seguimiento: deriva solar ~14,5"/s (delta +15 en agosto)
-  function driftLimit(c){
-    var nH = Math.sqrt(st.mp*1e6 * st.sw/st.sh); // pixeles horizontales
-    var p = st.sw / nH;                           // paso de pixel en mm
-    var scale = 206265 * p / c.fe;                // escala de placa, "/px
-    return { scale: scale, tmax: scale / 14.5 };  // presupuesto: 1 px
+  function extNow(ms){
+    var l=L(), aa=sunAltAz(ms,l.lat,l.lon);
+    var ha=appAlt(aa.alt);
+    return { alt:aa.alt, altApp:ha, az:aa.az, X:airmass(ha),
+             ev:Math.round(extEVraw(st.ext,ha)*2)/2, evRaw:extEVraw(st.ext,ha) };
   }
+  function expTime(q,ev){ return st.fnum*st.fnum/(st.iso*Math.pow(2,q-ev)); }
 
-  // datos de la totalidad (filas Q + secuencia de horquilla), reutilizados por la ficha
-  function totalityData(c){
-    var qOuter = qCorona(st.corR), dl = driftLimit(c);
-    var rows = [
-      [t("rowBaily"), 12],
-      [t("rowChromo"), 11],
-      [t("rowProm"), 9],
-      [t("rowCor01"), 7],
-      [t("rowCor05"), 3],
-      [t("rowCor1"), 1],
-      [t("rowCor2"), 0],
-      [t("rowCorYours", {r:fmt1(st.corR)}), qOuter]
+  function totalityData(c,ev){
+    var qOuter=qCorona(st.corR);
+    var rows=[
+      [t("rowDiamond"),13],[t("rowBaily"),12],[t("rowChromo"),11],[t("rowProm"),9],
+      [t("rowCor01"),7],[t("rowCor05"),3],[t("rowCor1"),1],[t("rowCor2"),0],
+      [t("rowCorYours",{r:f1(st.corR)}),qOuter]
     ];
-    var seq = [], total = 0;
-    for(var q=11; q>=Math.floor(qOuter); q--){
-      var s = snapShutter(expTime(q)), lb = shutLabel(s);
-      if(seq.length===0 || seq[seq.length-1].label !== lb){
-        seq.push({sec:s.sec, label:lb, warn: !st.track && s.sec > dl.tmax});
-        total += s.sec + 0.4; // margen por disparo
+    var seq=[],total=0,last=null;
+    for(var q=13;q>=Math.floor(qOuter);q--){
+      var s=shutFor(expTime(q,ev));
+      if(s.label!==last){
+        seq.push({sec:s.sec,label:s.label,out:s.out,warn:!st.track&&!s.out&&s.sec>c.tmax});
+        if(!s.out) total+=Math.min(s.sec,60)+0.4;
+        last=s.label;
       }
     }
-    return { rows: rows, seq: seq, total: total, dl: dl, qOuter: qOuter };
+    return {rows:rows,seq:seq,total:total,qOuter:qOuter};
   }
 
-  function exposure(c){
-    var col = $("expCol"), intro = $("expIntro"), tab = $("exptab");
-    var box = $("bracketBox"), seqEl = $("bracketSeq"), noteEl = $("bracketNote");
-    var dl = driftLimit(c);
-    var extTxt = st.ext > 0 ? t("extApplied", {ev:fmt1(extEV()), alt:L().alt}) : "";
-    var rows;
+  /* =========================================================================
+     7. DIBUJO
+     ========================================================================= */
+  var view=$("view");
+  function esc(n){ return (Math.round(n*10)/10); }
 
-    function rowHtml(r){
-      var s = snapShutter(expTime(r[1]));
-      var warn = !st.track && s.sec > dl.tmax;
-      return '<tr><td>'+r[0]+'</td><td class="n" style="text-align:center">'+r[1].toFixed(0).replace("-0","0")+'</td>'
-           + '<td class="n"'+(warn?' style="color:var(--prom)"':'')+'>'+shutLabel(s)+(warn?' ▲':'')+'</td></tr>';
+  // parada de gradiente de corona según ley de Baumbach
+  function coronaStops(rMaxSolar){
+    function B(r){ return 0.0532*Math.pow(r,-2.5)+1.425*Math.pow(r,-7)+2.565*Math.pow(r,-17); }
+    var lo=Math.log(B(rMaxSolar)), hi=Math.log(B(1.005)), out=[];
+    for(var i=0;i<=8;i++){
+      var r=1.005+(rMaxSolar-1.005)*i/8;
+      var op=(Math.log(B(r))-lo)/(hi-lo);
+      out.push({off:(r/rMaxSolar*100), op:Math.max(0,Math.min(1,op))*0.92});
     }
+    return out;
+  }
 
-    if(st.phase === "par"){
-      col.textContent = t("colPartial");
-      box.style.display = "none";
-      var qf = st.nd; // Q segun filtro: ND4,0=11 · ND5,0=8 · Baader ND3,8=12
-      rows = [
-        [t("rowPhot"), qf],
-        [t("rowCresc"), qf-2]
-      ];
-      intro.innerHTML = t("expIntroPar") + extTxt;
+  function draw(c,ms){
+    var l=L(), W=1000,H=750,cx=W/2,cy=H/2;
+    var total=isTotal(ms);
+    var atm=extNow(ms);
+    var flat=1-flattening(atm.altApp);              // compresión vertical
+    var off=moonOffset(l,ms);
+    var obsc=obscuration(off.sep);
+    var visible=obsc<1;
+
+    // escala: px por grado
+    var scale, span;
+    if(st.zoom==="fit"){
+      scale=0.96*Math.min(W/c.hFov,H/c.vFov);
     } else {
-      col.textContent = t("colStruct");
-      box.style.display = "block";
-      var T = totalityData(c);
-      rows = T.rows;
-      var span = 11 - T.qOuter;
-      intro.innerHTML = t("expIntroTot", {r:fmt1(st.corR), n:Math.round(span)}) + extTxt;
+      span=Math.max(Math.max(c.hFov,c.vFov),c.corDia)*1.25;
+      span=Math.max(span,D_SUN*5);
+      scale=0.9*Math.min(W,H)/span;
+    }
+    var fw=c.hFov*scale, fh=c.vFov*scale, fx=cx-fw/2, fy=cy-fh/2;
+    var rSun=R_SUN*scale, rMoon=R_MOON*scale, rCor=c.corR_deg*scale;
+    var mx=cx+off.x*scale, my=cy+off.y*scale*flat;
 
-      seqEl.innerHTML = T.seq.map(function(s){
-        return '<span class="chip'+(s.warn?' seqwarn':'')+'">'+s.label+'</span>';
+    var svg='<defs>';
+    // corona: gradiente radial con caída de Baumbach
+    var stops=coronaStops(Math.max(1.2,st.corR));
+    svg+='<radialGradient id="cg" cx="50%" cy="50%" r="50%">';
+    stops.forEach(function(s){
+      svg+='<stop offset="'+esc(s.off)+'%" stop-color="#eef0fb" stop-opacity="'+s.op.toFixed(3)+'"/>';
+    });
+    svg+='<stop offset="100%" stop-color="#cdd6f0" stop-opacity="0"/></radialGradient>';
+    svg+='<radialGradient id="cgs" cx="50%" cy="50%" r="50%">'
+       + '<stop offset="0%" stop-color="#f2f4ff" stop-opacity="0.42"/>'
+       + '<stop offset="55%" stop-color="#dfe6ff" stop-opacity="0.16"/>'
+       + '<stop offset="100%" stop-color="#cdd6f0" stop-opacity="0"/></radialGradient>';
+    // fotosfera con oscurecimiento del limbo
+    svg+='<radialGradient id="pg" cx="50%" cy="50%" r="50%">'
+       + '<stop offset="0%" stop-color="#fff6e2"/><stop offset="55%" stop-color="#ffdd93"/>'
+       + '<stop offset="86%" stop-color="#ffbd4e"/><stop offset="100%" stop-color="#e07f1c"/></radialGradient>';
+    svg+='<radialGradient id="sg" cx="50%" cy="50%" r="50%">'
+       + '<stop offset="55%" stop-color="#f8f5ea" stop-opacity="0.85"/>'
+       + '<stop offset="100%" stop-color="#f8f5ea" stop-opacity="0"/></radialGradient>';
+    svg+='<linearGradient id="hz" x1="0" y1="0" x2="0" y2="1">'
+       + '<stop offset="0%" stop-color="#1b1524"/><stop offset="100%" stop-color="#05050a"/></linearGradient>';
+    svg+='<mask id="outside"><rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#fff"/>'
+       + '<rect x="'+esc(fx)+'" y="'+esc(fy)+'" width="'+esc(fw)+'" height="'+esc(fh)+'" fill="#000"/></mask>';
+    svg+='</defs>';
+
+    // cielo: gradiente de crepúsculo si el horizonte anda cerca
+    svg+='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#04040a"/>';
+    // estrellas deterministas
+    var stars="";
+    for(var i=0;i<30;i++){
+      var sx=(i*97%100)/100*W, sy=(i*61%100)/100*H;
+      var sr=(i%3===0)?1.3:0.7, so=(i%4===0)?(total?0.55:0.18):(total?0.30:0.10);
+      stars+='<circle cx="'+sx.toFixed(0)+'" cy="'+sy.toFixed(0)+'" r="'+sr+'" fill="#cfd4e6" opacity="'+so+'"/>';
+    }
+    svg+=stars;
+
+    // horizonte: a atm.altApp grados por debajo del Sol
+    var hy=cy+atm.altApp*scale;
+    if(hy<H+40){
+      var terr='';
+      for(var x=0;x<=W;x+=50){
+        var k=(x*7919%100)/100;
+        terr+=(x===0?'M0 '+H+' L0 '+(hy-6-k*10).toFixed(0)+' ':'')+'L'+x+' '+(hy-4-k*14).toFixed(0)+' ';
+      }
+      terr+='L'+W+' '+H+' Z';
+      svg+='<rect x="0" y="'+esc(hy)+'" width="'+W+'" height="'+esc(H-hy+2)+'" fill="url(#hz)"/>';
+      svg+='<path d="'+terr+'" fill="#0b0a12" stroke="rgba(255,207,107,0.25)" stroke-width="1"/>';
+      svg+='<text x="12" y="'+esc(hy-9)+'" font-family="JetBrains Mono, monospace" font-size="17" fill="rgba(255,207,107,0.55)">'
+         + (lang()==="en"?"horizon ":"horizonte ")+f1(atm.altApp)+'°</text>';
+    }
+
+    svg+='<g transform="translate('+cx+' '+cy+') scale(1 '+flat.toFixed(4)+') translate('+(-cx)+' '+(-cy)+')">';
+    if(total){
+      // penachos: PA deterministas, longitudes variadas (máximo solar: corona casi simétrica)
+      var PA=[12,58,96,142,188,231,276,318], LN=[1.00,0.72,0.88,0.60,0.95,0.68,0.82,0.58];
+      svg+='<g opacity="0.85">';
+      for(var s=0;s<PA.length;s++){
+        var a=PA[s]*Math.PI/180, len=rCor*LN[s]*1.12, half=(9+((s*37)%11))*Math.PI/180;
+        var x1=cx+Math.sin(a-half)*rSun*1.02, y1=cy-Math.cos(a-half)*rSun*1.02;
+        var x2=cx+Math.sin(a-half*0.45)*len, y2=cy-Math.cos(a-half*0.45)*len;
+        var x3=cx+Math.sin(a+half*0.45)*len, y3=cy-Math.cos(a+half*0.45)*len;
+        var x4=cx+Math.sin(a+half)*rSun*1.02, y4=cy-Math.cos(a+half)*rSun*1.02;
+        svg+='<path d="M'+esc(x1)+' '+esc(y1)+' L'+esc(x2)+' '+esc(y2)+' L'+esc(x3)+' '+esc(y3)+' L'+esc(x4)+' '+esc(y4)+' Z" fill="url(#cgs)"/>';
+      }
+      svg+='</g>';
+      // corona radial
+      svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+esc(rCor)+'" fill="url(#cg)"/>';
+      svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+esc(rSun*1.30)+'" fill="url(#sg)"/>';
+      // cromosfera y protuberancias en el limbo solar, antes de tapar con la Luna
+      svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+esc(rSun)+'" fill="none" stroke="#ff8a5b" stroke-width="'+Math.max(1,rSun*0.05).toFixed(2)+'" opacity="0.9"/>';
+      if(rSun>7){
+        var pr=[[28,0.11],[133,0.07],[212,0.09],[305,0.05]];
+        pr.forEach(function(p){
+          var a=p[0]*Math.PI/180;
+          svg+='<ellipse cx="'+esc(cx+Math.sin(a)*rSun)+'" cy="'+esc(cy-Math.cos(a)*rSun)+'" rx="'+esc(rSun*p[1])+'" ry="'+esc(rSun*p[1]*1.6)+'" transform="rotate('+p[0]+' '+esc(cx+Math.sin(a)*rSun)+' '+esc(cy-Math.cos(a)*rSun)+')" fill="#ff5b52" opacity="0.85"/>';
+        });
+      }
+      // Luna
+      svg+='<circle cx="'+esc(mx)+'" cy="'+esc(my)+'" r="'+esc(rMoon)+'" fill="#05050b"/>';
+    } else if(visible){
+      // fotosfera + Luna en la posición real
+      svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+esc(rSun*1.06)+'" fill="url(#sg)" opacity="0.5"/>';
+      svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+esc(rSun)+'" fill="url(#pg)"/>';
+      if(rSun>14){
+        var sp=[[0.30,0.18,0.07],[0.42,0.22,0.04],[0.10,-0.34,0.05],[-0.22,0.30,0.035]];
+        sp.forEach(function(p){
+          svg+='<ellipse cx="'+esc(cx+rSun*p[0])+'" cy="'+esc(cy+rSun*p[1])+'" rx="'+esc(rSun*p[2])+'" ry="'+esc(rSun*p[2]*0.8)+'" fill="#8a4514" opacity="0.8"/>';
+        });
+      }
+      svg+='<circle cx="'+esc(mx)+'" cy="'+esc(my)+'" r="'+esc(rMoon)+'" fill="#04040a"/>';
+    }
+    svg+='</g>';
+
+    // rastro de deriva durante la totalidad sobre trípode fijo
+    if(!st.track){
+      var dd=DRIFT*l.dur/3600*scale, pa=l.paDrift*Math.PI/180;
+      var ex=cx+Math.sin(pa)*dd, ey=cy-Math.cos(pa)*dd;
+      svg+='<g opacity="0.8"><line x1="'+cx+'" y1="'+cy+'" x2="'+esc(ex)+'" y2="'+esc(ey)+'" '
+        +  'stroke="#6fe3a6" stroke-width="2" stroke-dasharray="6 5"/>'
+        +  '<circle cx="'+esc(ex)+'" cy="'+esc(ey)+'" r="4" fill="#6fe3a6"/></g>';
+    }
+
+    // máscara fuera del fotograma y marco
+    svg+='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#04040a" opacity="'+(st.zoom==="fit"?0.75:0.66)+'" mask="url(#outside)"/>';
+    svg+='<rect x="'+esc(fx)+'" y="'+esc(fy)+'" width="'+esc(fw)+'" height="'+esc(fh)+'" fill="none" stroke="#ffcf6b" stroke-width="2.2" rx="3"/>';
+    var tk=16;
+    [[fx,fy,1,1],[fx+fw,fy,-1,1],[fx,fy+fh,1,-1],[fx+fw,fy+fh,-1,-1]].forEach(function(p){
+      svg+='<path d="M'+esc(p[0])+' '+esc(p[1]+p[3]*tk)+' L'+esc(p[0])+' '+esc(p[1])+' L'+esc(p[0]+p[2]*tk)+' '+esc(p[1])+'" stroke="#ffcf6b" stroke-width="2.2" fill="none"/>';
+    });
+    svg+='<g stroke="rgba(255,207,107,0.35)" stroke-width="1">'
+      +  '<line x1="'+(cx-9)+'" y1="'+cy+'" x2="'+(cx+9)+'" y2="'+cy+'"/>'
+      +  '<line x1="'+cx+'" y1="'+(cy-9)+'" x2="'+cx+'" y2="'+(cy+9)+'"/></g>';
+
+    // barra de escala
+    var target=(st.zoom==="fit"?c.minFov:span)/4;
+    var nice=[0.02,0.05,0.1,0.25,0.5,1,2,5,10,20].reduce(function(p,v){
+      return Math.abs(v-target)<Math.abs(p-target)?v:p; });
+    var barPx=nice*scale;
+    var bx=26,by=H-30;
+    svg+='<g font-family="JetBrains Mono, monospace" font-size="19" fill="#cdd2e6">'
+      +  '<line x1="'+bx+'" y1="'+by+'" x2="'+esc(bx+barPx)+'" y2="'+by+'" stroke="#cdd2e6" stroke-width="2"/>'
+      +  '<line x1="'+bx+'" y1="'+(by-5)+'" x2="'+bx+'" y2="'+(by+5)+'" stroke="#cdd2e6" stroke-width="2"/>'
+      +  '<line x1="'+esc(bx+barPx)+'" y1="'+(by-5)+'" x2="'+esc(bx+barPx)+'" y2="'+(by+5)+'" stroke="#cdd2e6" stroke-width="2"/>'
+      +  '<text x="'+esc(bx+barPx+10)+'" y="'+(by+6)+'">'+(nice<1?f1(nice*60)+"′":f1(nice)+"°")+'</text></g>';
+    // reloj y estado dentro del visor
+    svg+='<g font-family="JetBrains Mono, monospace" fill="#ffcf6b">'
+      +  '<text x="'+(W-24)+'" y="42" font-size="26" text-anchor="end">'+hhmm(ms,true)+'</text>'
+      +  '<text x="'+(W-24)+'" y="70" font-size="18" text-anchor="end" fill="'+(total?"#ff5b52":"#8b90a6")+'">'
+      +  (total?t("flOff"):t("flOn"))+'</text></g>';
+
+    view.innerHTML=svg;
+  }
+
+  /* =========================================================================
+     8. PANELES
+     ========================================================================= */
+  function verdict(c,ms){
+    var l=L(), m=c.minFov, sun=D_SUN, inner=4*R_SUN, corDia=c.corDia, tag,txt;
+    var total=isTotal(ms), alt=f1(extNow(ms).altApp);
+    if(!total){
+      if(m<sun*0.95){ tag=t("vp1t"); txt=t("vp1x"); }
+      else if(m<sun*1.6){ tag=t("vp2t"); txt=t("vp2x"); }
+      else if(m<sun*4){ tag=t("vp3t"); txt=t("vp3x"); }
+      else { tag=t("vp4t"); txt=t("vp4x",{alt:alt}); }
+    } else if(m<sun*0.95){ tag=t("vt1t"); txt=t("vt1x"); }
+    else if(m<sun*1.6){ tag=t("vt2t"); txt=t("vt2x"); }
+    else if(m<inner*1.45){ tag=t("vt3t"); txt=t("vt3x"); }
+    else if(m<corDia*1.15){ tag=t("vt4t"); txt=t("vt4x"); }
+    else if(m<5){ tag=t("vt5t"); txt=t("vt5x"); }
+    else { tag=t("vt6t"); txt=t("vt6x",{alt:alt}); }
+    var dd=DRIFT*l.dur/3600;                     // grados de deriva en la totalidad
+    if(!st.track&&dd>0.12*m) txt+=t("vAddDrift",{d:fmtArc(dd),p:Math.round(dd/m*100)});
+    if(c.vFov/2>extNow(ms).altApp) txt+=t("vAddHorizon");
+    $("vtag").textContent=tag;
+    $("vtext").textContent=txt;
+  }
+
+  function refTable(c){
+    var l=L();
+    var rows=[
+      ["#ffcf6b",t("refPhoto"),D_SUN],
+      ["#9aa0bb",t("refMoon"),2*R_MOON],
+      ["#eef0fb",t("refInner"),4*R_SUN],
+      ["#cdd6f0",t("refChosen",{r:f1(st.corR)}),c.corDia],
+      ["#6fe3a6",t("refDrift",{d:l.dur}),DRIFT*l.dur/3600]
+    ];
+    $("reftab").innerHTML=rows.map(function(r){
+      var pct=r[2]/c.minFov*100;
+      return '<tr><td><span class="dot" style="background:'+r[0]+'"></span>'+r[1]+'</td>'
+           + '<td class="n">'+fmtArc(r[2])+'</td>'
+           + '<td class="n">'+(pct>999?"&gt;999":Math.round(pct))+' %</td></tr>';
+    }).join("");
+  }
+
+  function exposure(c,ms){
+    var l=L(), total=isTotal(ms), atm=extNow(ms), ev=atm.ev;
+    var rows, nOut=0, nWarn=0;
+    function rowHtml(r){
+      var s=shutFor(expTime(r[1],ev));
+      var warn=!st.track&&!s.out&&s.sec>c.tmax;
+      if(s.out) nOut++;
+      if(warn) nWarn++;
+      return '<tr><td>'+r[0]+'</td><td class="n" style="text-align:center">'+r[1].toFixed(0).replace("-0","0")+'</td>'
+           + '<td class="n'+(warn?' warn':'')+'" '+(s.out?'style="color:var(--gold)"':'')+'>'+s.label+(warn?' ▲':'')+'</td></tr>';
+    }
+    var extTxt=st.ext>0?t("extApplied",{ev:f1(ev),alt:f1(atm.altApp),am:f1(atm.X)}):"";
+    if(!total){
+      $("expCol").textContent=t("colPartial");
+      $("bracketBox").style.display="none";
+      rows=[[t("rowPhot"),st.nd],[t("rowCresc"),st.nd-2]];
+      var a1=f1(appAlt(sunAltAz(l.tC1,l.lat,l.lon).alt)), a2=f1(appAlt(sunAltAz(l.tEnd,l.lat,l.lon).alt));
+      $("expIntro").innerHTML=t("expIntroPar",{a1:a1,a2:a2})+extTxt;
+    } else {
+      $("expCol").textContent=t("colStruct");
+      $("bracketBox").style.display="block";
+      var T=totalityData(c,ev);
+      rows=T.rows;
+      $("expIntro").innerHTML=t("expIntroTot",{r:f1(st.corR),n:Math.round(13-T.qOuter)})+extTxt;
+      $("bracketSeq").innerHTML=T.seq.map(function(s){
+        return '<span class="chip'+(s.warn?' seqwarn':(s.out?' seqrange':''))+'">'+s.label+'</span>';
       }).join("");
-
-      var lim = tLabel(dl.tmax), nWarn = 0;
-      T.seq.forEach(function(s){ if(s.warn) nWarn++; });
-      var totDur = L().dur;
-      var feas = T.total <= totDur;
-      noteEl.innerHTML = t("seqNote", {n:T.seq.length, f:fmt1(st.fnum), iso:st.iso, s:Math.round(T.total)})
-        + (feas ? t("seqFits",  {d:totDur, loc:L().name})
-                : t("seqTight", {d:totDur, loc:L().name}))
-        + (st.track
-            ? t("seqTrack")
-            : (nWarn
-                ? t("seqWarn", {n:nWarn, fe:Math.round(c.fe), lim:lim})
-                : t("seqOk", {lim:lim})));
+      var nw=0,no=0;
+      T.seq.forEach(function(s){ if(s.warn) nw++; if(s.out) no++; });
+      var fits=T.total<=l.dur*0.8?"seqFits":(T.total<=l.dur?"seqTight":"seqOver");
+      var lim=shutFor(c.tmax).label;
+      $("bracketNote").innerHTML=t("seqNote",{n:T.seq.length-no,f:fN(st.fnum),iso:st.iso,s:Math.round(T.total)})
+        + t(fits,{d:l.dur,loc:l.name})
+        + (st.track?t("seqTrack"):(nw?t("seqWarn",{n:nw,b:st.dpx,fe:Math.round(c.fe),lim:lim}):t("seqOk",{lim:lim})))
+        + (no?t("seqRange"):"");
     }
-
-    tab.innerHTML = rows.map(rowHtml).join("");
+    $("exptab").innerHTML=rows.map(rowHtml).join("");
+    $("ndCtl").style.opacity=total?"0.45":"1";
   }
 
-  // --- contexto local dinamico ---
+  function partialPlan(c){
+    var l=L(), out="", ndName=t({8:"ndName8",12:"ndName12"}[st.nd]||"ndName11");
+    var steps=10, t0=l.tC1, t1=l.tEnd;
+    var ev0=extEVraw(st.ext,appAlt(sunAltAz(t0,l.lat,l.lon).alt));
+    var ev1=extEVraw(st.ext,appAlt(sunAltAz(t1,l.lat,l.lon).alt));
+    $("parPlanIntro").textContent=t("parPlanIntro",{nd:ndName,iso:st.iso,f:fN(st.fnum),dev:f1(ev1-ev0)});
+    for(var i=0;i<=steps;i++){
+      var ms=t0+(t1-t0)*i/steps;
+      if(ms>=l.tC2&&ms<=l.tC3) continue;
+      var aa=sunAltAz(ms,l.lat,l.lon), ha=appAlt(aa.alt), X=airmass(ha);
+      var ev=Math.round(extEVraw(st.ext,ha)*2)/2;
+      var s=shutFor(expTime(st.nd,ev));
+      out+='<tr><td>'+hhmm(ms,false)+'</td><td class="n">'+f1(ha)+'°</td><td class="n">'+f1(X)+'</td>'
+         + '<td class="n">+'+f1(ev)+'</td><td class="n"'+(s.out?' style="color:var(--gold)"':'')+'>'+s.label+'</td></tr>';
+    }
+    $("parPlan").innerHTML=out;
+  }
+
   function renderCtx(){
-    var d = L();
-    [].forEach.call(document.querySelectorAll(".locName"), function(el){ el.textContent = d.name; });
-    $("ctxBox").innerHTML = ''
-      + '<div class="line"><span>'+t("ctxC1")+'</span><span>'+locHHMM(d.c1, d.c1[2]!==0)+'</span></div>'
-      + '<div class="line"><span>'+t("ctxTot")+'</span><span>'+locHHMM(d.c2,true)+' → '+locHHMM(d.c3,true)+'</span></div>'
-      + '<div class="line"><span>'+t("ctxDur")+'</span><span>'+d.dur+' s</span></div>'
-      + '<div class="line"><span>'+t("ctxAlt")+'</span><span>≈ '+d.alt+'°</span></div>'
-      + '<div class="line"><span>'+endLabel()+'</span><span>'+locHHMM(d.endT, false)+'</span></div>'
-      + '<div class="line"><span>'+t("ctxSet")+'</span><span>'+d.set+'</span></div>'
-      + '<div class="hint" style="margin-top:10px">'+t(d.noteKey)+t("ctxFilter", {d:d.dur})+'</div>';
+    var l=L();
+    [].forEach.call(document.querySelectorAll(".locName"),function(el){ el.textContent=l.name; });
+    var rows=[
+      [t("ctxC1"),hhmm(l.tC1,true)],
+      [t("ctxTot"),hhmm(l.tC2,true)+" → "+hhmm(l.tC3,true)],
+      [t("ctxDur"),l.dur+" s"],
+      [t("ctxMax"),hhmm(l.tCX,true)],
+      [t("ctxAlt"),"≈ "+f1(l.altApp)+"°"],
+      [t("ctxAz"),Math.round(l.az)+"°"],
+      [t(l.endKey),hhmm(l.tC4,true)+(l.c4est?" *":"")],
+      [t("ctxSet"),hhmm(l.tSet,true)]
+    ];
+    $("ctxBox").innerHTML=rows.map(function(r){
+      return '<div class="line"><span>'+r[0]+'</span><span>'+r[1]+'</span></div>';
+    }).join("")
+    + '<div class="hint" style="margin-top:10px">'+t(l.noteKey)+t("ctxFilter",{d:l.dur})+' '+t("ctxSrc")+'</div>';
   }
 
-  function updateExtLabels(){
-    var alt = L().alt;
-    $("extOpt0").textContent = t("extOpt0");
-    $("extOpt1").textContent = t("extClean", {alt:alt, ev:fmt1(extEVfor(1,alt))});
-    $("extOpt2").textContent = t("extHaze",  {ev:fmt1(extEVfor(2,alt))});
-    $("extHint").textContent = t("extHint",  {alt:alt, am:fmt1(airmass(alt))});
+  function atmPanel(ms){
+    var l=L(), a=extNow(ms), X=a.X;
+    var flat=flattening(a.altApp)*100, disp=dispersionArcsec(a.altApp), see=seeingArcsec(X);
+    var rows=[
+      [t("atmAirmass"),f2(X)],
+      [t("atmExt"),"+"+f1(extEVraw(st.ext,a.altApp))+" EV"],
+      [t("atmRefr"),f1(refrMin(a.alt))+"′"],
+      [t("atmFlat"),f1(flat)+" %"],
+      [t("atmDisp"),f1(disp)+"″"],
+      [t("atmSee"),"≈ "+f1(see)+"″"]
+    ];
+    $("atmBox").innerHTML=rows.map(function(r){
+      return '<div class="line"><span>'+r[0]+'</span><span>'+r[1]+'</span></div>';
+    }).join("")+'<div class="hint" style="margin-top:10px">'+t("atmNote")+'</div>';
+    var hh=+$("obst").value||15;
+    $("obstv").textContent=hh;
+    $("obstHint").innerHTML=t("obstHint",{alt:f1(l.altApp),h:hh,
+      d:Math.round(hh/Math.tan(l.altApp*D2R)),az:Math.round(l.az)});
   }
 
-  // etiquetas estáticas que el JS posee (selects, botones, placeholders)
+  function timeline(ms){
+    var l=L(), t0=l.tC1, t1=l.tEnd, span=t1-t0;
+    var pos=Math.max(0,Math.min(1,(ms-t0)/span));
+    $("tlnow").style.left=(pos*100)+"%";
+    $("tltot").style.left=((l.tC2-t0)/span*100)+"%";
+    $("tltot").style.width=Math.max(0.6,(l.tC3-l.tC2)/span*100)+"%";
+    $("tkA").textContent=hhmm(l.tC1,false);
+    $("tkB").textContent=hhmm(l.tC2,false);
+    $("tkC").textContent=hhmm(l.tEnd,false);
+    var ob=obscuration(moonOffset(l,ms).sep), st_;
+    if(ms<l.tC1) st_=t("tsBefore");
+    else if(ms<l.tC2) st_=t("tsPartial");
+    else if(ms<=l.tC3) st_=t("tsTotal");
+    else if(ms<=l.tEnd) st_=t("tsFinal");
+    else st_=(l.tC4>l.tSet?t("tsSet"):t("tsAfter"));
+    $("tClock").innerHTML=hhmm(ms,true)+' <small>CEST</small>';
+    $("tState").textContent=t("tState",{ph:st_,ob:(ob>=1||ob<=0)?Math.round(ob*100):f1(ob*100)});
+    $("instHint").textContent=st.live
+      ? t("instLive",{off:st.clockOff})
+      : (isTotal(ms)?t("instHintTot",{r:Math.max(0,Math.round((l.tC3-ms)/1000))}):t("instHintPar"));
+    if(!st.live) $("inst").value=Math.round(pos*1000);
+    [].forEach.call($("qrow").querySelectorAll("button"),function(b){
+      b.classList.toggle("on",b.dataset.q==="live"&&st.live);
+    });
+  }
+
+  /* =========================================================================
+     9. RENDER
+     ========================================================================= */
+  var rafPending=false;
+  function render(){
+    var c=compute(), ms=instMs(), l=L(), a=extNow(ms);
+    renderCtx();
+    $("extOpt0").textContent=t("extOpt0");
+    $("extOpt1").textContent=t("extClean");
+    $("extOpt2").textContent=t("extHaze");
+    $("extHint").textContent=t("extHint",{am:f2(a.X),ev:f1(extEVraw(st.ext,a.altApp))});
+    $("sEq").innerHTML=Math.round(c.eq)+' <small>mm</small>';
+    $("sCrop").innerHTML=f2(c.crop)+' <small>×</small>';
+    $("sFov").innerHTML=fmtDeg(c.hFov)+' <small>×</small> '+fmtDeg(c.vFov);
+    var sunPct=D_SUN/c.vFov*100;
+    $("sSun").innerHTML=(sunPct>999?"&gt;999":(sunPct<1?f1(sunPct):Math.round(sunPct)))+' <small>'+t("sunUnit")+'</small>';
+    $("sScale").innerHTML=f2(c.scale)+' <small>'+t("pxUnit")+'</small>';
+    $("sDrift").innerHTML=fmtArc(DRIFT*l.dur/3600)+' <small>/ '+l.dur+' s</small>';
+    $("dpxHint").textContent=t("dpxHint",{s:f2(c.scale),am:f1(a.X),
+      see:f1(seeingArcsec(a.X)),sp:f1(seeingArcsec(a.X)/c.scale)});
+    verdict(c,ms); refTable(c); exposure(c,ms); partialPlan(c); atmPanel(ms); timeline(ms);
+    draw(c,ms);
+    saveURLSoon();
+  }
+  function paint(){
+    if(rafPending) return;
+    rafPending=true;
+    (window.requestAnimationFrame||function(f){ setTimeout(f,16); })(function(){
+      rafPending=false; render();
+    });
+  }
+
+  /* =========================================================================
+     10. ETIQUETAS DEPENDIENTES DEL IDIOMA
+     ========================================================================= */
   function updateStaticStrings(){
-    view.setAttribute("aria-label", t("ariaView"));
-    $("btnCard").textContent = t("btnCard");
-    $("btnShare").textContent = t("btnShare");
-    cw.placeholder = t("phW"); ch.placeholder = t("phH");
-    function setOpts(sel, arr){
-      [].forEach.call(sel.options, function(o,i){ if(arr[i] != null) o.textContent = arr[i]; });
+    view.setAttribute("aria-label",t("ariaView"));
+    $("btnCard").textContent=t("btnCard");
+    $("btnShare").textContent=t("btnShare");
+    $("cw").placeholder=t("phW"); $("ch").placeholder=t("phH");
+    $("thShort").textContent=t("thShort");
+    function setOpts(sel,arr){
+      [].forEach.call(sel.options,function(o,i){ if(arr[i]!=null) o.textContent=arr[i]; });
     }
-    setOpts(tc, tArr("tcOpts"));
-    setOpts(sensor, tArr("sensorOpts"));
-    setOpts($("nd"), tArr("ndOpts"));
-    var segs = [["orient","o",{h:"segH", v:"segV"}],
-                ["phase","p",{par:"segPar", tot:"segTot"}],
-                ["track","t",{"0":"segFixed", "1":"segTrack"}]];
-    segs.forEach(function(g){
-      [].forEach.call($(g[0]).querySelectorAll("button"), function(b){
-        var k = g[2][b.getAttribute("data-"+g[1])];
-        if(k) b.textContent = t(k);
+    setOpts($("tc"),tArr("tcOpts"));
+    setOpts($("sensor"),tArr("sensorOpts"));
+    setOpts($("nd"),tArr("ndOpts"));
+    [["orient","o",{h:"segH",v:"segV"}],
+     ["zoom","z",{fit:"segFit",sky:"segSky"}],
+     ["track","t",{"0":"segFixed","1":"segTrack"}],
+     ["alerts","a",{"0":"segOff","1":"segOn"}]].forEach(function(g){
+      [].forEach.call($(g[0]).querySelectorAll("button"),function(b){
+        var k=g[2][b.getAttribute("data-"+g[1])];
+        if(k) b.textContent=t(k);
       });
     });
+    var l=L();
+    [].forEach.call($("loc").options,function(o){
+      if(LOCS[o.value]) o.textContent=LOCS[o.value].name;
+    });
+    $("alertHint").textContent=t("alertHint");
   }
 
-  // --- pintar todo ---
-  function render(){
-    var c = compute();
-    renderCtx();
-    updateExtLabels();
-    $("sEq").innerHTML = Math.round(c.eq) + ' <small>mm</small>';
-    $("sCrop").innerHTML = fmt2(c.crop) + ' <small>×</small>';
-    $("sFov").innerHTML = fmtDeg(c.hFov) + ' <small>×</small> ' + fmtDeg(c.vFov);
-    var sunPct = D_SUN / c.vFov * 100;
-    $("sSun").innerHTML = (sunPct>999?"&gt;999":(sunPct<1?fmt1(sunPct):Math.round(sunPct))) + ' <small>'+t("sunUnit")+'</small>';
-    verdict(c);
-    refTable(c);
-    exposure(c);
-    $("ndCtl").style.opacity = (st.phase === "par") ? "1" : "0.4";
-    draw(c);
-    saveURL();
+  /* =========================================================================
+     11. EVENTOS
+     ========================================================================= */
+  function seg(id,attr,fn){
+    $(id).addEventListener("click",function(e){
+      var b=e.target.closest("button"); if(!b) return;
+      [].forEach.call(this.querySelectorAll("button"),function(x){
+        x.setAttribute("aria-pressed",x===b?"true":"false");
+      });
+      fn(b.getAttribute("data-"+attr)); paint();
+    });
   }
-
-  // --- eventos ---
-  focal.addEventListener("input", function(){
-    st.focal = tToFocal(+focal.value);
-    focalNum.value = st.focal; focalv.textContent = st.focal;
-    render();
+  $("focal").addEventListener("input",function(){
+    st.focal=tToFocal(+this.value);
+    $("focalNum").value=st.focal; $("focalv").textContent=st.focal; paint();
   });
-  focalNum.addEventListener("input", function(){
-    var v = Math.max(5, Math.min(6000, +focalNum.value || 5));
-    st.focal = v; focalv.textContent = v; focal.value = focalToT(v);
-    render();
+  $("focalNum").addEventListener("input",function(){
+    var v=Math.max(FMIN,Math.min(FMAX,+this.value||FMIN));
+    st.focal=v; $("focalv").textContent=v; $("focal").value=focalToT(v); paint();
   });
-  tc.addEventListener("change", function(){ st.tc = +tc.value; render(); });
-
-  sensor.addEventListener("change", function(){
-    if(sensor.value === "custom"){
-      st.custom = true; customBox.classList.add("on");
-      st.sw = +cw.value; st.sh = +ch.value; st.ratio = "custom";
+  $("tc").addEventListener("change",function(){ st.tc=+this.value||1; paint(); });
+  $("sensor").addEventListener("change",function(){
+    if(this.value==="custom"){
+      st.custom=true; $("customBox").classList.add("on");
+      st.sw=+$("cw").value||36; st.sh=+$("ch").value||24;
     } else {
-      st.custom = false; customBox.classList.remove("on");
-      var p = sensor.value.split(",");
-      st.sw = +p[0]; st.sh = +p[1]; st.ratio = p[2];
+      st.custom=false; $("customBox").classList.remove("on");
+      var p=this.value.split(","); st.sw=+p[0]; st.sh=+p[1];
     }
-    render();
+    paint();
   });
   function customUpdate(){
-    st.sw = Math.max(3, +cw.value || 3); st.sh = Math.max(3, +ch.value || 3); render();
+    st.sw=Math.max(3,+$("cw").value||3); st.sh=Math.max(3,+$("ch").value||3); paint();
   }
-  cw.addEventListener("input", customUpdate);
-  ch.addEventListener("input", customUpdate);
-
-  $("orient").addEventListener("click", function(e){
-    var b = e.target.closest("button"); if(!b) return;
-    st.orient = b.dataset.o;
-    [].forEach.call(this.querySelectorAll("button"), function(x){
-      x.setAttribute("aria-pressed", x === b ? "true" : "false");
-    });
-    render();
+  $("cw").addEventListener("input",customUpdate);
+  $("ch").addEventListener("input",customUpdate);
+  seg("orient","o",function(v){ st.orient=v==="v"?"v":"h"; });
+  seg("zoom","z",function(v){ st.zoom=v==="sky"?"sky":"fit"; });
+  seg("track","t",function(v){ st.track=v==="1"; });
+  seg("dpx","d",function(v){ st.dpx=+v||1; });
+  seg("alerts","a",function(v){ st.alerts=v==="1"; if(st.alerts) enableAlerts(); else releaseWake(); });
+  $("cor").addEventListener("input",function(){
+    st.corR=(+this.value)/10; $("corv").textContent=f1(st.corR); paint();
+  });
+  $("iso").addEventListener("input",function(){ st.iso=Math.max(25,+this.value||25); paint(); });
+  $("fnum").addEventListener("input",function(){ st.fnum=Math.max(1,+this.value||1); paint(); });
+  $("nd").addEventListener("change",function(){ st.nd=+this.value||8; paint(); });
+  $("mp").addEventListener("input",function(){ st.mp=Math.max(2,+this.value||2); paint(); });
+  $("ext").addEventListener("change",function(){ st.ext=+this.value||0; paint(); });
+  $("obst").addEventListener("input",paint);
+  $("clockOff").addEventListener("input",function(){
+    st.clockOff=Math.max(-300,Math.min(300,+this.value||0));
+    $("clockOffv").textContent=st.clockOff; paint();
+  });
+  $("loc").addEventListener("change",function(){
+    st.loc=(this.value in LOCS)?this.value:"coruna";
+    st.inst=null; fired={}; paint(); tick();
+  });
+  $("inst").addEventListener("input",function(){
+    var l=L();
+    st.live=false;
+    st.inst=Math.round(l.tC1+(l.tEnd-l.tC1)*(+this.value)/1000);
+    paint();
+  });
+  $("qrow").addEventListener("click",function(e){
+    var b=e.target.closest("button"); if(!b) return;
+    var l=L(), q=b.dataset.q;
+    if(q==="live"){ st.live=!st.live; if(st.alerts) enableAlerts(); }
+    else{
+      st.live=false;
+      st.inst= q==="c1"?l.tC1+1000
+             : q==="half"?Math.round(l.tC1+(l.tC2-l.tC1)*0.5)
+             : q==="c2"?l.tC2+1000
+             : q==="max"?l.tCX
+             : q==="c3"?l.tC3-1000
+             : l.tEnd-1000;
+    }
+    paint();
   });
 
-  $("phase").addEventListener("click", function(e){
-    var b = e.target.closest("button"); if(!b) return;
-    st.phase = b.dataset.p;
-    [].forEach.call(this.querySelectorAll("button"), function(x){
-      x.setAttribute("aria-pressed", x === b ? "true" : "false");
-    });
-    render();
-  });
-
-  cor.addEventListener("input", function(){
-    st.corR = (+cor.value)/10;
-    corv.textContent = fmt1(st.corR);
-    render();
-  });
-
-  $("iso").addEventListener("input", function(){
-    st.iso = Math.max(25, +this.value || 25); render();
-  });
-  $("fnum").addEventListener("input", function(){
-    st.fnum = Math.max(1, +this.value || 1); render();
-  });
-  $("nd").addEventListener("change", function(){
-    st.nd = +this.value; render();
-  });
-
-  $("mp").addEventListener("input", function(){
-    st.mp = Math.max(2, +this.value || 2); render();
-  });
-  $("ext").addEventListener("change", function(){
-    st.ext = +this.value; render();
-  });
-  $("track").addEventListener("click", function(e){
-    var b = e.target.closest("button"); if(!b) return;
-    st.track = b.dataset.t === "1";
-    [].forEach.call(this.querySelectorAll("button"), function(x){
-      x.setAttribute("aria-pressed", x === b ? "true" : "false");
-    });
-    render();
-  });
-
-  $("loc").addEventListener("change", function(){
-    st.loc = this.value in LOCS ? this.value : "coruna";
-    render(); tick();
-  });
-
-  // --- configuracion en la URL (hash, compatible con file://) ---
+  /* =========================================================================
+     12. CONFIGURACIÓN EN LA URL (con retardo: replaceState está limitado)
+     ========================================================================= */
+  var saveTimer=null;
+  function saveURLSoon(){
+    if(saveTimer) clearTimeout(saveTimer);
+    saveTimer=setTimeout(saveURL,400);
+  }
   function saveURL(){
     try{
-      var q = new URLSearchParams();
-      q.set("f", st.focal); q.set("tc", st.tc);
-      q.set("s", st.custom ? "c,"+st.sw+","+st.sh : String(sensor.selectedIndex));
-      q.set("o", st.orient); q.set("ph", st.phase); q.set("cr", st.corR);
-      q.set("iso", st.iso); q.set("fn", st.fnum); q.set("nd", st.nd);
-      q.set("mp", st.mp); q.set("tr", st.track ? 1 : 0); q.set("ex", st.ext);
-      q.set("loc", st.loc);
-      history.replaceState(null, "", "#"+q.toString());
-    }catch(e){ /* restricciones file:// en algun navegador: se ignora */ }
+      var q=new URLSearchParams();
+      q.set("f",st.focal); q.set("tc",st.tc);
+      q.set("s",st.custom?"c,"+st.sw+","+st.sh:String($("sensor").selectedIndex));
+      q.set("o",st.orient); q.set("z",st.zoom); q.set("cr",st.corR);
+      q.set("iso",st.iso); q.set("fn",st.fnum); q.set("nd",st.nd);
+      q.set("mp",st.mp); q.set("tr",st.track?1:0); q.set("dp",st.dpx);
+      q.set("ex",st.ext); q.set("loc",st.loc);
+      if(!st.live&&st.inst!=null) q.set("ti",Math.round((st.inst-L().tC1)/1000));
+      if(st.live) q.set("live","1");
+      history.replaceState(null,"","#"+q.toString());
+    }catch(e){}
   }
-
   function loadURL(){
     try{
-      var h = location.hash.replace(/^#/, "");
-      if(!h) return;
-      var q = new URLSearchParams(h);
-      if(q.has("f"))  st.focal = Math.max(5, Math.min(6000, +q.get("f") || st.focal));
-      if(q.has("tc")) st.tc = +q.get("tc") || 1;
+      var h=location.hash.replace(/^#/,""); if(!h) return;
+      var q=new URLSearchParams(h);
+      if(q.has("loc")&&(q.get("loc") in LOCS)) st.loc=q.get("loc");
+      if(q.has("f")) st.focal=Math.max(FMIN,Math.min(FMAX,+q.get("f")||st.focal));
+      if(q.has("tc")){ var v=+q.get("tc"); st.tc=[1,1.4,2].indexOf(v)>=0?v:1; }
       if(q.has("s")){
-        var sv = q.get("s");
-        if(sv.charAt(0) === "c"){
-          var pa = sv.split(",");
-          st.custom = true; st.sw = +pa[1] || 36; st.sh = +pa[2] || 24;
+        var sv=q.get("s"), sel=$("sensor");
+        if(sv.charAt(0)==="c"){
+          var pa=sv.split(","); st.custom=true;
+          st.sw=+pa[1]||36; st.sh=+pa[2]||24;
         } else {
-          var idx = parseInt(sv, 10);
-          if(idx >= 0 && idx < sensor.options.length - 1){
-            sensor.selectedIndex = idx;
-            var p = sensor.value.split(",");
-            st.sw = +p[0]; st.sh = +p[1];
+          var idx=parseInt(sv,10);
+          if(idx>=0&&idx<sel.options.length-1){
+            sel.selectedIndex=idx;
+            var p=sel.value.split(","); st.sw=+p[0]; st.sh=+p[1];
           }
         }
       }
-      if(q.has("o"))  st.orient = q.get("o") === "v" ? "v" : "h";
-      if(q.has("ph")) st.phase = q.get("ph") === "par" ? "par" : "tot";
-      if(q.has("cr")) st.corR = Math.max(1.5, Math.min(8, +q.get("cr") || st.corR));
-      if(q.has("iso"))st.iso = Math.max(25, +q.get("iso") || st.iso);
-      if(q.has("fn")) st.fnum = Math.max(1, +q.get("fn") || st.fnum);
-      if(q.has("nd")) st.nd = +q.get("nd") || st.nd;
-      if(q.has("mp")) st.mp = Math.max(2, +q.get("mp") || st.mp);
-      if(q.has("tr")) st.track = q.get("tr") === "1";
-      if(q.has("ex")){ var ev = +q.get("ex") || 0; st.ext = ev >= 1.5 ? 2 : (ev >= 1 ? 1 : 0); }
-      if(q.has("loc") && (q.get("loc") in LOCS)) st.loc = q.get("loc");
+      if(q.has("o")) st.orient=q.get("o")==="v"?"v":"h";
+      if(q.has("z")) st.zoom=q.get("z")==="sky"?"sky":"fit";
+      if(q.has("cr")) st.corR=Math.max(1.5,Math.min(8,+q.get("cr")||st.corR));
+      if(q.has("iso")) st.iso=Math.max(25,+q.get("iso")||st.iso);
+      if(q.has("fn")) st.fnum=Math.max(1,+q.get("fn")||st.fnum);
+      if(q.has("nd")){ var nv=+q.get("nd"); st.nd=[8,11.3,12].indexOf(nv)>=0?nv:8; }
+      if(q.has("mp")) st.mp=Math.max(2,+q.get("mp")||st.mp);
+      if(q.has("tr")) st.track=q.get("tr")==="1";
+      if(q.has("dp")){ var dv=+q.get("dp"); st.dpx=[1,2,3].indexOf(dv)>=0?dv:1; }
+      if(q.has("ex")){ var ev=+q.get("ex"); st.ext=[0,1,2].indexOf(ev)>=0?ev:1; }
+      if(q.has("ti")) st.inst=L().tC1+(+q.get("ti")||0)*1000;
+      if(q.get("live")==="1") st.live=true;
     }catch(e){}
   }
-
-  $("btnShare").addEventListener("click", function(){
+  $("btnShare").addEventListener("click",function(){
     saveURL();
-    var url = location.href, btn = this;
-    function ok(){ btn.textContent = t("btnCopied"); setTimeout(function(){ btn.textContent = t("btnShare"); }, 1800); }
-    function fb(){ window.prompt(t("promptCopy"), url); }
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(url).then(ok, fb);
-    } else { fb(); }
+    var url=location.href, btn=this;
+    function ok(){ btn.textContent=t("btnCopied"); setTimeout(function(){ btn.textContent=t("btnShare"); },1800); }
+    function fb(){ window.prompt(t("promptCopy"),url); }
+    if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(ok,fb);
+    else fb();
   });
 
-  // --- ficha de campo imprimible ---
-  $("btnCard").addEventListener("click", function(){
-    var c = compute();
-    var T = totalityData(c);
-    var lim = tLabel(T.dl.tmax);
-    var qf = st.nd;
-    var parRows = [[t("pcPhotFilter", {q:qf}), qf], [t("rowCresc"), qf-2]];
-    var rowHtml = function(r){ return '<tr><td>'+r[0]+'</td><td>'+shutLabel(snapShutter(expTime(r[1])))+'</td></tr>'; };
-    var seqHtml = T.seq.map(function(s){
-      return '<span class="pc-chip">☐ '+s.label+(s.warn ? ' ▲' : '')+'</span>';
+  /* =========================================================================
+     13. FICHA DE CAMPO
+     ========================================================================= */
+  $("btnCard").addEventListener("click",function(){
+    var c=compute(), l=L();
+    var evTot=Math.round(extEVraw(st.ext,l.altApp)*2)/2;
+    var T=totalityData(c,evTot);
+    var ndName=t({8:"ndName8",12:"ndName12"}[st.nd]||"ndName11");
+    var a1=appAlt(sunAltAz(l.tC1,l.lat,l.lon).alt), a3=appAlt(sunAltAz(l.tC3,l.lat,l.lon).alt);
+    var rowHtml=function(r){
+      var s=shutFor(expTime(r[1],evTot));
+      return '<tr><td>'+r[0]+'</td><td>'+s.label+'</td></tr>';
+    };
+    // parcial: cuatro momentos con su propia extinción
+    var parRows="";
+    [l.tC1,Math.round(l.tC1+(l.tC2-l.tC1)/2),l.tC3+60000,l.tEnd-60000].forEach(function(ms){
+      var ha=appAlt(sunAltAz(ms,l.lat,l.lon).alt);
+      var ev=Math.round(extEVraw(st.ext,ha)*2)/2;
+      parRows+='<tr><td>'+hhmm(ms,false)+' · '+f1(ha)+'° · +'+f1(ev)+' EV</td><td>'
+             + shutFor(expTime(st.nd,ev)).label+'</td></tr>';
+    });
+    var seqHtml=T.seq.map(function(s){
+      return '<span class="pc-chip">☐ '+s.label+(s.warn?' ▲':'')+'</span>';
     }).join("");
-    var ndName = t({11:"ndName11", 8:"ndName8", 12:"ndName12"}[st.nd] || "ndName8");
-    var d = L();
-
-    $("printCard").innerHTML = ''
-      + '<h1>'+t("pcTitle", {loc:d.name})+'</h1>'
-      + '<div class="pc-sub">'+t("pcSub", {d:new Date().toLocaleDateString(t("dateLocale"))})+'</div>'
-      + '<div class="pc-box">'+t("pcWarn", {d:d.dur, nd:ndName, safe:(st.nd===12 ? t("pcUnsafe") : "")})+'</div>'
-      + '<div class="pc-sec">'+t("pcTimes", {loc:d.name})+'</div>'
-      + '<table><tr><th>'+t("pcThTime")+'</th><th>'+t("pcThEvent")+'</th><th>'+t("pcThFilter")+'</th></tr>'
-      + '<tr><td>'+locHHMM(d.c1, d.c1[2]!==0)+'</td><td>'+t("pcC1")+'</td><td>'+t("pcOn")+'</td></tr>'
-      + '<tr><td>'+locHHMM(d.c2,true)+'</td><td>'+t("pcC2", {d:d.dur})+'</td><td><strong>'+t("pcOffStrong")+'</strong></td></tr>'
-      + '<tr><td>'+locHHMM(d.c3,true)+'</td><td>'+t("pcC3", {alt:d.alt})+'</td><td><strong>'+t("pcOnStrong")+'</strong></td></tr>'
-      + '<tr><td>'+locHHMM(d.endT,false)+'</td><td>'+t("pcEndRow", {e:endLabel(), s:d.set})+'</td><td>—</td></tr></table>'
-      + '<div class="pc-sec">'+t("pcKit")+'</div>'
-      + '<p>'+t("pcKitLine", {
-            f:st.focal, tc:st.tc, fe:Math.round(c.fe),
-            sw:fmt1(st.sw), sh:fmt1(st.sh),
-            orient:(st.orient==="h" ? t("orientH") : t("orientV")),
-            eq:Math.round(c.eq), hf:fmtDeg(c.hFov), vf:fmtDeg(c.vFov),
-            mount:(st.track ? t("mountTrack") : t("mountFixed"))
-          })+'</p>'
-      + '<div class="pc-sec">'+t("pcExp", {
-            iso:st.iso, f:fmt1(st.fnum),
-            ext:(st.ext>0 ? t("pcExtApplied", {ev:fmt1(extEV()), alt:d.alt}) : "")
-          })+'</div>'
-      + '<table><tr><th>'+t("pcThPartial", {nd:ndName})+'</th><th>'+t("pcThSpeed")+'</th></tr>'+parRows.map(rowHtml).join("")+'</table>'
-      + '<table><tr><th>'+t("pcThTot")+'</th><th>'+t("pcThSpeed")+'</th></tr>'+T.rows.map(rowHtml).join("")+'</table>'
-      + '<div class="pc-sec">'+t("pcBracket", {n:T.seq.length, s:Math.round(T.total), d:d.dur})+'</div>'
-      + '<p>'+seqHtml+'</p>'
-      + '<p>'+t("pcDrift", {lim:lim})+(st.ext===0 ? t("pcNoExt", {alt:d.alt, ev:fmt1(extEVfor(1,d.alt))}) : "")+'</p>';
+    var X=airmass(l.altApp);
+    var hh=+$("obst").value||15;
+    $("printCard").innerHTML=''
+      +'<h1>'+t("pcTitle",{loc:l.name})+'</h1>'
+      +'<div class="pc-sub">'+t("pcSub",{d:new Date().toLocaleDateString(t("dateLocale"))})+'</div>'
+      +'<div class="pc-box">'+t("pcWarn",{d:l.dur,nd:ndName,safe:(st.nd===12?t("pcUnsafe"):"")})+'</div>'
+      +'<div class="pc-sec">'+t("pcTimes",{loc:l.name})+'</div>'
+      +'<table><tr><th>'+t("pcThTime")+'</th><th>'+t("pcThEvent")+'</th><th>'+t("pcThFilter")+'</th></tr>'
+      +'<tr><td>'+hhmm(l.tC1,true)+'</td><td>'+t("pcC1",{alt:f1(a1)})+'</td><td>'+t("pcOn")+'</td></tr>'
+      +'<tr><td>'+hhmm(l.tC2,true)+'</td><td>'+t("pcC2",{d:l.dur})+'</td><td><strong>'+t("pcOffStrong")+'</strong></td></tr>'
+      +'<tr><td>'+hhmm(l.tCX,true)+'</td><td>'+t("pcMax")+'</td><td><strong>'+t("pcOffStrong")+'</strong></td></tr>'
+      +'<tr><td>'+hhmm(l.tC3,true)+'</td><td>'+t("pcC3",{alt:f1(a3)})+'</td><td><strong>'+t("pcOnStrong")+'</strong></td></tr>'
+      +'<tr><td>'+hhmm(l.tC4,true)+(l.c4est?' *':'')+'</td><td>'+t("pcEndRow",{e:t(l.endKey)})+'</td><td>'+t("pcOn")+'</td></tr>'
+      +'<tr><td>'+hhmm(l.tSet,true)+'</td><td>'+t("pcSetRow")+'</td><td>—</td></tr></table>'
+      +'<div class="pc-sec">'+t("pcKit")+'</div>'
+      +'<p>'+t("pcKitLine",{f:st.focal,tc:st.tc,fe:Math.round(c.fe),sw:f1(st.sw),sh:f1(st.sh),
+            orient:(st.orient==="h"?t("orientH"):t("orientV")),eq:Math.round(c.eq),
+            hf:fmtDeg(c.hFov),vf:fmtDeg(c.vFov),sc:f2(c.scale),
+            mount:(st.track?t("mountTrack"):t("mountFixed"))})+'</p>'
+      +'<div class="pc-sec">'+t("pcExp",{iso:st.iso,f:fN(st.fnum)})+'</div>'
+      +'<table><tr><th>'+t("pcThPartial",{nd:ndName})+'</th><th>'+t("pcThSpeed")+'</th></tr>'+parRows+'</table>'
+      +'<table><tr><th>'+t("pcThTot")+'</th><th>'+t("pcThSpeed")+'</th></tr>'+T.rows.map(rowHtml).join("")+'</table>'
+      +'<div class="pc-sec">'+t("pcBracket",{n:T.seq.length,s:Math.round(T.total),d:l.dur})+'</div>'
+      +'<p>'+seqHtml+'</p>'
+      +'<p>'+t("pcDrift",{lim:shutFor(c.tmax).label,b:st.dpx,d:l.dur,dr:fmtArc(DRIFT*l.dur/3600)})+'</p>'
+      +'<p>'+t("pcAtm",{am:f2(X),ev:f1(extEVraw(st.ext,l.altApp)),
+            disp:f1(dispersionArcsec(l.altApp)),flat:f1(flattening(l.altApp)*100)})+'</p>'
+      +'<p>'+t("pcHorizon",{alt:f1(l.altApp),az:Math.round(l.az),h:hh,
+            d:Math.round(hh/Math.tan(l.altApp*D2R))})+'</p>';
     window.print();
   });
 
-  // --- dia del eclipse: cuenta atras en vivo segun el lugar elegido ---
-  function cdown(ms){
-    var s = Math.max(0, Math.floor(ms/1000));
-    var d = Math.floor(s/86400);
-    if(d >= 2) return d + " " + t("days");
-    var h = Math.floor(s/3600), m = Math.floor((s%3600)/60), x = s%60;
+  /* =========================================================================
+     14. DÍA DEL ECLIPSE: CUENTA ATRÁS Y AVISOS
+     ========================================================================= */
+  var wakeLock=null, actx=null, fired={};
+  function enableAlerts(){
+    try{
+      if(!actx&&(window.AudioContext||window.webkitAudioContext))
+        actx=new (window.AudioContext||window.webkitAudioContext)();
+      if(actx&&actx.state==="suspended") actx.resume();
+    }catch(e){}
+    if(navigator.wakeLock&&navigator.wakeLock.request){
+      navigator.wakeLock.request("screen").then(function(w){
+        wakeLock=w; $("alertHint").textContent=t("alertOnMsg");
+      },function(){ $("alertHint").textContent=t("alertNoWake"); });
+    } else $("alertHint").textContent=t("alertNoWake");
+  }
+  function releaseWake(){
+    if(wakeLock&&wakeLock.release){ try{ wakeLock.release(); }catch(e){} wakeLock=null; }
+    $("alertHint").textContent=t("alertHint");
+  }
+  function beep(times){
+    if(navigator.vibrate) try{ navigator.vibrate([200,120,200,120,400]); }catch(e){}
+    if(!actx) return;
+    for(var i=0;i<times;i++){
+      var o=actx.createOscillator(), g=actx.createGain();
+      o.type="square"; o.frequency.value=i%2?1320:880;
+      g.gain.value=0.12; o.connect(g); g.connect(actx.destination);
+      var t0=actx.currentTime+i*0.32;
+      o.start(t0); o.stop(t0+0.22);
+    }
+  }
+  function cdown(msLeft){
+    var s=Math.max(0,Math.floor(msLeft/1000)), d=Math.floor(s/86400);
     function z(n){ return (n<10?"0":"")+n; }
-    return z(h)+":"+z(m)+":"+z(x);
+    if(d>=1) return d+" "+t("days")+" "+Math.floor(s%86400/3600)+" h";
+    return z(Math.floor(s/3600))+":"+z(Math.floor(s%3600/60))+":"+z(s%60);
   }
   function tick(){
-    var d = L();
-    var c1 = locUTC(d.c1), c2 = locUTC(d.c2), c3 = locUTC(d.c3), end = locUTC(d.endT);
-    var n = Date.now(), ph, fl, flc, cd, lab;
-    if(n < c1){       ph=t("edBefore",{loc:d.name});   fl=t("flPrep"); flc="var(--muted)"; cd=c1-n;  lab=t("labC1",{t:locHHMM(d.c1,false)}); }
-    else if(n < c2){  ph=t("edPartial",{loc:d.name});  fl=t("flOn");   flc="var(--gold)";  cd=c2-n;  lab=t("labC2",{t:locHHMM(d.c2,true)}); }
-    else if(n < c3){  ph=t("edTotality",{loc:d.name}); fl=t("flOff");  flc="var(--prom)";  cd=c3-n;  lab=t("labC3"); }
-    else if(n < end){ ph=t("edFinal",{loc:d.name});    fl=t("flOn");   flc="var(--gold)";  cd=end-n; lab=t("labEnd",{e:endLabel().toLowerCase(), t:locHHMM(d.endT,false)}); }
-    else {            ph=t("edDone");                  fl="—";         flc="var(--muted)"; cd=0;     lab=t("labNext"); }
-    $("edPhase").textContent = ph;
-    var ef = $("edFilter"); ef.textContent = fl; ef.style.color = flc;
-    $("edCount").textContent = cd > 0 ? cdown(cd) : "—";
-    $("edNext").textContent = lab;
+    var l=L(), n=nowMs(), ph,fl,flc,cd,lab;
+    if(n<l.tC1){ ph=t("edBefore",{loc:l.name}); fl=t("flPrep"); flc="var(--muted)"; cd=l.tC1-n; lab=t("labC1",{t:hhmm(l.tC1,false)}); }
+    else if(n<l.tC2){ ph=t("edPartial",{loc:l.name}); fl=t("flOn"); flc="var(--gold)"; cd=l.tC2-n; lab=t("labC2",{t:hhmm(l.tC2,true)}); }
+    else if(n<l.tC3){ ph=t("edTotality",{loc:l.name}); fl=t("flOff"); flc="var(--prom)"; cd=l.tC3-n; lab=t("labC3"); }
+    else if(n<l.tEnd){ ph=t("edFinal",{loc:l.name}); fl=t("flOn"); flc="var(--gold)"; cd=l.tEnd-n; lab=t("labEnd",{e:t(l.endKey).toLowerCase(),t:hhmm(l.tEnd,false)}); }
+    else { ph=t("edDone"); fl="—"; flc="var(--muted)"; cd=0; lab=t("labNext"); }
+    $("edPhase").textContent=ph;
+    var ef=$("edFilter"); ef.textContent=fl; ef.style.color=flc;
+    $("edCount").textContent=cd>0?cdown(cd):"—";
+    $("edNext").textContent=lab;
+    if(st.alerts){
+      var d2=(l.tC2-n)/1000, d3=(l.tC3-n)/1000;
+      if(d2<=30&&d2>26&&!fired.c2){ fired.c2=1; beep(3); $("edNext").textContent=t("alertC2"); }
+      if(d3<=15&&d3>11&&!fired.c3){ fired.c3=1; beep(4); $("edNext").textContent=t("alertC3"); }
+    }
+    if(st.live) paint();
   }
 
-  // init
+  /* =========================================================================
+     15. ARRANQUE
+     ========================================================================= */
   loadURL();
-  focal.value = focalToT(st.focal);
-  focalNum.value = st.focal; focalv.textContent = st.focal;
-  tc.value = String(st.tc);
-  if(st.custom){ sensor.value = "custom"; customBox.classList.add("on"); cw.value = st.sw; ch.value = st.sh; }
-  [].forEach.call($("orient").querySelectorAll("button"), function(b){
-    b.setAttribute("aria-pressed", b.dataset.o === st.orient ? "true" : "false");
+  $("loc").value=st.loc;
+  $("focal").value=focalToT(st.focal);
+  $("focalNum").value=st.focal; $("focalv").textContent=st.focal;
+  $("tc").value=String(st.tc);
+  if(st.custom){ $("sensor").value="custom"; $("customBox").classList.add("on"); $("cw").value=st.sw; $("ch").value=st.sh; }
+  $("cor").value=st.corR*10; $("corv").textContent=f1(st.corR);
+  $("iso").value=st.iso; $("fnum").value=st.fnum; $("nd").value=String(st.nd);
+  $("mp").value=st.mp; $("ext").value=String(st.ext);
+  $("clockOff").value=st.clockOff; $("clockOffv").textContent=st.clockOff;
+  [["orient","o",st.orient],["zoom","z",st.zoom],
+   ["track","t",st.track?"1":"0"],["dpx","d",String(st.dpx)],
+   ["alerts","a",st.alerts?"1":"0"]].forEach(function(g){
+    [].forEach.call($(g[0]).querySelectorAll("button"),function(b){
+      b.setAttribute("aria-pressed",b.getAttribute("data-"+g[1])===g[2]?"true":"false");
+    });
   });
-  [].forEach.call($("phase").querySelectorAll("button"), function(b){
-    b.setAttribute("aria-pressed", b.dataset.p === st.phase ? "true" : "false");
-  });
-  [].forEach.call($("track").querySelectorAll("button"), function(b){
-    b.setAttribute("aria-pressed", (b.dataset.t === "1") === st.track ? "true" : "false");
-  });
-  cor.value = st.corR*10; corv.textContent = fmt1(st.corR);
-  $("iso").value = st.iso; $("fnum").value = st.fnum; $("nd").value = String(st.nd);
-  $("mp").value = st.mp; $("ext").value = String(st.ext);
-  $("loc").value = st.loc;
   updateStaticStrings();
   render();
-  setInterval(tick, 1000); tick();
+  setInterval(tick,1000); tick();
+  document.addEventListener("visibilitychange",function(){
+    if(!document.hidden&&st.alerts) enableAlerts();
+  });
 
-  inited = true;
-  // repintado al cambiar de idioma; seguro aunque se llame antes de inicializar
-  window.onLangChange = function(){
-    if(!inited) return;          // la app aún no está montada: nada que repintar
-    updateStaticStrings();
-    render();
-    tick();
+  inited=true;
+  window.onLangChange=function(){
+    if(!inited) return;
+    updateStaticStrings(); render(); tick();
   };
-
 })();
 </script>
 </body>
