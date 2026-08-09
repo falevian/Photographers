@@ -496,6 +496,17 @@
           <div class="hint" data-lang="en">The Baader ND 3.8 is <code>photographic only</code>: never observe or focus by eye through it or through the optical viewfinder. To look, use ND 5.0.</div>
         </div>
         <div class="ctl">
+          <label class="lab" for="qtop" data-lang="es">Extremo brillante de la horquilla</label>
+          <label class="lab" for="qtop" data-lang="en">Bright end of the bracket</label>
+          <select id="qtop">
+            <option value="13" selected>Anillo de diamantes (Q 13)</option>
+            <option value="12">Perlas de Baily (Q 12)</option>
+            <option value="11">Cromosfera (Q 11)</option>
+            <option value="9">Protuberancias (Q 9)</option>
+          </select>
+          <div class="hint" id="qtopHint"></div>
+        </div>
+        <div class="ctl">
           <label class="lab" for="maxf" data-lang="es">Fotogramas por tanda</label>
           <label class="lab" for="maxf" data-lang="en">Frames per bracket run</label>
           <select id="maxf">
@@ -503,7 +514,7 @@
             <option value="5">5</option>
             <option value="7">7</option>
             <option value="9">9</option>
-            <option value="nikon" selected>Nikon: 9 con ≤1 EV, 5 con 2–3 EV</option>
+            <option value="nikon" selected>Nikon Z8: 9 con ≤1,7 EV, 5 con 2–3 EV</option>
             <option value="0" data-lang="es">Sin límite (intervalómetro)</option>
             <option value="0" data-lang="en">No limit (intervalometer)</option>
           </select>
@@ -515,7 +526,9 @@
           <select id="step">
             <option value="0.5">0,5 EV</option>
             <option value="1" selected>1 EV</option>
+            <option value="1.3">1,3 EV</option>
             <option value="1.5">1,5 EV</option>
+            <option value="1.7">1,7 EV</option>
             <option value="2">2 EV</option>
             <option value="3">3 EV</option>
           </select>
@@ -712,12 +725,14 @@
                 "Micro 4/3 · 17,3 × 13 mm (2,0×)",
                 "Tipo 1\" · 13,2 × 8,8 mm (2,7×)",
                 "Personalizado…"],
+    qtopHint:"El anillo de diamantes y las perlas duran menos de un segundo, no se apilan y ocurren solo en C2 y C3: se disparan aparte, en ráfaga a exposición fija. Sacarlos de la horquilla de corona ahorra dos pasos, y suele ser justo lo que hace que quepa en una sola tanda.",
+    qtopOpts:["Anillo de diamantes (Q 13)","Perlas de Baily (Q 12)","Cromosfera (Q 11)","Protuberancias (Q 9)"],
     thRun:"Tanda", thBase:"Exposición base a marcar", thFrames:"Fotogramas", thCov:"Cubre",
     planNote:"En manual, marca la velocidad base de cada tanda y deja que el horquillado la reparta: con número impar de fotogramas la tanda queda centrada en ella. Cada tanda solapa un fotograma con la siguiente, así que no hay huecos.",
     planOver:" La última tanda baja hasta Q {q}, por debajo de tu corona: son fotogramas de regalo con más señal en los penachos.",
     planClip:" <span class=\"warn\">El extremo rápido de la primera tanda pide {v} y tu cámara llega a {smax}: baja el ISO o cierra el diafragma si quieres el anillo de diamantes.</span>",
     planBulb:" El extremo lento de la última tanda pide {v}: fuera de la escala, usa bulb o acepta perder el penacho más externo.",
-    maxfHint:"Tope de fotogramas de una tanda de horquillado automático. La Z8 llega a 9, pero comprueba en el menú si ese tope baja al subir el incremento: en varias Nikon los pasos de 2 y 3 EV limitan la tanda a 5 fotogramas. Si el tope es 9 y necesitas más, el simulador cuenta las tandas y el tiempo de rearmar.",
+    maxfHint:"Tope de fotogramas de una tanda de horquillado automático. En la Z8, con incrementos de 0,3 a 1,7 EV caben 9 fotogramas; con 2 y 3 EV el máximo baja a 5. Nueve a 1,7 EV abarcan 13,6 pasos, y cinco a 3 EV, 12. Si la horquilla no cabe, el simulador cuenta las tandas y añade el tiempo de rearmar.",
     setsOne:" Cabe en una sola tanda de {m} fotogramas.",
     setsMany:" Con tandas de {m} fotogramas hacen falta {k}, y contando {r} s para rearmar entre ellas el total sube a ≈ {s} s por serie.",
     setsStep:" Para meter los {n} pasos en una sola tanda de {m} fotogramas el paso ha de ser ≥ {p} EV: usa {rec} EV.",
@@ -731,7 +746,7 @@
     rangeOk:"sobra margen.",
     rangeShort:"faltan {d}. Sube el presupuesto de arrastre, usa seguimiento o parte la serie en dos ISO.",
     rangeTrack:" Con seguimiento el margen va de {smax} a 30 s, {av} pasos, de sobra para los {n} de la horquilla.",
-    isoCap:" Techo de ISO a f/{f}: por encima de <b>ISO {b}</b> el disparo de Q 13 se sale de {smax} y pierdes el anillo de diamantes.",
+    isoCap:" Techo de ISO a f/{f}: por encima de <b>ISO {b}</b> el disparo más rápido (Q {q}) se sale de {smax}.",
     isoFloor:" Suelo de ISO: por debajo de ISO {a} el extremo débil pasa de 30 s y necesita bulb.",
     ndOpts:["ND 4,0 genérico (13,3 pasos)",
             "ND 5,0 · Baader AstroSolar visual (16,6 pasos)",
@@ -895,6 +910,8 @@
                 "Micro 4/3 · 17.3 × 13 mm (2.0×)",
                 "Type 1\" · 13.2 × 8.8 mm (2.7×)",
                 "Custom…"],
+    qtopHint:"The diamond ring and the beads last less than a second, do not stack and happen only at second and third contact: shoot them separately, as a burst at fixed exposure. Taking them out of the corona bracket saves two stops, and that is often exactly what makes it fit in a single run.",
+    qtopOpts:["Diamond ring (Q 13)","Baily's beads (Q 12)","Chromosphere (Q 11)","Prominences (Q 9)"],
     thRun:"Run", thBase:"Base exposure to dial", thFrames:"Frames", thCov:"Covers",
     planNote:"In manual mode, dial the base speed of each run and let the bracketing spread it out: with an odd number of frames the run is centred on it. Each run overlaps one frame with the next, so there are no gaps.",
     planOver:" The last run reaches down to Q {q}, below your corona: bonus frames with more signal in the streamers.",
@@ -914,7 +931,7 @@
     rangeOk:"margin to spare.",
     rangeShort:"{d} short. Raise the trailing budget, use tracking, or split the series across two ISO values.",
     rangeTrack:" With tracking the useful margin runs from {smax} to 30 s, {av} stops, ample for the {n} of the bracket.",
-    isoCap:" ISO ceiling at f/{f}: above <b>ISO {b}</b> the Q 13 frame falls outside {smax} and you lose the diamond ring.",
+    isoCap:" ISO ceiling at f/{f}: above <b>ISO {b}</b> the fastest frame (Q {q}) falls outside {smax}.",
     isoFloor:" ISO floor: below ISO {a} the faint end goes past 30 s and needs bulb.",
     ndOpts:["Generic ND 4.0 (13.3 stops)",
             "ND 5.0 · Baader AstroSolar visual (16.6 stops)",
@@ -1135,7 +1152,7 @@
   // paso de pixel en micras, para difracción y escala de placa
   // fotogramas efectivos por tanda: la regla de Nikon acopla el tope al incremento
   function framesPerRun(){
-    if(st.maxf==="nikon") return st.step>=2?5:9;
+    if(st.maxf==="nikon") return st.step>=2?5:9;   // Z8: 9 hasta 1,7 EV, 5 con 2 y 3 EV
     return +st.maxf||0;
   }
   function pxPitch(){ return st.sw/Math.sqrt(st.mp*1e6*st.sw/st.sh)*1000; }
@@ -1280,7 +1297,7 @@
     orient:"h", zoom:"fit",
     corR:4.0,
     iso:400, fnum:8, nd:8, mp:24,
-    track:false, dpx:1, ext:1, smax:8000, fps:2.5, step:1, maxf:"nikon",
+    track:false, dpx:1, ext:1, smax:8000, fps:2.5, step:1, qtop:13, maxf:"nikon",
     loc:"coruna",
     inst:null,        // ms del instante mostrado; null = mitad de la totalidad
     live:false,
@@ -1386,7 +1403,7 @@
       [t("rowCorYours",{r:f1(st.corR)}),qOuter]
     ];
     var seq=[],total=0,expSum=0,last=null,qs=[];
-    for(var q=13;q>qOuter+0.05;q-=st.step) qs.push(q);
+    for(var q=st.qtop;q>qOuter+0.05;q-=st.step) qs.push(q);
     qs.push(qOuter);                          // el extremo débil se cubre siempre
     for(var i=0;i<qs.length;i++){
       var s=shutFor(expTime(qs[i],ev));
@@ -1636,7 +1653,7 @@
       $("bracketBox").style.display="block"; $("planWrap").style.display="block";
       var T=totalityData(c,ev);
       rows=T.rows;
-      $("expIntro").innerHTML=t("expIntroTot",{r:f1(st.corR),n:Math.round(13-T.qOuter)})+extTxt;
+      $("expIntro").innerHTML=t("expIntroTot",{r:f1(st.corR),n:Math.round(st.qtop-T.qOuter)})+extTxt;
       $("bracketSeq").innerHTML=T.seq.map(function(s){
         return '<span class="chip'+(s.warn?' seqwarn':(s.out?' seqrange':''))+'">'+s.label+'</span>';
       }).join("");
@@ -1644,9 +1661,9 @@
       T.seq.forEach(function(s){ if(s.warn) nw++; if(s.out) no++; });
       var fitsRef=null;   // se resuelve tras construir el plan
       var lim=shutFor(c.tmax).label;
-      var need=13-T.qOuter;                                    // pasos que abarca la horquilla
+      var need=st.qtop-T.qOuter;                                    // pasos que abarca la horquilla
       var avail=Math.log(( st.track?SHUT_MAX:c.tmax )/SHUT_MIN)/Math.LN2;
-      var isoCap=Math.floor(st.fnum*st.fnum/(SHUT_MIN*Math.pow(2,13-ev)));
+      var isoCap=Math.floor(st.fnum*st.fnum/(SHUT_MIN*Math.pow(2,st.qtop-ev)));
       var isoFloor=Math.ceil(st.fnum*st.fnum/(SHUT_MAX*Math.pow(2,T.qOuter-ev)));
       var rng=st.track
         ? t("rangeTrack",{smax:smaxLabel(),av:f1(avail),n:f1(need)})
@@ -1659,7 +1676,7 @@
       var tSerie=plan.total+(kRuns-1)*REARM;
       var kSeries=Math.max(0,Math.floor((l.dur-RESERVA)/Math.max(0.5,tSerie)));
       var stepMin=nf>1?need/(nf-1):0;
-      var stepRec=[0.5,1,1.5,2,3].filter(function(x){ return x>=stepMin-1e-9; })[0]||3;
+      var stepRec=[0.5,1,1.3,1.5,1.7,2,3].filter(function(x){ return x>=stepMin-1e-9; })[0]||3;
       var setsTxt=(kRuns<=1)
         ? t("setsOne",{m:nf||(T.seq.length-no)})
         : t("setsMany",{m:nf,k:kRuns,r:REARM,s:f1(tSerie)})
@@ -1675,7 +1692,7 @@
         + (st.track?t("seqTrack"):(nw?t("seqWarn",{n:nw,b:st.dpx,fe:Math.round(c.fe),lim:lim}):t("seqOk",{lim:lim})))
         + (no?t("seqRange"):"")
         + rng
-        + t("isoCap",{f:fN(st.fnum),b:isoCap,smax:smaxLabel()})
+        + t("isoCap",{f:fN(st.fnum),b:isoCap,smax:smaxLabel(),q:dec(String(st.qtop))})
         + (st.iso<isoFloor?t("isoFloor",{a:isoFloor}):"");
     }
     $("exptab").innerHTML=rows.map(rowHtml).join("");
@@ -1684,30 +1701,33 @@
 
   // reparte la horquilla en tandas centradas, como hace el horquillado de la camara
   function buildPlan(nf,need,ev,c){
-    var runs=[], total=0, expSum=0, qOut=13-need;
-    var nNeed=Math.ceil(need/st.step-1e-9)+1;       // fotogramas que harian falta de una vez
-    var used, spanRun, k;
-    if(!nf||nf<2){                                  // intervalometro: una sola pasada
-      used=nNeed; spanRun=need; k=1;
-    } else {
-      used=[3,5,7,9].filter(function(x){ return x>=nNeed; })[0]||nf;
-      used=Math.min(used,nf);                       // nunca por encima del tope de la camara
-      spanRun=(used-1)*st.step;
-      k=Math.max(1,Math.ceil((need-1e-9)/spanRun));
+    var total=0, expSum=0, qOut=st.qtop-need, TOL=0.34;   // 1/3 de paso de tolerancia
+    var nNeed=Math.ceil(need/st.step-1e-9)+1;
+    function odd(x){ return [3,5,7,9].filter(function(v){ return v>=x; })[0]||9; }
+    var segs=[], qBot=qOut, guard=0;
+    while(qBot<st.qtop-TOL&&guard++<8){
+      var rem=st.qtop-qBot;
+      var fr=(!nf||nf<2)?nNeed:Math.min(nf,odd(Math.ceil(rem/st.step-1e-9)+1));
+      var span=(fr-1)*st.step;
+      segs.push({qBot:qBot,qTop:qBot+span,n:(nf&&nf>=2)?fr:0});
+      qBot+=span;
     }
-    // la primera tanda ancla en Q 13 y la ultima cierra justo en el extremo debil
-    var topFirst=13, topLast=Math.min(13,qOut+spanRun);
-    for(var i=0;i<k;i++){
-      var qTop=(k===1)?(qOut+spanRun):topFirst-(topFirst-topLast)*i/(k-1);
-      runs.push({qTop:qTop,qBot:qTop-spanRun,qMid:qTop-spanRun/2,n:(nf&&nf>=2)?used:0});
+    if(!segs.length) segs.push({qBot:qOut,qTop:st.qtop,n:(nf&&nf>=2)?nf:0});
+    // con varias tandas, la más brillante se ancla arriba; con una sola, el sobrante
+    // va al lado rápido, que no cuesta tiempo, en vez de al lado lento
+    if(segs.length>1){
+      var top=segs[segs.length-1], w=top.qTop-top.qBot;
+      top.qTop=st.qtop; top.qBot=st.qtop-w;
     }
+    var runs=segs.slice().reverse();                      // de brillante a débil, orden de disparo
     runs.forEach(function(r){
+      r.qMid=(r.qTop+r.qBot)/2;
       r.base=shutFor(expTime(r.qMid,ev));
       r.fast=shutFor(expTime(r.qTop,ev));
       r.slow=shutFor(expTime(r.qBot,ev));
       var m=r.n||nNeed;
       for(var j=0;j<m;j++){
-        var q=r.qTop-j*(r.n?st.step:(m>1?need/(m-1):0));
+        var q=r.qTop-j*(r.n?st.step:(m>1?(r.qTop-r.qBot)/(m-1):0));
         var tt=Math.min(expTime(q,ev),60);
         total+=Math.max(tt,1/st.fps); expSum+=tt;
       }
@@ -1726,7 +1746,7 @@
     }).join("");
     var last=plan.runs[plan.runs.length-1], first=plan.runs[0], extra="";
     if(last.qBot<qCorona(st.corR)-0.15) extra+=t("planOver",{q:f1(last.qBot)});
-    var dia=shutFor(expTime(13,plan.ev));
+    var dia=shutFor(expTime(st.qtop,plan.ev));
     if(dia.out) extra+=t("planClip",{v:dia.label,smax:smaxLabel()});
     if(last.slow.out) extra+=t("planBulb",{v:last.slow.label});
     $("planNote").innerHTML=t("planNote")+extra;
@@ -1883,6 +1903,8 @@
     $("fpsHint").textContent=t("fpsHint");
     $("stepHint").textContent=t("stepHint");
     $("maxfHint").textContent=t("maxfHint");
+    $("qtopHint").textContent=t("qtopHint");
+    setOpts($("qtop"),tArr("qtopOpts"));
   }
 
   /* =========================================================================
@@ -1933,13 +1955,16 @@
   $("fnum").addEventListener("input",function(){ st.fnum=Math.max(1,+this.value||1); paint(); });
   $("nd").addEventListener("change",function(){ st.nd=+this.value||8; paint(); });
   $("mp").addEventListener("input",function(){ st.mp=Math.max(2,+this.value||2); paint(); });
+  $("qtop").addEventListener("change",function(){
+    var v=+this.value; st.qtop=[13,12,11,9].indexOf(v)>=0?v:13; paint();
+  });
   $("maxf").addEventListener("change",function(){
     if(this.value==="nikon"){ st.maxf="nikon"; }
     else { var v=+this.value; st.maxf=[0,3,5,7,9].indexOf(v)>=0?v:9; }
     paint();
   });
   $("step").addEventListener("change",function(){
-    var v=+this.value; st.step=[0.5,1,1.5,2,3].indexOf(v)>=0?v:1; paint();
+    var v=+this.value; st.step=[0.5,1,1.3,1.5,1.7,2,3].indexOf(v)>=0?v:1; paint();
   });
   $("fps").addEventListener("change",function(){
     var v=+this.value; st.fps=[1,2.5,5,10,20,30].indexOf(v)>=0?v:2.5; paint();
@@ -1995,7 +2020,7 @@
       q.set("s",st.custom?"c,"+st.sw+","+st.sh:String($("sensor").selectedIndex));
       q.set("o",st.orient); q.set("z",st.zoom); q.set("cr",st.corR);
       q.set("iso",st.iso); q.set("fn",st.fnum); q.set("nd",st.nd);
-      q.set("mp",st.mp); q.set("tr",st.track?1:0); q.set("dp",st.dpx); q.set("sm",st.smax); q.set("fps",st.fps); q.set("bs",st.step); q.set("mf",st.maxf);
+      q.set("mp",st.mp); q.set("tr",st.track?1:0); q.set("dp",st.dpx); q.set("sm",st.smax); q.set("fps",st.fps); q.set("bs",st.step); q.set("mf",st.maxf); q.set("qt",st.qtop);
       q.set("ex",st.ext); q.set("loc",st.loc);
       if(!st.live&&st.inst!=null) q.set("ti",Math.round((st.inst-L().tC1)/1000));
       if(st.live) q.set("live","1");
@@ -2029,12 +2054,13 @@
       if(q.has("fn")) st.fnum=Math.max(1,+q.get("fn")||st.fnum);
       if(q.has("nd")){ var nv=+q.get("nd"); st.nd=[8,11.3,12].indexOf(nv)>=0?nv:8; }
       if(q.has("mp")) st.mp=Math.max(2,+q.get("mp")||st.mp);
+      if(q.has("qt")){ var qt=+q.get("qt"); st.qtop=[13,12,11,9].indexOf(qt)>=0?qt:13; }
       if(q.has("mf")){
         var mfs=q.get("mf");
         if(mfs==="nikon") st.maxf="nikon";
         else { var mv=+mfs; st.maxf=[0,3,5,7,9].indexOf(mv)>=0?mv:"nikon"; }
       }
-      if(q.has("bs")){ var bv=+q.get("bs"); st.step=[0.5,1,1.5,2,3].indexOf(bv)>=0?bv:1; }
+      if(q.has("bs")){ var bv=+q.get("bs"); st.step=[0.5,1,1.3,1.5,1.7,2,3].indexOf(bv)>=0?bv:1; }
       if(q.has("fps")){ var fv=+q.get("fps"); st.fps=[1,2.5,5,10,20,30].indexOf(fv)>=0?fv:2.5; }
       if(q.has("sm")){ var sm=+q.get("sm"); st.smax=[4000,8000,16000,32000,64000].indexOf(sm)>=0?sm:8000; }
       if(q.has("tr")) st.track=q.get("tr")==="1";
@@ -2134,6 +2160,8 @@
     $("fpsHint").textContent=t("fpsHint");
     $("stepHint").textContent=t("stepHint");
     $("maxfHint").textContent=t("maxfHint");
+    $("qtopHint").textContent=t("qtopHint");
+    setOpts($("qtop"),tArr("qtopOpts"));
   }
   function beep(times){
     if(navigator.vibrate) try{ navigator.vibrate([200,120,200,120,400]); }catch(e){}
@@ -2182,7 +2210,7 @@
   if(st.custom){ $("sensor").value="custom"; $("customBox").classList.add("on"); $("cw").value=st.sw; $("ch").value=st.sh; }
   $("cor").value=st.corR*10; $("corv").textContent=f1(st.corR);
   $("iso").value=st.iso; $("fnum").value=st.fnum; $("nd").value=String(st.nd);
-  $("mp").value=st.mp; $("ext").value=String(st.ext); $("smax").value=String(st.smax); $("fps").value=String(st.fps); $("step").value=String(st.step); $("maxf").value=String(st.maxf);
+  $("mp").value=st.mp; $("ext").value=String(st.ext); $("smax").value=String(st.smax); $("fps").value=String(st.fps); $("step").value=String(st.step); $("maxf").value=String(st.maxf); $("qtop").value=String(st.qtop);
   buildShut();
   $("clockOff").value=st.clockOff; $("clockOffv").textContent=st.clockOff;
   [["orient","o",st.orient],["zoom","z",st.zoom],
