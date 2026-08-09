@@ -887,6 +887,12 @@
     pcBracket:"Horquilla de totalidad · {n} disparos · ≈ {s} s de {d} s disponibles (marca cada uno)",
     pcRange:"Obturador hasta {smax}. La horquilla abarca {n} pasos; margen disponible sobre trípode fijo: {av} pasos.",
     pcDrift:"Límite de arrastre sin seguimiento a esta focal ≈ {lim} ({b} px). ▲ = velocidad que arrastra sobre trípode fijo. En los {d} s de totalidad el Sol se desplaza {dr} sobre trípode fijo.",
+    pcPlan:"Plan de tandas · qué marcar en la cámara",
+    pcPlanTop:"Extremo brillante de la horquilla: {top}. Paso {st} EV, {m} fotogramas por tanda.",
+    pcBurst:"Antes y después: ráfaga FIJA sin horquillar a {v} para el anillo de diamantes y las perlas, de C2 −6 s a C2 +3 s y otra vez en C3 −6 s. Fotogramas únicos, no se apilan.",
+    pcSeries:"Caben {k} series completas reservando 20 s para los anillos y para mirar, pero la corona no cambia en 78 s: con 3 o 4 tienes de sobra para apilar. El resto del tiempo, mira el eclipse.",
+    pcTop13:"anillo de diamantes (Q 13)", pcTop12:"perlas de Baily (Q 12)",
+    pcTop11:"cromosfera (Q 11)", pcTop9:"protuberancias (Q 9)",
     pcAtm:"Atmósfera en el máximo: {am} masas de aire, extinción +{ev} EV, dispersión {disp}″, achatamiento {flat} %.",
     pcHorizon:"Sol a {alt}° y azimut {az}°: un obstáculo de {h} m debe quedar a más de {d} m.",
     dateLocale:"es-ES"
@@ -1070,6 +1076,12 @@
     pcBracket:"Totality bracket · {n} frames · ≈ {s} s of the {d} s available (tick each one)",
     pcRange:"Shutter up to {smax}. The bracket spans {n} stops; margin available on a fixed tripod: {av} stops.",
     pcDrift:"Trailing limit without tracking at this focal length ≈ {lim} ({b} px). ▲ = speed that trails on a fixed tripod. During the {d} s of totality the Sun moves {dr} on a fixed tripod.",
+    pcPlan:"Run plan · what to dial on the camera",
+    pcPlanTop:"Bright end of the bracket: {top}. Step {st} EV, {m} frames per run.",
+    pcBurst:"Before and after: FIXED burst, no bracketing, at {v} for the diamond ring and the beads, from C2 −6 s to C2 +3 s and again at C3 −6 s. Single frames, they do not stack.",
+    pcSeries:"{k} complete series fit, reserving 20 s for the rings and for looking, but the corona does not change in 78 s: 3 or 4 are plenty for stacking. Spend the rest of the time looking.",
+    pcTop13:"diamond ring (Q 13)", pcTop12:"Baily's beads (Q 12)",
+    pcTop11:"chromosphere (Q 11)", pcTop9:"prominences (Q 9)",
     pcAtm:"Atmosphere at maximum: {am} air masses, extinction +{ev} EV, dispersion {disp}″, flattening {flat}%.",
     pcHorizon:"Sun at {alt}° and azimuth {az}°: an obstacle {h} m high must stand more than {d} m away.",
     dateLocale:"en-GB"
@@ -2086,6 +2098,7 @@
     var c=compute(), l=L();
     var evTot=Math.round(extEVraw(st.ext,l.altApp)*2)/2;
     var T=totalityData(c,evTot);
+    var pc=buildPlan(framesPerRun(),st.qtop-T.qOuter,evTot,c);
     var ndName=t({8:"ndName8",12:"ndName12"}[st.nd]||"ndName11");
     var a1=appAlt(sunAltAz(l.tC1,l.lat,l.lon).alt), a3=appAlt(sunAltAz(l.tC3,l.lat,l.lon).alt);
     var rowHtml=function(r){
@@ -2094,7 +2107,8 @@
     };
     // parcial: cuatro momentos con su propia extinción
     var parRows="";
-    [l.tC1,Math.round(l.tC1+(l.tC2-l.tC1)/2),l.tC3+60000,l.tEnd-60000].forEach(function(ms){
+    [l.tC1,Math.round(l.tC1+(l.tC2-l.tC1)/3),Math.round(l.tC1+2*(l.tC2-l.tC1)/3),l.tC2-120000,
+     l.tC3+120000,Math.round(l.tC3+(l.tEnd-l.tC3)/2),l.tEnd-60000].forEach(function(ms){
       var ha=appAlt(sunAltAz(ms,l.lat,l.lon).alt);
       var ev=Math.round(extEVraw(st.ext,ha)*2)/2;
       parRows+='<tr><td>'+hhmm(ms,false)+' · '+f1(ha)+'° · +'+f1(ev)+' EV</td><td>'
@@ -2125,10 +2139,20 @@
       +'<div class="pc-sec">'+t("pcExp",{iso:st.iso,f:fN(st.fnum)})+'</div>'
       +'<table><tr><th>'+t("pcThPartial",{nd:ndName})+'</th><th>'+t("pcThSpeed")+'</th></tr>'+parRows+'</table>'
       +'<table><tr><th>'+t("pcThTot")+'</th><th>'+t("pcThSpeed")+'</th></tr>'+T.rows.map(rowHtml).join("")+'</table>'
-      +'<div class="pc-sec">'+t("pcBracket",{n:T.seq.length,s:Math.round(T.total),d:l.dur})+'</div>'
+      +'<div class="pc-sec">'+t("pcBracket",{n:T.seq.length,s:Math.round(pc.total),d:l.dur})+'</div>'
+      +'<p>'+t("pcPlanTop",{top:t("pcTop"+st.qtop),st:dec(String(st.step)),m:framesPerRun()||"—"})+'</p>'
       +'<p>'+seqHtml+'</p>'
+      +'<div class="pc-sec">'+t("pcPlan")+'</div>'
+      +'<table><tr><th>'+t("thRun")+'</th><th>'+t("thBase")+'</th><th>'+t("thFrames")+'</th><th>'+t("thCov")+'</th></tr>'
+      +pc.runs.map(function(r,i){
+         return '<tr><td>'+(i+1)+'</td><td><strong>'+r.base.label+'</strong></td>'
+              +'<td>'+(r.n?r.n+" × "+dec(String(st.step))+" EV":"—")+'</td>'
+              +'<td>'+r.fast.label+' → '+r.slow.label+'</td></tr>';
+       }).join("")+'</table>'
+      +'<p>'+t("pcBurst",{v:shutFor(expTime(11,evTot)).label})+'</p>'
+      +'<p>'+t("pcSeries",{k:Math.max(0,Math.floor((l.dur-20)/Math.max(0.5,pc.total+(pc.runs.length-1)*2)))})+'</p>'
       +'<p>'+t("pcDrift",{lim:shutFor(c.tmax).label,b:st.dpx,d:l.dur,dr:fmtArc(DRIFT*l.dur/3600)})+'</p>'
-      +'<p>'+t("pcRange",{smax:smaxLabel()+" · "+dec(String(st.fps))+" fps",n:f1(13-T.qOuter),
+      +'<p>'+t("pcRange",{smax:smaxLabel()+" · "+dec(String(st.fps))+" fps",n:f1(st.qtop-T.qOuter),
             av:f1(Math.log((st.track?SHUT_MAX:c.tmax)/SHUT_MIN)/Math.LN2)})+'</p>'
       +'<p>'+t("pcAtm",{am:f2(X),ev:f1(extEVraw(st.ext,l.altApp)),
             disp:f1(dispersionArcsec(l.altApp)),flat:f1(flattening(l.altApp)*100)})+'</p>'
