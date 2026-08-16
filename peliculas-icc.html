@@ -88,7 +88,7 @@ footer{margin-top:52px;padding-top:16px;border-top:1px solid var(--line);font-fa
 /* ---------- conmutador de idioma ---------- */
 html[lang="es"] [data-lang="en"]{display:none!important}
 html[lang="en"] [data-lang="es"]{display:none!important}
-.langbar{position:fixed;top:14px;right:16px;z-index:50;display:flex;
+.langbar{position:fixed;top:14px;right:16px;z-index:100;display:flex;
          background:rgba(16,21,29,.92);border:1px solid var(--line2);border-radius:8px;
          overflow:hidden;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .langbar button{font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;
@@ -99,6 +99,7 @@ html[lang="en"] [data-lang="es"]{display:none!important}
 .langbar button.on{background:rgba(232,179,60,.14);color:var(--d)}
 .langbar button:focus-visible{outline:2px solid rgba(232,179,60,.6);outline-offset:-2px}
 @media(max-width:720px){.langbar{top:8px;right:8px}}
+@media print{.langbar{display:none!important}}
 </style>
 </head>
 <body>
@@ -699,6 +700,12 @@ window.onLangChange=function(l){
     document.title=META[l].title;
     var d=document.querySelector('meta[name="description"]');
     if(d) d.setAttribute("content",META[l].desc);
+    ["title","ph","alt","aria"].forEach(function(k){
+      [].forEach.call(document.querySelectorAll("[data-"+k+"-"+l+"]"),function(e){
+        var attr = k==="ph" ? "placeholder" : (k==="aria" ? "aria-label" : k);
+        e.setAttribute(attr, e.getAttribute("data-"+k+"-"+l));
+      });
+    });
     [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
       var on=b.getAttribute("data-setlang")===l;
       b.classList.toggle("on",on);
