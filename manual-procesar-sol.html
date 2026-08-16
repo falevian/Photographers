@@ -1,0 +1,1680 @@
+<!doctype html>
+<html lang="es" data-tema="dia">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>procesar_sol.py · manual · realce de manchas solares</title>
+<meta name="description" content="Manual de procesar_sol.py: revelado lineal, flat radial que retira el oscurecimiento del limbo, estirado del cociente y máscara de enfoque para el realce de manchas solares en luz blanca con una Nikon Z8.">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- las tres familias que declara la hoja: display, cuerpo y cifras -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- la paleta viene del fichero: los dos deben estar en la misma carpeta -->
+<style>
+/* cianotipo.css incrustado: el repositorio sirve páginas autónomas */
+/* ============================================================================
+   CIANOTIPO · paleta y tipografía
+   ----------------------------------------------------------------------------
+   Origen: cuadro de mando del cruce plan estratégico / presupuesto 2026.
+   Referencia: la copia por contacto de Herschel, 1842. Azul de Prusia sobre
+   papel frío, el mismo procedimiento del que salió la palabra "blueprint".
+
+   Idea de fondo, por si hay que defenderla en una revisión de diseño: el
+   cianotipo no interpreta, copia. Todo lo que había en el negativo sale en el
+   papel, incluidos el polvo y los arañazos. De ahí la regla de uso: el azul es
+   la identidad y la estructura, y el óxido queda reservado a lo que está mal.
+
+   Cómo se usa:
+     <link rel="stylesheet" href="cianotipo.css">
+   y a partir de ahí var(--c-ink), var(--c-cyan-7), etc.
+   Todo son variables CSS, así que se puede sobrescribir en cualquier ámbito.
+
+   Las tres capas están separadas a propósito:
+     1. RAMPAS      valores puros, sin significado asignado
+     2. SEMÁNTICA   qué papel cumple cada valor; es lo que conviene remapear
+     3. OPINIÓN     tipografía, retículas y utilidades; opcional
+   Un proyecto nuevo debería tocar solo la capa 2.
+
+   Los contrastes anotados son WCAG 2.1 medidos, no estimados. Umbrales:
+   4.5:1 texto normal (AA), 3:1 texto grande o límites de control, 7:1 AAA.
+   ========================================================================= */
+
+:root {
+
+  /* ---------------------------------------------------------------- 1. RAMPAS
+     Tinta: azul apagado en lugar de negro. Un negro puro sobre papel frío
+     vibra; esta tinta tiene el mismo croma que el azul del proceso.          */
+  --c-ink:        #0E1621;   /* Y 0,008 · 15,6:1 sobre papel · AAA           */
+  --c-ink-2:      #33455C;   /* Y 0,057 ·  8,4:1 sobre papel · AAA           */
+  --c-ink-3:      #6B7C90;   /* Y 0,196 ·  3,7:1 sobre papel · solo AA grande */
+  --c-ink-3-aa:   #5E6D7F;   /* variante para cuando ese gris lleva dato: 4,5:1 */
+
+  /* Papel y superficies. El papel no es blanco: un cianotipo se hace sobre
+     papel de acuarela y el blanco puro solo aparece en las zonas protegidas. */
+  --c-paper:      #E9EEF2;   /* fondo de página                              */
+  --c-surface:    #FFFFFF;   /* tarjetas, tablas, todo lo que "flota"        */
+  --c-surface-2:  #F5F8FA;   /* cabeceras de tabla, filas alternas           */
+
+  /* Trazos. Deliberadamente por debajo de 3:1: son pauta, no contorno.
+     Si un borde tiene que delimitar un control, usa --c-ink-3 o más oscuro. */
+  --c-rule:       #C6D4DF;   /* 1,5:1 sobre blanco                           */
+  --c-rule-2:     #E2EAF0;   /* 1,2:1 sobre blanco · retícula de fondo       */
+
+  /* Rampa cianotipo. Azul de Prusia virado a la sombra que da el ferricianuro
+     al revelar en agua. Los índices siguen el orden de una escala de grises:
+     9 es la exposición máxima, 1 es el velo.                                */
+  --c-cyan-9:     #0C3355;   /* 11,1:1 sobre papel · AAA · titulares, énfasis */
+  --c-cyan-7:     #14547F;   /*  6,9:1 sobre papel · AA  · rótulos, enlaces   */
+  --c-cyan-5:     #2E7FA8;   /*  3,8:1 sobre papel · relleno, NO texto pequeño */
+  --c-cyan-5-aa:  #297297;   /*  4,6:1 · si ese tono tiene que llevar texto   */
+  --c-cyan-3:     #8FBBD4;   /*  1,8:1 · decorativo, series secundarias      */
+  --c-cyan-1:     #DCEAF3;   /* fondo de selección, columna "hoy"            */
+
+  /* Señales. Sacadas de la química y del papel, no de un semáforo de UI:
+     óxido de hierro, tierra de siena, verdín. Conviven con el azul porque
+     comparten desaturación; un rojo o un verde saturados lo romperían.      */
+  --c-oxide:      #9E3524;   /* 6,0:1 sobre papel · algo está mal            */
+  --c-amber:      #96690F;   /* 4,2:1 sobre papel · revisar; 4,5 con -aa     */
+  --c-amber-aa:   #8E640E;   /* 4,5:1                                        */
+  --c-moss:       #2F6B47;   /* 5,4:1 sobre papel · cerrado, correcto        */
+  --c-violet:     #514183;   /* 7,4:1 sobre papel · cuarta dimensión, la que
+                                no es ni estado ni dinero (dependencias)     */
+
+  /* Fondos tenues de las señales, para chips y avisos en línea. */
+  --c-oxide-bg:   #FBEDEA;   /* óxido encima: 6,2:1                          */
+  --c-amber-bg:   #FCF3E2;   /* ámbar encima: 4,4:1 · sube a 5,0 con -aa     */
+  --c-moss-bg:    #EAF3ED;   /* verdín encima: 5,6:1                         */
+
+  /* ------------------------------------------------------------ 2. SEMÁNTICA
+     Esta es la capa que se remapea por proyecto. Si mañana la identidad no es
+     cianotipo sino platinotipia, se cambian estas ocho líneas y nada más.   */
+  --fg:            var(--c-ink);
+  --fg-soft:       var(--c-ink-2);
+  --fg-faint:      var(--c-ink-3);
+  --bg:            var(--c-paper);
+  --bg-raised:     var(--c-surface);
+  --bg-sunken:     var(--c-surface-2);
+  --border:        var(--c-rule);
+  --border-faint:  var(--c-rule-2);
+  --accent:        var(--c-cyan-9);
+  --accent-soft:   var(--c-cyan-7);
+  --accent-fill:   var(--c-cyan-5);
+  --accent-wash:   var(--c-cyan-1);
+  --danger:        var(--c-oxide);
+  --warning:       var(--c-amber);
+  --success:       var(--c-moss);
+  --info:          var(--c-violet);
+  --focus:         var(--c-cyan-7);
+
+  /* ------------------------------------------------------------- 3. OPINIÓN
+     Tipografía. Playfair Display para titulares y display (serif editorial
+     de alto contraste), Source Sans 3 para el cuerpo (humanista neutra, muy
+     legible en densidad alta) y IBM Plex Mono para TODA cifra.
+     Enlace, si hay red:
+     https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap
+     Las alternativas locales están elegidas para Windows, donde Segoe UI y
+     Consolas siempre están; sin red la página no cambia de estructura.      */
+  --font-display: "Playfair Display", "Georgia", "Times New Roman", serif;
+  --font-body:    "Source Sans 3", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono:    "IBM Plex Mono", "Cascadia Mono", Consolas, ui-monospace, monospace;
+
+  /* Escala tipográfica en razón 1,25 sobre 14 px. El cuerpo es 14 y no 16
+     porque estas páginas son de lectura densa, tabla y no artículo.         */
+  --t-micro: 9.5px;   /* etiquetas en versal, con --track-wide               */
+  --t-small: 11.5px;
+  --t-body:  14px;
+  --t-lead:  17px;
+  --t-h3:    22px;
+  --t-h2:    28px;
+  --t-h1:    clamp(30px, 4.6vw, 52px);
+
+  --track-wide:   .13em;   /* versalitas: sin este aire no se leen           */
+  --track-tight: -.022em;  /* titulares grandes: sin esto se desarman        */
+  --leading:      1.45;
+  --leading-tight: .94;
+
+  /* Retícula. Un módulo de 4 px y una pauta de 28 px que se dibuja en el
+     fondo: es la cuadrícula del papel milimetrado, no una decoración.       */
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 72px;
+  --grid: 28px;
+
+
+  /* Textura del papel, en dos términos con papeles opuestos.
+
+     La fibra es ruido fractal de dos octavas estirado en horizontal,
+     baseFrequency '0.6 1.5', de modo que el grano sale alargado como la fibra
+     de un papel de tina y no como estática de televisión. Vive en el primer
+     píxel y muere ahí: por encima de 16 px no aporta nada.
+
+     El baño son cuatro manchas medidas en porcentaje de la hoja, no en píxeles.
+     Al ser proporcionales no tienen tamaño propio ni se repiten nunca: dan la
+     desigualdad de una emulsión dada a brocha, que es lenta y no se percibe
+     como patrón. Sube o baja el 26 de los grises para más o menos irregularidad.
+
+     Todo se mezcla en soft-light sobre gris medio, así que el tono no se mueve.
+     Para dejar el fondo liso: --textura-fibra: none; --textura-bano: none.  */
+  --textura-fibra: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='t' x='0' y='0' width='100%' height='100%' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6 1.5' numOctaves='2' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='0.35' intercept='0.325'/%3E%3CfeFuncG type='linear' slope='0.35' intercept='0.325'/%3E%3CfeFuncB type='linear' slope='0.35' intercept='0.325'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23t)'/%3E%3C/svg%3E");
+  --textura-bano:
+    radial-gradient(70% 45% at 14% 6%, #9a9a9a, #808080 62%, #808080),    radial-gradient(55% 60% at 92% 26%, #666666, #808080 66%, #808080),    radial-gradient(80% 50% at 38% 78%, #929292, #808080 60%, #808080),    radial-gradient(60% 40% at 70% 96%, #6c6c6c, #808080 64%, #808080);
+  --textura-escala-fibra: 160px 160px;
+
+  /* Radio suave: mantiene el carácter sobrio del cianotipo con un toque contemporáneo. */
+  --radius: 8px;
+  --shadow-drawer: -14px 0 44px rgba(14, 22, 33, .22);
+  --shadow-card:    0 1px 0 rgba(14, 22, 33, .04);
+}
+
+/* ---------------------------------------------------------------------------
+   VARIANTE NOCHE · opt-in con <html data-tema="noche">
+   Invierte papel y tinta conservando el mismo azul. Los contrastes anotados
+   son medidos sobre --bg-raised, que es donde suele caer el texto. La variante
+   no se ha comprobado en pantalla ni en papel: punto de partida, no final.
+   ------------------------------------------------------------------------ */
+[data-tema="noche"] {
+  --fg:           #DCE6EE;   /* 13,6:1 · AAA                                 */
+  --fg-soft:      #A9BACB;   /*  8,7:1 · AAA                                 */
+  --fg-faint:     #7A8C9E;   /*  5,0:1 · AA, mejor que su equivalente diurno */
+  --bg:           #0B1219;
+  --bg-raised:    #121C26;
+  --bg-sunken:    #0E1620;
+  --border:       #2A3A49;
+  --border-faint: #1B2833;
+  --accent:       #7FB6D6;   /*  7,8:1 · AAA                                 */
+  --accent-soft:  #5C9BC0;
+  --accent-fill:  #2E7FA8;
+  --accent-wash:  #16303F;
+  --danger:       #E08373;
+  --warning:      #D8A94E;
+  --success:      #77BC94;
+  --info:         #A99BD6;
+}
+
+/* ---------------------------------------------------------------------------
+   UTILIDADES · lo mínimo para que la paleta se vea igual en dos proyectos.
+   Todas con prefijo u- para que no colisionen con nada.
+   ------------------------------------------------------------------------ */
+
+/* Papel de acuarela: fibra fina más baño desigual, generados en el propio CSS.
+
+   La versión anterior repartía mal la energía. Concentraba sigma 0,28 en la
+   banda de 16 a 128 píxeles, con un tamaño de nube característico de 87 px que
+   en un monitor grande se lee como un patrón artificial. Medido por escalas y
+   corregido: esa banda baja a 0,10 y la irregularidad se traslada por encima de
+   los 256 px, donde sube de 0,11 a 0,88. La proporción entre desigualdad de
+   hoja y grano fino pasa de 0,08 a 1,14, catorce veces más papel y menos ruido.
+
+   Cifras medidas en Chrome a 2344 px de ancho sobre una hoja de 2400 px:
+   media 236,60 frente al papel plano 237,00, sigma 0,77 en el primer píxel,
+   0,22 entre 2 y 8 px, 0,10 entre 16 y 128 px y 0,88 por encima de 256 px.
+   El desplazamiento de 0,4 niveles no cambia ningún contraste declarado.
+
+   La textura va solo en el fondo de página. Las tarjetas y las tablas siguen
+   lisas a propósito: el ruido bajo una columna de cifras estorba. */
+.u-papel {
+  background-color: var(--bg);
+  background-image: var(--textura-fibra), var(--textura-bano);
+  background-size: var(--textura-escala-fibra), auto, auto, auto, auto;
+  background-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+  background-blend-mode: soft-light, soft-light, soft-light, soft-light, soft-light;
+}
+/* La cuadrícula original sigue disponible: es papel milimetrado en lugar de
+   papel de acuarela, y para una página de cálculo puede ser lo que toca. */
+.u-papel--pauta {
+  background-image:
+    linear-gradient(var(--border-faint) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-faint) 1px, transparent 1px);
+  background-size: var(--grid) var(--grid);
+  background-position: -1px -1px;
+  background-blend-mode: normal, normal;
+  background-repeat: repeat, repeat;
+}
+/* En papel la textura solo gasta tinta. */
+@media print { .u-papel, .u-papel--pauta { background-image: none; } }
+
+/* Cifras. Sin tabular-nums las columnas de importes bailan. */
+.u-num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+
+/* Etiqueta de sección en versal monoespaciada. */
+.u-eyebrow {
+  font-family: var(--font-mono); font-size: var(--t-micro);
+  letter-spacing: var(--track-wide); text-transform: uppercase; color: var(--accent-soft);
+}
+
+/* Titular. La caja alta condensada solo funciona con tracking negativo. */
+.u-display {
+  font-family: var(--font-display); font-weight: 700; text-transform: uppercase;
+  letter-spacing: var(--track-tight); line-height: var(--leading-tight);
+}
+
+/* Marca de nivel: la usan las cuatro señales. */
+.u-chip {
+  font-family: var(--font-mono); font-size: var(--t-micro);
+  padding: 2px 5px; border: 1px solid var(--border); border-radius: var(--radius);
+  white-space: nowrap; color: var(--fg-soft);
+}
+.u-chip--danger  { color: var(--danger);  border-color: var(--danger);  background: var(--c-oxide-bg); }
+.u-chip--warning { color: var(--c-amber-aa); border-color: var(--warning); background: var(--c-amber-bg); }
+.u-chip--success { color: var(--success); border-color: var(--success); background: var(--c-moss-bg); }
+.u-chip--solid   { color: #fff; background: var(--accent); border-color: var(--accent); }
+
+/* Suelo de calidad. Ni una página sin esto. */
+:where(a, button, [tabindex]):focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+
+/* ============================================================================
+   REGLAS DE USO · el motivo por el que este fichero no es solo una lista
+
+   1. El azul es la estructura. Rótulos, titulares, enlaces, rellenos de serie
+      y todo lo que organice la página. Nunca significa "bien".
+   2. El óxido es lo que está mal, y nada más. En cuanto se usa para decorar,
+      deja de avisar. En el cuadro de mando aparece en menos del 5 % de la
+      superficie impresa; ese es el orden de magnitud correcto.
+   3. Ámbar es "mirar esto", verdín es "cerrado", violeta es la dimensión que
+      no es ni estado ni dinero. Cuatro señales; si aparece una quinta, casi
+      siempre es que faltaba una categoría en el dato.
+   4. Toda cifra en monoespaciada, siempre. Es la mitad del carácter de la
+      página y cuesta cero.
+   5. Un solo alarde por página. En el cuadro de mando es la carta de cruce;
+      todo lo demás está callado a propósito. Si hay dos, no hay ninguno.
+   6. Nada de degradados en la identidad. Un cianotipo tiene una sola tinta:
+      la gradación sale de la exposición, o sea de la rampa 9-7-5-3-1.
+   7. --c-ink-3 y --c-cyan-5 no llegan a 4,5:1 sobre papel. Valen para
+      etiquetas prescindibles y para rellenos; en cuanto lleven dato que haya
+      que leer, cambia a la variante -aa o sube un peldaño de la rampa.
+
+   Contrastes medidos sobre --c-paper #E9EEF2 (WCAG 2.1, sRGB):
+     ink 15,6  ·  ink-2 8,4  ·  cyan-9 11,1  ·  violet 7,4  ·  cyan-7 6,9
+     oxide 6,0  ·  moss 5,4  ·  ink-3-aa 4,5  ·  amber 4,2  ·  cyan-5 3,8
+     ink-3 3,7  ·  cyan-3 1,8  ·  rule 1,3
+   Blanco sobre color, para chips macizos:
+     ink 18,2  ·  cyan-9 13,0  ·  violet 8,6  ·  cyan-7 8,1  ·  oxide 7,0
+     moss 6,3  ·  amber 4,9  ·  cyan-5 4,5
+   ========================================================================= */
+
+</style>
+<style>
+  /* Nada de color literal aquí: todo sale de cianotipo.css. */
+  body{margin:0;font-family:var(--font-body);font-size:var(--t-body);
+       line-height:var(--leading);color:var(--fg);background:var(--bg)}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 var(--sp-5)}
+  .col{max-width:74ch}
+
+  a{color:var(--accent-soft)}
+
+  /* ---------------------------------------------------------- cabecera */
+  header.mast{padding:var(--sp-8) 0 var(--sp-5);display:grid;
+    grid-template-columns:1fr auto;gap:var(--sp-5);align-items:start}
+  h1{font-family:var(--font-display);font-weight:700;text-transform:uppercase;
+     letter-spacing:var(--track-tight);line-height:var(--leading-tight);
+     font-size:var(--t-h1);margin:var(--sp-2) 0 var(--sp-3)}
+  h1 em{font-style:normal;color:var(--accent)}
+  .lede{color:var(--fg-soft);font-size:var(--t-lead);max-width:52ch;margin:0}
+  .toolbar{display:flex;gap:var(--sp-2);align-items:center;justify-content:flex-end}
+  .tb{font-family:var(--font-mono);font-size:var(--t-small);
+      border:1px solid var(--border);background:var(--bg-raised);
+      color:var(--fg-soft);padding:5px 10px;border-radius:var(--radius);cursor:pointer}
+  .tb:hover{background:var(--accent-wash);color:var(--accent)}
+  .tb[aria-pressed="true"]{background:var(--accent);color:var(--bg-raised);
+      border-color:var(--accent)}
+
+  /* franja de cifras del montaje */
+  .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:1px;background:var(--border);border:1px solid var(--border);
+    border-radius:var(--radius);overflow:hidden;margin:var(--sp-6) 0 0}
+  .facts div{background:var(--bg-raised);padding:var(--sp-3) var(--sp-4)}
+  .facts dt{margin:0 0 var(--sp-1);font-family:var(--font-mono);
+    font-size:var(--t-micro);letter-spacing:var(--track-wide);
+    text-transform:uppercase;color:var(--fg-faint)}
+  .facts dd{margin:0;font-size:var(--t-h3);color:var(--accent)}
+  .facts dd small{font-size:var(--t-small);color:var(--fg-faint);
+    letter-spacing:0;font-variant-numeric:normal}
+
+  /* ---------------------------------------------------------- secciones */
+  h2{font-family:var(--font-display);text-transform:uppercase;
+     font-size:var(--t-h2);letter-spacing:.01em;margin:var(--sp-8) 0 var(--sp-3);
+     padding-bottom:var(--sp-1);border-bottom:1.5px solid var(--fg)}
+  h3{font-family:var(--font-mono);font-size:var(--t-micro);
+     letter-spacing:var(--track-wide);text-transform:uppercase;
+     color:var(--accent-soft);margin:var(--sp-6) 0 var(--sp-2)}
+  p{margin:0 0 var(--sp-3);max-width:84ch}
+  p.note{color:var(--fg-faint);font-size:var(--t-small);max-width:80ch}
+  code{font-family:var(--font-mono);font-size:.92em;background:var(--bg-sunken);
+    border:1px solid var(--border-faint);border-radius:4px;padding:.05em .3em}
+
+  /* ------------------------------------- tubería: el orden es información */
+  .pipe{list-style:none;margin:var(--sp-4) 0 0;padding:0;counter-reset:s;
+    border-top:1px solid var(--border)}
+  .pipe li{counter-increment:s;display:grid;grid-template-columns:44px 1fr;
+    gap:0 var(--sp-4);padding:var(--sp-3) 0;border-bottom:1px solid var(--border)}
+  .pipe li::before{content:counter(s,decimal-leading-zero);
+    font-family:var(--font-mono);font-variant-numeric:tabular-nums;
+    font-size:var(--t-lead);color:var(--accent-fill);padding-top:1px}
+  .pipe b{display:block;font-weight:600;margin-bottom:2px}
+  .pipe .fn{font-family:var(--font-mono);font-size:var(--t-small);
+    font-weight:400;color:var(--accent-soft)}
+  .pipe span.d{color:var(--fg-soft)}
+
+  /* ---------------------------------------------------------- gráfica */
+  .plot{margin:var(--sp-4) 0 0;background:var(--bg-raised);
+    border:1px solid var(--border);border-radius:var(--radius);
+    padding:var(--sp-4) var(--sp-4) var(--sp-3);box-shadow:var(--shadow-card)}
+  .plot svg{display:block;width:100%;height:auto}
+  .plot figcaption{margin-top:var(--sp-3);font-size:var(--t-small);
+    color:var(--fg-soft);max-width:82ch}
+  .key{display:flex;flex-wrap:wrap;gap:var(--sp-1) var(--sp-5);
+    margin:0 0 var(--sp-3);font-family:var(--font-mono);
+    font-size:var(--t-micro);letter-spacing:var(--track-wide);
+    text-transform:uppercase;color:var(--fg-soft)}
+  .key i{display:inline-block;width:20px;height:0;border-top-width:2px;
+    border-top-style:solid;vertical-align:.35em;margin-right:6px}
+
+  /* ---------------------------------------------------------- parámetros */
+  .params{margin:var(--sp-3) 0 0;border-top:1px solid var(--border)}
+  .param{display:grid;grid-template-columns:minmax(150px,210px) 1fr;
+    gap:var(--sp-1) var(--sp-5);padding:var(--sp-4) 0;
+    border-bottom:1px solid var(--border)}
+  .param dt{margin:0}
+  .param .flag{display:block;font-family:var(--font-mono);font-weight:500;
+    font-size:var(--t-body);color:var(--accent);word-break:break-word}
+  .param .def{display:block;margin-top:var(--sp-1);font-family:var(--font-mono);
+    font-size:var(--t-micro);letter-spacing:.04em;color:var(--fg-faint)}
+  .param dd{margin:0}
+  .param dd p{margin:0 0 var(--sp-2)}
+  .param dd p:last-child{margin:0}
+  .param dd b{color:var(--accent);font-family:var(--font-mono);font-weight:500}
+  .param .when{font-size:var(--t-small);color:var(--fg-soft);
+    border-left:2px solid var(--accent-fill);padding-left:var(--sp-3)}
+
+  /* ------------------------------------- banco de pruebas: único alarde */
+  .lab{margin:var(--sp-5) 0 0;border:1px solid var(--border);
+    border-radius:var(--radius);overflow:hidden;background:var(--bg-raised);
+    box-shadow:var(--shadow-card)}
+  .lab-head{padding:var(--sp-3) var(--sp-4);background:var(--accent);
+    color:var(--c-surface)}
+  .lab-head .u-eyebrow{color:var(--c-cyan-3);display:block;margin-bottom:4px}
+  .lab-head p{margin:0;font-size:var(--t-small);max-width:64ch;opacity:.92}
+  .stages{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+    background:var(--border)}
+  .stage{position:relative;margin:0;background:var(--c-ink)}
+  .stage canvas{display:block;width:100%;height:auto;image-rendering:pixelated}
+  .stage figcaption{position:absolute;inset:auto 0 0 0;padding:6px var(--sp-2);
+    background:rgba(14,22,33,.72);color:var(--c-cyan-1);
+    font-family:var(--font-mono);font-size:var(--t-micro);
+    letter-spacing:var(--track-wide);text-transform:uppercase}
+  .controls{padding:var(--sp-4);display:grid;gap:var(--sp-4);
+    grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+  .ctl > label{display:block;font-family:var(--font-mono);
+    font-size:var(--t-micro);letter-spacing:var(--track-wide);
+    text-transform:uppercase;color:var(--fg-faint);margin-bottom:var(--sp-2)}
+  .ctl > label b{color:var(--accent);font-size:var(--t-small);letter-spacing:0;
+    font-variant-numeric:tabular-nums}
+  .ctl input[type=range]{width:100%;accent-color:var(--accent-fill);margin:0}
+  .ctl-check{display:flex;align-items:center;gap:var(--sp-2)}
+  .ctl-check input{accent-color:var(--accent-fill);width:16px;height:16px}
+  .ctl-check label{font-family:var(--font-mono);font-size:var(--t-small);
+    color:var(--fg-soft)}
+  .readout{padding:0 var(--sp-4) var(--sp-4);font-family:var(--font-mono);
+    font-size:var(--t-small);line-height:1.7;color:var(--fg-soft);
+    font-variant-numeric:tabular-nums}
+  .readout b{color:var(--accent);font-weight:500}
+  .readout .warn{color:var(--danger)}
+
+  /* ---------------------------------------------------------- captura */
+  .verdict{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));
+    gap:1px;background:var(--border);border:1px solid var(--border);
+    border-radius:var(--radius);overflow:hidden;margin:var(--sp-4) 0 0}
+  .verdict div{background:var(--bg-raised);padding:var(--sp-4)}
+  .verdict h4{margin:0 0 var(--sp-2);font-family:var(--font-display);
+    font-weight:600;text-transform:uppercase;font-size:var(--t-h3);
+    letter-spacing:.01em;display:flex;flex-wrap:wrap;align-items:center;
+    gap:var(--sp-2)}
+  .verdict p{margin:0;color:var(--fg-soft)}
+
+  .spec{margin:var(--sp-4) 0 0;border-top:1px solid var(--border)}
+  .spec-row{display:grid;grid-template-columns:minmax(110px,160px) 1fr;
+    gap:var(--sp-1) var(--sp-5);padding:var(--sp-3) 0;
+    border-bottom:1px solid var(--border)}
+  .spec-row dt{margin:0;font-family:var(--font-mono);font-size:var(--t-micro);
+    letter-spacing:var(--track-wide);text-transform:uppercase;
+    color:var(--fg-faint)}
+  .spec-row dd{margin:0;color:var(--fg-soft)}
+  .spec-row dd em{font-style:normal;font-family:var(--font-mono);
+    font-variant-numeric:tabular-nums;color:var(--accent)}
+  .spec-row dd strong{font-weight:400;color:var(--fg)}
+
+  /* ---------------------------------------------------------- recetas */
+  .recipe{margin:var(--sp-4) 0 0}
+  .recipe h4{margin:0 0 var(--sp-2);font-family:var(--font-mono);
+    font-size:var(--t-micro);letter-spacing:var(--track-wide);
+    text-transform:uppercase;color:var(--accent-soft)}
+  .recipe pre{margin:0;overflow-x:auto;background:var(--c-ink);
+    color:var(--c-cyan-1);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);
+    font-family:var(--font-mono);font-size:var(--t-small);line-height:1.7}
+  .recipe pre b{color:var(--c-cyan-3);font-weight:400}
+  .recipe p{margin:var(--sp-2) 0 0;font-size:var(--t-small);color:var(--fg-soft)}
+
+  /* ---------------------------------------------------------- nota lateral */
+  .aside{margin:var(--sp-5) 0 0;background:var(--bg-sunken);
+    border:1px solid var(--border);border-radius:var(--radius);
+    padding:var(--sp-4)}
+  .aside h4{margin:0 0 var(--sp-2);font-family:var(--font-mono);
+    font-size:var(--t-micro);letter-spacing:var(--track-wide);
+    text-transform:uppercase;color:var(--accent-soft)}
+  .aside p{margin:0 0 var(--sp-2);color:var(--fg-soft)}
+  .aside p:last-child{margin:0}
+
+  footer{margin-top:var(--sp-8);padding:var(--sp-5) 0 var(--sp-8);
+    border-top:1px solid var(--border)}
+  footer p{font-family:var(--font-mono);font-size:var(--t-small);
+    color:var(--fg-faint);max-width:74ch}
+
+  @media(max-width:820px){
+    header.mast{grid-template-columns:1fr}
+    .toolbar{justify-content:flex-start}
+    .stages{grid-template-columns:1fr}
+    .param,.spec-row{grid-template-columns:1fr}
+  }
+  @media print{
+    .toolbar{display:none}
+    h2{break-after:avoid}
+    .plot,.lab,.verdict,.spec,.aside,.recipe{break-inside:avoid}
+    .recipe pre{color:var(--c-ink);background:var(--bg-sunken);
+      border:1px solid var(--border)}
+  }
+
+  /* el enlace al código usa la misma pastilla que los botones */
+  a.tb{text-decoration:none;display:inline-block;line-height:1.35}
+  a.tb:hover{color:var(--accent)}
+
+  /* ------------------------------------------- conmutador de idioma */
+  html[lang="es"] [data-lang="en"]{display:none!important}
+  html[lang="en"] [data-lang="es"]{display:none!important}
+  .langbar{position:fixed;top:14px;right:16px;z-index:100;display:flex;
+    background:var(--bg-raised);border:1px solid var(--border);
+    border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-card)}
+  .langbar button{font-family:var(--font-mono);font-size:var(--t-small);
+    letter-spacing:var(--track-wide);background:transparent;border:0;
+    color:var(--fg-faint);padding:6px 11px;cursor:pointer;
+    transition:background .15s,color .15s}
+  .langbar button+button{border-left:1px solid var(--border)}
+  .langbar button:hover{background:var(--accent-wash);color:var(--accent)}
+  .langbar button.on{background:var(--accent);color:var(--bg-raised)}
+  .langbar button:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+  @media(max-width:820px){.langbar{top:8px;right:8px}}
+  /* deja sitio al conmutador: la barra de botones vive arriba a la derecha */
+  @media(min-width:821px){header.mast .toolbar{margin-top:34px}}
+  @media print{.langbar{display:none}}
+</style>
+</head>
+<body class="u-papel">
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
+<div class="wrap">
+
+<header class="mast">
+  <div>
+    <span class="u-eyebrow" data-lang="es">procesar_sol.py · versión 2 · Nikon Z8</span>
+    <span class="u-eyebrow" data-lang="en">procesar_sol.py · version 2 · Nikon Z8</span>
+    <h1 data-lang="es">Realce de<br><em>manchas</em> solares</h1>
+    <h1 data-lang="en"><em>Sunspot</em><br>enhancement</h1>
+    <p class="lede" data-lang="es">Divide el disco por su perfil radial de brillo y estira linealmente
+      el residuo. La fotosfera acaba en el 90,9 % del blanco; las manchas, en el negro.</p>
+    <p class="lede" data-lang="en">Divides the disc by its own radial brightness profile and stretches the
+      residual linearly. The photosphere ends up at 90.9 % of white; the sunspots, at black.</p>
+  </div>
+  <div class="toolbar">
+    <a class="tb" href="scripts/eclipse/procesar_sol.py" data-lang="es">ver el código</a>
+    <a class="tb" href="scripts/eclipse/procesar_sol.py" data-lang="en">view the source</a>
+    <button class="tb" id="tema" aria-pressed="false"><span data-lang="es">variante noche</span><span data-lang="en">night variant</span></button>
+    <button class="tb" id="imprimir"><span data-lang="es">imprimir</span><span data-lang="en">print</span></button>
+  </div>
+</header>
+
+<dl class="facts" data-lang="es">
+  <div><dt>Focal implícita</dt><dd class="u-num">566 <small>mm</small></dd></div>
+  <div><dt>Escala de imagen</dt><dd class="u-num">1,58 <small>arcsec/px</small></dd></div>
+  <div><dt>Sobre el Sol</dt><dd class="u-num">1149 <small>km/px</small></dd></div>
+  <div><dt>Planitud del cociente</dt><dd class="u-num">1,000 <small>± 0,007</small></dd></div>
+  <div><dt>Salida</dt><dd class="u-num">16 <small>o 32 bits</small></dd></div>
+</dl>
+<dl class="facts" data-lang="en">
+  <div><dt>Implied focal length</dt><dd class="u-num">566 <small>mm</small></dd></div>
+  <div><dt>Image scale</dt><dd class="u-num">1.58 <small>arcsec/px</small></dd></div>
+  <div><dt>On the Sun</dt><dd class="u-num">1149 <small>km/px</small></dd></div>
+  <div><dt>Flatness of the ratio</dt><dd class="u-num">1.000 <small>± 0.007</small></dd></div>
+  <div><dt>Output</dt><dd class="u-num">16 <small>or 32 bits</small></dd></div>
+</dl>
+
+<h2 data-lang="es">Tubería de procesado</h2>
+<h2 data-lang="en">Processing pipeline</h2>
+<p class="col" data-lang="es">Cada paso opera sobre la salida del anterior. Los nombres en azul son las
+  funciones del archivo.</p>
+<p class="col" data-lang="en">Each step operates on the output of the one before it. The names in blue are the
+  functions in the file.</p>
+
+<ol class="pipe" data-lang="es">
+  <li><div>
+    <b>Revelado lineal <span class="fn">cargar()</span></b>
+    <span class="d">rawpy con <code>gamma=(1,1)</code>, sin autoexposición, 16 bits,
+    demosaicado AHD, balance de la cámara. La división por el flat exige valores
+    proporcionales al flujo, y una curva sRGB rompe esa proporcionalidad.</span>
+  </div></li>
+  <li><div>
+    <b>Extracción de un canal</b>
+    <span class="d">Se toma el verde: doble de fotositos en el mosaico de Bayer, y con
+    filtro solar el rojo satura antes. El resto de la cadena opera sobre un escalar.</span>
+  </div></li>
+  <li><div>
+    <b>Binning opcional <span class="fn">binear()</span></b>
+    <span class="d">Promedio de bloques N×N. Reduce el ruido en un factor N. El detalle
+    se pierde solo si el muestreo está por debajo de lo que resuelve el conjunto óptica
+    más atmósfera.</span>
+  </div></li>
+  <li><div>
+    <b>Apilado opcional <span class="fn">apilar()</span></b>
+    <span class="d">Detecta el centro del disco en cada fotograma, compensa la traslación
+    y promedia. El ruido baja como 1/√N.</span>
+  </div></li>
+  <li><div>
+    <b>Geometría del disco <span class="fn">detectar_disco()</span></b>
+    <span class="d">Umbral en el 25 % entre el percentil 5 y el 99,5, cierre y apertura
+    morfológicos con elipse de 15 px, contorno mayor, círculo mínimo envolvente. La
+    máscara final es el círculo relleno, de modo que las manchas quedan dentro.</span>
+  </div></li>
+  <li><div>
+    <b>Flat radial <span class="fn">flat_radial()</span></b>
+    <span class="d">Mediana de intensidad en 200 anillos concéntricos, suavizada con
+    ventana de Hann de 9 bins e interpolada a dos dimensiones. La mediana descarta las
+    manchas, así que el perfil describe el oscurecimiento del limbo.</span>
+  </div></li>
+  <li><div>
+    <b>Cociente</b>
+    <span class="d">Imagen dividida por el flat. La fotosfera queda en 1,000, la penumbra
+    entre 0,70 y 0,90 y la umbra entre 0,25 y 0,50, con independencia de la distancia al
+    centro.</span>
+  </div></li>
+  <li><div>
+    <b>Mapa tonal y enfoque</b>
+    <span class="d">Estirado lineal de la ventana <code>[bajo, alto]</code> al rango
+    completo, atenuación del último 2,5 % del radio para suprimir el aro del limbo, y
+    máscara de enfoque en dos escalas cuando <code>--enfoque</code> es mayor que cero.</span>
+  </div></li>
+</ol>
+<ol class="pipe" data-lang="en">
+  <li><div>
+    <b>Linear development <span class="fn">cargar()</span></b>
+    <span class="d">rawpy with <code>gamma=(1,1)</code>, no auto-exposure, 16 bits,
+    AHD demosaicing, camera white balance. Division by the flat field demands values
+    proportional to flux, and an sRGB curve breaks that proportionality.</span>
+  </div></li>
+  <li><div>
+    <b>Extraction of a single channel</b>
+    <span class="d">The green is taken: twice as many photosites in the Bayer mosaic, and
+    behind a solar filter the red saturates sooner. The rest of the chain works on a scalar.</span>
+  </div></li>
+  <li><div>
+    <b>Optional binning <span class="fn">binear()</span></b>
+    <span class="d">Average of N×N blocks. Reduces the noise by a factor of N. Detail is
+    lost only if the sampling lies below what the optics and the atmosphere together
+    actually resolve.</span>
+  </div></li>
+  <li><div>
+    <b>Optional stacking <span class="fn">apilar()</span></b>
+    <span class="d">Detects the centre of the disc in every frame, compensates for the
+    translation and averages. The noise falls as 1/√N.</span>
+  </div></li>
+  <li><div>
+    <b>Geometry of the disc <span class="fn">detectar_disco()</span></b>
+    <span class="d">Threshold at 25 % between the 5th and the 99.5th percentile, morphological
+    closing and opening with a 15 px ellipse, largest contour, minimum enclosing circle. The
+    final mask is the filled circle, so that the sunspots fall inside it.</span>
+  </div></li>
+  <li><div>
+    <b>Radial flat <span class="fn">flat_radial()</span></b>
+    <span class="d">Median intensity over 200 concentric annuli, smoothed with a 9-bin Hann
+    window and interpolated back to two dimensions. The median discards the sunspots, so the
+    profile describes the limb darkening.</span>
+  </div></li>
+  <li><div>
+    <b>Ratio</b>
+    <span class="d">Image divided by the flat. The photosphere settles at 1.000, the penumbra
+    between 0.70 and 0.90 and the umbra between 0.25 and 0.50, irrespective of the distance
+    from the centre.</span>
+  </div></li>
+  <li><div>
+    <b>Tone mapping and sharpening</b>
+    <span class="d">Linear stretch of the window <code>[bajo, alto]</code> to the full range,
+    roll-off over the outermost 2.5 % of the radius to suppress the limb ring, and a
+    two-scale unsharp mask when <code>--enfoque</code> is greater than zero.</span>
+  </div></li>
+</ol>
+
+<h2 data-lang="es">Perfil de oscurecimiento del limbo</h2>
+<h2 data-lang="en">Limb darkening profile</h2>
+<p class="col" data-lang="es">Hacia el borde, la línea de visión atraviesa capas más frías y la intensidad
+  cae al 30 % del valor central. El gradiente supera el contraste de una mancha pequeña,
+  así que el estirado va después de quitarlo.</p>
+<p class="col" data-lang="en">Towards the edge, the line of sight crosses cooler layers and the intensity
+  falls to 30 % of its central value. This radial gradient exceeds the contrast of a small
+  sunspot, so the stretch comes only after it has been removed.</p>
+
+<figure class="plot">
+  <div class="key" data-lang="es">
+    <span><i data-key="medido"></i>Perfil medido</span>
+    <span><i data-key="gauss" style="border-top-style:dashed"></i>Flat gaussiano (v1)</span>
+    <span><i data-key="radial"></i>Cociente con flat radial</span>
+  </div>
+  <div class="key" data-lang="en">
+    <span><i data-key="medido"></i>Measured profile</span>
+    <span><i data-key="gauss" style="border-top-style:dashed"></i>Gaussian flat (v1)</span>
+    <span><i data-key="radial"></i>Ratio with the radial flat</span>
+  </div>
+  <svg id="plot" viewBox="0 0 720 330" role="img"></svg>
+  <figcaption data-lang="es">Medido sobre tus archivos. El flat gaussiano de la primera versión desenfoca
+    disco y fondo negro juntos: el cociente subía a 1,025 en r/R = 0,8 y caía a 0,61 en el
+    limbo, y ese patrón anular era casi toda la señal visible. El flat radial deja
+    1,000 ± 0,007 en todo el disco.</figcaption>
+  <figcaption data-lang="en">Measured on your own files. The Gaussian flat of the first version blurs
+    the disc and the black background together: the ratio rose to 1.025 at r/R = 0.8 and fell to
+    0.61 at the limb, and that annular pattern was very nearly all the visible signal. The radial
+    flat leaves 1.000 ± 0.007 across the whole disc.</figcaption>
+</figure>
+
+<h2 data-lang="es">Parámetros</h2>
+<h2 data-lang="en">Parameters</h2>
+<p class="col" data-lang="es">Solo el archivo de entrada es obligatorio. Los valores por omisión están
+  ajustados a un disco de unos 1200 px de diámetro.</p>
+<p class="col" data-lang="en">Only the input file is compulsory. The defaults are tuned to a disc of some
+  1200 px in diameter.</p>
+
+<h3 data-lang="es">Entrada y salida</h3>
+<h3 data-lang="en">Input and output</h3>
+<dl class="params" data-lang="es">
+  <div class="param">
+    <dt><span class="flag">archivos</span><span class="def">posicional, uno o varios</span></dt>
+    <dd>
+      <p>Rutas a NEF, CR2, CR3, ARW, DNG y otros RAW que abra libraw, o a TIFF, PNG y
+        JPEG. Admite comodines del shell.</p>
+      <p class="when">En la Z8, dispara en compresión RAW “sin pérdida”. Los NEF de “Alta
+        eficiencia” usan TicoRAW, que libraw solo decodifica desde la versión 0.21.2; el
+        script detecta ese error y lo indica.</p>
+    </dd>
+  </div>
+  <div class="param">
+    <dt><span class="flag">--salida</span><span class="def">defecto: directorio actual</span></dt>
+    <dd><p>Carpeta de destino. Se crea si no existe.</p></dd>
+  </div>
+  <div class="param">
+    <dt><span class="flag">--formato</span><span class="def">tiff16 | tiff32 | png16<br>defecto: tiff16</span></dt>
+    <dd>
+      <p><b>tiff16</b>, entero de 16 bits, 65536 niveles. Formato de trabajo para
+        Photoshop o Capture One; los 14 bits del NEF caben con margen.</p>
+      <p><b>tiff32</b>, coma flotante, valores en [0,1] sin cuantizar. Para cadenas de
+        varias operaciones fotométricas, donde el redondeo se acumula. Lo leen Photoshop,
+        GIMP 2.10 en adelante, PixInsight, Siril e ImageJ.</p>
+      <p><b>png16</b>, alternativa portable.</p>
+    </dd>
+  </div>
+  <div class="param">
+    <dt><span class="flag">--lineal</span><span class="def">interruptor</span></dt>
+    <dd>
+      <p>Exporta además el cociente aplanado antes del estirado y del enfoque. En tiff32
+        se guarda tal cual, con la fotosfera en 1,0; en los formatos enteros se divide por
+        1,25 para que quepa en el rango.</p>
+      <p class="when">Es el archivo a llevar al editor para aplicar curvas propias en
+        lugar de la ventana fija del script.</p>
+    </dd>
+  </div>
+  <div class="param">
+    <dt><span class="flag">--sin-prev</span><span class="def">interruptor</span></dt>
+    <dd><p>Omite el JPEG de previsualización de 8 bits.</p></dd>
+  </div>
+  <div class="param">
+    <dt><span class="flag">--canal</span><span class="def">r | g | b | l<br>super | superg<br>defecto: g</span></dt>
+    <dd>
+      <p><b>g</b>, <b>r</b>, <b>b</b>: un canal del RAW demosaicado. <b>l</b>: luminancia
+        BT.709 de los tres. <b>super</b>: superpíxel 2×2 sobre el mosaico Bayer crudo
+        sumando los cuatro fotositos de cada celda. <b>superg</b>: igual, con los dos
+        verdes.</p>
+      <p>Los dos modos <b>super</b> no demosaican y no aplican balance de blancos: el
+        valor es proporcional a los electrones totales de la celda. Salen a la mitad de
+        resolución lineal.</p>
+      <p class="when">Sobre combinar canales: una celda Bayer 2×2 tiene 1 R, 2 G y 1 B, así
+        que el verde ya recoge la mitad de los fotones. La cota de mejora es
+        √((N<sub>R</sub>+2N<sub>G</sub>+N<sub>B</sub>) / 2N<sub>G</sub>), es decir
+        <em>×1,41</em> con flujo igual en los tres canales y <em>×1,32</em> con una
+        película Baader, no √3. Medido sobre mosaico simulado con demosaicado AHD, el
+        superpíxel da <em>×1,29</em>, que coincide con la predicción. La media de los tres
+        canales demosaicados mide <em>×1,92</em>, por encima de la cota física: el exceso
+        es paso-bajo de la interpolación de R y B, y se paga en contraste, con
+        <em>0,52</em> de retención en manchas de 1 px de radio frente a <em>0,89 a 1,03</em>
+        por encima de 3 px.</p>
+    </dd>
+  </div>
+</dl>
+<dl class="params" data-lang="en">
+  <div class="param">
+    <dt><span class="flag">archivos</span><span class="def">positional, one or more</span></dt>
+    <dd>
+      <p>Paths to NEF, CR2, CR3, ARW, DNG and other RAW files that libraw can open, or to
+        TIFF, PNG and JPEG. Shell wildcards are accepted.</p>
+      <p class="when">On the Z8, shoot in “lossless” RAW compression. The “High efficiency”
+        NEFs use TicoRAW, which libraw only decodes from version 0.21.2 onwards; the script
+        detects that error and reports it.</p>
+    </dd>
+  </div>
+  <div class="param">
+    <dt><span class="flag">--salida</span><span class="def">default: current directory</span></dt>
+    <dd><p>Destination folder. It is created if it does not exist.</p></dd>
+  </div>
+  <div class="param">
+    <dt><span class="flag">--formato</span><span class="def">tiff16 | tiff32 | png16<br>default: tiff16</span></dt>
+    <dd>
+      <p><b>tiff16</b>, 16-bit integer, 65536 levels. The working format for Photoshop or
+        Capture One; the 14 bits of the NEF fit with room to spare.</p>
+      <p><b>tiff32</b>, floating point, values in [0,1] without quantisation. For chains of
+        several photometric operations, where rounding accumulates. It is read by Photoshop,
+        GIMP 2.10 onwards, PixInsight, Siril and ImageJ.</p>
+      <p><b>png16</b>, a portable alternative.</p>
+    </dd>
+  </div>
+  <div class="param">
+    <dt><span class="flag">--lineal</span><span class="def">switch</span></dt>
+    <dd>
+      <p>Additionally exports the flattened ratio, before the stretch and the sharpening. In
+        tiff32 it is saved as it stands, with the photosphere at 1.0; in the integer formats it
+        is divided by 1.25 so that it fits within the range.</p>
+      <p class="when">This is the file to take into the editor in order to apply curves of your
+        own instead of the fixed window of the script.</p>
+    </dd>
+  </div>
+  <div class="param">
+    <dt><span class="flag">--sin-prev</span><span class="def">switch</span></dt>
+    <dd><p>Omits the 8-bit preview JPEG.</p></dd>
+  </div>
+  <div class="param">
+    <dt><span class="flag">--canal</span><span class="def">r | g | b | l<br>super | superg<br>default: g</span></dt>
+    <dd>
+      <p><b>g</b>, <b>r</b>, <b>b</b>: one channel of the demosaiced RAW. <b>l</b>: BT.709
+        luminance of the three. <b>super</b>: a 2×2 superpixel over the raw Bayer mosaic,
+        summing the four photosites of each cell. <b>superg</b>: the same, with the two greens.</p>
+      <p>The two <b>super</b> modes neither demosaic nor apply white balance: the value is
+        proportional to the total electrons in the cell. They come out at half the linear
+        resolution.</p>
+      <p class="when">On combining channels: a 2×2 Bayer cell holds 1 R, 2 G and 1 B, so the
+        green already collects half the photons. The upper bound on the gain is
+        √((N<sub>R</sub>+2N<sub>G</sub>+N<sub>B</sub>) / 2N<sub>G</sub>), that is,
+        <em>×1.41</em> with equal flux in all three channels and <em>×1.32</em> behind a Baader
+        film, not √3. Measured on a simulated mosaic with AHD demosaicing, the superpixel gives
+        <em>×1.29</em>, in agreement with the prediction. The mean of the three demosaiced
+        channels measures <em>×1.92</em>, above the physical bound: the excess is the low-pass
+        of the R and B interpolation, and it is paid for in contrast, with <em>0.52</em>
+        retention on sunspots of 1 px radius against <em>0.89 to 1.03</em> above 3 px.</p>
+    </dd>
+  </div>
+</dl>
+
+<h3 data-lang="es">Reducción de ruido y geometría</h3>
+<h3 data-lang="en">Noise reduction and geometry</h3>
+<dl class="params" data-lang="es">
+  <div class="param">
+    <dt><span class="flag">--bin N</span><span class="def">entero · defecto: 1</span></dt>
+    <dd>
+      <p>Promedia bloques de N×N píxeles antes de todo lo demás. Con N = 2 la relación
+        señal/ruido se duplica y el archivo baja a la cuarta parte.</p>
+      <p class="when">Aplicable cuando la escala de imagen está por debajo del límite de
+        resolución del conjunto, como en tu caso con 1,58 arcsec/px.</p>
+    </dd>
+  </div>
+  <div class="param">
+    <dt><span class="flag">--apilar</span><span class="def">interruptor</span></dt>
+    <dd>
+      <p>Trata todos los archivos de la línea de órdenes como una ráfaga: alinea por el
+        centro del disco y promedia. Genera una sola salida, con sufijo
+        <code>_apiladoN</code>.</p>
+      <p class="when">La alineación es solo traslación: corrige arrastre de seguimiento y
+        vibraciones. La rotación de campo y la distorsión instantánea del seeing quedan
+        fuera.</p>
+    </dd>
+  </div>
+  <div class="param">
+    <dt><span class="flag">--recorte</span><span class="def">interruptor</span></dt>
+    <dd>
+      <p>Recorta al disco con un margen del 15 % del radio.</p>
+      <p class="when">Con 45 Mpx y el disco ocupando una fracción del fotograma, acelera
+        todo lo que venga después.</p>
+    </dd>
+  </div>
+</dl>
+<dl class="params" data-lang="en">
+  <div class="param">
+    <dt><span class="flag">--bin N</span><span class="def">integer · default: 1</span></dt>
+    <dd>
+      <p>Averages blocks of N×N pixels before anything else. With N = 2 the signal-to-noise
+        ratio doubles and the file drops to a quarter of its size.</p>
+      <p class="when">Worth using when the image scale lies below the resolution limit of the
+        whole assembly, as it does in your case at 1.58 arcsec/px.</p>
+    </dd>
+  </div>
+  <div class="param">
+    <dt><span class="flag">--apilar</span><span class="def">switch</span></dt>
+    <dd>
+      <p>Treats every file on the command line as a single burst: aligns on the centre of the
+        disc and averages. It produces one output, with the suffix <code>_apiladoN</code>.</p>
+      <p class="when">The alignment is translation only: it corrects tracking drift and
+        vibration. Field rotation and the instantaneous distortion of the seeing lie outside
+        its reach.</p>
+    </dd>
+  </div>
+  <div class="param">
+    <dt><span class="flag">--recorte</span><span class="def">switch</span></dt>
+    <dd>
+      <p>Crops to the disc with a margin of 15 % of the radius.</p>
+      <p class="when">With 45 Mpx and the disc occupying a fraction of the frame, it speeds up
+        everything that follows.</p>
+    </dd>
+  </div>
+</dl>
+
+<h3 data-lang="es">Mapa tonal</h3>
+<h3 data-lang="en">Tone mapping</h3>
+<p class="col" data-lang="es">Definen qué valor del cociente se convierte en negro y cuál en blanco. La
+  fotosfera, que vale 1,0 por construcción, acaba en (1 − bajo) / (alto − bajo) del rango.</p>
+<p class="col" data-lang="en">These set which value of the ratio becomes black and which becomes white. The
+  photosphere, which is 1.0 by construction, ends up at (1 − bajo) / (alto − bajo) of the range.</p>
+
+<figure class="lab">
+  <div class="lab-head">
+    <span class="u-eyebrow" data-lang="es">Banco de pruebas</span>
+    <span class="u-eyebrow" data-lang="en">Test bench</span>
+    <p data-lang="es">Disco sintético con oscurecimiento del limbo, cinco manchas y ruido de fotones,
+      procesado con el mismo algoritmo. Los controles actualizan las tres etapas.</p>
+    <p data-lang="en">A synthetic disc with limb darkening, five sunspots and photon noise, put
+      through the same algorithm. The controls update all three stages.</p>
+  </div>
+  <div class="stages">
+    <figure class="stage"><canvas id="cA" width="260" height="260"></canvas>
+      <figcaption data-lang="es">1 · RAW lineal</figcaption>
+      <figcaption data-lang="en">1 · Linear RAW</figcaption></figure>
+    <figure class="stage"><canvas id="cB" width="260" height="260"></canvas>
+      <figcaption data-lang="es">2 · Cociente aplanado</figcaption>
+      <figcaption data-lang="en">2 · Flattened ratio</figcaption></figure>
+    <figure class="stage"><canvas id="cC" width="260" height="260"></canvas>
+      <figcaption data-lang="es">3 · Estirado</figcaption>
+      <figcaption data-lang="en">3 · Stretched</figcaption></figure>
+  </div>
+  <div class="controls">
+    <div class="ctl">
+      <label for="sBajo">--bajo <b id="vBajo">0,60</b></label>
+      <input type="range" id="sBajo" min="0.20" max="0.95" step="0.01" value="0.60">
+    </div>
+    <div class="ctl">
+      <label for="sAlto">--alto <b id="vAlto">1,04</b></label>
+      <input type="range" id="sAlto" min="1.00" max="1.30" step="0.01" value="1.04">
+    </div>
+    <div class="ctl">
+      <label for="sRuido"><span data-lang="es">ruido del sensor</span><span data-lang="en">sensor noise</span> <b id="vRuido">1,0×</b></label>
+      <input type="range" id="sRuido" min="0" max="3" step="0.1" value="1">
+    </div>
+    <div class="ctl">
+      <label data-lang="es">máscara de enfoque</label>
+      <label data-lang="en">unsharp mask</label>
+      <span class="ctl-check"><input type="checkbox" id="kEnf">
+        <label for="kEnf">--enfoque 0.8</label></span>
+    </div>
+  </div>
+  <div class="readout" id="readout" aria-live="polite"></div>
+</figure>
+
+<dl class="params" data-lang="es">
+  <div class="param">
+    <dt><span class="flag">--bajo</span><span class="def">flotante · defecto: 0.60</span></dt>
+    <dd>
+      <p>Valor del cociente que se mapea a negro. Fija cuánta estructura interna
+        conservan las umbras.</p>
+      <p class="when">A 0,40 conserva gradiente dentro de la umbra y aplana el contraste
+        general. Por encima de 0,70 las umbras llegan a negro puro y pierden toda su
+        estructura.</p>
+    </dd>
+  </div>
+  <div class="param">
+    <dt><span class="flag">--alto</span><span class="def">flotante · defecto: 1.04</span></dt>
+    <dd>
+      <p>Valor del cociente que se mapea a blanco. Determina cuánto ruido de la fotosfera
+        se va a blanco puro y, con ello, cuán limpio queda el disco.</p>
+      <p class="when">Primer mando a tocar. Con 1,02 el disco queda más limpio y las
+        manchas pequeñas resaltan más; con 1,10 aparece todo el grano.</p>
+    </dd>
+  </div>
+  <div class="param">
+    <dt><span class="flag">--enfoque G</span><span class="def">flotante · defecto: 0.8<br>0 lo desactiva</span></dt>
+    <dd>
+      <p>Ganancia de la máscara de enfoque, que actúa a sigma 2 px con ganancia G y a
+        sigma 8 px con ganancia 0,375 G.</p>
+      <p class="when">Con tu escala de imagen, ponlo a <code>0</code>. El análisis por
+        bandas de tu archivo sitúa el pico de potencia en sigma 2 a 3 px, donde actúa esta
+        máscara, y ahí el contenido es ruido. Sube de 0 con discos por encima de unos
+        1500 px de diámetro.</p>
+    </dd>
+  </div>
+</dl>
+<dl class="params" data-lang="en">
+  <div class="param">
+    <dt><span class="flag">--bajo</span><span class="def">float · default: 0.60</span></dt>
+    <dd>
+      <p>The value of the ratio that is mapped to black. It fixes how much internal structure
+        the umbrae retain.</p>
+      <p class="when">At 0.40 it preserves the gradient within the umbra and flattens the
+        overall contrast. Above 0.70 the umbrae reach pure black and lose all their structure.</p>
+    </dd>
+  </div>
+  <div class="param">
+    <dt><span class="flag">--alto</span><span class="def">float · default: 1.04</span></dt>
+    <dd>
+      <p>The value of the ratio that is mapped to white. It determines how much of the
+        photospheric noise goes to pure white and, with that, how clean the disc looks.</p>
+      <p class="when">The first control to reach for. At 1.02 the disc is cleaner and the small
+        sunspots stand out more; at 1.10 the whole grain appears.</p>
+    </dd>
+  </div>
+  <div class="param">
+    <dt><span class="flag">--enfoque G</span><span class="def">float · default: 0.8<br>0 disables it</span></dt>
+    <dd>
+      <p>Gain of the unsharp mask, which acts at sigma 2 px with gain G and at sigma 8 px with
+        gain 0.375 G.</p>
+      <p class="when">At your image scale, set it to <code>0</code>. The band analysis of your
+        file places the power peak at sigma 2 to 3 px, exactly where this mask acts, and there
+        the content is noise. Raise it above 0 for discs beyond some 1500 px in diameter.</p>
+    </dd>
+  </div>
+</dl>
+
+<h2 data-lang="es">Apilado y bracketing</h2>
+<h2 data-lang="en">Stacking and bracketing</h2>
+
+<div class="verdict" data-lang="es">
+  <div>
+    <h4>Apilado <span class="u-chip u-chip--success">aplicable</span></h4>
+    <p>El disco en luz blanca está limitado por ruido de fotones y por seeing, y ambos se
+      promedian. Con 100 fotogramas el ruido cae un factor 10.</p>
+  </div>
+  <div>
+    <h4>Bracketing <span class="u-chip u-chip--warning">solo calibración</span></h4>
+    <p>Fotosfera y umbra se diferencian en un factor 4 o 5, poco más de 2 pasos. La Z8 da
+      más de 12 pasos útiles en 14 bits, así que la escena cabe en una exposición. El
+      límite está en la relación señal/ruido.</p>
+  </div>
+</div>
+<div class="verdict" data-lang="en">
+  <div>
+    <h4>Stacking <span class="u-chip u-chip--success">applicable</span></h4>
+    <p>In white light the disc is limited by photon noise and by seeing, and both average out.
+      With 100 frames the noise falls by a factor of 10.</p>
+  </div>
+  <div>
+    <h4>Bracketing <span class="u-chip u-chip--warning">calibration only</span></h4>
+    <p>Photosphere and umbra differ by a factor of 4 or 5, little more than 2 stops. The Z8
+      gives over 12 usable stops in 14 bits, so the scene fits within a single exposure. The
+      limit lies in the signal-to-noise ratio.</p>
+  </div>
+</div>
+
+<p style="margin-top:var(--sp-4)" class="col" data-lang="es">La horquilla sirve para calibrar, no para
+  fusionar: al empezar la sesión, tres o cuatro exposiciones separadas un paso, te quedas
+  con la que deja la fotosfera entre el 70 y el 80 % del rango y bloqueas esos valores.
+  Después, ráfagas idénticas. Fusionar exposiciones distintas aporta algo con corona de
+  eclipse o protuberancias, que abarcan varios órdenes de magnitud.</p>
+<p style="margin-top:var(--sp-4)" class="col" data-lang="en">The bracket is there to calibrate, not to
+  merge: at the start of the session, three or four exposures a stop apart, and you keep the one
+  that leaves the photosphere between 70 and 80 % of the range and lock those values in.
+  Identical bursts thereafter. Merging different exposures earns its keep with the eclipse corona
+  or with prominences, which span several orders of magnitude.</p>
+
+<h3 data-lang="es">Protocolo</h3>
+<h3 data-lang="en">Protocol</h3>
+<dl class="spec" data-lang="es">
+  <div class="spec-row">
+    <dt>Filtro</dt>
+    <dd><strong>Filtro solar de apertura completa delante del objetivo</strong>: película
+      Baader AstroSolar ND5 o cristal equivalente. Un ND fotográfico o un filtro montado
+      detrás concentraría el haz sobre obturador y sensor. La cuña de Herschel es la única
+      excepción legítima, y es otro instrumento: desvía el haz en lugar de absorberlo.</dd>
+  </div>
+  <div class="spec-row">
+    <dt>ISO</dt>
+    <dd><em>64</em>, el nativo de la Z8. El limitante es el ruido de fotones, y el ISO
+      base maximiza la capacidad del pozo, es decir, los electrones por píxel y con ello
+      la relación señal/ruido.</dd>
+  </div>
+  <div class="spec-row">
+    <dt>Diafragma</dt>
+    <dd><em>f/8</em> de partida en un teleobjetivo de 500 a 600 mm. Más allá de
+      <em>f/11</em> la difracción empieza a costar resolución.</dd>
+  </div>
+  <div class="spec-row">
+    <dt>Obturación</dt>
+    <dd><em>1/500 s</em> o más corta, para congelar la turbulencia. Con ND5 a ISO 64 y
+      f/8 la exposición cae en ese entorno.</dd>
+  </div>
+  <div class="spec-row">
+    <dt>Exposición</dt>
+    <dd>Fotosfera entre el <em>70</em> y el <em>80 %</em> del rango. El histograma de la
+      cámara procede del JPEG incrustado, así que deja medio paso de margen hasta el
+      recorte; el script informa del porcentaje de disco saturado en cada archivo.</dd>
+  </div>
+  <div class="spec-row">
+    <dt>Fotogramas</dt>
+    <dd><em>50 a 200</em> por ráfaga. La Z8 dispara a <em>20 fps</em> en RAW: tres a diez
+      segundos. Varias ráfagas separadas unos minutos permiten descartar las de peor
+      seeing.</dd>
+  </div>
+  <div class="spec-row">
+    <dt>Enfoque</dt>
+    <dd>Manual, con vista en directo a máxima ampliación, sobre el borde del limbo o sobre
+      una mancha. Repítelo cada pocas ráfagas: el objetivo se calienta al sol y la focal
+      deriva.</dd>
+  </div>
+  <div class="spec-row">
+    <dt>Soporte</dt>
+    <dd>Trípode, obturador electrónico, disparo con retardo o mando. Estabilización del
+      objetivo desactivada.</dd>
+  </div>
+  <div class="spec-row">
+    <dt>Momento</dt>
+    <dd>Mañana, con el Sol por encima de unos <em>30°</em> y antes de que el suelo se
+      caliente. La columna de aire sobre tejados, asfalto o cristales degrada el seeing
+      más que una altura solar baja.</dd>
+  </div>
+</dl>
+<dl class="spec" data-lang="en">
+  <div class="spec-row">
+    <dt>Filter</dt>
+    <dd><strong>A full-aperture solar filter in front of the lens</strong>: Baader AstroSolar
+      ND5 film or equivalent glass. A photographic ND, or a filter mounted behind the lens,
+      would concentrate the beam on the shutter and the sensor. The Herschel wedge is the one
+      legitimate exception, and it is a different instrument: it deflects the beam rather than
+      absorbing it.</dd>
+  </div>
+  <div class="spec-row">
+    <dt>ISO</dt>
+    <dd><em>64</em>, the native setting of the Z8. Photon noise is the limiting factor, and
+      base ISO maximises well capacity, that is, the electrons per pixel and with them the
+      signal-to-noise ratio.</dd>
+  </div>
+  <div class="spec-row">
+    <dt>Aperture</dt>
+    <dd><em>f/8</em> as a starting point on a 500 to 600 mm telephoto. Beyond <em>f/11</em>
+      diffraction begins to cost resolution.</dd>
+  </div>
+  <div class="spec-row">
+    <dt>Shutter</dt>
+    <dd><em>1/500 s</em> or shorter, so as to freeze the atmospheric turbulence. With ND5 at
+      ISO 64 and f/8 the exposure falls in that region.</dd>
+  </div>
+  <div class="spec-row">
+    <dt>Exposure</dt>
+    <dd>Photosphere between <em>70</em> and <em>80 %</em> of the range. The camera histogram
+      is derived from the embedded JPEG, so leave half a stop of margin before clipping; the
+      script reports the percentage of saturated disc in each file.</dd>
+  </div>
+  <div class="spec-row">
+    <dt>Frames</dt>
+    <dd><em>50 to 200</em> per burst. The Z8 shoots at <em>20 fps</em> in RAW: three to ten
+      seconds. Several bursts a few minutes apart let you discard those taken in the worst
+      seeing.</dd>
+  </div>
+  <div class="spec-row">
+    <dt>Focus</dt>
+    <dd>Manual, on live view at maximum magnification, on the edge of the limb or on a sunspot.
+      Repeat it every few bursts: the lens warms in the sun and the focal length drifts.</dd>
+  </div>
+  <div class="spec-row">
+    <dt>Support</dt>
+    <dd>Tripod, electronic shutter, delayed release or a remote. Lens stabilisation switched
+      off.</dd>
+  </div>
+  <div class="spec-row">
+    <dt>Time of day</dt>
+    <dd>Morning, with the Sun above some <em>30°</em> and before the ground warms up. The
+      column of air over roofs, asphalt or glass degrades the seeing more than a low solar
+      altitude does.</dd>
+  </div>
+</dl>
+
+<div class="aside" data-lang="es">
+  <h4>Polvo o mancha solar</h4>
+  <p>El polvo en el filtro o en el sensor produce puntos oscuros fijos con el aspecto de
+    manchas pequeñas. La prueba es geométrica: gira el filtro 90° y repite la ráfaga. Las
+    manchas mantienen su posición respecto al disco; el polvo se desplaza con el filtro.
+    Segundo control: desplaza el encuadre unos cientos de píxeles y el polvo del sensor se
+    queda quieto en el fotograma mientras el disco se mueve.</p>
+  <p>Un fotograma con la tapa puesta y los mismos ajustes localiza los píxeles calientes,
+    que en la salida aparecen como puntos brillantes aislados.</p>
+</div>
+<div class="aside" data-lang="en">
+  <h4>Dust or sunspot</h4>
+  <p>Dust on the filter or on the sensor produces fixed dark points with the look of small
+    sunspots. The test is geometrical: rotate the filter by 90° and repeat the burst. The
+    sunspots hold their position relative to the disc; the dust travels with the filter. A
+    second check: shift the framing by a few hundred pixels and the sensor dust stays put in
+    the frame while the disc moves.</p>
+  <p>A dark frame — cap on, same settings — locates the hot pixels, which appear in the output
+    as isolated bright points.</p>
+</div>
+
+<h2 data-lang="es">Recetas</h2>
+<h2 data-lang="en">Recipes</h2>
+
+<div class="recipe">
+  <h4 data-lang="es">Un solo NEF</h4>
+  <h4 data-lang="en">A single NEF</h4>
+  <pre>python procesar_sol.py Z80_8280.NEF <b>--recorte --bin 2 --enfoque 0 --alto 1.02</b></pre>
+  <p data-lang="es">Sin amplificación de ruido, con binning que duplica la señal/ruido y el techo bajado
+    para limpiar la fotosfera.</p>
+  <p data-lang="en">No noise amplification, binning that doubles the signal-to-noise ratio, and the
+    ceiling lowered to clean up the photosphere.</p>
+</div>
+
+<div class="recipe">
+  <h4 data-lang="es">Una ráfaga completa</h4>
+  <h4 data-lang="en">A complete burst</h4>
+  <pre>python procesar_sol.py Z80_82*.NEF <b>--apilar --bin 2 --enfoque 0 --recorte --salida ./out</b></pre>
+  <p data-lang="es">Con 100 fotogramas puedes estrechar más la ventana: prueba después
+    <code>--alto 1.01</code>, que sin apilado solo daría grano.</p>
+  <p data-lang="en">With 100 frames you can narrow the window further: try <code>--alto 1.01</code>
+    afterwards, which without stacking would give nothing but grain.</p>
+</div>
+
+<div class="recipe">
+  <h4 data-lang="es">Para editar a mano</h4>
+  <h4 data-lang="en">For editing by hand</h4>
+  <pre>python procesar_sol.py Z80_8280.NEF <b>--formato tiff32 --lineal --enfoque 0 --recorte</b></pre>
+  <p data-lang="es">Genera el cociente aplanado sin estirar, en coma flotante. Aplica tus curvas sobre
+    <code>_lineal.tif</code> y usa <code>_manchas.tif</code> como referencia de dónde está
+    cada estructura.</p>
+  <p data-lang="en">Produces the flattened ratio without any stretch, in floating point. Apply your own
+    curves to <code>_lineal.tif</code> and use <code>_manchas.tif</code> as a reference for where
+    each structure lies.</p>
+</div>
+
+<h2 data-lang="es">Límites de resolución</h2>
+<h2 data-lang="en">Limits of resolution</h2>
+<dl class="spec" data-lang="es">
+  <div class="spec-row">
+    <dt>Granulación</dt>
+    <dd><span class="u-chip u-chip--danger">no resuelta</span> Las celdas fotosféricas
+      miden de 1000 a 1500 km, es decir, <em>alrededor de 1 píxel</em> a 1149 km/px, un
+      factor 3 a 5 por debajo de tu resolución angular. El grano visible en la imagen es
+      ruido: el recuento de desviaciones respecto a la mediana local sale simétrico entre
+      claras y oscuras, con razón de <em>0,92 a 0,98</em> en todos los anillos del disco,
+      y el ruido es simétrico mientras la estructura solar no lo es.</dd>
+  </div>
+  <div class="spec-row">
+    <dt>Difracción</dt>
+    <dd>A 550 nm, 1,22 λ/D vale <em>2,77 arcsec</em> con 50 mm de apertura libre,
+      <em>1,73</em> con 80 mm y <em>1,38</em> con 100 mm. Añade de 2 a 5 arcsec de seeing
+      diurno, peor que el nocturno por la convección del suelo.</dd>
+  </div>
+  <div class="spec-row">
+    <dt>Puntos brillantes</dt>
+    <dd><span class="u-chip u-chip--danger">ruido</span> En tu archivo son la cola positiva
+      del mismo ruido: <em>560</em> grupos de área mediana <em>2 px</em> con exceso
+      superior a 20 niveles, y una población casi idéntica de grupos oscuros al mismo
+      umbral. Las fáculas son estructuras extensas ligadas a regiones activas y se ven
+      sobre todo cerca del limbo, donde tu razón claras/oscuras cae a <em>0,60</em>, con
+      predominio de oscuras.</dd>
+  </div>
+  <div class="spec-row">
+    <dt>Para granulación</dt>
+    <dd><span class="u-chip" data-chip="info">otro montaje</span> Escala de imagen un
+      factor 5 mayor: unos <em>3000 mm</em> de focal, o un telescopio de 100 a 150 mm con
+      Barlow. Y vídeo de miles de fotogramas para apilar el 5 % mejor con AutoStakkert y
+      afilar por ondículas en Registax: el flujo de la fotografía planetaria.</dd>
+  </div>
+  <div class="spec-row">
+    <dt>Para fáculas</dt>
+    <dd><span class="u-chip" data-chip="info">otro montaje</span> Banda estrecha en Ca II K
+      o en el continuo azul, donde el contraste supera con holgura el de la luz blanca
+      integrada.</dd>
+  </div>
+</dl>
+<dl class="spec" data-lang="en">
+  <div class="spec-row">
+    <dt>Granulation</dt>
+    <dd><span class="u-chip u-chip--danger">not resolved</span> The photospheric cells measure
+      1000 to 1500 km, that is, <em>about 1 pixel</em> at 1149 km/px, a factor of 3 to 5 below
+      your angular resolution. The grain visible in the image is noise: the count of departures
+      from the local median comes out symmetrical between light and dark, with a ratio of
+      <em>0.92 to 0.98</em> in every annulus of the disc, and noise is symmetrical where solar
+      structure is not.</dd>
+  </div>
+  <div class="spec-row">
+    <dt>Diffraction</dt>
+    <dd>At 550 nm, 1.22 λ/D comes to <em>2.77 arcsec</em> with 50 mm of clear aperture,
+      <em>1.73</em> with 80 mm and <em>1.38</em> with 100 mm. Add 2 to 5 arcsec of daytime
+      seeing, worse than the nocturnal kind because of convection from the ground.</dd>
+  </div>
+  <div class="spec-row">
+    <dt>Bright points</dt>
+    <dd><span class="u-chip u-chip--danger">noise</span> In your file they are the positive tail
+      of that same noise: <em>560</em> groups of median area <em>2 px</em> exceeding 20 levels,
+      and an almost identical population of dark groups at the same threshold. Faculae are
+      extended structures tied to active regions and are seen above all near the limb, where
+      your light-to-dark ratio falls to <em>0.60</em>, dark predominating.</dd>
+  </div>
+  <div class="spec-row">
+    <dt>For granulation</dt>
+    <dd><span class="u-chip" data-chip="info">another setup</span> An image scale five times
+      finer: some <em>3000 mm</em> of focal length, or a 100 to 150 mm telescope with a Barlow.
+      And video of thousands of frames, to stack the best 5 % in AutoStakkert and apply wavelet
+      sharpening in Registax: the lucky-imaging workflow of planetary photography.</dd>
+  </div>
+  <div class="spec-row">
+    <dt>For faculae</dt>
+    <dd><span class="u-chip" data-chip="info">another setup</span> Narrowband in Ca II K or in
+      the blue continuum, where the contrast comfortably exceeds that of integrated white
+      light.</dd>
+  </div>
+</dl>
+
+<div class="aside" data-lang="es">
+  <h4>Salida monocroma</h4>
+  <p>Toda la cadena posterior al revelado es fotométrica: la división por el flat y el
+    estirado operan sobre una magnitud proporcional al flujo en una banda.</p>
+  <p>El color del Sol en luz blanca procede del filtro. La película Baader da un blanco
+    azulado y el cristal un naranja. Para un tono cálido, aplícalo al final en el editor
+    como decisión estética.</p>
+</div>
+<div class="aside" data-lang="en">
+  <h4>Monochrome output</h4>
+  <p>Everything in the chain after development is photometric: the division by the flat field
+    and the stretch both operate on a quantity proportional to the flux in one band.</p>
+  <p>The colour of the Sun in white light comes from the filter. The Baader film gives a bluish
+    white and the glass an orange. For a warm tone, apply it at the end in the editor, as an
+    aesthetic decision — false colour, not measurement.</p>
+</div>
+
+<footer>
+  <p data-lang="es">Cifras medidas sobre tus archivos: perfil radial, espectro por bandas espaciales,
+    recuento de desviaciones respecto a la mediana local y geometría del disco. La escala
+    de imagen se dedujo del diámetro del disco en el sensor, 5,27 mm con el paso de
+    4,35 µm de la Z8.</p>
+  <p data-lang="en">Figures measured on your own files: radial profile, spectrum by spatial band, count of
+    departures from the local median, and geometry of the disc. The image scale was deduced from
+    the diameter of the disc on the sensor, 5.27 mm at the 4.35 µm pixel pitch of the Z8.</p>
+</footer>
+
+</div>
+
+<script>
+'use strict';
+
+/* Lee una variable de la hoja resolviendo var() encadenado, igual que el
+   muestrario, para que la variante noche se propague a SVG y canvas. */
+function cssVar(name){
+  var root=document.documentElement, g=0;
+  var v=getComputedStyle(root).getPropertyValue(name).trim();
+  while(/^var\(/.test(v)&&g++<8){
+    v=getComputedStyle(root).getPropertyValue(v.slice(4,-1).split(',')[0].trim()).trim();
+  }
+  return v;
+}
+/* ------------------------------------------------------- idioma ------- */
+/* Cadenas que escribe el guion. Lo que está en el HTML va duplicado con
+   data-lang; aquí solo cabe lo que no tiene elemento propio. */
+var T={
+  es:{
+    ejeX:'RADIO NORMALIZADO r/R',
+    cociente:'cociente = 1,000',
+    medida:'intensidad medida',
+    limbo:'0,30 en el limbo',
+    bulto:'abultamiento del flat gaussiano',
+    plotAria:'Perfil radial de intensidad: la curva medida cae de 1,0 en el centro a 0,30 '+
+      'en el limbo; el cociente con flat radial se mantiene plano en 1,0; el flat gaussiano '+
+      'produce un abultamiento hacia r/R 0,8 y un hundimiento cerca del borde.',
+    lectura:'fotosfera → <b>{f} %</b> del blanco · recorte a negro <b>{n} %</b>'+
+      ' · recorte a blanco <b>{b} %</b>',
+    avBlanco:'Fotosfera recortada a blanco. Sube --alto.',
+    avGris:'Fotosfera por debajo del 75 %: el disco sale gris. Baja --bajo o --alto.',
+    avNegro:'Recorte a negro por encima del área de las umbras. Baja --bajo.',
+    avCuarto:'Más de la cuarta parte de la fotosfera en blanco puro.',
+    avEnfoque:'El enfoque amplifica el grano en la escala del ruido.'
+  },
+  en:{
+    ejeX:'NORMALISED RADIUS r/R',
+    cociente:'ratio = 1.000',
+    medida:'measured intensity',
+    limbo:'0.30 at the limb',
+    bulto:'bulge of the Gaussian flat',
+    plotAria:'Radial intensity profile: the measured curve falls from 1.0 at the centre to '+
+      '0.30 at the limb; the ratio with the radial flat stays level at 1.0; the Gaussian flat '+
+      'produces a bulge towards r/R 0.8 and a trough near the edge.',
+    lectura:'photosphere → <b>{f} %</b> of white · clipped to black <b>{n} %</b>'+
+      ' · clipped to white <b>{b} %</b>',
+    avBlanco:'Photosphere clipped to white. Raise --alto.',
+    avGris:'Photosphere below 75 %: the disc comes out grey. Lower --bajo or --alto.',
+    avNegro:'Black clipping exceeds the area of the umbrae. Lower --bajo.',
+    avCuarto:'More than a quarter of the photosphere at pure white.',
+    avEnfoque:'Sharpening amplifies the grain at the scale of the noise.'
+  }
+};
+function lang(){return document.documentElement.lang==='en'?'en':'es';}
+/* Se llama S y no t a propósito: dentro del banco de pruebas hay una
+   variable local t, y con var el ámbito es toda la función. */
+function S(k){return T[lang()][k];}
+function fmt(k,v){return S(k).replace(/\{(\w+)\}/g,function(m,n){return v[n];});}
+
+function num(x,d){return x.toLocaleString(lang()==='en'?'en-GB':'es-ES',
+  {minimumFractionDigits:d,maximumFractionDigits:d});}
+
+/* ---------------------------------------- gráfica del perfil radial ---- */
+var COL={};
+function leerColores(){
+  COL.medido = cssVar('--accent');       /* azul: los datos, la estructura  */
+  COL.gauss  = cssVar('--danger');       /* óxido: el flat que estaba mal   */
+  COL.radial = cssVar('--success');      /* verdín: el resultado correcto   */
+  COL.rule   = cssVar('--border');
+  COL.faint  = cssVar('--fg-faint');
+  document.querySelectorAll('.key i').forEach(function(i){
+    i.style.borderTopColor = COL[i.dataset.key];
+  });
+  var chip=document.querySelectorAll('[data-chip="info"]');
+  chip.forEach(function(c){
+    c.style.color=cssVar('--info'); c.style.borderColor=cssVar('--info');
+  });
+}
+
+function dibujarPlot(){
+  var svg=document.getElementById('plot'); if(!svg) return;
+  svg.setAttribute('aria-label',S('plotAria'));
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  var W=720,H=330,L=58,R=18,T=16,B=42;
+  function px(r){return L+r*(W-L-R);}
+  function py(v){return T+(1.12-v)/(1.12-0.20)*(H-T-B);}
+  var ns='http://www.w3.org/2000/svg';
+  function el(t,a){var e=document.createElementNS(ns,t);
+    for(var k in a) e.setAttribute(k,a[k]); return e;}
+  function txt(x,y,s,anchor,size){
+    var t=el('text',{x:x,y:y,'text-anchor':anchor||'start',
+      'font-family':cssVar('--font-mono'),'font-size':size||11,
+      'font-variant-numeric':'tabular-nums',fill:COL.faint});
+    t.textContent=s; svg.appendChild(t); return t;}
+
+  [0.2,0.4,0.6,0.8,1.0].forEach(function(v){
+    svg.appendChild(el('line',{x1:L,y1:py(v),x2:W-R,y2:py(v),
+      stroke:COL.rule,'stroke-width':1}));
+    txt(L-10,py(v)+4,num(v,1),'end');
+  });
+  [0,0.25,0.5,0.75,1].forEach(function(r){
+    txt(px(r),H-16,num(r,2),'middle');
+  });
+  var lx=txt((L+W-R)/2,H-2,S('ejeX'),'middle',10.5);
+  lx.setAttribute('letter-spacing','.14em');
+
+  /* ley cuadrática de oscurecimiento, u1 = 0,93 · u2 = −0,23 */
+  function limb(r){var m=Math.sqrt(Math.max(0,1-r*r));
+    return 1-0.93*(1-m)+0.23*(1-m)*(1-m);}
+  function path(f){var d='';
+    for(var i=0;i<=200;i++){var r=i/200;
+      d+=(i?'L':'M')+px(r).toFixed(1)+' '+py(f(r)).toFixed(1);}
+    return d;}
+
+  /* flat gaussiano: valores medidos sobre los archivos del usuario */
+  var gx=[0,.5,.8,.9,.95,.98,1], gy=[1.002,1.008,1.025,.997,.927,.814,.611], dg='';
+  for(var i=0;i<gx.length;i++)
+    dg+=(i?'L':'M')+px(gx[i]).toFixed(1)+' '+py(gy[i]).toFixed(1);
+
+  svg.appendChild(el('path',{d:path(limb),fill:'none',stroke:COL.medido,
+    'stroke-width':2.2,'stroke-linecap':'round'}));
+  svg.appendChild(el('path',{d:dg,fill:'none',stroke:COL.gauss,
+    'stroke-width':1.8,'stroke-dasharray':'6 5'}));
+  svg.appendChild(el('path',{d:path(function(){return 1.0;}),fill:'none',
+    stroke:COL.radial,'stroke-width':2.2}));
+
+  txt(px(.06),py(1.0)-11,S('cociente'));
+  txt(px(.19),py(.47),S('medida'));
+  txt(px(.97),py(.245),S('limbo'),'end');
+  txt(px(.80),py(1.078),S('bulto'),'middle');
+}
+
+/* ------------------------------------------------ banco de pruebas ---- */
+var render=function(){};
+(function(){
+  var N=260, Rd=104, cx=N/2, cy=N/2;
+  var cA=document.getElementById('cA'), cB=document.getElementById('cB'),
+      cC=document.getElementById('cC');
+  if(!cA) return;
+  var ctxA=cA.getContext('2d'), ctxB=cB.getContext('2d'), ctxC=cC.getContext('2d');
+  var out=document.getElementById('readout');
+
+  /* x, y en radios; r tamaño; u umbra; p penumbra */
+  var spots=[
+    {x:-.42,y:-.30,r:9,u:.30,p:.74},
+    {x:-.30,y:-.34,r:4,u:.38,p:.78},
+    {x:.18,y:.26,r:5.5,u:.34,p:.76},
+    {x:.24,y:.30,r:2.5,u:.46,p:.80},
+    {x:.46,y:-.18,r:3,u:.42,p:.79}
+  ];
+  function limb(m){return 1-0.93*(1-m)+0.23*(1-m)*(1-m);}
+
+  var base=new Float32Array(N*N), mask=new Uint8Array(N*N), rad=new Float32Array(N*N);
+  for(var y=0;y<N;y++)for(var x=0;x<N;x++){
+    var i=y*N+x, dx=x-cx+.5, dy=y-cy+.5, d=Math.hypot(dx,dy)/Rd;
+    rad[i]=d;
+    if(d>1){mask[i]=0;base[i]=0;continue;}
+    mask[i]=1;
+    var v=limb(Math.sqrt(Math.max(0,1-d*d))), fmin=1;
+    for(var s=0;s<spots.length;s++){
+      var sp=spots[s], sd=Math.hypot(dx-sp.x*Rd, dy-sp.y*Rd);
+      if(sd<sp.r*1.9){
+        var t=sd/sp.r;
+        var f = t<1 ? sp.u : sp.p+(1-sp.p)*(t-1)/0.9;
+        fmin=Math.min(fmin,f);
+      }
+    }
+    base[i]=v*fmin;
+  }
+
+  var seed=12345;
+  function rnd(){seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff;}
+  var gauss=new Float32Array(N*N);
+  for(var k=0;k<N*N;k++){
+    var u=0,w=0; while(u===0)u=rnd(); while(w===0)w=rnd();
+    gauss[k]=Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*w);
+  }
+
+  function flatRadial(img){
+    var NB=90, acc=[], b;
+    for(b=0;b<=NB;b++) acc.push([]);
+    for(var i=0;i<N*N;i++){
+      if(!mask[i]) continue;
+      acc[Math.min(NB,Math.floor(rad[i]*NB))].push(img[i]);
+    }
+    var prof=new Float32Array(NB+1), last=1;
+    for(b=0;b<=NB;b++){
+      var a=acc[b];
+      if(a.length>12){a.sort(function(p,q){return p-q;}); last=a[a.length>>1];}
+      prof[b]=last;
+    }
+    var sm=new Float32Array(NB+1), kk=[.067,.167,.25,.25,.167,.067,.032], kn=0;
+    for(var q=0;q<kk.length;q++) kn+=kk[q];
+    for(b=0;b<=NB;b++){
+      var acu=0;
+      for(var j=-3;j<=3;j++) acu+=kk[j+3]*prof[Math.min(NB,Math.max(0,b+j))];
+      sm[b]=acu/kn;
+    }
+    var f=new Float32Array(N*N);
+    for(var m2=0;m2<N*N;m2++){
+      if(!mask[m2]) continue;
+      var tt=rad[m2]*NB, b0=Math.min(NB,Math.floor(tt)), b1=Math.min(NB,b0+1);
+      f[m2]=sm[b0]+(sm[b1]-sm[b0])*(tt-b0);
+    }
+    return f;
+  }
+
+  function blur(src,dst,passes){
+    var tmp=new Float32Array(N*N), a=src;
+    for(var p=0;p<passes;p++){
+      for(var y2=0;y2<N;y2++)for(var x2=0;x2<N;x2++){
+        var i2=y2*N+x2, l=x2>0?a[i2-1]:a[i2], r=x2<N-1?a[i2+1]:a[i2];
+        tmp[i2]=(l+a[i2]+r)/3;
+      }
+      for(var x3=0;x3<N;x3++)for(var y3=0;y3<N;y3++){
+        var i3=y3*N+x3, uu=y3>0?tmp[i3-N]:tmp[i3], dd=y3<N-1?tmp[i3+N]:tmp[i3];
+        dst[i3]=(uu+tmp[i3]+dd)/3;
+      }
+      a=dst;
+    }
+    return dst;
+  }
+
+  /* fuera del disco: la tinta de la paleta, no negro puro */
+  var fondo=[14,22,33];
+  function paint(ctx,arr,scale){
+    var im=ctx.createImageData(N,N), d=im.data;
+    for(var i=0;i<N*N;i++){
+      if(mask[i]){
+        var v=Math.max(0,Math.min(255,Math.round(arr[i]*scale)));
+        d[i*4]=d[i*4+1]=d[i*4+2]=v;
+      } else {
+        d[i*4]=fondo[0]; d[i*4+1]=fondo[1]; d[i*4+2]=fondo[2];
+      }
+      d[i*4+3]=255;
+    }
+    ctx.putImageData(im,0,0);
+  }
+
+  var sB=document.getElementById('sBajo'), sA=document.getElementById('sAlto'),
+      sR=document.getElementById('sRuido'), kE=document.getElementById('kEnf');
+  var tmp1=new Float32Array(N*N), tmp2=new Float32Array(N*N);
+
+  render=function(){
+    var bajo=+sB.value, alto=+sA.value, nl=+sR.value, enf=kE.checked?0.8:0, i;
+    document.getElementById('vBajo').textContent=num(bajo,2);
+    document.getElementById('vAlto').textContent=num(alto,2);
+    document.getElementById('vRuido').textContent=num(nl,1)+'×';
+
+    /* 1. RAW lineal con ruido de fotones */
+    var raw=new Float32Array(N*N);
+    for(i=0;i<N*N;i++){
+      if(!mask[i]) continue;
+      raw[i]=Math.max(0, base[i]*0.80
+             + gauss[i]*nl*0.011*Math.sqrt(Math.max(base[i],.05)));
+    }
+    paint(ctxA, raw, 255/0.80*0.92);
+
+    /* 2. cociente aplanado */
+    var flat=flatRadial(raw), q=new Float32Array(N*N);
+    for(i=0;i<N*N;i++) if(mask[i]) q[i]=raw[i]/Math.max(flat[i],1e-6);
+    paint(ctxB, q, 255/1.25);
+
+    /* 3. estirado, atenuación de borde, enfoque opcional */
+    var r3=new Float32Array(N*N);
+    for(i=0;i<N*N;i++){
+      if(!mask[i]) continue;
+      var v=(q[i]-bajo)/(alto-bajo);
+      r3[i]=Math.max(0,Math.min(1,v))*Math.max(0,Math.min(1,(1-rad[i])*22));
+    }
+    if(enf>0){
+      blur(r3,tmp1,2);
+      for(i=0;i<N*N;i++) tmp2[i]=Math.max(0,Math.min(1,r3[i]+enf*(r3[i]-tmp1[i])));
+    }
+    var fin = enf>0 ? tmp2 : r3;
+    paint(ctxC, fin, 255);
+
+    /* lectura numérica medida sobre el resultado */
+    var foto=(1-bajo)/(alto-bajo), nd=0, nb=0, tot=0;
+    for(i=0;i<N*N;i++){
+      if(!mask[i]||rad[i]>0.97) continue;
+      tot++;
+      if(fin[i]<=0.002) nd++;
+      if(fin[i]>=0.998) nb++;
+    }
+    function av(k){return '<br><span class="warn">'+S(k)+'</span>';}
+    var msg=fmt('lectura',{f:num(foto*100,1),n:num(100*nd/tot,2),b:num(100*nb/tot,2)});
+    if(foto>=1) msg+=av('avBlanco');
+    else if(foto<0.75) msg+=av('avGris');
+    if(100*nd/tot>2.0) msg+=av('avNegro');
+    if(100*nb/tot>25) msg+=av('avCuarto');
+    if(enf) msg+=av('avEnfoque');
+    out.innerHTML=msg;
+  };
+
+  [sB,sA,sR].forEach(function(e){e.addEventListener('input',render);});
+  kE.addEventListener('change',render);
+})();
+
+/* ------------------------------------------------------- controles ---- */
+document.getElementById('imprimir').addEventListener('click',function(){window.print();});
+document.getElementById('tema').addEventListener('click',function(){
+  var noche=document.documentElement.getAttribute('data-tema')==='noche';
+  document.documentElement.setAttribute('data-tema', noche?'dia':'noche');
+  this.setAttribute('aria-pressed', String(!noche));
+  leerColores(); dibujarPlot();
+});
+
+/* Repinta todo lo que el guion escribe. El conmutador lo llama también en el
+   arranque, así que va protegido: si algo faltase, la página no se cae. */
+window.onLangChange=function(){
+  try{ leerColores(); }catch(e){}
+  try{ dibujarPlot(); }catch(e){}
+  try{ render(); }catch(e){}
+};
+
+leerColores();
+dibujarPlot();
+render();
+</script>
+
+<script>
+"use strict";
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{
+      title:"procesar_sol.py · manual · realce de manchas solares",
+      desc:"Manual de procesar_sol.py: revelado lineal, flat radial que retira el oscurecimiento del limbo, estirado del cociente y máscara de enfoque para el realce de manchas solares en luz blanca con una Nikon Z8."
+    },
+    en:{
+      title:"procesar_sol.py · manual · sunspot enhancement",
+      desc:"Manual for procesar_sol.py: linear development, a radial flat that removes limb darkening, a linear stretch of the ratio and an unsharp mask, for enhancing sunspots in white light with a Nikon Z8."
+    }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
+</body>
+</html>

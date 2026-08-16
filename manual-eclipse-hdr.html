@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>eclipse_hdr.py, manual técnico</title>
+<meta name="author" content="Rafael Vida">
+<meta name="description" content="Manual técnico de eclipse_hdr.py: fusión HDR lineal de horquillas RAW, registro por ajuste del limbo lunar y aplanado radial de la corona solar sin mapeo tonal.">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,75..125,400..700;1,75..125,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#E6E8EC;
+  --panel:#DCE0E6;
+  --ink:#0F1520;
+  --ink2:#454F61;
+  --rule:#BEC5CF;
+  --sky:#0C1220;
+  --sky2:#161F2E;
+  --corona:#DEE5F0;
+  --halpha:#B3352B;
+  --limb:#375A8C;
+  --display:'Archivo','Helvetica Neue',Arial,sans-serif;
+  --body:'Source Serif 4',Georgia,'Times New Roman',serif;
+  --mono:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--body);font-size:17px;line-height:1.62;
+  font-variant-numeric:oldstyle-nums;
+}
+h1,h2,h3,h4{font-family:var(--display);font-stretch:112%;font-weight:600;line-height:1.1;margin:0}
+p{margin:0 0 1em}
+a{color:var(--limb);text-decoration:none;border-bottom:1px solid rgba(55,90,140,.35)}
+a:hover{border-bottom-color:var(--limb)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--limb);outline-offset:3px}
+code,kbd,samp{font-family:var(--mono);font-size:.86em;font-variant-numeric:tabular-nums}
+code{background:rgba(15,21,32,.06);padding:.08em .3em;border-radius:2px}
+
+/* ---------- cabecera ---------- */
+.sky{background:var(--sky);color:var(--corona);position:relative;overflow:hidden}
+.sky::before{
+  content:"";position:absolute;inset:-30% -10% auto 30%;height:130%;
+  background:radial-gradient(ellipse at 50% 40%,rgba(190,210,240,.13),rgba(190,210,240,0) 62%);
+  pointer-events:none
+}
+.skywrap{max-width:1180px;margin:0 auto;padding:52px 28px 40px;position:relative}
+.eyebrow{
+  font-family:var(--mono);font-size:.7rem;letter-spacing:.19em;text-transform:uppercase;
+  font-variant-numeric:tabular-nums;color:#8FA3C0;margin:0 0 18px
+}
+h1{font-size:clamp(1.85rem,4.4vw,3rem);letter-spacing:-.014em;max-width:30ch}
+.file{font-family:var(--mono);font-size:.9rem;color:#9FB4D2;margin-top:14px;letter-spacing:.02em}
+.thesis{max-width:62ch;margin-top:20px;color:#C3CEDE;font-size:1.06rem}
+.thesis b{color:var(--corona);font-weight:600}
+
+.fig{margin:36px 0 0}
+.fig svg{width:100%;height:auto;display:block}
+.figcap{
+  font-family:var(--mono);font-size:.72rem;line-height:1.6;color:#8FA3C0;
+  max-width:88ch;margin-top:12px;letter-spacing:.01em
+}
+.stats{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
+  background:rgba(190,210,240,.16);margin-top:34px
+}
+.stat{background:var(--sky);padding:16px 18px}
+.stat b{
+  display:block;font-family:var(--display);font-stretch:118%;font-weight:600;
+  font-size:1.5rem;color:var(--corona);font-variant-numeric:lining-nums tabular-nums
+}
+.stat span{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:#8FA3C0}
+
+/* ---------- cadena de etapas ---------- */
+.chain{border-bottom:1px solid var(--rule);background:var(--panel)}
+.chainwrap{
+  max-width:1180px;margin:0 auto;padding:14px 28px;display:flex;gap:0;
+  overflow-x:auto;scrollbar-width:thin
+}
+.chain a{
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;white-space:nowrap;
+  padding:6px 14px 6px 0;margin-right:14px;border:0;border-right:1px solid var(--rule);color:var(--ink2)
+}
+.chain a:last-child{border-right:0}
+html[lang="es"] .chain a:nth-last-child(2){border-right:0}
+.chain a:hover{color:var(--halpha)}
+
+/* ---------- estructura ---------- */
+.shell{max-width:1180px;margin:0 auto;padding:0 28px 90px;display:block}
+nav.toc{
+  font-family:var(--mono);font-size:.74rem;line-height:2;padding:26px 0 6px;
+  border-bottom:1px solid var(--rule);margin-bottom:34px
+}
+nav.toc b{display:block;letter-spacing:.16em;text-transform:uppercase;color:var(--ink2);font-weight:500;margin-bottom:6px}
+nav.toc a{border:0;color:var(--ink);display:inline-block;margin-right:18px}
+nav.toc a:hover{color:var(--halpha)}
+main{max-width:74ch}
+section{padding-top:14px;margin-bottom:52px;scroll-margin-top:16px}
+h2{font-size:1.52rem;letter-spacing:-.01em;margin-bottom:4px}
+.h2num{
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.16em;color:var(--halpha);
+  display:block;margin-bottom:10px;font-variant-numeric:tabular-nums
+}
+h3{font-size:1.06rem;margin:30px 0 8px;font-stretch:106%}
+h4{font-family:var(--mono);font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);margin:24px 0 6px;font-weight:500}
+.lead{font-size:1.06rem;color:var(--ink2);margin-bottom:22px;max-width:64ch}
+hr{border:0;border-top:1px solid var(--rule);margin:0}
+
+ul,ol{margin:0 0 1em;padding-left:1.25em}
+li{margin-bottom:.45em}
+li::marker{color:var(--ink2)}
+dl{margin:0 0 1em}
+dt{font-family:var(--mono);font-size:.82rem;font-weight:500;margin-top:14px}
+dd{margin:2px 0 0}
+
+/* ---------- bloques ---------- */
+pre{
+  background:var(--sky);color:var(--corona);font-family:var(--mono);font-size:.78rem;
+  line-height:1.75;padding:16px 18px;overflow-x:auto;margin:0 0 1.2em;
+  border-left:2px solid var(--limb)
+}
+pre b{color:#8FE0B8;font-weight:400}
+pre i{color:#8FA3C0;font-style:normal}
+
+.eq{
+  font-family:var(--body);font-size:1.02rem;text-align:center;padding:14px 10px;
+  margin:0 0 1.1em;background:var(--panel);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)
+}
+.eq i{font-style:italic}
+.eq .op{color:var(--ink2)}
+
+.note,.warn{padding:14px 16px;margin:0 0 1.2em;background:var(--panel);font-size:.96rem}
+.note{border-left:2px solid var(--limb)}
+.warn{border-left:2px solid var(--halpha)}
+.note p:last-child,.warn p:last-child{margin-bottom:0}
+.tag{
+  font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;
+  display:block;margin-bottom:6px;color:var(--ink2)
+}
+.warn .tag{color:var(--halpha)}
+
+table{width:100%;border-collapse:collapse;margin:0 0 1.4em;font-size:.9rem}
+caption{
+  font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink2);text-align:left;padding-bottom:8px
+}
+th,td{text-align:left;vertical-align:top;padding:8px 12px 8px 0;border-bottom:1px solid var(--rule)}
+th{
+  font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
+  font-weight:500;color:var(--ink2);border-bottom:1px solid var(--ink)
+}
+td.k{font-family:var(--mono);font-size:.8rem;white-space:nowrap}
+td.v{font-family:var(--mono);font-size:.8rem;color:var(--halpha);white-space:nowrap}
+
+.answer{background:var(--sky);color:var(--corona);padding:26px 26px 22px;margin:0 0 26px}
+.answer h3{color:var(--corona);font-size:1.24rem;margin:0 0 10px}
+.answer p{color:#C3CEDE}
+.answer p:last-child{margin-bottom:0}
+.answer strong{color:var(--corona)}
+.yes{font-family:var(--mono);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:#8FE0B8;display:block;margin-bottom:12px}
+
+footer{
+  border-top:1px solid var(--rule);padding:24px 28px 60px;max-width:1180px;margin:0 auto;
+  font-family:var(--mono);font-size:.72rem;color:var(--ink2);line-height:1.9
+}
+
+@media (min-width:1080px){
+  .shell{display:grid;grid-template-columns:206px minmax(0,1fr);gap:56px;padding-top:0}
+  nav.toc{
+    position:sticky;top:0;align-self:start;border-bottom:0;border-right:1px solid var(--rule);
+    padding:34px 20px 34px 0;margin:0;max-height:100vh;overflow-y:auto
+  }
+  nav.toc a{display:block;margin:0}
+  main{padding-top:34px}
+}
+
+/* animación de entrada, una sola vez */
+.draw{stroke-dasharray:2600;stroke-dashoffset:2600;animation:draw 1.5s .25s cubic-bezier(.22,.8,.3,1) forwards}
+.fadein{opacity:0;animation:fade .8s 1.5s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fade{to{opacity:1}}
+@media (prefers-reduced-motion:reduce){
+  .draw{stroke-dasharray:none;stroke-dashoffset:0;animation:none}
+  .fadein{opacity:1;animation:none}
+}
+
+/* ---------- enlace al código fuente ---------- */
+.srcline{margin:14px 0 0}
+.srclink{
+  font-family:var(--mono);font-size:.78rem;letter-spacing:.02em;color:#9FB4D2;
+  border-bottom:1px solid rgba(159,180,210,.38)
+}
+.srclink:hover{color:var(--corona);border-bottom-color:var(--corona)}
+.srclink:focus-visible{outline:2px solid #9FB4D2;outline-offset:3px}
+
+/* ---------- conmutador de idioma ---------- */
+html[lang="es"] [data-lang="en"]{display:none!important}
+html[lang="en"] [data-lang="es"]{display:none!important}
+.anch{display:block;scroll-margin-top:16px}
+.langbar{
+  position:fixed;top:14px;right:16px;z-index:100;display:flex;
+  background:rgba(230,232,236,.94);border:1px solid var(--rule);border-radius:3px;
+  overflow:hidden;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)
+}
+.langbar button{
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;
+  background:transparent;border:0;color:var(--ink2);padding:7px 11px;cursor:pointer;
+  transition:background .15s,color .15s
+}
+.langbar button+button{border-left:1px solid var(--rule)}
+.langbar button:hover{color:var(--ink)}
+.langbar button.on{background:rgba(55,90,140,.14);color:var(--limb)}
+.langbar button:focus-visible{outline:2px solid var(--limb);outline-offset:-2px}
+@media(max-width:720px){.langbar{top:8px;right:8px}}
+</style>
+</head>
+<body>
+
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
+
+<header class="sky">
+  <div class="skywrap">
+    <p class="eyebrow" data-lang="es">Manual técnico · versión 1 · agosto de 2026</p>
+    <p class="eyebrow" data-lang="en">Technical manual · version 1 · August 2026</p>
+    <h1 data-lang="es">Fusión HDR lineal y aplanado radial de la corona solar</h1>
+    <h1 data-lang="en">Linear HDR merge and radial flattening of the solar corona</h1>
+    <p class="file">eclipse_hdr.py · Python 3 · numpy, scipy, scikit-image, rawpy</p>
+    <p class="srcline">
+      <a class="srclink" href="scripts/eclipse/eclipse_hdr.py" data-lang="es">↗ Código fuente · scripts/eclipse/eclipse_hdr.py</a>
+      <a class="srclink" href="scripts/eclipse/eclipse_hdr.py" data-lang="en">↗ Source code · scripts/eclipse/eclipse_hdr.py</a>
+    </p>
+    <p class="thesis" data-lang="es">El programa toma una serie de RAW en horquilla, reconstruye la
+    <b>radiancia lineal</b> de la escena a lo largo de todo el rango dinámico del
+    conjunto, registra los fotogramas ajustando una circunferencia al limbo lunar y
+    divide la imagen por su propio perfil radial para que la estructura azimutal de
+    la corona quede visible sin recurrir a ningún mapeo tonal perceptual.</p>
+    <p class="thesis" data-lang="en">The program takes a series of RAW files in an exposure
+    bracket, reconstructs the <b>linear radiance</b> of the scene across the whole dynamic
+    range of the set, registers the frames by fitting a circle to the lunar limb and divides
+    the image by its own radial profile, so that the azimuthal structure of the corona
+    becomes visible without recourse to any perceptual tone mapping.</p>
+
+    <figure class="fig">
+      <svg viewBox="0 0 940 430" role="img"
+        data-alt-es="Perfil radial de intensidad antes y después del aplanado, en escala logarítmica. La curva del HDR lineal cae 3,58 dex entre 1,05 y 4,1 radios lunares; la curva del resultado aplanado es plana en 0 dex."
+        data-alt-en="Radial intensity profile before and after flattening, on a logarithmic scale. The linear HDR curve falls by 3.58 dex between 1.05 and 4.1 lunar radii; the curve of the flattened result is flat at 0 dex."
+        aria-label="Perfil radial de intensidad antes y después del aplanado, en escala logarítmica. La curva del HDR lineal cae 3,58 dex entre 1,05 y 4,1 radios lunares; la curva del resultado aplanado es plana en 0 dex.">
+        <g fill="none" stroke="rgba(190,210,240,.16)" stroke-width="1">
+          <line x1="92" y1="74.2" x2="880" y2="74.2"/>
+          <line x1="92" y1="154.7" x2="880" y2="154.7"/>
+          <line x1="92" y1="235.2" x2="880" y2="235.2"/>
+          <line x1="92" y1="315.7" x2="880" y2="315.7"/>
+          <line x1="314.6" y1="46" x2="314.6" y2="372"/>
+          <line x1="472.6" y1="46" x2="472.6" y2="372"/>
+          <line x1="695.2" y1="46" x2="695.2" y2="372"/>
+          <line x1="853.2" y1="46" x2="853.2" y2="372"/>
+        </g>
+        <g fill="none" stroke="#8FA3C0" stroke-width="1">
+          <line x1="92" y1="46" x2="92" y2="372"/>
+          <line x1="92" y1="372" x2="880" y2="372"/>
+        </g>
+        <g font-family="IBM Plex Mono, monospace" font-size="12" fill="#8FA3C0">
+          <text x="84" y="78" text-anchor="end">0</text>
+          <text x="84" y="158.7" text-anchor="end">-1</text>
+          <text x="84" y="239.2" text-anchor="end">-2</text>
+          <text x="84" y="319.7" text-anchor="end">-3</text>
+          <text x="92" y="392" text-anchor="middle">1</text>
+          <text x="314.6" y="392" text-anchor="middle" data-lang="es">1,5</text>
+          <text x="314.6" y="392" text-anchor="middle" data-lang="en">1.5</text>
+          <text x="472.6" y="392" text-anchor="middle">2</text>
+          <text x="695.2" y="392" text-anchor="middle">3</text>
+          <text x="853.2" y="392" text-anchor="middle">4</text>
+          <text x="486" y="418" text-anchor="middle" letter-spacing="1.4" data-lang="es">r / R de la Luna (escala logarítmica)</text>
+          <text x="486" y="418" text-anchor="middle" letter-spacing="1.4" data-lang="en">r / R of the Moon (logarithmic scale)</text>
+          <text x="26" y="209" text-anchor="middle" transform="rotate(-90 26 209)" letter-spacing="1.4">log₁₀ I (dex)</text>
+        </g>
+        <polyline class="draw" stroke="#DEE5F0" stroke-width="2.4" stroke-linejoin="round" fill="none"
+          points="105.2,73.0 116.8,73.9 128.0,75.6 139.1,77.7 149.9,79.8 160.6,81.9 171.0,84.0 181.2,86.2 191.3,88.3 201.1,90.4 210.8,92.6 220.3,94.7 229.7,96.8 238.9,99.0 248.0,101.1 256.9,103.2 265.6,105.3 274.2,107.5 282.7,109.6 291.1,111.7 299.3,113.9 307.5,116.0 315.4,118.1 323.3,120.2 331.1,122.4 338.8,124.5 346.3,126.6 353.8,128.7 361.1,130.8 368.4,133.0 375.5,135.1 382.6,137.2 389.6,139.3 396.5,141.4 403.3,143.5 410.0,145.7 416.7,147.8 423.2,149.9 429.7,152.0 436.1,154.1 442.5,156.2 448.7,158.3 454.9,160.4 461.0,162.5 467.1,164.6 473.1,166.7 479.0,168.8 484.9,170.9 490.7,173.0 496.4,175.1 502.1,177.2 507.7,179.3 513.3,181.4 518.8,183.5 524.2,185.6 529.6,187.7 535.0,189.8 540.3,191.8 545.5,193.9 550.7,196.0 555.9,198.1 561.0,200.1 566.0,202.2 571.0,204.3 576.0,206.3 580.9,208.4 585.8,210.5 590.6,212.5 595.4,214.6 600.2,216.6 604.9,218.7 609.5,220.7 614.2,222.8 618.7,224.8 623.3,226.8 627.8,228.9 632.3,230.9 636.7,232.9 641.1,234.9 645.5,237.0 649.8,239.0 654.1,241.0 658.4,243.0 662.6,245.0 666.8,247.0 671.0,249.0 675.2,251.0 679.3,253.0 683.3,255.0 687.4,256.9 691.4,258.9 695.4,260.9 699.3,262.9 703.3,264.8 707.2,266.8 711.1,268.8 714.9,270.7 718.7,272.7 722.5,274.6 726.3,276.6 730.0,278.5 733.8,280.4 737.5,282.4 741.1,284.3 744.8,286.2 748.4,288.1 752.0,290.1 755.6,292.0 759.1,293.9 762.6,295.8 766.1,297.7 769.6,299.7 773.1,301.6 776.5,303.5 779.9,305.4 783.3,307.3 786.7,309.2 790.1,311.2 793.4,313.1 796.7,315.0 800.0,316.9 803.3,318.9 806.5,320.8 809.8,322.8 813.0,324.7 816.2,326.7 819.4,328.7 822.5,330.7 825.7,332.7 828.8,334.7 831.9,336.7 835.0,338.8 838.1,340.9 841.1,343.0 844.2,345.1 847.2,347.3 850.2,349.5 853.2,351.7 856.2,353.9 859.1,356.3 862.1,358.6 865.0,361.0 867.9,363.5 870.8,366.3"/>
+        <g class="fadein">
+          <polyline stroke="#B3352B" stroke-width="2.4" fill="none"
+            points="105.2,72.6 116.8,73.6 128.0,74.1 139.1,74.2 160.6,74.2 191.3,74.2 229.7,74.2 274.2,74.2 331.1,74.2 396.5,74.2 473.1,74.2 561.0,74.2 654.1,74.2 752.0,74.2 850.2,74.2 867.9,74.2 870.8,73.8"/>
+          <g fill="none" stroke="#8FA3C0" stroke-width="1">
+            <line x1="893" y1="74.2" x2="893" y2="362.4"/>
+            <line x1="888" y1="74.2" x2="898" y2="74.2"/>
+            <line x1="888" y1="362.4" x2="898" y2="362.4"/>
+          </g>
+          <text x="915" y="218" text-anchor="middle" transform="rotate(-90 915 218)"
+            font-family="IBM Plex Mono, monospace" font-size="12" fill="#8FA3C0" data-lang="es">3,58 dex</text>
+          <text x="915" y="218" text-anchor="middle" transform="rotate(-90 915 218)"
+            font-family="IBM Plex Mono, monospace" font-size="12" fill="#8FA3C0" data-lang="en">3.58 dex</text>
+          <g font-family="IBM Plex Mono, monospace" font-size="12">
+            <line x1="120" y1="300" x2="152" y2="300" stroke="#DEE5F0" stroke-width="2.4"/>
+            <text x="162" y="304" fill="#8FA3C0">01_hdr_lineal_f32.tif</text>
+            <line x1="120" y1="326" x2="152" y2="326" stroke="#B3352B" stroke-width="2.4"/>
+            <text x="162" y="330" fill="#8FA3C0">02_hdr_aplanado_f32.tif</text>
+          </g>
+        </g>
+      </svg>
+      <figcaption class="figcap"><span data-lang="es">Datos reales de la validación interna del programa: perfil radial de
+      luminancia medido sobre sus propias salidas. La intensidad cae 3,58 dex (un factor 3800) entre
+      1,05 y 4,1 radios lunares; tras la división por el perfil, el residuo radial queda en 0,0018 dex
+      de RMS. Ninguna curva de mapeo tonal comprime ese gradiente: se elimina por división.</span><span data-lang="en">Real data
+      from the program's internal validation: radial luminance profile measured on its own outputs.
+      The intensity falls by 3.58 dex (a factor of 3800) between 1.05 and 4.1 lunar radii; after
+      division by the profile, the radial residual stands at 0.0018 dex RMS. No tone mapping curve
+      compresses that gradient: it is removed by division.</span></figcaption>
+    </figure>
+
+    <div class="stats">
+      <div class="stat"><b data-lang="es">0,078 px</b><b data-lang="en">0.078 px</b><span data-lang="es">error de registro</span><span data-lang="en">registration error</span></div>
+      <div class="stat"><b data-lang="es">0,0100 dex</b><b data-lang="en">0.0100 dex</b><span data-lang="es">RMS fotométrico</span><span data-lang="en">photometric RMS</span></div>
+      <div class="stat"><b>16 EV</b><span data-lang="es">horquilla validada</span><span data-lang="en">validated bracket</span></div>
+      <div class="stat"><b>7</b><span data-lang="es">etapas del flujo</span><span data-lang="en">pipeline stages</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="chain">
+  <div class="chainwrap">
+    <a href="#e1" data-lang="es">1 · RAW lineal</a>
+    <a href="#e1" data-lang="en">1 · linear RAW</a>
+    <a href="#e2" data-lang="es">2 · limbo</a>
+    <a href="#e2" data-lang="en">2 · limb</a>
+    <a href="#e3" data-lang="es">3 · fusión</a>
+    <a href="#e3" data-lang="en">3 · merge</a>
+    <a href="#e4" data-lang="es">4 · registro</a>
+    <a href="#e4" data-lang="en">4 · registration</a>
+    <a href="#e5" data-lang="es">5 · fondo de cielo</a>
+    <a href="#e5" data-lang="en">5 · sky background</a>
+    <a href="#e6" data-lang="es">6 · perfil radial</a>
+    <a href="#e6" data-lang="en">6 · radial profile</a>
+    <a href="#e7" data-lang="es">7 · realce y salida</a>
+    <a href="#e7" data-lang="en">7 · enhancement and output</a>
+  </div>
+</div>
+
+<div class="shell">
+
+<nav class="toc" aria-label="Índice / Contents">
+  <b data-lang="es">Índice</b>
+  <b data-lang="en">Contents</b>
+  <a href="#alinea" data-lang="es">¿Alinea las fotos?</a>
+  <a href="#alinea" data-lang="en">Does it align the frames?</a>
+  <a href="#alcance" data-lang="es">Alcance</a>
+  <a href="#alcance" data-lang="en">Scope</a>
+  <a href="#instalacion" data-lang="es">Instalación y arranque</a>
+  <a href="#instalacion" data-lang="en">Installation and first run</a>
+  <a href="#etapas" data-lang="es">Las siete etapas</a>
+  <a href="#etapas" data-lang="en">The seven stages</a>
+  <a href="#opciones" data-lang="es">Opciones</a>
+  <a href="#opciones" data-lang="en">Options</a>
+  <a href="#salidas" data-lang="es">Salidas</a>
+  <a href="#salidas" data-lang="en">Outputs</a>
+  <a href="#validacion" data-lang="es">Validación</a>
+  <a href="#validacion" data-lang="en">Validation</a>
+  <a href="#limitaciones" data-lang="es">Limitaciones</a>
+  <a href="#limitaciones" data-lang="en">Limitations</a>
+  <a href="#campo" data-lang="es">Procedimiento de campo</a>
+  <a href="#campo" data-lang="en">Field procedure</a>
+  <a href="#diagnostico" data-lang="es">Leer el registro</a>
+  <a href="#diagnostico" data-lang="en">Reading the log</a>
+</nav>
+
+<main>
+
+<section id="alinea">
+  <span class="h2num" data-lang="es">Pregunta directa</span>
+  <span class="h2num" data-lang="en">Direct question</span>
+  <h2 data-lang="es">¿Alinea las fotos?</h2>
+  <h2 data-lang="en">Does it align the frames?</h2>
+  <div class="answer">
+    <span class="yes" data-lang="es">Sí, por ajuste del limbo lunar</span>
+    <span class="yes" data-lang="en">Yes, by fitting the lunar limb</span>
+    <div data-lang="es">
+      <p>El registro no usa correlación de contenido ni detección de puntos de interés,
+      que fracasan con un gradiente radial de tres órdenes de magnitud. Ajusta una
+      <strong>circunferencia al limbo de la Luna</strong> con precisión subpíxel y traslada cada
+      fotograma al centro del fotograma de referencia (el de exposición mediana) por
+      interpolación con <em>splines</em> cúbicos. En la validación interna el error residual
+      frente a la posición verdadera es de 0,078 px.</p>
+      <p>Lo que <strong>no</strong> hace: no corrige rotación, ni escala, ni distorsión. Solo traslación.
+      Las consecuencias medibles de esa decisión están cuantificadas en
+      <a href="#limitaciones">Limitaciones</a>, apartados L2 y L3.</p>
+    </div>
+    <div data-lang="en">
+      <p>Registration uses neither content correlation nor keypoint detection, both of which
+      fail against a radial gradient of three orders of magnitude. It fits a
+      <strong>circle to the limb of the Moon</strong> with sub-pixel precision and translates every
+      frame onto the centre of the reference frame (the one of median exposure) by cubic
+      <em>spline</em> interpolation. In the internal validation the residual error against the
+      true position is 0.078 px.</p>
+      <p>What it does <strong>not</strong> do: it corrects neither rotation, nor scale, nor distortion.
+      Translation only. The measurable consequences of that decision are quantified in
+      <a href="#limitaciones">Limitations</a>, items L2 and L3.</p>
+    </div>
+  </div>
+  <p data-lang="es">El registro se puede desactivar con <code>--no-align</code>. Tiene dos usos legítimos:
+  probar el flujo completo con cualquier horquilla estática antes del eclipse, y procesar
+  tomas con seguimiento ecuatorial en las que el desplazamiento entre fotogramas es
+  inferior a la fracción de píxel que introduciría la interpolación.</p>
+  <p data-lang="en">Registration can be switched off with <code>--no-align</code>. It has two legitimate
+  uses: exercising the whole pipeline on any static exposure bracket ahead of the eclipse, and
+  processing frames taken on an equatorial mount, where the displacement between frames is
+  smaller than the fraction of a pixel that the interpolation itself would introduce.</p>
+</section>
+
+<hr>
+
+<section id="alcance">
+  <span class="h2num" data-lang="es">Alcance</span>
+  <span class="h2num" data-lang="en">Scope</span>
+  <h2 data-lang="es">Qué produce y qué deja fuera</h2>
+  <h2 data-lang="en">What it produces and what it leaves out</h2>
+  <p class="lead" data-lang="es">El programa resuelve un problema fotométrico, no estético. Su salida
+  principal es un mapa de radiancia relativa; la imagen presentable es un subproducto.</p>
+  <p class="lead" data-lang="en">The program solves a photometric problem, not an aesthetic one. Its
+  principal output is a map of relative radiance; the presentable image is a by-product.</p>
+
+  <h4 data-lang="es">Sí</h4>
+  <h4 data-lang="en">Yes</h4>
+  <ul data-lang="es">
+    <li>Decodificado RAW estrictamente lineal, sin curva, sin brillo automático, sin recorte de altas luces.</li>
+    <li>Máscara de saturación medida sobre el mosaico de Bayer, antes del interpolado cromático.</li>
+    <li>Registro subpíxel por geometría del limbo.</li>
+    <li>Fusión con pesos de varianza inversa para ruido fotónico.</li>
+    <li>Sustracción del fondo de cielo (crepúsculo más extinción) con un modelo polinómico por canal.</li>
+    <li>Compresión del gradiente coronal por división del perfil radial azimutal.</li>
+    <li>Realce multiescala opcional, con el disco lunar protegido frente a los anillos de Gibbs.</li>
+  </ul>
+  <ul data-lang="en">
+    <li>Strictly linear RAW decoding: no curve, no automatic brightening, no highlight clipping.</li>
+    <li>Saturation mask measured on the Bayer mosaic, before demosaicing.</li>
+    <li>Sub-pixel registration from limb geometry.</li>
+    <li>Merge with inverse-variance weights for photon noise.</li>
+    <li>Subtraction of the sky background (twilight plus extinction) with a per-channel polynomial model.</li>
+    <li>Compression of the coronal gradient by division of the azimuthally averaged radial profile.</li>
+    <li>Optional multiscale enhancement, with the lunar disc shielded from Gibbs ringing.</li>
+  </ul>
+
+  <h4 data-lang="es">No</h4>
+  <h4 data-lang="en">No</h4>
+  <ul data-lang="es">
+    <li>No hace calibración con <em>flats</em>, <em>darks</em> ni mapas de píxeles calientes.
+    Solo se resta el nivel de negro que declara el fabricante en el RAW.</li>
+    <li>No alinea por rotación ni corrige rotación de campo.</li>
+    <li>No rechaza fotogramas: una nube, un cable o una vibración entran en la media ponderada.</li>
+    <li>No hace deconvolución, ni corrección de aberración cromática, ni eliminación de reflejos internos.</li>
+    <li>No es un revelador: la gestión de color final, el equilibrio y el recorte se hacen después,
+    en Photoshop o en Capture One, sobre el TIFF de 16 bits.</li>
+  </ul>
+  <ul data-lang="en">
+    <li>It performs no calibration with <em>flat fields</em>, <em>darks</em> or hot-pixel maps.
+    Only the black level declared by the manufacturer in the RAW is subtracted.</li>
+    <li>It does not align for rotation, nor correct field rotation.</li>
+    <li>It rejects no frames: a cloud, a cable or a vibration enters the weighted mean.</li>
+    <li>It performs no deconvolution, no chromatic aberration correction and no removal of internal flare.</li>
+    <li>It is not a raw converter: the final colour management, the balance and the crop are done
+    afterwards, in Photoshop or Capture One, on the 16-bit TIFF.</li>
+  </ul>
+</section>
+
+<hr>
+
+<section id="instalacion">
+  <span class="h2num" data-lang="es">Puesta en marcha</span>
+  <span class="h2num" data-lang="en">Getting started</span>
+  <h2 data-lang="es">Instalación y arranque</h2>
+  <h2 data-lang="en">Installation and first run</h2>
+<pre data-lang="es"><i># dependencias</i>
+pip install numpy scipy scikit-image tifffile pillow rawpy exifread
+brew install exiftool        <i># opcional, respaldo de metadatos</i>
+
+<i># 1. validación interna con corona sintética, no necesita ficheros</i>
+python eclipse_hdr.py --selftest
+
+<i># 2. ensayo con cualquier horquilla estática tuya, a media resolución</i>
+python eclipse_hdr.py bracket/*.CR3 -o prueba --no-align --half
+
+<i># 3. procesado real</i>
+python eclipse_hdr.py totalidad/IMG_2*.CR3 -o salida</pre>
+<pre data-lang="en"><i># dependencies</i>
+pip install numpy scipy scikit-image tifffile pillow rawpy exifread
+brew install exiftool        <i># optional, metadata fallback</i>
+
+<i># 1. internal validation on a synthetic corona, needs no files</i>
+python eclipse_hdr.py --selftest
+
+<i># 2. rehearsal on any static bracket of your own, at half resolution</i>
+python eclipse_hdr.py bracket/*.CR3 -o prueba --no-align --half
+
+<i># 3. the real run</i>
+python eclipse_hdr.py totalidad/IMG_2*.CR3 -o salida</pre>
+  <p data-lang="es">El paso 2 es el que conviene hacer antes del día 12: confirma que LibRaw decodifica
+  el formato de tu cámara, que los tiempos de exposición se leen del EXIF y que el
+  ordenador aguanta la memoria que exige la resolución completa. Si el EXIF no aporta
+  <code>ExposureTime</code>, el programa se detiene y pide los tiempos por
+  <code>--times 1/8000,1/2000,...</code> en el mismo orden que los ficheros.</p>
+  <p data-lang="en">Step 2 is the one worth running before the twelfth: it confirms that LibRaw decodes
+  your camera's format, that the exposure times are read from the EXIF, and that the computer
+  withstands the memory that full resolution demands. If the EXIF supplies no
+  <code>ExposureTime</code>, the program halts and asks for the times through
+  <code>--times 1/8000,1/2000,...</code> in the same order as the files.</p>
+  <div class="note">
+    <span class="tag" data-lang="es">Memoria</span>
+    <span class="tag" data-lang="en">Memory</span>
+    <div data-lang="es">
+      <p>El acumulador mantiene tres <em>arrays</em> float32 del tamaño del fotograma más el
+      fotograma más corto de reserva. Para 45 Mpx en color son unos 2,2 GB, y cada fotograma
+      cargado añade otros 0,5 GB temporales. Los fotogramas se procesan de uno en uno, en flujo,
+      así que el consumo no crece con el número de tomas, solo con la resolución. Con menos de
+      8 GB libres, usa <code>--half</code>.</p>
+    </div>
+    <div data-lang="en">
+      <p>The accumulator holds three float32 <em>arrays</em> the size of the frame, plus the
+      shortest frame in reserve. For 45 Mpx in colour that is some 2.2 GB, and each frame loaded
+      adds a further 0.5 GB temporarily. Frames are processed one at a time, as a stream, so the
+      consumption does not grow with the number of exposures, only with the resolution. With less
+      than 8 GB free, use <code>--half</code>.</p>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<section id="etapas">
+  <span class="h2num" data-lang="es">Algoritmos</span>
+  <span class="h2num" data-lang="en">Algorithms</span>
+  <h2 data-lang="es">Las siete etapas</h2>
+  <h2 data-lang="en">The seven stages</h2>
+  <p class="lead" data-lang="es">El programa recorre los ficheros dos veces. La primera pasada detecta el
+  limbo a media resolución para obtener una estimación robusta y encadenada del centro; la
+  segunda carga a resolución completa, refina, traslada y acumula.</p>
+  <p class="lead" data-lang="en">The program walks through the files twice. The first pass detects the
+  limb at half resolution in order to obtain a robust, chained estimate of the centre; the second
+  loads at full resolution, refines, translates and accumulates.</p>
+
+  <div class="anch" id="e1">
+    <h3 data-lang="es">1 · Decodificado RAW lineal</h3>
+    <h3 data-lang="en">1 · Linear RAW decoding</h3>
+  </div>
+  <p data-lang="es">Se llama a LibRaw a través de rawpy con <code>gamma=(1,1)</code>,
+  <code>no_auto_bright=True</code>, salida de 16 bits y primarios sRGB. El resultado es
+  proporcional al número de fotoelectrones por píxel, con los multiplicadores del equilibrio
+  de blancos aplicados (<code>--wb camera</code> o <code>--wb daylight</code>). La linealidad
+  es la condición que permite dividir por el tiempo de exposición en la etapa 3.</p>
+  <p data-lang="en">LibRaw is called through rawpy with <code>gamma=(1,1)</code>,
+  <code>no_auto_bright=True</code>, 16-bit output and sRGB primaries. The result is proportional
+  to the number of photoelectrons per pixel, with the white balance multipliers applied
+  (<code>--wb camera</code> or <code>--wb daylight</code>). Linearity is the condition that
+  permits division by the exposure time at stage 3.</p>
+  <p data-lang="es">La saturación no se detecta en la imagen revelada, donde el interpolado cromático ya ha
+  mezclado píxeles buenos con píxeles a tope, sino en el mosaico:</p>
+  <p data-lang="en">Saturation is not detected on the developed image, where demosaicing has already
+  blended sound pixels with pixels at full scale, but on the mosaic:</p>
+  <div class="eq" data-lang="es"><i>saturado</i> <span class="op">⇔</span> <i>M</i> ≥ <i>negro</i> + 0,97 (<i>blanco</i> <span class="op">−</span> <i>negro</i>)</div>
+  <div class="eq" data-lang="en"><i>saturated</i> <span class="op">⇔</span> <i>M</i> ≥ <i>black</i> + 0.97 (<i>white</i> <span class="op">−</span> <i>black</i>)</div>
+  <p data-lang="es">La máscara se reorienta según el <em>flip</em> declarado en el RAW, se combina en OR con
+  un criterio de respaldo sobre la imagen revelada y se dilata dos iteraciones para cubrir la
+  contaminación que el interpolado propaga a los vecinos.</p>
+  <p data-lang="en">The mask is reoriented according to the <em>flip</em> declared in the RAW, combined
+  by OR with a fallback criterion on the developed image, and dilated by two iterations to cover
+  the contamination that demosaicing propagates to the neighbours.</p>
+  <div class="note">
+    <span class="tag" data-lang="es">Efecto secundario útil de --half</span>
+    <span class="tag" data-lang="en">A useful side effect of --half</span>
+    <div data-lang="es">
+      <p>Con <code>half_size=True</code> LibRaw promedia cada celda 2×2 de Bayer en lugar de
+      interpolar. No hay interpolado cromático, por lo que desaparecen los artefactos de
+      laberinto y el falso color en el limbo, donde el gradiente es más violento. El precio es
+      la mitad de resolución lineal. Para fotometría del gradiente radial suele ser un buen
+      intercambio.</p>
+    </div>
+    <div data-lang="en">
+      <p>With <code>half_size=True</code>, LibRaw averages each 2×2 Bayer cell instead of
+      interpolating. There is no demosaicing, so the maze artefacts and the false colour at the
+      limb, where the gradient is at its most violent, both disappear. The price is half the
+      linear resolution. For photometry of the radial gradient this is usually a sound bargain.</p>
+    </div>
+  </div>
+
+  <div class="anch" id="e2">
+    <h3 data-lang="es">2 · Detección del limbo lunar</h3>
+    <h3 data-lang="en">2 · Detection of the lunar limb</h3>
+  </div>
+  <p data-lang="es">Dos fases. La inicialización usa la transformada de Hough para circunferencias sobre una
+  versión submuestreada y comprimida en logaritmo de la luminancia, con detección de bordes de
+  Canny (σ = 2) y un barrido de 40 radios entre 0,04 y 0,35 de la dimensión menor del
+  fotograma. Da un centro con error de unos pocos píxeles.</p>
+  <p data-lang="en">Two phases. Initialisation uses the circular Hough transform on a downsampled,
+  logarithmically compressed version of the luminance, with Canny edge detection (σ = 2) and a
+  sweep of 40 radii between 0.04 and 0.35 of the shorter dimension of the frame. It yields a
+  centre accurate to a few pixels.</p>
+  <p data-lang="es">El refinado no usa bordes binarios. Se trazan 720 rayos desde el centro provisional, se
+  muestrea log <i>I</i> a lo largo de cada rayo en 129 puntos entre 0,8 y 1,2 <i>r</i>₀, se
+  suaviza (σ = 2 muestras) y se localiza el máximo de la derivada radial. La posición subpíxel
+  sale del ajuste parabólico a las tres muestras centrales:</p>
+  <p data-lang="en">The refinement uses no binary edges. Some 720 rays are traced from the provisional
+  centre, log <i>I</i> is sampled along each ray at 129 points between 0.8 and 1.2 <i>r</i>₀,
+  smoothed (σ = 2 samples), and the maximum of the radial derivative is located. The sub-pixel
+  position follows from a parabolic fit to the three central samples:</p>
+  <div class="eq">δ = ½ (<i>g</i><sub>−1</sub> <span class="op">−</span> <i>g</i><sub>+1</sub>) / (<i>g</i><sub>−1</sub> <span class="op">−</span> 2<i>g</i><sub>0</sub> <span class="op">+</span> <i>g</i><sub>+1</sub>)</div>
+  <p data-lang="es">Con los 720 puntos de borde se ajusta la circunferencia por el método algebraico de Kasa,
+  que linealiza el problema escribiendo <i>x</i>² + <i>y</i>² = 2<i>ax</i> + 2<i>by</i> + <i>c</i>
+  y resolviéndolo por mínimos cuadrados. El ajuste se repite con recorte a 2,5σ del residuo
+  radial, y el ciclo completo (rayos, bordes, ajuste) se itera tres veces. Se descartan los
+  rayos cuyo gradiente máximo no llega al 30 % de la mediana, que es lo que ocurre en el borde
+  del encuadre o sobre una protuberancia muy brillante.</p>
+  <p data-lang="en">The 720 edge points are then fitted with a circle by Kåsa's algebraic method, which
+  linearises the problem by writing <i>x</i>² + <i>y</i>² = 2<i>ax</i> + 2<i>by</i> + <i>c</i>
+  and solving it by least squares. The fit is repeated with 2.5σ sigma clipping of the radial
+  residual, and the whole cycle (rays, edges, fit) is iterated three times. Rays whose maximum
+  gradient falls short of 30 % of the median are discarded, which is what happens at the edge of
+  the frame or over a very bright prominence.</p>
+  <p data-lang="es">La función devuelve centro, radio, desviación típica del residuo en píxeles y número de
+  puntos supervivientes. Esos dos últimos valores son el control de calidad que aparece en el
+  registro de ejecución.</p>
+  <p data-lang="en">The function returns centre, radius, standard deviation of the residual in pixels
+  and number of surviving points. Those last two values are the quality control that appears in
+  the execution log.</p>
+
+  <div class="anch" id="e3">
+    <h3 data-lang="es">3 · Fusión HDR</h3>
+    <h3 data-lang="en">3 · Linear HDR merge</h3>
+  </div>
+  <p data-lang="es">La exposición relativa de cada toma se calcula desde el EXIF como</p>
+  <p data-lang="en">The relative exposure of each frame is computed from the EXIF as</p>
+  <div class="eq" data-lang="es"><i>e</i> = <i>t</i> · ISO / <i>N</i>², normalizada a max(<i>e</i>) = 1</div>
+  <div class="eq" data-lang="en"><i>e</i> = <i>t</i> · ISO / <i>N</i>², normalised to max(<i>e</i>) = 1</div>
+  <p data-lang="es">y la radiancia se estima como media ponderada de las estimaciones individuales:</p>
+  <p data-lang="en">and the radiance is estimated as a weighted mean of the individual estimates:</p>
+  <div class="eq"><i>L</i> = Σ<sub><i>i</i></sub> <i>w<sub>i</sub></i> <i>I<sub>i</sub></i> / <i>e<sub>i</sub></i> <span class="op">⁄</span> Σ<sub><i>i</i></sub> <i>w<sub>i</sub></i></div>
+  <p data-lang="es">El peso tiene tres factores. Uno anula los píxeles saturados con una rampa suave entre
+  0,92 y 0,98 de la escala, más la máscara del mosaico. Otro anula los que están bajo el suelo
+  de ruido, con rampa entre <code>--floor</code> y tres veces ese valor. El tercero es
+  <i>e<sub>i</sub></i>, y no es arbitrario: si el ruido dominante es fotónico,
+  var(<i>I</i>) ∝ <i>I</i>, de modo que la varianza del estimador
+  <i>L̂<sub>i</sub></i> = <i>I<sub>i</sub></i>/<i>e<sub>i</sub></i> es proporcional a
+  <i>L</i>/<i>e<sub>i</sub></i>. El peso de varianza inversa es entonces proporcional a la
+  exposición, exactamente lo que se aplica.</p>
+  <p data-lang="en">The weight has three factors. One annuls the saturated pixels with a smooth ramp
+  between 0.92 and 0.98 of full scale, together with the mosaic mask. Another annuls those below
+  the noise floor, with a ramp between <code>--floor</code> and three times that value. The third
+  is <i>e<sub>i</sub></i>, and it is not arbitrary: if the dominant noise is photon noise,
+  var(<i>I</i>) ∝ <i>I</i>, so that the variance of the estimator
+  <i>L̂<sub>i</sub></i> = <i>I<sub>i</sub></i>/<i>e<sub>i</sub></i> is proportional to
+  <i>L</i>/<i>e<sub>i</sub></i>. The inverse-variance weight is then proportional to the
+  exposure, which is exactly what is applied.</p>
+  <p data-lang="es">Los píxeles en los que ningún fotograma aporta peso (el núcleo saturado en todas las
+  tomas) se rellenan con la estimación de la exposición más corta, para que la imagen no
+  contenga huecos. Es un relleno, no una medida: en esa zona la fotometría no existe.</p>
+  <p data-lang="en">Pixels to which no frame contributes any weight (the core, saturated in every
+  exposure) are filled in with the estimate from the shortest exposure, so that the image contains
+  no holes. It is a fill, not a measurement: in that region there is no photometry.</p>
+  <p data-lang="es">Cuando hay varias tomas por escalón de exposición, y con ráfagas las hay, los fotogramas
+  de igual exposición (tolerancia de 0,25 EV, con independencia del orden de captura) se
+  combinan antes con una media recortada por píxel: con <i>n</i> ≥ 3 se descarta el máximo,
+  con <i>n</i> ≥ 8 también el mínimo. Un avión, un satélite o una vibración afectan a un solo
+  fotograma del grupo, y el recorte los elimina con un coste en SNR de (<i>n</i>−2)/<i>n</i>.
+  El peso del grupo en la fusión es proporcional a <i>e</i> · <i>n</i><sub>ef</sub>. Se
+  controla con <code>--trim</code>.</p>
+  <p data-lang="en">When there are several exposures per bracket step, as there are when shooting in
+  bursts, the frames of equal exposure (tolerance of 0.25 EV, irrespective of the order of
+  capture) are first combined by a per-pixel trimmed mean: with <i>n</i> ≥ 3 the maximum is
+  discarded, with <i>n</i> ≥ 8 the minimum as well. An aircraft, a satellite or a vibration
+  affects a single frame of the group, and this outlier rejection removes them at a cost in SNR
+  of (<i>n</i>−2)/<i>n</i>. The weight of the group in the merge is proportional to
+  <i>e</i> · <i>n</i><sub>ef</sub>. It is governed by <code>--trim</code>.</p>
+
+  <div class="anch" id="e4">
+    <h3 data-lang="es">4 · Registro</h3>
+    <h3 data-lang="en">4 · Registration</h3>
+  </div>
+  <p data-lang="es">La referencia es el fotograma de exposición mediana, elegido porque es el que tiene a la
+  vez limbo bien definido y corona con señal suficiente. Para cada uno de los demás se aplica</p>
+  <p data-lang="en">The reference is the frame of median exposure, chosen because it is the one that has
+  at once a well-defined limb and a corona with sufficient signal. To each of the others is applied</p>
+  <div class="eq">(Δ<i>x</i>, Δ<i>y</i>) = (<i>x</i><sub>ref</sub> <span class="op">−</span> <i>x<sub>i</sub></i>, <i>y</i><sub>ref</sub> <span class="op">−</span> <i>y<sub>i</sub></i>)</div>
+  <p data-lang="es">con <code>scipy.ndimage.shift</code> de orden 3 sobre cada canal, y de orden 1 con umbral
+  0,2 sobre la máscara de saturación, para que la máscara siga cubriendo lo que debe cubrir
+  después del desplazamiento. Los desplazamientos por debajo de 0,05 px se omiten, para no
+  interpolar sin necesidad.</p>
+  <p data-lang="en">with <code>scipy.ndimage.shift</code> of order 3 on each channel, and of order 1 with
+  a threshold of 0.2 on the saturation mask, so that the mask still covers what it must cover after
+  the displacement. Shifts below 0.05 px are skipped, so as not to interpolate needlessly.</p>
+  <p data-lang="es">La cadena de inicialización importa: en la primera pasada el centro detectado en un
+  fotograma sirve de estimación inicial para el siguiente. Sin seguimiento, a 400 mm el
+  arrastre sidéreo es de unos 6,5 px/s, así que en una ráfaga de nueve tomas el limbo se
+  desplaza decenas de píxeles y la búsqueda ciega por Hough se vuelve frágil.</p>
+  <p data-lang="en">The chain of initialisation matters: in the first pass the centre detected in one
+  frame serves as the initial estimate for the next. Without tracking, at 400 mm the sidereal
+  trailing amounts to some 6.5 px/s, so that across a burst of nine exposures the limb travels
+  tens of pixels and the blind Hough search turns fragile.</p>
+
+  <div class="anch" id="e5">
+    <h3 data-lang="es">5 · Fondo de cielo</h3>
+    <h3 data-lang="en">5 · Sky background</h3>
+  </div>
+  <p data-lang="es">Se ajusta por canal un polinomio (constante, plano o cuadrática completa) a los píxeles
+  con <i>r</i> &gt; <i>k</i> · <i>R</i><sub>Luna</sub>, con <i>k</i> = 4 por omisión. El
+  muestreo es en rejilla de paso ≈ min(<i>H</i>,<i>W</i>)/700 y con un margen que excluye el
+  borde afectado por los desplazamientos del registro.</p>
+  <p data-lang="en">A polynomial (constant, plane or full quadratic) is fitted per channel to the pixels
+  with <i>r</i> &gt; <i>k</i> · <i>R</i><sub>Moon</sub>, with <i>k</i> = 4 by default. Sampling
+  is on a grid of step ≈ min(<i>H</i>,<i>W</i>)/700, with a margin that excludes the border
+  affected by the registration shifts.</p>
+  <p data-lang="es">El recorte de valores atípicos es deliberadamente asimétrico: se conservan los residuos
+  entre −4σ y +2σ. La contaminación que hay que rechazar es corona residual y estrellas, es
+  decir, siempre positiva, mientras que las fluctuaciones negativas son ruido legítimo del
+  fondo. Un recorte simétrico sesgaría el fondo hacia arriba y se comería la corona externa.
+  Antes de iterar se descarta además todo lo que supera el percentil 60.</p>
+  <p data-lang="en">The outlier rejection is deliberately asymmetric: residuals between −4σ and +2σ
+  are retained. The contamination that must be rejected is residual corona and stars, that is to
+  say always positive, whereas the negative fluctuations are legitimate background noise. A
+  symmetric sigma clipping would bias the background upwards and eat into the outer corona.
+  Before iterating, everything above the 60th percentile is additionally discarded.</p>
+  <p data-lang="es">Si la fracción de cielo disponible baja del 4 % del encuadre, el modelo polinómico está
+  mal condicionado y el programa degrada solo a fondo constante, avisando en el registro.</p>
+  <p data-lang="en">If the fraction of available sky falls below 4 % of the frame, the polynomial model
+  is ill-conditioned and the program degrades on its own to a constant background, giving notice
+  in the log.</p>
+  <div class="note">
+    <span class="tag" data-lang="es">Por qué un plano basta</span>
+    <span class="tag" data-lang="en">Why a plane suffices</span>
+    <div data-lang="es">
+      <p>Con el Sol a 12° de altura, la masa de aire es ≈ 4,8 y la extinción atmosférica varía
+      de forma monótona con la altura aparente. En un encuadre de 3,4° de alto a 400 mm, el
+      gradiente vertical de transmisión es del orden del 15 %, suave y casi lineal a esa escala.
+      <code>--bg poly2</code> tiene sentido si hay bruma estructurada o luz parásita del cielo
+      crepuscular cerca del horizonte.</p>
+    </div>
+    <div data-lang="en">
+      <p>With the Sun at 12° of altitude, the airmass is ≈ 4.8 and atmospheric extinction varies
+      monotonically with apparent altitude. Across a frame 3.4° tall at 400 mm, the vertical
+      gradient of transmission is of the order of 15 %, gentle and very nearly linear at that
+      scale. <code>--bg poly2</code> makes sense if there is structured haze or stray light from
+      the twilit sky near the horizon.</p>
+    </div>
+  </div>
+
+  <div class="anch" id="e6">
+    <h3 data-lang="es">6 · Aplanado radial</h3>
+    <h3 data-lang="en">6 · Radial flattening</h3>
+  </div>
+  <p data-lang="es">Es la etapa que sustituye al mapeo tonal. Se construye el perfil radial en anillos de
+  1 px con media recortada a 3σ, calculada con <code>bincount</code> para que el coste sea
+  lineal. Solo entran píxeles con <i>r</i> ≥ <i>R</i><sub>Luna</sub> + 3, de modo que el disco
+  lunar no contamine los primeros anillos. Dentro del disco el divisor se congela en su valor
+  en <i>R</i><sub>Luna</sub> + 4, y después se suaviza el perfil en logaritmo con σ = 3
+  anillos. La imagen aplanada es</p>
+  <p data-lang="en">This is the stage that stands in for tone mapping. The radial profile is built in
+  1 px annuli with a 3σ trimmed mean, computed with <code>bincount</code> so that the cost stays
+  linear. Only pixels with <i>r</i> ≥ <i>R</i><sub>Moon</sub> + 3 are admitted, so that the lunar
+  disc does not contaminate the innermost annuli. Within the disc the divisor is frozen at its
+  value at <i>R</i><sub>Moon</sub> + 4, and the profile is then smoothed in the logarithm with
+  σ = 3 annuli. The flattened image is</p>
+  <div class="eq"><i>F</i>(<i>x</i>) = <i>L</i>(<i>x</i>) / <i>p</i>(<i>r</i>(<i>x</i>))</div>
+  <p data-lang="es">seguido de una normalización por la mediana en el anillo 1,05 a 1,4 <i>R</i><sub>Luna</sub>,
+  para que <i>F</i> ≈ 1 justo fuera del limbo. Con <code>--profile lum</code> los tres canales
+  se dividen por el mismo perfil de luminancia, lo que conserva los cocientes de color y por
+  tanto la información cromática de la corona. Con <code>--profile rgb</code> cada canal se
+  divide por el suyo, lo que neutraliza cualquier gradiente radial de color, incluida la
+  extinción diferencial que el modelo de fondo no haya capturado, a cambio de destruir el color
+  real.</p>
+  <p data-lang="en">followed by a normalisation to the median within the annulus 1.05 to 1.4
+  <i>R</i><sub>Moon</sub>, so that <i>F</i> ≈ 1 just outside the limb. With
+  <code>--profile lum</code> the three channels are divided by the same luminance profile, which
+  preserves the colour ratios and hence the chromatic information of the corona. With
+  <code>--profile rgb</code> each channel is divided by its own, which neutralises any radial
+  colour gradient, including the differential extinction that the background model has failed to
+  capture, at the cost of destroying the real colour.</p>
+  <p data-lang="es">Conceptualmente esto es un filtro de paso alto circular, la versión de simetría exacta del
+  filtro adaptativo que Druckmüller aplica a sus composiciones. La ventaja frente a un
+  desenfoque gaussiano restado es que no introduce halos alrededor del limbo, porque el divisor
+  no conoce nada más que el radio.</p>
+  <p data-lang="en">Conceptually this is a circular high-pass filter, the exactly symmetric counterpart
+  of the adaptive filter that Druckmüller applies to his composites. Its advantage over a
+  subtracted Gaussian blur is that it introduces no haloes around the limb, because the divisor
+  knows nothing whatever beyond the radius.</p>
+  <div class="warn">
+    <span class="tag" data-lang="es">Consecuencia inevitable</span>
+    <span class="tag" data-lang="en">An unavoidable consequence</span>
+    <div data-lang="es">
+      <p>Dividir por el perfil radial elimina, por construcción, toda la estructura radial real:
+      la caída de brillo de un penacho a lo largo de su eje desaparece junto con el gradiente
+      coronal. La imagen aplanada revela estructura azimutal y no es fotométrica. Cualquier
+      medida se hace sobre <code>01_hdr_lineal_f32.tif</code>.</p>
+    </div>
+    <div data-lang="en">
+      <p>Dividing by the radial profile removes, by construction, all the real radial structure:
+      the fall in brightness of a coronal streamer along its axis vanishes together with the
+      coronal gradient. The flattened image reveals azimuthal structure and is not photometric.
+      Any measurement is made on <code>01_hdr_lineal_f32.tif</code>.</p>
+    </div>
+  </div>
+
+  <div class="anch" id="e7">
+    <h3 data-lang="es">7 · Realce multiescala y codificación de salida</h3>
+    <h3 data-lang="en">7 · Multiscale enhancement and output encoding</h3>
+  </div>
+  <p data-lang="es">Antes de filtrar, <i>F</i> se recorta a un intervalo derivado de los percentiles 0,2 y
+  99,8 dentro del anillo estructural (1,05 a 3,5 <i>R</i><sub>Luna</sub>), porque el ruido del
+  campo exterior queda amplificado por la división y de lo contrario domina los filtros
+  gaussianos. El disco lunar se rellena con la mediana de un anillo estrecho justo por fuera
+  del limbo, únicamente para el cálculo de los desenfoques, y el resultado se recompone con un
+  degradado de 3 px. Ambas cosas evitan el anillo oscuro que aparecería en el limbo.</p>
+  <p data-lang="en">Before filtering, <i>F</i> is clipped to an interval derived from the 0.2 and 99.8
+  percentiles within the structural annulus (1.05 to 3.5 <i>R</i><sub>Moon</sub>), because the
+  noise of the outer field is amplified by the division and would otherwise dominate the Gaussian
+  filters. The lunar disc is filled with the median of a narrow annulus just outside the limb,
+  solely for the computation of the blurs, and the result is recomposed with a 3 px feather. Both
+  measures avoid the dark ring that would otherwise appear at the limb.</p>
+  <div class="eq"><i>E</i> = <i>G</i> <span class="op">+</span> Σ<sub><i>k</i></sub> <i>g<sub>k</sub></i> (<i>G</i> <span class="op">−</span> <i>G</i> ∗ <i>N</i>(0, σ<sub><i>k</i></sub>))</div>
+  <p data-lang="es">Las escalas por omisión, σ = 3, 10, 30 y 90 px con ganancias decrecientes, cubren desde
+  las estrías finas de la corona hasta los penachos. La codificación final estira entre los
+  percentiles 0,5 y 99,7 medidos también en el anillo estructural, y aplica gamma 2,2. El
+  estirado se mide donde está la señal que interesa, no en todo el fotograma, que es el error
+  que produce imágenes lavadas.</p>
+  <p data-lang="en">The default scales, σ = 3, 10, 30 and 90 px with decreasing gains, span everything
+  from the fine striations of the corona to the coronal streamers. The final encoding stretches
+  between the 0.5 and 99.7 percentiles, likewise measured within the structural annulus, and
+  applies gamma 2.2. The stretch is measured where the signal of interest lies, not across the
+  whole frame, which is the error that yields washed-out images.</p>
+</section>
+
+<hr>
+
+<section id="opciones">
+  <span class="h2num" data-lang="es">Referencia</span>
+  <span class="h2num" data-lang="en">Reference</span>
+  <h2 data-lang="es">Opciones de la línea de órdenes</h2>
+  <h2 data-lang="en">Command-line options</h2>
+  <table>
+    <caption><span data-lang="es">Todas las opciones y su valor por omisión</span><span data-lang="en">Every option and its default value</span></caption>
+    <thead><tr>
+      <th data-lang="es">Opción</th><th data-lang="en">Option</th>
+      <th data-lang="es">Omisión</th><th data-lang="en">Default</th>
+      <th data-lang="es">Cuándo tocarla</th><th data-lang="en">When to touch it</th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="k">ficheros</td><td class="v">-</td><td><span data-lang="es">Patrones admitidos, <code>*.CR3</code>. Se ordenan y se eliminan duplicados. Mínimo dos.</span><span data-lang="en">Glob patterns accepted, <code>*.CR3</code>. They are sorted and de-duplicated. Two files minimum.</span></td></tr>
+      <tr><td class="k">-o, --out</td><td class="v">salida</td><td><span data-lang="es">Directorio de salida, se crea si no existe.</span><span data-lang="en">Output directory; it is created if it does not exist.</span></td></tr>
+      <tr><td class="k">--selftest</td><td class="v">-</td><td><span data-lang="es">Validación con corona sintética. Ejecutar siempre tras instalar.</span><span data-lang="en">Validation on a synthetic corona. Always run it after installing.</span></td></tr>
+      <tr><td class="k">--half</td><td class="v">-</td><td><span data-lang="es">Media resolución sin interpolado cromático. Pruebas, equipos con poca memoria, o cuando prima la limpieza del limbo.</span><span data-lang="en">Half resolution without demosaicing. Trials, machines short of memory, or wherever cleanliness at the limb comes first.</span></td></tr>
+      <tr><td class="k">--wb</td><td class="v">camera</td><td><span data-lang="es"><code>daylight</code> da un punto de partida colorimétrico reproducible, independiente del ajuste de la cámara.</span><span data-lang="en"><code>daylight</code> gives a reproducible colorimetric point of departure, independent of the camera setting.</span></td></tr>
+      <tr><td class="k">--times</td><td class="v">-</td><td><span data-lang="es">Solo si falta <code>ExposureTime</code> en el EXIF. Acepta <code>1/2000</code> o <code>0.0005</code>.</span><span data-lang="en">Only if <code>ExposureTime</code> is missing from the EXIF. Accepts <code>1/2000</code> or <code>0.0005</code>.</span></td></tr>
+      <tr><td class="k">--moon-radius</td><td class="v">auto</td><td><span data-lang="es">Radio lunar aproximado en píxeles a resolución completa. Restringe el barrido de Hough si la detección falla.</span><span data-lang="en">Approximate lunar radius in pixels at full resolution. Restricts the Hough sweep if detection fails.</span></td></tr>
+      <tr><td class="k">--center</td><td class="v">auto</td><td><span data-lang="es">Centro manual <code>x,y</code>, útil con <code>--no-align</code> si el limbo no se detecta.</span><span data-lang="en">Manual centre <code>x,y</code>, useful with <code>--no-align</code> if the limb is not detected.</span></td></tr>
+      <tr><td class="k">--no-align</td><td class="v">-</td><td><span data-lang="es">Sin registro. Seguimiento ecuatorial, o ensayo del flujo con material que no sea del eclipse.</span><span data-lang="en">No registration. Equatorial tracking, or a rehearsal of the pipeline on material other than the eclipse.</span></td></tr>
+      <tr><td class="k">--floor</td><td class="v">1.5e-3</td><td><span data-lang="es">Suelo de ruido en fracción de saturación. Súbelo si el ISO es alto y aparece grano estructurado en la corona externa.</span><span data-lang="en">Noise floor as a fraction of saturation. Raise it if the ISO is high and structured grain appears in the outer corona.</span></td></tr>
+      <tr><td class="k">--trim</td><td class="v">auto</td><td><span data-lang="es">Recorte de extremos por píxel dentro de cada grupo de igual exposición. <code>off</code> lo desactiva; solo tiene sentido con menos de 3 tomas por escalón.</span><span data-lang="en">Per-pixel outlier rejection within each group of equal exposure. <code>off</code> disables it; that is sensible only with fewer than 3 frames per step.</span></td></tr>
+      <tr><td class="k">--bg</td><td class="v">plane</td><td><span data-lang="es"><code>poly2</code> con bruma estructurada, <code>const</code> con poco cielo en el encuadre, <code>none</code> para no tocar el fondo.</span><span data-lang="en"><code>poly2</code> with structured haze, <code>const</code> with little sky in the frame, <code>none</code> to leave the background untouched.</span></td></tr>
+      <tr><td class="k">--bg-k</td><td class="v">4.0</td><td><span data-lang="es">Radio interior de la zona de cielo, en radios lunares. Bájalo a 3 con focales largas, súbelo si sospechas corona detectable más allá de 4 R.</span><span data-lang="en">Inner radius of the sky region, in lunar radii. Lower it to 3 at long focal lengths, raise it if you suspect detectable corona beyond 4 R.</span></td></tr>
+      <tr><td class="k">--profile</td><td class="v">lum</td><td><span data-lang="es"><code>rgb</code> si queda gradiente de color radial tras el fondo, aceptando que el color deja de ser real.</span><span data-lang="en"><code>rgb</code> if a radial colour gradient survives the background subtraction, accepting that the colour ceases to be real.</span></td></tr>
+      <tr><td class="k">--no-enhance</td><td class="v">-</td><td><span data-lang="es">Omite el realce multiescala. Recomendable si vas a hacer el realce tú en Photoshop sobre el fichero 02.</span><span data-lang="en">Skips the multiscale enhancement. Advisable if you intend to do the enhancement yourself in Photoshop on file 02.</span></td></tr>
+      <tr><td class="k">--sigmas</td><td class="v">3,10,30,90</td><td><span data-lang="es">Escalas del realce en píxeles. Escálalas con la resolución y la focal.</span><span data-lang="en">Enhancement scales in pixels. Scale them with the resolution and the focal length.</span></td></tr>
+      <tr><td class="k">--gains</td><td class="v">1.0,0.8,0.6,0.4</td><td><span data-lang="es">Ganancias por escala. Por encima de 1,5 en la escala fina aparece grano.</span><span data-lang="en">Gains per scale. Above 1.5 on the fine scale, grain appears.</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<hr>
+
+<section id="salidas">
+  <span class="h2num" data-lang="es">Salidas</span>
+  <span class="h2num" data-lang="en">Outputs</span>
+  <h2 data-lang="es">Los cinco ficheros y qué hacer con ellos</h2>
+  <h2 data-lang="en">The five files and what to do with them</h2>
+  <table>
+    <caption><span data-lang="es">Contenido del directorio de salida</span><span data-lang="en">Contents of the output directory</span></caption>
+    <thead><tr>
+      <th data-lang="es">Fichero</th><th data-lang="en">File</th>
+      <th data-lang="es">Tipo</th><th data-lang="en">Type</th>
+      <th data-lang="es">Contenido y uso</th><th data-lang="en">Content and use</th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="k">01_hdr_lineal_f32.tif</td><td class="v">float32 RGB</td>
+        <td><span data-lang="es">Radiancia relativa, lineal, tras la fusión. Unidades arbitrarias fijadas por la exposición más larga de la serie. Los valores superan 1 hasta un factor 2<sup>16</sup>. Es el único fichero fotométrico: cualquier medida, cualquier composición propia y cualquier aplanado alternativo parten de aquí.</span><span data-lang="en">Relative radiance, linear, after the merge. Arbitrary units set by the longest exposure of the series. Values exceed 1 by up to a factor of 2<sup>16</sup>. It is the only photometric file: any measurement, any composite of your own and any alternative flattening start from here.</span></td></tr>
+      <tr><td class="k">02_hdr_aplanado_f32.tif</td><td class="v">float32 RGB</td>
+        <td><span data-lang="es">Fondo de cielo restado y perfil radial dividido, normalizado a 1 justo fuera del limbo. Estructura azimutal visible, fotometría destruida. Es el punto de entrada natural si prefieres hacer el realce y el estirado a mano en Photoshop en modo 32 bits.</span><span data-lang="en">Sky background subtracted and radial profile divided out, normalised to 1 just outside the limb. Azimuthal structure visible, photometry destroyed. It is the natural point of entry if you prefer to do the enhancement and the stretch by hand in Photoshop in 32-bit mode.</span></td></tr>
+      <tr><td class="k">03_final_16bit.tif</td><td class="v">uint16 RGB</td>
+        <td><span data-lang="es">Con realce multiescala, estirado por percentiles y gamma 2,2. Imagen presentable, para acabar de ajustar color y contraste local.</span><span data-lang="en">With multiscale enhancement, percentile stretch and gamma 2.2. The presentable image, for the final adjustment of colour and local contrast.</span></td></tr>
+      <tr><td class="k">perfil_radial.csv</td><td class="v"><span data-lang="es">texto</span><span data-lang="en">text</span></td>
+        <td><span data-lang="es">Columnas <code>r_px</code> y el perfil usado como divisor (una columna con <code>--profile lum</code>, tres con <code>rgb</code>). Sirve para reproducir el aplanado en otro programa y para comprobar que el perfil decrece de forma monótona desde el limbo.</span><span data-lang="en">Columns <code>r_px</code> and the profile used as divisor (one column with <code>--profile lum</code>, three with <code>rgb</code>). It serves to reproduce the flattening in another program and to check that the profile decreases monotonically outwards from the limb.</span></td></tr>
+      <tr><td class="k">preview.jpg</td><td class="v">jpeg</td>
+        <td><span data-lang="es">Submuestreado a 2000 px de lado mayor. Control rápido, nada más.</span><span data-lang="en">Downsampled to 2000 px on the longer side. A quick check, nothing more.</span></td></tr>
+    </tbody>
+  </table>
+  <div class="note">
+    <span class="tag">Photoshop</span>
+    <div data-lang="es">
+      <p>Los TIFF float32 se abren en modo 32 bits por canal. Al convertir a 16 bits, Photoshop
+      ofrece un mapeo tonal: hay que elegir exposición y gamma, no ninguno de los métodos
+      adaptativos, porque el gradiente radial ya está eliminado y cualquier compresión local
+      volvería a introducir halos en el limbo.</p>
+    </div>
+    <div data-lang="en">
+      <p>The float32 TIFFs open in 32-bit-per-channel mode. On converting to 16 bits, Photoshop
+      offers a tone mapping: choose exposure and gamma, and none of the adaptive methods, because
+      the radial gradient has already been removed and any local compression would reintroduce
+      haloes at the limb.</p>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<section id="validacion">
+  <span class="h2num" data-lang="es">Validación</span>
+  <span class="h2num" data-lang="en">Validation</span>
+  <h2 data-lang="es">Qué comprueba <code>--selftest</code> y qué no demuestra</h2>
+  <h2 data-lang="en">What <code>--selftest</code> checks and what it does not prove</h2>
+  <p data-lang="es">Se genera una escena sintética con nueve escalones de exposición separados 2 EV, 16 EV en
+  total, y tres tomas por escalón, 27 fotogramas: corona con caída exponencial y modulación
+  azimutal cos(5θ) que gira con el radio, disco lunar oscuro, fondo de cielo con gradiente
+  horizontal, ruido gaussiano más ruido fotónico, saturación del núcleo en las tomas largas,
+  deriva del centro de 4,7 px por fotograma con perturbación aleatoria y una traza brillante de
+  satélite inyectada en un único fotograma.</p>
+  <p data-lang="en">A synthetic scene is generated with nine exposure steps 2 EV apart, 16 EV in all,
+  and three frames per step, 27 frames: a corona with exponential fall-off and a cos(5θ)
+  azimuthal modulation that rotates with radius, a dark lunar disc, a sky background with a
+  horizontal gradient, Gaussian noise plus photon noise, saturation of the core in the long
+  exposures, a drift of the centre of 4.7 px per frame with a random perturbation, and a bright
+  satellite trail injected into a single frame.</p>
+  <p data-lang="es">El programa procesa esa serie sin conocer la verdad y se comparan cuatro cosas:</p>
+  <p data-lang="en">The program processes that series without knowledge of the ground truth, and four
+  things are compared:</p>
+  <dl data-lang="es">
+    <dt>error de centro &lt; 0,6 px</dt>
+    <dd>Obtenido: 0,078 px como máximo sobre los 27 fotogramas.</dd>
+    <dt>RMS fotométrico &lt; 0,04 dex</dt>
+    <dd>Obtenido: 0,0100 dex en el anillo de 1,05 a 3,0 <i>R</i><sub>Luna</sub>, es decir, la
+    radiancia se reconstruye con un error del 2 % a lo largo de tres décadas.</dd>
+    <dt>residuo sobre la traza del transitorio &lt; 0,05 dex</dt>
+    <dd>Obtenido: 0,0047 dex con el recorte activo. El control negativo, con
+    <code>--trim off</code>, deja 0,0422 dex: un sesgo local del 10 % causado por un solo
+    fotograma de 27.</dd>
+    <dt>radio detectado a menos de 2 px del verdadero</dt>
+    <dd>Obtenido: 138,13 px frente a 140 de referencia. El sesgo hacia dentro es sistemático y
+    esperable, ver L5.</dd>
+  </dl>
+  <dl data-lang="en">
+    <dt>centre error &lt; 0.6 px</dt>
+    <dd>Obtained: 0.078 px at most across the 27 frames.</dd>
+    <dt>photometric RMS &lt; 0.04 dex</dt>
+    <dd>Obtained: 0.0100 dex in the annulus from 1.05 to 3.0 <i>R</i><sub>Moon</sub>; that is, the
+    radiance is reconstructed to within 2 % across three decades.</dd>
+    <dt>residual over the trail of the transient &lt; 0.05 dex</dt>
+    <dd>Obtained: 0.0047 dex with outlier rejection active. The negative control, with
+    <code>--trim off</code>, leaves 0.0422 dex: a local bias of 10 % caused by a single frame
+    out of 27.</dd>
+    <dt>radius detected to within 2 px of the true value</dt>
+    <dd>Obtained: 138.13 px against a reference of 140. The inward bias is systematic and to be
+    expected; see L5.</dd>
+  </dl>
+  <p data-lang="es">Lo que la prueba no demuestra: que LibRaw lea correctamente tu cámara, que el EXIF de tus
+  ficheros esté completo, que la corona real, que no es axisimétrica ni exponencial, se comporte
+  como el modelo, ni que la atmósfera colabore. Es una verificación de la implementación
+  matemática, no del sistema completo. Para eso está el ensayo con material propio y
+  <code>--no-align</code>.</p>
+  <p data-lang="en">What the test does not prove: that LibRaw reads your camera correctly, that the EXIF
+  of your files is complete, that the real corona, which is neither axisymmetric nor exponential,
+  behaves like the model, or that the atmosphere will oblige. It is a verification of the
+  mathematical implementation, not of the complete system. For that there is the rehearsal on
+  material of your own with <code>--no-align</code>.</p>
+</section>
+
+<hr>
+
+<section id="limitaciones">
+  <span class="h2num" data-lang="es">Limitaciones</span>
+  <span class="h2num" data-lang="en">Limitations</span>
+  <h2 data-lang="es">Fuentes de error, cuantificadas</h2>
+  <h2 data-lang="en">Sources of error, quantified</h2>
+  <p class="lead" data-lang="es">Las cifras siguientes suponen 400 mm de focal, sensor de fotograma completo
+  con píxel de 4,3 µm (escala de 2,22 segundos de arco por píxel) y las condiciones de la
+  totalidad en A Coruña el 12 de agosto de 2026: 76 s de duración, Sol a 12° de altura.</p>
+  <p class="lead" data-lang="en">The figures below assume a focal length of 400 mm, a full-frame sensor
+  with a 4.3 µm pixel (a plate scale of 2.22 arcseconds per pixel) and the conditions of totality
+  at A Coruña on 12 August 2026: 76 s of duration, the Sun at 12° of altitude.</p>
+
+  <h4 data-lang="es">L1 · La imagen aplanada no es fotométrica</h4>
+  <h4 data-lang="en">L1 · The flattened image is not photometric</h4>
+  <p data-lang="es">Ya está dicho en la etapa 6, pero es el malentendido más costoso. Dividir por
+  <i>p</i>(<i>r</i>) elimina toda la información radial. Ninguna medida de brillo coronal, de
+  gradiente ni de color absoluto puede hacerse sobre los ficheros 02 o 03.</p>
+  <p data-lang="en">This is already said at stage 6, but it is the costliest misunderstanding. Dividing
+  by <i>p</i>(<i>r</i>) removes all the radial information. No measurement of coronal brightness,
+  of gradient or of absolute colour can be made on files 02 or 03.</p>
+
+  <h4 data-lang="es">L2 · Movimiento relativo de la Luna respecto al Sol</h4>
+  <h4 data-lang="en">L2 · Relative motion of the Moon with respect to the Sun</h4>
+  <p data-lang="es">El registro fija la Luna, así que la corona se mueve. El desplazamiento relativo
+  acumulado durante toda la totalidad es del orden de la diferencia de diámetros aparentes,
+  aproximadamente 1 minuto de arco, es decir, unos 27 px. Mezclar fotogramas del segundo
+  contacto con fotogramas del tercero difumina la corona en esa cantidad. Dentro de una ráfaga
+  de 5 s el efecto baja a 1,8 px. La conclusión práctica: procesar por grupos temporales
+  próximos y componer después, no fusionar los 76 s en un solo pase.</p>
+  <p data-lang="en">Registration fixes the Moon, so the corona moves. The relative displacement
+  accumulated over the whole of totality is of the order of the difference in apparent diameters,
+  approximately 1 arcminute, that is to say some 27 px. Mixing frames from second contact with
+  frames from third smears the corona by that amount. Within a 5 s burst the effect falls to
+  1.8 px. The practical conclusion: process by groups close together in time and composite
+  afterwards, rather than merging the whole 76 s in a single pass.</p>
+
+  <h4 data-lang="es">L3 · Rotación de campo sin montura ecuatorial</h4>
+  <h4 data-lang="en">L3 · Field rotation without an equatorial mount</h4>
+  <p data-lang="es">Con la cámara fija, la velocidad de rotación del campo es</p>
+  <p data-lang="en">With the camera fixed, the rate of field rotation is</p>
+  <div class="eq" data-lang="es">ω ≈ 15,04 · cos φ · cos <i>A</i> / cos <i>h</i> &nbsp;[°/h]</div>
+  <div class="eq" data-lang="en">ω ≈ 15.04 · cos φ · cos <i>A</i> / cos <i>h</i> &nbsp;[°/h]</div>
+  <p data-lang="es">con <i>A</i> el azimut medido desde el norte. Para φ = 43,4°, <i>h</i> = 12° y
+  <i>A</i> ≈ 295°, sale ω ≈ 4,7 °/h, o 0,10° a lo largo de los 76 s. A 3
+  <i>R</i><sub>Luna</sub> del centro (0,78°) eso equivale a un arrastre tangencial de 4,9
+  segundos de arco, unos 2,2 px, que el registro por traslación no corrige. En 5 s son 0,14 px,
+  despreciable. De nuevo, agrupar por tiempo resuelve el problema.</p>
+  <p data-lang="en">with <i>A</i> the azimuth measured from north. For φ = 43.4°, <i>h</i> = 12° and
+  <i>A</i> ≈ 295°, this gives ω ≈ 4.7 °/h, or 0.10° over the 76 s. At 3
+  <i>R</i><sub>Moon</sub> from the centre (0.78°) that amounts to a tangential trailing of 4.9
+  arcseconds, some 2.2 px, which translation-only registration does not correct. Over 5 s it is
+  0.14 px, negligible. Once again, grouping by time settles the matter.</p>
+
+  <h4 data-lang="es">L4 · Interacción entre viñeteado y aplanado radial</h4>
+  <h4 data-lang="en">L4 · Interaction between vignetting and radial flattening</h4>
+  <p data-lang="es">El perfil radial está centrado en la Luna; el viñeteado del objetivo está centrado en el
+  eje óptico. Si la Luna está descentrada en el encuadre, el aplanado no elimina el viñeteado y
+  además lo convierte en una modulación azimutal espuria, indistinguible de una asimetría real
+  de la corona. Dos remedios: encuadrar la Luna en el centro, o corregir el viñeteado antes con
+  un <em>flat</em> del objetivo a esa misma abertura.</p>
+  <p data-lang="en">The radial profile is centred on the Moon; the vignetting of the lens is centred on
+  the optical axis. If the Moon sits off-centre in the frame, the flattening does not remove the
+  vignetting and moreover converts it into a spurious azimuthal modulation, indistinguishable
+  from a real asymmetry of the corona. Two remedies: frame the Moon at the centre, or correct the
+  vignetting beforehand with a <em>flat field</em> of the lens at that same aperture.</p>
+
+  <h4 data-lang="es">L5 · Sesgo del radio medido</h4>
+  <h4 data-lang="en">L5 · Bias of the measured radius</h4>
+  <p data-lang="es">El estimador localiza el máximo del gradiente de log <i>I</i>, que con una PSF finita cae
+  dentro del borde geométrico. En la validación el radio sale 1,9 px corto sobre 140. Para el
+  registro es inocuo, porque el sesgo es idéntico en todos los fotogramas y solo importa la
+  diferencia de centros. Sí desplaza en torno al 1 % los umbrales que dependen de
+  <i>R</i><sub>Luna</sub>: el suelo del divisor, el anillo de normalización y la zona de
+  cielo.</p>
+  <p data-lang="en">The estimator locates the maximum of the gradient of log <i>I</i>, which with a
+  finite point spread function falls inside the geometric edge. In the validation the radius comes
+  out 1.9 px short of 140. For registration this is harmless, since the bias is identical in every
+  frame and only the difference of centres matters. It does shift by about 1 % the thresholds that
+  depend on <i>R</i><sub>Moon</sub>: the floor of the divisor, the normalisation annulus and the
+  sky region.</p>
+
+  <h4 data-lang="es">L6 · Píxeles calientes y ausencia de calibración</h4>
+  <h4 data-lang="en">L6 · Hot pixels and the absence of calibration</h4>
+  <p data-lang="es">No hay resta de <em>dark</em> ni mapa de defectos. Un píxel caliente sobrevive a la media
+  ponderada y aparece como un punto fijo en la corona, que el realce multiescala amplifica. Con
+  exposiciones de medio segundo y temperatura de agosto el efecto es pequeño pero visible en las
+  zonas más débiles. Mitigación: desactivar la reducción de ruido de larga exposición en cámara
+  para no perder tiempo entre tomas, y restar externamente un <em>dark</em> del mismo tiempo e
+  ISO si aparece.</p>
+  <p data-lang="en">There is no <em>dark</em> subtraction and no defect map. A hot pixel survives the
+  weighted mean and shows up as a fixed point in the corona, which the multiscale enhancement
+  amplifies. With half-second exposures and August temperatures the effect is small but visible in
+  the faintest regions. Mitigation: switch off in-camera long-exposure noise reduction so as not
+  to lose time between frames, and subtract a <em>dark</em> of the same time and ISO externally
+  should one appear.</p>
+
+  <h4 data-lang="es">L7 · Umbral de saturación y equilibrio de blancos</h4>
+  <h4 data-lang="en">L7 · Saturation threshold and white balance</h4>
+  <p data-lang="es">El criterio de respaldo marca como saturado todo píxel cuyo canal máximo supera 0,96 en la
+  imagen ya balanceada. Los multiplicadores del equilibrio de blancos son mayores que 1 en rojo
+  y azul, así que un píxel brillante pero no saturado en el sensor puede cruzar ese umbral y
+  quedar excluido. La consecuencia es que la corona interior puede perder la aportación de las
+  tomas más cortas. Prevención: incluir en la horquilla una exposición claramente más corta de
+  lo necesario, para que siempre exista un fotograma sin saturar en el limbo.</p>
+  <p data-lang="en">The fallback criterion marks as saturated every pixel whose maximum channel exceeds
+  0.96 in the already balanced image. The white balance multipliers are greater than 1 in red and
+  blue, so a pixel that is bright but not saturated at the sensor may cross that threshold and be
+  excluded. The consequence is that the inner corona may lose the contribution of the shortest
+  exposures. Prevention: include in the bracket an exposure distinctly shorter than necessary, so
+  that there is always a frame free of clipping at the limb.</p>
+
+  <h4 data-lang="es">L8 · Modelo de fondo de primer orden</h4>
+  <h4 data-lang="en">L8 · First-order background model</h4>
+  <p data-lang="es">Un plano no describe luz parásita interna, reflejos entre lentes ni un banco de bruma
+  localizado. Si el residuo tras la sustracción tiene estructura, se propagará al aplanado como
+  asimetría azimutal. Se detecta comparando el resultado con <code>--bg plane</code> y
+  <code>--bg poly2</code>: lo que cambie de sitio no es corona.</p>
+  <p data-lang="en">A plane describes neither internal stray light, nor reflections between elements,
+  nor a localised bank of haze. If the residual after subtraction has structure, it will propagate
+  into the flattening as azimuthal asymmetry. It is detected by comparing the result with
+  <code>--bg plane</code> and with <code>--bg poly2</code>: whatever moves is not corona.</p>
+
+  <h4 data-lang="es">L9 · Requisitos geométricos</h4>
+  <h4 data-lang="en">L9 · Geometric requirements</h4>
+  <p data-lang="es">El limbo completo debe estar dentro del encuadre, con al menos 90 de los 720 rayos
+  íntegramente contenidos, y el radio ha de caer entre 0,04 y 0,35 de la dimensión menor. A
+  1200 mm sobre fotograma completo el disco lunar ocupa ya 1260 px de radio, más de 0,35 de la
+  altura, y la detección automática falla: hay que dar <code>--moon-radius</code>.</p>
+  <p data-lang="en">The complete limb must lie within the frame, with at least 90 of the 720 rays
+  wholly contained, and the radius must fall between 0.04 and 0.35 of the shorter dimension. At
+  1200 mm on full frame the lunar disc already spans a radius of 1260 px, more than 0.35 of the
+  height, and automatic detection fails: <code>--moon-radius</code> must be supplied.</p>
+
+  <h4 data-lang="es">L10 · Rechazo limitado a eventos de un solo fotograma</h4>
+  <h4 data-lang="en">L10 · Rejection limited to single-frame events</h4>
+  <p data-lang="es">El recorte por grupos elimina lo que afecta a una única toma de un grupo de 3 o más. Una
+  nube que cubre varias tomas consecutivas, un desenfoque sostenido o un píxel caliente, que
+  por ser idéntico en todos los fotogramas del grupo sobrevive a cualquier estadístico de
+  orden, pasan el filtro. La inspección previa sigue siendo necesaria.</p>
+  <p data-lang="en">Outlier rejection by group removes whatever affects a single frame of a group of 3
+  or more. A cloud covering several consecutive frames, a sustained defocus, or a hot pixel, which
+  by being identical in every frame of the group survives any order statistic, all pass the
+  filter. Prior inspection remains necessary.</p>
+</section>
+
+<hr>
+
+<section id="campo">
+  <span class="h2num" data-lang="es">Campo</span>
+  <span class="h2num" data-lang="en">Field</span>
+  <h2 data-lang="es">Cómo disparar para que este flujo funcione</h2>
+  <h2 data-lang="en">How to shoot so that this pipeline works</h2>
+  <ol data-lang="es">
+    <li><b>Abertura e ISO fijos</b> durante toda la totalidad. La escala fotométrica se
+    reconstruye con <i>t</i>·ISO/<i>N</i>², pero cambiar de abertura cambia también el
+    viñeteado y la PSF, y eso no se compensa con un número.</li>
+    <li><b>Horquilla de 16 EV en pasos de 2 EV</b>, por ejemplo de 1/4000 a 1/2 s a f/8 e ISO
+    200. Nueve tomas. El paso de 2 EV es suficiente porque la ponderación por
+    <i>e<sub>i</sub></i> hace que los solapes contribuyan de forma óptima.</li>
+    <li><b>Ráfagas repetidas</b> de la misma escalera. Las tomas de igual exposición se
+    promedian con el mismo peso y la relación señal a ruido crece como √<i>N</i>. Con la
+    escalera anterior cabe una decena de repeticiones en 76 s.</li>
+    <li><b>Agrupar por tiempo al procesar.</b> Por L2 y L3, cada grupo debería cubrir menos de
+    unos 10 s. Se procesa cada grupo por separado y se combinan los resultados al final, con la
+    Luna alineada y aceptando el difuminado residual de la corona, o alineando por la corona si
+    lo que interesa es su estructura.</li>
+    <li><b>Dejar cielo en el encuadre.</b> A 400 mm el campo es de 5,15° × 3,44° y el radio
+    lunar mide 420 px, de modo que la región con <i>r</i> &gt; 4 <i>R</i> cubre el 81 % del
+    fotograma: el plano de fondo queda bien determinado. A 800 mm esa fracción cae al 25 %,
+    todavía por encima del mínimo, pero conviene <code>--bg-k 3</code>. A focales mayores,
+    <code>--bg const</code>.</li>
+    <li><b>Enfoque manual fijado</b> antes de la totalidad, sobre el limbo lunar con
+    ampliación en pantalla, y bloqueado. El autofoco no tiene nada a lo que agarrarse y un
+    cambio de enfoque entre fotogramas rompe la fusión.</li>
+    <li><b>RAW sin compresión con pérdida</b> y sin reducción de ruido en cámara.</li>
+  </ol>
+  <ol data-lang="en">
+    <li><b>Fixed aperture and ISO</b> throughout totality. The photometric scale is reconstructed
+    with <i>t</i>·ISO/<i>N</i>², but changing the aperture also changes the vignetting and the
+    point spread function, and that is not compensated by a single number.</li>
+    <li><b>A 16 EV bracket in 2 EV steps</b>, for instance from 1/4000 to 1/2 s at f/8 and ISO
+    200. Nine frames. The 2 EV step suffices because the weighting by <i>e<sub>i</sub></i> makes
+    the overlaps contribute optimally.</li>
+    <li><b>Repeated bursts</b> of the same ladder. Frames of equal exposure are averaged with the
+    same weight and the signal-to-noise ratio grows as √<i>N</i>. With the ladder above, a dozen
+    or so repetitions fit within 76 s.</li>
+    <li><b>Group by time when processing.</b> By L2 and L3, each group should span less than
+    about 10 s. Each group is processed separately and the results combined at the end, with the
+    Moon aligned and the residual smearing of the corona accepted, or else aligned on the corona
+    if it is its structure that matters.</li>
+    <li><b>Leave sky in the frame.</b> At 400 mm the field is 5.15° × 3.44° and the lunar radius
+    measures 420 px, so that the region with <i>r</i> &gt; 4 <i>R</i> covers 81 % of the frame:
+    the background plane is well determined. At 800 mm that fraction falls to 25 %, still above
+    the minimum, but <code>--bg-k 3</code> is advisable. At longer focal lengths,
+    <code>--bg const</code>.</li>
+    <li><b>Manual focus set</b> before totality, on the lunar limb with magnification on screen,
+    and locked. Autofocus has nothing to seize upon, and a change of focus between frames breaks
+    the merge.</li>
+    <li><b>RAW without lossy compression</b> and with in-camera noise reduction off.</li>
+  </ol>
+  <div class="warn">
+    <span class="tag" data-lang="es">Antes del día 12</span>
+    <span class="tag" data-lang="en">Before the twelfth</span>
+    <div data-lang="es">
+      <p>Ejecuta <code>--selftest</code> y después una horquilla propia con
+      <code>--no-align --half</code>. Lo que falla el día del eclipse no son los algoritmos, es
+      un formato RAW que LibRaw no reconoce, un EXIF incompleto o una tarjeta llena.</p>
+    </div>
+    <div data-lang="en">
+      <p>Run <code>--selftest</code>, and then a bracket of your own with
+      <code>--no-align --half</code>. What fails on the day of the eclipse is not the algorithms;
+      it is a RAW format that LibRaw does not recognise, an incomplete EXIF or a full card.</p>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<section id="diagnostico">
+  <span class="h2num" data-lang="es">Diagnóstico</span>
+  <span class="h2num" data-lang="en">Diagnostics</span>
+  <h2 data-lang="es">Leer el registro de ejecución</h2>
+  <h2 data-lang="en">Reading the execution log</h2>
+<pre>rango dinamico del bracket: 16.0 EV
+pase A: deteccion del limbo a media resolucion...
+  IMG_4471.CR3   centro=(2612.4, 1740.8) r=210.3  <b>sigma=0.31 px</b>  <b>n=698</b>
+pase B: fusion (referencia: IMG_4475.CR3)...
+  IMG_4471.CR3   <b>desplazamiento=(+27.44, -19.02) px</b>  sigma=0.29</pre>
+  <dl data-lang="es">
+    <dt>sigma</dt>
+    <dd>Desviación típica del residuo radial del ajuste de circunferencia. Por debajo de 0,5 px
+    el limbo está bien determinado. Por encima de 1,5 px sospecha desenfoque, movimiento durante
+    la exposición o que el ajuste ha enganchado la cromosfera en lugar del limbo.</dd>
+    <dt>n</dt>
+    <dd>Rayos supervivientes de 720. Menos de 300 indica que buena parte del limbo está fuera
+    del encuadre o tapada por una protuberancia muy brillante.</dd>
+    <dt>desplazamiento</dt>
+    <dd>Debe crecer de forma monótona y aproximadamente lineal con el tiempo si no hay
+    seguimiento. Un salto no monótono señala una detección errónea en ese fotograma.</dd>
+    <dt>rango dinámico</dt>
+    <dd>Si sale muy por debajo de lo que disparaste, los metadatos están mal leídos y toda la
+    fotometría posterior es falsa. Compruébalo antes de mirar la imagen.</dd>
+  </dl>
+  <dl data-lang="en">
+    <dt>sigma</dt>
+    <dd>Standard deviation of the radial residual of the circle fit. Below 0.5 px the limb is well
+    determined. Above 1.5 px, suspect defocus, movement during the exposure, or that the fit has
+    latched onto the chromosphere instead of the limb. (The log is written in Spanish, without
+    accents.)</dd>
+    <dt>n</dt>
+    <dd>Rays surviving out of 720. Fewer than 300 indicates that a good part of the limb lies
+    outside the frame or is obscured by a very bright prominence.</dd>
+    <dt>desplazamiento</dt>
+    <dd>The displacement should grow monotonically and roughly linearly with time when there is
+    no tracking. A non-monotonic jump signals a faulty detection in that frame.</dd>
+    <dt>rango dinamico</dt>
+    <dd>If the dynamic range comes out far below what you shot, the metadata have been misread and
+    all the subsequent photometry is false. Check this before looking at the image.</dd>
+  </dl>
+  <p data-lang="es">Después, dos comprobaciones sobre las salidas. En <code>perfil_radial.csv</code> el perfil
+  debe decrecer de forma monótona desde el limbo hacia fuera: un perfil no monótono significa
+  que el centro está mal o que el fondo quedó sobrerrestado. En <code>preview.jpg</code> el
+  disco lunar debe aparecer oscuro y la corona con estructura: un disco claro indica fondo
+  sobrerrestado y valores negativos amplificados por la división.</p>
+  <p data-lang="en">Then two checks on the outputs. In <code>perfil_radial.csv</code> the profile must
+  decrease monotonically outwards from the limb: a non-monotonic profile means either that the
+  centre is wrong or that the background was over-subtracted. In <code>preview.jpg</code> the
+  lunar disc must appear dark and the corona structured: a bright disc indicates an
+  over-subtracted background and negative values amplified by the division.</p>
+</section>
+
+</main>
+</div>
+
+<footer>
+  <div data-lang="es">eclipse_hdr.py, manual técnico · Las cifras de validación provienen de la
+  ejecución de <code>--selftest</code> incluida en el propio programa · Fórmulas de rotación de
+  campo y masa de aire evaluadas para 43,4° N, altura solar 12° · Código fuente:
+  <a href="scripts/eclipse/eclipse_hdr.py">scripts/eclipse/eclipse_hdr.py</a></div>
+  <div data-lang="en">eclipse_hdr.py, technical manual · The validation figures come from the
+  <code>--selftest</code> run included in the program itself · Field rotation and airmass formulae
+  evaluated for 43.4° N, solar altitude 12° · Source code:
+  <a href="scripts/eclipse/eclipse_hdr.py">scripts/eclipse/eclipse_hdr.py</a></div>
+</footer>
+
+<script>
+"use strict";
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{
+      title:"eclipse_hdr.py, manual técnico",
+      desc:"Manual técnico de eclipse_hdr.py: fusión HDR lineal de horquillas RAW, registro por ajuste del limbo lunar y aplanado radial de la corona solar sin mapeo tonal."
+    },
+    en:{
+      title:"eclipse_hdr.py, technical manual",
+      desc:"Technical manual for eclipse_hdr.py: linear HDR merge of RAW exposure brackets, registration by lunar limb fitting and radial flattening of the solar corona without tone mapping."
+    }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    var f=document.querySelector("svg[data-alt-es]");
+    if(f) f.setAttribute("aria-label",f.getAttribute(l==="en"?"data-alt-en":"data-alt-es"));
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
+</body>
+</html>

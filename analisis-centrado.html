@@ -1,0 +1,2902 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Colocación del sujeto en el fotograma</title>
+<meta name="description" content="Panel interactivo de colocación del sujeto en el fotograma: centroide, dispersión, tono, color, textura y deriva temporal a partir del CSV de subject_center.py.">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
+<style>
+  :root{
+    /* caja de luz de 5000 K */
+    --paper:#eaeff2; --panel:#f7fafb; --ink:#10161a; --ink2:#4a5a63;
+    --rule:#c2ced5; --rule2:#8fa0aa;
+    /* filtros dicroicos de cabezal de ampliadora */
+    --g1:#a8106f; --g2:#0b6e8a; --g3:#8a6100; --g4:#3e4a50;
+    --g5:#6b2fa0; --g6:#0f7a4f; --g7:#1f4fd8; --g8:#7d2b12;
+    --g9:#5c7a00; --g10:#007d78; --g11:#d4479a; --g12:#4aa8c4;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"DejaVu Sans Mono",monospace;
+    --sans:system-ui,"Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--paper); color:var(--ink); font-family:var(--mono);
+    font-size:13px; line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+  }
+  p,.prose{font-family:var(--sans); color:var(--ink2); font-size:13px; max-width:64ch}
+  a{color:var(--g2)}
+  .eyebrow{
+    font-size:10px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--ink2); font-weight:600;
+  }
+  header{
+    border-bottom:1px solid var(--rule2); padding:22px 26px 16px;
+    display:flex; flex-wrap:wrap; gap:18px; align-items:flex-end;
+    justify-content:space-between;
+  }
+  h1{
+    font-family:var(--mono); font-size:23px; font-weight:600;
+    letter-spacing:-.01em; margin:6px 0 4px;
+  }
+  h2{font-size:11px; letter-spacing:.18em; text-transform:uppercase; margin:0; font-weight:600}
+  .load{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+  button,label.btn{
+    font-family:var(--mono); font-size:11.5px; letter-spacing:.06em;
+    text-transform:uppercase; background:var(--ink); color:var(--panel);
+    border:1px solid var(--ink); padding:8px 13px; border-radius:2px; cursor:pointer;
+  }
+  button.ghost,label.btn.ghost{background:transparent; color:var(--ink)}
+  button:hover,label.btn:hover{background:var(--g2); border-color:var(--g2); color:#fff}
+  button:disabled{opacity:.35; cursor:not-allowed}
+  :focus-visible{outline:2px solid var(--g1); outline-offset:2px}
+
+  #wrap{display:grid; grid-template-columns:268px minmax(0,1fr); align-items:start}
+  #side{
+    border-right:1px solid var(--rule2); padding:18px 20px 60px;
+    position:sticky; top:0; max-height:100vh; overflow:auto;
+  }
+  #main{padding:0 0 60px}
+  .panel{border-bottom:1px solid var(--rule2); padding:20px 26px}
+  .panel>.head{display:flex; gap:14px; align-items:baseline; justify-content:space-between; flex-wrap:wrap; margin-bottom:12px}
+  .fset{border:0; margin:0 0 18px; padding:0}
+  .fset>legend{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2); padding:0 0 7px; font-weight:600}
+  .row{display:flex; gap:8px; align-items:center; margin:5px 0}
+  .row input[type=number],.row input[type=text]{
+    font-family:var(--mono); font-size:12px; width:100%; padding:5px 6px;
+    border:1px solid var(--rule2); background:var(--panel); color:var(--ink); border-radius:2px;
+  }
+  input[type=range]{width:100%; accent-color:var(--g1)}
+  .chk{display:flex; gap:8px; align-items:center; cursor:pointer; padding:2px 0; font-size:12.5px}
+  .chk input{accent-color:var(--g1)}
+  .swatch{width:11px; height:11px; flex:0 0 11px; border:1px solid rgba(0,0,0,.35)}
+  .muted{color:var(--ink2)}
+  .num{font-variant-numeric:tabular-nums}
+  .kpi{display:flex; gap:22px; flex-wrap:wrap; margin-top:2px}
+  .kpi div span{display:block; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2)}
+  .kpi div b{font-size:19px; font-weight:600; font-variant-numeric:tabular-nums}
+  table{border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; font-size:12px}
+  th,td{text-align:right; padding:6px 9px; border-bottom:1px solid var(--rule)}
+  th{font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink2); font-weight:600; border-bottom:1px solid var(--rule2)}
+  th:first-child,td:first-child{text-align:left}
+  tbody tr:hover{background:#e3eaee}
+  .grid2{display:grid; grid-template-columns:repeat(auto-fit,minmax(330px,1fr)); gap:24px}
+  svg{display:block; width:100%; height:auto; overflow:visible}
+  .glass{background:var(--panel); border:1px solid var(--rule); padding:14px}
+  #tip{
+    position:fixed; pointer-events:none; opacity:0; transition:opacity .08s;
+    background:var(--ink); color:var(--panel); font-size:11px; padding:6px 8px;
+    max-width:340px; z-index:9; border-radius:2px; line-height:1.35;
+  }
+  .toggles{display:flex; gap:14px; flex-wrap:wrap; font-size:11.5px}
+  #tabs{display:flex; gap:0; border-bottom:1px solid var(--rule2); padding:0 26px; flex-wrap:wrap}
+  #tabs button{
+    background:transparent; color:var(--ink2); border:0; border-bottom:2px solid transparent;
+    padding:11px 15px; text-transform:uppercase; letter-spacing:.14em; font-size:10.5px;
+    border-radius:0;
+  }
+  #tabs button:hover{background:transparent; color:var(--ink)}
+  #tabs button[aria-selected=true]{color:var(--ink); border-bottom-color:var(--g1)}
+  select.sel{
+    font-family:var(--mono); font-size:11px; padding:4px 6px; border:1px solid var(--rule2);
+    background:var(--panel); color:var(--ink); border-radius:2px; max-width:190px;
+  }
+  #drop{
+    border:1.5px dashed var(--rule2); padding:44px 26px; margin:26px;
+    text-align:center; background:var(--panel);
+  }
+  #drop.hot{border-color:var(--g1); background:#f2e7ef}
+  code{background:#dfe7eb; padding:1.5px 5px; font-size:12px}
+  .note{font-family:var(--sans); font-size:12px; color:var(--ink2); max-width:70ch; margin:10px 0 0}
+  .warn{color:var(--g1)}
+  @media (max-width:900px){
+    #wrap{grid-template-columns:1fr}
+    #side{position:static; max-height:none; border-right:0; border-bottom:1px solid var(--rule2)}
+    .panel{padding:18px 16px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+  /* ---------- conmutador de idioma ---------- */
+  html[lang="es"] [data-lang="en"]{display:none!important}
+  html[lang="en"] [data-lang="es"]{display:none!important}
+  /* Va dentro del grupo de carga de la cabecera, no flotante: la barra lateral
+     es pegajosa y ocupa toda la altura, así que un elemento fijo taparía los
+     controles de grupo o el rótulo del filtro. */
+  .langbar{display:flex; flex:0 0 auto; border:1px solid var(--rule2);
+           border-radius:2px; overflow:hidden; align-self:center}
+  .langbar button{font-family:var(--mono); font-size:10.5px; letter-spacing:.09em;
+                  text-transform:uppercase; background:transparent; border:0;
+                  color:var(--ink2); padding:7px 10px; border-radius:0; cursor:pointer;
+                  transition:background .15s,color .15s}
+  .langbar button+button{border-left:1px solid var(--rule2)}
+  .langbar button:hover{background:transparent; border-color:var(--rule2); color:var(--ink)}
+  .langbar button.on{background:var(--g1); color:#fff}
+  .langbar button:focus-visible{outline:2px solid var(--g1); outline-offset:-2px}
+  .srclinks{font-family:var(--sans); font-size:11.5px; color:var(--ink2); margin:8px 0 0}
+  .srclinks a{margin-right:14px}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="eyebrow" data-lang="es">Fotometría de encuadre · subject_center.csv</div>
+    <div class="eyebrow" data-lang="en">Framing photometry · subject_center.csv</div>
+    <h1 data-lang="es">Colocación del sujeto en el fotograma</h1>
+    <h1 data-lang="en">Subject placement within the frame</h1>
+    <p data-lang="es">Distribución del centroide del sujeto y contraste entre cuerpos, épocas o
+       carpetas. Todo se calcula en el navegador; ningún dato sale del equipo.</p>
+    <p data-lang="en">Distribution of the subject centroid and contrast between bodies, periods or
+       folders. Everything is computed in the browser; no data leaves the machine.</p>
+    <p class="srclinks">
+      <a href="manual-medidas.html" data-lang="es">Manual de referencia de las medidas</a>
+      <a href="manual-medidas.html" data-lang="en">Reference manual of the measurements</a>
+      <a href="scripts/analitica/subject_center.py" data-lang="es">Código: subject_center.py</a>
+      <a href="scripts/analitica/subject_center.py" data-lang="en">Source code: subject_center.py</a>
+    </p>
+  </div>
+  <div class="load">
+    <label class="btn" for="file"><span data-lang="es">Cargar CSV</span><span data-lang="en">Load CSV</span></label>
+    <input id="file" type="file" accept=".csv,text/csv" hidden>
+    <button id="export" class="ghost" disabled><span data-lang="es">Exportar selección</span><span data-lang="en">Export selection</span></button>
+    <div class="langbar" role="group" aria-label="Idioma / Language">
+      <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+      <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+</header>
+
+<div id="drop">
+  <div class="eyebrow" data-lang="es">Sin datos</div>
+  <div class="eyebrow" data-lang="en">No data</div>
+  <p style="margin:10px auto" data-lang="es">Arrastra aquí el CSV que genera el analizador, o púlsa
+     Cargar CSV. Columnas necesarias: <code>group</code>, <code>x_norm</code>,
+     <code>y_norm</code>, <code>r_norm</code>.</p>
+  <p style="margin:10px auto" data-lang="en">Drag the CSV produced by the analyser here, or press
+     Load CSV. Required columns: <code>group</code>, <code>x_norm</code>,
+     <code>y_norm</code>, <code>r_norm</code>.</p>
+  <p style="margin:0 auto"><code>python subject_center.py ./M5 ./M4 --group-by top --csv medidas.csv</code></p>
+</div>
+
+<div id="wrap" hidden>
+  <aside id="side">
+    <fieldset class="fset">
+      <legend data-lang="es">Grupos</legend>
+      <legend data-lang="en">Groups</legend>
+      <div class="row" style="gap:6px">
+        <button id="gAll" class="ghost" style="padding:4px 8px;font-size:10px"><span data-lang="es">Todos</span><span data-lang="en">All</span></button>
+        <button id="gNone" class="ghost" style="padding:4px 8px;font-size:10px"><span data-lang="es">Ninguno</span><span data-lang="en">None</span></button>
+        <button id="gTop" class="ghost" style="padding:4px 8px;font-size:10px"><span data-lang="es">6 mayores</span><span data-lang="en">6 largest</span></button>
+      </div>
+      <div class="row"><input id="gq" type="text" data-ph-es="buscar grupo" data-ph-en="search group"></div>
+      <div id="groupList" style="max-height:46vh;overflow:auto"></div>
+      <div id="gInfo" class="muted" style="font-size:11px;margin-top:6px"></div>
+    </fieldset>
+
+    <fieldset class="fset">
+      <legend data-lang="es">Depuración</legend>
+      <legend data-lang="en">Data cleaning</legend>
+      <div class="row"><span class="muted">conf ≥</span>
+        <output id="confOut" class="num">0.30</output></div>
+      <input id="conf" type="range" min="0" max="0.9" step="0.05" value="0.3"
+        data-title-es="Confianza mínima del estimador de saliencia" data-title-en="Minimum confidence of the saliency estimator">
+      <div class="row"><span class="muted" data-lang="es">área ≤</span><span class="muted" data-lang="en">area ≤</span>
+        <output id="areaOut" class="num">1.00</output></div>
+      <input id="area" type="range" min="0.02" max="1" step="0.01" value="1"
+        data-title-es="Fracción máxima del fotograma ocupada por el sujeto" data-title-en="Maximum fraction of the frame taken up by the subject">
+      <label class="chk" style="margin-top:6px"><input type="checkbox" id="trim" checked>
+        <span data-lang="es">recortar ejes al 1–99 %</span><span data-lang="en">clip axes to the 1st–99th percentile</span></label>
+      <div class="row" style="margin-top:8px">
+        <input id="q" type="text" data-ph-es="filtro por ruta o modelo" data-ph-en="filter by path or model">
+      </div>
+    </fieldset>
+
+    <fieldset class="fset">
+      <legend data-lang="es">Fechas</legend>
+      <legend data-lang="en">Dates</legend>
+      <div class="row"><span class="muted" data-lang="es">desde</span><span class="muted" data-lang="en">from</span><input id="d0" type="date"></div>
+      <div class="row"><span class="muted" data-lang="es">hasta</span><span class="muted" data-lang="en">to</span><input id="d1" type="date"></div>
+      <div class="row"><button id="dReset" class="ghost" style="padding:5px 9px"><span data-lang="es">Todo</span><span data-lang="en">All</span></button>
+        <span id="dInfo" class="muted" style="font-size:11px"></span></div>
+    </fieldset>
+
+    <fieldset class="fset">
+      <legend data-lang="es">Óptica</legend>
+      <legend data-lang="en">Optics</legend>
+      <div class="row"><span class="muted" data-lang="es">focal</span><span class="muted" data-lang="en">focal length</span>
+        <input id="f0" type="number" data-ph-es="mín" data-ph-en="min"><input id="f1" type="number" data-ph-es="máx" data-ph-en="max"></div>
+      <div class="row"><span class="muted">f/</span>
+        <input id="a0" type="number" step="0.1" data-ph-es="mín" data-ph-en="min"><input id="a1" type="number" step="0.1" data-ph-es="máx" data-ph-en="max"></div>
+      <div id="orientList"></div>
+    </fieldset>
+
+    <fieldset class="fset">
+      <legend data-lang="es">Referencias del visor</legend>
+      <legend data-lang="en">Viewfinder references</legend>
+      <label class="chk"><input type="checkbox" id="tThirds" checked><span data-lang="es">tercios</span><span data-lang="en">rule of thirds</span></label>
+      <label class="chk"><input type="checkbox" id="tArcs" checked><span data-lang="es">campo de medida M5 (8 mm)</span><span data-lang="en">M5 metering field (8 mm)</span></label>
+      <label class="chk"><input type="checkbox" id="tPatch" checked><span data-lang="es">parche del telémetro</span><span data-lang="en">rangefinder patch</span></label>
+      <div class="row"><span class="muted" data-lang="es">ancho del parche</span><span class="muted" data-lang="en">patch width</span>
+        <output id="patchOut" class="num">0.20</output></div>
+      <input id="patch" type="range" min="0.05" max="0.5" step="0.01" value="0.2">
+      <label class="chk"><input type="checkbox" id="tDens"><span data-lang="es">densidad por celdas</span><span data-lang="en">cell density</span></label>
+      <label class="chk"><input type="checkbox" id="tEll" checked><span data-lang="es">elipse del 50 %</span><span data-lang="en">50 % ellipse</span></label>
+      <label class="chk"><input type="checkbox" id="tPts" checked><span data-lang="es">fotogramas</span><span data-lang="en">frames</span></label>
+    </fieldset>
+
+    <fieldset class="fset">
+      <legend data-lang="es">Criterio</legend>
+      <legend data-lang="en">Criterion</legend>
+      <div class="row"><span class="muted" data-lang="es">centrada si r &lt;</span><span class="muted" data-lang="en">centred if r &lt;</span>
+        <input id="thr" type="number" step="0.01" value="0.15" style="width:70px"></div>
+      <div class="row"><span class="muted" data-lang="es">remuestreos</span><span class="muted" data-lang="en">resamples</span>
+        <input id="iters" type="number" step="1000" value="10000" style="width:90px"></div>
+    </fieldset>
+  </aside>
+
+  <main id="main">
+    <section class="panel">
+      <div class="head"><h2 data-lang="es">Selección</h2><h2 data-lang="en">Selection</h2><div id="warn" class="muted"></div></div>
+      <div class="kpi" id="kpi"></div>
+    </section>
+
+    <nav id="tabs" role="tablist" data-aria-es="Vistas" data-aria-en="Views">
+      <button role="tab" data-tab="encuadre" aria-selected="true"><span data-lang="es">Encuadre</span><span data-lang="en">Framing</span></button>
+      <button role="tab" data-tab="tono" aria-selected="false"><span data-lang="es">Tono</span><span data-lang="en">Tone</span></button>
+      <button role="tab" data-tab="color" aria-selected="false"><span data-lang="es">Color</span><span data-lang="en">Colour</span></button>
+      <button role="tab" data-tab="textura" aria-selected="false"><span data-lang="es">Textura</span><span data-lang="en">Texture</span></button>
+      <button role="tab" data-tab="conclusiones" aria-selected="false"><span data-lang="es">Conclusiones</span><span data-lang="en">Conclusions</span></button>
+      <button role="tab" data-tab="evolucion" aria-selected="false"><span data-lang="es">Evolución</span><span data-lang="en">Evolution</span></button>
+      <button role="tab" data-tab="explorar" aria-selected="false"><span data-lang="es">Explorar</span><span data-lang="en">Explore</span></button>
+    </nav>
+
+    <div id="tab-encuadre" role="tabpanel">
+
+    <section class="panel">
+      <div class="head">
+        <h2 data-lang="es">Vidrio deslustrado · centroide de cada fotograma</h2>
+        <h2 data-lang="en">Ground glass · centroid of every frame</h2>
+        <div class="toggles muted" id="legend"></div>
+      </div>
+      <div class="glass"><svg id="svGlass" viewBox="0 0 860 600" role="img"
+        data-aria-es="Posición del sujeto dentro del fotograma"
+        data-aria-en="Subject placement within the frame"></svg></div>
+      <p class="note" data-lang="es">Coordenadas normalizadas al semieje: el borde del rectángulo es
+        el límite del fotograma. La circunferencia segmentada reproduce el campo de
+        8 mm que mide la célula del M5, y el rectángulo interior el parche del
+        telémetro, cuyo tamaño aparente depende de la focal, así que ajústalo a la
+        que estés usando. Si la hipótesis del enfocar y recomponer fuese cierta, la
+        nube se concentraría dentro de esas dos figuras.</p>
+      <p class="note" data-lang="en">Coordinates normalised to the semi-axis: the edge of the
+        rectangle is the limit of the frame. The segmented circle reproduces the 8 mm
+        field read by the M5 cell, and the inner rectangle the rangefinder patch, whose
+        apparent size depends on the focal length, so set it to the one you are using.
+        If the focus-and-recompose hypothesis held, the cloud would gather inside those
+        two figures.</p>
+    </section>
+
+    <section class="panel">
+      <div class="grid2">
+        <div>
+          <div class="head"><h2 data-lang="es">Distribución acumulada de r</h2><h2 data-lang="en">Cumulative distribution of r</h2></div>
+          <svg id="svEcdf" viewBox="0 0 420 300" role="img"
+            data-aria-es="Función de distribución acumulada de r" data-aria-en="Cumulative distribution function of r"></svg>
+        </div>
+        <div>
+          <div class="head"><h2 data-lang="es">Marginales de x y de y</h2><h2 data-lang="en">Marginals of x and y</h2></div>
+          <svg id="svMarg" viewBox="0 0 420 300" role="img"
+            data-aria-es="Distribuciones marginales" data-aria-en="Marginal distributions"></svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="head"><h2 data-lang="es">Estadística por grupo</h2><h2 data-lang="en">Statistics by group</h2></div>
+      <table id="tGroups"><thead></thead><tbody></tbody></table>
+      <p class="note" data-lang="es">IC95 de la mediana por bootstrap percentil. r se mide en
+        semidiagonales, con corrección de relación de aspecto.</p>
+      <p class="note" data-lang="en">95 % CI of the median by percentile bootstrap. r is measured in
+        semi-diagonals, corrected for aspect ratio.</p>
+    </section>
+
+    <section class="panel">
+      <div class="head"><h2 data-lang="es">Contraste entre dos grupos</h2><h2 data-lang="en">Contrast between two groups</h2></div>
+      <div id="contrast"></div>
+    </section>
+
+    <section class="panel">
+      <div class="head"><h2 data-lang="es">Confusores: r frente a focal y a diafragma</h2><h2 data-lang="en">Confounders: r against focal length and aperture</h2></div>
+      <div class="grid2">
+        <svg id="svFocal" viewBox="0 0 420 300" role="img"
+          data-aria-es="r frente a focal" data-aria-en="r against focal length"></svg>
+        <svg id="svAp" viewBox="0 0 420 300" role="img"
+          data-aria-es="r frente a número f" data-aria-en="r against f-number"></svg>
+      </div>
+      <table id="tBins" style="margin-top:18px"><thead></thead><tbody></tbody></table>
+      <p class="note" data-lang="es">Una diferencia global entre cuerpos se disuelve a menudo al
+        estratificar por focal: si con un cuerpo usabas sobre todo un 35 y con el
+        otro un 90, lo que mides es el ángulo de campo, no el hábito de encuadre.
+        Compara las medianas dentro de cada banda de focal.</p>
+      <p class="note" data-lang="en">An overall difference between bodies often dissolves once you
+        stratify by focal length: if with one body you mostly used a 35 and with the
+        other a 90, what you are measuring is the angle of view, not the framing habit.
+        Compare the medians within each focal-length band.</p>
+    </section>
+    </div><!-- /encuadre -->
+
+    <div id="tab-tono" role="tabpanel" hidden>
+      <section class="panel">
+        <div class="head"><h2 data-lang="es">Perfil de zonas · once bandas iguales de L*</h2>
+          <h2 data-lang="en">Zone profile · eleven equal bands of L*</h2>
+          <div class="toggles muted" data-lang="es">V = gris del 18 %</div>
+          <div class="toggles muted" data-lang="en">V = 18 % grey</div></div>
+        <svg id="svZones" viewBox="0 0 860 300" role="img"
+          data-aria-es="Reparto de zonas" data-aria-en="Distribution of zones"></svg>
+        <p class="note" data-lang="es">Fracción media de superficie en cada zona. La forma del perfil
+          es la huella tonal del conjunto: un desplazamiento hacia la izquierda es
+          clave baja, un perfil ancho y plano es escena de mucha latitud, y dos
+          jorobas en los extremos delatan contraluz o alto contraste.</p>
+        <p class="note" data-lang="en">Mean fraction of the area in each zone. The shape of the
+          profile is the tonal signature of the set: a shift to the left is low key,
+          a broad flat profile is a scene of wide latitude, and two humps at the ends
+          betray backlighting or high contrast.</p>
+      </section>
+      <section class="panel">
+        <div class="grid2">
+          <div><div class="head"><h2 data-lang="es">Clave frente a latitud usada</h2><h2 data-lang="en">Key against latitude used</h2></div>
+            <svg id="svKey" viewBox="0 0 420 300" role="img"
+              data-aria-es="Clave frente a latitud" data-aria-en="Key against latitude"></svg></div>
+          <div><div class="head"><h2 data-lang="es">Acumuladas de tono</h2><h2 data-lang="en">Tone cumulatives</h2>
+            <select id="toneKey" class="sel"></select></div>
+            <svg id="svTone" viewBox="0 0 420 300" role="img"
+              data-aria-es="Acumulada de tono" data-aria-en="Tone cumulative"></svg></div>
+        </div>
+        <p class="note" data-lang="es">La clave se mide en diafragmas sobre el gris del 18 %, con la
+          luminancia linealizada según IEC 61966-2-1; la latitud es el intervalo entre
+          los percentiles 0,5 y 99,5, también en diafragmas. Un cuerpo con fotómetro
+          selectivo debería producir menos dispersión vertical si mides siempre igual.</p>
+        <p class="note" data-lang="en">Key is measured in stops above 18 % grey, with luminance
+          linearised according to IEC 61966-2-1; latitude is the interval between the
+          0.5th and 99.5th percentiles, also in stops. A body with a selective meter
+          should produce less vertical dispersion if you always meter the same way.</p>
+      </section>
+      <section class="panel">
+        <div class="head"><h2 data-lang="es">Estadística tonal por grupo</h2><h2 data-lang="en">Tonal statistics by group</h2></div>
+        <table id="tTone"><thead></thead><tbody></tbody></table>
+      </section>
+    </div>
+
+    <div id="tab-color" role="tabpanel" hidden>
+      <section class="panel">
+        <div class="head"><h2 data-lang="es">Plano a*b* · dominante media de cada fotograma</h2>
+          <h2 data-lang="en">a*b* plane · mean colour cast of every frame</h2>
+          <div class="toggles muted">
+            <label class="chk"><input type="checkbox" id="tSplit" checked><span data-lang="es">tono partido</span><span data-lang="en">split toning</span></label>
+            <label class="chk"><input type="checkbox" id="tCEll" checked><span data-lang="es">elipse del 50 %</span><span data-lang="en">50 % ellipse</span></label></div></div>
+        <div class="glass"><svg id="svAB" viewBox="0 0 560 560" role="img"
+          data-aria-es="Plano a b de CIELAB" data-aria-en="CIELAB a b plane"></svg></div>
+        <p class="note" data-lang="es">CIELAB con blanco D65. b* positivo es amarillo y negativo azul,
+          así que el eje vertical es la calidez; a* positivo es magenta y negativo verde.
+          Con el tono partido activado, cada flecha va de la dominante del cuarto más
+          oscuro a la del cuarto más claro del fotograma.</p>
+        <p class="note" data-lang="en">CIELAB with a D65 white point. Positive b* is yellow and
+          negative b* is blue, so the vertical axis is warmth; positive a* is magenta and
+          negative a* is green. With split toning enabled, each arrow runs from the cast of
+          the darkest quarter to that of the lightest quarter of the frame.</p>
+      </section>
+      <section class="panel">
+        <div class="grid2">
+          <div><div class="head"><h2 data-lang="es">Rosa de tonos</h2><h2 data-lang="en">Hue rose</h2></div>
+            <svg id="svRose" viewBox="0 0 420 340" role="img"
+              data-aria-es="Histograma circular de tono" data-aria-en="Circular histogram of hue"></svg></div>
+          <div><div class="head"><h2 data-lang="es">Acumuladas de color</h2><h2 data-lang="en">Colour cumulatives</h2>
+            <select id="colKey" class="sel"></select></div>
+            <svg id="svCol" viewBox="0 0 420 300" role="img"
+              data-aria-es="Acumulada de color" data-aria-en="Colour cumulative"></svg></div>
+        </div>
+        <p class="note" data-lang="es">La rosa reparte los fotogramas por su tono medio, ponderando por
+          la concentración circular, de modo que un fotograma casi neutro pesa poco.
+          La temperatura de color queda vacía cuando la dominante media se aleja del
+          locus planckiano: entonces la calidez se lee en b* y no en kelvin.</p>
+        <p class="note" data-lang="en">The rose distributes the frames by their mean hue, weighted by
+          the circular concentration, so that a nearly neutral frame counts for little.
+          Correlated colour temperature is left blank when the mean cast strays from the
+          Planckian locus: warmth is then read in b* rather than in kelvin.</p>
+      </section>
+      <section class="panel">
+        <div class="head"><h2 data-lang="es">Estadística de color por grupo</h2><h2 data-lang="en">Colour statistics by group</h2></div>
+        <table id="tColor"><thead></thead><tbody></tbody></table>
+        <p class="note warn" id="filmWarn"></p>
+      </section>
+    </div>
+
+    <div id="tab-textura" role="tabpanel" hidden>
+      <section class="panel">
+        <div class="grid2">
+          <div><div class="head"><h2 data-lang="es">Pendiente espectral frente a acutancia</h2><h2 data-lang="en">Spectral slope against acutance</h2></div>
+            <svg id="svTex" viewBox="0 0 420 300" role="img"
+              data-aria-es="Pendiente espectral" data-aria-en="Spectral slope"></svg></div>
+          <div><div class="head"><h2 data-lang="es">Superficie en foco frente a diafragma</h2><h2 data-lang="en">Area in focus against aperture</h2></div>
+            <svg id="svFoc" viewBox="0 0 420 300" role="img"
+              data-aria-es="Foco frente a diafragma" data-aria-en="Focus against aperture"></svg></div>
+        </div>
+        <p class="note" data-lang="es">El espectro de potencia de una escena natural cae como f<tspan>−α</tspan>
+          con α próximo a 2 (Field, 1987): valores altos indican escenas suaves y de
+          estructura gruesa, valores bajos, textura fina repartida por todo el cuadro.
+          La superficie en foco debe crecer al cerrar el diafragma; si no lo hace, o
+          estás enfocando al infinito, o el estimador se está comiendo el grano.</p>
+        <p class="note" data-lang="en">The power spectrum of a natural scene falls off as f<tspan>−α</tspan>
+          with α close to 2 (Field, 1987): high values indicate soft scenes of coarse
+          structure, low values fine texture spread across the whole frame. The area in
+          focus should grow as the aperture is stopped down; if it does not, either you
+          are focusing at infinity or the estimator is eating the grain.</p>
+      </section>
+      <section class="panel">
+        <div class="grid2">
+          <div><div class="head"><h2 data-lang="es">Acumuladas de textura</h2><h2 data-lang="en">Texture cumulatives</h2>
+            <select id="texKey" class="sel"></select></div>
+            <svg id="svTexE" viewBox="0 0 420 300" role="img"
+              data-aria-es="Acumulada de textura" data-aria-en="Texture cumulative"></svg></div>
+          <div><div class="head"><h2 data-lang="es">Anisotropía de bordes</h2><h2 data-lang="en">Edge anisotropy</h2></div>
+            <svg id="svAniso" viewBox="0 0 420 300" role="img"
+              data-aria-es="Anisotropia de bordes" data-aria-en="Edge anisotropy"></svg></div>
+        </div>
+      </section>
+      <section class="panel">
+        <div class="head"><h2 data-lang="es">Estadística de textura por grupo</h2><h2 data-lang="en">Texture statistics by group</h2></div>
+        <table id="tTex"><thead></thead><tbody></tbody></table>
+      </section>
+    </div>
+
+    <div id="tab-conclusiones" role="tabpanel" hidden>
+      <section class="panel">
+        <div class="head"><h2 data-lang="es">Veredicto</h2><h2 data-lang="en">Verdict</h2>
+          <div class="toggles"><span id="vAxis" class="muted"></span>
+            <button id="btnInforme" class="ghost" style="padding:5px 10px"><span data-lang="es">Informe de texto</span><span data-lang="en">Text report</span></button></div></div>
+        <div id="veredicto"></div>
+        <textarea id="informeTxt" readonly hidden spellcheck="false"
+          style="width:100%;min-height:280px;margin-top:14px;font-family:var(--mono);
+          font-size:11.5px;background:var(--panel);border:1px solid var(--rule2);
+          color:var(--ink);padding:10px;resize:vertical"></textarea>
+      </section>
+      <section class="panel">
+        <div class="head"><h2 data-lang="es">Arrastre · primer tercio frente a último tercio</h2>
+          <h2 data-lang="en">Drift · first third against last third</h2>
+          <div class="toggles muted" data-lang="es">en unidades de dispersión robusta</div>
+          <div class="toggles muted" data-lang="en">in units of robust dispersion</div></div>
+        <svg id="svDrift" viewBox="0 0 860 460" role="img"
+          data-aria-es="Arrastre de los descriptores" data-aria-en="Drift of the descriptors"></svg>
+        <p class="note" data-lang="es">Cada fila compara la mediana de las primeras sesiones con la de
+          las últimas, en desviaciones robustas para que las magnitudes sean comparables
+          entre sí: el punto hueco es el pasado y el relleno, el presente. La línea
+          pequeña de la derecha es la mediana móvil por sesiones y la marca vertical
+          ocre, cuando aparece, es el punto de ruptura de Pettitt: ahí se concentra el
+          cambio, y distingue un giro puntual (compraste un objetivo, cambiaste de
+          película) de una deriva gradual.</p>
+        <p class="note" data-lang="en">Each row compares the median of the earliest sessions with
+          that of the latest, in robust deviations so that the magnitudes are comparable
+          with one another: the hollow point is the past and the filled one the present.
+          The small line on the right is the rolling median by session, and the ochre
+          vertical mark, when it appears, is the Pettitt change point: that is where the
+          change concentrates, and it distinguishes an abrupt turn (you bought a lens,
+          you changed film) from a gradual drift.</p>
+      </section>
+      <section class="panel">
+        <div class="head"><h2 data-lang="es">Mapa de deriva</h2><h2 data-lang="en">Drift map</h2>
+          <div class="toggles muted" id="pcaInfo"></div></div>
+        <div class="glass"><svg id="svPCA" viewBox="0 0 860 560" role="img"
+          data-aria-es="Mapa de deriva por componentes principales"
+          data-aria-en="Drift map by principal components"></svg></div>
+        <p class="note" data-lang="es">Componentes principales sobre los descriptores estandarizados por
+          mediana y desviación robusta. Cada cruz es un fotograma y la línea une los
+          centroides de cada periodo en orden. Si tu forma de fotografiar cambia, esa
+          línea avanza en una dirección; si solo cambia lo que retratas de un año para
+          otro, deambula. Los ejes no significan nada por sí mismos: se leen por las
+          cargas que aparecen a los lados.</p>
+        <p class="note" data-lang="en">Principal components over the descriptors standardised by
+          median and robust deviation. Each cross is a frame and the line joins the
+          centroids of each period in order. If the way you photograph changes, that line
+          advances in one direction; if only your subject matter changes from one year to
+          the next, it wanders. The axes mean nothing in themselves: they are read through
+          the loadings printed alongside them.</p>
+      </section>
+      <section class="panel">
+        <div class="head"><h2 data-lang="es">Todos los contrastes</h2><h2 data-lang="en">All contrasts</h2>
+          <div class="toggles"><label class="chk"><input type="checkbox" id="fAll">
+            <span data-lang="es">incluir los que no pasan el umbral</span><span data-lang="en">include those below the threshold</span></label></div></div>
+        <table id="tFind"><thead></thead><tbody></tbody></table>
+        <p class="note" data-lang="es">Los contrastes se calculan sobre sesiones, mismo grupo y mismo
+          día, o bloques de 36 fotogramas cuando no hay fecha: una ráfaga de treinta
+          tomas de la misma escena cuenta como una observación. τ de Mann-Kendall sobre
+          el eje temporal, q de Benjamini-Hochberg sobre los <span id="nTests">—</span>
+          contrastes de esta tabla, y δ de Cliff entre el primer y el último tercio de
+          sesiones: 0 significa épocas indistinguibles y ±1, sin solape. Se declara
+          hallazgo con q &lt; 0,10 y |δ| ≥ 0,15. Ruptura es la fecha del cambio más
+          probable según Pettitt, solo cuando es significativa y no cae en los extremos.
+          Focal y diafragma dicen si la tendencia sobrevive dentro de una sola banda;
+          carpetas, si el signo se repite entre carpetas.</p>
+        <p class="note" data-lang="en">Contrasts are computed over sessions — same group and same
+          day, or blocks of 36 frames when there is no date: a burst of thirty exposures
+          of the same scene counts as one observation. Mann-Kendall τ over the time axis,
+          Benjamini-Hochberg q over the <span id="nTestsEn">—</span> contrasts in this
+          table, and Cliff's δ between the first and the last third of the sessions:
+          0 means indistinguishable periods and ±1 no overlap at all. A finding is
+          declared at q &lt; 0.10 and |δ| ≥ 0.15. Change point is the most probable date
+          of the change according to Pettitt, reported only when it is significant and
+          does not fall at either extreme. Focal length and aperture say whether the trend
+          survives within a single band; folders, whether the sign repeats across folders.</p>
+      </section>
+    </div>
+
+    <div id="tab-evolucion" role="tabpanel" hidden>
+      <section class="panel">
+        <div class="head"><h2 data-lang="es">Serie temporal</h2><h2 data-lang="en">Time series</h2>
+          <div class="toggles">
+            <label class="chk"><span data-lang="es">eje</span><span data-lang="en">axis</span>
+              <select id="evoAxis" class="sel">
+              <option value="t">fecha</option>
+              <option value="seq">secuencia de fotogramas</option></select></label>
+            <label class="chk"><span data-lang="es">variable</span><span data-lang="en">variable</span> <select id="evoKey" class="sel"></select></label>
+            <label class="chk"><span data-lang="es">ventana</span><span data-lang="en">window</span> <input id="evoWin" type="number" min="3" max="151"
+              step="2" value="15" style="width:62px"></label>
+            <label class="chk"><input type="checkbox" id="evoPts" checked><span data-lang="es">fotogramas</span><span data-lang="en">frames</span></label>
+          </div></div>
+        <div id="evoWarn" style="font-size:11px;margin-bottom:6px"></div>
+        <svg id="svEvo" viewBox="0 0 860 400" role="img"
+          data-aria-es="Serie temporal" data-aria-en="Time series"></svg>
+        <div id="evoStats"></div>
+        <p class="note" data-lang="es">La línea es la mediana móvil centrada sobre la ventana indicada,
+          en número de fotogramas, no en días: con una cadencia irregular una ventana
+          temporal fija dejaría tramos vacíos. La tendencia se contrasta con la τ de
+          Mann-Kendall, que solo mira el signo de todas las parejas y no supone
+          linealidad, y la pendiente de Sen da la magnitud. Si no hay fecha en el EXIF,
+          usa el eje de secuencia: en película el número de fotograma dentro del rollo
+          ya es una cronología.</p>
+        <p class="note" data-lang="en">The line is the centred rolling median over the window given,
+          counted in frames rather than days: with an irregular cadence a fixed time
+          window would leave empty stretches. The trend is tested with Mann-Kendall τ,
+          which looks only at the sign of every pair and assumes no linearity, and Sen's
+          slope gives the magnitude. If there is no date in the EXIF, use the sequence
+          axis: on film the frame number within the roll is already a chronology.</p>
+      </section>
+      <section class="panel">
+        <div class="head"><h2 data-lang="es">Panorama · medianas móviles de ocho variables</h2><h2 data-lang="en">Overview · rolling medians of eight variables</h2></div>
+        <svg id="svSparks" viewBox="0 0 860 460" role="img"
+          data-aria-es="Panorama de series" data-aria-en="Overview of series"></svg>
+        <p class="note" data-lang="es">Cada recuadro tiene su propia escala vertical, rotulada con el
+          mínimo y el máximo de la mediana móvil. Sirve para ver la forma de la
+          evolución, no para comparar magnitudes entre recuadros.</p>
+        <p class="note" data-lang="en">Each panel has its own vertical scale, labelled with the
+          minimum and maximum of the rolling median. It serves to see the shape of the
+          evolution, not to compare magnitudes across panels.</p>
+      </section>
+    </div>
+
+    <div id="tab-explorar" role="tabpanel" hidden>
+      <section class="panel">
+        <div class="head"><h2 data-lang="es">Dos variables cualesquiera</h2><h2 data-lang="en">Any two variables</h2>
+          <div class="toggles">
+            <label class="chk">x <select id="exX" class="sel"></select></label>
+            <label class="chk">y <select id="exY" class="sel"></select></label>
+            <label class="chk"><input type="checkbox" id="exLine" checked><span data-lang="es">recta de Theil-Sen</span><span data-lang="en">Theil-Sen line</span></label>
+          </div></div>
+        <svg id="svEx" viewBox="0 0 860 420" role="img"
+          data-aria-es="Exploración de dos variables" data-aria-en="Exploration of two variables"></svg>
+        <div id="exStats"></div>
+        <p class="note" data-lang="es">ρ de Spearman con p por permutación: no supone linealidad ni
+          normalidad, solo monotonía. La recta es de Theil-Sen, mediana de las
+          pendientes de todos los pares, insensible a valores atípicos. Correlación no
+          es causa: casi todo aquí está mediado por la focal, el diafragma y la luz.</p>
+        <p class="note" data-lang="en">Spearman's ρ with a permutation p: it assumes neither
+          linearity nor normality, only monotonicity. The line is Theil-Sen, the median of
+          the slopes of every pair, insensitive to outliers. Correlation is not causation:
+          nearly everything here is mediated by focal length, aperture and light.</p>
+      </section>
+      <section class="panel">
+        <div class="head"><h2 data-lang="es">Matriz de correlaciones de Spearman</h2><h2 data-lang="en">Matrix of Spearman correlations</h2>
+          <div class="toggles muted" data-lang="es">pulsa una celda para llevarla al gráfico</div>
+          <div class="toggles muted" data-lang="en">click a cell to send it to the plot</div></div>
+        <svg id="svCorr" viewBox="0 0 860 700" role="img"
+          data-aria-es="Matriz de correlaciones" data-aria-en="Correlation matrix"></svg>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div id="tip" role="status"></div>
+
+<script>
+"use strict";
+const PAL=["--g1","--g2","--g3","--g4","--g5","--g6","--g7","--g8","--g9",
+  "--g10","--g11","--g12"].map(v=>
+  getComputedStyle(document.documentElement).getPropertyValue(v).trim());
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt=(v,d=3)=>Number.isFinite(v)?v.toFixed(d):"—";
+const pct=v=>Number.isFinite(v)?(100*v).toFixed(1)+" %":"—";
+
+/* ---------- diccionario de cadenas generadas por JS ----------
+   Todo lo que el JS escribe por id o dibuja dentro de un SVG pasa por t().
+   OJO: en este fichero «t» es también el nombre de la marca de tiempo y de
+   media docena de contadores locales; los de las funciones que traducen se
+   han renombrado (ln, tb, tv, ri) para no eclipsar a la función. */
+const LANG=()=>document.documentElement.lang==="en"?"en":"es";
+const T={
+  es:{
+    noGroup:"sin grupo", noData:"sin datos", group:"grupo", n:"n",
+    frames:"fotogramas", frame:"fotograma", sessions:"sesiones", session:"sesión",
+    date:"fecha", perYear:"por año", perFrame:"por fotograma",
+    axSeq:"secuencia de fotogramas",
+    noneFound:"ningún descriptor pasa el umbral de evidencia",
+    // depuración y filtros
+    noGroupMatch:"ningún grupo con ese texto",
+    groupsActive:"activos", paletteWrap:"colores y se repiten",
+    palettePre:"la paleta tiene", withDate:"con fecha", withoutDate:"sin",
+    noneWithDate:"ningún fotograma con fecha",
+    csvMissing:"El CSV no trae ", csvMake:". Genera el fichero con subject_center.py.",
+    // mensajes de lienzo vacío
+    noZones:"el CSV no trae el perfil de zonas",
+    noColour:"el CSV no trae descriptores de color",
+    noHue:"el CSV no trae tono medio",
+    noDescriptors:"el CSV no trae descriptores",
+    noCsvCol:"el CSV no trae ", noDataFor:"sin datos de ", orJoin:" o ",
+    noDatedFrame:"ningún fotograma con fecha: prueba el eje de secuencia o --infer-date",
+    fewCols:"hacen falta más columnas numéricas",
+    pcaNeed:"hacen falta al menos 40 fotogramas en 12 sesiones",
+    tooFew:"muestra insuficiente",
+    // rótulos de ejes y de figuras
+    rSemi:"r (semidiagonales)", zone:"zona", areaPct:"% de superficie",
+    abWarm:"+b* AMARILLO · CÁLIDO", abCool:"−b* AZUL · FRÍO",
+    roseWarm:"b*+ cálido", roseCool:"b*− frío",
+    driftLegend:"PASADO ○ → PRESENTE ●",
+    driftSpark:"MEDIANA POR SESIONES · ruptura ▎",
+    axis:"EJE", focal35:"focal equiv. 35 mm", fnum:"número f",
+    // veredicto
+    axCapture:"eje: fecha de captura", axFileOrder:"eje: orden de archivo, sin fechas",
+    needA:"Hacen falta al menos 60 fotogramas repartidos en 12 sesiones para intentar una lectura. Ahora hay ",
+    needB:" fotogramas en ",
+    noDriftHead:"No hay deriva detectable.", noDriftA:"Ninguno de los ",
+    noDriftB:` descriptores contrastados pasa el umbral una vez corregida la
+      multiplicidad (q &lt; 0,10 y |δ| ≥ 0,15, sobre sesiones). Eso no prueba que no
+      cambies: con esta muestra el panel solo detecta desplazamientos de cierto tamaño.
+      Mira la tabla de abajo marcando la casilla para ver los que se quedan cerca.`,
+    oneChange:"Un cambio con respaldo", someChanges:"Cambios con respaldo",
+    fromV:"de ", toV:" a ", ci95:"IC95 ", ciTo:" a ",
+    breakTowards:"con el grueso del cambio hacia ", andMore:"Y ", inTable:" más en la tabla.",
+    caveats:"Reservas",
+    // tabla de hallazgos
+    thDescriptor:"descriptor", thReading:"lectura", thSesFr:"ses · fot",
+    thPast:"pasado", thPresent:"presente", thChange:"cambio", thCliff:"δ de Cliff",
+    thTau:"τ", thQ:"q", thBreak:"ruptura", thStrat:"focal · diafr.", thFolders:"carpetas",
+    yes:"sí", no:"no",
+    findEmptyA:"Ningún descriptor pasa el umbral. Marca la casilla para ver los ",
+    findEmptyB:" contrastes.",
+    // mapa de deriva
+    pcaDescriptors:"descriptores", pcaVsTime:"eje 1 frente al tiempo",
+    pcaStraight:"rectitud", pcaOriented:"deriva orientada", pcaWander:"sin dirección clara",
+    pcaWeakA:"el eje 1 solo recoge el ",
+    pcaWeakB:" % de la variabilidad: cualquier deriva es pequeña al lado de la dispersión entre fotogramas",
+    // evolución
+    evoMoreGroupsA:" grupo", evoMoreGroupsPl:"s", evoMoreGroupsB:" más sin dibujar: se muestran los ",
+    evoMoreGroupsC:" mayores",
+    evoOutA:" fotograma", evoOutB:" fuera del recorte 1–99 %",
+    evoThin:"una de cada ", evoThinB:" cruces dibujada",
+    thTauMK:"τ de Mann-Kendall", thZ:"z", thP:"p", thSen:"pendiente de Sen ",
+    thFirst:"primer valor", thLast:"último valor",
+    // explorar
+    thRho:"ρ de Spearman", thPerm:"p permutación", thTheil:"pendiente Theil-Sen",
+    // tabla por grupo del encuadre
+    thRmed:"r mediana", thCI:"IC95", thMAD:"MAD", thAbsX:"|x| med", thAbsY:"|y| med",
+    thInPatch:"dentro del parche",
+    // contraste
+    contrastNeedA:"Deja activos exactamente dos grupos con 8 fotogramas o más para calcular el contraste. Ahora hay ",
+    thMeasure:"medida", thValue:"valor",
+    cMedianR:"mediana de r", cDiffMed:"diferencia de medianas",
+    cPermP:"p permutación", cMWU:"U de Mann-Whitney", cCliff:"delta de Cliff",
+    cKS:"D de Kolmogórov-Smirnov",
+    cTwoSided:"bilateral sobre la diferencia de medianas",
+    cCliffRead:"0 = sin efecto, ±1 = separación total",
+    cKSRead:", sensible a forma y no solo a posición",
+    cMoreCentred:" encuadra más centrado",
+    cNoteA:"n=", cNoteB:` frente a `,
+    cNoteC:`. Antes de dar por buena una diferencia, comprueba en la tabla de bandas de
+      focal que se mantiene dentro de cada banda: el estimador de saliencia arrastra su
+      propio sesgo, común a los dos grupos, así que la diferencia es interpretable pero
+      el valor absoluto de r no.`,
+    // bandas de focal
+    thFocalMm:"focal (mm)", thBinN:" · n", thBinR:" · r med",
+    binsNoFocal:`Sin focal en el EXIF, habitual en escaneos de película. Estratifica con
+      el filtro de texto por ruta si organizas por objetivo.`,
+    // indicadores
+    kpiFrames:"fotogramas", kpiGroups:"grupos activos", kpiRmed:"r mediana",
+    kpiRmean:"r medio", kpiCentred:"centradas", kpiBiasX:"sesgo medio x",
+    kpiBiasY:"sesgo medio y",
+    smallSample:"muestra pequeña, los intervalos serán anchos",
+    // aviso de película
+    filmA:"Temperatura de color disponible en ", filmB:" de ",
+    filmC:` fotogramas; en el resto la dominante media queda lejos del locus planckiano.
+      En escaneos de película estos números describen la emulsión, el revelado y el
+      perfil del escáner tanto como la luz de la escena.`,
+    // reservas
+    resSessA:"Los contrastes se hacen sobre las ", resSessB:" sesiones (grupo y día, o bloques de 36 fotogramas sin fecha), no sobre los ",
+    resSessC:" fotogramas: una ráfaga de treinta tomas de la misma escena cuenta como una observación, no como treinta.",
+    resGearA:"El equipo también se mueve (", resGearB:"), así que parte de lo anterior puede ser consecuencia de eso y no de una decisión de encuadre.",
+    resStrat:": la tendencia se cae al mirar una sola banda de focal o de diafragma, señal de que la explica el equipo.",
+    resFolders:": el signo no se repite en la mayoría de las carpetas, así que puede venir de qué fotografiaste cada época más que de cómo lo fotografiaste.",
+    resColour:"Los descriptores de color de un escaneo describen la emulsión, el revelado y el perfil del escáner tanto como la luz de la escena.",
+    resSeq:"Sin fechas en el EXIF el eje es el orden de archivo dentro de cada carpeta, que solo es cronología si numeras de forma consecutiva.",
+    resFinal:"Todo esto es correlación con el tiempo, no una explicación. El panel no sabe si cambiaste de mirada, de ciudad, de laboratorio o de escáner.",
+    // informe de texto
+    repTitle:"INFORME DE DERIVA FOTOGRAFICA · ", repCorpusA:"Corpus: ",
+    repCorpusB:" fotogramas en ", repCorpusC:" sesiones y ", repCorpusD:" grupos",
+    repFromTo:", de ", repTo:" a ", repNoDates:", sin fechas (eje de secuencia).",
+    repCritA:"Criterio: q de Benjamini-Hochberg < 0,10 sobre ",
+    repCritB:" contrastes y |delta de Cliff| >= 0,15, calculados sobre sesiones.",
+    repFindings:"HALLAZGOS", repNoFindings:"HALLAZGOS: ninguno pasa el umbral.",
+    repBreak:"; ruptura hacia ", repRestA:"Sin evidencia suficiente: ",
+    repRestB:" descriptores más.", repCaveats:"RESERVAS",
+    repFooter:"Generado con subject_center.py y analisis-centrado.html.",
+    approxFrame:"≈ fotograma ",
+    exportName:"seleccion_centrado.csv",
+    // unidades
+    uStops:"diafragmas", uLevels:"niveles",
+  },
+  en:{
+    noGroup:"no group", noData:"no data", group:"group", n:"n",
+    frames:"frames", frame:"frame", sessions:"sessions", session:"session",
+    date:"date", perYear:"per year", perFrame:"per frame",
+    axSeq:"frame sequence",
+    noneFound:"no descriptor passes the evidence threshold",
+    noGroupMatch:"no group matches that text",
+    groupsActive:"active", paletteWrap:"colours and they repeat",
+    palettePre:"the palette has", withDate:"dated", withoutDate:"undated",
+    noneWithDate:"no dated frame",
+    csvMissing:"The CSV lacks ", csvMake:". Generate the file with subject_center.py.",
+    noZones:"the CSV carries no zone profile",
+    noColour:"the CSV carries no colour descriptors",
+    noHue:"the CSV carries no mean hue",
+    noDescriptors:"the CSV carries no descriptors",
+    noCsvCol:"the CSV carries no ", noDataFor:"no data for ", orJoin:" or ",
+    noDatedFrame:"no frame carries a date: try the sequence axis or --infer-date",
+    fewCols:"more numeric columns are needed",
+    pcaNeed:"at least 40 frames across 12 sessions are needed",
+    tooFew:"sample too small",
+    rSemi:"r (semi-diagonals)", zone:"zone", areaPct:"% of area",
+    abWarm:"+b* YELLOW · WARM", abCool:"−b* BLUE · COOL",
+    roseWarm:"b*+ warm", roseCool:"b*− cool",
+    driftLegend:"PAST ○ → PRESENT ●",
+    driftSpark:"MEDIAN BY SESSION · change point ▎",
+    axis:"AXIS", focal35:"35 mm equiv. focal length", fnum:"f-number",
+    axCapture:"axis: capture date", axFileOrder:"axis: file order, no dates",
+    needA:"At least 60 frames spread over 12 sessions are needed to attempt a reading. There are currently ",
+    needB:" frames in ",
+    noDriftHead:"No detectable drift.", noDriftA:"None of the ",
+    noDriftB:` descriptors tested passes the threshold once multiplicity is corrected
+      (q &lt; 0.10 and |δ| ≥ 0.15, over sessions). That does not prove you are not
+      changing: with this sample the panel only detects shifts above a certain size.
+      Look at the table below, ticking the box, to see the ones that come close.`,
+    oneChange:"One supported change", someChanges:"Supported changes",
+    fromV:"from ", toV:" to ", ci95:"95 % CI ", ciTo:" to ",
+    breakTowards:"with the bulk of the change around ", andMore:"And ", inTable:" more in the table.",
+    caveats:"Caveats",
+    thDescriptor:"descriptor", thReading:"reading", thSesFr:"ses · fr",
+    thPast:"past", thPresent:"present", thChange:"change", thCliff:"Cliff's δ",
+    thTau:"τ", thQ:"q", thBreak:"change point", thStrat:"focal · aperture", thFolders:"folders",
+    yes:"yes", no:"no",
+    findEmptyA:"No descriptor passes the threshold. Tick the box to see all ",
+    findEmptyB:" contrasts.",
+    pcaDescriptors:"descriptors", pcaVsTime:"axis 1 against time",
+    pcaStraight:"straightness", pcaOriented:"oriented drift", pcaWander:"no clear direction",
+    pcaWeakA:"axis 1 accounts for only ",
+    pcaWeakB:" % of the variability: any drift is small beside the dispersion between frames",
+    evoMoreGroupsA:" group", evoMoreGroupsPl:"s", evoMoreGroupsB:" more not drawn: the ",
+    evoMoreGroupsC:" largest are shown",
+    evoOutA:" frame", evoOutB:" outside the 1–99 % clip",
+    evoThin:"one cross in every ", evoThinB:" drawn",
+    thTauMK:"Mann-Kendall τ", thZ:"z", thP:"p", thSen:"Sen's slope ",
+    thFirst:"first value", thLast:"last value",
+    thRho:"Spearman's ρ", thPerm:"permutation p", thTheil:"Theil-Sen slope",
+    thRmed:"median r", thCI:"95 % CI", thMAD:"MAD", thAbsX:"median |x|", thAbsY:"median |y|",
+    thInPatch:"inside the patch",
+    contrastNeedA:"Leave exactly two groups of 8 frames or more active to compute the contrast. There are currently ",
+    thMeasure:"measure", thValue:"value",
+    cMedianR:"median r", cDiffMed:"difference of medians",
+    cPermP:"permutation p", cMWU:"Mann-Whitney U", cCliff:"Cliff's delta",
+    cKS:"Kolmogorov-Smirnov D",
+    cTwoSided:"two-sided on the difference of medians",
+    cCliffRead:"0 = no effect, ±1 = complete separation",
+    cKSRead:", sensitive to shape and not only to location",
+    cMoreCentred:" frames more centrally",
+    cNoteA:"n=", cNoteB:` against `,
+    cNoteC:`. Before taking a difference at face value, check in the focal-band table
+      that it holds within each band: the saliency estimator carries a bias of its own,
+      common to both groups, so the difference is interpretable but the absolute value
+      of r is not.`,
+    thFocalMm:"focal length (mm)", thBinN:" · n", thBinR:" · median r",
+    binsNoFocal:`No focal length in the EXIF, common in film scans. Stratify with the
+      path text filter if you organise by lens.`,
+    kpiFrames:"frames", kpiGroups:"active groups", kpiRmed:"median r",
+    kpiRmean:"mean r", kpiCentred:"centred", kpiBiasX:"mean x bias",
+    kpiBiasY:"mean y bias",
+    smallSample:"small sample, the intervals will be wide",
+    filmA:"Correlated colour temperature available in ", filmB:" of ",
+    filmC:` frames; in the rest the mean cast lies far from the Planckian locus. In film
+      scans these figures describe the emulsion, the processing and the scanner profile
+      as much as the light of the scene.`,
+    resSessA:"Contrasts are computed over the ", resSessB:" sessions (group and day, or blocks of 36 frames when undated), not over the ",
+    resSessC:" frames: a burst of thirty exposures of the same scene counts as one observation, not as thirty.",
+    resGearA:"The equipment moves too (", resGearB:"), so part of the above may follow from that rather than from a framing decision.",
+    resStrat:": the trend collapses when a single focal-length or aperture band is examined, a sign that the equipment explains it.",
+    resFolders:": the sign does not repeat across most folders, so it may come from what you photographed in each period rather than from how you photographed it.",
+    resColour:"The colour descriptors of a scan describe the emulsion, the processing and the scanner profile as much as the light of the scene.",
+    resSeq:"With no EXIF dates the axis is the file order within each folder, which is only a chronology if you number consecutively.",
+    resFinal:"All of this is correlation with time, not an explanation. The panel does not know whether you changed your eye, your city, your lab or your scanner.",
+    repTitle:"PHOTOGRAPHIC DRIFT REPORT · ", repCorpusA:"Corpus: ",
+    repCorpusB:" frames in ", repCorpusC:" sessions and ", repCorpusD:" groups",
+    repFromTo:", from ", repTo:" to ", repNoDates:", undated (sequence axis).",
+    repCritA:"Criterion: Benjamini-Hochberg q < 0.10 over ",
+    repCritB:" contrasts and |Cliff's delta| >= 0.15, computed over sessions.",
+    repFindings:"FINDINGS", repNoFindings:"FINDINGS: none passes the threshold.",
+    repBreak:"; change point around ", repRestA:"Insufficient evidence: ",
+    repRestB:" further descriptors.", repCaveats:"CAVEATS",
+    repFooter:"Generated with subject_center.py and analisis-centrado.html.",
+    approxFrame:"≈ frame ",
+    exportName:"subject_placement_selection.csv",
+    uStops:"stops", uLevels:"levels",
+  }
+};
+function t(k){ const d=T[LANG()]||T.es; return d[k]!==undefined?d[k]:(T.es[k]!==undefined?T.es[k]:k); }
+/* «sin grupo» es la clave interna del grupo vacío; solo se traduce al pintarla. */
+const gname=g=>g==="sin grupo"?t("noGroup"):g;
+
+/* ---------- lectura de CSV ---------- */
+function parseCSV(text){
+  const rows=[]; let row=[], field="", q=false;
+  text=text.replace(/^\uFEFF/,"");
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){
+      if(c==='"'){ if(text[i+1]==='"'){field+='"';i++;} else q=false; }
+      else field+=c;
+    }else if(c==='"') q=true;
+    else if(c===","){ row.push(field); field=""; }
+    else if(c==="\n"||c==="\r"){
+      if(c==="\r"&&text[i+1]==="\n") i++;
+      row.push(field); field="";
+      if(row.length>1||row[0]!=="") rows.push(row);
+      row=[];
+    }else field+=c;
+  }
+  if(field!==""||row.length) { row.push(field); rows.push(row); }
+  if(!rows.length) return {head:[],data:[]};
+  const head=rows[0].map(h=>h.trim());
+  const TEXT=new Set(["path","group","orientation","make","model","lens",
+    "datetime","method","error","film","body","note"]);
+  const data=rows.slice(1).map(r=>{
+    const o={};
+    head.forEach((h,i)=>{
+      let v=(r[i]??"").trim();
+      if(TEXT.has(h)){o[h]=v;return;}
+      if(v===""||v==="nan"||v==="NaN"){o[h]=NaN;return;}
+      const n=Number(v); o[h]=Number.isFinite(n)?n:v;
+    });
+    return o;
+  });
+  return {head,data};
+}
+
+/* ---------- estadística ---------- */
+function quickselect(a,k){ // k-ésimo menor, in situ
+  let lo=0,hi=a.length-1;
+  while(lo<hi){
+    const p=a[(lo+hi)>>1]; let i=lo,j=hi;
+    while(i<=j){ while(a[i]<p)i++; while(a[j]>p)j--;
+      if(i<=j){const t=a[i];a[i]=a[j];a[j]=t;i++;j--;} }
+    if(k<=j) hi=j; else if(k>=i) lo=i; else break;
+  }
+  return a[k];
+}
+function medianOf(arr){
+  const n=arr.length; if(!n) return NaN;
+  const a=Float64Array.from(arr);
+  if(n&1) return quickselect(a,(n-1)>>1);
+  const hi=quickselect(a,n>>1);
+  let lo=-Infinity; for(let i=0;i<(n>>1);i++) if(a[i]>lo) lo=a[i];
+  return (lo+hi)/2;
+}
+const mean=a=>a.reduce((s,v)=>s+v,0)/(a.length||1);
+function quantile(sorted,p){
+  const n=sorted.length; if(!n) return NaN;
+  const h=(n-1)*p, lo=Math.floor(h), hi=Math.ceil(h);
+  return sorted[lo]+(h-lo)*(sorted[hi]-sorted[lo]);
+}
+const madOf=a=>{const m=medianOf(a); return medianOf(a.map(v=>Math.abs(v-m)));};
+function mulberry32(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;
+  let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;
+  return ((t^t>>>14)>>>0)/4294967296;};}
+function bootstrapCI(v,iters,seed){
+  const n=v.length; if(n<6) return [NaN,NaN];
+  const rnd=mulberry32(seed), meds=new Float64Array(iters), buf=new Float64Array(n);
+  for(let b=0;b<iters;b++){
+    for(let i=0;i<n;i++) buf[i]=v[(rnd()*n)|0];
+    meds[b]=medianOf(buf);
+  }
+  const s=Array.from(meds).sort((p,q)=>p-q);
+  return [quantile(s,.025),quantile(s,.975)];
+}
+function permTest(a,b,iters,seed){
+  const obs=medianOf(a)-medianOf(b);
+  const n=a.length,N=n+b.length,pool=Float64Array.from([...a,...b]);
+  const rnd=mulberry32(seed); let ge=0;
+  const buf=new Float64Array(N);
+  for(let it=0;it<iters;it++){
+    buf.set(pool);
+    for(let i=N-1;i>0;i--){const j=(rnd()*(i+1))|0;const t=buf[i];buf[i]=buf[j];buf[j]=t;}
+    const d=medianOf(buf.subarray(0,n))-medianOf(buf.subarray(n));
+    if(Math.abs(d)>=Math.abs(obs)-1e-15) ge++;
+  }
+  return {diff:obs,p:(ge+1)/(iters+1)};
+}
+function erfc(x){ // Numerical Recipes erfcc, error < 1.2e-7
+  const z=Math.abs(x),t=2/(2+z);
+  const r=t*Math.exp(-z*z-1.26551223+t*(1.00002368+t*(.37409196+t*(.09678418+
+    t*(-.18628806+t*(.27886807+t*(-1.13520398+t*(1.48851587+
+    t*(-.82215223+t*.17087277)))))))));
+  return x>=0?r:2-r;
+}
+const normP=z=>Math.min(1,erfc(Math.abs(z)/Math.SQRT2)); // p bilateral
+function mannWhitney(a,b){
+  const n1=a.length,n2=b.length,N=n1+n2;
+  const all=[...a.map(v=>[v,0]),...b.map(v=>[v,1])].sort((p,q)=>p[0]-q[0]);
+  const rank=new Float64Array(N); let i=0,tie=0;
+  while(i<N){
+    let j=i; while(j+1<N&&all[j+1][0]===all[i][0]) j++;
+    const r=(i+j+2)/2, t=j-i+1; tie+=t*t*t-t;
+    for(let k=i;k<=j;k++) rank[k]=r;
+    i=j+1;
+  }
+  let R1=0; for(let k=0;k<N;k++) if(all[k][1]===0) R1+=rank[k];
+  const U=R1-n1*(n1+1)/2;
+  const mu=n1*n2/2;
+  const sd=Math.sqrt(n1*n2/12*((N+1)-tie/(N*(N-1))));
+  const z=sd>0?(U-mu)/sd:0;
+  return {U,z,p:normP(z),delta:2*U/(n1*n2)-1};
+}
+function ksTest(a,b){
+  const A=[...a].sort((p,q)=>p-q),B=[...b].sort((p,q)=>p-q);
+  let i=0,j=0,d=0;
+  while(i<A.length&&j<B.length){
+    const x=Math.min(A[i],B[j]);
+    while(i<A.length&&A[i]<=x) i++;
+    while(j<B.length&&B[j]<=x) j++;
+    d=Math.max(d,Math.abs(i/A.length-j/B.length));
+  }
+  const ne=Math.sqrt(A.length*B.length/(A.length+B.length)), l=(ne+.12+.11/ne)*d;
+  // serie de Kolmogorov con criterio de convergencia: para lambda pequeno
+  // oscila y no converge, caso en el que la probabilidad tiende a 1
+  const a2=-2*l*l; let fac=2,sum=0,prev=0,p=1;
+  for(let k=1;k<=100;k++){
+    const term=fac*Math.exp(a2*k*k);
+    sum+=term;
+    if(Math.abs(term)<=1e-3*prev||Math.abs(term)<=1e-8*sum){p=sum;break;}
+    fac=-fac; prev=Math.abs(term);
+  }
+  return {D:d,p:Math.min(1,Math.max(0,p))};
+}
+function cov2(xs,ys){
+  const mx=mean(xs),my=mean(ys); let a=0,b=0,c=0;
+  for(let i=0;i<xs.length;i++){const dx=xs[i]-mx,dy=ys[i]-my;a+=dx*dx;b+=dx*dy;c+=dy*dy;}
+  const n=Math.max(1,xs.length-1);
+  return {mx,my,sxx:a/n,sxy:b/n,syy:c/n};
+}
+function ellipse50(xs,ys){ // contorno del 50 % gaussiano: chi2_2(0.5) = 1.3863
+  const {mx,my,sxx,sxy,syy}=cov2(xs,ys);
+  const tr=sxx+syy,det=sxx*syy-sxy*sxy;
+  const disc=Math.max(0,tr*tr/4-det);
+  const l1=tr/2+Math.sqrt(disc),l2=tr/2-Math.sqrt(disc);
+  const ang=0.5*Math.atan2(2*sxy,sxx-syy);   // estable si sxy tiende a 0
+  const k=Math.sqrt(1.3863);
+  return {mx,my,a:k*Math.sqrt(Math.max(l1,0)),b:k*Math.sqrt(Math.max(l2,0)),ang};
+}
+
+/* ---------- multiplicidad, efecto y reduccion de dimension ---------- */
+function benjaminiHochberg(ps){
+  // Con 30 descriptores contrastados a 0,05 salen una o dos tendencias
+  // falsas por puro azar. El procedimiento de Benjamini y Hochberg (1995)
+  // controla la proporcion esperada de falsos hallazgos entre los declarados.
+  const idx=ps.map((p,i)=>[p,i]).filter(([p])=>Number.isFinite(p))
+    .sort((a,b)=>a[0]-b[0]);
+  const m=idx.length, q=new Array(ps.length).fill(NaN);
+  let prev=1;
+  for(let k=m-1;k>=0;k--){
+    const [p,i]=idx[k];
+    prev=Math.min(prev,p*m/(k+1));
+    q[i]=Math.min(1,prev);
+  }
+  return q;
+}
+function bootDiffMedian(a,b,iters=2000,seed=17){
+  const rnd=mulberry32(seed), na=a.length, nb=b.length;
+  const A=new Float64Array(na), B=new Float64Array(nb), out=new Float64Array(iters);
+  for(let it=0;it<iters;it++){
+    for(let i=0;i<na;i++) A[i]=a[(rnd()*na)|0];
+    for(let i=0;i<nb;i++) B[i]=b[(rnd()*nb)|0];
+    out[it]=medianOf(B)-medianOf(A);
+  }
+  const s=Array.from(out).sort((p,q)=>p-q);
+  return [quantile(s,.025),quantile(s,.975)];
+}
+function jacobiEigen(M,iters=100){
+  // Rotaciones de Jacobi: para una matriz simetrica pequena da todos los
+  // autovalores y autovectores sin dependencias externas.
+  const n=M.length;
+  let A=M.map(r=>r.slice());
+  let V=Array.from({length:n},(_,i)=>Array.from({length:n},(_,j)=>i===j?1:0));
+  for(let sweep=0;sweep<iters;sweep++){
+    let off=0;
+    for(let i=0;i<n-1;i++) for(let j=i+1;j<n;j++) off+=A[i][j]*A[i][j];
+    if(off<1e-18) break;
+    for(let p=0;p<n-1;p++) for(let q=p+1;q<n;q++){
+      if(Math.abs(A[p][q])<1e-14) continue;
+      const theta=(A[q][q]-A[p][p])/(2*A[p][q]);
+      const t=Math.sign(theta||1)/(Math.abs(theta)+Math.sqrt(theta*theta+1));
+      const c=1/Math.sqrt(t*t+1), s=t*c;
+      for(let k=0;k<n;k++){
+        const akp=A[k][p], akq=A[k][q];
+        A[k][p]=c*akp-s*akq; A[k][q]=s*akp+c*akq;
+      }
+      for(let k=0;k<n;k++){
+        const apk=A[p][k], aqk=A[q][k];
+        A[p][k]=c*apk-s*aqk; A[q][k]=s*apk+c*aqk;
+      }
+      for(let k=0;k<n;k++){
+        const vkp=V[k][p], vkq=V[k][q];
+        V[k][p]=c*vkp-s*vkq; V[k][q]=s*vkp+c*vkq;
+      }
+    }
+  }
+  const ord=Array.from({length:n},(_,i)=>i).sort((a,b)=>A[b][b]-A[a][a]);
+  return {values:ord.map(i=>A[i][i]),
+          vectors:ord.map(i=>V.map(row=>row[i]))};
+}
+function robustPCA(rows,keys){
+  // Estandarizacion por mediana y MAD, no por media y desviacion: un puñado
+  // de fotogramas extremos no debe fijar la escala de los ejes.
+  const use=keys.filter(k=>rows.filter(r=>Number.isFinite(r[k])).length>=0.7*rows.length);
+  if(use.length<3) return null;
+  const cen={}, sc={};
+  for(const k of use){
+    const v=rows.map(r=>r[k]).filter(Number.isFinite);
+    cen[k]=medianOf(v);
+    const md=madOf(v)*1.4826;
+    sc[k]=md>1e-12?md:1;
+  }
+  const Z=rows.map(r=>use.map(k=>{
+    const v=Number.isFinite(r[k])?r[k]:cen[k];       // ausentes a la mediana
+    return Math.max(-6,Math.min(6,(v-cen[k])/sc[k]));// recorte a 6 MAD
+  }));
+  const p=use.length, n=Z.length;
+  const C=Array.from({length:p},()=>new Array(p).fill(0));
+  for(const z of Z) for(let i=0;i<p;i++) for(let j=i;j<p;j++) C[i][j]+=z[i]*z[j];
+  for(let i=0;i<p;i++) for(let j=i;j<p;j++){C[i][j]/=(n-1); C[j][i]=C[i][j];}
+  const e=jacobiEigen(C);
+  const tot=e.values.reduce((a,v)=>a+Math.max(0,v),0)||1;
+  // signo canonico: que la primera carga dominante sea positiva
+  const fix=v=>{const i=v.reduce((b,x,k)=>Math.abs(x)>Math.abs(v[b])?k:b,0);
+    return v[i]<0?v.map(x=>-x):v;};
+  const pc=[fix(e.vectors[0]),fix(e.vectors[1])];
+  const proj=Z.map(z=>[0,1].map(c=>z.reduce((a,v,i)=>a+v*pc[c][i],0)));
+  return {keys:use,pc,proj,
+          varExp:[e.values[0]/tot,e.values[1]/tot],
+          loadings:[0,1].map(c=>use.map((k,i)=>({k,w:pc[c][i]}))
+            .sort((a,b)=>Math.abs(b.w)-Math.abs(a.w)))};
+}
+
+/* ---------- sesiones, ruptura y rectitud ---------- */
+function sessionKeyOf(r,ax){
+  return (r.group||"sin grupo")+"|"+(ax==="t"?isoDay(r.t):Math.floor(((r.seq||1)-1)/36));
+}
+function sessionsOf(rows,ax,keys){
+  // Los fotogramas de una misma sesion comparten escena, luz y pelicula:
+  // tratarlos como observaciones independientes multiplica la evidencia por
+  // el tamano de la rafaga (pseudorreplicacion) y fabrica significacion de
+  // la nada. Los contrastes se hacen sobre la mediana de cada sesion: mismo
+  // grupo y mismo dia natural cuando hay fecha, o bloques de 36 fotogramas
+  // consecutivos (un rollo de 135) cuando no la hay.
+  keys=keys||Object.keys(SENTIDO);
+  const m=new Map();
+  for(const r of rows){
+    if(!Number.isFinite(r[ax])) continue;
+    const k=sessionKeyOf(r,ax);
+    if(!m.has(k)) m.set(k,[]);
+    m.get(k).push(r);
+  }
+  const out=[...m.values()].map(fr=>{
+    const s2={group:fr[0].group||"sin grupo",frames:fr.length};
+    s2[ax]=medianOf(fr.map(r=>r[ax]));
+    for(const key of keys){
+      const v=fr.map(r=>r[key]).filter(Number.isFinite);
+      s2[key]=v.length?medianOf(v):NaN;
+    }
+    return s2;
+  });
+  out.sort((a,b)=>a[ax]-b[ax]);
+  return out;
+}
+function pettitt(x,y){
+  // Prueba de Pettitt (1979): localiza el punto de ruptura mas probable sin
+  // suponer forma alguna. U_t se acumula con la identidad
+  // U_t = U_{t-1} + #{y_j > y_t} - #{y_j < y_t}, que deja el calculo en
+  // O(n log n); la significacion usa la aproximacion clasica
+  // p = 2 exp(-6 K^2 / (n^3 + n^2)).
+  const n=y.length;
+  if(n<12) return {p:NaN,at:NaN,idx:-1,K:NaN};
+  const sorted=[...y].sort((a,b)=>a-b);
+  const lower=v=>{let lo=0,hi=n;while(lo<hi){const m2=(lo+hi)>>1;if(sorted[m2]<v)lo=m2+1;else hi=m2;}return lo;};
+  const upper=v=>{let lo=0,hi=n;while(lo<hi){const m2=(lo+hi)>>1;if(sorted[m2]<=v)lo=m2+1;else hi=m2;}return lo;};
+  let U=0,K=0,ki=0;
+  for(let t=0;t<n-1;t++){
+    const less=lower(y[t]), greater=n-upper(y[t]);
+    U+=greater-less;
+    if(Math.abs(U)>K){K=Math.abs(U);ki=t;}
+  }
+  return {p:Math.min(1,2*Math.exp(-6*K*K/(n*n*n+n*n))),K,idx:ki,
+          at:(x[ki]+x[Math.min(n-1,ki+1)])/2};
+}
+function straightness(cent){
+  // Rectitud de una trayectoria: desplazamiento neto dividido por longitud
+  // recorrida. 1 es avance en linea recta y valores bajos, deambular.
+  if(cent.length<3) return NaN;
+  let L=0;
+  for(let i=1;i<cent.length;i++)
+    L+=Math.hypot(cent[i][0]-cent[i-1][0],cent[i][1]-cent[i-1][1]);
+  if(L<=1e-12) return NaN;
+  return Math.hypot(cent[cent.length-1][0]-cent[0][0],
+                    cent[cent.length-1][1]-cent[0][1])/L;
+}
+function centroidsByBlocks(pts,k){
+  const n=pts.length, out=[], per=Math.floor(n/k);
+  for(let i=0;i<k;i++){
+    const a=i*per, b=i===k-1?n:(i+1)*per;
+    const bl=pts.slice(a,b);
+    if(bl.length) out.push([medianOf(bl.map(p=>p[0])),medianOf(bl.map(p=>p[1]))]);
+  }
+  return out;
+}
+function straightnessTest(pts,k,iters=400,seed=23){
+  // El p sale de permutar el orden temporal de las sesiones y recomputar la
+  // rectitud: mide si el avance observado podria salir de un deambular.
+  const obs=straightness(centroidsByBlocks(pts,k));
+  if(!Number.isFinite(obs)) return {S:NaN,p:NaN};
+  const rnd=mulberry32(seed), sh=pts.slice(); let ge=0;
+  for(let it=0;it<iters;it++){
+    for(let i=sh.length-1;i>0;i--){const j=(rnd()*(i+1))|0;const t=sh[i];sh[i]=sh[j];sh[j]=t;}
+    if(straightness(centroidsByBlocks(sh,k))>=obs-1e-15) ge++;
+  }
+  return {S:obs,p:(ge+1)/(iters+1)};
+}
+
+/* ---------- motor de hallazgos ---------- */
+// Solo se contrastan descriptores que el panel sabe poner en palabras: la
+// pareja de frases define a la vez el catalogo y la direccion de lectura.
+const SENTIDO={
+  key_stops:{es:["expones más claro","expones más oscuro"],
+             en:["you expose lighter","you expose darker"]},
+  lstar_median:{es:["fotogramas más claros","fotogramas más oscuros"],
+                en:["lighter frames","darker frames"]},
+  dr_stops:{es:["aprovechas más latitud","aprovechas menos latitud"],
+            en:["you use more latitude","you use less latitude"]},
+  contrast_sd:{es:["más contraste","menos contraste"],
+               en:["more contrast","less contrast"]},
+  clip_lo:{es:["más sombras al negro","menos sombras al negro"],
+           en:["more shadows clipped to black","fewer shadows clipped to black"]},
+  clip_hi:{es:["más luces quemadas","menos luces quemadas"],
+           en:["more highlights blown","fewer highlights blown"]},
+  tone_entropy:{es:["reparto tonal más variado","reparto tonal más concentrado"],
+                en:["more varied tonal distribution","more concentrated tonal distribution"]},
+  lab_b:{es:["color más cálido","color más frío"],
+         en:["warmer colour","cooler colour"]},
+  lab_a:{es:["dominante más magenta","dominante más verde"],
+         en:["more magenta cast","more green cast"]},
+  chroma_mean:{es:["más saturado","más desaturado"],
+               en:["more saturated","more desaturated"]},
+  chroma_p95:{es:["colores puntuales más intensos","colores puntuales más apagados"],
+              en:["stronger accent colours","more muted accent colours"]},
+  colorfulness:{es:["más colorido","menos colorido"],
+                en:["more colourful","less colourful"]},
+  cct_k:{es:["luz más azulada","luz más cálida"],
+         en:["bluer light","warmer light"]},
+  hue_conc:{es:["gama de tonos más concentrada","gama de tonos más dispersa"],
+            en:["more concentrated hue range","more dispersed hue range"]},
+  split_dab:{es:["más tono partido entre luces y sombras","menos tono partido"],
+             en:["more split toning between highlights and shadows","less split toning"]},
+  acutance:{es:["más microdetalle","menos microdetalle"],
+            en:["more micro-detail","less micro-detail"]},
+  grain_levels:{es:["más grano","menos grano"],
+                en:["more grain","less grain"]},
+  focus_frac:{es:["más superficie en foco","menos superficie en foco"],
+              en:["more area in focus","less area in focus"]},
+  edge_vert:{es:["más estructura vertical","más estructura horizontal"],
+             en:["more vertical structure","more horizontal structure"]},
+  alpha_spectral:{es:["escenas más suaves, con menos textura fina","escenas con más textura fina"],
+                  en:["softer scenes, with less fine texture","scenes with more fine texture"]},
+  blur_all:{es:["fotogramas más desenfocados","fotogramas más nítidos"],
+            en:["blurrier frames","sharper frames"]},
+  blur_bg:{es:["fondos más desenfocados","fondos más nítidos"],
+           en:["blurrier backgrounds","sharper backgrounds"]},
+  blur_sep:{es:["más separación entre sujeto y fondo","menos separación entre sujeto y fondo"],
+            en:["more separation between subject and background","less separation between subject and background"]},
+  creaminess:{es:["fondos más cremosos","fondos menos cremosos"],
+              en:["creamier backgrounds","less creamy backgrounds"]},
+  bg_micro:{es:["más estructura residual en el fondo","fondos más limpios"],
+            en:["more residual structure in the background","cleaner backgrounds"]},
+  subj_micro:{es:["sujeto con más microdetalle","sujeto con menos microdetalle"],
+              en:["subject with more micro-detail","subject with less micro-detail"]},
+  r_norm:{es:["sujeto más descentrado","sujeto más centrado"],
+          en:["subject placed further off-centre","subject placed more centrally"]},
+  area_frac:{es:["sujeto más grande en el cuadro","sujeto más pequeño en el cuadro"],
+             en:["larger subject in the frame","smaller subject in the frame"]},
+  spread_norm:{es:["sujeto peor definido","sujeto más compacto"],
+               en:["less well defined subject","more compact subject"]},
+  focal35_mm:{es:["focales más largas","focales más cortas"],
+              en:["longer focal lengths","shorter focal lengths"]},
+  f_number:{es:["diafragmas más cerrados","diafragmas más abiertos"],
+            en:["smaller apertures","wider apertures"]},
+};
+const frase=(k,i)=>{const e=SENTIDO[k]; return (e[LANG()]||e.es)[i];};
+const UNITS={key_stops:"@stops",dr_stops:"@stops",lstar_median:"L*",
+  contrast_sd:"L*",tone_entropy:"bits",lab_a:"a*",lab_b:"b*",chroma_mean:"C*",
+  chroma_p95:"C*",cct_k:"K",grain_levels:"@levels",focal35_mm:"mm",
+  hue_conc:"",split_dab:"Δa*b*"};
+/* Las unidades con arroba se traducen; el resto son símbolos y no cambian. */
+const unitOf=k=>{const u=UNITS[k];
+  if(u===undefined) return undefined;
+  return u==="@stops"?t("uStops"):u==="@levels"?t("uLevels"):u;};
+const PCT=new Set(["clip_lo","clip_hi","focus_frac","area_frac"]);
+const EQUIPO=["focal35_mm","f_number"];
+
+function fmtVal(k,v){
+  if(!Number.isFinite(v)) return "—";
+  if(PCT.has(k)) return (100*v).toFixed(1)+" %";
+  if(k==="cct_k") return Math.round(v)+" K";
+  const u=unitOf(k)!==undefined?unitOf(k):"";
+  const d=Math.abs(v)>=100?0:Math.abs(v)>=10?1:Math.abs(v)>=1?2:3;
+  return v.toFixed(d)+(u?" "+u:"");
+}
+function fmtDelta(k,v){
+  if(!Number.isFinite(v)) return "—";
+  const s=v>0?"+":"";
+  if(PCT.has(k)) return s+(100*v).toFixed(1)+" pp";
+  if(k==="cct_k") return s+Math.round(v)+" K";
+  const u=unitOf(k)!==undefined?unitOf(k):"";
+  const d=Math.abs(v)>=100?0:Math.abs(v)>=10?1:Math.abs(v)>=1?2:3;
+  return s+v.toFixed(d)+(u?" "+u:"");
+}
+
+function bandOf(rows,key,bands){
+  // banda modal: la que mas fotogramas reune, para estratificar
+  let best=null,bn=0;
+  for(const [lo,hi] of bands){
+    const n=rows.filter(r=>r[key]>=lo&&r[key]<hi).length;
+    if(n>bn){bn=n;best=[lo,hi];}
+  }
+  return bn>=30?best:null;
+}
+const FOCAL_BANDS=[[0,24],[24,29],[29,39],[39,59],[59,89],[89,1e4]];
+const AP_BANDS=[[0,1.9],[1.9,2.9],[2.9,4.9],[4.9,8.9],[8.9,1e3]];
+
+function findings(rows){
+  const ax=rows.some(r=>Number.isFinite(r.t))?"t":"seq";
+  const sess=sessionsOf(rows,ax);
+  const fb=bandOf(rows,"focal35_mm",FOCAL_BANDS);
+  const ab=bandOf(rows,"f_number",AP_BANDS);
+  const sessF=fb?sessionsOf(rows.filter(r=>r.focal35_mm>=fb[0]&&r.focal35_mm<fb[1]),ax):null;
+  const sessA=ab?sessionsOf(rows.filter(r=>r.f_number>=ab[0]&&r.f_number<ab[1]),ax):null;
+  const keys=Object.keys(SENTIDO).filter(k=>{
+    const nf=rows.filter(r=>Number.isFinite(r[k])&&Number.isFinite(r[ax])).length;
+    const ns=sess.filter(s2=>Number.isFinite(s2[k])).length;
+    return nf>=30&&ns>=12;
+  });
+  const out=keys.map(k=>{
+    const nFr=rows.filter(r=>Number.isFinite(r[k])&&Number.isFinite(r[ax])).length;
+    const sv=sess.filter(s2=>Number.isFinite(s2[k]));
+    const xs=sv.map(s2=>s2[ax]), ys=sv.map(s2=>s2[k]);
+    const mk=mannKendall(xs,ys), ts=theilSen(xs,ys), pt=pettitt(xs,ys);
+    const third=Math.max(1,Math.floor(sv.length/3));
+    const early=ys.slice(0,third), late=ys.slice(-third);
+    const mE=medianOf(early), mL=medianOf(late), delta=mL-mE;
+    const scale=1.4826*madOf(ys)||1;
+    const cl=mannWhitney(late,early).delta;
+    const span=xs[xs.length-1]-xs[0];
+    const perYear=(ts&&(ax!=="t"||span>=30*86400000))?ts.m*(ax==="t"?YEAR_MS:1):NaN;
+    const rupturaOk=Number.isFinite(pt.p)&&pt.p<0.05
+      &&pt.idx>0.1*sv.length&&pt.idx<0.9*sv.length;
+    // estado: código interno («nd», «yes», «no»), se traduce solo al pintarlo
+    const strat=[["focal",fb,sessF],["diafragma",ab,sessA]].map(([nm,b,se])=>{
+      if(!b||!se) return {nm,estado:"nd"};
+      const q2=se.filter(s2=>Number.isFinite(s2[k]));
+      if(q2.length<12) return {nm,estado:"nd"};
+      const m2=mannKendall(q2.map(s2=>s2[ax]),q2.map(s2=>s2[k]));
+      return {nm,estado:!Number.isFinite(m2.p)?"nd"
+        :(m2.p<0.05&&Math.sign(m2.tau)===Math.sign(mk.tau))?"yes":"no",n:q2.length};
+    });
+    const porGrupo=[...new Set(sv.map(s2=>s2.group))].map(g=>{
+      const q2=sv.filter(s2=>s2.group===g);
+      if(q2.length<10) return null;
+      return Math.sign(mannKendall(q2.map(s2=>s2[ax]),q2.map(s2=>s2[k])).tau);
+    }).filter(v=>v!==null&&v!==0);
+    const acuerdo=porGrupo.filter(sg=>sg===Math.sign(mk.tau)).length;
+    return {k,n:nFr,nSes:sv.length,tau:mk.tau,p:mk.p,perYear,mE,mL,delta,
+      std:delta/scale,cliff:cl,early,late,strat,xs,ys,pt,rupturaOk,
+      grupos:porGrupo.length,acuerdo,ax,
+      // la frase se resuelve al leerla, para que siga al idioma en vigor
+      fi:delta>0?0:1, get frase(){return frase(this.k,this.fi);}};
+  });
+  const q=benjaminiHochberg(out.map(f=>f.p));
+  out.forEach((f,i)=>{f.q=q[i];});
+  out.sort((a,b)=>Math.abs(b.cliff)-Math.abs(a.cliff));
+  return {list:out,ax,fb,ab,sess,
+          nFrames:rows.filter(r=>Number.isFinite(r[ax])).length};
+}
+function rupturaTxt(f){
+  if(!f.rupturaOk) return null;
+  return f.ax==="t"?isoDay(f.pt.at).slice(0,7):t("approxFrame")+Math.round(f.pt.at);
+}
+const Q_MAX=0.10, CLIFF_MIN=0.15;
+const solido=f=>Number.isFinite(f.q)&&f.q<Q_MAX&&Math.abs(f.cliff)>=CLIFF_MIN;
+
+/* ---------- conclusiones ---------- */
+function reservas(F){
+  const buenos=F.list.filter(solido);
+  const equipo=F.list.filter(f=>EQUIPO.includes(f.k)&&solido(f));
+  const frenados=buenos.filter(f=>f.strat.some(s2=>s2.estado==="no"));
+  const discrepan=buenos.filter(f=>f.grupos>=3&&f.acuerdo<Math.ceil(0.6*f.grupos));
+  const color=buenos.some(f=>["lab_a","lab_b","cct_k","chroma_mean","chroma_p95",
+    "colorfulness","split_dab","hue_conc"].includes(f.k));
+  const out=[];
+  const cita=f=>(LANG()==="en"?"“"+f.frase+"”":"«"+f.frase+"»");
+  out.push(t("resSessA")+F.sess.length+t("resSessB")+F.nFrames+t("resSessC"));
+  if(equipo.length)
+    out.push(t("resGearA")+equipo.map(f=>f.frase).join(", ")+t("resGearB"));
+  if(frenados.length)
+    out.push(frenados.map(cita).join(", ")+t("resStrat"));
+  if(discrepan.length)
+    out.push(discrepan.map(cita).join(", ")+t("resFolders"));
+  if(color) out.push(t("resColour"));
+  if(F.ax==="seq") out.push(t("resSeq"));
+  out.push(t("resFinal"));
+  return out;
+}
+
+function drawVeredicto(rows,F){
+  const box=$("#veredicto");
+  const qSmall=LANG()==="en"?"&lt;0.0001":"&lt;0,0001";
+  $("#vAxis").textContent=`${F.nFrames} ${t("frames")} · ${F.sess.length} ${t("sessions")} · `
+    +(F.ax==="t"?t("axCapture"):t("axFileOrder"));
+  if(rows.length<60||F.sess.length<12){
+    box.innerHTML=`<p class="note">`+esc(t("needA")+rows.length+t("needB")
+      +F.sess.length+" "+(F.sess.length===1?t("session"):t("sessions"))+".")+`</p>`;
+    return;
+  }
+  const buenos=F.list.filter(solido);
+  let html="";
+  if(!buenos.length){
+    html+=`<p><b>${t("noDriftHead")}</b> ${t("noDriftA")}${F.list.length}${t("noDriftB")}</p>`;
+  }else{
+    const top=buenos.slice(0,6);
+    top.forEach(f=>{if(!f.ci) f.ci=f.early.length>=8
+      ? bootDiffMedian(f.early,f.late,1200,17):[NaN,NaN];});
+    html+=`<p style="font-size:14.5px;color:var(--ink);max-width:78ch">`
+      +`<b>${top.length===1?t("oneChange"):t("someChanges")}:</b> `
+      +top.map(f=>esc(f.frase)).join("; ")+`.</p>`;
+    html+=`<ul style="font-family:var(--sans);font-size:13px;color:var(--ink2);
+      max-width:78ch;margin:10px 0 0;padding-left:18px">`;
+    for(const f of top){
+      const rt=rupturaTxt(f);
+      html+=`<li style="margin-bottom:7px"><b>${esc(f.frase)}</b>: `
+        +`${t("fromV")}${esc(fmtVal(f.k,f.mE))}${t("toV")}${esc(fmtVal(f.k,f.mL))} `
+        +`(${esc(fmtDelta(f.k,f.delta))}`
+        +(f.ci&&Number.isFinite(f.ci[0])?`, ${t("ci95")}${esc(fmtDelta(f.k,f.ci[0]))}${t("ciTo")}${esc(fmtDelta(f.k,f.ci[1]))}`:"")
+        +`), δ=${fmt(f.cliff,2)}, q=${f.q<0.0001?qSmall:fmt(f.q,4)}`
+        +(Number.isFinite(f.perYear)?`, ${esc(fmtDelta(f.k,f.perYear))} ${t("perYear")}`:"")
+        +(rt?`, ${t("breakTowards")}${esc(rt)}`:"")
+        +`.</li>`;
+    }
+    html+=`</ul>`;
+    if(buenos.length>top.length)
+      html+=`<p class="note">${t("andMore")}${buenos.length-top.length}${t("inTable")}</p>`;
+  }
+  html+=`<p class="eyebrow" style="margin-top:16px">${t("caveats")}</p>
+    <ul style="font-family:var(--sans);font-size:12.5px;color:var(--ink2);
+      max-width:78ch;margin:6px 0 0;padding-left:18px">`
+    +reservas(F).map(a=>`<li style="margin-bottom:5px">${esc(a)}</li>`).join("")+`</ul>`;
+  box.innerHTML=html;
+}
+
+function buildReport(rows,F){
+  const L=[];
+  const qSmall=LANG()==="en"?"<0.0001":"<0,0001";
+  L.push(t("repTitle")+new Date().toISOString().slice(0,10));
+  const ts=rows.map(r=>r.t).filter(Number.isFinite);
+  L.push(t("repCorpusA")+F.nFrames+t("repCorpusB")+F.sess.length+t("repCorpusC")
+    +new Set(rows.map(r=>r.group||"sin grupo")).size+t("repCorpusD")
+    +(ts.length?t("repFromTo")+isoDay(Math.min(...ts))+t("repTo")+isoDay(Math.max(...ts))+"."
+      :t("repNoDates")));
+  L.push(t("repCritA")+F.list.length+t("repCritB"));
+  L.push("");
+  const buenos=F.list.filter(solido);
+  L.push(buenos.length?`${t("repFindings")} (${buenos.length})`:t("repNoFindings"));
+  for(const f of buenos){
+    if(!f.ci) f.ci=f.early.length>=8?bootDiffMedian(f.early,f.late,1200,17):[NaN,NaN];
+    // «ln», no «t»: en esta función t() es la traductora
+    let ln=`- ${f.frase}: ${fmtVal(f.k,f.mE)} -> ${fmtVal(f.k,f.mL)} (${fmtDelta(f.k,f.delta)}`;
+    if(f.ci&&Number.isFinite(f.ci[0]))
+      ln+=`; ${t("ci95")}${fmtDelta(f.k,f.ci[0])}${t("ciTo")}${fmtDelta(f.k,f.ci[1])}`;
+    ln+=`; delta=${f.cliff.toFixed(2)}; q=${f.q<0.0001?qSmall:f.q.toFixed(4)}`;
+    if(Number.isFinite(f.perYear)) ln+=`; ${fmtDelta(f.k,f.perYear)} ${t("perYear")}`;
+    const rt=rupturaTxt(f); if(rt) ln+=t("repBreak")+rt;
+    L.push(ln+").");
+  }
+  const resto=F.list.length-buenos.length;
+  if(resto>0) L.push(t("repRestA")+resto+t("repRestB"));
+  L.push("",t("repCaveats"));
+  for(const a of reservas(F)) L.push("- "+a);
+  L.push("",t("repFooter"));
+  return L.join("\n");
+}
+
+function drawDrift(rows,F){
+  const {s,W,H}=V("#svDrift");
+  const buenos=F.list.filter(solido).slice(0,14);
+  if(!buenos.length){emptyMsg(s,W,H,t("noneFound"));return;}
+  const xL=200, xDb0=212, xDb1=448, xSp0=482, xSp1=706, xTx=718, yTop=36;
+  const fila=Math.min(30,(H-yTop-26)/buenos.length);
+  const lim=Math.max(0.35,...buenos.map(f=>Math.abs(f.std)))*1.15;
+  const X=v=>(xDb0+xDb1)/2+v/(2*lim)*(xDb1-xDb0);
+  let g=`<text x="${xDb0}" y="16" font-size="9.5" letter-spacing=".14em" fill="var(--ink2)"
+    font-family="var(--mono)">${esc(t("driftLegend"))}</text>`;
+  g+=`<text x="${xSp0}" y="16" font-size="9.5" letter-spacing=".14em" fill="var(--ink2)"
+    font-family="var(--mono)">${esc(t("driftSpark"))}</text>`;
+  // «tv», no «t»: aquí t() es la función traductora
+  for(const tv of [-lim,0,lim]){
+    g+=`<path d="M${X(tv)} ${yTop-6}V${yTop+fila*buenos.length}" stroke="var(--rule)"
+      ${tv===0?'stroke-width="1.2"':'stroke-dasharray="2 4"'}/>`;
+    g+=`<text x="${X(tv)}" y="${yTop+fila*buenos.length+16}" text-anchor="middle" font-size="9"
+      fill="var(--ink2)" font-family="var(--mono)">${tv.toFixed(1)}</text>`;
+  }
+  buenos.forEach((f,i)=>{
+    const y=yTop+i*fila+fila/2;
+    const col=f.std>0?"var(--g2)":"var(--g1)";
+    g+=`<text x="${xL}" y="${y+3.5}" text-anchor="end" font-size="10.5"
+      fill="var(--ink)" font-family="var(--mono)">${esc(label(f.k).slice(0,30))}</text>`;
+    g+=`<path d="M${X(-f.std/2)} ${y}L${X(f.std/2)} ${y}" stroke="${col}" stroke-width="2.4"/>`;
+    g+=`<circle cx="${X(-f.std/2)}" cy="${y}" r="4" fill="var(--panel)" stroke="${col}" stroke-width="1.8"/>`;
+    g+=`<circle cx="${X(f.std/2)}" cy="${y}" r="4.6" fill="${col}"/>`;
+    // mediana movil por sesiones, escalada a la fila
+    const rm=rollingMedian(f.xs,f.ys,Math.max(5,Math.round(f.nSes/10)));
+    if(rm.length>2){
+      const lx=f.xs[0], hx=f.xs[f.xs.length-1];
+      const vv=rm.map(p2=>p2[1]);
+      let lo=Math.min(...vv), hi=Math.max(...vv);
+      if(!(hi>lo)){hi=lo+1;lo=lo-1;}
+      const SX=v=>xSp0+(v-lx)/((hx-lx)||1)*(xSp1-xSp0);
+      const SY=v=>y+fila*0.30-(v-lo)/(hi-lo)*fila*0.60;
+      const d=polyPath(rm,SX,SY,lx,hx);
+      if(d) g+=`<path d="${d}" fill="none" stroke="${col}" stroke-width="1.3" opacity=".85"/>`;
+      if(f.rupturaOk&&f.pt.at>=lx&&f.pt.at<=hx)
+        g+=`<path d="M${SX(f.pt.at).toFixed(1)} ${(y-fila*0.38).toFixed(1)}V${(y+fila*0.38).toFixed(1)}"
+          stroke="var(--g3)" stroke-width="2"/>`;
+    }
+    g+=`<text x="${xTx}" y="${y+3.5}" font-size="10" fill="var(--ink2)"
+      font-family="var(--mono)">${esc(fmtDelta(f.k,f.delta))}</text>`;
+  });
+  s.innerHTML=g;
+}
+
+function drawPCA(rows,F){
+  const {s,W,H}=V("#svPCA");
+  const keys=Object.keys(SENTIDO).filter(k=>!EQUIPO.includes(k));
+  const usable=rows.filter(r=>Number.isFinite(r[F.ax]));
+  const P=usable.length>=40&&F.sess.length>=12?robustPCA(usable,keys):null;
+  if(!P){emptyMsg(s,W,H,t("pcaNeed"));
+    $("#pcaInfo").textContent=""; return;}
+  // proyeccion agregada por sesion
+  const map=new Map();
+  usable.forEach((r,i)=>{
+    const k=sessionKeyOf(r,F.ax);
+    if(!map.has(k)) map.set(k,{t:[],p1:[],p2:[]});
+    const o=map.get(k);
+    o.t.push(r[F.ax]); o.p1.push(P.proj[i][0]); o.p2.push(P.proj[i][1]);
+  });
+  const sp=[...map.values()].map(o=>({t:medianOf(o.t),x:medianOf(o.p1),y:medianOf(o.p2)}))
+    .sort((a,b)=>a.t-b.t);
+  const nb=Math.max(2,Math.min(6,Math.floor(sp.length/8)||2));
+  const per=Math.floor(sp.length/nb), blocks=[];
+  for(let i=0;i<nb;i++){
+    const a=i*per, b=i===nb-1?sp.length:(i+1)*per;
+    const bl=sp.slice(a,b);
+    if(bl.length) blocks.push({cx:medianOf(bl.map(o=>o.x)),cy:medianOf(bl.map(o=>o.y)),
+      hi:bl[bl.length-1].t});
+  }
+  const pad=76, x0=pad+40, y0=H-pad, x1=W-pad, y1=pad-30;
+  const xsF=P.proj.map(p2=>p2[0]), ysF=P.proj.map(p2=>p2[1]);
+  const rx=robustRange(xsF,0.08)||[-1,1], ry=robustRange(ysF,0.08)||[-1,1];
+  const X=v=>Math.max(x0-2,Math.min(x1+2,x0+(v-rx[0])/(rx[1]-rx[0])*(x1-x0)));
+  const Y=v=>Math.max(y1-2,Math.min(y0+2,y0-(v-ry[0])/(ry[1]-ry[0])*(y0-y1)));
+  let g=`<rect x="${x0}" y="${y1}" width="${x1-x0}" height="${y0-y1}" fill="var(--panel)"
+    stroke="var(--rule)"/>`;
+  g+=`<path d="M${X(0)} ${y1}V${y0}" stroke="var(--rule)" stroke-dasharray="3 4"/>`;
+  g+=`<path d="M${x0} ${Y(0)}H${x1}" stroke="var(--rule)" stroke-dasharray="3 4"/>`;
+  let d="";
+  P.proj.forEach(p2=>{
+    if(p2[0]<rx[0]||p2[0]>rx[1]||p2[1]<ry[0]||p2[1]>ry[1]) return;
+    const px=X(p2[0]),py=Y(p2[1]);
+    d+=`M${(px-2).toFixed(1)} ${py.toFixed(1)}h4M${px.toFixed(1)} ${(py-2).toFixed(1)}v4`;
+  });
+  g+=`<path d="${d}" stroke="var(--rule2)" stroke-width="1" opacity=".55" fill="none"/>`;
+  g+=`<path d="${blocks.map((c,i)=>(i?"L":"M")+X(c.cx).toFixed(1)+" "+Y(c.cy).toFixed(1)).join("")}"
+    fill="none" stroke="var(--g1)" stroke-width="2.2"/>`;
+  blocks.forEach((c,i)=>{
+    const cx=X(c.cx),cy=Y(c.cy), ult=i===blocks.length-1;
+    g+=`<circle cx="${cx}" cy="${cy}" r="${ult?6.5:5}" fill="${ult?"var(--g1)":"#fff"}"
+      stroke="var(--g1)" stroke-width="2"/>`;
+    g+=`<text x="${cx}" y="${cy-11}" text-anchor="middle" font-size="9" fill="var(--g1)"
+      font-family="var(--mono)">${esc(F.ax==="t"?isoDay(c.hi).slice(0,7):String(Math.round(c.hi)))}</text>`;
+  });
+  const carga=c=>P.loadings[c].slice(0,3)
+    .map(l=>(l.w>0?"+":"−")+label(l.k).split(" ")[0]).join(" ");
+  g+=`<text x="${x0}" y="${y0+26}" font-size="9.5" letter-spacing=".1em" fill="var(--ink2)"
+    font-family="var(--mono)">${t("axis")} 1 (${(100*P.varExp[0]).toFixed(0)} %) · ${esc(carga(0))}</text>`;
+  g+=`<text transform="translate(${x0-14} ${y0}) rotate(-90)" font-size="9.5"
+    letter-spacing=".1em" fill="var(--ink2)" font-family="var(--mono)">${t("axis")} 2 (${(100*P.varExp[1]).toFixed(0)} %) · ${esc(carga(1))}</text>`;
+  s.innerHTML=g;
+  const st=straightnessTest(sp.map(o=>[o.x,o.y]),nb);
+  const rho=spearman(sp.map(o=>o.t),sp.map(o=>o.x),0,5);
+  const dir=Math.abs(rho.rho)>=0.2&&rho.p<0.05
+    &&!(Number.isFinite(st.p)&&st.p>=0.1);
+  const dec=v=>LANG()==="en"?v:v.replace(".",",");
+  $("#pcaInfo").innerHTML=`${P.keys.length} ${t("pcaDescriptors")} · ${sp.length} ${t("sessions")} · `
+    +`${t("pcaVsTime")}: ρ=${fmt(rho.rho,2)}, p${rho.p<0.0005?" &lt; "+dec("0.0005"):"="+fmt(rho.p,3)}`
+    +(Number.isFinite(st.S)?` · ${t("pcaStraight")} ${fmt(st.S,2)} (p${st.p<0.0035?" &lt; "+dec("0.0035"):"="+fmt(st.p,3)})`:"")
+    +` · `+(dir?`<span style="color:var(--g1)">${t("pcaOriented")}</span>`
+      :`<span class="muted">${t("pcaWander")}</span>`)
+    +(P.varExp[0]<0.2?` · <span class="warn">${t("pcaWeakA")}`
+      +`${(100*P.varExp[0]).toFixed(0)}${t("pcaWeakB")}</span>`:"");
+}
+
+function tableFindings(F){
+  // «tb», no «t»: en esta función t() es la traductora
+  const tb=$("#tFind"), todos=$("#fAll").checked;
+  const list=todos?F.list:F.list.filter(solido);
+  ["#nTests","#nTestsEn"].forEach(i=>{const e=$(i); if(e) e.textContent=String(F.list.length);});
+  tb.querySelector("thead").innerHTML=`<tr><th>${t("thDescriptor")}</th><th>${t("thReading")}</th>
+    <th>${t("thSesFr")}</th><th>${t("thPast")}</th><th>${t("thPresent")}</th><th>${t("thChange")}</th><th>${t("thCliff")}</th>
+    <th>${t("thTau")}</th><th>${t("thQ")}</th><th>${t("thBreak")}</th><th>${t("thStrat")}</th><th>${t("thFolders")}</th></tr>`;
+  const est=v=>v==="yes"?`<span style="color:var(--g6)">${t("yes")}</span>`
+    :v==="no"?`<span class="warn">${t("no")}</span>`:`<span class="muted">—</span>`;
+  tb.querySelector("tbody").innerHTML=list.length?list.map(f=>{
+    const ok=solido(f);
+    const rt=rupturaTxt(f);
+    return `<tr style="${ok?"":"opacity:.55"}">
+      <td>${esc(label(f.k))}</td><td>${ok?esc(f.frase):`<span class="muted">${esc(f.frase)}</span>`}</td>
+      <td>${f.nSes} · ${f.n}</td><td>${esc(fmtVal(f.k,f.mE))}</td><td>${esc(fmtVal(f.k,f.mL))}</td>
+      <td>${esc(fmtDelta(f.k,f.delta))}</td><td>${fmt(f.cliff,2)}</td>
+      <td>${fmt(f.tau,3)}</td>
+      <td>${Number.isFinite(f.q)?(f.q<0.0001?(LANG()==="en"?"&lt;0.0001":"&lt;0,0001"):fmt(f.q,4)):"—"}</td>
+      <td>${rt?esc(rt):`<span class="muted">—</span>`}</td>
+      <td>${est(f.strat[0].estado)} · ${est(f.strat[1].estado)}</td>
+      <td>${f.grupos?`${f.acuerdo}/${f.grupos}`:`<span class="muted">—</span>`}</td></tr>`;
+  }).join(""):`<tr><td colspan="12" class="muted">${esc(t("findEmptyA")+F.list.length+t("findEmptyB"))}</td></tr>`;
+}
+
+/* ---------- tiempo y tendencia ---------- */
+function parseStamp(s){
+  if(!s) return NaN;
+  const m=String(s).trim().match(/^(\d{4})[:\-\/](\d{2})[:\-\/](\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?/);
+  if(!m) {const d=Date.parse(s); return Number.isFinite(d)?d:NaN;}
+  return Date.UTC(+m[1],+m[2]-1,+m[3],+(m[4]||12),+(m[5]||0),+(m[6]||0));
+}
+const YEAR_MS=365.2425*24*3600*1000;
+function isoDay(ms){const d=new Date(ms);return d.toISOString().slice(0,10);}
+function mannKendall(x,y){
+  // S es el numerador de la tau de Kendall: concordantes menos discordantes.
+  // Contarlo pareja a pareja es O(n^2) y con unos miles de fotogramas por
+  // treinta descriptores el navegador se queda colgado, asi que se cuenta con
+  // un arbol de Fenwick en O(n log n). Los empates en x se excluyen
+  // procesando por bloques de x igual, y los empates en y no cuentan ni como
+  // concordantes ni como discordantes.
+  const n=x.length;
+  if(n<8) return {S:NaN,z:NaN,p:NaN,tau:NaN,n};
+  const ord=x.map((v,i)=>i).sort((a,b)=>x[a]-x[b]);
+  const xs=ord.map(i=>x[i]), ys=ord.map(i=>y[i]);
+  const uniq=[...new Set(ys)].sort((a,b)=>a-b);
+  const rank=new Map(uniq.map((v,i)=>[v,i+1]));
+  const m=uniq.length;
+  const bit=new Int32Array(m+1);
+  const add=r=>{for(;r<=m;r+=r&-r) bit[r]++;};
+  const sum=r=>{let s=0;for(;r>0;r-=r&-r) s+=bit[r];return s;};
+  let S=0, hechos=0;
+  for(let i=0;i<n;){
+    let j=i; while(j+1<n&&xs[j+1]===xs[i]) j++;      // bloque de x igual
+    for(let k=i;k<=j;k++){
+      const r=rank.get(ys[k]);
+      const menores=sum(r-1), iguales=sum(r)-menores;
+      S+=menores-(hechos-menores-iguales);
+    }
+    for(let k=i;k<=j;k++) add(rank.get(ys[k]));
+    hechos+=j-i+1;
+    i=j+1;
+  }
+  const tie=g=>{const c=new Map();g.forEach(q=>c.set(q,(c.get(q)||0)+1));
+    let t=0;c.forEach(k=>{if(k>1)t+=k*(k-1)*(2*k+5);});return t;};
+  const pares=g=>{const c=new Map();g.forEach(q=>c.set(q,(c.get(q)||0)+1));
+    let t=0;c.forEach(k=>{if(k>1)t+=k*(k-1)/2;});return t;};
+  const varS=(n*(n-1)*(2*n+5)-tie(ys)-tie(xs))/18;
+  const z=varS>0?(S-Math.sign(S))/Math.sqrt(varS):0;
+  const n0=n*(n-1)/2;
+  const den=Math.sqrt((n0-pares(xs))*(n0-pares(ys)));
+  return {S,z,p:normP(z),tau:den>0?S/den:NaN,n};
+}
+function polyPath(pts,X,Y,lx,hx){
+  // La linea se corta donde el eje esta recortado, en vez de arrastrarla
+  // fuera del lienzo. Los SVG llevan overflow visible para que quepan las
+  // etiquetas de los ejes, asi que una coordenada lejana no se recorta sola:
+  // se dibuja encima del resto de la pagina, cruzando la barra lateral.
+  let d="",abierto=false;
+  for(const [x,y] of pts){
+    if(!(x>=lx&&x<=hx)||!Number.isFinite(y)){abierto=false;continue;}
+    d+=(abierto?"L":"M")+X(x).toFixed(1)+" "+Y(y).toFixed(1);
+    abierto=true;
+  }
+  return d;
+}
+function rollingMedian(xs,ys,win){
+  const ord=xs.map((v,i)=>i).sort((a,b)=>xs[a]-xs[b]);
+  const X=ord.map(i=>xs[i]), Y=ord.map(i=>ys[i]);
+  const h=Math.max(1,Math.floor(win/2)), out=[];
+  for(let i=0;i<X.length;i++){
+    const a=Math.max(0,i-h), b=Math.min(X.length,i+h+1);
+    out.push([X[i],medianOf(Y.slice(a,b))]);
+  }
+  return out;
+}
+const MESES_L={
+  es:["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"],
+  en:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]};
+const mes=i=>(MESES_L[LANG()]||MESES_L.es)[i];
+function timeTicks(lo,hi){
+  // Etiquetas sin ambiguedad: 04-07 puede leerse como abril o como julio,
+  // asi que los meses van con su abreviatura.
+  const out=[], span=hi-lo;
+  const d0=new Date(lo), d1=new Date(hi);
+  if(span>6*YEAR_MS){
+    const step=Math.ceil(span/YEAR_MS/6);
+    for(let y=d0.getUTCFullYear();y<=d1.getUTCFullYear();y+=step){
+      const tv=Date.UTC(y,0,1); if(tv>=lo&&tv<=hi) out.push({v:tv,l:String(y)});
+    }
+  }else if(span>200*24*3600*1000){
+    const step=span>3*YEAR_MS?6:3;
+    for(let y=d0.getUTCFullYear();y<=d1.getUTCFullYear();y++)
+      for(let m=0;m<12;m+=step){
+        const tv=Date.UTC(y,m,1);
+        if(tv>=lo&&tv<=hi) out.push({v:tv,l:`${mes(m)} ${String(y).slice(2)}`});
+      }
+  }else{
+    const n=5;
+    for(let i=0;i<=n;i++){
+      const tv=lo+span*i/n, d=new Date(tv);
+      // en inglés el día va detrás del mes; en español, delante
+      out.push({v:tv,l:LANG()==="en"?`${mes(d.getUTCMonth())} ${d.getUTCDate()}`
+                                    :`${d.getUTCDate()} ${mes(d.getUTCMonth())}`});
+    }
+  }
+  return out.length?out:[{v:lo,l:isoDay(lo)},{v:hi,l:isoDay(hi)}];
+}
+
+/* ---------- paneles de evolucion ---------- */
+function evoData(rows,key){
+  const ax=$("#evoAxis").value;
+  const out=[];
+  for(const gr of S.groups){
+    if(!S.on.has(gr)) continue;
+    const p=rows.filter(r=>(r.group||"sin grupo")===gr
+      &&Number.isFinite(r[key])&&Number.isFinite(r[ax]));
+    if(p.length) out.push([gr,p.map(r=>r[ax]),p.map(r=>r[key])]);
+  }
+  return {ax,series:out};
+}
+function drawEvo(rows){
+  const key=$("#evoKey").value;
+  const {s,W,H,x0,y0,x1,y1}=frameOf("#svEvo",56,40,16,14);
+  const {ax,series}=evoData(rows,key);
+  if(!series.length){
+    const sinVar=!rows.some(r=>Number.isFinite(r[key]));
+    emptyMsg(s,W,H, sinVar ? t("noCsvCol")+label(key)
+      : ax==="t" ? t("noDatedFrame")
+                 : t("noDataFor")+label(key));
+    $("#evoStats").innerHTML=""; $("#evoWarn").innerHTML=""; return;
+  }
+  // con muchas series el trazado es ilegible: se dibujan las mayores
+  const MAXS=Math.min(PAL.length,12);
+  let extra=0;
+  series.sort((a,b)=>b[1].length-a[1].length);
+  if(series.length>MAXS){extra=series.length-MAXS; series.length=MAXS;}
+  const rxr=robustRange(series.flatMap(([,xs])=>xs),0.01);
+  const ryr=robustRange(series.flatMap(([,,ys])=>ys),0.07);
+  let lx=rxr[0], hx=rxr[1];
+  if(!(hx>lx)) hx=lx+1;
+  const ry=[ryr[0],ryr[1]];
+  const fuera=(rxr[2]||0)+(ryr[2]||0);
+  const X=v=>Math.max(x0-2,Math.min(x1+2,x0+(v-lx)/(hx-lx)*(x1-x0)));
+  const Y=v=>Math.max(y1,Math.min(y0,y0-(v-ry[0])/(ry[1]-ry[0])*(y0-y1)));
+  const xt=(ax==="t"?timeTicks(lx,hx):ticksFor(lx,hx))
+    .filter(t=>t.v>=lx&&t.v<=hx).map(t=>({p:X(t.v),l:t.l}));
+  let g=axes(x0,y0,x1,y1,xt,
+    ticksFor(ry[0],ry[1]).filter(t=>t.v>=ry[0]&&t.v<=ry[1]).map(t=>({p:Y(t.v),l:t.l})),
+    ax==="t"?t("date"):t("frame"),label(key));
+  const win=Math.max(3,Math.min(151,parseInt($("#evoWin").value)||15));
+  const total=series.reduce((a,s2)=>a+s2[1].length,0);
+  const step=total>1200?Math.ceil(total/1200):1;   // no dibujar mas de 1200 cruces
+  const showPts=$("#evoPts").checked;
+  for(const [gr,xs,ys] of series){
+    if(showPts){
+      let d="";
+      xs.forEach((v,i)=>{
+        if(i%step||v<lx||v>hx||ys[i]<ry[0]||ys[i]>ry[1]) return;
+        const px=X(v),py=Y(ys[i]);
+        d+=`M${(px-2).toFixed(1)} ${py.toFixed(1)}h4M${px.toFixed(1)} ${(py-2).toFixed(1)}v4`;});
+      g+=`<path d="${d}" stroke="${colorOf(gr)}" stroke-width="1" opacity=".38" fill="none"/>`;
+    }
+    const rm=rollingMedian(xs,ys,win);
+    const d=polyPath(rm,X,Y,lx,hx);
+    if(d) g+=`<path d="${d}" fill="none" stroke="${colorOf(gr)}" stroke-width="2"/>`;
+    const ts=theilSen(xs,ys);
+    if(ts){
+      const ya=ts.b+ts.m*lx, yb=ts.b+ts.m*hx;
+      // solo se dibuja la recta si su recorrido cabe en el eje: con pocas
+      // tomas y muy juntas en el tiempo la pendiente no es informativa
+      if(Math.max(ya,yb)<=ry[1]+(ry[1]-ry[0])&&Math.min(ya,yb)>=ry[0]-(ry[1]-ry[0]))
+        g+=`<path d="M${X(lx)} ${Y(ya)}L${X(hx)} ${Y(yb)}"
+          stroke="${colorOf(gr)}" stroke-width="1.3" stroke-dasharray="7 4" opacity=".8"/>`;
+    }
+  }
+  s.innerHTML=g;
+  const avisos=[];
+  const pl=n=>n>1?t("evoMoreGroupsPl"):"";
+  if(extra) avisos.push(`${extra}${t("evoMoreGroupsA")}${pl(extra)}${t("evoMoreGroupsB")}${MAXS}${t("evoMoreGroupsC")}`);
+  if(fuera) avisos.push(`${fuera}${t("evoOutA")}${pl(fuera)}${t("evoOutB")}`);
+  if(step>1) avisos.push(`${t("evoThin")}${step}${t("evoThinB")}`);
+  $("#evoWarn").innerHTML=avisos.length?`<span class="warn">${esc(avisos.join(" · "))}</span>`:"";
+  const per=ax==="t"?t("perYear"):t("perFrame");
+  $("#evoStats").innerHTML=`<table><thead><tr><th>${t("group")}</th><th>${t("n")}</th>
+    <th>${t("thTauMK")}</th><th>${t("thZ")}</th><th>${t("thP")}</th><th>${t("thSen")}${esc(per)}</th>
+    <th>${t("thFirst")}</th><th>${t("thLast")}</th></tr></thead><tbody>`+
+    series.map(([gr,xs,ys])=>{
+      const mk=mannKendall(xs,ys), ts=theilSen(xs,ys);   // ambos exigen n>=8
+      const k=ax==="t"?YEAR_MS:1;
+      // una pendiente por año calculada sobre unos pocos días es una
+      // extrapolación de dos órdenes de magnitud: mejor no darla
+      const span=Math.max(...xs)-Math.min(...xs);
+      const okSpan=ax!=="t"||span>=30*24*3600*1000;
+      const rm=rollingMedian(xs,ys,win);
+      return `<tr><td><span class="swatch" style="display:inline-block;background:${colorOf(gr)}"></span> ${esc(gname(gr))}</td>
+        <td>${xs.length}</td><td>${fmt(mk.tau,3)}</td><td>${fmt(mk.z,2)}</td>
+        <td>${Number.isFinite(mk.p)?(mk.p<0.0001?"&lt; 0.0001":fmt(mk.p,4)):"—"}</td>
+        <td>${ts&&okSpan?String(+(ts.m*k).toPrecision(3)):"—"}</td>
+        <td>${fmt(rm[0][1],3)}</td><td>${fmt(rm[rm.length-1][1],3)}</td></tr>`;
+    }).join("")+`</tbody></table>`;
+}
+
+const SPARKS=["r_norm","blur_sep","creaminess","lab_b","cct_k","contrast_sd",
+              "alpha_spectral","grain_levels"];
+function drawSparks(rows){
+  const {s,W,H}=V("#svSparks");
+  const keys=SPARKS.filter(present);
+  if(!keys.length){emptyMsg(s,W,H,t("noDescriptors"));return;}
+  const ax=$("#evoAxis").value;
+  const win=Math.max(3,Math.min(151,parseInt($("#evoWin").value)||15));
+  const cols=2, rowsN=Math.ceil(keys.length/cols);
+  const pw=(W-20)/cols, ph=(H-10)/rowsN;
+  let g="";
+  keys.forEach((k,i)=>{
+    const cx=10+(i%cols)*pw, cy=6+Math.floor(i/cols)*ph;
+    const ix0=cx+62, iy0=cy+ph-24, ix1=cx+pw-14, iy1=cy+20;
+    const {series}=evoData(rows,k);
+    g+=`<text x="${cx}" y="${cy+13}" font-size="9.5" letter-spacing=".1em"
+      fill="var(--ink2)" font-family="var(--mono)">${esc(label(k).slice(0,34).toUpperCase())}</text>`;
+    g+=`<path d="M${ix0} ${iy0}H${ix1}" stroke="var(--rule)"/>`;
+    const lines=series.map(([gr,xs,ys])=>[gr,rollingMedian(xs,ys,win)]).filter(([,m])=>m.length>1);
+    if(!lines.length){
+      g+=`<text x="${(ix0+ix1)/2}" y="${(iy0+iy1)/2}" text-anchor="middle" font-size="9"
+        fill="var(--ink2)" font-family="var(--mono)">${esc(t("noData"))}</text>`;
+      return;
+    }
+    const xs=lines.flatMap(([,m])=>m.map(p=>p[0])), vs=lines.flatMap(([,m])=>m.map(p=>p[1]));
+    let lx=Math.min(...xs), hx=Math.max(...xs); if(hx===lx) hx=lx+1;
+    let lo=Math.min(...vs), hi=Math.max(...vs); if(hi===lo){hi=lo+1;lo=lo-1;}
+    const X=v=>ix0+(v-lx)/(hx-lx)*(ix1-ix0), Y=v=>iy0-(v-lo)/(hi-lo)*(iy0-iy1);
+    [[hi,iy1],[lo,iy0]].forEach(([v,yy])=>{
+      g+=`<text x="${ix0-6}" y="${yy+3}" text-anchor="end" font-size="8.5"
+        fill="var(--ink2)" font-family="var(--mono)">${esc(String(+v.toPrecision(3)))}</text>`;
+    });
+    lines.forEach(([gr,m])=>{
+      const d=polyPath(m,X,Y,lx,hx);
+      if(d) g+=`<path d="${d}" fill="none" stroke="${colorOf(gr)}" stroke-width="1.7"/>`;
+    });
+    if(ax==="t"){
+      g+=`<text x="${ix0}" y="${iy0+13}" font-size="8" fill="var(--ink2)" font-family="var(--mono)">${esc(isoDay(lx))}</text>`;
+      g+=`<text x="${ix1}" y="${iy0+13}" text-anchor="end" font-size="8" fill="var(--ink2)" font-family="var(--mono)">${esc(isoDay(hx))}</text>`;
+    }
+  });
+  s.innerHTML=g;
+}
+
+/* ---------- catalogo de columnas ---------- */
+const COLS={
+  r_norm:{es:"r (descentramiento)",en:"r (off-centre distance)"},
+  x_norm:{es:"x del sujeto",en:"subject x"},
+  y_norm:{es:"y del sujeto",en:"subject y"},
+  spread_norm:{es:"dispersión del sujeto",en:"subject dispersion"},
+  area_frac:{es:"área del sujeto",en:"subject area"},
+  confidence:{es:"confianza",en:"confidence"},
+  aspect:{es:"relación de aspecto",en:"aspect ratio"},
+  focal35_mm:{es:"focal equiv. 35 mm",en:"35 mm equiv. focal length"},
+  focal_mm:{es:"focal",en:"focal length"},
+  f_number:{es:"número f",en:"f-number"},
+  width:{es:"ancho (px)",en:"width (px)"},
+  height:{es:"alto (px)",en:"height (px)"},
+  mpx:{es:"resolución de origen (Mpx)",en:"source resolution (Mpx)"},
+  key_stops:{es:"clave (diafragmas sobre 18 %)",en:"key (stops above 18 %)"},
+  lum_mean:{es:"luminancia media",en:"mean luminance"},
+  lstar_median:{es:"L* mediano",en:"median L*"},
+  contrast_sd:{es:"contraste (σ de L*)",en:"contrast (σ of L*)"},
+  dr_stops:{es:"latitud usada (diafragmas)",en:"latitude used (stops)"},
+  clip_lo:{es:"sombras recortadas",en:"shadows clipped"},
+  clip_hi:{es:"luces recortadas",en:"highlights clipped"},
+  tone_entropy:{es:"entropía tonal (bits)",en:"tonal entropy (bits)"},
+  lab_a:{es:"a* medio (verde–magenta)",en:"mean a* (green–magenta)"},
+  lab_b:{es:"b* medio (azul–amarillo)",en:"mean b* (blue–yellow)"},
+  chroma_mean:{es:"croma medio C*",en:"mean chroma C*"},
+  chroma_p95:{es:"croma p95",en:"chroma p95"},
+  colorfulness:{es:"colorido (Hasler)",en:"colourfulness (Hasler)"},
+  cct_k:{es:"temperatura de color (K)",en:"colour temperature (K)"},
+  duv:{es:"Duv (desvío del locus)",en:"Duv (departure from the locus)"},
+  hue_mean_deg:{es:"tono medio (grados)",en:"mean hue (degrees)"},
+  hue_conc:{es:"concentración de tono",en:"hue concentration"},
+  hue_sd_deg:{es:"dispersión de tono (grados)",en:"hue dispersion (degrees)"},
+  split_dab:{es:"tono partido |Δa*b*|",en:"split toning |Δa*b*|"},
+  split_dir_deg:{es:"dirección del tono partido",en:"split toning direction"},
+  sh_b:{es:"b* de sombras",en:"shadow b*"},
+  hi_b:{es:"b* de luces",en:"highlight b*"},
+  acutance:{es:"acutancia",en:"acutance"},
+  grain_levels:{es:"grano (niveles)",en:"grain (levels)"},
+  focus_frac:{es:"superficie en foco",en:"area in focus"},
+  edge_vert:{es:"anisotropía vertical",en:"vertical anisotropy"},
+  alpha_spectral:{es:"pendiente espectral α",en:"spectral slope α"},
+  blur_all:{es:"desenfoque del fotograma",en:"frame blur"},
+  blur_subject:{es:"desenfoque del sujeto",en:"subject blur"},
+  blur_bg:{es:"desenfoque del fondo",en:"background blur"},
+  blur_sep:{es:"separación sujeto–fondo",en:"subject–background separation"},
+  bg_micro:{es:"micro-contraste del fondo",en:"background micro-contrast"},
+  subj_micro:{es:"micro-contraste del sujeto",en:"subject micro-contrast"},
+  bg_rel_micro:{es:"micro-contraste relativo del fondo",en:"relative background micro-contrast"},
+  creaminess:{es:"cremosidad",en:"creaminess"},
+};
+const ZONES=Array.from({length:11},(_,i)=>"z"+String(i).padStart(2,"0"));
+const ROMAN=["0","I","II","III","IV","V","VI","VII","VIII","IX","X"];
+const label=k=>{const e=COLS[k]; return e?(e[LANG()]||e.es):k;};
+function present(k){return S.rows.some(r=>Number.isFinite(r[k]));}
+function numCols(){return Object.keys(COLS).filter(present);}
+
+/* ---------- helpers genericos de dibujo ---------- */
+function frameOf(id,padL=52,padB=36,padT=14,padR=12){
+  const {s,W,H}=V(id);
+  return {s,W,H,x0:padL,y0:H-padB,x1:W-padR,y1:padT};
+}
+function ticksFor(lo,hi,n=5){
+  if(!(hi>lo)) return [{v:lo,l:String(+lo.toFixed(2))}];
+  const raw=(hi-lo)/n, mag=Math.pow(10,Math.floor(Math.log10(raw)));
+  const step=[1,2,2.5,5,10].map(m=>m*mag).find(v=>v>=raw)||mag*10;
+  const out=[];
+  for(let v=Math.ceil(lo/step)*step; v<=hi+1e-9; v+=step)
+    out.push({v,l:String(+v.toFixed(6))});
+  return out;
+}
+function robustRange(vals,pad=0.06){
+  // Un solo fotograma con un valor extremo aplasta todo lo demas contra el
+  // eje. Con el recorte activado los limites son los percentiles 1 y 99, y
+  // los puntos que caen fuera no se dibujan.
+  const v=vals.filter(Number.isFinite).sort((a,b)=>a-b);
+  if(!v.length) return null;
+  const trim=$("#trim")&&$("#trim").checked&&v.length>=50;
+  let lo=trim?quantile(v,0.01):v[0], hi=trim?quantile(v,0.99):v[v.length-1];
+  if(!(hi>lo)){hi=(lo||0)+1;lo=(lo||0)-1;}
+  const m=(hi-lo)*pad;
+  return [lo-m,hi+m,v.length-v.filter(x=>x>=lo&&x<=hi).length];
+}
+function rangeOf(rows,key,pad=0.06){
+  return robustRange(rows.map(r=>r[key]),pad);
+}
+function emptyMsg(s,W,H,txt){
+  s.innerHTML=`<text x="${W/2}" y="${H/2}" text-anchor="middle" font-size="11"
+    fill="var(--ink2)" font-family="var(--mono)">${esc(txt)}</text>`;
+}
+function scatterXY(id,rows,kx,ky,opts={}){
+  const {s,W,H,x0,y0,x1,y1}=frameOf(id);
+  const rx=rangeOf(rows,kx), ry=rangeOf(rows,ky);
+  if(!rx||!ry){emptyMsg(s,W,H,t("noDataFor")+label(kx)+t("orJoin")+label(ky));return;}
+  const X=v=>x0+(v-rx[0])/(rx[1]-rx[0])*(x1-x0);
+  const Y=v=>y0-(v-ry[0])/(ry[1]-ry[0])*(y0-y1);
+  let g=axes(x0,y0,x1,y1,
+    ticksFor(rx[0],rx[1]).map(t=>({p:X(t.v),l:t.l})),
+    ticksFor(ry[0],ry[1]).map(t=>({p:Y(t.v),l:t.l})),
+    opts.xlab||label(kx), opts.ylab||label(ky));
+  if(opts.vline!==undefined&&opts.vline>=rx[0]&&opts.vline<=rx[1])
+    g+=`<path d="M${X(opts.vline)} ${y0}V${y1}" stroke="var(--rule2)" stroke-dasharray="3 3"/>`;
+  if(opts.hline!==undefined&&opts.hline>=ry[0]&&opts.hline<=ry[1])
+    g+=`<path d="M${x0} ${Y(opts.hline)}H${x1}" stroke="var(--rule2)" stroke-dasharray="3 3"/>`;
+  for(const gr of S.groups){
+    if(!S.on.has(gr)) continue;
+    const pts=rows.filter(r=>(r.group||"sin grupo")===gr
+      &&Number.isFinite(r[kx])&&Number.isFinite(r[ky]));
+    if(!pts.length) continue;
+    let d="";
+    pts.forEach(r=>{
+      if(r[kx]<rx[0]||r[kx]>rx[1]||r[ky]<ry[0]||r[ky]>ry[1]) return;
+      const px=X(r[kx]),py=Y(r[ky]);
+      d+=`M${(px-2.5).toFixed(1)} ${py.toFixed(1)}h5M${px.toFixed(1)} ${(py-2.5).toFixed(1)}v5`;});
+    g+=`<path d="${d}" stroke="${colorOf(gr)}" stroke-width="1" opacity=".6" fill="none"/>`;
+    if(opts.line){
+      const ts=theilSen(pts.map(r=>r[kx]),pts.map(r=>r[ky]));
+      if(ts){
+        const xa=rx[0],xb=rx[1];
+        const ya=ts.b+ts.m*xa, yb=ts.b+ts.m*xb;
+        const cl=(xv,yv)=>[X(xv),Math.max(y1,Math.min(y0,Y(yv)))];
+        const [ax,ay]=cl(xa,ya),[bx,by]=cl(xb,yb);
+        g+=`<path d="M${ax} ${ay}L${bx} ${by}" stroke="${colorOf(gr)}"
+          stroke-width="1.6" opacity=".85" stroke-dasharray="7 4"/>`;
+      }
+    }
+  }
+  s.innerHTML=g;
+}
+function ecdfOf(id,rows,key){
+  const {s,W,H,x0,y0,x1,y1}=frameOf(id);
+  const rx=rangeOf(rows,key,0.02);
+  if(!rx){emptyMsg(s,W,H,t("noDataFor")+label(key));return;}
+  const X=v=>x0+(v-rx[0])/(rx[1]-rx[0])*(x1-x0), Y=p=>y0-p*(y0-y1);
+  // Con el eje recortado hay valores mas alla del limite: se sujetan al borde
+  // en lugar de dibujarse fuera. En una acumulada eso es lo correcto, porque
+  // la curva tiene que llegar a F=1 de todos modos.
+  const Xc=v=>Math.max(x0,Math.min(x1,X(v)));
+  let g=axes(x0,y0,x1,y1,
+    ticksFor(rx[0],rx[1]).filter(t=>t.v>=rx[0]&&t.v<=rx[1]).map(t=>({p:X(t.v),l:t.l})),
+    [0,.25,.5,.75,1].map(v=>({p:Y(v),l:v.toFixed(2)})),label(key),"F");
+  for(const gr of S.groups){
+    if(!S.on.has(gr)) continue;
+    const v=rows.filter(r=>(r.group||"sin grupo")===gr).map(r=>r[key])
+      .filter(Number.isFinite).sort((a,b)=>a-b);
+    if(!v.length) continue;
+    let d=`M${Xc(v[0]).toFixed(1)} ${Y(0)}`;
+    v.forEach((r,i)=>{const px=Xc(r).toFixed(1);
+      d+=`L${px} ${Y(i/v.length).toFixed(1)}L${px} ${Y((i+1)/v.length).toFixed(1)}`;});
+    g+=`<path d="${d}" fill="none" stroke="${colorOf(gr)}" stroke-width="1.6"/>`;
+  }
+  s.innerHTML=g;
+}
+function statTable(id,rows,specs){
+  // «tb», no «t»: en esta función t() es la traductora
+  const tb=$(id);
+  const gs=groupsOf(rows);
+  tb.querySelector("thead").innerHTML=`<tr><th>${t("group")}</th><th>${t("n")}</th>`+
+    specs.map(sp=>`<th>${esc(sp.lab||label(sp.k))}</th>`).join("")+"</tr>";
+  tb.querySelector("tbody").innerHTML=gs.map(([g,rs])=>{
+    const cells=specs.map(sp=>{
+      const v=rs.map(r=>r[sp.k]).filter(Number.isFinite);
+      return `<td>${v.length?fmt(medianOf(v),sp.d??2):"—"}</td>`;
+    }).join("");
+    return `<tr><td><span class="swatch" style="display:inline-block;background:${colorOf(g)}"></span> ${esc(gname(g))}</td>
+      <td>${rs.length}</td>${cells}</tr>`;
+  }).join("");
+}
+
+/* ---------- estadistica de asociacion ---------- */
+function ranks(v){
+  const idx=v.map((x,i)=>[x,i]).sort((a,b)=>a[0]-b[0]);
+  const out=new Array(v.length);
+  let i=0;
+  while(i<idx.length){
+    let j=i; while(j+1<idx.length&&idx[j+1][0]===idx[i][0]) j++;
+    const r=(i+j+2)/2;
+    for(let k=i;k<=j;k++) out[idx[k][1]]=r;
+    i=j+1;
+  }
+  return out;
+}
+function pearson(a,b){
+  const n=a.length, ma=mean(a), mb=mean(b);
+  let sa=0,sb=0,sab=0;
+  for(let i=0;i<n;i++){const da=a[i]-ma,db=b[i]-mb;sa+=da*da;sb+=db*db;sab+=da*db;}
+  return (sa>0&&sb>0)?sab/Math.sqrt(sa*sb):NaN;
+}
+function spearman(x,y,iters=0,seed=11){
+  const n=x.length;
+  if(n<6) return {rho:NaN,p:NaN,n};
+  // El coste de la prueba de permutacion es iteraciones por n. Con miles de
+  // fotogramas no hace falta tanta resolucion en el valor p, asi que se
+  // reparte un presupuesto fijo de operaciones.
+  if(!iters) iters=Math.max(500,Math.min(2000,Math.round(2e6/n)));
+  const rx=ranks(x), ry=ranks(y);
+  const rho=pearson(rx,ry);
+  if(!Number.isFinite(rho)) return {rho:NaN,p:NaN,n};
+  const rnd=mulberry32(seed); const sh=ry.slice(); let ge=0;
+  for(let it=0;it<iters;it++){
+    for(let i=n-1;i>0;i--){const j=(rnd()*(i+1))|0;const t=sh[i];sh[i]=sh[j];sh[j]=t;}
+    if(Math.abs(pearson(rx,sh))>=Math.abs(rho)-1e-15) ge++;
+  }
+  return {rho,p:(ge+1)/(iters+1),n,iters};
+}
+function theilSen(x,y,cap=250,seed=3){
+  if(x.length<8) return null;
+  // El umbral de separacion tiene que ser relativo al recorrido de x. Con
+  // marcas de tiempo en milisegundos, dos fotogramas del mismo minuto distan
+  // unos pocos miles de unidades: la pendiente de ese par se dispara y, con
+  // pocos puntos, arrastra la mediana. De ahi las pendientes de miles de
+  // unidades por año que salian en archivos con varias tomas por dia.
+  const lo=Math.min(...x), hi=Math.max(...x), span=hi-lo;
+  if(!(span>0)) return null;
+  let X=x,Y=y;
+  if(x.length>cap){
+    const rnd=mulberry32(seed), pick=[];
+    for(let i=0;i<cap;i++) pick.push((rnd()*x.length)|0);
+    X=pick.map(i=>x[i]); Y=pick.map(i=>y[i]);
+  }
+  const minDx=1e-3*span;          // parejas separadas al menos un 0,1 % del recorrido
+  const sl=[];
+  for(let i=0;i<X.length;i++) for(let j=i+1;j<X.length;j++){
+    const dx=X[j]-X[i];
+    if(Math.abs(dx)>minDx) sl.push((Y[j]-Y[i])/dx);
+  }
+  if(sl.length<8) return null;
+  const m=medianOf(sl);
+  return {m,b:medianOf(Y.map((v,i)=>v-m*X[i])),pairs:sl.length};
+}
+
+/* ---------- paneles de tono ---------- */
+function drawZones(rows){
+  const {s,W,H,x0,y0,x1,y1}=frameOf("#svZones",52,42,16,14);
+  const gs=groupsOf(rows);
+  if(!gs.length||!present("z05")){emptyMsg(s,W,H,t("noZones"));return;}
+  const prof=gs.map(([g,rs])=>[g,ZONES.map(k=>mean(rs.map(r=>r[k]).filter(Number.isFinite))||0)]);
+  const max=Math.max(0.02,...prof.flatMap(([,p])=>p));
+  const bw=(x1-x0)/11;
+  let g=axes(x0,y0,x1,y1,ROMAN.map((l,i)=>({p:x0+(i+.5)*bw,l})),
+    ticksFor(0,max,4).map(tk=>({p:y0-tk.v/max*(y0-y1),l:(100*tk.v).toFixed(0)+"%"})),
+    t("zone"),t("areaPct"));
+  g+=`<path d="M${x0+5.5*bw} ${y0}V${y1}" stroke="var(--g3)" stroke-dasharray="4 3"/>`;
+  const k=prof.length, iw=bw*0.78/k;
+  prof.forEach(([gr,p],gi)=>{
+    p.forEach((v,i)=>{
+      const h=v/max*(y0-y1);
+      g+=`<rect x="${x0+i*bw+bw*0.11+gi*iw}" y="${y0-h}" width="${iw*0.9}" height="${h}"
+        fill="${colorOf(gr)}" opacity=".78"/>`;
+    });
+  });
+  s.innerHTML=g;
+}
+
+/* ---------- panel a*b* ---------- */
+function drawAB(rows){
+  const {s,W,H}=V("#svAB");
+  const pad=48, R=Math.min(W,H)/2-pad, cx=W/2, cy=H/2;
+  const vals=rows.flatMap(r=>[Math.abs(r.lab_a),Math.abs(r.lab_b),
+    Math.abs(r.sh_a),Math.abs(r.sh_b),Math.abs(r.hi_a),Math.abs(r.hi_b)])
+    .filter(Number.isFinite);
+  if(!vals.length){emptyMsg(s,W,H,t("noColour"));return;}
+  const lim=Math.max(6,Math.ceil(Math.max(...vals)/5)*5);
+  const X=a=>cx+a/lim*R, Y=b=>cy-b/lim*R;
+  let g=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="var(--panel)" stroke="var(--rule)"/>`;
+  for(const f of [1/3,2/3])
+    g+=`<circle cx="${cx}" cy="${cy}" r="${R*f}" fill="none" stroke="var(--rule)" stroke-dasharray="2 4"/>`;
+  g+=`<g stroke="var(--rule2)"><path d="M${cx-R} ${cy}h${2*R}"/><path d="M${cx} ${cy-R}v${2*R}"/></g>`;
+  // el parámetro se llama «txt» y no «t» para no eclipsar a la traductora
+  const tag=(x,y,txt,anchor)=>`<text x="${x}" y="${y}" text-anchor="${anchor}" font-size="9.5"
+    letter-spacing=".14em" fill="var(--ink2)" font-family="var(--mono)">${esc(txt)}</text>`;
+  g+=tag(cx,cy-R-10,t("abWarm"),"middle");
+  g+=tag(cx,cy+R+20,t("abCool"),"middle");
+  g+=tag(cx+R+8,cy+3,"+a*","start")+tag(cx-R-8,cy+3,"−a*","end");
+  g+=tag(cx+R*0.66,cy-8,"C* "+Math.round(lim*2/3),"middle");
+  for(const gr of S.groups){
+    if(!S.on.has(gr)) continue;
+    const pts=rows.filter(r=>(r.group||"sin grupo")===gr
+      &&Number.isFinite(r.lab_a)&&Number.isFinite(r.lab_b));
+    if(!pts.length) continue;
+    let d="";
+    pts.forEach(r=>{const px=X(r.lab_a),py=Y(r.lab_b);
+      d+=`M${(px-2.5).toFixed(1)} ${py.toFixed(1)}h5M${px.toFixed(1)} ${(py-2.5).toFixed(1)}v5`;});
+    g+=`<path d="${d}" stroke="${colorOf(gr)}" stroke-width="1" opacity=".6" fill="none"/>`;
+    if($("#tCEll").checked&&pts.length>=4){
+      const e=ellipse50(pts.map(r=>X(r.lab_a)),pts.map(r=>Y(r.lab_b)));
+      g+=`<ellipse cx="${e.mx.toFixed(1)}" cy="${e.my.toFixed(1)}"
+        rx="${Math.max(e.a,1).toFixed(1)}" ry="${Math.max(e.b,1).toFixed(1)}"
+        transform="rotate(${(e.ang*180/Math.PI).toFixed(2)} ${e.mx.toFixed(1)} ${e.my.toFixed(1)})"
+        fill="none" stroke="${colorOf(gr)}" stroke-width="1.4"/>`;
+    }
+    if($("#tSplit").checked){
+      const q=pts.filter(r=>Number.isFinite(r.sh_a)&&Number.isFinite(r.hi_b));
+      if(q.length){
+        const sa=medianOf(q.map(r=>r.sh_a)),sb=medianOf(q.map(r=>r.sh_b));
+        const ha=medianOf(q.map(r=>r.hi_a)),hb=medianOf(q.map(r=>r.hi_b));
+        const x1p=X(sa),y1p=Y(sb),x2=X(ha),y2=Y(hb);
+        const an=Math.atan2(y2-y1p,x2-x1p), L=9;
+        g+=`<g stroke="${colorOf(gr)}" fill="none" stroke-width="2">
+          <path d="M${x1p} ${y1p}L${x2} ${y2}"/>
+          <path d="M${x2} ${y2}L${x2-L*Math.cos(an-.4)} ${y2-L*Math.sin(an-.4)}"/>
+          <path d="M${x2} ${y2}L${x2-L*Math.cos(an+.4)} ${y2-L*Math.sin(an+.4)}"/></g>
+          <circle cx="${x1p}" cy="${y1p}" r="3" fill="var(--panel)" stroke="${colorOf(gr)}" stroke-width="1.6"/>`;
+      }
+    }
+    const ma=medianOf(pts.map(r=>r.lab_a)),mb=medianOf(pts.map(r=>r.lab_b));
+    g+=`<circle cx="${X(ma)}" cy="${Y(mb)}" r="5.5" fill="#fff" stroke="${colorOf(gr)}" stroke-width="2.2"/>`;
+  }
+  s.innerHTML=g;
+}
+
+function drawRose(rows){
+  const {s,W,H}=V("#svRose");
+  const cx=W/2, cy=H/2+6, R=Math.min(W,H)/2-40;
+  const nb=12, bins=new Map();
+  let max=0;
+  for(const gr of S.groups){
+    if(!S.on.has(gr)) continue;
+    const arr=new Array(nb).fill(0);
+    rows.filter(r=>(r.group||"sin grupo")===gr).forEach(r=>{
+      if(!Number.isFinite(r.hue_mean_deg)) return;
+      const w=Number.isFinite(r.hue_conc)?r.hue_conc:1;
+      arr[Math.min(nb-1,Math.floor(((r.hue_mean_deg%360)+360)%360/(360/nb)))]+=w;
+    });
+    const tot=arr.reduce((a,b)=>a+b,0);
+    if(tot>0){const nrm=arr.map(v=>v/tot); max=Math.max(max,...nrm); bins.set(gr,nrm);}
+  }
+  if(!bins.size){emptyMsg(s,W,H,t("noHue"));return;}
+  let g=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="var(--panel)" stroke="var(--rule)"/>`;
+  for(const f of [1/3,2/3]) g+=`<circle cx="${cx}" cy="${cy}" r="${R*f}" fill="none" stroke="var(--rule)" stroke-dasharray="2 4"/>`;
+  const dirs=[[0,"a*+"],[90,t("roseWarm")],[180,"a*−"],[270,t("roseCool")]];
+  // «lb», no «t», para no eclipsar a la traductora dentro del bucle
+  dirs.forEach(([d,lb])=>{
+    const a=-d*Math.PI/180;
+    g+=`<path d="M${cx} ${cy}L${cx+R*Math.cos(a)} ${cy+R*Math.sin(a)}" stroke="var(--rule)"/>`;
+    g+=`<text x="${cx+(R+16)*Math.cos(a)}" y="${cy+(R+16)*Math.sin(a)+3}" text-anchor="middle"
+      font-size="9" fill="var(--ink2)" font-family="var(--mono)">${esc(lb)}</text>`;
+  });
+  const k=bins.size; let gi=0;
+  bins.forEach((arr,gr)=>{
+    arr.forEach((v,i)=>{
+      if(v<=0) return;
+      const w=(360/nb)/k*0.85;
+      const a0=-(i*(360/nb)+gi*w)*Math.PI/180, a1=-(i*(360/nb)+(gi+1)*w)*Math.PI/180;
+      const rr=Math.sqrt(v/max)*R;
+      g+=`<path d="M${cx} ${cy}L${cx+rr*Math.cos(a0)} ${cy+rr*Math.sin(a0)}
+        A${rr} ${rr} 0 0 0 ${cx+rr*Math.cos(a1)} ${cy+rr*Math.sin(a1)}Z"
+        fill="${colorOf(gr)}" opacity=".62" stroke="${colorOf(gr)}" stroke-width=".8"/>`;
+    });
+    gi++;
+  });
+  s.innerHTML=g;
+}
+
+/* ---------- exploracion ---------- */
+function drawExplore(rows){
+  const kx=$("#exX").value, ky=$("#exY").value;
+  scatterXY("#svEx",rows,kx,ky,{line:$("#exLine").checked});
+  const gs=groupsOf(rows);
+  const rowsOut=gs.map(([g,rs])=>{
+    const p=rs.filter(r=>Number.isFinite(r[kx])&&Number.isFinite(r[ky]));
+    if(p.length<6) return `<tr><td>${esc(gname(g))}</td><td>${p.length}</td><td colspan="3" class="muted">${t("tooFew")}</td></tr>`;
+    const sp=spearman(p.map(r=>r[kx]),p.map(r=>r[ky]));
+    const ts=theilSen(p.map(r=>r[kx]),p.map(r=>r[ky]));
+    return `<tr><td><span class="swatch" style="display:inline-block;background:${colorOf(g)}"></span> ${esc(gname(g))}</td>
+      <td>${p.length}</td><td>${fmt(sp.rho,3)}</td>
+      <td>${sp.p<0.0005?"&lt; 0.0005":fmt(sp.p,4)}</td>
+      <td>${ts?fmt(ts.m,4):"—"}</td></tr>`;
+  }).join("");
+  $("#exStats").innerHTML=`<table><thead><tr><th>${t("group")}</th><th>${t("n")}</th>
+    <th>${t("thRho")}</th><th>${t("thPerm")}</th><th>${t("thTheil")}</th></tr></thead>
+    <tbody>${rowsOut}</tbody></table>`;
+}
+
+function drawCorr(rows){
+  const {s,W,H}=V("#svCorr");
+  const keys=numCols().filter(k=>rows.filter(r=>Number.isFinite(r[k])).length>=8);
+  if(keys.length<3){emptyMsg(s,W,H,t("fewCols"));return;}
+  const n=keys.length, padL=178, padT=14, cell=Math.min(34,(Math.min(W-padL-12,H-padT-150))/n);
+  const rk=keys.map(k=>{
+    const v=rows.map(r=>r[k]);
+    const ok=v.map((x,i)=>[x,i]).filter(([x])=>Number.isFinite(x));
+    return {k,idx:new Set(ok.map(([,i])=>i))};
+  });
+  const rankCache={};
+  const rankOf=(k,idxs)=>{
+    const key=k+"|"+idxs.length;
+    if(rankCache[key]) return rankCache[key];
+    return rankCache[key]=ranks(idxs.map(i=>rows[i][k]));
+  };
+  let g="";
+  for(let i=0;i<n;i++){
+    g+=`<text x="${padL-8}" y="${padT+i*cell+cell*0.68}" text-anchor="end" font-size="9"
+      fill="var(--ink2)" font-family="var(--mono)">${esc(label(keys[i]).slice(0,26))}</text>`;
+    g+=`<text transform="translate(${padL+i*cell+cell*0.72} ${padT+n*cell+8}) rotate(55)"
+      font-size="9" fill="var(--ink2)" font-family="var(--mono)">${esc(label(keys[i]).slice(0,26))}</text>`;
+  }
+  for(let i=0;i<n;i++) for(let j=0;j<n;j++){
+    const idxs=[];
+    // «ri», no «t»: en esta función t() es la traductora
+    for(let ri=0;ri<rows.length;ri++)
+      if(Number.isFinite(rows[ri][keys[i]])&&Number.isFinite(rows[ri][keys[j]])) idxs.push(ri);
+    let rho=NaN;
+    if(idxs.length>=8) rho=pearson(rankOf(keys[i],idxs),rankOf(keys[j],idxs));
+    const x=padL+j*cell, y=padT+i*cell;
+    const col=!Number.isFinite(rho)?"var(--paper)":(rho>=0?"var(--g2)":"var(--g1)");
+    g+=`<rect x="${x}" y="${y}" width="${cell-1}" height="${cell-1}" fill="${col}"
+      fill-opacity="${Number.isFinite(rho)?Math.abs(rho).toFixed(3):0}"
+      stroke="var(--rule)" stroke-width=".4" data-i="${keys[i]}" data-j="${keys[j]}"
+      style="cursor:pointer"><title>${esc(label(keys[i]))} · ${esc(label(keys[j]))}: ρ=${fmt(rho,3)} (n=${idxs.length})</title></rect>`;
+    if(cell>=26&&Number.isFinite(rho)&&Math.abs(rho)>=0.3)
+      g+=`<text x="${x+cell/2}" y="${y+cell/2+3}" text-anchor="middle" font-size="8"
+        fill="${Math.abs(rho)>0.6?"#fff":"var(--ink)"}" font-family="var(--mono)"
+        pointer-events="none">${rho.toFixed(2).replace("0.",".")}</text>`;
+  }
+  s.innerHTML=g;
+  s.querySelectorAll("rect[data-i]").forEach(r=>r.addEventListener("click",()=>{
+    $("#exY").value=r.dataset.i; $("#exX").value=r.dataset.j;
+    drawExplore(S.sel);
+    const el=$("#svEx");
+    if(el&&typeof el.scrollIntoView==="function")
+      el.scrollIntoView({behavior:"smooth",block:"center"});
+  }));
+}
+
+/* ---------- pestanas ---------- */
+const TABS=["encuadre","tono","color","textura","conclusiones","evolucion","explorar"];
+let TAB="encuadre";
+function drawTab(rows){
+  if(TAB==="tono"){
+    drawZones(rows);
+    scatterXY("#svKey",rows,"key_stops","dr_stops",{vline:0});
+    ecdfOf("#svTone",rows,$("#toneKey").value);
+    statTable("#tTone",rows,[{k:"key_stops",d:2},{k:"dr_stops",d:2},
+      {k:"contrast_sd",d:1},{k:"lstar_median",d:1},{k:"clip_lo",d:3},
+      {k:"clip_hi",d:3},{k:"tone_entropy",d:2}]);
+  }else if(TAB==="color"){
+    drawAB(rows); drawRose(rows); ecdfOf("#svCol",rows,$("#colKey").value);
+    statTable("#tColor",rows,[{k:"lab_b",d:1},{k:"lab_a",d:1},{k:"chroma_mean",d:1},
+      {k:"colorfulness",d:1},{k:"cct_k",d:0},{k:"duv",d:4},{k:"split_dab",d:1},
+      {k:"hue_conc",d:2}]);
+    const n=rows.filter(r=>Number.isFinite(r.cct_k)).length;
+    $("#filmWarn").textContent=rows.length&&present("lab_b")
+      ? t("filmA")+n+t("filmB")+rows.length+t("filmC") : "";
+  }else if(TAB==="textura"){
+    scatterXY("#svTex",rows,"acutance","alpha_spectral",{hline:2});
+    scatterXY("#svFoc",rows,"f_number","focus_frac",{line:true});
+    ecdfOf("#svTexE",rows,$("#texKey").value);
+    ecdfOf("#svAniso",rows,"edge_vert");
+    statTable("#tTex",rows,[{k:"acutance",d:2},{k:"alpha_spectral",d:2},
+      {k:"grain_levels",d:2},{k:"focus_frac",d:3},{k:"edge_vert",d:3}]);
+  }else if(TAB==="conclusiones"){
+    const F=findings(rows); S.lastF=F;
+    drawVeredicto(rows,F); drawDrift(rows,F); drawPCA(rows,F); tableFindings(F);
+  }else if(TAB==="evolucion"){
+    drawEvo(rows); drawSparks(rows);
+  }else if(TAB==="explorar"){
+    drawExplore(rows); drawCorr(rows);
+  }
+}
+function fillSelectors(){
+  const cols=numCols();
+  const opts=ks=>ks.map(k=>`<option value="${esc(k)}">${esc(label(k))}</option>`).join("");
+  const pick=(id,pref,list)=>{
+    const el=$(id); const use=list.filter(k=>cols.includes(k));
+    el.innerHTML=opts(use.length?use:cols);
+    const p=pref.find(k=>use.includes(k)); if(p) el.value=p;
+  };
+  pick("#toneKey",["key_stops","dr_stops"],
+    ["key_stops","dr_stops","contrast_sd","lstar_median","tone_entropy","clip_lo","clip_hi"]);
+  pick("#colKey",["cct_k","lab_b"],
+    ["lab_b","lab_a","cct_k","duv","chroma_mean","chroma_p95","colorfulness","hue_conc","split_dab"]);
+  pick("#texKey",["grain_levels"],
+    ["grain_levels","acutance","alpha_spectral","focus_frac","edge_vert"]);
+  pick("#evoKey",["creaminess","blur_sep","r_norm"],cols);
+  $("#exX").innerHTML=opts(cols); $("#exY").innerHTML=opts(cols);
+  $("#exX").value=cols.includes("f_number")?"f_number":cols[0];
+  $("#exY").value=cols.includes("r_norm")?"r_norm":cols[Math.min(1,cols.length-1)];
+}
+
+/* ---------- estado ---------- */
+const S={rows:[],groups:[],on:new Set(),orients:[],onOr:new Set(),sel:[],aspect:1.5};
+
+function ingest(text){
+  const {head,data}=parseCSV(text);
+  const need=["group","x_norm","y_norm","r_norm"];
+  const miss=need.filter(c=>!head.includes(c));
+  if(miss.length){ alert(t("csvMissing")+miss.join(", ")+t("csvMake")); return; }
+  S.rows=data.filter(r=>!r.error&&Number.isFinite(r.x_norm)&&Number.isFinite(r.y_norm));
+  S.rows.forEach(r=>{
+    r.t=parseStamp(r.datetime);
+    r.mpx=(Number.isFinite(r.width)&&Number.isFinite(r.height))?r.width*r.height/1e6:NaN;
+  });
+  // secuencia: orden cronologico dentro del grupo, y si no hay fecha, orden de ruta
+  const byG={};
+  S.rows.forEach(r=>{const k=r.group||"sin grupo";(byG[k]=byG[k]||[]).push(r);});
+  Object.values(byG).forEach(list=>{
+    list.sort((a,b)=>(Number.isFinite(a.t)&&Number.isFinite(b.t)&&a.t!==b.t)
+      ? a.t-b.t : String(a.path).localeCompare(String(b.path)));
+    list.forEach((r,i)=>{r.seq=i+1;});
+  });
+  const ts=S.rows.map(r=>r.t).filter(Number.isFinite);
+  S.tmin=ts.length?Math.min(...ts):NaN; S.tmax=ts.length?Math.max(...ts):NaN;
+  const nd=S.rows.length-ts.length;
+  S.nDated=ts.length; S.nUndated=nd;
+  paintDateInfo();
+  $("#d0").value=""; $("#d1").value="";
+  if(ts.length){$("#d0").min=$("#d1").min=isoDay(S.tmin);
+                $("#d0").max=$("#d1").max=isoDay(S.tmax);}
+  const evo=$("#evoAxis"); evo.value=ts.length?"t":"seq";
+  const cnt=new Map();
+  S.rows.forEach(r=>{const k=r.group||"sin grupo";cnt.set(k,(cnt.get(k)||0)+1);});
+  S.groups=[...cnt.keys()].sort();
+  S.count=cnt;
+  S.bySize=[...cnt.entries()].sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
+  // con muchos grupos, dibujarlos todos es ilegible y la paleta se repite:
+  // se activan los seis mayores y el resto queda a un clic
+  S.on=new Set(S.groups.length>8?S.bySize.slice(0,6):S.groups);
+  S.orients=[...new Set(S.rows.map(r=>r.orientation).filter(Boolean))].sort();
+  S.onOr=new Set(S.orients);
+  buildGroupUI(); buildOrientUI(); fillSelectors();
+  $("#drop").hidden=true; $("#wrap").hidden=false; $("#export").disabled=false;
+  refresh();
+}
+function colorOf(g){return PAL[S.groups.indexOf(g)%PAL.length];}
+function paintDateInfo(){
+  const el=$("#dInfo"); if(!el||S.nDated===undefined) return;
+  el.textContent=S.nDated
+    ? `${S.nDated} ${t("withDate")}${S.nUndated?", "+S.nUndated+" "+t("withoutDate"):""}`
+    : t("noneWithDate");
+}
+
+function buildGroupUI(){
+  const q=$("#gq").value.trim().toLowerCase();
+  const vis=S.bySize.filter(g=>!q||g.toLowerCase().includes(q));
+  $("#groupList").innerHTML=vis.map(g=>
+    `<label class="chk"><input type="checkbox" data-g="${esc(g)}"${S.on.has(g)?" checked":""}>
+     <span class="swatch" style="background:${colorOf(g)}"></span>${esc(gname(g))}
+     <span class="muted" style="margin-left:auto">${S.count.get(g)}</span></label>`).join("")
+    ||`<span class="muted">${t("noGroupMatch")}</span>`;
+  $("#groupList").querySelectorAll("input").forEach(cb=>cb.onchange=()=>{
+    cb.checked?S.on.add(cb.dataset.g):S.on.delete(cb.dataset.g); refresh();});
+  const n=S.on.size;
+  const de=LANG()==="en"?" of ":" de ";
+  $("#gInfo").innerHTML=`${n}${de}${S.groups.length} ${t("groupsActive")}`
+    +(n>PAL.length?` · <span class="warn">${t("palettePre")} ${PAL.length} ${t("paletteWrap")}</span>`:"");
+}
+function buildOrientUI(){
+  // «landscape»/«portrait» vienen del CSV: son datos, no interfaz
+  $("#orientList").innerHTML=S.orients.map(o=>
+    `<label class="chk"><input type="checkbox" data-o="${esc(o)}" checked>${esc(o)}</label>`).join("");
+  $("#orientList").querySelectorAll("input").forEach(cb=>cb.onchange=()=>{
+    cb.checked?S.onOr.add(cb.dataset.o):S.onOr.delete(cb.dataset.o); refresh();});
+}
+
+function num(id){const v=parseFloat($(id).value); return Number.isFinite(v)?v:null;}
+function filterRows(){
+  const cmin=+$("#conf").value, amax=+$("#area").value;
+  const f0=num("#f0"),f1=num("#f1"),a0=num("#a0"),a1=num("#a1");
+  const q=$("#q").value.trim().toLowerCase();
+  const t0=$("#d0").value?Date.parse($("#d0").value+"T00:00:00Z"):null;
+  const t1=$("#d1").value?Date.parse($("#d1").value+"T23:59:59Z"):null;
+  return S.rows.filter(r=>{
+    if((t0!==null||t1!==null)&&!Number.isFinite(r.t)) return false;
+    if(t0!==null&&!(r.t>=t0)) return false;
+    if(t1!==null&&!(r.t<=t1)) return false;
+    if(!S.on.has(r.group||"sin grupo")) return false;
+    if(S.orients.length&&r.orientation&&!S.onOr.has(r.orientation)) return false;
+    if(Number.isFinite(r.confidence)&&r.confidence<cmin) return false;
+    if(Number.isFinite(r.area_frac)&&r.area_frac>amax) return false;
+    const f=Number.isFinite(r.focal35_mm)&&r.focal35_mm>0?r.focal35_mm:r.focal_mm;
+    if(f0!==null&&!(f>=f0)) return false;
+    if(f1!==null&&!(f<=f1)) return false;
+    if(a0!==null&&!(r.f_number>=a0)) return false;
+    if(a1!==null&&!(r.f_number<=a1)) return false;
+    if(q&&!((r.path||"")+" "+(r.model||"")+" "+(r.lens||"")).toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+const focalOf=r=>Number.isFinite(r.focal35_mm)&&r.focal35_mm>0?r.focal35_mm:r.focal_mm;
+
+/* ---------- dibujo ---------- */
+const V=(id)=>{const s=$(id);const b=s.getAttribute("viewBox").split(" ").map(Number);return{s,W:b[2],H:b[3]};};
+function axes(x0,y0,x1,y1,xt,yt,xlab,ylab){
+  let g=`<g stroke="var(--rule2)" stroke-width="1" fill="none">
+    <path d="M${x0} ${y0}H${x1}"/><path d="M${x0} ${y0}V${y1}"/></g>`;
+  g+=xt.map(t=>`<g><path d="M${t.p} ${y0}v5" stroke="var(--rule2)"/>
+    <text x="${t.p}" y="${y0+17}" text-anchor="middle" font-size="10" fill="var(--ink2)" font-family="var(--mono)">${esc(t.l)}</text></g>`).join("");
+  g+=yt.map(t=>`<g><path d="M${x0} ${t.p}h-5" stroke="var(--rule2)"/>
+    <text x="${x0-9}" y="${t.p+3.5}" text-anchor="end" font-size="10" fill="var(--ink2)" font-family="var(--mono)">${esc(t.l)}</text></g>`).join("");
+  if(xlab) g+=`<text x="${x1}" y="${y0+30}" text-anchor="end" font-size="9.5" letter-spacing=".12em" fill="var(--ink2)" font-family="var(--mono)">${esc(xlab)}</text>`;
+  if(ylab) g+=`<text x="${x0-4}" y="${y1-10}" font-size="9.5" letter-spacing=".12em" fill="var(--ink2)" font-family="var(--mono)">${esc(ylab)}</text>`;
+  return g;
+}
+
+function drawGlass(rows){
+  const {s,W,H}=V("#svGlass");
+  const asp=S.aspect;
+  const pad=54, availW=W-2*pad, availH=H-2*pad;
+  let fw=availW, fh=fw/asp;
+  if(fh>availH){fh=availH; fw=fh*asp;}
+  const cx=W/2, cy=H/2, x0=cx-fw/2, y0=cy-fh/2;
+  const X=v=>cx+v*fw/2, Y=v=>cy-v*fh/2;
+  let g="";
+
+  // rebate: marcas de borde y pie de imagen
+  g+=`<g stroke="var(--g3)" stroke-width="1" opacity=".8">`;
+  for(let i=0;i<=8;i++){const px=x0+i*fw/8;
+    g+=`<path d="M${px} ${y0-13}v6"/><path d="M${px} ${y0+fh+7}v6"/>`;}
+  g+=`</g>`;
+  const nOn=rows.length;
+  g+=`<text x="${x0}" y="${y0-20}" font-size="9.5" letter-spacing=".2em" fill="var(--g3)" font-family="var(--mono)">
+      ${esc(`N=${nOn}  ASP ${asp.toFixed(2)}  CONF≥${(+$("#conf").value).toFixed(2)}`)}</text>`;
+
+  // fotograma
+  g+=`<rect x="${x0}" y="${y0}" width="${fw}" height="${fh}" fill="#fff" stroke="var(--ink)" stroke-width="1.4"/>`;
+
+  // densidad
+  if($("#tDens").checked&&nOn){
+    const nx=24, ny=Math.max(6,Math.round(24/asp)), cells=new Map();
+    let max=0;
+    rows.forEach(r=>{
+      const i=Math.min(nx-1,Math.max(0,Math.floor((r.x_norm+1)/2*nx)));
+      const j=Math.min(ny-1,Math.max(0,Math.floor((1-r.y_norm)/2*ny)));
+      const k=j*nx+i, v=(cells.get(k)||0)+1; cells.set(k,v); if(v>max)max=v;
+    });
+    cells.forEach((v,k)=>{
+      const i=k%nx, j=(k-i)/nx;
+      g+=`<rect x="${x0+i*fw/nx}" y="${y0+j*fh/ny}" width="${fw/nx+.4}" height="${fh/ny+.4}"
+        fill="var(--ink)" opacity="${(0.06+0.5*v/max).toFixed(3)}"/>`;
+    });
+  }
+
+  // tercios y centro
+  if($("#tThirds").checked){
+    g+=`<g stroke="var(--rule)" stroke-width="1" stroke-dasharray="3 4">`;
+    for(const tf of [1/3,2/3]) g+=`<path d="M${x0+tf*fw} ${y0}v${fh}"/><path d="M${x0} ${y0+tf*fh}h${fw}"/>`;
+    g+=`</g>`;
+  }
+  g+=`<g stroke="var(--rule2)"><path d="M${cx-9} ${cy}h18"/><path d="M${cx} ${cy-9}v18"/></g>`;
+
+  // campo de medida de 8 mm sobre 24 mm de altura, cuatro arcos
+  if($("#tArcs").checked){
+    const R=(8/24)*fh/2;
+    for(let k=0;k<4;k++){
+      const a0=(-38+90*k)*Math.PI/180, a1=(38+90*k)*Math.PI/180;
+      g+=`<path d="M${cx+R*Math.cos(a0)} ${cy+R*Math.sin(a0)}
+        A${R} ${R} 0 0 1 ${cx+R*Math.cos(a1)} ${cy+R*Math.sin(a1)}"
+        fill="none" stroke="var(--ink)" stroke-width="1.2" opacity=".55"/>`;
+    }
+    g+=`<text x="${cx+R+6}" y="${cy-R-4}" font-size="9" fill="var(--ink2)" font-family="var(--mono)">8 mm</text>`;
+  }
+  // parche del telémetro
+  const pw=+$("#patch").value;
+  if($("#tPatch").checked){
+    const w=pw*fw, h=w*0.72;
+    g+=`<rect x="${cx-w/2}" y="${cy-h/2}" width="${w}" height="${h}" fill="none"
+      stroke="var(--ink)" stroke-width="1" stroke-dasharray="5 3" opacity=".7"/>`;
+  }
+
+  // puntos
+  if($("#tPts").checked){
+    for(const gr of S.groups){
+      if(!S.on.has(gr)) continue;
+      const pts=rows.filter(r=>(r.group||"sin grupo")===gr);
+      if(!pts.length) continue;
+      let d="";
+      for(const r of pts){
+        if(Math.abs(r.x_norm)>1.02||Math.abs(r.y_norm)>1.02) continue;
+        const px=X(r.x_norm),py=Y(r.y_norm);
+        d+=`M${(px-3).toFixed(1)} ${py.toFixed(1)}h6M${px.toFixed(1)} ${(py-3).toFixed(1)}v6`;}
+      g+=`<path d="${d}" stroke="${colorOf(gr)}" stroke-width="1.1" opacity=".8" fill="none"/>`;
+    }
+  }
+  // elipse del 50 % y mediana
+  for(const gr of S.groups){
+    if(!S.on.has(gr)) continue;
+    const pts=rows.filter(r=>(r.group||"sin grupo")===gr);
+    if(pts.length<4) continue;
+    const xs=pts.map(r=>r.x_norm), ys=pts.map(r=>r.y_norm);
+    if($("#tEll").checked){
+      // la covarianza se calcula ya en pixeles: escalar x e y por separado
+      // despues de rotar deformaria la elipse cuando el aspecto no es 1
+      const e=ellipse50(xs.map(X),ys.map(Y));
+      const deg=e.ang*180/Math.PI;
+      g+=`<ellipse cx="${e.mx.toFixed(1)}" cy="${e.my.toFixed(1)}"
+        rx="${Math.max(e.a,1).toFixed(1)}" ry="${Math.max(e.b,1).toFixed(1)}"
+        transform="rotate(${deg.toFixed(2)} ${e.mx.toFixed(1)} ${e.my.toFixed(1)})"
+        fill="none" stroke="${colorOf(gr)}" stroke-width="1.4" opacity=".9"/>`;
+    }
+    const mx=medianOf(xs), my=medianOf(ys);
+    g+=`<g><circle cx="${X(mx)}" cy="${Y(my)}" r="5.5" fill="#fff" stroke="${colorOf(gr)}" stroke-width="2.2"/>
+      <circle cx="${X(mx)}" cy="${Y(my)}" r="1.6" fill="${colorOf(gr)}"/></g>`;
+  }
+  s.innerHTML=g;
+  s.__hit={X,Y,rows};
+}
+
+function drawEcdf(rows){
+  const {s,W,H}=V("#svEcdf");
+  const L=42,R=10,T=12,B=34, x0=L,y0=H-B,x1=W-R,y1=T;
+  const thr=parseFloat($("#thr").value)||0.15;
+  const X=v=>x0+v*(x1-x0), Y=p=>y0-p*(y0-y1);
+  let g=axes(x0,y0,x1,y1,
+    [0,.25,.5,.75,1].map(v=>({p:X(v),l:v.toFixed(2)})),
+    [0,.25,.5,.75,1].map(v=>({p:Y(v),l:v.toFixed(2)})),
+    t("rSemi"),"F(r)");
+  g+=`<path d="M${X(thr)} ${y0}V${y1}" stroke="var(--g3)" stroke-dasharray="4 3"/>`;
+  for(const gr of S.groups){
+    if(!S.on.has(gr)) continue;
+    const v=rows.filter(r=>(r.group||"sin grupo")===gr).map(r=>r.r_norm)
+      .filter(Number.isFinite).sort((a,b)=>a-b);
+    if(!v.length) continue;
+    let d=`M${X(0)} ${Y(0)}`;
+    v.forEach((r,i)=>{d+=`L${X(Math.min(r,1))} ${Y(i/v.length)}L${X(Math.min(r,1))} ${Y((i+1)/v.length)}`;});
+    d+=`L${X(1)} ${Y(1)}`;
+    g+=`<path d="${d}" fill="none" stroke="${colorOf(gr)}" stroke-width="1.6"/>`;
+  }
+  s.innerHTML=g;
+}
+
+function drawMarg(rows){
+  const {s,W,H}=V("#svMarg");
+  const nb=22, half=(H-30)/2;
+  let g="";
+  [["x_norm","x",0],["y_norm","y",half+18]].forEach(([key,lab,off])=>{
+    const L=42,R=10, x0=L,x1=W-R, yb=off+half-16, yt=off+4;
+    const X=v=>x0+(v+1)/2*(x1-x0);
+    const hs=[];let max=0;
+    for(const gr of S.groups){
+      if(!S.on.has(gr)) continue;
+      const h=new Array(nb).fill(0);
+      const v=rows.filter(r=>(r.group||"sin grupo")===gr);
+      v.forEach(r=>{const b=Math.min(nb-1,Math.max(0,Math.floor((r[key]+1)/2*nb)));h[b]++;});
+      const n=v.length||1; const hn=h.map(c=>c/n); max=Math.max(max,...hn);
+      hs.push([gr,hn]);
+    }
+    g+=axes(x0,yb,x1,yt,[-1,-.5,0,.5,1].map(v=>({p:X(v),l:v.toFixed(1)})),[],lab,"");
+    g+=`<path d="M${X(0)} ${yb}V${yt}" stroke="var(--rule2)" stroke-dasharray="3 3"/>`;
+    hs.forEach(([gr,hn])=>{
+      let d=`M${x0} ${yb}`;
+      hn.forEach((v,i)=>{const y=yb-(max?v/max:0)*(yb-yt);
+        d+=`L${x0+i*(x1-x0)/nb} ${y}L${x0+(i+1)*(x1-x0)/nb} ${y}`;});
+      d+=`L${x1} ${yb}`;
+      g+=`<path d="${d}" fill="${colorOf(gr)}" fill-opacity=".1" stroke="${colorOf(gr)}" stroke-width="1.3"/>`;
+    });
+  });
+  s.innerHTML=g;
+}
+
+function scatterVs(id,rows,key,xlab,ticks){
+  const {s,W,H}=V(id);
+  const L=42,R=10,T=12,B=34, x0=L,y0=H-B,x1=W-R,y1=T;
+  const vals=rows.map(r=>key(r)).filter(Number.isFinite);
+  if(!vals.length){s.innerHTML=`<text x="${W/2}" y="${H/2}" text-anchor="middle" font-size="11" fill="var(--ink2)" font-family="var(--mono)">${esc(t("noDataFor")+xlab)}</text>`;return;}
+  const lo=Math.min(...vals), hi=Math.max(...vals), span=(hi-lo)||1;
+  const X=v=>x0+(v-lo)/span*(x1-x0), Y=v=>y0-Math.min(v,1)*(y0-y1);
+  const xt=(ticks||[lo,lo+span/2,hi]).filter(v=>v>=lo-1e-9&&v<=hi+1e-9)
+    .map(v=>({p:X(v),l:String(+v.toFixed(1))}));
+  let g=axes(x0,y0,x1,y1,xt.length?xt:[{p:X(lo),l:String(+lo.toFixed(1))},{p:X(hi),l:String(+hi.toFixed(1))}],
+    [0,.25,.5,.75,1].map(v=>({p:Y(v),l:v.toFixed(2)})),xlab,"r");
+  for(const gr of S.groups){
+    if(!S.on.has(gr)) continue;
+    const pts=rows.filter(r=>(r.group||"sin grupo")===gr&&Number.isFinite(key(r)));
+    let d="";
+    pts.forEach(r=>{const px=X(key(r)),py=Y(r.r_norm);
+      d+=`M${(px-2.5).toFixed(1)} ${py.toFixed(1)}h5M${px.toFixed(1)} ${(py-2.5).toFixed(1)}v5`;});
+    g+=`<path d="${d}" stroke="${colorOf(gr)}" stroke-width="1" opacity=".55" fill="none"/>`;
+  }
+  s.innerHTML=g;
+}
+
+/* ---------- tablas y contraste ---------- */
+function groupsOf(rows){
+  const m=new Map();
+  rows.forEach(r=>{const k=r.group||"sin grupo"; if(!m.has(k))m.set(k,[]); m.get(k).push(r);});
+  return [...m.entries()].sort((a,b)=>b[1].length-a[1].length);
+}
+function tableGroups(rows){
+  const thr=parseFloat($("#thr").value)||0.15, pw=+$("#patch").value, ph=pw*0.72;
+  const head=[t("group"),t("n"),t("thRmed"),t("thCI"),t("thMAD"),t("thAbsX"),t("thAbsY"),
+              `r<${thr.toFixed(2)}`,t("thInPatch")];
+  $("#tGroups").querySelector("thead").innerHTML="<tr>"+head.map(h=>`<th>${esc(h)}</th>`).join("")+"</tr>";
+  $("#tGroups").querySelector("tbody").innerHTML=groupsOf(rows).map(([g,rs])=>{
+    const r=rs.map(v=>v.r_norm).filter(Number.isFinite);
+    const [lo,hi]=bootstrapCI(r,2000,1);
+    const inPatch=rs.filter(v=>Math.abs(v.x_norm)<=pw&&Math.abs(v.y_norm)<=ph).length/rs.length;
+    return `<tr><td><span class="swatch" style="display:inline-block;background:${colorOf(g)}"></span> ${esc(gname(g))}</td>
+      <td>${rs.length}</td><td>${fmt(medianOf(r))}</td>
+      <td class="muted">[${fmt(lo)}, ${fmt(hi)}]</td><td>${fmt(madOf(r))}</td>
+      <td>${fmt(medianOf(rs.map(v=>Math.abs(v.x_norm))))}</td>
+      <td>${fmt(medianOf(rs.map(v=>Math.abs(v.y_norm))))}</td>
+      <td>${pct(r.filter(v=>v<thr).length/r.length)}</td>
+      <td>${pct(inPatch)}</td></tr>`;
+  }).join("");
+}
+function contrast(rows){
+  const gs=groupsOf(rows).filter(([,rs])=>rs.length>=8);
+  const box=$("#contrast");
+  if(gs.length!==2){
+    box.innerHTML=`<p class="note">${esc(t("contrastNeedA")+gs.length+".")}</p>`;
+    return;
+  }
+  const iters=Math.max(1000,Math.min(50000,parseInt($("#iters").value)||10000));
+  const [nA,rsA]=gs[0],[nB,rsB]=gs[1];
+  const a=rsA.map(r=>r.r_norm).filter(Number.isFinite);
+  const b=rsB.map(r=>r.r_norm).filter(Number.isFinite);
+  const pt=permTest(a,b,iters,7), mw=mannWhitney(a,b), ks=ksTest(a,b);
+  const dA=bootstrapCI(a,2000,2), dB=bootstrapCI(b,2000,3);
+  const sign=esc(gname(pt.diff<0?nA:nB))+t("cMoreCentred");
+  box.innerHTML=`
+   <table><thead><tr><th>${t("thMeasure")}</th><th>${t("thValue")}</th><th>${t("thReading")}</th></tr></thead><tbody>
+    <tr><td>${t("cMedianR")}</td><td>${fmt(medianOf(a))} vs ${fmt(medianOf(b))}</td>
+        <td class="muted">${esc(gname(nA))} [${fmt(dA[0])}, ${fmt(dA[1])}] · ${esc(gname(nB))} [${fmt(dB[0])}, ${fmt(dB[1])}]</td></tr>
+    <tr><td>${t("cDiffMed")}</td><td>${pt.diff>0?"+":""}${fmt(pt.diff,4)}</td><td class="muted">${sign}</td></tr>
+    <tr><td>${t("cPermP")} (${iters})</td><td>${pt.p<1/(iters+1)*1.5?"&lt; "+fmt(1.5/(iters+1),4):fmt(pt.p,4)}</td>
+        <td class="muted">${t("cTwoSided")}</td></tr>
+    <tr><td>${t("cMWU")}</td><td>${mw.U.toFixed(0)} (z=${fmt(mw.z,2)})</td>
+        <td class="muted">p=${fmt(mw.p,4)}</td></tr>
+    <tr><td>${t("cCliff")}</td><td>${fmt(mw.delta,3)}</td>
+        <td class="muted">${t("cCliffRead")}</td></tr>
+    <tr><td>${t("cKS")}</td><td>${fmt(ks.D,3)}</td>
+        <td class="muted">p=${fmt(ks.p,4)}${t("cKSRead")}</td></tr>
+   </tbody></table>
+   <p class="note">${esc(t("cNoteA")+a.length+t("cNoteB")+b.length+t("cNoteC"))}</p>`;
+}
+function tableBins(rows){
+  const bins=[[0,24],[24,29],[29,39],[39,59],[59,89],[89,139],[139,1e4]];
+  const gs=groupsOf(rows).map(([g])=>g);
+  const withF=rows.filter(r=>Number.isFinite(focalOf(r)));
+  // «tb», no «t»: en esta función t() es la traductora
+  const tb=$("#tBins");
+  if(!withF.length){
+    tb.querySelector("thead").innerHTML="";
+    tb.querySelector("tbody").innerHTML=`<tr><td class="muted" style="border:0">${esc(t("binsNoFocal"))}</td></tr>`;
+    return;
+  }
+  tb.querySelector("thead").innerHTML=`<tr><th>${t("thFocalMm")}</th>`+
+    gs.map(g=>`<th>${esc(gname(g))}${t("thBinN")}</th><th>${esc(gname(g))}${t("thBinR")}</th>`).join("")+"</tr>";
+  tb.querySelector("tbody").innerHTML=bins.map(([lo,hi])=>{
+    const cells=gs.map(g=>{
+      const v=withF.filter(r=>(r.group||"sin grupo")===g&&focalOf(r)>=lo&&focalOf(r)<hi)
+        .map(r=>r.r_norm).filter(Number.isFinite);
+      return `<td>${v.length||"—"}</td><td>${v.length?fmt(medianOf(v)):"—"}</td>`;
+    }).join("");
+    const any=gs.some((g,i)=>cells.split("<td>")[1+2*i]!=="—</td>");
+    return any?`<tr><td>${lo}${hi>1e3?" +":"–"+(hi-1)}</td>${cells}</tr>`:"";
+  }).join("");
+}
+
+/* ---------- refresco ---------- */
+function refresh(){
+  const rows=filterRows();
+  S.sel=rows;
+  const asp=medianOf(rows.map(r=>r.aspect).filter(v=>Number.isFinite(v)&&v>0));
+  S.aspect=Number.isFinite(asp)&&asp>0?asp:1.5;
+  const r=rows.map(v=>v.r_norm).filter(Number.isFinite);
+  const thr=parseFloat($("#thr").value)||0.15;
+  $("#kpi").innerHTML=[
+    [t("kpiFrames"),`${rows.length} <span class="muted">/ ${S.rows.length}</span>`],
+    [t("kpiGroups"),groupsOf(rows).length],
+    [t("kpiRmed"),fmt(medianOf(r))],
+    [t("kpiRmean"),fmt(mean(r))],
+    [`${t("kpiCentred")} (r&lt;${thr.toFixed(2)})`,pct(r.filter(v=>v<thr).length/(r.length||1))],
+    [t("kpiBiasX"),fmt(mean(rows.map(v=>v.x_norm)),3)],
+    [t("kpiBiasY"),fmt(mean(rows.map(v=>v.y_norm)),3)],
+  ].map(([k,v])=>`<div><span>${k}</span><b>${v}</b></div>`).join("");
+  $("#warn").innerHTML=rows.length<20
+    ? `<span class="warn">${t("smallSample")}</span>`:"";
+  $("#legend").innerHTML=groupsOf(rows).map(([g,rs])=>
+    `<span><span class="swatch" style="display:inline-block;background:${colorOf(g)}"></span> ${esc(gname(g))} (${rs.length})</span>`).join("");
+  drawGlass(rows); drawEcdf(rows); drawMarg(rows);
+  scatterVs("#svFocal",rows,focalOf,t("focal35"),[21,28,35,50,90,135]);
+  scatterVs("#svAp",rows,r=>r.f_number,t("fnum"),[1.4,2,2.8,4,5.6,8,11,16]);
+  tableGroups(rows); contrast(rows); tableBins(rows);
+  drawTab(rows);
+}
+
+/* ---------- interacción ---------- */
+["#conf","#area","#patch"].forEach(id=>$(id).addEventListener("input",()=>{
+  $("#confOut").textContent=(+$("#conf").value).toFixed(2);
+  $("#areaOut").textContent=(+$("#area").value).toFixed(2);
+  $("#patchOut").textContent=(+$("#patch").value).toFixed(2);
+  refresh();
+}));
+["#f0","#f1","#a0","#a1","#thr","#iters","#q"].forEach(id=>{
+  let t; $(id).addEventListener("input",()=>{clearTimeout(t);t=setTimeout(refresh,260);});
+});
+["#tThirds","#tArcs","#tPatch","#tDens","#tEll","#tPts","#tSplit","#tCEll",
+ "#exLine"].forEach(id=>$(id).addEventListener("change",refresh));
+["#toneKey","#colKey","#texKey","#exX","#exY","#evoKey","#evoAxis"].forEach(id=>
+  $(id).addEventListener("change",()=>drawTab(S.sel)));
+$("#evoPts").addEventListener("change",()=>drawTab(S.sel));
+$("#trim").addEventListener("change",refresh);
+$("#fAll").addEventListener("change",()=>drawTab(S.sel));
+$("#btnInforme").addEventListener("click",()=>{
+  const F=S.lastF||findings(S.sel);
+  const txt=buildReport(S.sel,F);
+  const ta=$("#informeTxt");
+  ta.value=txt; ta.hidden=false;
+  if(ta.select) ta.select();
+  if(typeof navigator!=="undefined"&&navigator.clipboard&&navigator.clipboard.writeText)
+    navigator.clipboard.writeText(txt).catch(()=>{});
+});
+(()=>{let t;$("#evoWin").addEventListener("input",()=>{
+  clearTimeout(t);t=setTimeout(()=>drawTab(S.sel),200);});})();
+["#d0","#d1"].forEach(id=>$(id).addEventListener("change",refresh));
+$("#gAll").addEventListener("click",()=>{S.on=new Set(S.groups);buildGroupUI();refresh();});
+$("#gNone").addEventListener("click",()=>{S.on=new Set();buildGroupUI();refresh();});
+$("#gTop").addEventListener("click",()=>{S.on=new Set(S.bySize.slice(0,6));buildGroupUI();refresh();});
+(()=>{let t;$("#gq").addEventListener("input",()=>{clearTimeout(t);t=setTimeout(buildGroupUI,180);});})();
+$("#dReset").addEventListener("click",()=>{$("#d0").value="";$("#d1").value="";refresh();});
+
+$("#tabs").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-tab]"); if(!b) return;
+  TAB=b.dataset.tab;
+  $("#tabs").querySelectorAll("button").forEach(x=>
+    x.setAttribute("aria-selected",String(x===b)));
+  TABS.forEach(t=>{$("#tab-"+t).hidden=(t!==TAB);});
+  drawTab(S.sel);
+});
+
+$("#file").addEventListener("change",e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const rd=new FileReader(); rd.onload=()=>ingest(rd.result); rd.readAsText(f);
+});
+const drop=$("#drop");
+["dragover","dragenter"].forEach(ev=>document.addEventListener(ev,e=>{
+  e.preventDefault(); drop.classList.add("hot");}));
+["dragleave","drop"].forEach(ev=>document.addEventListener(ev,e=>{
+  if(ev==="dragleave"&&e.relatedTarget) return;
+  drop.classList.remove("hot");}));
+document.addEventListener("drop",e=>{
+  e.preventDefault();
+  const f=e.dataTransfer.files[0]; if(!f) return;
+  const rd=new FileReader(); rd.onload=()=>ingest(rd.result); rd.readAsText(f);
+});
+
+$("#export").addEventListener("click",()=>{
+  if(!S.sel.length) return;
+  const cols=Object.keys(S.sel[0]);
+  const q=v=>{const s=String(v??""); return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
+  const csv=[cols.join(","),...S.sel.map(r=>cols.map(c=>q(r[c])).join(","))].join("\n");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  a.download=t("exportName"); a.click(); URL.revokeObjectURL(a.href);
+});
+
+const tip=$("#tip");
+$("#svGlass").addEventListener("mousemove",e=>{
+  const h=$("#svGlass").__hit; if(!h){return;}
+  const box=$("#svGlass").getBoundingClientRect(), vb=$("#svGlass").viewBox.baseVal;
+  const mx=(e.clientX-box.left)/box.width*vb.width, my=(e.clientY-box.top)/box.height*vb.height;
+  let best=null,bd=1e9;
+  for(const r of h.rows){
+    const d=(h.X(r.x_norm)-mx)**2+(h.Y(r.y_norm)-my)**2;
+    if(d<bd){bd=d;best=r;}
+  }
+  if(best&&bd<200){
+    tip.innerHTML=`${esc((best.path||"").split(/[\\/]/).pop())}<br>
+      <span style="opacity:.7">${esc(best.group?gname(best.group):"")} · r=${fmt(best.r_norm)} ·
+      x=${fmt(best.x_norm)} y=${fmt(best.y_norm)}
+      ${Number.isFinite(focalOf(best))?" · "+focalOf(best)+" mm":""}
+      ${Number.isFinite(best.f_number)?" · f/"+best.f_number:""}</span>`;
+    tip.style.left=Math.min(innerWidth-350,e.clientX+14)+"px";
+    tip.style.top=(e.clientY+14)+"px"; tip.style.opacity=1;
+  }else tip.style.opacity=0;
+});
+$("#svGlass").addEventListener("mouseleave",()=>tip.style.opacity=0);
+
+/* ---------- repintado al cambiar de idioma ----------
+   Se declara al final del arranque y está protegido para poder invocarse antes
+   de que haya CSV cargado: entonces no hay nada que repintar. */
+window.onLangChange=function(){
+  // <option> no se oculta con display:none de forma fiable: se reescribe el texto
+  const ax=$("#evoAxis");
+  if(ax) [].forEach.call(ax.options,o=>{o.textContent=o.value==="t"?t("date"):t("axSeq");});
+  paintDateInfo();
+  if(!S.rows||!S.rows.length) return;
+  // los selectores se reconstruyen con los rótulos del nuevo idioma; hay que
+  // conservar la variable elegida, que es la clave y no el rótulo
+  const keep={};
+  const sels=["#toneKey","#colKey","#texKey","#evoKey","#exX","#exY"];
+  sels.forEach(i=>{const e=$(i); if(e) keep[i]=e.value;});
+  fillSelectors();
+  sels.forEach(i=>{const e=$(i); if(e&&keep[i]) e.value=keep[i];});
+  buildGroupUI(); buildOrientUI();
+  refresh();
+  const ta=$("#informeTxt");
+  if(ta&&!ta.hidden&&S.sel&&S.sel.length)
+    ta.value=buildReport(S.sel,S.lastF||findings(S.sel));
+};
+</script>
+
+<script>
+"use strict";
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{
+      title:"Colocación del sujeto en el fotograma",
+      desc:"Panel interactivo de colocación del sujeto en el fotograma: centroide, dispersión, tono, color, textura y deriva temporal a partir del CSV de subject_center.py."
+    },
+    en:{
+      title:"Subject placement within the frame",
+      desc:"Interactive panel of subject placement within the frame: centroid, dispersion, tone, colour, texture and drift over time from the subject_center.py CSV."
+    }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    /* atributos y nodos sin hijos, que no admiten bloques duales */
+    ["title","ph","alt","aria"].forEach(function(k){
+      [].forEach.call(document.querySelectorAll("[data-"+k+"-"+l+"]"),function(e){
+        var attr = k==="ph" ? "placeholder" : (k==="aria" ? "aria-label" : k);
+        e.setAttribute(attr, e.getAttribute("data-"+k+"-"+l));
+      });
+    });
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
+</body>
+</html>

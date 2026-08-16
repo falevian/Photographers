@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M11 · Simulador de telémetro y círculo de confusión</title>
+<meta name="description" content="Simulador del telémetro de la Leica M11 y del círculo de confusión: visor, parche, base efectiva, desplazamiento de foco, disco de Airy y tasa de acierto por diafragma.">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
+<style>
+  :root{
+    --bg:#111316; --panel:#191c21; --panel2:#14161a; --line:#2a2e35;
+    --txt:#cfd2d6; --dim:#8b9097; --faint:#5c6167;
+    --amber:#e2a94f; --amber-band:rgba(226,169,79,.22);
+    --steel:#6f9cc9; --steel-band:rgba(111,156,201,.25);
+    --red:#cf3a30; --frame:#ece9df; --ok:#7fb069;
+    --mono:ui-monospace,"SF Mono","Cascadia Mono",Consolas,monospace;
+    --sans:"Avenir Next",Futura,"Century Gothic","Segoe UI",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  html,body{background:var(--bg); color:var(--txt); font-family:var(--sans); font-size:15px}
+  .wrap{max-width:1180px; margin:0 auto; padding:18px 20px 60px}
+
+  header{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; border-bottom:1px solid var(--line); padding-bottom:12px; margin-bottom:16px}
+  header h1{font-size:1.15rem; font-weight:600; letter-spacing:.06em}
+  header .dot{display:inline-block; width:.62em; height:.62em; border-radius:50%; background:var(--red); margin-right:.45em; vertical-align:baseline}
+  header .spec{font-family:var(--mono); font-size:.78rem; color:var(--dim)}
+
+  .chips{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px}
+  .chip{border:1px solid var(--line); background:var(--panel2); color:var(--txt); border-radius:3px;
+        padding:7px 12px; cursor:pointer; font-family:var(--mono); font-size:.8rem; letter-spacing:.02em}
+  .chip:hover{border-color:var(--dim)}
+  .chip.on{border-color:var(--amber); color:var(--amber)}
+  .chip.add{color:var(--dim); border-style:dashed}
+
+  .grid{display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr); gap:16px}
+  @media(max-width:900px){ .grid{grid-template-columns:1fr} }
+
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:14px}
+  .card h2{font-size:.72rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); margin-bottom:10px}
+  canvas{display:block; width:100%; height:auto; background:var(--panel2); border:1px solid var(--line); border-radius:3px}
+  canvas.barrel{cursor:ew-resize; touch-action:none}
+
+  .loupe-row{display:grid; grid-template-columns:1fr auto; gap:12px; align-items:start; margin-top:12px}
+  @media(max-width:900px){ .loupe-row{grid-template-columns:1fr} }
+
+  .readouts{font-family:var(--mono); font-size:.82rem; line-height:1.9; width:100%}
+  .readouts td{padding:0 6px; border-bottom:1px dotted #23262c; vertical-align:top}
+  .readouts td:first-child{color:var(--dim); white-space:nowrap}
+  .readouts td:last-child{text-align:right; white-space:nowrap}
+  .v-ok{color:var(--ok)} .v-warn{color:var(--amber)} .v-bad{color:#e0655c}
+
+  .controls{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-top:16px}
+  .ctrl label{display:block; font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); margin-bottom:6px}
+  .ctrl .val{font-family:var(--mono); color:var(--amber); font-size:.8rem}
+  input[type=range]{width:100%; accent-color:var(--amber); background:transparent}
+  .stops{display:flex; flex-wrap:wrap; gap:5px}
+  .stop{border:1px solid var(--line); background:var(--panel2); color:var(--txt); border-radius:3px;
+        min-width:44px; padding:5px 6px; text-align:center; cursor:pointer; font-family:var(--mono); font-size:.8rem}
+  .stop.on{border-color:var(--amber); color:var(--amber)}
+  .btn{border:1px solid var(--line); background:var(--panel2); color:var(--txt); border-radius:3px;
+       padding:8px 14px; cursor:pointer; font-family:var(--mono); font-size:.8rem}
+  .btn:hover{border-color:var(--dim)}
+  .btn.primary{border-color:var(--amber); color:var(--amber)}
+  .btn.danger{border-color:var(--red); color:#e0655c}
+  .btnrow{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; align-items:center}
+
+  .legend{display:flex; gap:18px; flex-wrap:wrap; font-size:.74rem; color:var(--dim); margin-top:8px; font-family:var(--mono)}
+  .sw{display:inline-block; width:22px; height:9px; border-radius:2px; vertical-align:middle; margin-right:6px}
+
+  .verdict{margin-top:12px; font-family:var(--mono); font-size:.85rem; padding:10px 12px;
+           border:1px solid var(--line); border-radius:3px; background:var(--panel2); display:none}
+  .statwrap{overflow-x:auto}
+  table.stat{border-collapse:collapse; font-family:var(--mono); font-size:.8rem; width:100%}
+  table.stat th{color:var(--dim); font-weight:600; text-align:right; padding:4px 8px; border-bottom:1px solid var(--line)}
+  table.stat td{text-align:right; padding:4px 8px; border-bottom:1px dotted #23262c; white-space:nowrap}
+  table.stat th:first-child, table.stat td:first-child{text-align:left; color:var(--amber)}
+  .note{font-size:.78rem; color:var(--dim); margin-top:10px; line-height:1.55}
+
+  dialog{background:var(--panel); color:var(--txt); border:1px solid var(--line); border-radius:4px; padding:18px; max-width:340px}
+  dialog::backdrop{background:rgba(0,0,0,.6)}
+  dialog input{width:100%; background:var(--panel2); border:1px solid var(--line); color:var(--txt);
+               border-radius:3px; padding:6px 8px; font-family:var(--mono); margin:4px 0 10px}
+  dialog label{font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--dim)}
+
+  /* ---------- conmutador de idioma ---------- */
+  html[lang="es"] [data-lang="en"]{display:none!important}
+  html[lang="en"] [data-lang="es"]{display:none!important}
+  .guidelink{font-family:var(--sans); font-size:.8rem; color:var(--dim); text-decoration:none;
+             border-bottom:1px solid var(--line); padding-bottom:1px}
+  .guidelink:hover{color:var(--amber); border-bottom-color:var(--amber)}
+  /* la cabecera es propia de la página y no flota: el conmutador se integra en ella
+     con margin-left:auto, de modo que no tapa ningún control del simulador */
+  .langbar{margin-left:auto; display:flex; border:1px solid var(--line); border-radius:3px;
+           overflow:hidden; background:var(--panel2); align-self:center}
+  .langbar button{font-family:var(--mono); font-size:.72rem; letter-spacing:.09em;
+                  background:transparent; border:0; color:var(--dim); padding:6px 11px; cursor:pointer;
+                  transition:background .15s,color .15s}
+  .langbar button+button{border-left:1px solid var(--line)}
+  .langbar button:hover{color:var(--txt)}
+  .langbar button.on{background:rgba(226,169,79,.14); color:var(--amber)}
+  .langbar button:focus-visible{outline:2px solid rgba(226,169,79,.6); outline-offset:-2px}
+  @media(max-width:560px){ .langbar{margin-left:0} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1><span class="dot"></span><span data-lang="es">M11 · Simulador de telémetro</span><span data-lang="en">M11 · Rangefinder simulator</span></h1>
+  <span class="spec" data-lang="es">base mecánica 69,25 mm · aumento 0,73× · base efectiva 50,55 mm · paso de píxel 3,78 µm</span>
+  <span class="spec" data-lang="en">mechanical baseline 69.25 mm · 0.73× magnification · effective base length 50.55 mm · pixel pitch 3.78 µm</span>
+  <a class="guidelink" href="manual-telemetro-m11.html" data-lang="es">Manual ↗</a>
+  <a class="guidelink" href="manual-telemetro-m11.html" data-lang="en">Manual ↗</a>
+  <div class="langbar" role="group" aria-label="Idioma / Language">
+    <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+    <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+  </div>
+</header>
+
+<div class="chips" id="lensChips"></div>
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <h2 data-lang="es">Visor · marcos y parche</h2>
+      <h2 data-lang="en">Viewfinder · frame lines and patch</h2>
+      <canvas id="finder" width="860" height="470"></canvas>
+      <div class="loupe-row">
+        <div>
+          <h2 style="margin-top:10px" data-lang="es">Lupa del parche · ×14</h2>
+          <h2 style="margin-top:10px" data-lang="en">Rangefinder patch loupe · ×14</h2>
+          <canvas id="loupe" width="520" height="150"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2 data-lang="es">Anillo de enfoque · arrastra la escala</h2>
+      <h2 data-lang="en">Focusing ring · drag the scale</h2>
+      <canvas id="barrel" class="barrel" width="860" height="150"></canvas>
+      <div class="legend" data-lang="es">
+        <span><span class="sw" style="background:var(--amber-band); border:1px solid var(--amber)"></span>profundidad de campo</span>
+        <span><span class="sw" style="background:var(--steel-band); border:1px solid var(--steel)"></span>zona ciega del telémetro (desalineación &lt; ε)</span>
+        <span><span class="sw" style="background:rgba(207,58,48,.2); border:1px solid var(--red)"></span>fuera de acople (&lt; 0,7 m)</span>
+      </div>
+      <div class="legend" data-lang="en">
+        <span><span class="sw" style="background:var(--amber-band); border:1px solid var(--amber)"></span>depth of field</span>
+        <span><span class="sw" style="background:var(--steel-band); border:1px solid var(--steel)"></span>rangefinder blind zone (misalignment &lt; ε)</span>
+        <span><span class="sw" style="background:rgba(207,58,48,.2); border:1px solid var(--red)"></span>beyond the coupling range (&lt; 0.7 m)</span>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <h2 data-lang="es">Matriz de píxeles · 15 × 15 · 3,78 µm</h2>
+      <h2 data-lang="en">Pixel matrix · 15 × 15 · 3.78 µm</h2>
+      <canvas id="matrix" width="420" height="420"></canvas>
+      <div class="legend" data-lang="es">
+        <span><span class="sw" style="border:1px dashed var(--frame); background:none"></span>disco geométrico c</span>
+        <span><span class="sw" style="border:1px dotted var(--amber); background:none"></span>disco de Airy (λ = 550 nm)</span>
+      </div>
+      <div class="legend" data-lang="en">
+        <span><span class="sw" style="border:1px dashed var(--frame); background:none"></span>geometrical disc c</span>
+        <span><span class="sw" style="border:1px dotted var(--amber); background:none"></span>Airy disc (λ = 550 nm)</span>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2 data-lang="es">Lectura</h2>
+      <h2 data-lang="en">Readout</h2>
+      <table class="readouts"><tbody id="readTable"></tbody></table>
+      <div class="verdict" id="verdict"></div>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <div class="controls">
+    <div class="ctrl">
+      <label><span data-lang="es">Distancia real del sujeto</span><span data-lang="en">True subject distance</span> <span class="val" id="dTrueVal"></span></label>
+      <input type="range" id="dTrue" min="0" max="1000" value="430">
+    </div>
+    <div class="ctrl">
+      <label><span data-lang="es">Diafragma</span><span data-lang="en">Aperture</span></label>
+      <div class="stops" id="stops"></div>
+    </div>
+    <div class="ctrl">
+      <label><span data-lang="es">Agudeza del ojo ε</span><span data-lang="en">Visual acuity ε</span> <span class="val" id="epsVal"></span></label>
+      <input type="range" id="eps" min="20" max="120" value="60">
+    </div>
+    <div class="ctrl">
+      <label><span data-lang="es">Magnificador del visor</span><span data-lang="en">Viewfinder magnifier</span></label>
+      <div class="stops" id="mags"></div>
+    </div>
+    <div class="ctrl">
+      <label><span data-lang="es">Criterio de nitidez</span><span data-lang="en">Sharpness criterion</span></label>
+      <div class="stops" id="crits"></div>
+    </div>
+    <div class="ctrl">
+      <label><span data-lang="es">Modelo del ojo</span><span data-lang="en">Eye model</span></label>
+      <div class="stops">
+        <button class="stop" id="eyeHard"><span data-lang="es">umbral duro</span><span data-lang="en">hard threshold</span></button>
+        <button class="stop" id="eyePsy"><span data-lang="es">curva psicométrica</span><span data-lang="en">psychometric curve</span></button>
+      </div>
+      <div class="stops" style="margin-top:6px">
+        <button class="stop" data-eps="0.6"><span data-lang="es">buena luz 0,6′</span><span data-lang="en">good light 0.6′</span></button>
+        <button class="stop" data-eps="1.0"><span data-lang="es">interior 1,0′</span><span data-lang="en">indoors 1.0′</span></button>
+        <button class="stop" data-eps="1.8"><span data-lang="es">penumbra 1,8′</span><span data-lang="en">dim light 1.8′</span></button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label><span data-lang="es">Sistema de enfoque</span><span data-lang="en">Focusing system</span></label>
+      <div class="stops">
+        <button class="stop" id="sysRF"><span data-lang="es">telémetro</span><span data-lang="en">rangefinder</span></button>
+        <button class="stop" id="sysVis"><span data-lang="es">Visoflex (EVF ampliado)</span><span data-lang="en">Visoflex (magnified EVF)</span></button>
+      </div>
+      <label style="margin-top:8px"><span data-lang="es">Umbral en el EVF</span><span data-lang="en">EVF threshold</span> <span class="val" id="cthVal"></span></label>
+      <input type="range" id="cth" min="5" max="40" value="15">
+    </div>
+    <div class="ctrl">
+      <label><span data-lang="es">Tolerancia mecánica · desfase</span><span data-lang="en">Mechanical tolerance · offset</span> <span class="val" id="mechOffVal"></span></label>
+      <input type="range" id="mechOff" min="-60" max="60" value="0">
+      <label style="margin-top:8px"><span data-lang="es">ruido de la leva σ</span><span data-lang="en">coupling-cam noise σ</span> <span class="val" id="mechNoiseVal"></span></label>
+      <input type="range" id="mechNoise" min="0" max="30" value="0">
+    </div>
+    <div class="ctrl">
+      <label><span data-lang="es">Reencuadre tras enfocar α</span><span data-lang="en">Recomposing after focusing α</span> <span class="val" id="alphaVal"></span></label>
+      <input type="range" id="alpha" min="0" max="25" value="0">
+    </div>
+    <div class="ctrl">
+      <label><span data-lang="es">Desplazamiento de foco del objetivo</span><span data-lang="en">Focus shift of the lens</span> <span class="val" id="fsVal"></span></label>
+      <input type="range" id="fs" min="0" max="120" value="35">
+      <div class="stops" style="margin-top:6px">
+        <button class="stop on" id="fsOn"><span data-lang="es">activo</span><span data-lang="en">on</span></button>
+        <button class="stop" id="fsOff"><span data-lang="es">sin desplazamiento</span><span data-lang="en">no shift</span></button>
+        <button class="stop" id="fsReset"><span data-lang="es">valor del objetivo</span><span data-lang="en">lens value</span></button>
+      </div>
+      <label style="margin-top:8px"><span data-lang="es">Leva ajustada a f/</span><span data-lang="en">Coupling cam calibrated at f/</span></label>
+      <div class="stops" id="cals"></div>
+      <label style="margin-top:8px"><span data-lang="es">Crecimiento con la magnificación · fs·(1 + k·m)</span><span data-lang="en">Growth with magnification · fs·(1 + k·m)</span> <span class="val" id="fsmVal"></span></label>
+      <input type="range" id="fsm" min="0" max="40" value="15">
+    </div>
+    <div class="ctrl">
+      <label><span data-lang="es">Fase subpíxel del disco</span><span data-lang="en">Sub-pixel phase of the disc</span></label>
+      <div class="stops">
+        <button class="stop" data-phase="center"><span data-lang="es">centro</span><span data-lang="en">centre</span></button>
+        <button class="stop" data-phase="edge"><span data-lang="es">arista</span><span data-lang="en">edge</span></button>
+        <button class="stop" data-phase="corner"><span data-lang="es">esquina</span><span data-lang="en">corner</span></button>
+      </div>
+      <label style="margin-top:8px"><span data-lang="es">Escala del anillo</span><span data-lang="en">Ring scale</span></label>
+      <div class="stops">
+        <button class="stop" id="scaleLog"><span data-lang="es">logarítmica</span><span data-lang="en">logarithmic</span></button>
+        <button class="stop" id="scaleHel">1/d <span data-lang="es">(helicoide)</span><span data-lang="en">(helicoid)</span></button>
+      </div>
+    </div>
+  </div>
+  <div class="btnrow">
+    <button class="btn" id="btnHuman"><span data-lang="es">Enfocar como un humano (error aleatorio ≤ ε)</span><span data-lang="en">Focus like a human (random error ≤ ε)</span></button>
+    <button class="btn" id="btnPerfect"><span data-lang="es">Alinear exacto</span><span data-lang="en">Align exactly</span></button>
+    <button class="btn primary" id="btnBlind"><span data-lang="es">Modo a ciegas</span><span data-lang="en">Blind mode</span></button>
+    <button class="btn danger" id="btnShoot" style="display:none"><span data-lang="es">Disparar</span><span data-lang="en">Shoot</span></button>
+    <button class="btn" id="btnReset"><span data-lang="es">Restablecer todo</span><span data-lang="en">Reset everything</span></button>
+    <span class="note" style="margin:0" id="saveNote" data-lang="es">ajustes y objetivos añadidos se guardan en este navegador</span>
+    <span class="note" style="margin:0" data-lang="en">settings and added lenses are saved in this browser</span>
+  </div>
+  <div class="note" id="footNote" data-lang="es">
+    El parche se congela por debajo de 0,7 m porque la leva del telémetro llega a su tope mecánico.
+    El desplazamiento se dibuja a escala angular real, 1′ de arco son unos 0,33 px en el visor, de ahí la lupa: en ella la banda azul es ±ε, si las barras dobles caen dentro tu ojo las daría por alineadas.
+    Anillo: arrastrar para movimiento grueso, rueda para fino, rueda con mayúsculas para muy fino.
+    Reencuadre: se enfoca al sujeto sobre el eje y se gira α; la distancia axial del sujeto pasa a d·cos α, el plano de foco no se mueve.
+    Desplazamiento de foco: el telémetro se ajusta a plena abertura; al cerrar, la aberración esférica lleva el mejor foco hacia atrás según fs·[(N<sub>máx</sub>/N<sub>cal</sub>)² − (N<sub>máx</sub>/N)²], nulo en el diafragma de calibración de la leva y negativo por debajo de él. Los valores por objetivo son estimaciones editables.
+    En modo a ciegas la distancia real se sortea y se oculta; alinea con la lupa y dispara.
+    Curva psicométrica: probabilidad de detección Weibull con umbral ε al 50 % y pendiente 3,5; el enfoque humano se detiene donde el ojo no detecta.
+    Visoflex: la zona ciega pasa a ser |Δv| &lt; N·c<sub>th</sub>, proporcional al diafragma, y el desplazamiento de foco desaparece porque se enfoca a la abertura de trabajo sobre el sensor.
+    Tolerancia mecánica: el desfase se suma al plano imagen en todas las tomas; el ruido σ se sortea en cada toma (enfoque humano, a ciegas, Monte Carlo).
+  </div>
+  <div class="note" data-lang="en">
+    The rangefinder patch freezes below 0.7 m because the coupling cam has reached its mechanical stop.
+    The displacement is drawn at true angular scale — one arcminute is about 0.33 px in the viewfinder — hence the loupe: in it the blue band is ±ε, and if the doubled bars fall inside it your eye would take them for aligned.
+    Ring: drag for coarse movement, wheel for fine, wheel with shift for very fine.
+    Recomposing: the subject is focused on axis and the camera is then swung through α; the axial distance of the subject becomes d·cos α, while the plane of focus does not move. This is the cosine error.
+    Focus shift: the rangefinder is calibrated at full aperture; on stopping down, spherical aberration carries best focus rearwards by fs·[(N<sub>max</sub>/N<sub>cal</sub>)² − (N<sub>max</sub>/N)²], null at the aperture the coupling cam is calibrated for and negative below it. The per-lens values are editable estimates.
+    In blind mode the true distance is drawn at random and hidden; align with the loupe and shoot.
+    Psychometric curve: a Weibull detection probability with threshold ε at 50 % and slope 3.5; human focusing stops where the eye no longer detects the misalignment.
+    Visoflex: the blind zone becomes |Δv| &lt; N·c<sub>th</sub>, proportional to the aperture, and focus shift disappears because focusing takes place at the working aperture on the sensor itself.
+    Mechanical tolerance: the offset is added at the image plane in every exposure; the noise σ is drawn afresh for each exposure (human focusing, blind mode, Monte Carlo).
+  </div>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <h2 data-lang="es">Curva c(N) · círculo en el peor caso de la zona ciega, por objetivo</h2>
+  <h2 data-lang="en">c(N) curve · worst-case circle within the blind zone, lens by lens</h2>
+  <canvas id="curves" width="860" height="300"></canvas>
+  <div class="note" data-lang="es">Cada punto es el círculo total con el anillo en el borde de la zona ciega del sistema de enfoque, más Airy, desplazamiento de foco y desfase mecánico. Sin ruido aleatorio. La curva gruesa es el objetivo seleccionado.</div>
+  <div class="note" data-lang="en">Each point is the total circle with the ring at the edge of the focusing system's blind zone, plus the Airy disc, focus shift and mechanical offset. Random noise excluded. The heavy curve is the selected lens.</div>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <h2 data-lang="es">Estadística · mil enfoques humanos con el sujeto a la distancia actual</h2>
+  <h2 data-lang="en">Statistics · one thousand human focusings at the current subject distance</h2>
+  <div class="grid">
+    <div>
+      <canvas id="hist" width="860" height="230"></canvas>
+      <div class="btnrow" style="margin-top:10px">
+        <button class="btn primary" id="btnMC"><span data-lang="es">Simular 1000 enfoques</span><span data-lang="en">Simulate 1000 focusings</span></button>
+        <span class="note" style="margin:0" data-lang="es">Incluye reencuadre y desplazamiento de foco. Error de alineación uniforme dentro de ±ε.</span>
+        <span class="note" style="margin:0" data-lang="en">Includes recomposing and focus shift. Alignment error uniform within ±ε.</span>
+      </div>
+    </div>
+    <div>
+      <h2 data-lang="es">Tasa de acierto por diafragma</h2>
+      <h2 data-lang="en">Hit rate by aperture</h2>
+      <div id="statTable" class="statwrap"></div>
+    </div>
+  </div>
+</div>
+
+<dialog id="dlgLens">
+  <h2 style="margin-bottom:10px; font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--dim)" data-lang="es">Añadir objetivo</h2>
+  <h2 style="margin-bottom:10px; font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--dim)" data-lang="en">Add a lens</h2>
+  <label><span data-lang="es">Nombre</span><span data-lang="en">Name</span></label><input id="nlName" value="Objetivo">
+  <label><span data-lang="es">Focal (mm)</span><span data-lang="en">Focal length (mm)</span></label><input id="nlF" type="number" value="50" step="1" min="16" max="135">
+  <label><span data-lang="es">Abertura máxima (f/)</span><span data-lang="en">Maximum aperture (f/)</span></label><input id="nlN" type="number" value="2" step="0.1" min="0.95" max="5.6">
+  <label><span data-lang="es">Enfoque mínimo (m)</span><span data-lang="en">Minimum focus (m)</span></label><input id="nlMfd" type="number" value="0.7" step="0.05" min="0.3" max="2">
+  <label><span data-lang="es">Desplazamiento de foco (µm en plano imagen, a m→0)</span><span data-lang="en">Focus shift (µm at the image plane, as m→0)</span></label><input id="nlFs" type="number" value="20" step="5" min="0" max="200">
+  <div class="btnrow" style="margin-top:6px">
+    <button class="btn primary" id="nlOk"><span data-lang="es">Añadir</span><span data-lang="en">Add</span></button>
+    <button class="btn" id="nlCancel"><span data-lang="es">Cancelar</span><span data-lang="en">Cancel</span></button>
+  </div>
+</dialog>
+
+</div>
+<script>
+"use strict";
+
+/* =======================================================================
+   DICCIONARIO / DICTIONARY
+   Todo el texto que el JavaScript escribe en caliente: rótulos de los lienzos,
+   filas de la lectura, encabezados de la tabla generada, mensajes de estado y
+   atributos. Los nombres de los objetivos y las focales son datos del catálogo
+   y no se traducen nunca.
+   ======================================================================= */
+const T = {
+es:{
+  /* --- objetivos y diálogo --- */
+  addLens:"+ añadir", lensDefault:"Objetivo",
+  /* --- rótulos del visor y de la lupa --- */
+  camStopFinder:"leva en tope · telémetro desacoplado",
+  camStopLoupe:"leva en tope: la imagen del parche no responde",
+  visoActive:"Visoflex activo: el parche no interviene, se enfoca sobre el sensor ampliado",
+  pDetect:"· P(detectar) = ",
+  discernible:"(distinguible)",
+  looksAligned:"(dentro de ±ε, parece alineado)",
+  /* --- anillo de enfoque --- */
+  subject:"sujeto", afterRecompose:"tras reencuadre",
+  focusedAt:" · enfocado a ",
+  scaleHelic:"escala 1/d fiel al helicoide · ", scaleLogar:"escala logarítmica · ",
+  barrelHelp:"arrastrar · rueda · flechas (May = fino) · pellizco",
+  visoGreen:"zona verde: indistinguible en el EVF ampliado (Visoflex)",
+  /* --- matriz de píxeles --- */
+  discOverflow:"el disco desborda la matriz · Ø ",
+  peakSignal:"pico de señal: ",
+  ofFocusedPoint:" % del punto enfocado",
+  photositesOver:" % · fotositos > 10 %: ", phaseIs:" · fase: ",
+  phCenter:"centro", phEdge:"arista", phCorner:"esquina",
+  hiddenUntilShot:"oculto hasta disparar",
+  acrossUm:" µm de lado",
+  /* --- histograma y tabla estadística --- */
+  pressToSimulate:"pulsa “Simular 1000 enfoques” para ver la distribución de c",
+  histAxis:"c total (µm), escala logarítmica",
+  median:"mediana", max:"máx",
+  thCmin:"c mín", thMedian:"mediana", thDof:"PdC",
+  /* --- curva c(N) --- */
+  subjectAt:"sujeto a ", blindEdge:" · borde de la zona ciega", offsetTag:" · desfase ",
+  /* --- veredicto de nitidez --- */
+  clsSensor:"≤ 2 px, al límite del sensor",
+  clsClassic:"pasa el criterio clásico de 30 µm",
+  clsBad:"desenfocada a cualquier criterio",
+  result:"Resultado: c total = ", errorIs:" · error ",
+  /* --- filas de la lectura --- */
+  rLens:"objetivo", rRingAt:"anillo en", rMech:"mecánica",
+  rMechOff:"desfase ", rMechNoise:" µm · ruido de esta toma ",
+  rSharpPlane:"plano nítido real", rShift:"· desplazamiento ",
+  rSubjectAt:"sujeto a", hidden:"oculto",
+  rAxial:"axial tras reencuadre ",
+  rDistErr:"error de distancia",
+  rDefocus:"desenfoque en plano imagen",
+  rCgeo:"c geométrico", rAiry:"disco de Airy", rCtot:"c total",
+  rDof:"PdC", rPatch:"parche desplazado",
+  rEyeSees:"· el ojo lo ve", rUnderEps:"· bajo ε, parece alineado",
+  rEbl:"base efectiva",
+  /* --- controles escritos por render() --- */
+  hiddenF:"oculta",
+  fsFromLens:" (objetivo)", fsCamAt:" · leva a f/", fsOff:" · inactivo",
+  fsmEff:" · fs eficaz ",
+  blindOn:"Modo a ciegas", blindOff:"Salir del modo a ciegas",
+  resetTitle:"Borra ajustes y objetivos guardados en este navegador",
+  resetAsk:"¿Borrar ajustes y objetivos guardados en este navegador?"
+},
+en:{
+  addLens:"+ add", lensDefault:"Lens",
+  camStopFinder:"cam against its stop · rangefinder uncoupled",
+  camStopLoupe:"cam against its stop: the patch image no longer responds",
+  visoActive:"Visoflex active: the rangefinder patch plays no part, focusing is done on the magnified sensor image",
+  pDetect:"· P(detect) = ",
+  discernible:"(discernible)",
+  looksAligned:"(within ±ε, appears aligned)",
+  subject:"subject", afterRecompose:"after recomposing",
+  focusedAt:" · focused at ",
+  scaleHelic:"1/d scale, true to the helicoid · ", scaleLogar:"logarithmic scale · ",
+  barrelHelp:"drag · wheel · arrows (Shift = fine) · pinch",
+  visoGreen:"green zone: indiscernible in the magnified EVF (Visoflex)",
+  discOverflow:"the disc overflows the matrix · Ø ",
+  peakSignal:"peak signal: ",
+  ofFocusedPoint:" % of the focused point",
+  photositesOver:" % · photosites > 10 %: ", phaseIs:" · phase: ",
+  phCenter:"centre", phEdge:"edge", phCorner:"corner",
+  hiddenUntilShot:"hidden until the shot",
+  acrossUm:" µm across",
+  pressToSimulate:"press “Simulate 1000 focusings” to see the distribution of c",
+  histAxis:"total c (µm), logarithmic scale",
+  median:"median", max:"max",
+  thCmin:"c min", thMedian:"median", thDof:"DoF",
+  subjectAt:"subject at ", blindEdge:" · edge of the blind zone", offsetTag:" · offset ",
+  clsSensor:"≤ 2 px, at the limit of the sensor",
+  clsClassic:"meets the classic 30 µm criterion",
+  clsBad:"out of focus by any criterion",
+  result:"Result: total c = ", errorIs:" · error ",
+  rLens:"lens", rRingAt:"ring at", rMech:"mechanics",
+  rMechOff:"offset ", rMechNoise:" µm · noise of this exposure ",
+  rSharpPlane:"true plane of focus", rShift:"· focus shift ",
+  rSubjectAt:"subject at", hidden:"hidden",
+  rAxial:"axial after recomposing ",
+  rDistErr:"distance error",
+  rDefocus:"defocus at the image plane",
+  rCgeo:"geometrical c", rAiry:"Airy disc", rCtot:"total c",
+  rDof:"DoF", rPatch:"patch displacement",
+  rEyeSees:"· the eye sees it", rUnderEps:"· below ε, appears aligned",
+  rEbl:"effective base length",
+  hiddenF:"hidden",
+  fsFromLens:" (lens)", fsCamAt:" · cam at f/", fsOff:" · inactive",
+  fsmEff:" · effective fs ",
+  blindOn:"Blind mode", blindOff:"Leave blind mode",
+  resetTitle:"Clears the settings and lenses saved in this browser",
+  resetAsk:"Clear the settings and lenses saved in this browser?"
+}
+};
+const LANG   = ()=> document.documentElement.lang==="en" ? "en" : "es";
+const LOCALE = ()=> LANG()==="en" ? "en-GB" : "es-ES";
+function t(k){ const D=T[LANG()]||T.es; return D[k]!==undefined ? D[k] : (T.es[k]!==undefined?T.es[k]:k); }
+/* separador decimal para las cadenas ya formateadas con punto (marcas del anillo, etc.) */
+const dec = s => LANG()==="en" ? String(s) : String(s).replace(".",",");
+
+/* ================= Constantes de la M11 ================= */
+const BASE = 69.25;          // mm, base mecánica
+const MAG  = 0.73;           // aumento del visor
+const PITCH = 3.78;          // µm por píxel
+const LAMBDA = 0.55e-3;      // mm, 550 nm
+const COUPLE_MIN = 0.7;      // m, tope de la leva
+const DMAX = 60;             // m, posición de ∞ en la escala
+const PX_PER_DEG = 20;       // escala angular del lienzo del visor
+const PX_PER_RAD = PX_PER_DEG*180/Math.PI;
+const LOUPE_ZOOM = 14;
+
+/* pares de marcos de la M11: 35+135, 50+75, 28+90 */
+const FRAME_PAIRS = {35:135, 135:35, 50:75, 75:50, 28:90, 90:28};
+
+/* ================= Objetivos =================
+   fs: desplazamiento de foco por aberración esférica, en µm de plano imagen,
+   entre plena abertura y diafragma muy cerrado. Valores estimados y editables. */
+const LENSES = [
+  {name:"Summicron-M 35 f/2",           f:35,  nmax:2.0, mfd:0.70, fs:10},
+  {name:"Summilux-M 50 f/1.4",          f:50,  nmax:1.4, mfd:0.70, fs:25},
+  {name:"Thypoch Simera 75 f/1.4",      f:75,  nmax:1.4, mfd:0.60, fs:35},
+  {name:"Voigtländer Nokton 35 f/1.2",  f:35,  nmax:1.2, mfd:0.50, fs:55},
+  {name:"LLL 50 f/2 (réplica 1966)",    f:50,  nmax:2.0, mfd:1.00, fs:30},
+  {name:"Noctilux-M 50 f/0.95",         f:50,  nmax:0.95,mfd:1.00, fs:80},
+  {name:"Summicron-M 90 f/2",           f:90,  nmax:2.0, mfd:1.00, fs:15},
+  {name:"APO-Telyt-M 135 f/3.4",        f:135, nmax:3.4, mfd:1.50, fs:0},
+];
+const STOPS_ALL = [0.95,1.2,1.4,2,2.8,4,5.6,8,11,16];
+
+/* ================= Estado ================= */
+const S = {
+  lens: LENSES[2],           // Thypoch por defecto
+  N: 1.4,
+  dTrue: 3.0,                // m
+  dSet: 3.0,                 // m
+  eps: 1.0,                  // arcmin, umbral al 50 % de detección
+  psycho: false,             // curva psicométrica en vez de umbral duro
+  magX: 1.0,                 // magnificador 1 / 1.25 / 1.4
+  c0: 2*PITCH/1000,          // criterio PdC en mm (2 px)
+  alpha: 0,                  // grados de reencuadre tras enfocar
+  fs: null,                  // µm, null = valor del objetivo
+  fsOn: true,                // aplicar desplazamiento de foco
+  fsm: 15,                   // crecimiento del desplazamiento con la magnificación: fs·(1 + fsm·m)
+  nCal: 0.95,                // diafragma al que está ajustada la leva (se acota a nmax)
+  mechOff: 0,                // µm, desfase constante del par cuerpo+objetivo en el plano imagen
+  mechNoise: 0,              // µm, desviación típica del ruido de la leva por toma
+  noiseSample: 0,            // µm, muestra de ruido de la toma actual
+  visoflex: false,           // enfoque sobre sensor en vez de telémetro
+  cthVis: 1.5,               // px, desenfoque mínimo que el ojo detecta en el EVF ampliado
+  phase: "center",           // fase subpíxel del disco: center | edge | corner
+  helicoid: false,           // escala del anillo en 1/d (fiel al helicoide) en vez de logarítmica
+  blind: false,
+  shot: null,                // resultado del disparo en modo a ciegas
+  mc: null,                  // último resultado Monte Carlo
+};
+
+/* ================= Óptica ================= */
+const mm = m => m*1000;
+function dSetEff(){ return S.dSet >= DMAX*0.99 ? 1e5 : S.dSet; }        // m
+function atInf(){ return S.dSet >= DMAX*0.99; }
+function vImg(dm, f){ const d = mm(dm); return f*d/(d-f); }            // distancia imagen, mm
+function dOfV(v, f){ return f*v/(v-f)/1000; }                            // inversa, m
+function magAt(dm, f){ return f/(mm(dm)-f); }                            // aumento lateral
+function fsCur(){ return S.fs===null ? S.lens.fs : S.fs; }               // µm, valor a m→0
+/* Reencuadre: se enfoca a d sobre el eje, se gira α, la distancia axial pasa a d·cosα */
+function dAxial(dTrue){ return dTrue*Math.cos(S.alpha*Math.PI/180); }
+
+/* Desplazamiento de foco por esférica, referido al diafragma de calibración N_cal de la leva
+   y creciente con la magnificación m del sujeto:
+   Δv_s(N,d) = fs·(1 + fsm·m)·[(Nmax/N_cal)² − (Nmax/N)²]   (mm)
+   Se anula en N = N_cal, es negativo por debajo. Con Visoflex no interviene: se enfoca a la
+   abertura de trabajo sobre el sensor y el desplazamiento queda absorbido. */
+function nCal(){ return Math.max(S.nCal, S.lens.nmax); }
+function focusShift(N, dTrue){
+  if(!S.fsOn || S.visoflex) return 0;
+  const a = S.lens.nmax/nCal(), r = S.lens.nmax/N;
+  const m = magAt(dAxial(dTrue===undefined?S.dTrue:dTrue), S.lens.f);
+  return fsCur()/1000 * (1 + S.fsm*m) * (a*a - r*r);
+}
+/* desfase mecánico constante en el plano imagen (positivo: el sensor queda más lejos del ideal) */
+function mechOffset(){ return S.visoflex ? 0 : S.mechOff/1000; }
+
+/* Núcleo puro: círculo total (µm) para un enfoque d′ (m), sujeto d (m), diafragma N, ruido (mm) */
+function cTotalFor(dSet, dTrue, N, noiseMm){
+  const f = S.lens.f;
+  const vSensor = vImg(dSet>=DMAX*0.99?1e5:dSet, f) + mechOffset() + (noiseMm||0);
+  const vSharp  = vImg(dAxial(dTrue), f) + focusShift(N, dTrue);
+  const dv = Math.abs(vSensor - vSharp);
+  const g = 1000 * dv * (f/N) / vSharp;
+  const a = 1000 * 2.44 * LAMBDA * N;
+  return {c:Math.sqrt(g*g+a*a), g, a, dv};
+}
+function curNoise(){ return S.noiseSample/1000; }
+function defocus(){ return cTotalFor(S.dSet,S.dTrue,S.N,curNoise()).dv; }
+function cGeo(){ return cTotalFor(S.dSet,S.dTrue,S.N,curNoise()).g; }
+function cAiry(){ return 1000 * 2.44 * LAMBDA * S.N; }
+function cTotal(){ return cTotalFor(S.dSet,S.dTrue,S.N,curNoise()).c; }
+/* círculo mínimo alcanzable a N con el anillo perfecto: Airy + desplazamiento + desfase */
+function cFloor(N){
+  const f=S.lens.f, v=vImg(dAxial(S.dTrue),f);
+  const g=1000*Math.abs(focusShift(N)-mechOffset())*(f/N)/v, a=1000*2.44*LAMBDA*N;
+  return Math.sqrt(g*g+a*a);
+}
+/* distancia a la que realmente está el plano nítido, dado anillo, diafragma, desfase y ruido */
+function dSharpPlane(){
+  const v = vImg(dSetEff(),S.lens.f) + mechOffset() + curNoise() - focusShift(S.N);
+  return v<=S.lens.f? Infinity : dOfV(v,S.lens.f);
+}
+
+function hyperfocal(){ return (S.lens.f*S.lens.f)/(S.N*S.c0) + S.lens.f; } // mm
+function dofLimits(dm){
+  if(dm===Infinity) return [hyperfocal()/1000, Infinity];
+  const d = mm(dm), f = S.lens.f, H = hyperfocal();
+  const near = d*(H-f)/(H + d - 2*f);
+  const farD = (H - d <= 0) ? Infinity : d*(H-f)/(H - d);
+  return [near/1000, farD/1000];
+}
+
+/* ================= Telémetro ================= */
+/* La alineación se hace ANTES de reencuadrar, sobre dTrue. */
+function dRF(){ return Math.max(dSetEff(), COUPLE_MIN); }
+function patchAngle(){
+  return BASE*MAG*S.magX * (1/mm(dRF()) - 1/mm(S.dTrue));
+}
+function patchArcmin(){ return patchAngle() * 180/Math.PI * 60; }
+function kBlind(){ return (S.eps/60)*(Math.PI/180) / (BASE*MAG*S.magX); }   // 1/mm
+/* Curva psicométrica: probabilidad de que el ojo detecte una desalineación Δ (arcmin).
+   Weibull con umbral ε al 50 % y pendiente β = 3,5, forma habitual en tareas de vernier. */
+function pDetect(deltaArcmin){
+  const x = Math.abs(deltaArcmin)/S.eps;
+  return 1 - Math.pow(2, -Math.pow(x, 3.5));
+}
+/* Visoflex: se detecta el desenfoque cuando el círculo geométrico supera cth píxeles en el
+   sensor. En el plano imagen eso es |Δv| < N·cth·PITCH·v/f, proporcional a N. */
+function kVis(N){ return N*S.cthVis*PITCH/1000 * vImg(dAxial(S.dTrue),S.lens.f)/S.lens.f; } // mm
+
+/* zona ciega en distancias [lo, hi] (m). Telémetro: |1/d′ − 1/d| < k. Visoflex: |v(d′) − v(d)| < kVis */
+function blindZone(N){
+  N = N||S.N;
+  if(S.visoflex){
+    const f=S.lens.f, v0=vImg(dAxial(S.dTrue),f), k=kVis(N);
+    const lo=dOfV(v0+k,f), hiV=v0-k;
+    return [lo, hiV<=f? Infinity : dOfV(hiV,f)];
+  }
+  const k = kBlind(), u0 = 1/mm(S.dTrue);
+  const lo = 1/(u0+k)/1000, hiU = u0-k;
+  return [lo, hiU<=0 ? Infinity : 1/hiU/1000];
+}
+function clampDm(d){ return Math.min(Math.max(d, S.lens.mfd), DMAX); }
+/* un enfoque humano: posición del anillo dentro de la zona ciega.
+   Umbral duro: uniforme. Psicométrico: rechazo con probabilidad de detección. */
+function humanFocus(N){
+  N = N||S.N;
+  if(S.visoflex){
+    const f=S.lens.f, v0=vImg(dAxial(S.dTrue),f), k=kVis(N);
+    const v = v0 + (Math.random()*2-1)*k;
+    return clampDm(v<=f? DMAX : dOfV(v,f));
+  }
+  const k = kBlind(), u0 = 1/mm(S.dTrue);
+  let du;
+  if(!S.psycho){ du = (Math.random()*2-1)*k; }
+  else {
+    for(let i=0;i<64;i++){
+      const cand = (Math.random()*2-1)*2*k;               // hasta 2ε
+      const delta = cand*(BASE*MAG*S.magX)*180/Math.PI*60; // arcmin
+      if(Math.random() > pDetect(delta)){ du=cand; break; }
+    }
+    if(du===undefined) du=0;
+  }
+  const u = u0 + du;
+  return clampDm(u<=0? DMAX : (1/u)/1000);
+}
+function gaussian(){ let u=0,v=0; while(u===0)u=Math.random(); while(v===0)v=Math.random(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+function sampleNoise(){ return S.mechNoise>0 ? S.mechNoise*gaussian() : 0; } // µm
+
+/* ================= Monte Carlo ================= */
+function monteCarlo(nRuns, N){
+  const cs = new Float64Array(nRuns);
+  let hit2=0, hit30=0;
+  for(let i=0;i<nRuns;i++){
+    const c = cTotalFor(humanFocus(N), S.dTrue, N, sampleNoise()/1000).c;
+    cs[i]=c; if(c<=2*PITCH) hit2++; if(c<=30) hit30++;
+  }
+  const sorted = Array.from(cs).sort((a,b)=>a-b);
+  const q = p => sorted[Math.min(nRuns-1, Math.floor(p*nRuns))];
+  return {N, cs:sorted, hit2:hit2/nRuns, hit30:hit30/nRuns, med:q(.5), p90:q(.9), max:sorted[nRuns-1]};
+}
+
+/* ================= Curva c(N) por objetivo ================= */
+/* círculo inducido por el sistema de enfoque en el peor caso de la zona ciega (borde),
+   más Airy, desplazamiento y desfase, para un objetivo dado; ruido excluido (determinista). */
+function cCurveFor(L){
+  const save = {lens:S.lens, fs:S.fs, nCal:S.nCal};
+  S.lens=L; S.fs=null; S.nCal=Math.max(save.nCal, L.nmax);
+  const out = STOPS_ALL.filter(n=>n>=L.nmax-1e-9 && n<=16).map(N=>{
+    const [lo,hi] = blindZone(N);
+    const c1 = cTotalFor(clampDm(lo), S.dTrue, N, 0).c;
+    const c2 = cTotalFor(hi===Infinity? DMAX : clampDm(hi), S.dTrue, N, 0).c;
+    return {N, c:Math.max(c1,c2)};
+  });
+  S.lens=save.lens; S.fs=save.fs; S.nCal=save.nCal;
+  return out;
+}
+
+/* ================= Utilidades de lienzo ================= */
+function setupCanvas(cv){
+  if(!cv.dataset.w){ cv.dataset.w = cv.getAttribute("width"); cv.dataset.h = cv.getAttribute("height"); }
+  const w = +cv.dataset.w, h = +cv.dataset.h;
+  const dpr = Math.min(window.devicePixelRatio||1, 2);
+  const bw = Math.round(w*dpr), bh = Math.round(h*dpr);
+  if(cv.width!==bw || cv.height!==bh){
+    cv.width = bw; cv.height = bh;
+    cv.style.aspectRatio = w+"/"+h;
+  }
+  const ctx = cv.getContext("2d");
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,w,h);
+  return [ctx, w, h];
+}
+const fmt = (x,nd=1) => x===Infinity ? "∞" : x.toLocaleString(LOCALE(),{minimumFractionDigits:nd,maximumFractionDigits:nd});
+
+/* ================= Escena del visor ================= */
+function drawScene(ctx, W, H, dx){
+  // cielo y suelo
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,"#2b3540"); g.addColorStop(.62,"#39424c"); g.addColorStop(.63,"#23262b"); g.addColorStop(1,"#1b1d21");
+  ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+  const hor = H*0.62;
+  // edificio a la izquierda
+  ctx.fillStyle = "#171a1e";
+  ctx.fillRect(dx+W*0.06, hor-170, 150, 170);
+  ctx.fillStyle = "#c8b98a";
+  for(let r=0;r<4;r++) for(let c=0;c<3;c++) ctx.fillRect(dx+W*0.06+18+c*46, hor-150+r*40, 22, 26);
+  // farolas de alto contraste, los blancos para alinear
+  const poles = [0.36, 0.52, 0.70];
+  poles.forEach((p,i)=>{
+    const x = dx + W*p;
+    ctx.fillStyle = "#0d0f11";
+    ctx.fillRect(x-3, hor-130-i*18, 6, 130+i*18);
+    ctx.fillStyle = "#f3ead0";
+    ctx.beginPath(); ctx.arc(x, hor-138-i*18, 8, 0, 7); ctx.fill();
+  });
+  // línea de tejado
+  ctx.strokeStyle = "#0e1013"; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.moveTo(dx+W*0.62, hor-92); ctx.lineTo(dx+W*1.05, hor-60); ctx.stroke();
+}
+
+function frameRect(f, W, H){
+  const halfH = Math.atan(18/f)*MAG*PX_PER_RAD;
+  const halfV = Math.atan(12/f)*MAG*PX_PER_RAD;
+  return [W/2-halfH, H/2-halfV, halfH*2, halfV*2];
+}
+
+function drawFrames(ctx, W, H){
+  const pairs = [[S.lens.f, true]];
+  const other = FRAME_PAIRS[S.lens.f];
+  if(other) pairs.push([other,false]);
+  pairs.forEach(([f,active])=>{
+    const [x,y,w,h] = frameRect(f,W,H);
+    ctx.strokeStyle = active ? "rgba(236,233,223,.95)" : "rgba(236,233,223,.38)";
+    ctx.lineWidth = active?2:1.4;
+    // esquinas al estilo M
+    const s = Math.min(26, w*0.18);
+    ctx.beginPath();
+    [[x,y,1,1],[x+w,y,-1,1],[x,y+h,1,-1],[x+w,y+h,-1,-1]].forEach(([cx,cy,sx,sy])=>{
+      ctx.moveTo(cx+sx*s, cy); ctx.lineTo(cx,cy); ctx.lineTo(cx, cy+sy*s);
+    });
+    // muescas laterales
+    ctx.moveTo(x, y+h/2-8); ctx.lineTo(x, y+h/2+8);
+    ctx.moveTo(x+w, y+h/2-8); ctx.lineTo(x+w, y+h/2+8);
+    ctx.stroke();
+    ctx.font = "12px "+getComputedStyle(document.body).getPropertyValue("--mono");
+    ctx.fillStyle = ctx.strokeStyle;
+    ctx.fillText(f+" mm", x+4, y-6);
+  });
+}
+
+const PATCH = {w: 3.4*PX_PER_DEG, h: 1.9*PX_PER_DEG}; // tamaño aparente del parche
+
+function drawFinder(){
+  const [ctx,W,H] = setupCanvas(el.finder);
+  drawScene(ctx,W,H,0);
+  drawFrames(ctx,W,H);
+  const dx = patchAngle()*PX_PER_RAD;
+  const px = W/2-PATCH.w/2, py = H/2-PATCH.h/2;
+  // parche: más luminoso, con imagen secundaria desplazada
+  ctx.save();
+  ctx.beginPath(); ctx.rect(px,py,PATCH.w,PATCH.h); ctx.clip();
+  ctx.fillStyle = "rgba(255,252,238,.14)"; ctx.fillRect(px,py,PATCH.w,PATCH.h);
+  ctx.globalAlpha = .55;
+  drawScene(ctx,W,H,dx);
+  ctx.restore();
+  ctx.strokeStyle = "rgba(255,252,238,.8)"; ctx.lineWidth = 1;
+  ctx.strokeRect(px,py,PATCH.w,PATCH.h);
+  if(S.dSet < COUPLE_MIN - 1e-9){
+    ctx.fillStyle = "#e0655c";
+    ctx.font = "12px "+getComputedStyle(document.body).getPropertyValue("--mono");
+    ctx.fillText(t("camStopFinder"), px, py+PATCH.h+16);
+  }
+}
+
+function drawLoupe(){
+  const [ctx,W,H] = setupCanvas(el.loupe);
+  ctx.fillStyle = "#0d0f12"; ctx.fillRect(0,0,W,H);
+  const mono = getComputedStyle(document.body).getPropertyValue("--mono");
+  const pmin = (Math.PI/180/60)*PX_PER_RAD*LOUPE_ZOOM;   // px por minuto de arco
+  const dxL  = patchArcmin()*pmin;                        // desplazamiento de la imagen secundaria
+
+  // banda de agudeza: umbral duro ±ε, o gradiente psicométrico (probabilidad de NO detectar)
+  if(!S.psycho){
+    ctx.fillStyle = "rgba(111,156,201,.16)";
+    ctx.fillRect(W/2 - S.eps*pmin, 0, 2*S.eps*pmin, H-24);
+    ctx.strokeStyle = "rgba(111,156,201,.55)"; ctx.lineWidth=1;
+    ctx.strokeRect(W/2 - S.eps*pmin, 0.5, 2*S.eps*pmin, H-24.5);
+  } else {
+    for(let x=Math.floor(W/2-2.5*S.eps*pmin); x<=W/2+2.5*S.eps*pmin; x++){
+      const a = 1-pDetect((x-W/2)/pmin);
+      if(a<0.02) continue;
+      ctx.fillStyle = `rgba(111,156,201,${(0.28*a).toFixed(3)})`; ctx.fillRect(x,0,1,H-24);
+    }
+    ctx.strokeStyle = "rgba(111,156,201,.55)"; ctx.setLineDash([2,3]);
+    ctx.beginPath(); ctx.moveTo(W/2-S.eps*pmin,0); ctx.lineTo(W/2-S.eps*pmin,H-24); ctx.moveTo(W/2+S.eps*pmin,0); ctx.lineTo(W/2+S.eps*pmin,H-24); ctx.stroke(); ctx.setLineDash([]);
+  }
+  if(S.visoflex){
+    ctx.fillStyle="#7fb069"; ctx.font="12px "+mono;
+    ctx.fillText(t("visoActive"), 10, H-34);
+  }
+
+  // blanco de alineación: barras verticales brillantes, imagen primaria y secundaria
+  const bars = [-30,-15,0,15,30];      // posiciones en arcmin
+  function drawBars(off, alpha, col){
+    ctx.globalAlpha = alpha; ctx.fillStyle = col;
+    bars.forEach(a=>{
+      const x = W/2 + a*pmin + off;
+      ctx.fillRect(x-1.2, 8, 2.4, H-46);
+    });
+    ctx.globalAlpha = 1;
+  }
+  drawBars(0,   .95, "#f3ead0");   // imagen directa
+  drawBars(dxL, .55, "#e8f0f8");   // imagen del parche
+
+  // retícula del índice
+  ctx.strokeStyle = "rgba(226,169,79,.7)";
+  ctx.beginPath(); ctx.moveTo(W/2,0); ctx.lineTo(W/2,H-24); ctx.stroke();
+
+  // regla en minutos de arco
+  ctx.fillStyle = "rgba(139,144,151,.9)"; ctx.font = "10px "+mono;
+  ctx.textAlign = "center";
+  for(let a=-40;a<=40;a++){
+    const x = W/2 + a*pmin;
+    if(x<4||x>W-4) continue;
+    ctx.fillRect(x, H-20, 1, a%5===0?8:4);
+    if(a%10===0) ctx.fillText(a+"′", x, H-24);
+  }
+  ctx.textAlign = "left";
+  const arc = patchArcmin();
+  const seen = Math.abs(arc) >= S.eps;
+  ctx.fillStyle = seen? "#e2a94f" : "#7fb069";
+  ctx.font = "12px "+mono;
+  const pd = pDetect(arc);
+  ctx.fillText("Δ = "+fmt(arc,2)+"′  "+(S.psycho? t("pDetect")+fmt(pd*100,0)+" %" : (seen?t("discernible"):t("looksAligned"))), 10, 18);
+  if(S.dSet < COUPLE_MIN - 1e-9){
+    ctx.fillStyle = "#e0655c";
+    ctx.fillText(t("camStopLoupe"), 10, 34);
+  }
+}
+
+/* ================= Anillo de enfoque ================= */
+function barrelMap(){
+  if(S.helicoid){
+    const uMax = 1/mm(S.lens.mfd);
+    return {K:(860*0.94)/uMax, C:430, uCur:1/mm(Math.min(S.dSet,DMAX)), helicoid:true};
+  }
+  const K = (860*0.94)/Math.log(DMAX/S.lens.mfd);   // px por unidad de ln(d)
+  return {K, C:430};
+}
+function xOfD(dm, M){
+  const d = (dm===Infinity || dm>=DMAX) ? DMAX : Math.max(dm, S.lens.mfd*0.98);
+  if(M.helicoid){ const u = d>=DMAX? 0 : 1/mm(d); return M.C + (M.uCur-u)*M.K; }
+  return M.C + M.K*Math.log(d/Math.min(S.dSet,DMAX));
+}
+
+function drawBarrel(){
+  const [ctx,W,H] = setupCanvas(el.barrel);
+  ctx.fillStyle = "#14161a"; ctx.fillRect(0,0,W,H);
+  const M = barrelMap();
+  const mono = getComputedStyle(document.body).getPropertyValue("--mono");
+  const yScale = 86;
+
+  // sombreado < 0,7 m
+  if(S.lens.mfd < COUPLE_MIN){
+    const x1 = xOfD(S.lens.mfd,M), x2 = xOfD(COUPLE_MIN,M);
+    ctx.fillStyle = "rgba(207,58,48,.16)";
+    ctx.fillRect(x1-8, yScale-28, x2-x1+8, 56);
+  }
+
+  // banda PdC alrededor del plano nítido real (anillo + desplazamiento de foco)
+  const dSharp = dSharpPlane();
+  const [dn,df] = dofLimits(dSharp);
+  let xn = xOfD(Math.max(dn,S.lens.mfd),M), xf = xOfD(df===Infinity?DMAX:df,M);
+  if(xf-xn < 3){ const c=(xn+xf)/2; xn=c-1.5; xf=c+1.5; }
+  ctx.fillStyle = "rgba(226,169,79,.22)";
+  ctx.fillRect(xn, yScale-28, Math.min(xf,W+20)-xn, 56);
+  ctx.strokeStyle = "rgba(226,169,79,.6)"; ctx.lineWidth=1;
+  ctx.strokeRect(xn, yScale-28, Math.min(xf,W+20)-xn, 56);
+  // si el plano nítido no coincide con el índice, señalarlo
+  if(Math.abs(focusShift(S.N))>1e-6){
+    const xs = xOfD(dSharp===Infinity?DMAX:dSharp,M);
+    ctx.strokeStyle="#e2a94f"; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(xs,yScale-30); ctx.lineTo(xs,yScale+10); ctx.stroke();
+  }
+
+  // banda ciega del telémetro alrededor del sujeto (oculta a ciegas)
+  if(!S.blind){
+    const [bl,bh] = blindZone();
+    let xb1 = xOfD(bl,M), xb2 = xOfD(bh===Infinity?DMAX:bh,M);
+    if(xb2-xb1 < 3){ const c=(xb1+xb2)/2; xb1=c-1.5; xb2=c+1.5; }
+    ctx.fillStyle = S.visoflex? "rgba(127,176,105,.28)" : "rgba(111,156,201,.28)";
+    ctx.fillRect(xb1, yScale-16, Math.min(xb2,W+20)-xb1, 32);
+    ctx.strokeStyle = S.visoflex? "rgba(127,176,105,.9)" : "rgba(111,156,201,.85)";
+    ctx.strokeRect(xb1, yScale-16, Math.min(xb2,W+20)-xb1, 32);
+  }
+
+  // línea de escala
+  ctx.strokeStyle = "#3a3f47"; ctx.lineWidth = 1.4;
+  ctx.beginPath(); ctx.moveTo(0,yScale); ctx.lineTo(W,yScale); ctx.stroke();
+
+  // marcas
+  const marks = [0.5,0.6,0.7,0.8,0.9,1,1.2,1.5,2,2.5,3,4,5,7,10,15,20,30,Infinity]
+                .filter(d=>d===Infinity || d>=S.lens.mfd-1e-9);
+  ctx.font = "13px "+mono; ctx.textAlign="center";
+  marks.forEach(d=>{
+    const x = xOfD(d,M);
+    if(x<-24||x>W+24) return;
+    ctx.strokeStyle = "#565b63";
+    ctx.beginPath(); ctx.moveTo(x,yScale-9); ctx.lineTo(x,yScale+9); ctx.stroke();
+    ctx.fillStyle = d===Infinity? "#cfd2d6" : "#e2a94f";
+    ctx.fillText(d===Infinity?"∞":dec(d), x, yScale+27);
+  });
+
+  // marca del sujeto (oculta a ciegas); si hay reencuadre, también la distancia axial efectiva
+  if(!S.blind){
+    const xt = xOfD(S.dTrue,M);
+    ctx.strokeStyle = "#6f9cc9"; ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.moveTo(xt,yScale-34); ctx.lineTo(xt,yScale+12); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle="#6f9cc9"; ctx.fillText(t("subject"), xt, yScale-38);
+    if(S.alpha>0){
+      const xa = xOfD(dAxial(S.dTrue),M);
+      ctx.strokeStyle = "#c98bd8"; ctx.setLineDash([2,3]);
+      ctx.beginPath(); ctx.moveTo(xa,yScale-20); ctx.lineTo(xa,yScale+12); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle="#c98bd8"; ctx.fillText(t("afterRecompose"), xa, yScale+42);
+    }
+  }
+
+  // índice fijo
+  ctx.fillStyle = "#ece9df";
+  ctx.beginPath(); ctx.moveTo(M.C,yScale-24); ctx.lineTo(M.C-8,yScale-40); ctx.lineTo(M.C+8,yScale-40); ctx.closePath(); ctx.fill();
+  ctx.textAlign="left";
+  ctx.fillStyle="#8b9097"; ctx.font="13px "+mono;
+  ctx.fillText(S.lens.name+t("focusedAt")+(atInf()?"∞":fmt(S.dSet,2)+" m"), 10, 22);
+  ctx.fillStyle="#5c6167"; ctx.font="11px "+mono;
+  ctx.fillText((S.helicoid?t("scaleHelic"):t("scaleLogar"))+t("barrelHelp"), 10, H-8);
+  if(S.visoflex){ ctx.fillStyle="#7fb069"; ctx.fillText(t("visoGreen"), W-360, H-8); }
+}
+
+/* arrastre del anillo */
+let dragging=false, lastX=0;
+function clampD(d){ return Math.min(Math.max(d, S.lens.mfd), DMAX); }
+const pointers = new Map(); let pinchD0=0, pinchDSet0=0;
+function stepD(factorLog){ S.dSet = clampD(S.dSet*Math.exp(factorLog)); S.noiseSample=0; render(); }
+function barrelDrag(cv){
+  cv.tabIndex = 0;
+  cv.addEventListener("pointerdown", e=>{
+    cv.focus(); pointers.set(e.pointerId, e.clientX);
+    if(pointers.size===2){ const xs=[...pointers.values()]; pinchD0=Math.abs(xs[0]-xs[1])||1; pinchDSet0=S.dSet; dragging=false; }
+    else { dragging=true; lastX=e.clientX; }
+    cv.setPointerCapture(e.pointerId);
+  });
+  cv.addEventListener("pointermove", e=>{
+    if(!pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId, e.clientX);
+    if(pointers.size===2){
+      const xs=[...pointers.values()]; const dNow=Math.abs(xs[0]-xs[1])||1;
+      // pellizco: separar dedos = alejar el enfoque (log)
+      S.dSet = clampD(pinchDSet0 * Math.pow(dNow/pinchD0, 0.6)); S.noiseSample=0; render(); return;
+    }
+    if(!dragging) return;
+    const rect = cv.getBoundingClientRect();
+    const scale = 860/rect.width;
+    const M = barrelMap();
+    if(M.helicoid){
+      let u = 1/mm(Math.min(S.dSet,DMAX)) + (e.clientX-lastX)*scale/M.K;
+      u = Math.min(Math.max(u,0), 1/mm(S.lens.mfd));
+      S.dSet = u<=1/mm(DMAX)? DMAX : (1/u)/1000;
+    } else {
+      S.dSet = clampD(S.dSet * Math.exp(-(e.clientX-lastX)*scale/M.K));
+    }
+    S.noiseSample=0; lastX = e.clientX; render();
+  });
+  const up = e=>{ pointers.delete(e.pointerId); if(pointers.size<2) dragging=false; };
+  cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
+  cv.addEventListener("keydown", e=>{
+    const fine = e.shiftKey? 0.0015 : 0.02;
+    if(e.key==="ArrowRight"||e.key==="ArrowUp"){ e.preventDefault(); stepD(fine); }
+    else if(e.key==="ArrowLeft"||e.key==="ArrowDown"){ e.preventDefault(); stepD(-fine); }
+    else if(e.key==="Home"){ e.preventDefault(); S.dSet=S.lens.mfd; render(); }
+    else if(e.key==="End"){ e.preventDefault(); S.dSet=DMAX; render(); }
+  });
+  cv.addEventListener("wheel", e=>{
+    e.preventDefault();
+    const fine = e.shiftKey? 0.00006 : 0.0004;
+    S.dSet = clampD(S.dSet * Math.exp(-e.deltaY*fine));
+    render();
+  }, {passive:false});
+}
+
+/* ================= Matriz de píxeles ================= */
+function drawMatrix(){
+  const [ctx,W,H] = setupCanvas(el.matrix);
+  const NPX = 15, cell = W/NPX;
+  const rPix = (cTotal()/2)/PITCH;   // radio del disco total en unidades de píxel
+  const ph = S.phase==="edge"? [0.5,0] : S.phase==="corner"? [0.5,0.5] : [0,0];
+  const cx = NPX/2 + ph[0], cy = NPX/2 + ph[1];
+  const SS = 6;
+  const blurHidden = S.blind && !S.shot;
+  const mono = getComputedStyle(document.body).getPropertyValue("--mono");
+
+  // fotometría: la energía total del punto es constante; el pico cae como 1/área del disco.
+  // Ipeak = 1 si el disco cabe en un fotosito; si no, área_1px/área_disco.
+  const area = Math.PI*Math.max(rPix,0.12)**2;
+  const Ipeak = Math.min(1, 1/area);
+  const gamma = x => Math.pow(x, 1/2.2);
+
+  let lit=0;
+  for(let j=0;j<NPX;j++) for(let i=0;i<NPX;i++){
+    let cov=0;
+    if(!blurHidden){
+      const r2 = Math.max(rPix,0.12)**2;
+      for(let a=0;a<SS;a++) for(let b=0;b<SS;b++){
+        const x=i+(a+.5)/SS, y=j+(b+.5)/SS;
+        if((x-cx)**2+(y-cy)**2 <= r2) cov++;
+      }
+      cov/= SS*SS;
+    }
+    if(!blurHidden && cov/area>0.1) lit++;
+    const I = blurHidden? 0 : gamma(Math.min(1, cov/area));
+    const v = Math.round(16 + I*222);
+    ctx.fillStyle = `rgb(${v},${v},${v})`;
+    ctx.fillRect(i*cell+0.5, j*cell+0.5, cell-1, cell-1);
+  }
+  // rejilla
+  ctx.strokeStyle="rgba(60,65,72,.9)"; ctx.lineWidth=1;
+  for(let i=0;i<=NPX;i++){
+    ctx.beginPath(); ctx.moveTo(i*cell,0); ctx.lineTo(i*cell,H); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,i*cell); ctx.lineTo(W,i*cell); ctx.stroke();
+  }
+  if(!blurHidden){
+    // círculo geométrico, solo si cabe en el lienzo
+    const rg = (cGeo()/2)/PITCH*cell;
+    if(rg <= W/2){
+      ctx.strokeStyle="rgba(236,233,223,.85)"; ctx.setLineDash([6,4]); ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.arc(cx*cell,cy*cell,Math.max(rg,1),0,7); ctx.stroke();
+    }
+    // Airy
+    const ra = (cAiry()/2)/PITCH*cell;
+    if(ra <= W/2){
+      ctx.strokeStyle="rgba(226,169,79,.85)"; ctx.setLineDash([2,4]);
+      ctx.beginPath(); ctx.arc(cx*cell,cy*cell,ra,0,7); ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    // rótulos de estado
+    ctx.font="12px "+mono;
+    if(2*rPix > NPX){
+      ctx.fillStyle="#e0655c";
+      ctx.fillText(t("discOverflow")+fmt(cTotal()/PITCH,1)+" px", 8, 18);
+      ctx.fillStyle="#8b9097";
+      ctx.fillText(t("peakSignal")+(Ipeak*100).toLocaleString(LOCALE(),{maximumSignificantDigits:2})+t("ofFocusedPoint"), 8, 34);
+    } else {
+      ctx.fillStyle="#8b9097";
+      ctx.fillText(t("peakSignal")+fmt(Ipeak*100,0)+t("photositesOver")+lit+t("phaseIs")+({center:t("phCenter"),edge:t("phEdge"),corner:t("phCorner")})[S.phase], 8, 18);
+    }
+  } else {
+    ctx.fillStyle="#8b9097";
+    ctx.font="13px "+mono;
+    ctx.textAlign="center";
+    ctx.fillText(t("hiddenUntilShot"), W/2, H/2);
+  }
+  ctx.textAlign="left";
+  ctx.fillStyle="#5c6167"; ctx.font="11px "+mono;
+  ctx.fillText(dec((NPX*PITCH).toFixed(1))+t("acrossUm"), 8, H-8);
+}
+
+/* ================= Estadística ================= */
+function drawStats(){
+  const [ctx,W,H] = setupCanvas(el.hist);
+  const mono = getComputedStyle(document.body).getPropertyValue("--mono");
+  ctx.fillStyle="#14161a"; ctx.fillRect(0,0,W,H);
+  const mc = S.mc;
+  if(!mc){
+    ctx.fillStyle="#5c6167"; ctx.font="13px "+mono; ctx.textAlign="center";
+    ctx.fillText(t("pressToSimulate"), W/2, H/2);
+    ctx.textAlign="left"; el.statTable.innerHTML=""; return;
+  }
+  // histograma de c en escala log de 1 a 300 µm
+  const L=48, R=W-16, T=18, Bm=H-34;
+  const lo=Math.log10(1), hi=Math.log10(300);
+  const nb=48, bins=new Float64Array(nb);
+  /* «frac» y no «t»: una local llamada t eclipsaría a la función traductora t(). */
+  mc.cs.forEach(c=>{ const frac=(Math.log10(Math.max(c,1))-lo)/(hi-lo); const b=Math.min(nb-1,Math.max(0,Math.floor(frac*nb))); bins[b]++; });
+  const bmax=Math.max(...bins);
+  const xOf=c=>L+(Math.log10(c)-lo)/(hi-lo)*(R-L);
+  // zonas de criterio
+  ctx.fillStyle="rgba(127,176,105,.10)"; ctx.fillRect(L,T,xOf(2*PITCH)-L,Bm-T);
+  ctx.fillStyle="rgba(226,169,79,.08)"; ctx.fillRect(xOf(2*PITCH),T,xOf(30)-xOf(2*PITCH),Bm-T);
+  ctx.fillStyle="rgba(207,58,48,.08)"; ctx.fillRect(xOf(30),T,R-xOf(30),Bm-T);
+  // barras
+  for(let b=0;b<nb;b++){
+    const c1=Math.pow(10,lo+(b/nb)*(hi-lo)), c2=Math.pow(10,lo+((b+1)/nb)*(hi-lo));
+    const x1=xOf(c1), x2=xOf(c2), h=(bins[b]/bmax)*(Bm-T);
+    const cmid=Math.sqrt(c1*c2);
+    ctx.fillStyle = cmid<=2*PITCH? "#7fb069" : cmid<=30? "#e2a94f" : "#cf3a30";
+    ctx.fillRect(x1+0.5, Bm-h, Math.max(1,x2-x1-1), h);
+  }
+  // ejes
+  ctx.strokeStyle="#3a3f47"; ctx.beginPath(); ctx.moveTo(L,Bm); ctx.lineTo(R,Bm); ctx.stroke();
+  ctx.fillStyle="#8b9097"; ctx.font="11px "+mono; ctx.textAlign="center";
+  [1,2,5,10,20,50,100,200].forEach(c=>{ const x=xOf(c); ctx.fillRect(x,Bm,1,5); ctx.fillText(c,x,Bm+17); });
+  ctx.fillText(t("histAxis"), (L+R)/2, H-4);
+  // marcas de criterio
+  ctx.textAlign="left"; ctx.font="11px "+mono;
+  ctx.fillStyle="#7fb069"; ctx.fillText("2 px", xOf(2*PITCH)-30, T+10);
+  ctx.fillStyle="#e2a94f"; ctx.fillText("30 µm", xOf(30)+4, T+10);
+  // resumen
+  ctx.fillStyle="#cfd2d6"; ctx.font="12px "+mono;
+  ctx.fillText(`f/${mc.N} · n=${mc.cs.length} · ${t("median")} ${fmt(mc.med,1)} µm · p90 ${fmt(mc.p90,1)} µm · ${t("max")} ${fmt(mc.max,1)} µm`, L, T-6);
+}
+function drawStatTable(rowsMC){
+  if(!rowsMC){ return; }
+  const head = `<tr><th>f/</th><th>${t("thCmin")}</th><th>≤ 2 px</th><th>≤ 30 µm</th><th>${t("thMedian")}</th><th>p90</th><th>${t("thDof")} (${dec((S.c0*1000).toFixed(1))} µm)</th></tr>`;
+  const body = rowsMC.map(r=>{
+    const [dn,df]=dofAt(r.N);
+    const cls2 = r.hit2>=.9?"v-ok":r.hit2>=.5?"v-warn":"v-bad";
+    const cls30 = r.hit30>=.9?"v-ok":r.hit30>=.5?"v-warn":"v-bad";
+    const fl=cFloor(r.N); const clsF = fl<=2*PITCH?"v-ok":fl<=30?"v-warn":"v-bad";
+    return `<tr><td>${r.N}</td><td class="${clsF}">${fmt(fl,1)} µm</td><td class="${cls2}">${(r.hit2*100).toFixed(0)} %</td><td class="${cls30}">${(r.hit30*100).toFixed(0)} %</td><td>${fmt(r.med,1)} µm</td><td>${fmt(r.p90,1)} µm</td><td>${fmt((df===Infinity?9999:df-dn)*1000,0)} mm</td></tr>`;
+  }).join("");
+  el.statTable.innerHTML = `<table class="stat">${head}${body}</table>`;
+}
+/* PdC total a un diafragma dado, alrededor del sujeto, para la tabla */
+function dofAt(N){
+  const save=S.N; S.N=N;
+  const r=dofLimits(dAxial(S.dTrue)); S.N=save; return r;
+}
+function runMonteCarloAll(){
+  const n=1000;
+  S.mc = monteCarlo(n, S.N);
+  const rows = STOPS_ALL.filter(x=>x>=S.lens.nmax-1e-9 && x<=16).map(N=>monteCarlo(n,N));
+  S.mcRows = rows;             // se conservan para repintar la tabla al cambiar de idioma
+  drawStats(); drawStatTable(rows);
+}
+
+/* ================= Curvas c(N) ================= */
+const CURVE_COLORS = ["#e2a94f","#6f9cc9","#7fb069","#c98bd8","#e0655c","#5bc0be","#f2d16b","#a0a8b0","#ff9f80","#8fd694"];
+function drawCurves(){
+  const [ctx,W,H] = setupCanvas(el.curves);
+  const mono = getComputedStyle(document.body).getPropertyValue("--mono");
+  ctx.fillStyle="#14161a"; ctx.fillRect(0,0,W,H);
+  const L=52, R=W-190, T=22, B=H-38;
+  const nLo=Math.log2(0.9), nHi=Math.log2(18);
+  const yMax=40;
+  const xOf=N=>L+(Math.log2(N)-nLo)/(nHi-nLo)*(R-L);
+  const yOf=c=>B-Math.min(c,yMax)/yMax*(B-T);
+  // fondos de criterio
+  ctx.fillStyle="rgba(127,176,105,.08)"; ctx.fillRect(L,yOf(2*PITCH),R-L,B-yOf(2*PITCH));
+  ctx.fillStyle="rgba(226,169,79,.06)"; ctx.fillRect(L,yOf(30),R-L,yOf(2*PITCH)-yOf(30));
+  ctx.strokeStyle="rgba(127,176,105,.8)"; ctx.setLineDash([4,3]); ctx.beginPath(); ctx.moveTo(L,yOf(2*PITCH)); ctx.lineTo(R,yOf(2*PITCH)); ctx.stroke();
+  ctx.strokeStyle="rgba(226,169,79,.8)"; ctx.beginPath(); ctx.moveTo(L,yOf(30)); ctx.lineTo(R,yOf(30)); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle="#7fb069"; ctx.font="11px "+mono; ctx.fillText("2 px",L+4,yOf(2*PITCH)-4);
+  ctx.fillStyle="#e2a94f"; ctx.fillText("30 µm",L+4,yOf(30)-4);
+  // Airy
+  ctx.strokeStyle="rgba(139,144,151,.7)"; ctx.setLineDash([2,3]); ctx.beginPath();
+  STOPS_ALL.forEach((N,i)=>{ const y=yOf(1000*2.44*LAMBDA*N); i?ctx.lineTo(xOf(N),y):ctx.moveTo(xOf(N),y); }); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle="#8b9097"; ctx.fillText("Airy",xOf(16)+4,yOf(1000*2.44*LAMBDA*16)+4);
+  // ejes
+  ctx.strokeStyle="#3a3f47"; ctx.beginPath(); ctx.moveTo(L,B); ctx.lineTo(R,B); ctx.moveTo(L,T); ctx.lineTo(L,B); ctx.stroke();
+  ctx.fillStyle="#8b9097"; ctx.textAlign="center";
+  STOPS_ALL.forEach(N=>{ ctx.fillRect(xOf(N),B,1,4); ctx.fillText(N,xOf(N),B+16); });
+  ctx.textAlign="right";
+  [0,10,20,30,40].forEach(c=>{ ctx.fillRect(L-4,yOf(c),4,1); ctx.fillText(c,L-7,yOf(c)+4); });
+  ctx.textAlign="left"; ctx.fillText("µm",L-40,T-8);
+  ctx.fillText(t("subjectAt")+fmt(S.dTrue,1)+` m · ε=${fmt(S.eps,1)}′`+t("blindEdge")+(S.visoflex?" · Visoflex":"")+(S.alpha?` · α=${S.alpha}°`:"")+(S.mechOff?t("offsetTag")+S.mechOff+" µm":""), L+50, T-8);
+  // curvas
+  let ly=T+6;
+  LENSES.forEach((Lz,i)=>{
+    const col=CURVE_COLORS[i%CURVE_COLORS.length], cur=Lz===S.lens;
+    const pts=cCurveFor(Lz);
+    ctx.strokeStyle=col; ctx.lineWidth=cur?3:1.4; ctx.globalAlpha=cur?1:.75;
+    ctx.beginPath(); pts.forEach((p,k)=>{ k?ctx.lineTo(xOf(p.N),yOf(p.c)):ctx.moveTo(xOf(p.N),yOf(p.c)); }); ctx.stroke();
+    pts.forEach(p=>{ ctx.fillStyle=col; ctx.beginPath(); ctx.arc(xOf(p.N),yOf(p.c),cur?3.2:2.2,0,7); ctx.fill(); });
+    ctx.globalAlpha=1;
+    // leyenda
+    ctx.fillStyle=col; ctx.fillRect(R+12,ly-4,14,cur?3:2);
+    ctx.fillStyle=cur?"#ece9df":"#8b9097"; ctx.font=(cur?"bold ":"")+"11px "+mono;
+    ctx.fillText(Lz.name.length>24?Lz.name.slice(0,23)+"…":Lz.name, R+30, ly);
+    ly+=15;
+  });
+  ctx.lineWidth=1;
+}
+
+/* ================= Persistencia local ================= */
+const LS_KEY="telemetro_m11_v5";
+function saveState(){
+  try{
+    const custom = LENSES.filter(L=>L.custom);
+    const st = {}; ["N","dTrue","dSet","eps","psycho","magX","c0","alpha","fs","fsOn","fsm","nCal","mechOff","mechNoise","visoflex","cthVis","phase","helicoid"].forEach(k=>st[k]=S[k]);
+    st.lensName=S.lens.name;
+    localStorage.setItem(LS_KEY, JSON.stringify({st, custom}));
+  }catch(e){}
+}
+function loadState(){
+  try{
+    const raw=localStorage.getItem(LS_KEY); if(!raw) return false;
+    const {st,custom}=JSON.parse(raw);
+    (custom||[]).forEach(L=>{ if(!LENSES.some(x=>x.name===L.name)) LENSES.push(L); });
+    Object.keys(st).forEach(k=>{ if(k!=="lensName" && k in S) S[k]=st[k]; });
+    const L=LENSES.find(x=>x.name===st.lensName); if(L) S.lens=L;
+    return true;
+  }catch(e){ return false; }
+}
+function clearState(){ try{ localStorage.removeItem(LS_KEY); }catch(e){} location.reload(); }
+
+/* ================= Lectura ================= */
+function classFor(cUm){
+  const cpx = cUm/PITCH;
+  if(cpx<=2) return ["v-ok",t("clsSensor")];
+  if(cUm<=30) return ["v-warn",t("clsClassic")];
+  return ["v-bad",t("clsBad")];
+}
+function drawReadouts(){
+  const rows = [];
+  const hide = S.blind && !S.shot;
+  const dv = defocus()*1000;
+  const arc = patchArcmin();
+  const dSharp = dSharpPlane();
+  const [dn,df] = dofLimits(dSharp);
+  const cg = cGeo(), ct = cTotal();
+  const [cls,txt] = classFor(ct);
+  const seen = Math.abs(arc) >= S.eps;
+  const shiftUm = focusShift(S.N)*1000;
+  const dAx = dAxial(S.dTrue);
+
+  const oc = t("hidden");
+  rows.push([t("rLens"), S.lens.name+(S.visoflex?" · <span class='v-ok'>Visoflex</span>":"")]);
+  rows.push([t("rRingAt"), atInf()?"∞":fmt(S.dSet,3)+" m"]);
+  if(S.mechOff||S.noiseSample) rows.push([t("rMech"), t("rMechOff")+fmt(S.mechOff,0)+t("rMechNoise")+fmt(S.noiseSample,1)+" µm"]);
+  if(shiftUm>1e-6) rows.push([t("rSharpPlane"), (dSharp===Infinity?"∞":fmt(dSharp,3)+" m")+" <span class='v-warn'>"+t("rShift")+fmt(shiftUm,0)+" µm</span>"]);
+  rows.push([t("rSubjectAt"), hide?oc:fmt(S.dTrue,3)+" m"]);
+  if(S.alpha>0) rows.push([t("rAxial")+fmt(S.alpha,0)+"°", hide?oc:fmt(dAx,3)+" m <span class='v-warn'>· −"+fmt((S.dTrue-dAx)*1000,0)+" mm</span>"]);
+  rows.push([t("rDistErr"), hide?oc:fmt(Math.abs((dSharp===Infinity?1e5:dSharp)-dAx)*1000,1)+" mm"]);
+  rows.push([t("rDefocus"), hide?oc:fmt(dv,1)+" µm"]);
+  rows.push([t("rCgeo"), hide?oc:fmt(cg,1)+" µm · "+fmt(cg/PITCH,1)+" px"]);
+  rows.push([t("rAiry"), fmt(cAiry(),1)+" µm"]);
+  rows.push([t("rCtot"), hide?oc:`<span class="${cls}">${fmt(ct,1)} µm · ${fmt(ct/PITCH,1)} px</span>`]);
+  rows.push([t("rDof")+" ("+dec((S.c0*1000).toFixed(1))+" µm)", fmt(dn,2)+" – "+(df===Infinity?"∞":fmt(df,2))+" m"]);
+  rows.push([t("rPatch"), fmt(Math.abs(arc),2)+"′ "+(seen?'<span class="v-warn">'+t("rEyeSees")+'</span>':'<span class="v-ok">'+t("rUnderEps")+'</span>')]);
+  rows.push([t("rEbl"), fmt(BASE*MAG*S.magX,1)+" mm"]);
+  el.readTable.innerHTML = rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join("");
+
+  const v = el.verdict;
+  if(S.shot){
+    /* el veredicto se reclasifica en cada pintado: así sigue al idioma en curso */
+    const [scls,stxt] = classFor(S.shot.ct);
+    v.style.display="block";
+    v.innerHTML = t("result")+`<b>${fmt(S.shot.ct,1)} µm</b> (${fmt(S.shot.ct/PITCH,1)} px)`+t("errorIs")+`${fmt(S.shot.err*1000,0)} mm · <span class="${scls}">${stxt}</span>`;
+  } else v.style.display="none";
+}
+
+/* ================= UI ================= */
+const el = {};
+function $(id){ return document.getElementById(id); }
+
+function buildChips(){
+  el.lensChips.innerHTML="";
+  LENSES.forEach(L=>{
+    const b=document.createElement("button");
+    b.className="chip"+(L===S.lens?" on":"");
+    b.textContent=L.name;
+    b.onclick=()=>{ S.lens=L; S.fs=null; S.nCal=L.nmax; if(S.N<L.nmax) S.N=L.nmax; if(S.dSet<L.mfd) S.dSet=L.mfd; buildChips(); buildStops(); invalidateMC(); render(); };
+    el.lensChips.appendChild(b);
+  });
+  const add=document.createElement("button");
+  add.className="chip add"; add.textContent=t("addLens");
+  add.onclick=()=>$("dlgLens").showModal();
+  el.lensChips.appendChild(add);
+}
+function buildStops(){
+  el.stops.innerHTML="";
+  STOPS_ALL.filter(n=>n>=S.lens.nmax-1e-9 && n<=16).forEach(n=>{
+    const b=document.createElement("button");
+    b.className="stop"+(Math.abs(n-S.N)<1e-9?" on":"");
+    b.textContent=n; b.onclick=()=>{S.N=n; buildStops(); invalidateMC(); render();};
+    el.stops.appendChild(b);
+  });
+}
+function buildMags(){
+  [[1,"—"],[1.25,"×"+dec("1.25")],[1.4,"×"+dec("1.4")]].forEach(([m,lbl])=>{
+    const b=document.createElement("button");
+    b.className="stop"+(m===S.magX?" on":""); b.textContent=lbl;
+    b.onclick=()=>{S.magX=m; buildAll(); invalidateMC(); render();};
+    el.mags.appendChild(b);
+  });
+}
+function buildCrits(){
+  [[2*PITCH/1000,"2 px"],[0.030,"30 µm"]].forEach(([c,lbl])=>{
+    const b=document.createElement("button");
+    b.className="stop"+(Math.abs(c-S.c0)<1e-9?" on":""); b.textContent=lbl;
+    b.onclick=()=>{S.c0=c; buildAll(); invalidateMC(); render();};
+    el.crits.appendChild(b);
+  });
+}
+function buildCals(){
+  el.cals.innerHTML="";
+  STOPS_ALL.filter(n=>n>=S.lens.nmax-1e-9 && n<=5.6).forEach(n=>{
+    const b=document.createElement("button");
+    b.className="stop"+(Math.abs(n-nCal())<1e-9?" on":""); b.textContent=n;
+    b.onclick=()=>{S.nCal=n; buildCals(); invalidateMC(); render();};
+    el.cals.appendChild(b);
+  });
+}
+function buildAll(){
+  el.mags.innerHTML=""; el.crits.innerHTML="";
+  buildMags(); buildCrits(); buildStops(); buildChips(); buildCals();
+}
+
+/* distancia real: deslizador logarítmico 0,5 – 30 m */
+function sliderToD(v){ return 0.5*Math.pow(60, v/1000); }
+function dToSlider(d){ return 1000*Math.log(d/0.5)/Math.log(60); }
+
+function render(){
+  el.dTrueVal.textContent = S.blind&&!S.shot ? t("hiddenF") : fmt(S.dTrue,2)+" m";
+  el.epsVal.textContent = fmt(S.eps,1)+"′";
+  el.alphaVal.textContent = fmt(S.alpha,0)+"°";
+  el.fsVal.textContent = fmt(fsCur(),0)+" µm"+(S.fs===null?t("fsFromLens"):"")+(S.fsOn?t("fsCamAt")+nCal():t("fsOff"));
+  el.fs.value = fsCur();
+  el.fsOn.classList.toggle("on", S.fsOn); el.fsOff.classList.toggle("on", !S.fsOn);
+  el.eyeHard.classList.toggle("on", !S.psycho); el.eyePsy.classList.toggle("on", S.psycho);
+  document.querySelectorAll("[data-eps]").forEach(b=>b.classList.toggle("on", Math.abs(+b.dataset.eps-S.eps)<1e-6));
+  el.sysRF.classList.toggle("on", !S.visoflex); el.sysVis.classList.toggle("on", S.visoflex);
+  el.cthVal.textContent = fmt(S.cthVis,1)+" px · "+fmt(S.cthVis*PITCH,1)+" µm"; el.cth.value=Math.round(S.cthVis*10);
+  el.mechOffVal.textContent = (S.mechOff>0?"+":"")+fmt(S.mechOff,0)+" µm"; el.mechOff.value=S.mechOff;
+  el.mechNoiseVal.textContent = fmt(S.mechNoise,0)+" µm"; el.mechNoise.value=S.mechNoise;
+  el.fsmVal.textContent = "k = "+fmt(S.fsm,0)+t("fsmEff")+fmt(fsCur()*(1+S.fsm*magAt(dAxial(S.dTrue),S.lens.f)),0)+" µm"; el.fsm.value=S.fsm;
+  document.querySelectorAll("[data-phase]").forEach(b=>b.classList.toggle("on", b.dataset.phase===S.phase));
+  el.scaleLog.classList.toggle("on", !S.helicoid); el.scaleHel.classList.toggle("on", S.helicoid);
+  el.btnBlind.textContent = S.blind ? t("blindOff") : t("blindOn");
+  el.btnReset.title = t("resetTitle");
+  el.eps.value = Math.round(S.eps*60);
+  drawFinder(); drawLoupe(); drawBarrel(); drawMatrix(); drawReadouts(); drawStats(); drawCurves();
+  saveState();
+}
+/* cualquier cambio de parámetros invalida la estadística previa */
+function invalidateMC(){ S.mc=null; S.mcRows=null; if(el.statTable) el.statTable.innerHTML=""; }
+
+/* ---------- repintado al cambiar de idioma ----------
+   El conmutador llama a window.onLangChange también al arrancar, antes de que
+   DOMContentLoaded haya poblado «el»: de ahí la comprobación de LISTO. */
+let LISTO=false;
+function aplicarEtiquetas(){
+  /* valores y atributos que el marcado dual no puede cubrir */
+  const nl=$("nlName");
+  if(nl && (nl.value===""||nl.value===T.es.lensDefault||nl.value===T.en.lensDefault)) nl.value=t("lensDefault");
+}
+function aplicarIdioma(){
+  aplicarEtiquetas();
+  buildAll();                       // chips, diafragmas, magnificador, criterios, leva
+  render();                         // rótulos, lienzos y lectura
+  if(S.mcRows) drawStatTable(S.mcRows);   // la tabla generada conserva sus datos
+}
+window.onLangChange=function(){ if(LISTO) aplicarIdioma(); };
+
+window.addEventListener("DOMContentLoaded", ()=>{
+  ["finder","loupe","barrel","matrix","lensChips","stops","mags","crits",
+   "readTable","verdict","dTrue","dTrueVal","eps","epsVal","btnHuman",
+   "btnPerfect","btnBlind","btnShoot","footNote",
+   "alpha","alphaVal","fs","fsVal","fsOn","fsOff","fsReset","cals","hist","statTable","btnMC",
+   "curves","eyeHard","eyePsy","sysRF","sysVis","cth","cthVal","mechOff","mechOffVal","mechNoise","mechNoiseVal",
+   "fsm","fsmVal","scaleLog","scaleHel","btnReset"].forEach(id=>el[id]=$(id));
+
+  loadState();
+  buildAll();
+  barrelDrag(el.barrel);
+
+  el.dTrue.value = dToSlider(S.dTrue);
+  el.dTrue.addEventListener("input", e=>{
+    if(S.blind) return;
+    S.dTrue = sliderToD(+e.target.value); invalidateMC(); render();
+  });
+  el.eps.addEventListener("input", e=>{ S.eps = +e.target.value/60; invalidateMC(); render(); });
+  el.alpha.addEventListener("input", e=>{ S.alpha = +e.target.value; invalidateMC(); render(); });
+  el.fs.addEventListener("input", e=>{ S.fs = +e.target.value; invalidateMC(); render(); });
+  el.fsOn.onclick = ()=>{ S.fsOn=true; invalidateMC(); render(); };
+  el.fsOff.onclick = ()=>{ S.fsOn=false; invalidateMC(); render(); };
+  el.fsReset.onclick = ()=>{ S.fs=null; invalidateMC(); render(); };
+  el.btnMC.onclick = ()=>{ runMonteCarloAll(); };
+  el.eyeHard.onclick = ()=>{ S.psycho=false; invalidateMC(); render(); };
+  el.eyePsy.onclick  = ()=>{ S.psycho=true;  invalidateMC(); render(); };
+  document.querySelectorAll("[data-eps]").forEach(b=>b.onclick=()=>{ S.eps=+b.dataset.eps; el.eps.value=Math.round(S.eps*60); invalidateMC(); render(); });
+  el.sysRF.onclick  = ()=>{ S.visoflex=false; invalidateMC(); render(); };
+  el.sysVis.onclick = ()=>{ S.visoflex=true;  invalidateMC(); render(); };
+  el.cth.addEventListener("input", e=>{ S.cthVis=+e.target.value/10; invalidateMC(); render(); });
+  el.mechOff.addEventListener("input", e=>{ S.mechOff=+e.target.value; invalidateMC(); render(); });
+  el.mechNoise.addEventListener("input", e=>{ S.mechNoise=+e.target.value; invalidateMC(); render(); });
+  el.fsm.addEventListener("input", e=>{ S.fsm=+e.target.value; invalidateMC(); render(); });
+  document.querySelectorAll("[data-phase]").forEach(b=>b.onclick=()=>{ S.phase=b.dataset.phase; render(); });
+  el.scaleLog.onclick = ()=>{ S.helicoid=false; render(); };
+  el.scaleHel.onclick = ()=>{ S.helicoid=true;  render(); };
+  el.btnReset.onclick = ()=>{ if(confirm(t("resetAsk"))) clearState(); };
+
+  el.btnPerfect.onclick = ()=>{ S.dSet = clampD(S.dTrue); S.noiseSample=0; render(); };
+  el.btnHuman.onclick = ()=>{ S.dSet = humanFocus(); S.noiseSample=sampleNoise(); render(); };
+
+  el.btnBlind.onclick = ()=>{
+    if(!S.blind){
+      S.blind = true; S.shot = null;
+      S.dTrue = 1 + Math.random()*11;
+      S.dSet = Math.max(S.lens.mfd, 0.9 + Math.random()*15);
+      S.noiseSample = sampleNoise();
+      el.btnShoot.style.display = "inline-block";
+    } else {
+      S.blind=false; S.shot=null;
+      el.btnShoot.style.display="none";
+    }
+    /* el rótulo del botón lo escribe render() desde el diccionario */
+    invalidateMC(); render();
+  };
+
+  el.btnShoot.onclick = ()=>{
+    const ct = cTotal();
+    S.shot = {ct, err: Math.abs(S.dSet-S.dTrue)};
+    render();
+  };
+
+  $("nlOk").onclick = e=>{
+    e.preventDefault();
+    const L = {name:$("nlName").value||t("lensDefault"),
+               f:+$("nlF").value, nmax:+$("nlN").value, mfd:+$("nlMfd").value, fs:Math.max(0,+$("nlFs").value||0), custom:true};
+    if(L.f>0&&L.nmax>0&&L.mfd>0){ LENSES.push(L); S.lens=L; S.N=L.nmax; S.fs=null; S.nCal=L.nmax; }
+    $("dlgLens").close(); buildAll(); invalidateMC(); render();
+  };
+  $("nlCancel").onclick = e=>{e.preventDefault(); $("dlgLens").close();};
+
+  window.addEventListener("resize", render);
+  aplicarEtiquetas();
+  render();
+  LISTO=true;
+});
+</script>
+
+<script>
+/* ---------- conmutador de idioma ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{
+      title:"M11 · Simulador de telémetro y círculo de confusión",
+      desc:"Simulador del telémetro de la Leica M11 y del círculo de confusión: visor, parche, base efectiva, desplazamiento de foco, disco de Airy y tasa de acierto por diafragma."
+    },
+    en:{
+      title:"M11 · Rangefinder and circle of confusion simulator",
+      desc:"A simulator of the Leica M11 rangefinder and of the circle of confusion: viewfinder, patch, effective base length, focus shift, Airy disc and hit rate by aperture."
+    }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
+</body>
+</html>

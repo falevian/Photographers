@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual · Películas clásicas en perfiles ICC · Capture One</title>
+<meta name="description" content="Manual de peliculas.py: cinco materiales fotográficos clásicos modelados por integración espectral a 1 nm y escritos como perfiles ICC de entrada para Capture One y Leica M11.">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink-900:#0A0D11; --ink-800:#10151D; --ink-700:#161C26;
+  --line:#28323F; --line2:#384556; --mut:#77879A; --txt:#C3CED9; --hi:#EDF2F6;
+  --F:#35B7E6; --d:#E8B33C; --C:#DB4A3E; --ok:#4FBF95;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --cond:"IBM Plex Sans Condensed","Helvetica Neue",Arial,sans-serif;
+  --serif:"Spectral",Georgia,serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--ink-900);color:var(--txt);font-family:var(--serif);font-weight:300;font-size:15.5px;line-height:1.65}
+.wrap{max-width:880px;margin:0 auto;padding:0 22px 90px}
+.eyebrow{font-family:var(--cond);font-weight:600;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--mut)}
+h1{font-family:var(--cond);font-weight:600;font-size:clamp(28px,5vw,44px);line-height:1;letter-spacing:-.02em;text-transform:uppercase;color:var(--hi);margin:10px 0 12px}
+h1 .a{color:var(--d)}
+h2{font-family:var(--cond);font-weight:600;font-size:16px;letter-spacing:.14em;text-transform:uppercase;color:var(--hi);margin:0 0 4px}
+h3{font-family:var(--cond);font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--d);margin:22px 0 6px}
+h4{font-family:var(--cond);font-weight:600;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--hi);margin:18px 0 4px}
+p{margin:0 0 .9em}
+a{color:var(--F);text-decoration:none}
+a:hover{text-decoration:underline}
+b{color:var(--hi);font-weight:600}
+em{color:var(--hi)}
+code{font-family:var(--mono);font-size:12.5px;background:var(--ink-700);border:1px solid var(--line);border-radius:2px;padding:1px 5px;color:#cfd5dd}
+.kv{font-family:var(--mono);font-size:11px;color:var(--mut)}
+section{margin-top:44px;padding-top:22px;border-top:1px solid var(--line);scroll-margin-top:18px}
+.n{font-family:var(--mono);font-size:11px;color:var(--d);margin-right:8px}
+.note{border-left:2px solid var(--d);padding-left:12px;color:var(--txt);font-size:14.5px;margin:14px 0}
+.warn{border-left:2px solid var(--C);padding-left:12px;color:var(--txt);font-size:14.5px;margin:14px 0}
+.stop{border:1px solid rgba(219,74,62,.45);background:rgba(219,74,62,.07);border-left:3px solid var(--C);
+      padding:15px 17px;margin:26px 0;font-size:15px}
+.stop .h{font-family:var(--cond);font-weight:700;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--C);margin:0 0 7px}
+.stop p:last-child{margin-bottom:0}
+.stop code{background:rgba(219,74,62,.12);border-color:rgba(219,74,62,.35);color:#f0c3bd}
+table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11.5px;margin:10px 0 16px}
+th{font-family:var(--cond);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);text-align:left;font-weight:600;padding:4px 8px 4px 0;border-bottom:1px solid var(--line2)}
+td{padding:4px 8px 4px 0;border-bottom:1px solid rgba(40,50,63,.55);vertical-align:top}
+td:first-child{color:var(--hi)}
+td.num{text-align:right;white-space:nowrap}
+.scroll{overflow-x:auto;margin:10px 0 16px}
+.scroll table{margin:0;min-width:560px}
+.toc{border:1px solid var(--line);background:var(--ink-800);padding:14px 18px;margin-top:22px}
+.toc a{display:block;padding:3px 0;font-family:var(--cond);font-size:13.5px;color:var(--txt)}
+.toc a:hover{color:var(--d);text-decoration:none}
+.toc .n{margin-right:10px}
+pre.cmd{font-family:var(--mono);font-size:12px;line-height:1.8;background:var(--ink-800);
+        border:1px solid var(--line);border-left:2px solid var(--F);
+        padding:12px 15px;margin:14px 0;overflow-x:auto;color:#cfd5dd;white-space:pre}
+pre.cmd .c{color:var(--mut)}
+pre.cmd .o{color:var(--d)}
+pre.cmd .s{color:var(--ok)}
+.formula{font-family:var(--serif);font-style:italic;text-align:center;color:var(--hi);margin:12px 0;font-size:16px}
+.eq{font-family:var(--mono);font-size:12.5px;color:var(--hi);background:var(--ink-800);
+    border:1px solid var(--line);border-left:2px solid var(--d);
+    padding:12px 15px;margin:14px 0;overflow-x:auto;line-height:1.85}
+.eq .c{color:var(--mut);font-size:.9em}
+ul.clean{margin:11px 0;padding:0;list-style:none}
+ul.clean li{position:relative;padding-left:18px;margin:7px 0;font-size:15px}
+ul.clean li::before{content:"";position:absolute;left:1px;top:10px;width:5px;height:5px;background:var(--d)}
+ol.steps{margin:11px 0;padding-left:20px}
+ol.steps li{margin:9px 0;padding-left:4px}
+ol.steps li::marker{font-family:var(--mono);font-size:11px;color:var(--d)}
+.lede{font-size:16.5px;max-width:62ch}
+footer{margin-top:52px;padding-top:16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;color:var(--mut);line-height:1.7}
+@media(max-width:640px){.wrap{padding:0 14px 60px}}
+
+/* ---------- conmutador de idioma ---------- */
+html[lang="es"] [data-lang="en"]{display:none!important}
+html[lang="en"] [data-lang="es"]{display:none!important}
+.langbar{position:fixed;top:14px;right:16px;z-index:50;display:flex;
+         background:rgba(16,21,29,.92);border:1px solid var(--line2);border-radius:8px;
+         overflow:hidden;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.langbar button{font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;
+                background:transparent;border:0;color:var(--mut);padding:7px 11px;cursor:pointer;
+                transition:background .15s,color .15s}
+.langbar button+button{border-left:1px solid var(--line2)}
+.langbar button:hover{color:var(--txt)}
+.langbar button.on{background:rgba(232,179,60,.14);color:var(--d)}
+.langbar button:focus-visible{outline:2px solid rgba(232,179,60,.6);outline-offset:-2px}
+@media(max-width:720px){.langbar{top:8px;right:8px}}
+</style>
+</head>
+<body>
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
+
+<div class="wrap">
+
+<header style="padding-top:44px">
+  <div class="eyebrow" data-lang="es">Manual · perfiles ICC de película · agosto de 2026</div>
+  <div class="eyebrow" data-lang="en">Manual · film ICC profiles · August 2026</div>
+  <h1 data-lang="es">Películas clásicas<br>en perfiles <span class="a">ICC</span></h1>
+  <h1 data-lang="en">Classic films<br>as <span class="a">ICC</span> profiles</h1>
+  <p class="lede" data-lang="es">Cinco materiales fotográficos reconstruidos a partir de la respuesta física publicada por el fabricante y escritos como perfiles ICC de entrada para Capture One. Toda la parte de color se calcula por integración espectral a 1 nm entre 380 y 730 nm. Este manual explica qué modela cada uno, cómo se genera el perfil, qué significa cada opción y dónde están los límites.</p>
+  <p class="lede" data-lang="en">Five photographic materials reconstructed from the physical response published by the manufacturer and written out as input profiles for Capture One. The whole colour computation is done by spectral integration at 1 nm between 380 and 730 nm. This manual explains what each model contains, how the profile is generated, what every option does and where the limits lie.</p>
+  <p class="kv" data-lang="es">Programa principal: <a href="scripts/peliculas/peliculas.py">scripts/peliculas/peliculas.py</a> · grano: <a href="scripts/peliculas/grano.py">scripts/peliculas/grano.py</a> · fuente original: <a href="scripts/peliculas/LEEME.md">LEEME.md</a> · solo requiere numpy</p>
+  <p class="kv" data-lang="en">Main program: <a href="scripts/peliculas/peliculas.py">scripts/peliculas/peliculas.py</a> · grain: <a href="scripts/peliculas/grano.py">scripts/peliculas/grano.py</a> · original source: <a href="scripts/peliculas/LEEME.md">LEEME.md</a> · requires only numpy</p>
+
+  <nav class="toc" data-lang="es">
+    <a href="#s1"><span class="n">01</span>Qué es esto y en qué se diferencia de un preajuste</a>
+    <a href="#s2"><span class="n">02</span>Los cinco materiales</a>
+    <a href="#s3"><span class="n">03</span>Uso rápido: tres órdenes</a>
+    <a href="#s4"><span class="n">04</span>Las dos vías: perfil compuesto y perfil genérico</a>
+    <a href="#s5"><span class="n">05</span>Opciones de la línea de órdenes</a>
+    <a href="#s6"><span class="n">06</span>El carácter medido de cada material</a>
+    <a href="#s7"><span class="n">07</span>El caso pro400h: dos etapas, dos mandos</a>
+    <a href="#s8"><span class="n">08</span>El caso trix: positivado y virado</a>
+    <a href="#s9"><span class="n">09</span>El grano: por qué va aparte</a>
+    <a href="#s10"><span class="n">10</span>Instalación y uso en Capture One</a>
+    <a href="#s11"><span class="n">11</span>Método, validación y límites conocidos</a>
+    <a href="#s12"><span class="n">12</span>Los ficheros</a>
+  </nav>
+  <nav class="toc" data-lang="en">
+    <a href="#s1"><span class="n">01</span>What this is, and how it differs from a preset</a>
+    <a href="#s2"><span class="n">02</span>The five materials</a>
+    <a href="#s3"><span class="n">03</span>Quick start: three commands</a>
+    <a href="#s4"><span class="n">04</span>Two routes: composed profile and generic profile</a>
+    <a href="#s5"><span class="n">05</span>Command-line options</a>
+    <a href="#s6"><span class="n">06</span>The measured character of each material</a>
+    <a href="#s7"><span class="n">07</span>The pro400h case: two stages, two controls</a>
+    <a href="#s8"><span class="n">08</span>The trix case: printing and toning</a>
+    <a href="#s9"><span class="n">09</span>Grain: why it lives outside the profile</a>
+    <a href="#s10"><span class="n">10</span>Installing and using in Capture One</a>
+    <a href="#s11"><span class="n">11</span>Method, validation and known limits</a>
+    <a href="#s12"><span class="n">12</span>The files</a>
+  </nav>
+</header>
+
+<div class="stop" data-lang="es">
+  <p class="h">Antes de nada · el error que hay que evitar</p>
+  <p>En cada imagen revelada con uno de estos perfiles hay que poner <b>Curve &gt; Linear Response</b> en Capture One. El modelo <b>ya incorpora la curva de tono del material</b>: la curva característica del negativo, la del papel o la de la diapositiva están dentro del perfil. Si se deja activa la curva guía de Capture One, ambas se suman y el contraste sale duplicado.</p>
+  <p>Es el error más visible que se puede cometer con estos perfiles, y no siempre se reconoce como un error: se lee como «esta película es muy contrastada». No lo es; es la curva aplicada dos veces.</p>
+</div>
+<div class="stop" data-lang="en">
+  <p class="h">Before anything else · the mistake to avoid</p>
+  <p>Every image developed with one of these profiles must be set to <b>Curve &gt; Linear Response</b> in Capture One. The model <b>already contains the tone curve of the material</b>: the characteristic curve of the negative, of the paper or of the reversal film sits inside the profile. If Capture One's own guide curve is left active, the two are compounded and contrast comes out doubled.</p>
+  <p>This is the most visible mistake that can be made with these profiles, and it is not always recognised as a mistake: it reads as "this film is very contrasty". It is not; it is the curve applied twice.</p>
+</div>
+
+<section id="s1">
+  <h2 data-lang="es"><span class="n">01</span>Qué es esto y en qué se diferencia de un preajuste</h2>
+  <h2 data-lang="en"><span class="n">01</span>What this is, and how it differs from a preset</h2>
+
+  <p data-lang="es">Un preajuste de película hecho a ojo es un juicio estético: alguien mira una diapositiva, mira su pantalla y mueve curvas y ruedas de color hasta que le parece que se parecen. El resultado puede ser bellísimo y sigue siendo, técnicamente, una opinión. No hay forma de saber qué haría ese preajuste con un color que el autor no miró mientras lo ajustaba.</p>
+  <p data-lang="en">A film preset built by eye is an aesthetic judgement: someone looks at a transparency, looks at their screen, and moves curves and colour wheels until the two seem to match. The result can be beautiful and it remains, technically, an opinion. There is no way to know what such a preset would do with a colour the author never looked at while adjusting it.</p>
+
+  <p data-lang="es">Aquí no se ajusta nada visualmente. Se parte de la <b>respuesta física publicada por el fabricante</b> —sensibilidades espectrales, curvas características, densidades espectrales de colorante, granularidad rms— y se calcula lo que el material habría hecho con la escena. Para cada uno de los 1 nm entre 380 y 730 nm.</p>
+  <p data-lang="en">Nothing here is adjusted visually. The starting point is the <b>physical response published by the manufacturer</b> — spectral sensitivities, characteristic curves, spectral dye densities, rms granularity — and what the material would have done with the scene is computed from it. At every one of the 1 nm steps between 380 and 730 nm.</p>
+
+  <p data-lang="es">La cadena de una diapositiva, en corto: los XYZ de la escena se convierten en exposición de cada capa mediante las sensibilidades espectrales del material; cada exposición pasa por su curva característica y da una densidad Status A; las tres densidades se invierten a cantidades de colorante; los colorantes dan una transmitancia espectral; esa transmitancia se ilumina con un proyector de 3200 K y se integra contra el observador. El resultado es el XYZ que el ojo habría visto en la pantalla de proyección. Ese es el número que va al perfil.</p>
+  <p data-lang="en">The chain of a reversal film, in brief: the scene XYZ are turned into an exposure for each layer through the spectral sensitivities of the material; each exposure passes through its characteristic curve and yields a Status A density; the three densities are inverted into dye amounts; the dyes give a spectral transmittance; that transmittance is lit by a 3200 K projector and integrated against the observer. The result is the XYZ the eye would have seen on the projection screen. That number is what goes into the profile.</p>
+
+  <p data-lang="es">Consecuencia práctica: el carácter del material no está programado, <em>emerge</em>. Nadie escribió «que los verdes se vayan a esmeralda» en Velvia; sale del apareamiento de sus tres capas. Nadie escribió «que la latitud del C-41 sea grande»; sale de resolver el filtrado de la ampliadora en cada exposición. Y el modelo responde a colores que nadie miró nunca, porque no depende de haberlos mirado.</p>
+  <p data-lang="en">The practical consequence: the character of the material is not programmed, it <em>emerges</em>. Nobody wrote "send the greens towards emerald" into Velvia 50; it falls out of the pairing of its three layers. Nobody wrote "make the latitude of C-41 generous"; it falls out of solving the enlarger filtration at each exposure. And the model answers for colours nobody ever looked at, because it does not depend on having looked at them.</p>
+
+  <div class="note" data-lang="es">Todo el color es cálculo espectral. Lo único parametrizado por objetivo colorimético declarado, y se dice expresamente, es el virado del blanco y negro: no hay dato de fabricante para el color de un virado de sepia o de selenio.</div>
+  <div class="note" data-lang="en">All the colour is spectral computation. The single part parameterised towards a declared colorimetric target — and it is stated as such — is the toning of the black and white print: no manufacturer datum exists for the colour of a sepia or selenium toning.</div>
+</section>
+
+<section id="s2">
+  <h2 data-lang="es"><span class="n">02</span>Los cinco materiales</h2>
+  <h2 data-lang="en"><span class="n">02</span>The five materials</h2>
+
+  <p data-lang="es">Un solo fichero ejecutable, <code>peliculas.py</code>, contiene los cinco modelos, el lector y el escritor de perfiles ICC. La clave de la primera columna es lo que se teclea tras <code>--pelicula</code>.</p>
+  <p data-lang="en">A single executable file, <code>peliculas.py</code>, contains the five models together with the ICC profile reader and writer. The key in the first column is what one types after <code>--pelicula</code>.</p>
+
+  <div class="scroll" data-lang="es">
+  <table>
+    <thead><tr><th>Clave</th><th>Material</th><th>Proceso</th><th>Fuente documental</th><th>Quién lo usó</th></tr></thead>
+    <tbody>
+      <tr><td>k64</td><td>Kodachrome 64 (PKR)</td><td>K-14</td><td>Kodak E-55 (2009)</td><td>Alex Webb</td></tr>
+      <tr><td>k25</td><td>Kodachrome 25 (PKM)</td><td>K-14</td><td>Kodak E-55 (2009)</td><td>Plossu, Ghirri</td></tr>
+      <tr><td>velvia50</td><td>Velvia 50 (RVP 50)</td><td>E-6</td><td>Fujifilm AF3-0221E2</td><td>el paisaje de los años noventa</td></tr>
+      <tr><td>pro400h</td><td>PRO 400H + Endura Premier</td><td>C-41 + RA-4</td><td>Fujifilm AF3-176E y Kodak E-4070</td><td>Rinko Kawauchi</td></tr>
+      <tr><td>trix</td><td>Tri-X 400 (D-76, 8 min) + Multigrade IV RC grado 2</td><td>blanco y negro + gelatina</td><td>Kodak F-4017 y hoja técnica de Ilford MG IV</td><td>el blanco y negro de reportaje</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="scroll" data-lang="en">
+  <table>
+    <thead><tr><th>Key</th><th>Material</th><th>Process</th><th>Documentary source</th><th>Who used it</th></tr></thead>
+    <tbody>
+      <tr><td>k64</td><td>Kodachrome 64 (PKR)</td><td>K-14</td><td>Kodak E-55 (2009)</td><td>Alex Webb</td></tr>
+      <tr><td>k25</td><td>Kodachrome 25 (PKM)</td><td>K-14</td><td>Kodak E-55 (2009)</td><td>Plossu, Ghirri</td></tr>
+      <tr><td>velvia50</td><td>Velvia 50 (RVP 50)</td><td>E-6</td><td>Fujifilm AF3-0221E2</td><td>nineties landscape work</td></tr>
+      <tr><td>pro400h</td><td>PRO 400H + Endura Premier</td><td>C-41 + RA-4</td><td>Fujifilm AF3-176E and Kodak E-4070</td><td>Rinko Kawauchi</td></tr>
+      <tr><td>trix</td><td>Tri-X 400 (D-76, 8 min) + Multigrade IV RC grade 2</td><td>black and white + gelatin silver</td><td>Kodak F-4017 and the Ilford MG IV datasheet</td><td>reportage black and white</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p data-lang="es">Tres son materiales reversibles de una sola etapa: la película que se expone es la que se mira. Los dos últimos son <b>sistemas de dos etapas</b>, negativo más papel, y se comportan de manera distinta en casi todo: tienen dos exposiciones independientes, tienen latitud, y su grano nace en un sitio y se ve en otro.</p>
+  <p data-lang="en">Three of them are single-stage reversal materials: the film that is exposed is the film that is looked at. The last two are <b>two-stage systems</b>, negative plus paper, and they behave differently in almost every respect: they have two independent exposures, they have latitude, and their grain is born in one place and seen in another.</p>
+</section>
+
+<section id="s3">
+  <h2 data-lang="es"><span class="n">03</span>Uso rápido: tres órdenes</h2>
+  <h2 data-lang="en"><span class="n">03</span>Quick start: three commands</h2>
+
+  <p data-lang="es">Primero, localizar el perfil ICC de cámara que Capture One usa para el cuerpo. El buscador acepta un patrón:</p>
+  <p data-lang="en">First, locate the camera input profile that Capture One uses for the body. The search accepts a pattern:</p>
+
+  <pre class="cmd" data-lang="es"><span class="c"># situarse en la carpeta donde esté peliculas.py</span>
+cd scripts/peliculas
+
+<span class="c"># localizar el perfil de cámara de Capture One</span>
+python3 peliculas.py <span class="o">--listar</span> m11</pre>
+  <pre class="cmd" data-lang="en"><span class="c"># move into the folder where peliculas.py lives</span>
+cd scripts/peliculas
+
+<span class="c"># locate the Capture One camera profile</span>
+python3 peliculas.py <span class="o">--listar</span> m11</pre>
+
+  <p data-lang="es">Segundo, inspeccionar un candidato. <code>--info</code> no genera nada: informa de la clase del perfil, su espacio, si trae tabla A2B y cuál es su blanco.</p>
+  <p data-lang="en">Second, inspect a candidate. <code>--info</code> generates nothing: it reports the class of the profile, its space, whether it carries an A2B table and what its white point is.</p>
+
+  <pre class="cmd" data-lang="es">python3 peliculas.py <span class="o">--info</span> <span class="s">"/ruta/al/perfil.icm"</span></pre>
+  <pre class="cmd" data-lang="en">python3 peliculas.py <span class="o">--info</span> <span class="s">"/path/to/profile.icm"</span></pre>
+
+  <p data-lang="es">Tercero, componer, generar e instalar. Esta es la orden completa:</p>
+  <p data-lang="en">Third, compose, generate and install. This is the complete command:</p>
+
+  <pre class="cmd" data-lang="es">python3 peliculas.py <span class="s">"/Applications/Capture One.app/Contents/Frameworks/ImageProcessing.framework/Versions/A/Resources/Profiles/Input/LeicaM11-ProStandard.icm"</span> <span class="o">--pelicula</span> k25 <span class="o">--n</span> 45 <span class="o">--instalar</span></pre>
+  <pre class="cmd" data-lang="en">python3 peliculas.py <span class="s">"/Applications/Capture One.app/Contents/Frameworks/ImageProcessing.framework/Versions/A/Resources/Profiles/Input/LeicaM11-ProStandard.icm"</span> <span class="o">--pelicula</span> k25 <span class="o">--n</span> 45 <span class="o">--instalar</span></pre>
+
+  <div class="warn" data-lang="es"><b>Las comillas dobles no son opcionales.</b> Las rutas de Capture One llevan espacios; sin comillas la ruta llega partida al intérprete y el programa recibe media docena de argumentos sueltos en lugar de un fichero.</div>
+  <div class="warn" data-lang="en"><b>The double quotes are not optional.</b> Capture One's paths contain spaces; without quotes the path reaches the interpreter already broken and the program receives half a dozen loose arguments instead of one file.</div>
+</section>
+
+<section id="s4">
+  <h2 data-lang="es"><span class="n">04</span>Las dos vías: perfil compuesto y perfil genérico</h2>
+  <h2 data-lang="en"><span class="n">04</span>Two routes: composed profile and generic profile</h2>
+
+  <h3 data-lang="es">Perfil compuesto sobre el ICC de la cámara — recomendada</h3>
+  <h3 data-lang="en">Profile composed over the camera ICC — recommended</h3>
+  <p data-lang="es">Se pasa como argumento el perfil ICC de la cámara y la transformada del material se compone <b>sobre la respuesta real del sensor</b>. El perfil resultante ya no es «una película»: es esa película vista por ese sensor, y por eso reproduce mejor lo que hace el material con los colores donde cámara y observador difieren.</p>
+  <p data-lang="en">The camera's ICC profile is passed as an argument and the film transform is composed <b>over the real response of the sensor</b>. The resulting profile is no longer "a film": it is that film as seen by that sensor, and it therefore reproduces better what the material does with the colours where camera and observer diverge.</p>
+  <p data-lang="es">En el M11 hay dos perfiles en <code>Profiles/Input/</code>: <code>LeicaM11.icm</code> y <code>LeicaM11-ProStandard.icm</code>. Los ProStandard aplican una preservación de tono propia; el estándar es más neutro. Conviene generar ambos y comparar sobre imágenes propias: la diferencia se ve sobre todo en rojos y en pieles.</p>
+  <p data-lang="en">On the M11 there are two profiles in <code>Profiles/Input/</code>: <code>LeicaM11.icm</code> and <code>LeicaM11-ProStandard.icm</code>. The ProStandard ones apply a hue-preservation of their own; the standard one is more neutral. It is worth generating both and comparing them on one's own images: the difference shows mainly in reds and in skin.</p>
+
+  <h3 data-lang="es">Perfil genérico</h3>
+  <h3 data-lang="en">Generic profile</h3>
+  <p data-lang="es">Con <code>--generico</code> no hace falta perfil de cámara: el modelo supone <b>primarios Rec.709 a la entrada</b>. Es independiente del cuerpo y sirve para cualquier flujo, a costa de fidelidad. También sirven las LUT <code>.cube</code> del paquete antiguo para material ya revelado y exportado.</p>
+  <p data-lang="en">With <code>--generico</code> no camera profile is needed: the model assumes <b>Rec.709 primaries at the input</b>. It is body-independent and works in any pipeline, at the cost of fidelity. The <code>.cube</code> LUTs from the older package also serve for material already developed and exported.</p>
+
+  <div class="note" data-lang="es">Regla simple: si se revela raw en Capture One, compóngase sobre el perfil de cámara. El genérico es para material ya renderizado a un espacio conocido, o para probar un material sin instalar nada.</div>
+  <div class="note" data-lang="en">A simple rule: if the raw file is being developed in Capture One, compose over the camera profile. The generic one is for material already rendered into a known space, or for trying out a material without installing anything.</div>
+</section>
+
+<section id="s5">
+  <h2 data-lang="es"><span class="n">05</span>Opciones de la línea de órdenes</h2>
+  <h2 data-lang="en"><span class="n">05</span>Command-line options</h2>
+
+  <div class="scroll" data-lang="es">
+  <table>
+    <thead><tr><th>Opción</th><th>Efecto</th></tr></thead>
+    <tbody>
+      <tr><td>--pelicula {k64,k25,velvia50,pro400h,trix}</td><td>material a emular; por omisión <code>k64</code></td></tr>
+      <tr><td>--ev X</td><td>exposición del material en pasos; negativo = más denso y más saturado en diapositiva. En <code>pro400h</code> expone el negativo</td></tr>
+      <tr><td>--gain X</td><td>ganancia de colorante; menor que 1 rebaja contraste y croma a la vez</td></tr>
+      <tr><td>--copia X</td><td>solo <code>pro400h</code> y <code>trix</code>: pasos de aclarado de la copia respecto al balance de laboratorio</td></tr>
+      <tr><td>--virado {neutro,frio,calido,sepia,selenio}</td><td>solo <code>trix</code>: virado de la copia</td></tr>
+      <tr><td>--n {33,45}</td><td>lado del CLUT del ICC; por omisión 33</td></tr>
+      <tr><td>--generico</td><td>perfil sin cámara; supone primarios Rec.709 a la entrada</td></tr>
+      <tr><td>--info</td><td>solo inspecciona el perfil indicado, no genera nada</td></tr>
+      <tr><td>--listar [patrón]</td><td>lista los perfiles de cámara encontrados en el sistema</td></tr>
+      <tr><td>--instalar</td><td>copia el ICC a ColorSync y crea el estilo de Capture One</td></tr>
+      <tr><td>-o salida.icc</td><td>ruta del fichero de salida</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="scroll" data-lang="en">
+  <table>
+    <thead><tr><th>Option</th><th>Effect</th></tr></thead>
+    <tbody>
+      <tr><td>--pelicula {k64,k25,velvia50,pro400h,trix}</td><td>material to emulate; defaults to <code>k64</code></td></tr>
+      <tr><td>--ev X</td><td>exposure of the material in stops; negative = denser and more saturated on reversal film. On <code>pro400h</code> it exposes the negative</td></tr>
+      <tr><td>--gain X</td><td>dye gain; below 1 it lowers contrast and chroma together</td></tr>
+      <tr><td>--copia X</td><td><code>pro400h</code> and <code>trix</code> only: stops of lightening of the print with respect to the laboratory balance</td></tr>
+      <tr><td>--virado {neutro,frio,calido,sepia,selenio}</td><td><code>trix</code> only: toning of the print</td></tr>
+      <tr><td>--n {33,45}</td><td>side of the ICC CLUT; defaults to 33</td></tr>
+      <tr><td>--generico</td><td>profile without a camera; assumes Rec.709 primaries at the input</td></tr>
+      <tr><td>--info</td><td>only inspects the given profile, generates nothing</td></tr>
+      <tr><td>--listar [pattern]</td><td>lists the camera profiles found on the system</td></tr>
+      <tr><td>--instalar</td><td>copies the ICC into ColorSync and creates the Capture One style</td></tr>
+      <tr><td>-o output.icc</td><td>path of the output file</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note" data-lang="es">Los valores de <code>--virado</code> son literales en español porque son los que el programa acepta: <code>neutro</code>, <code>frio</code>, <code>calido</code>, <code>sepia</code>, <code>selenio</code>. Se teclean tal cual, sin acentos.</div>
+  <div class="note" data-lang="en">The values of <code>--virado</code> are Spanish literals because they are what the program accepts: <code>neutro</code> (neutral), <code>frio</code> (cool), <code>calido</code> (warm), <code>sepia</code>, <code>selenio</code> (selenium). They are typed exactly as they appear, without accents.</div>
+
+  <p data-lang="es">El nombre del perfil generado incorpora los ajustes usados —por ejemplo <code>ev+1.5 c+0.55</code>—, de modo que se pueden instalar varias variantes del mismo material a la vez y distinguirlas en la lista de Capture One.</p>
+  <p data-lang="en">The name of the generated profile carries the settings used — for instance <code>ev+1.5 c+0.55</code> — so that several variants of the same material can be installed side by side and told apart in Capture One's list.</p>
+</section>
+
+<section id="s6">
+  <h2 data-lang="es"><span class="n">06</span>El carácter medido de cada material</h2>
+  <h2 data-lang="en"><span class="n">06</span>The measured character of each material</h2>
+
+  <p data-lang="es">Las cifras que siguen no son impresiones: están medidas sobre el ColorChecker de 24 parches, comparando la salida del modelo con la reproducción colorimétrica exacta de la misma escena. <b>ΔC*</b> es el exceso de croma, <b>Δh</b> el giro de tono en grados y <b>Δu′v′</b> la deriva de los neutros en el diagrama uniforme.</p>
+  <p data-lang="en">The figures that follow are not impressions: they are measured on the 24-patch colour checker, comparing the model's output against the exact colorimetric reproduction of the same scene. <b>ΔC*</b> is the excess of chroma, <b>Δh</b> the hue angle shift in degrees and <b>Δu′v′</b> the drift of the neutrals in the uniform diagram.</p>
+
+  <div class="scroll" data-lang="es">
+  <table>
+    <thead><tr><th></th><th>k25</th><th>k64</th><th>velvia50</th><th>pro400h (copia normal)</th></tr></thead>
+    <tbody>
+      <tr><td>Croma medio añadido</td><td>+5,0</td><td>+10,8</td><td>+13,5</td><td>+16,9</td></tr>
+      <tr><td>Verdes</td><td>+9,5</td><td>+30,1</td><td>+25,6 y ΔL −15,6, Δh +20°</td><td>+22,7</td></tr>
+      <tr><td>Azul saturado</td><td>+22,7</td><td>+26,2</td><td>+32,3</td><td>+41,0</td></tr>
+      <tr><td>Amarillos</td><td>+10,6</td><td>+18,9</td><td>+30,8</td><td>+6,6</td></tr>
+      <tr><td>Piel clara</td><td>croma casi intacto, Δh +11°</td><td>Δh +16°</td><td>Δh +13°</td><td>+10 C*, Δh +12° hacia naranja</td></tr>
+      <tr><td>Sombras profundas</td><td>cálidas, Δu′ +0,036 a −5 EV</td><td>cálidas, Δu′ +0,038</td><td>neutras, Δu′ &lt; 0,005</td><td>según la copia</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="scroll" data-lang="en">
+  <table>
+    <thead><tr><th></th><th>k25</th><th>k64</th><th>velvia50</th><th>pro400h (normal print)</th></tr></thead>
+    <tbody>
+      <tr><td>Mean chroma added</td><td>+5.0</td><td>+10.8</td><td>+13.5</td><td>+16.9</td></tr>
+      <tr><td>Greens</td><td>+9.5</td><td>+30.1</td><td>+25.6, with ΔL −15.6, Δh +20°</td><td>+22.7</td></tr>
+      <tr><td>Saturated blue</td><td>+22.7</td><td>+26.2</td><td>+32.3</td><td>+41.0</td></tr>
+      <tr><td>Yellows</td><td>+10.6</td><td>+18.9</td><td>+30.8</td><td>+6.6</td></tr>
+      <tr><td>Light skin</td><td>chroma nearly untouched, Δh +11°</td><td>Δh +16°</td><td>Δh +13°</td><td>+10 C*, Δh +12° towards orange</td></tr>
+      <tr><td>Deep shadows</td><td>warm, Δu′ +0.036 at −5 EV</td><td>warm, Δu′ +0.038</td><td>neutral, Δu′ &lt; 0.005</td><td>depends on the print</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3 data-lang="es">Lectura corta</h3>
+  <h3 data-lang="en">The short reading</h3>
+
+  <p data-lang="es"><b>Los dos Kodachrome comparten firma de familia.</b> Capa roja por encima de las otras en toda la escala y sombras que caen a cálido. Los picos de densidad de colorante salen casi idénticos en las dos digitalizaciones —0,76 / 1,05 / 1,25 frente a 0,77 / 1,06 / 1,28— porque el K-14 usa los mismos acopladores en ambos materiales. El 25 es la versión contenida: gamma ~1,5 frente a ~2,0, la paleta callada de Ghirri. El 64 es más gráfico.</p>
+  <p data-lang="en"><b>The two Kodachromes share a family signature.</b> The red layer sits above the others across the whole scale and the shadows fall warm. The dye density peaks come out almost identical in the two digitisations — 0.76 / 1.05 / 1.25 against 0.77 / 1.06 / 1.28 — because K-14 uses the same dye couplers in both materials. The 25 is the restrained version: gamma about 1.5 against about 2.0, the quiet palette of Ghirri. The 64 is the more graphic of the two.</p>
+
+  <p data-lang="es"><b>Velvia va aparte.</b> Sus tres capas están apareadas por diseño, de modo que los neutros quedan clavados hasta el fondo de la escala (Δu′ &lt; 0,005) y el carácter se pone entero en el croma y en unos verdes oscurecidos y girados a esmeralda: +25,6 de croma con ΔL −15,6 y Δh +20° es exactamente eso, un verde que se vuelve más intenso y más oscuro a la vez.</p>
+  <p data-lang="en"><b>Velvia 50 stands apart.</b> Its three layers are paired by design, so the neutrals stay locked all the way down the scale (Δu′ &lt; 0.005) and the character is placed entirely in the chroma and in greens that are darkened and swung towards emerald: +25.6 of chroma with ΔL −15.6 and Δh +20° is precisely that, a green that becomes more intense and darker at once.</p>
+
+  <p data-lang="es"><b>El sistema negativo más papel es el más saturado de todos en copia estándar</b>, con la piel cálida típica del Endura, y es el único con dos mandos de exposición. Merece su propia sección.</p>
+  <p data-lang="en"><b>The negative-plus-paper system is the most saturated of them all in a standard print</b>, with the warm skin typical of Endura Premier, and it is the only one with two exposure controls. It deserves its own section.</p>
+</section>
+
+<section id="s7">
+  <h2 data-lang="es"><span class="n">07</span>El caso pro400h: dos etapas, dos mandos</h2>
+  <h2 data-lang="en"><span class="n">07</span>The pro400h case: two stages, two controls</h2>
+
+  <p data-lang="es">La cadena es física de punta a punta, sin ningún atajo pictórico entre el negativo y la copia:</p>
+  <p data-lang="en">The chain is physical from end to end, with no pictorial shortcut between negative and print:</p>
+
+  <div class="eq" data-lang="es">XYZ de escena
+  → exposición de las capas del negativo <span class="c">(sensibilidades del AF3-176E bajo D55)</span>
+  → curvas características Status M <span class="c">(gamma 0,51; máscara naranja en los Dmin 0,95 / 0,69 / 0,17)</span>
+  → el papel se expone a través del negativo: <b>logE = PBAL − D<sub>Status M</sub></b>
+  → curvas del papel Status A <span class="c">(gamma ~2,9)</span>
+  → inversión a colorantes del papel
+  → reflectancia espectral
+  → XYZ bajo D50 relativo al blanco del papel</div>
+  <div class="eq" data-lang="en">Scene XYZ
+  → exposure of the negative layers <span class="c">(AF3-176E sensitivities under D55)</span>
+  → Status M characteristic curves <span class="c">(gamma 0.51; orange mask in the Dmin values 0.95 / 0.69 / 0.17)</span>
+  → the paper is exposed through the negative: <b>logE = PBAL − D<sub>Status M</sub></b>
+  → Status A paper curves <span class="c">(gamma about 2.9)</span>
+  → inversion into paper dyes
+  → spectral reflectance
+  → XYZ under D50 relative to the paper white</div>
+
+  <p data-lang="es"><b>PBAL</b> es el filtrado YMC de la ampliadora, y no se fija a mano: se resuelve por Newton en cada exposición para que el gris del 18 % imprima neutro en L* = 47. Eso es exactamente lo que hace un minilab o un escáner fotograma a fotograma, y tiene una consecuencia verificada en el modelo: con el gris reequilibrado, <b>sobreexponer el negativo +1,5 pasos apenas mueve la escala tonal</b>. La latitud del C-41 no está programada en ninguna parte; emerge de resolver el balance.</p>
+  <p data-lang="en"><b>PBAL</b> is the YMC filtration of the enlarger, and it is not set by hand: it is solved by Newton's method at every exposure so that the 18 % grey prints neutral at L* = 47. That is exactly what a minilab or a frame-by-frame scanner does, and it has a consequence verified in the model: with the grey rebalanced, <b>overexposing the negative by +1.5 stops barely moves the tonal scale</b>. The latitude of C-41 is programmed nowhere; it emerges from solving the balance.</p>
+
+  <h3 data-lang="es">Los dos mandos</h3>
+  <h3 data-lang="en">The two controls</h3>
+  <ul class="clean" data-lang="es">
+    <li><code>--ev</code> expone el <b>negativo</b>. Subirlo llena las sombras sobre la parte recta de la curva y comprime las altas luces contra el hombro del papel.</li>
+    <li><code>--copia</code> aclara la <b>copia</b> respecto al balance de laboratorio, en pasos. Es el mando del positivador, no el de la cámara.</li>
+  </ul>
+  <ul class="clean" data-lang="en">
+    <li><code>--ev</code> exposes the <b>negative</b>. Raising it fills the shadows onto the straight-line portion of the curve and compresses the highlights against the shoulder of the paper.</li>
+    <li><code>--copia</code> lightens the <b>print</b> with respect to the laboratory balance, in stops. It is the printer's control, not the camera's.</li>
+  </ul>
+
+  <h3 data-lang="es">El ajuste Kawauchi</h3>
+  <h3 data-lang="en">The Kawauchi setting</h3>
+  <p data-lang="es">El look asociado a Rinko Kawauchi es la combinación de ambos mandos: negativo generosamente expuesto y copia aclarada.</p>
+  <p data-lang="en">The look associated with Rinko Kawauchi is the combination of both controls: a generously exposed negative and a lightened print.</p>
+
+  <pre class="cmd" data-lang="es">python3 peliculas.py <span class="o">--generico</span> <span class="o">--pelicula</span> pro400h <span class="o">--ev</span> 1.5 <span class="o">--copia</span> 0.55</pre>
+  <pre class="cmd" data-lang="en">python3 peliculas.py <span class="o">--generico</span> <span class="o">--pelicula</span> pro400h <span class="o">--ev</span> 1.5 <span class="o">--copia</span> 0.55</pre>
+
+  <p data-lang="es">Resultado medido: gris medio impreso en L* 76, sombras levantadas a 45 con un tinte frío de menta (b* −5 en los medios bajos), piel lavada (+28 L*, croma negativo) y cielos girados hacia cian.</p>
+  <p data-lang="en">Measured result: middle grey printed at L* 76, shadows lifted to 45 with a cool mint cast (b* −5 in the lower midtones), washed-out skin (+28 L*, negative chroma) and skies swung towards cyan.</p>
+
+  <div class="note" data-lang="es">Con <code>--ev 0 --copia 0</code> se obtiene la copia RA-4 recta, sin interpretación: es un resultado valioso por sí mismo y, seguramente, el punto de partida correcto antes de tocar nada.</div>
+  <div class="note" data-lang="en">With <code>--ev 0 --copia 0</code> one obtains the straight RA-4 print, uninterpreted: a valuable result in its own right and, most likely, the correct point of departure before touching anything.</div>
+</section>
+
+<section id="s8">
+  <h2 data-lang="es"><span class="n">08</span>El caso trix: positivado y virado</h2>
+  <h2 data-lang="en"><span class="n">08</span>The trix case: printing and toning</h2>
+
+  <p data-lang="es">Misma arquitectura de dos etapas que el <code>pro400h</code>, pero monocanal:</p>
+  <p data-lang="en">The same two-stage architecture as <code>pro400h</code>, but single-channel:</p>
+
+  <div class="eq" data-lang="es">exposición pancromática <span class="c">(vector XYZ→H ajustado con la sensibilidad del F-4017, R² = 0,998, pesos [0,24 · 0,31 · 0,51])</span>
+  → curva del negativo en D-76 a 8 minutos <span class="c">(velo 0,32; gamma 0,62)</span>
+  → papel Multigrade IV RC a grado 2 <span class="c">(copia autoexpuesta para gris del 18 % en densidad 0,74)</span></div>
+  <div class="eq" data-lang="en">panchromatic exposure <span class="c">(XYZ→H vector fitted to the F-4017 sensitivity, R² = 0.998, weights [0.24 · 0.31 · 0.51])</span>
+  → negative curve in D-76 at 8 minutes <span class="c">(fog 0.32; gamma 0.62)</span>
+  → Multigrade IV RC paper at grade 2 <span class="c">(print auto-exposed for 18 % grey at density 0.74)</span></div>
+
+  <p data-lang="es">La mitad del peso está en Z: ese es el sesgo azul del pancromático clásico, el que aclara los cielos y oscurece los rojos, y la razón histórica del filtro amarillo. No se ha impuesto; sale del ajuste sobre la sensibilidad publicada.</p>
+  <p data-lang="en">Half the weight sits on Z: that is the blue bias of the classic panchromatic emulsion, the one that lightens skies and darkens reds, and the historical reason for the yellow filter. It has not been imposed; it comes out of the fit to the published sensitivity.</p>
+
+  <p data-lang="es"><code>--copia</code> aclara u oscurece desde esa densidad de referencia de 0,74.</p>
+  <p data-lang="en"><code>--copia</code> lightens or darkens from that reference density of 0.74.</p>
+
+  <h3 data-lang="es">El virado</h3>
+  <h3 data-lang="en">Toning</h3>
+  <p data-lang="es">El virado es la <b>única parte parametrizada</b> de todo el sistema, y se declara como tal. La densidad espectral de la copia se modela como</p>
+  <p data-lang="en">Toning is the <b>only parameterised part</b> of the whole system, and it is declared as such. The spectral density of the print is modelled as</p>
+
+  <div class="formula">D(λ) = D<sub>min</sub> + (D − D<sub>min</sub>) · f(λ)</div>
+
+  <p data-lang="es">con f construida sobre dos bases suaves y coeficientes resueltos para objetivos colorimétricos declarados en el parche de D = 1,0: sepia a* +5, b* +18; selenio +2,5 y +1,5; cálido +1,5 y +6; frío −1 y −3. La densidad visual se conserva por construcción y el croma escala con la densidad, como en un virado químico real: las luces apenas se tiñen y los medios oscuros llevan el color.</p>
+  <p data-lang="en">with f built on two smooth bases and coefficients solved for colorimetric targets declared at the D = 1.0 patch: sepia a* +5, b* +18; selenium +2.5 and +1.5; warm +1.5 and +6; cool −1 and −3. Visual density is preserved by construction and chroma scales with density, as in a real chemical toning: the highlights are barely tinted and the dark midtones carry the colour.</p>
+
+  <pre class="cmd" data-lang="es">python3 peliculas.py <span class="o">--generico</span> <span class="o">--pelicula</span> trix <span class="o">--virado</span> sepia</pre>
+  <pre class="cmd" data-lang="en">python3 peliculas.py <span class="o">--generico</span> <span class="o">--pelicula</span> trix <span class="o">--virado</span> sepia</pre>
+</section>
+
+<section id="s9">
+  <h2 data-lang="es"><span class="n">09</span>El grano: por qué va aparte</h2>
+  <h2 data-lang="en"><span class="n">09</span>Grain: why it lives outside the profile</h2>
+
+  <p data-lang="es">Un perfil ICC es una transformación <b>por píxel</b>: a cada terna de entrada le corresponde una terna de salida, siempre la misma, sin mirar a los vecinos. El grano es un fenómeno <b>espacial</b> —tiene tamaño, tiene correlación entre capas, cambia con la escala de observación— y por tanto no cabe en un ICC. No es una limitación de la implementación, es la definición del formato.</p>
+  <p data-lang="en">An ICC profile is a <b>per-pixel</b> transform: every input triplet maps to one output triplet, always the same one, without looking at its neighbours. Grain is a <b>spatial</b> phenomenon — it has a size, it has correlation between layers, it changes with the scale of observation — and therefore it cannot fit inside an ICC. This is not a limitation of the implementation, it is the definition of the format.</p>
+
+  <p data-lang="es">Por eso hay un segundo programa, <a href="scripts/peliculas/grano.py"><code>grano.py</code></a>, que se aplica como paso posterior sobre la imagen ya exportada de Capture One. Requiere numpy y Pillow.</p>
+  <p data-lang="en">Hence a second program, <a href="scripts/peliculas/grano.py"><code>grano.py</code></a>, applied as a subsequent step to the image already exported from Capture One. It requires numpy and Pillow.</p>
+
+  <pre class="cmd" data-lang="es"><span class="c"># 1. revelar en Capture One con el perfil generado y exportar</span>
+<span class="c"># 2. añadir el grano</span>
+python3 grano.py exportada.jpg salida.jpg <span class="o">--pelicula</span> k64
+python3 grano.py exportada.jpg salida.jpg <span class="o">--pelicula</span> trix <span class="o">--intensidad</span> 1.2</pre>
+  <pre class="cmd" data-lang="en"><span class="c"># 1. develop in Capture One with the generated profile and export</span>
+<span class="c"># 2. add the grain</span>
+python3 grano.py exportada.jpg salida.jpg <span class="o">--pelicula</span> k64
+python3 grano.py exportada.jpg salida.jpg <span class="o">--pelicula</span> trix <span class="o">--intensidad</span> 1.2</pre>
+
+  <h3 data-lang="es">El algoritmo, paso a paso</h3>
+  <h3 data-lang="en">The algorithm, step by step</h3>
+
+  <ol class="steps" data-lang="es">
+    <li><b>Amplitud base, por la ley de Selwyn.</b> La granularidad rms difusa de la hoja técnica está medida con apertura de 48 µm a densidad 1,0. La desviación en otra apertura escala con la raíz del cociente de áreas, de modo que σ(D=1) = (rms/1000) · √(A₄₈ / A<sub>píxel</sub>), con el píxel equivalente calculado suponiendo que el lado largo de la imagen es un fotograma de 36 mm. Esto hace el resultado <b>invariante con la resolución</b>: a resolución completa del M11 (3,8 µm por píxel) el σ por píxel es alto, pero al reducir al tamaño de visionado la varianza promedia exactamente lo que promediaría la película. Mirar el grano al 100 % en pantalla equivale a mirar la diapositiva con lupa de 25 aumentos.</li>
+    <li><b>Dependencia con el tono.</b> No hay una ley única. <code>--pelicula</code> selecciona un perfil σ(densidad mostrada) precalculado sobre el eje neutro del modelo espectral de cada material y embebido en el script como tabla por canal.</li>
+    <li><b>Textura.</b> Tres campos gaussianos por capa con correlación parcial (<code>--correlacion</code>), tamaño de grano dado por filtrado gaussiano (<code>--grano-um</code>, con FWHM igual al diámetro característico) y varianza renormalizada tras el filtrado para no alterar la calibración del paso 1.</li>
+    <li><b>Separación luminancia / croma.</b> La rms de la hoja técnica es granularidad de densidad <b>visual</b>: mide la componente de luminancia de la fluctuación. El ruido de densidad se descompone por tanto en una componente de luminancia, que conserva íntegra la calibración, y una componente cromática, que existe porque las tres capas son emulsiones estadísticamente independientes pero se escala con su propia ganancia <code>--croma</code>.</li>
+    <li><b>Aplicación.</b> El ruido se suma en el dominio de densidad, canal a canal, D′ = D + n·σ(D), y se vuelve a sRGB. <code>--dmax-vis</code> fija la densidad máxima representable (2,6 por omisión).</li>
+  </ol>
+  <ol class="steps" data-lang="en">
+    <li><b>Base amplitude, by Selwyn's law.</b> The diffuse rms granularity in the datasheet is measured with a 48 µm aperture at density 1.0. The deviation at another aperture scales with the square root of the ratio of areas, so that σ(D=1) = (rms/1000) · √(A₄₈ / A<sub>pixel</sub>), with the equivalent pixel computed on the assumption that the long side of the image is a 36 mm frame. This makes the result <b>invariant with resolution</b>: at the full resolution of the M11 (3.8 µm per pixel) the per-pixel σ is high, but on reduction to viewing size the variance averages exactly what the film would have averaged. Looking at the grain at 100 % on screen is equivalent to looking at the transparency through a 25× loupe.</li>
+    <li><b>Dependence on tone.</b> There is no single law. <code>--pelicula</code> selects a σ(displayed density) profile precomputed along the neutral axis of the spectral model of each material and embedded in the script as a per-channel table.</li>
+    <li><b>Texture.</b> Three Gaussian fields per layer with partial correlation (<code>--correlacion</code>), grain size given by Gaussian filtering (<code>--grano-um</code>, with FWHM equal to the characteristic diameter) and variance renormalised after filtering so as not to disturb the calibration of step 1.</li>
+    <li><b>Luminance / chroma separation.</b> The datasheet rms is granularity of <b>visual</b> density: it measures the luminance component of the fluctuation. The density noise is therefore decomposed into a luminance component, which keeps the calibration intact, and a chromatic component, which exists because the three layers are statistically independent emulsions but is scaled by its own gain <code>--croma</code>.</li>
+    <li><b>Application.</b> The noise is added in the density domain, channel by channel, D′ = D + n·σ(D), and converted back to sRGB. <code>--dmax-vis</code> sets the maximum representable density (2.6 by default).</li>
+  </ol>
+
+  <h4 data-lang="es">Diapositivas frente a copias</h4>
+  <h4 data-lang="en">Reversal films against prints</h4>
+  <p data-lang="es">En las diapositivas (<code>k64</code>, <code>k25</code>, <code>velvia50</code>) la fluctuación por capa sigue la estadística binomial de cobertura de colorante, σ ∝ √(a·(1−a/a<sub>sat</sub>)): crece con la densidad, alcanza el máximo hacia D ≈ 1,5 y decae al saturar cerca de Dmax. El perfil del K64 va de 0,37 en las luces a 1,09 en el máximo y 0,91 en el negro profundo; Velvia decae menos porque su Dmax de 3,7 queda más lejos.</p>
+  <p data-lang="en">In reversal films (<code>k64</code>, <code>k25</code>, <code>velvia50</code>) the per-layer fluctuation follows the binomial statistics of dye coverage, σ ∝ √(a·(1−a/a<sub>sat</sub>)): it grows with density, peaks around D ≈ 1.5 and decays as it saturates near Dmax. The K64 profile runs from 0.37 in the highlights to 1.09 at the maximum and 0.91 in the deep black; Velvia 50 decays less because its Dmax of 3.7 lies further away.</p>
+  <p data-lang="es">En los sistemas de negativo más papel (<code>pro400h</code>, <code>trix</code>) el grano nace en el negativo, donde crece con la densidad, y llega a la copia <b>multiplicado por la pendiente local de la curva del papel</b>, que se anula en ambos extremos. El grano vive en los medios y desaparece en blancos y negros, como en una copia real. El perfil del Tri-X impreso: 0,14 junto al blanco del papel, máximo de 1,8 en los medios oscuros, cero en el negro del hombro. Medido sobre imagen frente a la ley genérica, el σ en luces baja de 4,1 a 2,7 y en medios oscuros sube de 4,4 a 7,6.</p>
+  <p data-lang="en">In negative-plus-paper systems (<code>pro400h</code>, <code>trix</code>) the grain is born in the negative, where it grows with density, and reaches the print <b>multiplied by the local slope of the paper curve</b>, which vanishes at both ends. The grain lives in the midtones and disappears in the whites and the blacks, as in a real print. The profile of printed Tri-X: 0.14 next to the paper white, a maximum of 1.8 in the dark midtones, zero in the black of the shoulder. Measured on an image against the generic law, σ in the highlights falls from 4.1 to 2.7 and in the dark midtones rises from 4.4 to 7.6.</p>
+  <p data-lang="es">Sin <code>--pelicula</code> se aplica la ley genérica σ ∝ √D, útil para materiales no modelados: para Kodachrome 200, por ejemplo, <code>--rms 16</code>.</p>
+  <p data-lang="en">Without <code>--pelicula</code> the generic law σ ∝ √D applies, useful for materials that are not modelled: for Kodachrome 200, for instance, <code>--rms 16</code>.</p>
+
+  <h4 data-lang="es">Por qué el croma va a 0,45</h4>
+  <h4 data-lang="en">Why chroma is set to 0.45</h4>
+  <p data-lang="es">Con independencia total entre capas el ruido cromático superaría al de luminancia (relación 1,27), y el ojo lee eso como ruido digital, no como grano. Con <code>--croma 0.45</code> queda subordinado (0,76), como en un escaneo real. La separación está verificada: al variar <code>--croma</code>, el σ de luminancia no cambia —0,84 en el degradado de prueba para 1,0, 0,45 y 0,0— y solo se mueve el cromático, 1,07, 0,64 y 0,37. <code>--croma 0</code> da grano acromático; <code>--croma 1</code>, el aspecto de un escaneo de tambor a 5000 ppp mirado de cerca.</p>
+  <p data-lang="en">Under full independence between layers the chromatic noise would exceed the luminance noise (a ratio of 1.27), and the eye reads that as digital noise, not as grain. With <code>--croma 0.45</code> it stays subordinate (0.76), as in a real scan. The separation is verified: varying <code>--croma</code> leaves the luminance σ unchanged — 0.84 on the test gradient for 1.0, 0.45 and 0.0 — and only the chromatic one moves, 1.07, 0.64 and 0.37. <code>--croma 0</code> gives achromatic grain; <code>--croma 1</code>, the look of a 5000 ppi drum scan examined closely.</p>
+  <p data-lang="es">En las copias viradas del Tri-X el grano sale coloreado por la vía correcta: la fluctuación es de una sola imagen de plata y el virado la mapea a densidad espectral, así que el grano de un sepia es pardo <em>por construcción</em> —σ de croma 0,002 en la copia neutra, 4,0 en la sepia, con el mismo campo de ruido.</p>
+  <p data-lang="en">In toned Tri-X prints the grain comes out coloured by the correct route: the fluctuation belongs to a single silver image and the toning maps it into spectral density, so the grain of a sepia print is brown <em>by construction</em> — chroma σ of 0.002 in the neutral print, 4.0 in the sepia one, with the same noise field.</p>
+
+  <h4 data-lang="es">Preajustes de grano</h4>
+  <h4 data-lang="en">Grain presets</h4>
+  <div class="scroll" data-lang="es">
+  <table>
+    <thead><tr><th>--pelicula</th><th class="num">rms</th><th class="num">grano (µm)</th><th class="num">correlación</th><th class="num">croma</th></tr></thead>
+    <tbody>
+      <tr><td>k64</td><td class="num">10</td><td class="num">11</td><td class="num">0,35</td><td class="num">0,45</td></tr>
+      <tr><td>k25</td><td class="num">9</td><td class="num">10</td><td class="num">0,35</td><td class="num">0,45</td></tr>
+      <tr><td>velvia50</td><td class="num">9</td><td class="num">10</td><td class="num">0,35</td><td class="num">0,45</td></tr>
+      <tr><td>pro400h</td><td class="num">4</td><td class="num">12</td><td class="num">0,35</td><td class="num">0,45</td></tr>
+      <tr><td>trix</td><td class="num">17</td><td class="num">14</td><td class="num">1,0</td><td class="num">1,0</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="scroll" data-lang="en">
+  <table>
+    <thead><tr><th>--pelicula</th><th class="num">rms</th><th class="num">grain (µm)</th><th class="num">correlation</th><th class="num">chroma</th></tr></thead>
+    <tbody>
+      <tr><td>k64</td><td class="num">10</td><td class="num">11</td><td class="num">0.35</td><td class="num">0.45</td></tr>
+      <tr><td>k25</td><td class="num">9</td><td class="num">10</td><td class="num">0.35</td><td class="num">0.45</td></tr>
+      <tr><td>velvia50</td><td class="num">9</td><td class="num">10</td><td class="num">0.35</td><td class="num">0.45</td></tr>
+      <tr><td>pro400h</td><td class="num">4</td><td class="num">12</td><td class="num">0.35</td><td class="num">0.45</td></tr>
+      <tr><td>trix</td><td class="num">17</td><td class="num">14</td><td class="num">1.0</td><td class="num">1.0</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p data-lang="es">La correlación es 0,35 en color y 1,0 en <code>trix</code>, porque en el blanco y negro solo hay una imagen de plata. Todo es anulable por línea de órdenes: <code>--rms</code>, <code>--grano-um</code>, <code>--correlacion</code>, <code>--croma</code>, <code>--intensidad</code>, <code>--semilla</code>, <code>--dmax-vis</code>.</p>
+  <p data-lang="en">Correlation is 0.35 for colour and 1.0 for <code>trix</code>, because in black and white there is only one silver image. Everything can be overridden from the command line: <code>--rms</code>, <code>--grano-um</code>, <code>--correlacion</code>, <code>--croma</code>, <code>--intensidad</code>, <code>--semilla</code>, <code>--dmax-vis</code>.</p>
+
+  <div class="note" data-lang="es">La alternativa rápida, sin salir de Capture One, es su herramienta Film Grain. No modela la dependencia con el tono ni la separación luminancia/croma, que son justamente las dos cosas que distinguen el grano de una copia del ruido de un sensor.</div>
+  <div class="note" data-lang="en">The quick alternative, without leaving Capture One, is its Film Grain tool. It models neither the dependence on tone nor the luminance/chroma separation, which are precisely the two things that distinguish the grain of a print from the noise of a sensor.</div>
+</section>
+
+<section id="s10">
+  <h2 data-lang="es"><span class="n">10</span>Instalación y uso en Capture One</h2>
+  <h2 data-lang="en"><span class="n">10</span>Installing and using in Capture One</h2>
+
+  <p data-lang="es"><code>--instalar</code> hace dos cosas: copia el ICC generado a <code>~/Library/ColorSync/Profiles/</code> y crea el estilo correspondiente en <code>~/Library/Application Support/Capture One/Styles/</code>. Hay que <b>reiniciar Capture One</b> para que los reconozca; no basta con crear un catálogo nuevo.</p>
+  <p data-lang="en"><code>--instalar</code> does two things: it copies the generated ICC into <code>~/Library/ColorSync/Profiles/</code> and creates the corresponding style in <code>~/Library/Application Support/Capture One/Styles/</code>. Capture One must be <b>restarted</b> for it to pick them up; creating a new catalogue is not enough.</p>
+
+  <p data-lang="es">El estilo es un XML mínimo que se limita a apuntar al perfil por su nombre de fichero, como se ve en <a href="scripts/peliculas/Kodachrome64_K14.costyle"><code>Kodachrome64_K14.costyle</code></a>:</p>
+  <p data-lang="en">The style is a minimal XML file that does no more than point at the profile by its file name, as can be seen in <a href="scripts/peliculas/Kodachrome64_K14.costyle"><code>Kodachrome64_K14.costyle</code></a>:</p>
+
+  <pre class="cmd" data-lang="es">&lt;SL Engine="1200"&gt;
+    &lt;E K="Name" V="Kodachrome 64 K-14" /&gt;
+    &lt;E K="ICCProfile" V="Kodachrome64_K14.icc" /&gt;
+    &lt;E K="UUID" V="7C0DA3E1-6B54-4F2A-9E31-A1B2C3D4E5F6" /&gt;
+&lt;/SL&gt;</pre>
+  <pre class="cmd" data-lang="en">&lt;SL Engine="1200"&gt;
+    &lt;E K="Name" V="Kodachrome 64 K-14" /&gt;
+    &lt;E K="ICCProfile" V="Kodachrome64_K14.icc" /&gt;
+    &lt;E K="UUID" V="7C0DA3E1-6B54-4F2A-9E31-A1B2C3D4E5F6" /&gt;
+&lt;/SL&gt;</pre>
+
+  <h3 data-lang="es">En cada imagen, dos ajustes imprescindibles</h3>
+  <h3 data-lang="en">Two indispensable settings on every image</h3>
+  <ul class="clean" data-lang="es">
+    <li><b>Base Characteristics &gt; ICC Profile</b> → el perfil generado.</li>
+    <li><b>Base Characteristics &gt; Curve</b> → <b>Linear Response</b>.</li>
+  </ul>
+  <ul class="clean" data-lang="en">
+    <li><b>Base Characteristics &gt; ICC Profile</b> → the generated profile.</li>
+    <li><b>Base Characteristics &gt; Curve</b> → <b>Linear Response</b>.</li>
+  </ul>
+
+  <div class="stop" data-lang="es">
+    <p class="h">Curve &gt; Linear Response · obligatorio</p>
+    <p>El modelo <b>ya incorpora la curva de tono del material</b>. Si se deja activa la curva guía por omisión de Capture One, ambas curvas se suman y el contraste sale <b>duplicado</b>: negros tapados, luces recortadas y un croma exagerado que no pertenece a ninguna película.</p>
+    <p>Es <b>el error más visible que se puede cometer con estos perfiles</b>. Si el resultado parece demasiado duro, lo primero que hay que comprobar no es el <code>--gain</code> ni el <code>--ev</code>: es la curva.</p>
+  </div>
+  <div class="stop" data-lang="en">
+    <p class="h">Curve &gt; Linear Response · mandatory</p>
+    <p>The model <b>already contains the tone curve of the material</b>. If Capture One's default guide curve is left active, the two curves are compounded and contrast comes out <b>doubled</b>: blocked blacks, clipped highlights and an exaggerated chroma that belongs to no film at all.</p>
+    <p>This is <b>the most visible mistake that can be made with these profiles</b>. If the result looks too harsh, the first thing to check is neither <code>--gain</code> nor <code>--ev</code>: it is the curve.</p>
+  </div>
+
+  <p data-lang="es">A partir de ahí, el resto de herramientas de Capture One siguen disponibles y se comportan como corresponde: el perfil ocupa el lugar del perfil de entrada, no el de un ajuste de revelado.</p>
+  <p data-lang="en">From that point on, the rest of Capture One's tools remain available and behave as they should: the profile occupies the place of the input profile, not that of a development adjustment.</p>
+</section>
+
+<section id="s11">
+  <h2 data-lang="es"><span class="n">11</span>Método, validación y límites conocidos</h2>
+  <h2 data-lang="en"><span class="n">11</span>Method, validation and known limits</h2>
+
+  <h3 data-lang="es">Digitalización de las hojas técnicas</h3>
+  <h3 data-lang="en">Digitising the datasheets</h3>
+  <p data-lang="es">Cada gráfica se rasteriza a 400 ppp y se digitaliza por etiquetado de componentes conexas, con enmascarado del texto por cajas medidas y seguimiento conjunto de las curvas con memoria de pendiente y asignación excluyente; las permutaciones de cola en los cruces se detectan por identidad física. Donde el documento lo permite hay controles de cierre: en K64, |N − (Y+M+C)| máximo 0,016 y densidad visual del neutro 1,001 frente al 1,000 nominal; en K25, cierre con error máximo 0,036.</p>
+  <p data-lang="en">Each graph is rasterised at 400 ppi and digitised by connected-component labelling, with the text masked out by measured boxes and joint tracking of the curves using slope memory and exclusive assignment; tail permutations at crossings are resolved by physical identity. Where the document allows it there are closure checks: in K64, |N − (Y+M+C)| at most 0.016 and a visual neutral density of 1.001 against the nominal 1.000; in K25, closure with a maximum error of 0.036.</p>
+
+  <h3 data-lang="es">Cadena de diapositiva</h3>
+  <h3 data-lang="en">Reversal film chain</h3>
+  <p data-lang="es">Para <code>k64</code>, <code>k25</code> y <code>velvia50</code>: matriz 3×3 XYZ→exposición de capa ajustada sobre 924 reflectancias (los 24 parches del ColorChecker con peso 12, más 900 sintéticas) → curvas características → inversión densitométrica Status A con responsividades gaussianas en 640, 540 y 438 nm y jacobiano con términos cruzados → balance de grises resuelto para el neutro de D = 1,0 → colorantes → transmitancia → proyector de 3200 K → adaptación de Bradford. El blanco difuso se coloca donde la curva verde está 0,105 por encima de Dmin.</p>
+  <p data-lang="en">For <code>k64</code>, <code>k25</code> and <code>velvia50</code>: a 3×3 XYZ→layer-exposure matrix fitted over 924 reflectances (the 24 colour checker patches at weight 12, plus 900 synthetic ones) → characteristic curves → Status A densitometric inversion with Gaussian responsivities at 640, 540 and 438 nm and a Jacobian carrying cross terms → grey balance solved for the D = 1.0 neutral → dyes → transmittance → 3200 K projector → Bradford adaptation. The diffuse white is placed where the green curve stands 0.105 above Dmin.</p>
+
+  <h3 data-lang="es">Validación real en Capture One</h3>
+  <h3 data-lang="en">Real validation in Capture One</h3>
+  <p data-lang="es">K64 sobre M11 con carta Calibrite: la predicción del modelo frente al render real del ICC da <b>ΔE medio 2,9 en 23 parches</b>, 18 de ellos por debajo de 2,5. La escala neutra confirma que no hay desajuste de exposición dependiente del tono: el rango entre el blanco y el gris oscuro es de 0,08 EV, ruido de medida.</p>
+  <p data-lang="en">K64 on the M11 with a Calibrite chart: the model's prediction against the real render of the ICC gives a <b>mean ΔE of 2.9 over 23 patches</b>, 18 of them below 2.5. The neutral scale confirms that there is no tone-dependent exposure mismatch: the range between white and dark grey is 0.08 EV, measurement noise.</p>
+
+  <p data-lang="es">Los ICC generados son <b>v2, clase de entrada</b> (<code>scnr</code>), con CLUT de 33³ o 45³, indexado gamma 1,8 y PCS Lab. Verificados con Little CMS (<code>transicc</code>): la diferencia entre la tabla y el modelo directo es ΔE2000 medio 0,022, máximo 0,31 con rejilla de 33.</p>
+  <p data-lang="en">The generated ICCs are <b>v2, input class</b> (<code>scnr</code>), with a 33³ or 45³ CLUT, gamma 1.8 indexing and a Lab PCS. Verified with Little CMS (<code>transicc</code>): the difference between the table and the direct model is a mean ΔE2000 of 0.022, at most 0.31 on the 33 grid.</p>
+
+  <h3 data-lang="es">Limitaciones conocidas, en orden de importancia</h3>
+  <h3 data-lang="en">Known limitations, in order of importance</h3>
+  <ol class="steps" data-lang="es">
+    <li><b>Amarillos, naranjas y cianes muy saturados en los Kodachrome</b> se desvían más: ΔE de 7 a 11 en los cuatro parches monocolorante del ColorChecker. La inversión lineal Status A se estira lejos del punto de linealización. Se evaluó un solver de Newton exacto y se descartó: mejora esos cuatro parches pero degrada la media global de 2,9 a 4,9, porque fuerza consistencia exacta con unas responsividades Status A que son aproximadas.</li>
+    <li><b>La capa roja ajusta peor</b> que las demás en todos los materiales (R² de 0,96 a 0,98 frente a 0,998 y mejores). No es un defecto del método sino la colorimetría real de estas películas: sus sensibilidades rojas entre 640 y 650 nm no son combinación lineal de las funciones del observador. Cabe esperar desviaciones mayores en rojos profundos, sobre todo en Velvia 50.</li>
+    <li><b>En <code>pro400h</code>, la cuarta capa sensible al cian del negativo no se modela</b>; su función es corregir fluorescentes y bajo luz de día su aporte es menor. El puente negativo→papel usa la equivalencia Status M ≈ densidad de impresión, que es la finalidad de diseño de Status M, en lugar de los espectros de colorante del negativo, que Fujifilm no publica.</li>
+    <li><b>Las sensibilidades espectrales de las hojas técnicas empiezan dibujadas en su pico o cerca de él</b>, sin flanco izquierdo en el azul; el tratamiento es idéntico en todos los materiales.</li>
+    <li><b>En <code>trix</code>, el pie del papel por debajo de D = 0,55 no es separable en la gráfica</b> —las cinco curvas emparejadas se funden— y se completa con la aproximación exponencial clásica hacia Dmin = 0,06, con la constante resuelta para reproducir exactamente el ISO(R) = 110 que publica Ilford para el grado 2. La curva del negativo y el resto del papel son digitalización directa. El virado es una parametrización colorimétrica declarada, no un dato de fabricante.</li>
+    <li><b>El perfil genérico supone primarios Rec.709 a la entrada.</b> Para máxima fidelidad, componer sobre el perfil de cámara.</li>
+  </ol>
+  <ol class="steps" data-lang="en">
+    <li><b>Highly saturated yellows, oranges and cyans in the Kodachromes</b> deviate more: ΔE from 7 to 11 across the four single-dye patches of the colour checker. The linear Status A inversion is stretched far from its linearisation point. An exact Newton solver was evaluated and discarded: it improves those four patches but degrades the overall mean from 2.9 to 4.9, because it forces exact consistency with Status A responsivities that are themselves approximate.</li>
+    <li><b>The red layer fits worse</b> than the others in every material (R² from 0.96 to 0.98 against 0.998 and better). This is not a defect of the method but the real colorimetry of these films: their red sensitivities between 640 and 650 nm are not a linear combination of the observer functions. Larger deviations are to be expected in deep reds, above all in Velvia 50.</li>
+    <li><b>In <code>pro400h</code>, the fourth cyan-sensitive layer of the negative is not modelled</b>; its purpose is to correct for fluorescent lighting and under daylight its contribution is minor. The negative→paper bridge uses the equivalence Status M ≈ printing density, which is the design purpose of Status M, rather than the dye spectra of the negative, which Fujifilm does not publish.</li>
+    <li><b>The spectral sensitivities in the datasheets begin drawn at or near their peak</b>, with no left-hand flank in the blue; the treatment is identical across all materials.</li>
+    <li><b>In <code>trix</code>, the toe of the paper below D = 0.55 is not separable on the graph</b> — the five paired curves merge — and is completed with the classical exponential approximation towards Dmin = 0.06, the constant solved so as to reproduce exactly the ISO(R) = 110 that Ilford publishes for grade 2. The negative curve and the rest of the paper are direct digitisation. The toning is a declared colorimetric parameterisation, not a manufacturer's datum.</li>
+    <li><b>The generic profile assumes Rec.709 primaries at the input.</b> For maximum fidelity, compose over the camera profile.</li>
+  </ol>
+</section>
+
+<section id="s12">
+  <h2 data-lang="es"><span class="n">12</span>Los ficheros</h2>
+  <h2 data-lang="en"><span class="n">12</span>The files</h2>
+
+  <div class="scroll" data-lang="es">
+  <table>
+    <thead><tr><th>Fichero</th><th>Contenido</th></tr></thead>
+    <tbody>
+      <tr><td><a href="scripts/peliculas/peliculas.py">scripts/peliculas/peliculas.py</a></td><td>el entregable principal: los cinco modelos, el lector y el escritor de ICC y la línea de órdenes completa. Solo numpy</td></tr>
+      <tr><td><a href="scripts/peliculas/grano.py">scripts/peliculas/grano.py</a></td><td>grano físico independiente, con los perfiles σ(densidad) embebidos. numpy y Pillow</td></tr>
+      <tr><td><a href="scripts/peliculas/LEEME.md">scripts/peliculas/LEEME.md</a></td><td>la fuente original de este manual, con el inventario completo de material de verificación</td></tr>
+      <tr><td><a href="scripts/peliculas/Kodachrome64_K14.costyle">scripts/peliculas/Kodachrome64_K14.costyle</a></td><td>ejemplo de estilo de Capture One, el que crea <code>--instalar</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="scroll" data-lang="en">
+  <table>
+    <thead><tr><th>File</th><th>Contents</th></tr></thead>
+    <tbody>
+      <tr><td><a href="scripts/peliculas/peliculas.py">scripts/peliculas/peliculas.py</a></td><td>the main deliverable: the five models, the ICC reader and writer, and the full command line. numpy only</td></tr>
+      <tr><td><a href="scripts/peliculas/grano.py">scripts/peliculas/grano.py</a></td><td>standalone physical grain, with the σ(density) profiles embedded. numpy and Pillow</td></tr>
+      <tr><td><a href="scripts/peliculas/LEEME.md">scripts/peliculas/LEEME.md</a></td><td>the original source of this manual, with the complete inventory of verification material</td></tr>
+      <tr><td><a href="scripts/peliculas/Kodachrome64_K14.costyle">scripts/peliculas/Kodachrome64_K14.costyle</a></td><td>an example Capture One style, the one that <code>--instalar</code> creates</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p data-lang="es">El LEEME original documenta además el material gráfico de verificación —las digitalizaciones de curvas, los pares comparativos y los recortes de grano al 100 %— y el paquete modular antiguo <code>Kodachrome64/</code>, que incluye las LUT <code>.cube</code> y un LEEME propio con el detalle numérico completo del E-55.</p>
+  <p data-lang="en">The original LEEME additionally documents the graphical verification material — the curve digitisations, the comparative pairs and the 100 % grain crops — and the older modular package <code>Kodachrome64/</code>, which includes the <code>.cube</code> LUTs and a LEEME of its own with the full numerical detail of the E-55.</p>
+</section>
+
+<footer>
+  <span data-lang="es">Manual de <code>peliculas.py</code> · los modelos proceden de la respuesta física publicada por el fabricante, no de ajuste visual · las cifras de carácter están medidas sobre ColorChecker frente a la reproducción colorimétrica exacta · las limitaciones de la sección 11 forman parte del resultado y conviene leerlas antes de atribuir una desviación al material.</span>
+  <span data-lang="en">Manual for <code>peliculas.py</code> · the models derive from the physical response published by the manufacturer, not from visual adjustment · the character figures are measured on a colour checker against the exact colorimetric reproduction · the limitations in section 11 are part of the result and are worth reading before ascribing a deviation to the material.</span>
+</footer>
+</div>
+
+<script>
+"use strict";
+/* Al cambiar de idioma, refleja la elección en la dirección para poder compartirla.
+   Language change is mirrored into the address bar so the choice can be shared. */
+window.onLangChange=function(l){
+  try{
+    var u=new URL(location.href);
+    u.searchParams.set("lang",l);
+    history.replaceState(null,"",u.toString());
+  }catch(e){}
+};
+</script>
+
+<script>
+"use strict";
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{
+      title:"Manual · Películas clásicas en perfiles ICC · Capture One",
+      desc:"Manual de peliculas.py: cinco materiales fotográficos clásicos modelados por integración espectral a 1 nm y escritos como perfiles ICC de entrada para Capture One y Leica M11."
+    },
+    en:{
+      title:"Manual · Classic films as ICC profiles · Capture One",
+      desc:"Manual for peliculas.py: five classic photographic materials modelled by spectral integration at 1 nm and written out as input ICC profiles for Capture One and the Leica M11."
+    }
+  };
+
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
+</body>
+</html>

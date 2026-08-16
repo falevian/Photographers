@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flash TTL con la Leica Q3 43. Manual técnico</title>
+<meta name="author" content="Rafael Vida">
+<meta name="description" content="Cómo mide, cómo sincroniza y cómo se comporta la Leica Q3 43 con flash TTL: obturador central, predestello, HSS, relleno de día, arrastre del obturador y calculadoras de alcance.">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
+<style>
+  :root{
+    --paper:#f6f6f4;
+    --ink:#161616;
+    --ink2:#4a4a4a;
+    --line:#d6d6d2;
+    --panel:#ffffff;
+    --graphite:#26282b;
+    --red:#d70f1c;
+    --amber:#c98a00;
+    --mono:"SF Mono","Menlo","Consolas","Liberation Mono",monospace;
+    --sans:"Helvetica Neue",Helvetica,Arial,"Liberation Sans",sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16.5px;line-height:1.55}
+  a{color:var(--ink);text-decoration-color:var(--red);text-underline-offset:3px}
+  a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+
+  header{background:var(--graphite);color:#eee;padding:56px 24px 40px;border-bottom:6px solid var(--red)}
+  .wrap{max-width:1040px;margin:0 auto}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#bbb}
+  h1{font-size:clamp(30px,5vw,50px);line-height:1.05;margin:10px 0 14px;font-weight:700;letter-spacing:-.01em}
+  h1 span{color:var(--red)}
+  .lead{max-width:720px;color:#d8d8d8;font-size:17px;margin:0 0 26px}
+  .specs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:#3a3d41;border:1px solid #3a3d41}
+  .specs div{background:var(--graphite);padding:12px 14px}
+  .specs b{display:block;font-family:var(--mono);font-size:19px;color:#fff;font-weight:600}
+  .specs small{color:#aaa;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+
+  nav.toc{border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:5}
+  nav.toc .wrap{display:flex;gap:2px 22px;flex-wrap:wrap;padding:10px 24px;font-size:13.5px}
+  nav.toc a{text-decoration:none;color:var(--ink2);padding:4px 0}
+  nav.toc a:hover{color:var(--red)}
+
+  main .wrap{padding:24px 24px 80px}
+  section{padding:38px 0 8px;border-bottom:1px solid var(--line)}
+  section:last-of-type{border-bottom:0}
+  h2{font-size:26px;margin:0 0 6px;letter-spacing:-.01em}
+  h2 .n{font-family:var(--mono);font-size:13px;color:var(--red);vertical-align:middle;margin-right:10px;font-weight:600}
+  h3{font-size:18px;margin:26px 0 8px}
+  p{margin:0 0 14px;max-width:760px}
+  ul,ol{max-width:760px;padding-left:22px}
+  li{margin-bottom:7px}
+  code,.mono{font-family:var(--mono);font-size:.92em}
+  code{background:#ececea;padding:1px 6px;border-radius:3px}
+  .menu{font-family:var(--mono);font-size:.9em;background:var(--graphite);color:#fff;padding:2px 8px;border-radius:3px;white-space:nowrap}
+
+  table{border-collapse:collapse;width:100%;margin:12px 0 22px;font-size:15px;background:var(--panel)}
+  th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+  th{background:#ececea;font-weight:600;font-size:13.5px;letter-spacing:.03em;text-transform:uppercase}
+  td.mono{white-space:nowrap}
+
+  .note{border-left:4px solid var(--red);background:#fff;padding:12px 16px;margin:16px 0 20px;max-width:760px}
+  .note.amber{border-left-color:var(--amber)}
+  .note b{display:block;font-size:13px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+  .eq{font-family:var(--mono);background:#fff;border:1px solid var(--line);padding:12px 16px;margin:12px 0 18px;max-width:760px;overflow-x:auto;font-size:15px;line-height:1.7}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr}}
+
+  .tool{background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--graphite);padding:22px;margin:18px 0 26px}
+  .tool h3{margin-top:0}
+  .ctrl{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin:12px 0 16px}
+  .ctrl label{display:block;font-size:12.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);margin-bottom:5px}
+  .ctrl input,.ctrl select{width:100%;padding:8px 10px;font:inherit;font-family:var(--mono);border:1px solid #bbb;border-radius:3px;background:#fff}
+  .out{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+  .out div{background:#f1f1ef;padding:12px 14px;border-radius:3px}
+  .out b{display:block;font-family:var(--mono);font-size:22px;font-weight:600}
+  .out small{color:var(--ink2);font-size:12.5px;text-transform:uppercase;letter-spacing:.04em}
+  svg text{font-family:var(--mono);font-size:11px;fill:#444}
+  footer{color:var(--ink2);font-size:13.5px;padding:24px;border-top:1px solid var(--line);text-align:center}
+
+  /* ---------- conmutador de idioma ---------- */
+  html[lang="es"] [data-lang="en"]{display:none!important}
+  html[lang="en"] [data-lang="es"]{display:none!important}
+  .langbar{position:fixed;top:12px;right:16px;z-index:30;display:flex;
+           background:var(--panel);border:1px solid var(--line);border-radius:4px;
+           overflow:hidden;box-shadow:0 1px 5px rgba(0,0,0,.22)}
+  .langbar button{font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;
+                  background:transparent;border:0;color:var(--ink2);padding:7px 11px;cursor:pointer;
+                  transition:background .15s,color .15s}
+  .langbar button+button{border-left:1px solid var(--line)}
+  .langbar button:hover{color:var(--ink)}
+  .langbar button.on{background:var(--red);color:#fff}
+  .langbar button:focus-visible{outline:3px solid var(--red);outline-offset:-3px}
+  /* El conmutador flota sobre la cabecera oscura y sobre el índice pegajoso
+     (z-index 5). Se reserva sitio a la derecha para no tapar ni los enlaces
+     del índice ni la última celda de la fila de especificaciones. */
+  @media(max-width:1230px){nav.toc .wrap{padding-right:116px}}
+  @media(max-width:720px){.langbar{top:8px;right:8px}
+                          nav.toc .wrap{padding-right:104px}
+                          header{padding-top:64px}}
+</style>
+</head>
+<body>
+
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow" data-lang="es">Manual técnico · Leica Q3 43 · APO Summicron 43 f/2 ASPH.</div>
+    <div class="eyebrow" data-lang="en">Technical manual · Leica Q3 43 · APO Summicron 43 f/2 ASPH.</div>
+    <h1 data-lang="es">Flash TTL con la <span>Leica Q3 43</span></h1>
+    <h1 data-lang="en">TTL flash with the <span>Leica Q3 43</span></h1>
+    <p class="lead" data-lang="es">Cómo mide, cómo sincroniza y cómo se comporta la cámara con flash a plena luz, con poca luz y a velocidades altas. Redactado para quien ya domina la exposición y quiere entender el sistema, no solo operarlo.</p>
+    <p class="lead" data-lang="en">How the camera meters, how it synchronises and how it behaves with flash in full daylight, in low light and at high shutter speeds. Written for those who already command exposure and wish to understand the system, not merely to operate it.</p>
+    <div class="specs" data-lang="es">
+      <div><b>1/2000 s</b><small>Sincronía máxima (obturador central)</small></div>
+      <div><b>TTL predestello</b><small>Medición ponderada al centro</small></div>
+      <div><b>0</b><small>Flash con obturador electrónico</small></div>
+      <div><b>±3 EV</b><small>Compensación de flash en cámara, pasos de 1/3</small></div>
+      <div><b>Godox iT32 + X5L</b><small>Unidad de referencia de este manual · NG 18</small></div>
+    </div>
+    <div class="specs" data-lang="en">
+      <div><b>1/2000 s</b><small>Maximum flash sync speed (leaf shutter)</small></div>
+      <div><b>TTL pre-flash</b><small>Centre-weighted metering</small></div>
+      <div><b>0</b><small>Flash with the electronic shutter</small></div>
+      <div><b>±3 EV</b><small>In-camera flash exposure compensation, 1/3 steps</small></div>
+      <div><b>Godox iT32 + X5L</b><small>Reference unit for this manual · GN 18</small></div>
+    </div>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="wrap" data-lang="es">
+    <a href="#s1">1 Hardware</a>
+    <a href="#s1b">1b Godox iT32</a>
+    <a href="#s2">2 Menú de flash</a>
+    <a href="#s3">3 Física de la exposición</a>
+    <a href="#s4">4 Modos P A S M</a>
+    <a href="#s5">5 Métodos de medición</a>
+    <a href="#s6">6 Mucha luz</a>
+    <a href="#s7">7 Poca luz</a>
+    <a href="#s8">8 Velocidad alta y HSS</a>
+    <a href="#s9">9 Compensación</a>
+    <a href="#s10">10 Fuera de cámara</a>
+    <a href="#s11">11 Calculadora</a>
+    <a href="#s12">12 Recetas</a>
+  </div>
+  <div class="wrap" data-lang="en">
+    <a href="#s1">1 Hardware</a>
+    <a href="#s1b">1b Godox iT32</a>
+    <a href="#s2">2 Flash menu</a>
+    <a href="#s3">3 Exposure physics</a>
+    <a href="#s4">4 P A S M modes</a>
+    <a href="#s5">5 Metering methods</a>
+    <a href="#s6">6 Bright light</a>
+    <a href="#s7">7 Low light</a>
+    <a href="#s8">8 High speed and HSS</a>
+    <a href="#s9">9 Compensation</a>
+    <a href="#s10">10 Off-camera</a>
+    <a href="#s11">11 Calculator</a>
+    <a href="#s12">12 Recipes</a>
+  </div>
+</nav>
+
+<main><div class="wrap">
+
+<section id="s1">
+  <h2><span class="n">01</span><span data-lang="es">Lo que determina todo: obturador central y medición TTL</span><span data-lang="en">What determines everything: leaf shutter and TTL metering</span></h2>
+  <p data-lang="es">La Q3 43 lleva un obturador central de laminillas dentro del objetivo. A diferencia de un obturador de plano focal, las laminillas abren y cierran sobre todo el fotograma a la vez, de modo que en cualquier velocidad hasta 1/2000 s existe un instante en el que el sensor completo está descubierto. Por eso la sincronía nominal es 1/2000 s y no 1/200 s como en la mayoría de cámaras. Además existe una función de obturador electrónico hasta 1/16000 s, pero con ella el flash no se dispara.</p>
+  <p data-lang="en">The Q3 43 carries a leaf shutter of blades inside the lens. Unlike a focal-plane shutter, the blades open and close over the whole frame at once, so that at any speed up to 1/2000 s there is an instant at which the entire sensor is uncovered. Hence the nominal flash sync speed is 1/2000 s and not 1/200 s as on most cameras. There is in addition an electronic shutter function up to 1/16000 s, but with it the flash does not fire.</p>
+  <p data-lang="es">La medición del flash es TTL por predestello: la cámara ordena al flash un destello de prueba de energía conocida, mide la luz reflejada por la escena a través del objetivo con ponderación central, calcula la energía necesaria para el destello principal y la comunica al flash inmediatamente antes de la exposición. Todo ocurre en unas decenas de milisegundos, sin que el fotógrafo lo perciba como dos destellos.</p>
+  <p data-lang="en">Flash metering is TTL by pre-flash: the camera orders the flash to emit a test burst of known energy, measures the light reflected by the scene through the lens with centre weighting, computes the energy required for the main burst and communicates it to the flash immediately before the exposure. It all happens within a few tens of milliseconds, without the photographer perceiving it as two separate bursts.</p>
+
+  <h3 data-lang="es">Unidades compatibles</h3>
+  <h3 data-lang="en">Compatible units</h3>
+  <table>
+    <tr><th data-lang="es">Unidad</th><th data-lang="en">Unit</th><th data-lang="es">NG (ISO 100)</th><th data-lang="en">GN (ISO 100)</th><th data-lang="es">TTL con la Q3 43</th><th data-lang="en">TTL with the Q3 43</th><th data-lang="es">Observaciones</th><th data-lang="en">Notes</th></tr>
+    <tr><td>Leica SF 26</td><td class="mono">26</td><td data-lang="es">Sí</td><td data-lang="en">Yes</td><td data-lang="es">Compacta, sin zoom motorizado. Compensación desde la cámara.</td><td data-lang="en">Compact, no motorised zoom. Compensation from the camera.</td></tr>
+    <tr><td>Leica SF 40</td><td class="mono">40</td><td data-lang="es">Sí</td><td data-lang="en">Yes</td><td data-lang="es">Compensación en la propia unidad ±2 EV en pasos de 1/2 EV. Fabricada por Nissin (i40).</td><td data-lang="en">Compensation on the unit itself, ±2 EV in 1/2 EV steps. Made by Nissin (i40).</td></tr>
+    <tr><td>Leica SF 58</td><td class="mono">58</td><td data-lang="es">Sí</td><td data-lang="en">Yes</td><td data-lang="es">Antigua, base Metz. Modos TTL, A y M.</td><td data-lang="en">Older, Metz-based. TTL, A and M modes.</td></tr>
+    <tr><td>Leica SF 60</td><td class="mono" data-lang="es">60 (a 200 mm)</td><td class="mono" data-lang="en">60 (at 200 mm)</td><td data-lang="es">Sí</td><td data-lang="en">Yes</td><td data-lang="es">Zoom 24 a 200 mm, LED de vídeo, receptor de radio para SF C1. Compensación ±2 EV en pasos de 1/3 EV. Fabricada por Nissin (i60A).</td><td data-lang="en">24 to 200 mm zoom, video LED, radio receiver for the SF C1. Compensation ±2 EV in 1/3 EV steps. Made by Nissin (i60A).</td></tr>
+    <tr><td>Leica SF 64</td><td class="mono">64</td><td data-lang="es">Sí</td><td data-lang="en">Yes</td><td data-lang="es">Modelo grande, base Metz. Modos TTL, A, M y estrobo.</td><td data-lang="en">Large model, Metz-based. TTL, A, M and stroboscopic modes.</td></tr>
+    <tr><td>Leica SF C1</td><td class="mono" data-lang="es">controlador</td><td class="mono" data-lang="en">controller</td><td data-lang="es">Sí (radio 2,4 GHz)</td><td data-lang="en">Yes (2.4 GHz radio)</td><td data-lang="es">Controla SF 60 y Nissin i60A con firmware Leica en TTL, hasta 3 grupos y 8 canales.</td><td data-lang="en">Controls the SF 60 and the Nissin i60A with Leica firmware in TTL, up to 3 groups and 8 channels.</td></tr>
+    <tr><td data-lang="es"><b>Godox iT32 con módulo X5L</b></td><td data-lang="en"><b>Godox iT32 with the X5L module</b></td><td class="mono">18</td><td data-lang="es">Sí (protocolo Leica emulado)</td><td data-lang="en">Yes (emulated Leica protocol)</td><td data-lang="es">El módulo X5L aporta la zapata TTL Leica y el radio 2,4 GHz del sistema X. Sin el X5L el iT32 no tiene zapata. Ver sección 1b.</td><td data-lang="en">The X5L module supplies the Leica TTL shoe and the 2.4 GHz radio of the X system. Without the X5L the iT32 has no shoe. See section 1b.</td></tr>
+    <tr><td data-lang="es">Otras con contacto central</td><td data-lang="en">Others with a centre contact</td><td class="mono">variable</td><td>No</td><td data-lang="es">Disparan en modo manual del flash. Sin comunicación de ISO, diafragma ni medición.</td><td data-lang="en">They fire in the flash's manual mode. No communication of ISO, aperture or metering.</td></tr>
+  </table>
+  <div class="note amber" data-lang="es"><b>Precaución eléctrica</b>Leica advierte de daños irreparables con flashes incompatibles. El riesgo real es el voltaje de disparo de unidades antiguas (algunas superan los 100 V en el contacto central). Un flash moderno de baja tensión (por debajo de 6 V) es seguro aunque no ofrezca TTL.</div>
+  <div class="note amber" data-lang="en"><b>Electrical caution</b>Leica warns of irreparable damage with incompatible flashes. The real risk is the trigger voltage of older units (some exceed 100 V at the centre contact). A modern low-voltage flash (below 6 V) is safe even if it offers no TTL.</div>
+</section>
+
+
+<section id="s1b">
+  <h2><span class="n">1b</span><span data-lang="es">Su unidad: Godox iT32 con módulo X5L</span><span data-lang="en">Your unit: Godox iT32 with the X5L module</span></h2>
+  <p data-lang="es">El iT32 es un flash compacto (169 g, 101 × 56 × 39 mm) con batería interna USB C, cabezal que inclina y gira, difusor y filtros CTO magnéticos, lámpara LED de modelado y pantalla táctil en color. Por sí solo no tiene zapata: el módulo magnético X5L le añade la zapata TTL con protocolo Leica y el emisor de radio del sistema Godox X. Godox declara compatibilidad TTL con Q, Q2 y Q3; la Q3 43 comparte el protocolo de zapata de la Q3.</p>
+  <p data-lang="en">The iT32 is a compact flash (169 g, 101 × 56 × 39 mm) with an internal USB-C battery, a head that tilts and swivels, a magnetic diffuser and magnetic CTO gels, an LED modelling lamp and a colour touchscreen. On its own it has no shoe: the magnetic X5L module adds the TTL shoe with the Leica protocol and the radio transmitter of the Godox X system. Godox declares TTL compatibility with the Q, Q2 and Q3; the Q3 43 shares the shoe protocol of the Q3.</p>
+  <table>
+    <tr><th data-lang="es">Parámetro</th><th data-lang="en">Parameter</th><th data-lang="es">Valor</th><th data-lang="en">Value</th><th data-lang="es">Consecuencia con la Q3 43</th><th data-lang="en">Consequence with the Q3 43</th></tr>
+    <tr><td data-lang="es">Número guía</td><td data-lang="en">Guide number</td><td class="mono">18 (ISO 100)</td><td data-lang="es">Un tercio del SF 60. A f/2 e ISO 100 alcanza 9 m directo; rebotado necesita ISO 800 o más. Ver calculadora, sección 11.</td><td data-lang="en">One third of the SF 60. At f/2 and ISO 100 it reaches 9 m direct; bounced it needs ISO 800 or more. See the calculator, section 11.</td></tr>
+    <tr><td data-lang="es">Potencia</td><td data-lang="en">Power</td><td class="mono" data-lang="es">1/1 a 1/128</td><td class="mono" data-lang="en">1/1 to 1/128</td><td data-lang="es">Rango de 7 EV en manual. En TTL la cámara elige dentro de ese rango.</td><td data-lang="en">A 7 EV range in manual. In TTL the camera chooses within that range.</td></tr>
+    <tr><td data-lang="es">Modos</td><td data-lang="en">Modes</td><td>TTL · M · Multi</td><td data-lang="es">TTL usa el predestello de la Q3 43 con ponderación central, exactamente igual que una unidad Leica.</td><td data-lang="en">TTL uses the Q3 43's pre-flash with centre weighting, exactly as a Leica unit does.</td></tr>
+    <tr><td data-lang="es">Sincronía</td><td data-lang="en">Sync</td><td data-lang="es">1.ª cortinilla · 2.ª cortinilla · HSS 1/8000 s</td><td data-lang="en">First curtain · second curtain · HSS 1/8000 s</td><td data-lang="es">Fije la 2.ª cortinilla desde el menú de la cámara (<span class="menu">Punto de sincronización</span>); si no obedece, fíjela en el flash. HSS: desactivado. Ver sección 8.</td><td data-lang="en">Set second curtain from the camera menu (<span class="menu">Sync Point</span>); if it does not obey, set it on the flash. HSS: off. See section 8.</td></tr>
+    <tr><td data-lang="es">Reciclado</td><td data-lang="en">Recycling time</td><td class="mono" data-lang="es">≈ 1,5 s a 1/1</td><td class="mono" data-lang="en">≈ 1.5 s at 1/1</td><td data-lang="es">A 1/8 o menos el reciclado es casi instantáneo; adecuado para las ráfagas de 2 a 4 fps.</td><td data-lang="en">At 1/8 or less the recycling is almost instantaneous; adequate for the 2 to 4 fps bursts.</td></tr>
+    <tr><td data-lang="es">Autonomía</td><td data-lang="en">Battery life</td><td class="mono" data-lang="es">≈ 510 destellos a 1/1</td><td class="mono" data-lang="en">≈ 510 flashes at 1/1</td><td data-lang="es">Batería interna, sin AA. El X5L tiene su propia batería (100 mAh, unas 16 h) que se carga desde el iT32 cuando están acoplados.</td><td data-lang="en">Internal battery, no AA cells. The X5L has a battery of its own (100 mAh, some 16 h) which charges from the iT32 when the two are coupled.</td></tr>
+    <tr><td>Radio</td><td data-lang="es">Godox X 2,4 GHz, hasta 80 m</td><td data-lang="en">Godox X 2.4 GHz, up to 80 m</td><td data-lang="es">Acoplado al X5L en el modo “iT32 + X5”, el conjunto actúa como emisor TTL para AD100Pro II, AD200Pro II, AD600Pro II, V100, iT30Pro y otros receptores X.</td><td data-lang="en">Coupled to the X5L in the “iT32 + X5” mode, the assembly acts as a TTL transmitter for the AD100Pro II, AD200Pro II, AD600Pro II, V100, iT30Pro and other X receivers.</td></tr>
+  </table>
+  <h3 data-lang="es">Puesta en marcha con la Q3 43</h3>
+  <h3 data-lang="en">Getting started with the Q3 43</h3>
+  <ol data-lang="es">
+    <li>Cámara apagada, monte el X5L en la zapata y acople el iT32 por el imán. Encienda primero el flash y después la cámara; el protocolo Leica se negocia al arrancar y algunos módulos Godox no se reconocen si se acoplan con la cámara ya encendida.</li>
+    <li>En la cámara: tipo de obturador <span class="menu">Mecánico</span>, modo de flash <span class="menu">Manual</span> (o <span class="menu">Sincronización larga</span> en interiores). Debe aparecer el icono de flash y el valor de compensación en la línea de estado.</li>
+    <li>En el iT32: modo TTL, compensación 0, HSS apagado, zoom en automático si la unidad lo comunica o fijo a 35 a 50 mm para cubrir los 43 mm sin viñeteo.</li>
+    <li>Compensación de flash: úsela desde el menú de la cámara. Los flashes Godox suelen sumar su propia compensación a la de la cámara (a diferencia de las unidades Leica, que la sustituyen). Verifique con dos disparos: −1 EV en cámara y 0 en flash frente a 0 en cámara y −1 en flash; si el histograma coincide, ambas vías son equivalentes y puede elegir la que le resulte cómoda.</li>
+    <li>Suspensión: si la cámara entra en reposo, el X5L puede tardar en volver a comunicar. Un toque a medio recorrido del disparador y espere el icono de flash antes de la primera foto.</li>
+  </ol>
+  <ol data-lang="en">
+    <li>With the camera off, mount the X5L on the shoe and attach the iT32 by its magnet. Switch on the flash first and the camera afterwards; the Leica protocol is negotiated at start-up and some Godox modules are not recognised if they are attached with the camera already on.</li>
+    <li>On the camera: shutter type <span class="menu">Mechanical</span>, flash mode <span class="menu">Manual</span> (or <span class="menu">Slow Sync</span> indoors). The flash icon and the compensation value should appear on the status line.</li>
+    <li>On the iT32: TTL mode, compensation 0, HSS off, zoom on automatic if the unit reports it or fixed at 35 to 50 mm so as to cover the 43 mm without vignetting.</li>
+    <li>Flash exposure compensation: apply it from the camera menu. Godox flashes tend to add their own compensation to the camera's (unlike Leica units, which replace it). Verify with two frames: −1 EV on the camera and 0 on the flash against 0 on the camera and −1 on the flash; if the histogram matches, both routes are equivalent and you may choose whichever suits you.</li>
+    <li>Standby: if the camera goes to sleep, the X5L may take a moment to resume communication. Touch the shutter release half-way and wait for the flash icon before the first frame.</li>
+  </ol>
+  <h3 data-lang="es">Qué implica un NG 18 en cada escenario</h3>
+  <h3 data-lang="en">What a GN 18 implies in each scenario</h3>
+  <ul data-lang="es">
+    <li><b>Relleno de sol a 1/2000 s.</b> Con el recorte del pulso a potencia plena, cuente con NG efectivo 12 a 13. A f/2.8 e ISO 100 eso son unos 4,5 m; a f/2, unos 6,5 m. Suficiente para retrato de medio cuerpo, insuficiente para figura entera a distancia. Si le falta, baje a 1/1000 s y cierre a f/4: recupera un paso de ventana y el ambiente no cambia. La compensación de relleno de −1 a −1 2/3 EV pide solo la mitad o un tercio de esa energía, lo que devuelve margen. Ventaja adicional: a esa fracción el pulso es corto y ya no hay recorte.</li>
+    <li><b>Interior rebotado.</b> Con 2 EV de pérdida por techo, ISO 1600 y f/2: NG efectivo 36, alcance 18 m; ISO 800 y f/2.8: NG 25, alcance 9 m. Trabaje entre ISO 800 y 3200 y evite techos por encima de 3,5 m; en esos casos use la tarjeta reflectora o el difusor magnético con el cabezal a 60°.</li>
+    <li><b>Duración del pulso.</b> Los flashes de esta clase tienen pulsos más cortos que un SF 60 a igual fracción, porque su energía máxima es menor. Es una ventaja para congelar movimiento y para el recorte a 1/2000 s. Godox no publica en ficha la t.1 del iT32; a 1/8 espere valores por debajo de 1/5000 s.</li>
+    <li><b>Filtros CTO magnéticos.</b> El 1/2 CTO y el CTO completo se acoplan sin velcro; con luz de tungsteno ponga el CTO completo y balance de blancos a 3200 K. El TTL no requiere corrección: mide la luz filtrada que realmente vuelve.</li>
+  </ul>
+  <ul data-lang="en">
+    <li><b>Fill flash in sunlight at 1/2000 s.</b> With the pulse clipped at full power, reckon on an effective GN of 12 to 13. At f/2.8 and ISO 100 that is some 4.5 m; at f/2, some 6.5 m. Enough for a half-length portrait, not enough for a full figure at a distance. If you fall short, drop to 1/1000 s and stop down to f/4: you recover a stop of window and the ambient light does not change. A fill compensation of −1 to −1 2/3 EV calls for only a half or a third of that energy, which restores the headroom. An added benefit: at that fraction the pulse is short and there is no longer any clipping.</li>
+    <li><b>Bounce indoors.</b> With 2 EV of loss to the ceiling, ISO 1600 and f/2: effective GN 36, range 18 m; ISO 800 and f/2.8: GN 25, range 9 m. Work between ISO 800 and 3200 and avoid ceilings above 3.5 m; in those cases use the bounce card or the magnetic diffuser with the head at 60°.</li>
+    <li><b>Pulse duration.</b> Flashes of this class have shorter pulses than an SF 60 at the same fraction, because their maximum energy is lower. It is an advantage both for freezing movement and for the clipping at 1/2000 s. Godox does not publish the t.1 of the iT32 in its specifications; at 1/8 expect values below 1/5000 s.</li>
+    <li><b>Magnetic CTO gels.</b> The 1/2 CTO and the full CTO attach without Velcro; under tungsten light fit the full CTO gel and set the white balance to 3200 K. The TTL requires no correction: it measures the filtered light that actually returns.</li>
+  </ul>
+  <div class="note" data-lang="es"><b>Fuera de cámara con TTL</b>Dos configuraciones. Primera: iT32 + X5L en la zapata como emisor y otras unidades Godox como receptores; el iT32 puede seguir aportando relleno frontal. Segunda: un disparador Godox para Leica (X3 L o XPro L) en la zapata y el iT32 en un pie como receptor; el iT32 recibe por su radio interna sin necesitar el X5L acoplado. En ambos casos la medición TTL de la Q3 43 sigue siendo el predestello ponderado al centro; la relación entre grupos se ajusta desde el emisor.</div>
+  <div class="note" data-lang="en"><b>Off-camera with TTL</b>Two configurations. First: iT32 + X5L on the shoe as transmitter and other Godox units as receivers; the iT32 can go on providing frontal fill. Second: a Godox trigger for Leica (X3 L or XPro L) on the shoe and the iT32 on a stand as receiver; the iT32 receives through its internal radio without needing the X5L attached. In both cases the Q3 43's TTL metering remains the centre-weighted pre-flash; the ratio between groups is set from the transmitter.</div>
+</section>
+
+<section id="s2">
+  <h2><span class="n">02</span><span data-lang="es">Ajustes de flash en la cámara</span><span data-lang="en">Flash settings on the camera</span></h2>
+  <p data-lang="es">Con el flash montado y encendido, aparece el icono de flash en la línea de estado. Los ajustes viven en <span class="menu">Menú principal › Ajustes de flash</span> y conviene añadirlos al menú de favoritos o a un botón FN.</p>
+  <p data-lang="en">With the flash mounted and switched on, the flash icon appears on the status line. The settings live in <span class="menu">Main Menu › Flash Settings</span> and it is worth adding them to the favourites menu or to an FN button.</p>
+  <table>
+    <tr><th data-lang="es">Ajuste</th><th data-lang="en">Setting</th><th data-lang="es">Opciones</th><th data-lang="en">Options</th><th data-lang="es">Qué hace</th><th data-lang="en">What it does</th></tr>
+    <tr><td data-lang="es">Modo de flash</td><td data-lang="en">Flash Mode</td><td data-lang="es">Automático · Manual · Sincronización larga</td><td data-lang="en">Auto · Manual · Slow Sync</td><td data-lang="es">Automático: la cámara decide si el flash dispara según la luz medida (en poca luz sí, en mucha luz no). Manual: dispara siempre, es el modo para relleno de día. Sincronización larga: dispara siempre y permite tiempos de obturación lentos para registrar el ambiente.</td><td data-lang="en">Auto: the camera decides whether the flash fires according to the metered light (in low light it does, in bright light it does not). Manual: it always fires, and this is the mode for daylight fill. Slow Sync: it always fires and allows slow shutter times so as to record the ambient light.</td></tr>
+    <tr><td data-lang="es">Punto de sincronización</td><td data-lang="en">Sync Point</td><td data-lang="es">Inicio de exposición · Fin de exposición</td><td data-lang="en">Start of Exposure · End of Exposure</td><td data-lang="es">Primera o segunda cortinilla. Con tiempos largos y sujetos en movimiento, “Fin de exposición” coloca la estela de luz ambiente detrás del sujeto congelado.</td><td data-lang="en">First or second curtain. With long shutter times and moving subjects, “End of Exposure” places the trail of ambient light behind the frozen subject.</td></tr>
+    <tr><td data-lang="es">Compensación de exposición de flash</td><td data-lang="en">Flash Exposure Compensation</td><td data-lang="es">−3 a +3 EV en pasos de 1/3</td><td data-lang="en">−3 to +3 EV in 1/3 steps</td><td data-lang="es">Escala solo la energía del destello. No toca la exposición ambiente. Ver sección 9.</td><td data-lang="en">It scales the energy of the burst alone. It does not touch the ambient exposure. See section 9.</td></tr>
+    <tr><td data-lang="es">Alcance del flash</td><td data-lang="en">Flash Range</td><td data-lang="es">Indicación en pantalla</td><td data-lang="en">On-screen indication</td><td data-lang="es">La cámara puede mostrar el alcance útil calculado a partir de NG, ISO y diafragma actuales.</td><td data-lang="en">The camera can display the useful range computed from the current guide number, ISO and aperture.</td></tr>
+    <tr><td data-lang="es">Tipo de obturador <span class="mono">(Ajustes de cámara)</span></td><td data-lang="en">Shutter Type <span class="mono">(Camera Settings)</span></td><td data-lang="es">Mecánico · Electrónico · Híbrido</td><td data-lang="en">Mechanical · Electronic · Hybrid</td><td data-lang="es">Para trabajar con flash, fije “Mecánico”. En “Híbrido” la cámara pasa al electrónico por encima de 1/2000 s y el flash deja de dispararse sin aviso claro.</td><td data-lang="en">To work with flash, set “Mechanical”. In “Hybrid” the camera switches to the electronic shutter above 1/2000 s and the flash stops firing without any clear warning.</td></tr>
+  </table>
+  <div class="note amber" data-lang="es"><b>Rótulos del menú</b>Los nombres recuadrados son los del menú en español. El rótulo que verá depende del idioma configurado en la cámara: con la interfaz en inglés, esos mismos ajustes aparecen como <span class="menu">Flash Settings</span>, <span class="menu">Sync Point</span>, <span class="menu">Slow Sync</span> y <span class="menu">Mechanical</span>. La ruta del menú y el orden de las opciones no cambian.</div>
+  <div class="note amber" data-lang="en"><b>Menu labels</b>The boxed names are those of the English menu. The label you will actually see depends on the language configured in the camera: with the interface in Spanish, those same settings appear as <span class="menu">Ajustes de flash</span>, <span class="menu">Punto de sincronización</span>, <span class="menu">Sincronización larga</span> and <span class="menu">Mecánico</span>. The menu path and the order of the options do not change.</div>
+  <div class="note" data-lang="es"><b>Regla operativa</b>Con flash: obturador mecánico, modo de flash <span class="menu">Manual</span> para relleno y <span class="menu">Sincronización larga</span> para interiores. <span class="menu">Automático</span> solo si quiere que la cámara decida por usted.</div>
+  <div class="note" data-lang="en"><b>Operating rule</b>With flash: mechanical shutter, flash mode <span class="menu">Manual</span> for fill and <span class="menu">Slow Sync</span> indoors. <span class="menu">Auto</span> only if you wish the camera to decide for you.</div>
+</section>
+
+<section id="s3">
+  <h2><span class="n">03</span><span data-lang="es">Física de la exposición con flash</span><span data-lang="en">The physics of flash exposure</span></h2>
+  <p data-lang="es">Toda foto con flash es la superposición de dos exposiciones independientes sobre el mismo fotograma. La luz ambiente es continua y depende de tiempo, diafragma e ISO. La luz del flash es un pulso de unos cientos de microsegundos a pocos milisegundos y su contribución depende del diafragma, del ISO, de la distancia y de la energía del pulso, pero no del tiempo de obturación mientras el pulso completo quepa dentro de la ventana en que el obturador está abierto.</p>
+  <p data-lang="en">Every flash photograph is the superposition of two independent exposures upon the same frame. The ambient light is continuous and depends on time, aperture and ISO. The flash light is a pulse of a few hundred microseconds to a few milliseconds, and its contribution depends on the aperture, the ISO, the distance and the energy of the pulse, but not on the shutter time, so long as the whole pulse fits within the window in which the shutter is open.</p>
+  <div class="eq">
+    E_total = E_ambiente(t, N, ISO) + E_flash(N, ISO, d, Q)<br><br>
+    <span data-lang="es">Ley del número guía:</span><span data-lang="en">Guide-number law:</span>  d_max = NG(ISO 100) · √(ISO/100) / N<br>
+    <span data-lang="es">NG escala con la energía:</span><span data-lang="en">GN scales with energy:</span> NG(Q) = NG(Q_full) · √(Q/Q_full)<br>
+    <span data-lang="es">Iluminancia por flash:</span><span data-lang="en">Flash illuminance:</span> E ∝ Q / d²  <span data-lang="es">(ley del inverso del cuadrado, fuente puntual)</span><span data-lang="en">(inverse-square law, point source)</span><span data-lang="es"><br><br>NG = número guía, E_ambiente = exposición ambiente, Q = energía del pulso</span><span data-lang="en"><br><br>NG = guide number (GN), E_ambiente = ambient exposure, Q = pulse energy</span>
+  </div>
+  <p data-lang="es">De aquí salen las dos palancas prácticas. El tiempo de obturación es su control exclusivo del ambiente. El diafragma y el ISO afectan a ambos, pero el TTL compensa automáticamente su efecto sobre el flash ajustando Q, así que en la práctica el diafragma se convierte en un control de profundidad de campo y el ISO en un control de alcance.</p>
+  <p data-lang="en">From this come the two practical levers. The shutter time is your exclusive control over the ambient light. The aperture and the ISO affect both, but the TTL automatically compensates for their effect upon the flash by adjusting Q, so that in practice the aperture becomes a control of depth of field and the ISO a control of range.</p>
+
+  <h3 data-lang="es">Qué hace exactamente el TTL de la Q3 43</h3>
+  <h3 data-lang="en">What the Q3 43's TTL does exactly</h3>
+  <ol data-lang="es">
+    <li>Presión a medio recorrido: la cámara mide el ambiente con el método de medición elegido (multizona, ponderado al centro, puntual o realces) y fija t, N e ISO según el modo de exposición.</li>
+    <li>Presión completa: la cámara emite el predestello. Mide la escena con ponderación central, siempre, con independencia del método de medición elegido para el ambiente.</li>
+    <li>Calcula la energía Q necesaria para que el sujeto (zona central) quede a gris medio menos la compensación de flash configurada, y descuenta la aportación del ambiente ya medida.</li>
+    <li>Abre el obturador, ordena el destello principal en el punto de sincronización elegido y cierra.</li>
+  </ol>
+  <ol data-lang="en">
+    <li>Half-press: the camera meters the ambient light with the metering method chosen (multi-field, centre-weighted, spot or highlight-weighted) and sets t, N and ISO according to the exposure mode.</li>
+    <li>Full press: the camera emits the pre-flash. It meters the scene with centre weighting, always, regardless of the metering method chosen for the ambient light.</li>
+    <li>It computes the energy Q required for the subject (the central zone) to sit at middle grey minus the flash exposure compensation set, and discounts the contribution of the ambient light already metered.</li>
+    <li>It opens the shutter, orders the main burst at the chosen sync point, and closes.</li>
+  </ol>
+  <p data-lang="es">Consecuencia importante: el sistema no sabe qué hay en el centro. Un sujeto de piel clara sobre pared blanca provoca subexposición del flash; un sujeto oscuro sobre fondo negro, sobreexposición. Como el TTL trata de llevar el centro a un gris de reflectancia media, la compensación de flash es la corrección natural.</p>
+  <p data-lang="en">An important consequence: the system does not know what lies at the centre. A fair-skinned subject against a white wall makes the flash underexpose; a dark subject against a black background, overexpose. Since the TTL sets out to bring the centre to a grey of average reflectance, flash exposure compensation is the natural correction.</p>
+</section>
+
+<section id="s4">
+  <h2><span class="n">04</span><span data-lang="es">Comportamiento en cada modo de exposición</span><span data-lang="en">Behaviour in each exposure mode</span></h2>
+  <p data-lang="es">El modo de exposición se selecciona con la posición del dial de tiempos y del anillo de diafragma (ambos en “A” da programa, etc.). El flash cambia lo que la automática hace con el tiempo de obturación.</p>
+  <p data-lang="en">The exposure mode is selected by the position of the shutter-speed dial and of the aperture ring (both at “A” gives programme, and so on). The flash changes what the automation does with the shutter time.</p>
+  <table>
+    <tr><th data-lang="es">Modo</th><th data-lang="en">Mode</th><th data-lang="es">Con flash en “Automático” o “Manual”</th><th data-lang="en">With flash in “Auto” or “Manual”</th><th data-lang="es">Con “Sincronización larga”</th><th data-lang="en">With “Slow Sync”</th><th data-lang="es">Uso recomendado</th><th data-lang="en">Recommended use</th></tr>
+    <tr><td><b>P</b></td><td data-lang="es">La cámara restringe el tiempo a una banda segura, aproximadamente 1/30 s a 1/2000 s, para evitar trepidación. En interiores el fondo suele quedar oscuro.</td><td data-lang="en">The camera restricts the time to a safe band, roughly 1/30 s to 1/2000 s, to avoid camera shake. Indoors the background usually comes out dark.</td><td data-lang="es">Se permiten tiempos más lentos que la banda; el ambiente se registra.</td><td data-lang="en">Times slower than that band are allowed; the ambient light is recorded.</td><td data-lang="es">Reportaje rápido, relleno sin pensar.</td><td data-lang="en">Fast reportage, fill flash without thinking.</td></tr>
+    <tr><td><b>A</b></td><td data-lang="es">Usted fija N; la cámara fija t dentro de la misma banda. Con Auto ISO la cámara sube ISO antes que bajar de 1/30 s.</td><td data-lang="en">You set N; the camera sets t within the same band. With Auto ISO the camera will raise the ISO sooner than it will go below 1/30 s.</td><td data-lang="es">t se alarga hasta lo que pida el ambiente medido.</td><td data-lang="en">t lengthens to whatever the metered ambient light demands.</td><td data-lang="es">Retrato con control de profundidad de campo.</td><td data-lang="en">Portraiture with control of depth of field.</td></tr>
+    <tr><td><b>S</b></td><td data-lang="es">Usted fija t (cualquier valor hasta 1/2000 s); la cámara fija N. El TTL ajusta el flash a esa N.</td><td data-lang="en">You set t (any value up to 1/2000 s); the camera sets N. The TTL adjusts the flash to that N.</td><td data-lang="es">Igual; usted ya controla t.</td><td data-lang="en">The same; you already control t.</td><td data-lang="es">Poco frecuente con flash; útil para forzar 1/2000 s.</td><td data-lang="en">Seldom used with flash; useful for forcing 1/2000 s.</td></tr>
+    <tr><td><b>M</b></td><td data-lang="es">Usted fija t y N. La cámara no toca nada; el TTL solo dosifica el destello. La balanza de exposición muestra solo el ambiente.</td><td data-lang="en">You set t and N. The camera touches nothing; the TTL merely doses the burst. The exposure scale shows the ambient light alone.</td><td data-lang="es">Sin diferencia.</td><td data-lang="en">No difference.</td><td data-lang="es">El modo más predecible. Recomendado para trabajo serio.</td><td data-lang="en">The most predictable mode. Recommended for serious work.</td></tr>
+  </table>
+  <div class="note" data-lang="es"><b>Método de trabajo en M</b>Primero exponga el ambiente como quiera verlo (típicamente 1 a 2 EV por debajo del gris medio en exteriores, o al gusto en interiores). Después deje que el TTL exponga al sujeto. Ajuste la compensación de flash hasta que la relación sujeto/fondo le convenza. Con este método, la medición ambiente y la medición del flash quedan desacopladas.</div>
+  <div class="note" data-lang="en"><b>Working method in M</b>First expose the ambient light as you wish to see it (typically 1 to 2 EV below middle grey outdoors, or to taste indoors). Then let the TTL expose the subject. Adjust the flash exposure compensation until the subject-to-background relation convinces you. With this method, the ambient metering and the flash metering remain decoupled.</div>
+</section>
+
+<section id="s5">
+  <h2><span class="n">05</span><span data-lang="es">Métodos de medición y flash</span><span data-lang="en">Metering methods and flash</span></h2>
+  <p data-lang="es">El método de medición seleccionado en <span class="menu">Medición de exposición</span> afecta exclusivamente a la exposición ambiente. La medición del flash es siempre TTL predestello ponderada al centro. Aun así, el método elegido cambia el resultado final, porque el TTL descuenta la aportación del ambiente que la cámara ha medido.</p>
+  <p data-lang="en">The metering method selected in <span class="menu">Exposure Metering</span> affects the ambient exposure exclusively. Flash metering is always centre-weighted TTL pre-flash. Even so, the method chosen changes the final result, because the TTL discounts the contribution of the ambient light that the camera has metered.</p>
+  <table>
+    <tr><th data-lang="es">Método</th><th data-lang="en">Method</th><th data-lang="es">Efecto sobre el ambiente</th><th data-lang="en">Effect on the ambient light</th><th data-lang="es">Interacción con el flash</th><th data-lang="en">Interaction with the flash</th></tr>
+    <tr><td data-lang="es">Multizona (predeterminado)</td><td data-lang="en">Multi-field (default)</td><td data-lang="es">Analiza toda la escena, prioriza la zona de enfoque. Robusto.</td><td data-lang="en">It analyses the whole scene and gives priority to the zone in focus. Robust.</td><td data-lang="es">Buena opción general. En contraluces tiende a subexponer el fondo, lo cual favorece un relleno visible.</td><td data-lang="en">A good general choice. Against the light it tends to underexpose the background, which favours a visible fill.</td></tr>
+    <tr><td data-lang="es">Ponderada al centro</td><td data-lang="en">Centre-weighted</td><td data-lang="es">Promedio con peso central.</td><td data-lang="en">An average with central weighting.</td><td data-lang="es">Coherente con la ponderación del TTL. Resultado más previsible cuando el sujeto está centrado.</td><td data-lang="en">Consistent with the TTL's own weighting. A more predictable result when the subject is centred.</td></tr>
+    <tr><td data-lang="es">Puntual</td><td data-lang="en">Spot</td><td data-lang="es">Solo un pequeño círculo central (se desplaza con el punto AF cuando el AF es puntual).</td><td data-lang="en">Only a small central circle (it moves with the AF point when the AF is set to spot).</td><td data-lang="es">Peligrosa con flash: si el punto cae sobre el sujeto oscuro, la ambiente sube y el TTL reduce el flash hasta casi anularlo. Úsela solo si mide conscientemente el fondo.</td><td data-lang="en">Dangerous with flash: if the point falls upon a dark subject, the ambient exposure rises and the TTL cuts the flash back almost to nothing. Use it only if you deliberately meter the background.</td></tr>
+    <tr><td data-lang="es">Ponderada a realces</td><td data-lang="en">Highlight-weighted</td><td data-lang="es">Protege las altas luces del fotograma.</td><td data-lang="en">It protects the highlights of the frame.</td><td data-lang="es">Excelente para relleno de día: el fondo brillante no se quema y el flash levanta el sujeto. Combínela con compensación de flash 0 a −1 EV.</td><td data-lang="en">Excellent for daylight fill: the bright background is not blown and the flash lifts the subject. Combine it with flash exposure compensation of 0 to −1 EV.</td></tr>
+  </table>
+  <p data-lang="es">Distinga las dos compensaciones. La compensación de exposición del dial trasero mueve el ambiente (y, en P y A, el tiempo de obturación). La compensación de flash mueve solo el destello. En modo M la primera no tiene efecto sobre t y N, únicamente sobre Auto ISO si está activo.</p>
+  <p data-lang="en">Distinguish the two compensations. The exposure compensation on the rear dial moves the ambient light (and, in P and A, the shutter time). The flash exposure compensation moves the burst alone. In M mode the former has no effect upon t and N, only upon Auto ISO if that is active.</p>
+</section>
+
+<section id="s6">
+  <h2><span class="n">06</span><span data-lang="es">Con mucha luz: relleno y dominar el sol</span><span data-lang="en">In bright light: fill flash and overpowering the sun</span></h2>
+  <p data-lang="es">Aquí el obturador central es la ventaja decisiva de la Q3 43. Con luz de sol (EV 15 a ISO 100) la exposición ambiente correcta a f/2 es 1/8000 s, y a f/2.8 es 1/4000 s. Una cámara con sincronía a 1/200 s obligaría a cerrar a f/11 o a usar HSS con pérdida de potencia. La Q3 43 sincroniza a 1/2000 s con la potencia íntegra del flash.</p>
+  <p data-lang="en">Here the leaf shutter is the Q3 43's decisive advantage. In sunlight (EV 15 at ISO 100) the correct ambient exposure at f/2 is 1/8000 s, and at f/2.8 it is 1/4000 s. A camera with a flash sync speed of 1/200 s would oblige you to stop down to f/11 or to resort to high-speed sync with its loss of power. The Q3 43 synchronises at 1/2000 s with the full power of the flash.</p>
+  <div class="eq">
+    EV = log2(N² / t)   <span data-lang="es">con ISO 100</span><span data-lang="en">at ISO 100</span><br>
+    <span data-lang="es">Sol pleno:</span><span data-lang="en">Full sun:</span> EV 15 → f/2.8 · 1/4000 s · ISO 100  → f/2.8 · 1/2000 s · ISO 50<br>
+    <span data-lang="es">Con ISO 50 y 1/2000 s: f/2.8 sol pleno, f/2 solo si el sol está velado (EV 14) o con filtro ND</span><span data-lang="en">At ISO 50 and 1/2000 s: f/2.8 in full sun, f/2 only with hazy sun (EV 14) or an ND filter</span>
+  </div>
+  <h3 data-lang="es">Relleno (fill) de retrato</h3>
+  <h3 data-lang="en">Portrait fill flash</h3>
+  <ol data-lang="es">
+    <li>Modo M, obturador mecánico, ISO 100 o 50, modo de flash <span class="menu">Manual</span>.</li>
+    <li>Exponga el fondo a −1 EV respecto de la lectura ponderada a realces. Ejemplo: cielo y mar, ISO 100, f/2.8, 1/2000 s.</li>
+    <li>Compensación de flash −1 a −1 2/3 EV. El sujeto queda un tercio a un paso por debajo del gris medio, con las sombras del rostro abiertas y aspecto natural.</li>
+    <li>Distancia límite: con NG 60 e ISO 100 a f/2.8, d_max ≈ 21 m a potencia plena; en la práctica, con la pérdida por difusor y con el pulso recortado a 1/2000 s (ver abajo), cuente con la mitad.</li>
+  </ol>
+  <ol data-lang="en">
+    <li>M mode, mechanical shutter, ISO 100 or 50, flash mode <span class="menu">Manual</span>.</li>
+    <li>Expose the background at −1 EV relative to the highlight-weighted reading. Example: sky and sea, ISO 100, f/2.8, 1/2000 s.</li>
+    <li>Flash exposure compensation of −1 to −1 2/3 EV. The subject sits a third to a full stop below middle grey, with the shadows of the face opened up and a natural look.</li>
+    <li>Limiting distance: with GN 60 and ISO 100 at f/2.8, d_max ≈ 21 m at full power; in practice, with the loss to the diffuser and with the pulse clipped at 1/2000 s (see below), reckon on half of that.</li>
+  </ol>
+  <h3 data-lang="es">El pulso del flash frente a la ventana de 1/2000 s</h3>
+  <h3 data-lang="en">The flash pulse against the 1/2000 s window</h3>
+  <p data-lang="es">A potencia plena, un flash de zapata tiene una duración t.5 del orden de 1/300 s a 1/1000 s y una t.1 de 1/150 s a 1/400 s. La ventana del obturador a 1/2000 s dura 500 µs. Por tanto, a potencia plena el obturador se cierra antes de que el pulso termine y una fracción notable de la energía se pierde. Al bajar la potencia, el pulso se acorta drásticamente (a 1/16 puede estar en 1/10000 s) y cabe entero. El TTL de un flash de sistema tiene en cuenta esta relación y anticipa el disparo; con flashes de terceros disparados por el contacto central, la sincronización a 1/2000 s puede fallar (hay informes con Profoto A2 en la Q3). Si necesita máxima energía a 1/2000 s, mida con la unidad concreta.</p>
+  <p data-lang="en">At full power, a shoe-mount flash has a t.5 pulse duration of the order of 1/300 s to 1/1000 s and a t.1 of 1/150 s to 1/400 s. The shutter window at 1/2000 s lasts 500 µs. At full power, therefore, the shutter closes before the pulse has ended and a notable fraction of the energy is lost. As the power is reduced, the pulse shortens drastically (at 1/16 it may be down to 1/10000 s) and fits entirely within the window. The TTL of a system flash takes this relation into account and anticipates the firing; with third-party flashes triggered through the centre contact, synchronisation at 1/2000 s may fail (there are reports with the Profoto A2 on the Q3). If you need maximum energy at 1/2000 s, measure it with the particular unit.</p>
+  <div class="grid2">
+    <div>
+      <svg viewBox="0 0 460 150" width="100%" role="img" aria-label="Ventana del obturador y pulso a potencia plena" data-lang="es">
+        <rect x="40" y="20" width="400" height="110" fill="#fff" stroke="#d6d6d2"/>
+        <rect x="60" y="30" width="60" height="90" fill="#26282b" opacity=".12"/>
+        <text x="62" y="26">obturador abierto 500 µs</text>
+        <path d="M60 118 Q75 30 100 60 T160 100 T260 115 T430 118" fill="none" stroke="#d70f1c" stroke-width="2.5"/>
+        <text x="200" y="60">pulso a 1/1: t.1 ≈ 3 ms</text>
+        <text x="200" y="76">energía perdida tras el cierre</text>
+        <text x="40" y="145">0</text><text x="400" y="145">t (ms)</text>
+      </svg>
+      <svg viewBox="0 0 460 150" width="100%" role="img" aria-label="Shutter window and pulse at full power" data-lang="en">
+        <rect x="40" y="20" width="400" height="110" fill="#fff" stroke="#d6d6d2"/>
+        <rect x="60" y="30" width="60" height="90" fill="#26282b" opacity=".12"/>
+        <text x="62" y="26">shutter open 500 µs</text>
+        <path d="M60 118 Q75 30 100 60 T160 100 T260 115 T430 118" fill="none" stroke="#d70f1c" stroke-width="2.5"/>
+        <text x="200" y="60">pulse at 1/1: t.1 ≈ 3 ms</text>
+        <text x="200" y="76">energy lost after the shutter closes</text>
+        <text x="40" y="145">0</text><text x="400" y="145">t (ms)</text>
+      </svg>
+    </div>
+    <div>
+      <svg viewBox="0 0 460 150" width="100%" role="img" aria-label="Ventana del obturador y pulso a potencia reducida" data-lang="es">
+        <rect x="40" y="20" width="400" height="110" fill="#fff" stroke="#d6d6d2"/>
+        <rect x="60" y="30" width="60" height="90" fill="#26282b" opacity=".12"/>
+        <text x="62" y="26">obturador abierto 500 µs</text>
+        <path d="M60 118 Q66 30 76 70 T100 116 T430 118" fill="none" stroke="#d70f1c" stroke-width="2.5"/>
+        <text x="200" y="60">pulso a 1/16: t.1 ≈ 0,15 ms</text>
+        <text x="200" y="76">energía íntegra dentro de la ventana</text>
+        <text x="40" y="145">0</text><text x="400" y="145">t (ms)</text>
+      </svg>
+      <svg viewBox="0 0 460 150" width="100%" role="img" aria-label="Shutter window and pulse at reduced power" data-lang="en">
+        <rect x="40" y="20" width="400" height="110" fill="#fff" stroke="#d6d6d2"/>
+        <rect x="60" y="30" width="60" height="90" fill="#26282b" opacity=".12"/>
+        <text x="62" y="26">shutter open 500 µs</text>
+        <path d="M60 118 Q66 30 76 70 T100 116 T430 118" fill="none" stroke="#d70f1c" stroke-width="2.5"/>
+        <text x="200" y="60">pulse at 1/16: t.1 ≈ 0.15 ms</text>
+        <text x="200" y="76">full energy within the window</text>
+        <text x="40" y="145">0</text><text x="400" y="145">t (ms)</text>
+      </svg>
+    </div>
+  </div>
+  <p data-lang="es">Conclusión operativa: a 1/2000 s el flash rinde como si tuviera dos tercios o la mitad de su número guía nominal. Para dominar el sol a distancias mayores de 3 a 4 m, cierre a f/4 o f/5.6 y baje a 1/500 s o 1/1000 s: el ambiente se compensa cerrando diafragma y el flash gana ventana. Como el ISO afecta igual a ambas luces, no sirve para cambiar la relación; sirve para ampliar el alcance cuando el diafragma ya está decidido.</p>
+  <p data-lang="en">Operating conclusion: at 1/2000 s the flash performs as though it had two thirds or one half of its nominal guide number. To overpower the sun at distances greater than 3 to 4 m, stop down to f/4 or f/5.6 and drop to 1/500 s or 1/1000 s: the ambient light is compensated by closing the aperture and the flash gains window. Since the ISO affects both lights equally, it does not serve to change the ratio between them; it serves to extend the range once the aperture has been decided.</p>
+</section>
+
+<section id="s7">
+  <h2><span class="n">07</span><span data-lang="es">Con poca luz: ambiente, arrastre y rebote</span><span data-lang="en">In low light: ambient, dragging the shutter and bounce</span></h2>
+  <p data-lang="es">En interiores el problema se invierte: sobra capacidad de flash y falta luz ambiente. Si deja que el flash haga todo el trabajo, el fondo cae a negro y aparece el aspecto de foto de carné. El objetivo es equilibrar.</p>
+  <p data-lang="en">Indoors the problem is inverted: there is flash capacity to spare and a shortage of ambient light. If you let the flash do all the work, the background falls to black and the look of a passport photograph appears. The aim is to balance the two.</p>
+  <h3 data-lang="es">Arrastrar el obturador</h3>
+  <h3 data-lang="en">Dragging the shutter</h3>
+  <ol data-lang="es">
+    <li>Modo M o A con modo de flash <span class="menu">Sincronización larga</span>, obturador mecánico.</li>
+    <li>ISO fijo entre 800 y 3200. La Q3 43 rinde limpia a 3200 y el TTL agradece no tener que trabajar en el límite de potencia. Evite Auto ISO con flash: en P y A la cámara tiende a fijar el ISO más bajo posible dentro de su banda de tiempos y el ambiente desaparece.</li>
+    <li>Tiempo entre 1/15 s y 1/60 s con el estabilizador activo. El destello congela al sujeto; el ambiente se registra con ligera trepidación en el fondo, que a estas velocidades apenas se nota a f/2.</li>
+    <li>Compensación de flash entre 0 y −2/3 EV para que el destello no delate su presencia.</li>
+    <li><span class="menu">Punto de sincronización</span> en “Fin de exposición” si hay movimiento y tiempos por debajo de 1/30 s.</li>
+  </ol>
+  <ol data-lang="en">
+    <li>M or A mode with flash mode <span class="menu">Slow Sync</span>, mechanical shutter.</li>
+    <li>A fixed ISO between 800 and 3200. The Q3 43 performs cleanly at 3200 and the TTL is grateful not to have to work at the limit of its power. Avoid Auto ISO with flash: in P and A the camera tends to set the lowest ISO possible within its band of shutter times, and the ambient light disappears.</li>
+    <li>A shutter time between 1/15 s and 1/60 s with the stabiliser active. The burst freezes the subject; the ambient light is recorded with slight shake in the background, which at these speeds is barely noticeable at f/2.</li>
+    <li>Flash exposure compensation between 0 and −2/3 EV, so that the burst does not betray its presence.</li>
+    <li><span class="menu">Sync Point</span> at “End of Exposure” if there is movement and shutter times below 1/30 s.</li>
+  </ol>
+  <h3 data-lang="es">Rebote</h3>
+  <h3 data-lang="en">Bounce</h3>
+  <p data-lang="es">El SF 40 y el SF 60 giran e inclinan el reflector. Rebotar en un techo blanco a 3 m convierte la fuente puntual en una superficie extensa; la luz suaviza y la caída con la distancia sujeto/fondo se reduce, porque la distancia efectiva fuente/sujeto crece. El coste es de 2 a 3 EV, que el TTL absorbe elevando Q hasta el límite. Con NG 60, ISO 1600 y f/2, el alcance directo teórico es 120 m; rebotado quedan de 15 a 20 m efectivos, sobrados para cualquier interior. Techos coloreados tiñen la luz: fije el balance de blancos en “Flash” y corrija en revelado, o use la tarjeta reflectora del SF 60 para una porción de luz directa neutra.</p>
+  <p data-lang="en">The SF 40 and the SF 60 swivel and tilt the reflector. Bouncing off a white ceiling at 3 m turns the point source into an extended surface; the light softens and the fall-off with the subject-to-background distance is reduced, because the effective source-to-subject distance grows. The cost is 2 to 3 EV, which the TTL absorbs by raising Q to the limit. With GN 60, ISO 1600 and f/2, the theoretical direct range is 120 m; bounced, 15 to 20 m remain effective, ample for any interior. Coloured ceilings tint the light: set the white balance to “Flash” and correct in processing, or use the SF 60's bounce card for a portion of neutral direct light.</p>
+  <h3 data-lang="es">Balance de blancos</h3>
+  <h3 data-lang="en">White balance</h3>
+  <p data-lang="es">El tubo de xenón de las unidades Leica ronda los 5600 K. En interiores con luz cálida (2800 a 3200 K) mezclar sin filtro produce sujeto neutro y fondo naranja. Es una elección estética; si quiere coherencia, coloque un gel CTO 1/2 o CTO completo en el flash y ajuste el balance de blancos a 3200 K. El TTL no se ve afectado por el gel, ya que mide a través del objetivo la luz que realmente vuelve.</p>
+  <p data-lang="en">The xenon tube of the Leica units runs at around 5600 K. Indoors under warm light (2800 to 3200 K), mixing without a gel produces a neutral subject and an orange background. It is an aesthetic choice; if you want coherence, fit a 1/2 CTO or a full CTO gel on the flash and set the white balance to 3200 K. The TTL is unaffected by the gel, since it measures through the lens the light that actually returns.</p>
+  <div class="note amber" data-lang="es"><b>Enfoque en penumbra</b>El SF 60 aporta un iluminador AF propio, pero la Q3 43 usa el suyo integrado. Con AF puntual y detección de rostros el sistema funciona bien hasta unos −4 EV; en escenas más oscuras pase a MF con focus peaking o preajuste la distancia.</div>
+  <div class="note amber" data-lang="en"><b>Focusing in dim light</b>The SF 60 provides an AF illuminator of its own, but the Q3 43 uses its built-in one. With spot AF and face detection the system works well down to about −4 EV; in darker scenes switch to MF with focus peaking, or preset the distance.</div>
+</section>
+
+<section id="s8">
+  <h2><span class="n">08</span><span data-lang="es">Velocidad alta y HSS</span><span data-lang="en">High shutter speeds and HSS</span></h2>
+  <p data-lang="es">La sincronía de alta velocidad (HSS) resuelve un problema de obturadores de plano focal: por encima de la velocidad de sincronía el sensor nunca está descubierto por completo, y el flash emite un tren de pulsos durante todo el recorrido de la rendija. Ese tren desperdicia entre 2 y 3 EV de energía. La Q3 43 no tiene ese problema porque a 1/2000 s el obturador central sigue abriendo todo el fotograma.</p>
+  <p data-lang="en">High-speed sync (HSS) solves a problem peculiar to focal-plane shutters: above the flash sync speed the sensor is never fully uncovered, and the flash emits a train of pulses throughout the travel of the slit. That train wastes between 2 and 3 EV of energy. The Q3 43 does not have that problem, because at 1/2000 s the leaf shutter still opens the whole frame.</p>
+  <table>
+    <tr><th data-lang="es">Tiempo</th><th data-lang="en">Shutter time</th><th data-lang="es">Obturador</th><th data-lang="en">Shutter</th><th>Flash</th><th data-lang="es">Comentario</th><th data-lang="en">Comment</th></tr>
+    <tr><td class="mono" data-lang="es">120 s a 1/2000 s</td><td class="mono" data-lang="en">120 s to 1/2000 s</td><td data-lang="es">Mecánico central</td><td data-lang="en">Mechanical leaf</td><td data-lang="es">TTL normal, potencia íntegra (recorte parcial solo a 1/1000 s y 1/2000 s con potencia plena)</td><td data-lang="en">Normal TTL, full power (partial clipping only at 1/1000 s and 1/2000 s at full power)</td><td data-lang="es">El rango de trabajo del flash. Cubre todo lo que en otras cámaras exige HSS.</td><td data-lang="en">The flash's working range. It covers everything that on other cameras demands HSS.</td></tr>
+    <tr><td class="mono" data-lang="es">1/2500 s a 1/16000 s</td><td class="mono" data-lang="en">1/2500 s to 1/16000 s</td><td data-lang="es">Electrónico</td><td data-lang="en">Electronic</td><td data-lang="es">No dispara</td><td data-lang="en">Does not fire</td><td data-lang="es">La hoja de especificaciones menciona un paso a modo lineal con unidades HSS, pero como el mecánico termina en 1/2000 s, en la práctica por encima de ese valor solo interviene el electrónico, que no admite flash.</td><td data-lang="en">The specification sheet mentions a switch to linear mode with HSS units, but since the mechanical shutter ends at 1/2000 s, in practice above that value only the electronic shutter is involved, and it admits no flash.</td></tr>
+  </table>
+  <p data-lang="es">El modo HSS que el SF 60 y el SF 64 anuncian hasta 1/8000 s está pensado para las series SL, M y S. Con la Q3 43 déjelo desactivado en la unidad: activarlo no aporta nada y algunas versiones de firmware fuerzan el modo lineal por debajo de la sincronía, con la consiguiente pérdida de energía y variación de resultados. Si en la Q3 43 le aparecen fotos oscuras a 1/2000 s con potencia sobrada, compruebe primero que el HSS de la unidad está apagado y el tipo de obturador está en <span class="menu">Mecánico</span>.</p>
+  <p data-lang="en">The HSS mode that the SF 60 and the SF 64 advertise up to 1/8000 s is intended for the SL, M and S series. With the Q3 43 leave it switched off on the unit: enabling it contributes nothing, and some firmware versions force linear mode below the sync speed, with the consequent loss of energy and variation of results. If on the Q3 43 you find dark frames at 1/2000 s with power to spare, check first that the unit's HSS is off and that the shutter type is set to <span class="menu">Mechanical</span>.</p>
+  <p data-lang="es">Cuándo tiene sentido ir a 1/2000 s: congelar agua, salpicaduras o gestos con luz ambiente presente, o abrir a f/2 en exteriores. Recuerde que la congelación del sujeto la aporta el destello (0,1 a 1 ms), no el obturador; el tiempo corto solo elimina la contribución del ambiente al movimiento.</p>
+  <p data-lang="en">When going to 1/2000 s makes sense: freezing water, splashes or gestures with ambient light present, or opening to f/2 outdoors. Remember that it is the burst (0.1 to 1 ms) that freezes the subject, not the shutter; the short time merely removes the ambient light's contribution to the movement.</p>
+</section>
+
+<section id="s9">
+  <h2><span class="n">09</span><span data-lang="es">Compensación de flash: quién manda</span><span data-lang="en">Flash exposure compensation: who is in charge</span></h2>
+  <p data-lang="es">Hay dos lugares donde fijar la compensación de flash y no se suman. La cámara ofrece −3 a +3 EV en pasos de 1/3. El SF 40 ofrece ±2 EV en pasos de 1/2 y el SF 60 ±2 EV en pasos de 1/3, ambos en la propia unidad. Cuando la unidad tiene un valor distinto de cero, ese valor sustituye al de la cámara y el menú de la cámara queda sin efecto. La recomendación es dejar la unidad a 0 y trabajar siempre desde el menú de la cámara, donde el valor se ve en la línea de estado junto al icono de flash.</p>
+  <p data-lang="en">There are two places in which to set the flash exposure compensation, and they do not add together. The camera offers −3 to +3 EV in 1/3 steps. The SF 40 offers ±2 EV in 1/2 steps and the SF 60 ±2 EV in 1/3 steps, both on the unit itself. When the unit holds a value other than zero, that value replaces the camera's and the camera menu is left without effect. The recommendation is to leave the unit at 0 and always work from the camera menu, where the value is visible on the status line beside the flash icon.</p>
+  <table>
+    <tr><th data-lang="es">Situación</th><th data-lang="en">Situation</th><th data-lang="es">Compensación de flash sugerida</th><th data-lang="en">Suggested flash exposure compensation</th><th data-lang="es">Motivo</th><th data-lang="en">Reason</th></tr>
+    <tr><td data-lang="es">Relleno de día, fondo bien expuesto</td><td data-lang="en">Daylight fill, background well exposed</td><td class="mono" data-lang="es">−1 a −1 2/3 EV</td><td class="mono" data-lang="en">−1 to −1 2/3 EV</td><td data-lang="es">El flash debe insinuar, no iluminar.</td><td data-lang="en">The flash should suggest, not illuminate.</td></tr>
+    <tr><td data-lang="es">Fondo a −1 EV, sujeto como protagonista</td><td data-lang="en">Background at −1 EV, subject as protagonist</td><td class="mono" data-lang="es">−1/3 a −2/3 EV</td><td class="mono" data-lang="en">−1/3 to −2/3 EV</td><td data-lang="es">Sujeto justo por debajo del gris medio, piel natural.</td><td data-lang="en">Subject just below middle grey, natural skin.</td></tr>
+    <tr><td data-lang="es">Sujeto claro sobre fondo blanco</td><td data-lang="en">Light subject against a white background</td><td class="mono" data-lang="es">+2/3 a +1 EV</td><td class="mono" data-lang="en">+2/3 to +1 EV</td><td data-lang="es">El TTL intentará oscurecer el blanco a gris.</td><td data-lang="en">The TTL will try to darken the white to grey.</td></tr>
+    <tr><td data-lang="es">Sujeto oscuro sobre fondo negro</td><td data-lang="en">Dark subject against a black background</td><td class="mono" data-lang="es">−2/3 a −1 EV</td><td class="mono" data-lang="en">−2/3 to −1 EV</td><td data-lang="es">El TTL intentará aclarar el negro a gris.</td><td data-lang="en">The TTL will try to lighten the black to grey.</td></tr>
+    <tr><td data-lang="es">Rebote en techo alto</td><td data-lang="en">Bounce off a high ceiling</td><td class="mono" data-lang="es">0 a +1/3 EV</td><td class="mono" data-lang="en">0 to +1/3 EV</td><td data-lang="es">El TTL suele quedarse corto cuando trabaja cerca de la potencia máxima.</td><td data-lang="en">The TTL tends to fall short when working near maximum power.</td></tr>
+  </table>
+</section>
+
+<section id="s10">
+  <h2><span class="n">10</span><span data-lang="es">Flash fuera de cámara con TTL</span><span data-lang="en">Off-camera flash with TTL</span></h2>
+  <p data-lang="es">El controlador SF C1 va en la zapata, habla TTL con la cámara y transmite por radio a 2,4 GHz a unidades SF 60 (y a Nissin i60A con firmware Leica). Permite hasta tres grupos con relación de potencia entre ellos, compensación por grupo, TTL o manual por grupo, y control del zoom del reflector. Cuando el SF C1 está montado, la ponderación central del TTL sigue aplicándose: el predestello lo emiten las unidades remotas y la cámara mide igual.</p>
+  <p data-lang="en">The SF C1 controller goes on the shoe, speaks TTL with the camera and transmits by radio at 2.4 GHz to SF 60 units (and to the Nissin i60A with Leica firmware). It allows up to three groups with a power ratio between them, compensation per group, TTL or manual per group, and control of the reflector zoom. When the SF C1 is mounted, the TTL's centre weighting still applies: the pre-flash is emitted by the remote units and the camera meters just the same.</p>
+  <ul data-lang="es">
+    <li>Ventaja del obturador central fuera de cámara: puede colocar un SF 60 con paraguas a 1,5 m del sujeto, en exterior, y trabajar a f/2 y 1/2000 s con relación de potencia real, sin HSS.</li>
+    <li>El SF C1 admite hasta 8 canales; si en un evento coincide con otros sistemas Nissin Air, cambie de canal.</li>
+    <li>Profoto ofrece la versión “L” de su Air Remote TTL con protocolo Leica; con ella las unidades Profoto de estudio funcionan en TTL con la Q3 43. Los informes de sincronía a 1/2000 s con estas unidades son variables por la duración del pulso a alta potencia; verifique con su equipo.</li>
+    <li>Cualquier disparador de radio genérico con contacto central dispara los flashes en manual. Es una opción sólida cuando la escena es estática y prefiere el control absoluto.</li>
+  </ul>
+  <ul data-lang="en">
+    <li>The advantage of the leaf shutter off camera: you may place an SF 60 with an umbrella 1.5 m from the subject, outdoors, and work at f/2 and 1/2000 s with a real power ratio, without HSS.</li>
+    <li>The SF C1 accepts up to 8 channels; if at an event you find yourself alongside other Nissin Air systems, change channel.</li>
+    <li>Profoto offers the “L” version of its Air Remote TTL with the Leica protocol; with it, Profoto studio units work in TTL with the Q3 43. Reports of synchronisation at 1/2000 s with these units vary, on account of the pulse duration at high power; verify with your own equipment.</li>
+    <li>Any generic radio trigger with a centre contact will fire the flashes in manual. It is a sound option when the scene is static and you prefer absolute control.</li>
+  </ul>
+</section>
+
+<section id="s11">
+  <h2><span class="n">11</span><span data-lang="es">Calculadora de alcance y relación flash/ambiente</span><span data-lang="en">Calculator of range and flash-to-ambient ratio</span></h2>
+  <div class="tool">
+    <h3 data-lang="es">Alcance por número guía</h3>
+    <h3 data-lang="en">Range from the guide number</h3>
+    <div class="ctrl">
+      <div><label for="gn" data-lang="es">Número guía (m, ISO 100)</label><label for="gn" data-lang="en">Guide number (m, ISO 100)</label><input id="gn" type="number" value="18" min="5" max="200" step="1"></div>
+      <div><label for="iso">ISO</label><select id="iso"><option>50</option><option selected>100</option><option>200</option><option>400</option><option>800</option><option>1600</option><option>3200</option><option>6400</option></select></div>
+      <div><label for="ap" data-lang="es">Diafragma f/</label><label for="ap" data-lang="en">Aperture f/</label><select id="ap"><option>2</option><option>2.8</option><option>4</option><option>5.6</option><option>8</option><option>11</option><option>16</option></select></div>
+      <div><label for="pw" data-lang="es">Fracción de potencia</label><label for="pw" data-lang="en">Power fraction</label><select id="pw"><option value="1">1/1</option><option value="0.5">1/2</option><option value="0.25">1/4</option><option value="0.125">1/8</option><option value="0.0625">1/16</option><option value="0.03125">1/32</option></select></div>
+      <div><label for="loss" data-lang="es">Pérdida (rebote, difusor) EV</label><label for="loss" data-lang="en">Loss (bounce, diffuser) EV</label><select id="loss"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+      <div><label for="clip" data-lang="es">Ventana 1/2000 s con potencia plena</label><label for="clip" data-lang="en">1/2000 s window at full power</label><select id="clip"><option value="0" data-tk="oClipNo">no aplica</option><option value="1" data-tk="oClipYes">aplica (recorte ≈ 1 EV)</option></select></div>
+    </div>
+    <div class="out">
+      <div><b id="o_gn">18,0</b><small data-lang="es">NG efectivo (m)</small><small data-lang="en">Effective GN (m)</small></div>
+      <div><b id="o_d">9,0 m</b><small data-lang="es">Distancia máxima directa</small><small data-lang="en">Maximum direct distance</small></div>
+      <div><b id="o_d3">3 m: 1/100</b><small data-lang="es">Potencia necesaria a 3 m</small><small data-lang="en">Power required at 3 m</small></div>
+      <div><b id="o_hint"></b><small data-lang="es">Nota</small><small data-lang="en">Note</small></div>
+    </div>
+    <p style="margin-top:14px;font-size:14px;color:var(--ink2)" data-lang="es">Modelo: d = NG·√(ISO/100)·√P·2^(−pérdida/2)/N. La casilla de recorte resta 1 EV cuando se dispara a potencia plena en 1/2000 s. El valor predeterminado es el NG 18 del Godox iT32. Los flashes con zoom indican el NG a la posición larga del reflector; a 43 mm un SF 60 rinde en torno a NG 36; ajuste la primera casilla a su unidad y foco.</p>
+    <p style="margin-top:14px;font-size:14px;color:var(--ink2)" data-lang="en">Model: d = NG·√(ISO/100)·√P·2^(−loss/2)/N. The clipping box subtracts 1 EV when firing at full power at 1/2000 s. The default value is the GN 18 of the Godox iT32. Flashes with a zoom reflector quote the guide number at the long position of the reflector; at 43 mm an SF 60 delivers around GN 36; set the first box to your own unit and focal length.</p>
+  </div>
+
+  <div class="tool">
+    <h3 data-lang="es">Ambiente frente a flash en exteriores</h3>
+    <h3 data-lang="en">Ambient versus flash outdoors</h3>
+    <div class="ctrl">
+      <div><label for="ev" data-lang="es">EV de la escena (ISO 100)</label><label for="ev" data-lang="en">Scene EV (ISO 100)</label><select id="ev"><option value="15" data-tk="oEv15">15 sol pleno</option><option value="14" data-tk="oEv14">14 sol velado</option><option value="13" data-tk="oEv13">13 nublado claro</option><option value="12" data-tk="oEv12">12 nublado</option><option value="11" data-tk="oEv11">11 sombra</option><option value="9" data-tk="oEv9">9 atardecer</option></select></div>
+      <div><label for="ap2" data-lang="es">Diafragma f/</label><label for="ap2" data-lang="en">Aperture f/</label><select id="ap2"><option>2</option><option selected>2.8</option><option>4</option><option>5.6</option><option>8</option></select></div>
+      <div><label for="iso2">ISO</label><select id="iso2"><option>50</option><option selected>100</option><option>200</option><option>400</option></select></div>
+      <div><label for="under" data-lang="es">Fondo respecto al gris medio (EV)</label><label for="under" data-lang="en">Background relative to middle grey (EV)</label><select id="under"><option value="0">0</option><option value="-1" selected>−1</option><option value="-2">−2</option></select></div>
+    </div>
+    <div class="out">
+      <div><b id="o_t">1/4000</b><small data-lang="es">Tiempo requerido</small><small data-lang="en">Shutter time required</small></div>
+      <div><b id="o_ok">Fuera de sincronía</b><small data-lang="es">Estado con obturador central</small><small data-lang="en">Status with the leaf shutter</small></div>
+      <div><b id="o_fix"></b><small data-lang="es">Cómo entrar en 1/2000 s</small><small data-lang="en">How to get within 1/2000 s</small></div>
+    </div>
+  </div>
+</section>
+
+<section id="s12">
+  <h2><span class="n">12</span><span data-lang="es">Recetas de arranque</span><span data-lang="en">Starting recipes</span></h2>
+  <div class="grid2">
+    <div>
+      <h3 data-lang="es">Retrato al sol, relleno suave</h3>
+      <h3 data-lang="en">Portrait in sunlight, gentle fill</h3>
+      <ul data-lang="es">
+        <li>M · obturador mecánico · ISO 100 · f/2.8 · 1/2000 s</li>
+        <li>Medición ponderada a realces, fondo a −2/3 EV</li>
+        <li>Modo de flash Manual · compensación −1 1/3 EV</li>
+        <li>iT32 sin difusor, cabezal frontal, distancia ≤ 3 m (NG 18 con recorte a 1/2000 s)</li>
+      </ul>
+      <ul data-lang="en">
+        <li>M · mechanical shutter · ISO 100 · f/2.8 · 1/2000 s</li>
+        <li>Highlight-weighted metering, background at −2/3 EV</li>
+        <li>Flash mode Manual · compensation −1 1/3 EV</li>
+        <li>iT32 without diffuser, head forward, distance ≤ 3 m (GN 18 with clipping at 1/2000 s)</li>
+      </ul>
+      <h3 data-lang="es">Interior de evento</h3>
+      <h3 data-lang="en">Event interior</h3>
+      <ul data-lang="es">
+        <li>M · mecánico · ISO 1600 · f/2 · 1/30 s (NG 18 rebotado exige ISO alto)</li>
+        <li>Sincronización larga · Fin de exposición</li>
+        <li>Rebote a techo, tarjeta reflectora fuera · compensación −1/3 EV</li>
+        <li>WB Flash, DNG</li>
+      </ul>
+      <ul data-lang="en">
+        <li>M · mechanical · ISO 1600 · f/2 · 1/30 s (GN 18 bounced demands a high ISO)</li>
+        <li>Slow Sync · End of Exposure</li>
+        <li>Bounce off the ceiling, bounce card out · compensation −1/3 EV</li>
+        <li>Flash WB, DNG</li>
+      </ul>
+    </div>
+    <div>
+      <h3 data-lang="es">Objetos, congelar movimiento con fondo</h3>
+      <h3 data-lang="en">Objects, freezing movement with a background</h3>
+      <ul data-lang="es">
+        <li>M · mecánico · ISO 400 · f/5.6 · 1/1000 s</li>
+        <li>iT32 fuera de cámara como receptor con X3 L en la zapata, TTL grupo A, o manual 1/8 (pulso corto)</li>
+        <li>Compensación 0, verificar por histograma</li>
+      </ul>
+      <ul data-lang="en">
+        <li>M · mechanical · ISO 400 · f/5.6 · 1/1000 s</li>
+        <li>iT32 off camera as receiver with the X3 L on the shoe, TTL group A, or manual 1/8 (short pulse)</li>
+        <li>Compensation 0, verify by histogram</li>
+      </ul>
+      <h3 data-lang="es">Diagnóstico si algo falla</h3>
+      <h3 data-lang="en">Diagnosis if something fails</h3>
+      <ul data-lang="es">
+        <li>No dispara: tipo de obturador en electrónico o híbrido por encima de 1/2000 s.</li>
+        <li>Fotos oscuras a 1/2000 s: HSS activo en el iT32 o pulso demasiado largo a potencia plena.</li>
+        <li>La cámara no ve el flash: se acopló con la cámara encendida; apague, acople X5L e iT32, encienda flash y luego cámara.</li>
+        <li>Compensación sin efecto: hay un valor fijado en la unidad que sustituye al de la cámara.</li>
+        <li>Fondo negro en interiores: modo P/A sin sincronización larga o Auto ISO activo.</li>
+      </ul>
+      <ul data-lang="en">
+        <li>It does not fire: shutter type set to electronic or hybrid above 1/2000 s.</li>
+        <li>Dark frames at 1/2000 s: HSS enabled on the iT32, or a pulse too long at full power.</li>
+        <li>The camera does not see the flash: it was attached with the camera switched on; switch off, attach the X5L and the iT32, switch on the flash and then the camera.</li>
+        <li>Compensation with no effect: a value is set on the unit which replaces the camera's.</li>
+        <li>Black background indoors: P/A mode without Slow Sync, or Auto ISO active.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</div></main>
+
+<footer>
+  <div data-lang="es">Datos de sincronía, medición y compatibilidad tomados de las especificaciones y del manual de la Leica Q3 43 (edición 2024/9) de los manuales de las unidades SF 40 y SF 60 y de la ficha técnica del Godox iT32 y del módulo X5L (2026). Los valores de duración de pulso son órdenes de magnitud típicos de flashes de zapata; verifique los de su unidad. Sin garantía de firmware futuro.</div>
+  <div data-lang="en">Sync, metering and compatibility data taken from the specifications and the manual of the Leica Q3 43 (2024/9 edition), from the manuals of the SF 40 and SF 60 units and from the data sheets of the Godox iT32 and the X5L module (2026). The pulse duration figures are typical orders of magnitude for shoe-mount flashes; verify those of your own unit. No warranty as to future firmware.</div>
+</footer>
+
+<script>
+"use strict";
+(function(){
+  const $=id=>document.getElementById(id);
+
+  /* ---------- cadenas generadas desde JS / JS-generated strings ---------- */
+  const T={
+    es:{
+      at3m:"3 m: ", d3Short:"3 m: insuficiente",
+      hintShort:"Alcance corto: suba ISO o abra",
+      hintFits:"Pulso corto, cabe en 1/2000 s",
+      hintLong:"Cerca de plena potencia: pulso largo",
+      inSync:"Dentro de sincronía", outSync:"Fuera de sincronía",
+      noChange:"Sin cambios", fixA:"Cerrar a f/", fixB:" o ND ", fixC:" EV",
+      oClipNo:"no aplica", oClipYes:"aplica (recorte ≈ 1 EV)",
+      oEv15:"15 sol pleno", oEv14:"14 sol velado", oEv13:"13 nublado claro",
+      oEv12:"12 nublado", oEv11:"11 sombra", oEv9:"9 atardecer"
+    },
+    en:{
+      at3m:"3 m: ", d3Short:"3 m: insufficient",
+      hintShort:"Short range: raise the ISO or open up",
+      hintFits:"Short pulse, fits within 1/2000 s",
+      hintLong:"Near full power: long pulse",
+      inSync:"Within sync", outSync:"Beyond sync",
+      noChange:"No change", fixA:"Stop down to f/", fixB:" or ND ", fixC:" EV",
+      oClipNo:"not applicable", oClipYes:"applies (≈ 1 EV clipping)",
+      oEv15:"15 full sun", oEv14:"14 hazy sun", oEv13:"13 bright overcast",
+      oEv12:"12 overcast", oEv11:"11 shade", oEv9:"9 sunset"
+    }
+  };
+  const lang=()=>document.documentElement.lang==="en"?"en":"es";
+  const t=k=>T[lang()][k];
+  /* Decimales con punto en inglés, con coma en español. */
+  const fmt=(x,d=1)=>x.toLocaleString(lang()==="en"?"en-GB":"es-ES",{minimumFractionDigits:d,maximumFractionDigits:d});
+
+  /* Las <option> no se duplican con data-lang: se reescriben desde el diccionario. */
+  function relabelOptions(){
+    [].forEach.call(document.querySelectorAll("option[data-tk]"),function(o){
+      const s=t(o.getAttribute("data-tk"));
+      if(s) o.textContent=s;
+    });
+  }
+
+  function calc1(){
+    const gn=parseFloat($('gn').value)||0, iso=parseFloat($('iso').value), N=parseFloat($('ap').value),
+          P=parseFloat($('pw').value), loss=parseFloat($('loss').value), clip=parseFloat($('clip').value);
+    const evLoss=loss+(clip&&P===1?1:0);
+    const gnEff=gn*Math.sqrt(iso/100)*Math.sqrt(P)*Math.pow(2,-evLoss/2);
+    const d=gnEff/N;
+    $('o_gn').textContent=fmt(gnEff);
+    $('o_d').textContent=fmt(d)+' m';
+    const gnFull=gn*Math.sqrt(iso/100)*Math.pow(2,-loss/2);
+    const needP=Math.pow(3*N/gnFull,2);
+    let s;
+    if(needP>1) s=t('d3Short');
+    else{const frac=Math.max(1,Math.round(1/needP)); s=t('at3m')+'1/'+frac;}
+    $('o_d3').textContent=s;
+    $('o_hint').textContent= d<2 ? t('hintShort') : (needP<=0.0625?t('hintFits'):t('hintLong'));
+  }
+  function calc2(){
+    const ev=parseFloat($('ev').value), N=parseFloat($('ap2').value), iso=parseFloat($('iso2').value), under=parseFloat($('under').value);
+    const evIso=ev+Math.log2(iso/100)-under;
+    /* ts, no t: t() es el acceso al diccionario de cadenas. */
+    const ts=N*N/Math.pow(2,evIso);
+    const inv=1/ts;
+    $('o_t').textContent= ts>=1?fmt(ts)+' s':'1/'+Math.round(inv);
+    const ok= inv<=2000;
+    $('o_ok').textContent= ok?t('inSync'):t('outSync');
+    $('o_ok').style.color= ok?'#1a7f37':'#d70f1c';
+    if(ok){$('o_fix').textContent=t('noChange');}
+    else{
+      const stops=Math.log2(inv/2000);
+      const newN=N*Math.pow(2,stops/2);
+      $('o_fix').textContent=t('fixA')+fmt(newN)+t('fixB')+Math.ceil(stops)+t('fixC');
+    }
+  }
+  ['gn','iso','ap','pw','loss','clip'].forEach(id=>$(id).addEventListener('input',calc1));
+  ['ev','ap2','iso2','under'].forEach(id=>$(id).addEventListener('input',calc2));
+  relabelOptions();calc1();calc2();
+
+  /* Repinta lo que depende de t() al cambiar de idioma. El conmutador lo invoca
+     al arrancar, así que el guardián evita ejecutarlo antes de tiempo. */
+  const ready=true;
+  window.onLangChange=function(){
+    if(!ready) return;
+    relabelOptions();calc1();calc2();
+  };
+})();
+</script>
+
+<script>
+"use strict";
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{
+      title:"Flash TTL con la Leica Q3 43. Manual técnico",
+      desc:"Cómo mide, cómo sincroniza y cómo se comporta la Leica Q3 43 con flash TTL: obturador central, predestello, HSS, relleno de día, arrastre del obturador y calculadoras de alcance."
+    },
+    en:{
+      title:"TTL flash with the Leica Q3 43. Technical manual",
+      desc:"How the Leica Q3 43 meters, synchronises and behaves with TTL flash: leaf shutter, pre-flash, HSS, daylight fill, dragging the shutter and range calculators."
+    }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
+</body>
+</html>
