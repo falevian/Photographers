@@ -13,7 +13,7 @@ Photography and light-physics tools that run entirely in the browser.
 
 ## Español
 
-Veinte documentos que resuelven cuestiones fotográficas con el modelo físico o estadístico
+Veintidós documentos que resuelven cuestiones fotográficas con el modelo físico o estadístico
 delante: simuladores, métricas, catálogos, scripts de procesado y su documentación.
 
 Todo el cálculo ocurre en el navegador. No hay servidor, ni cuenta, ni telemetría, y cada
@@ -33,21 +33,17 @@ elección previa se sigue el idioma del navegador.
 | [`simulador-eclipse-coruna.html`](simulador-eclipse-coruna.html) | Encuadre y exposición del eclipse total del 12 de agosto de 2026: si la corona te cabe en el encuadre, horquilla de exposición por fases con la fotometría de Espenak, extinción atmosférica, trípode frente a seguimiento, y ficha de campo imprimible. | 130 KB |
 | [`simulador-flash.html`](simulador-flash.html) | Banco óptico de flash. La dureza de una sombra la fija el tamaño angular de la fuente vista desde el sujeto: sombras, caída de luz por número guía, vencer al sol y balance con la luz ambiente. | 53 KB |
 
-### Carácter óptico
+### El objetivo y el plano nítido
+
+Qué carácter tiene el objetivo y dónde cae realmente el plano nítido. Lo primero son
+las aberraciones que el diseñador decidió no corregir; lo segundo, si el telémetro y el
+ojo aciertan a ponerlo donde uno cree, y qué le hace al objetivo el vidrio del sensor.
 
 | Documento | Qué hace | Peso |
 |---|---|---:|
 | [`caracter-optico-leica-m.html`](caracter-optico-leica-m.html) | 128 objetivos de montura Leica M, de 1925 a 2026, con 32 descriptores cada uno. Reconstruye el disco de desenfoque por trazado geométrico, mide la distancia de carácter entre dos objetivos y devuelve sus vecinos más próximos. | 166 KB |
-
-### Enfocar a mano
-
-Un telémetro no mide la nitidez: mide un desplazamiento angular y lo traduce a
-distancia. Cuánto acierta depende de su base efectiva, del diafragma y de la agudeza
-del ojo.
-
-| Documento | Qué hace | Peso |
-|---|---|---:|
-| [`telemetro-m11.html`](telemetro-m11.html) | Qué ve el ojo por el visor de la M11 y qué queda de ello en el sensor. Seis lienzos que van del parche del telémetro a la rejilla de fotositos, con el error de coseno al recomponer y una tasa de acierto por Montecarlo. | 76 KB |
+| [`telemetro-m11.html`](telemetro-m11.html) | Qué ve el ojo por el visor de la M11 y qué queda de ello en el sensor. Seis lienzos que van del parche del telémetro a la rejilla de fotositos, con el error de coseno al recomponer y una tasa de acierto por Montecarlo. | 90 KB |
+| [`stack-sensor.html`](stack-sensor.html) | Por qué un gran angular calculado para película se deshace en las esquinas de una cámara digital: el vidrio que cubre el sensor es una lámina plano-paralela que el objetivo nunca tuvo en cuenta. Traza los rayos reales por hasta tres láminas y compara dos sensores a la vez. Manual: [`manual-stack-sensor.html`](manual-stack-sensor.html). | 50 KB |
 
 ### Analizar tus propias fotos
 
@@ -62,7 +58,7 @@ la página es su manual; el código está en [`scripts/`](scripts/).
 
 | Documento | Qué hace | Peso |
 |---|---|---:|
-| [`peliculas-icc.html`](peliculas-icc.html) | Cinco películas clásicas modeladas a partir de la respuesta física publicada por el fabricante, no por ajuste visual: el color sale de integrar el espectro a 1 nm entre 380 y 730. Genera perfiles ICC para Capture One, compuestos sobre la respuesta real de tu cámara. Código: [`peliculas.py`](scripts/peliculas/peliculas.py) y [`grano.py`](scripts/peliculas/grano.py). | 74 KB |
+| [`peliculas-icc.html`](peliculas-icc.html) | Cinco películas clásicas modeladas a partir de la respuesta física publicada por el fabricante, no por ajuste visual: el color sale de integrar el espectro a 1 nm entre 380 y 730. Genera perfiles ICC para Capture One, compuestos sobre la respuesta real de tu cámara. Código: [`peliculas.py`](scripts/peliculas/peliculas.py) y [`grano.py`](scripts/peliculas/grano.py). | 75 KB |
 | [`manual-eclipse-hdr.html`](manual-eclipse-hdr.html) | Fusión HDR lineal y aplanado radial de la corona solar a partir de horquillas RAW. El gradiente coronal abarca tres órdenes de magnitud y no se comprime con una curva: se elimina dividiendo por el perfil radial. Código: [`eclipse_hdr.py`](scripts/eclipse/eclipse_hdr.py). | 89 KB |
 | [`manual-procesar-sol.html`](manual-procesar-sol.html) | El disco solar en luz blanca: oscurecimiento del limbo, manchas y granulación. Qué hacer con el gradiente radial antes de tocar el contraste. Código: [`procesar_sol.py`](scripts/eclipse/procesar_sol.py). | 83 KB |
 
@@ -91,6 +87,7 @@ la página es su manual; el código está en [`scripts/`](scripts/).
 | [`guia-simulador.html`](guia-simulador.html) | Guía del banco óptico de flash: qué hace cada control y en qué fórmulas se apoya. |
 | [`manual-flash-ttl-q3.html`](manual-flash-ttl-q3.html) | Flash TTL con la Leica Q3 43: cómo mide, cómo sincroniza y por qué a potencia plena el pulso no cabe entero en la ventana de 1/2000 s. Con dos calculadoras. |
 | [`manual-telemetro-m11.html`](manual-telemetro-m11.html) | Manual del simulador de telémetro, con el modelo físico, la verificación numérica y un anexo ilustrado sobre el disco de Airy. Seis figuras incrustadas. |
+| [`manual-stack-sensor.html`](manual-stack-sensor.html) | Manual del simulador del stack: el modelo de trazado, cómo se leen la mancha RMS y la MTF, y qué es heurístico y qué no. |
 | [`manual-medidas.html`](manual-medidas.html) | Referencia de todas las medidas del análisis de centrado: qué es cada una, cómo se define, cómo se interpreta y hasta dónde llega. |
 
 ### El código
@@ -128,7 +125,7 @@ python3 -m http.server 8000
 
 ## English
 
-Twenty documents that settle photographic questions with the physical or statistical
+Twenty-two documents that settle photographic questions with the physical or statistical
 model in plain sight: simulators, metrics, catalogues, processing scripts and their
 documentation.
 
@@ -149,21 +146,17 @@ address. With no prior choice, the browser's language is followed.
 | [`simulador-eclipse-coruna.html`](simulador-eclipse-coruna.html) | Framing and exposure for the total solar eclipse of 12 August 2026: whether the corona fits your frame, the exposure bracket phase by phase using Espenak's photometry, atmospheric extinction, tripod against tracking, and a printable field sheet. | 130 KB |
 | [`simulador-flash.html`](simulador-flash.html) | Flash optical bench. The hardness of a shadow is set by the angular size of the source as seen from the subject: shadows, light falloff from the guide number, overpowering the sun, and balance with ambient light. | 53 KB |
 
-### Optical character
+### The lens and the plane of focus
+
+What character the lens has and where the plane of focus actually falls. The first is
+the aberrations its designer chose not to correct; the second, whether the rangefinder
+and the eye manage to put it where you think, and what the sensor's glass does to the lens.
 
 | Document | What it does | Size |
 |---|---|---:|
 | [`caracter-optico-leica-m.html`](caracter-optico-leica-m.html) | 128 Leica M-mount lenses, from 1925 to 2026, with 32 descriptors each. Reconstructs the defocus disc by geometric tracing, measures the character distance between two lenses and returns their nearest neighbours. | 166 KB |
-
-### Focusing by hand
-
-A rangefinder does not measure sharpness: it measures an angular displacement and
-turns it into distance. How often it gets it right depends on its effective base
-length, the aperture and the acuity of the eye.
-
-| Document | What it does | Size |
-|---|---|---:|
-| [`telemetro-m11.html`](telemetro-m11.html) | What the eye sees through the M11 viewfinder and what survives of it on the sensor. Six canvases running from the rangefinder patch to the grid of photosites, with the cosine error from recomposing and a Monte Carlo hit rate. | 76 KB |
+| [`telemetro-m11.html`](telemetro-m11.html) | What the eye sees through the M11 viewfinder and what survives of it on the sensor. Six canvases running from the rangefinder patch to the grid of photosites, with the cosine error from recomposing and a Monte Carlo hit rate. | 90 KB |
+| [`stack-sensor.html`](stack-sensor.html) | Why a wide-angle computed for film falls apart in the corners of a digital camera: the glass covering the sensor is a plane-parallel plate the lens never accounted for. Traces the real rays through up to three plates and compares two sensors at once. Manual: [`manual-stack-sensor.html`](manual-stack-sensor.html). | 50 KB |
 
 ### Analysing your own photographs
 
@@ -178,7 +171,7 @@ the page is its manual; the code lives in [`scripts/`](scripts/).
 
 | Document | What it does | Size |
 |---|---|---:|
-| [`peliculas-icc.html`](peliculas-icc.html) | Five classic films modelled from the physical response published by the manufacturer, not by eyeballing: the colour comes from integrating the spectrum at 1 nm between 380 and 730. Generates ICC profiles for Capture One, composed over your camera's real response. Code: [`peliculas.py`](scripts/peliculas/peliculas.py) and [`grano.py`](scripts/peliculas/grano.py). | 74 KB |
+| [`peliculas-icc.html`](peliculas-icc.html) | Five classic films modelled from the physical response published by the manufacturer, not by eyeballing: the colour comes from integrating the spectrum at 1 nm between 380 and 730. Generates ICC profiles for Capture One, composed over your camera's real response. Code: [`peliculas.py`](scripts/peliculas/peliculas.py) and [`grano.py`](scripts/peliculas/grano.py). | 75 KB |
 | [`manual-eclipse-hdr.html`](manual-eclipse-hdr.html) | Linear HDR merge and radial flattening of the solar corona from RAW brackets. The coronal gradient spans three orders of magnitude and does not compress with a curve: it is removed by dividing by the radial profile. Code: [`eclipse_hdr.py`](scripts/eclipse/eclipse_hdr.py). | 89 KB |
 | [`manual-procesar-sol.html`](manual-procesar-sol.html) | The solar disc in white light: limb darkening, sunspots and granulation. What to do with the radial gradient before touching contrast at all. Code: [`procesar_sol.py`](scripts/eclipse/procesar_sol.py). | 83 KB |
 
@@ -207,6 +200,7 @@ the page is its manual; the code lives in [`scripts/`](scripts/).
 | [`guia-simulador.html`](guia-simulador.html) | Guide to the flash optical bench: what each control does and which formulas it rests on. |
 | [`manual-flash-ttl-q3.html`](manual-flash-ttl-q3.html) | TTL flash with the Leica Q3 43: how it meters, how it syncs, and why at full power the pulse does not fit inside the 1/2000 s window. With two calculators. |
 | [`manual-telemetro-m11.html`](manual-telemetro-m11.html) | Manual for the rangefinder simulator, with the physical model, the numerical verification and an illustrated annex on the Airy disc. Six embedded figures. |
+| [`manual-stack-sensor.html`](manual-stack-sensor.html) | Manual for the stack simulator: the tracing model, how to read the RMS spot and the MTF, and what is heuristic and what is not. |
 | [`manual-medidas.html`](manual-medidas.html) | Reference for every measure in the subject-placement analysis: what each one is, how it is defined, how to read it and how far it goes. |
 
 ### The code

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>M11 · Simulador de telémetro y círculo de confusión</title>
-<meta name="description" content="Simulador del telémetro de la Leica M11 y del círculo de confusión: visor, parche, base efectiva, desplazamiento de foco, disco de Airy y tasa de acierto por diafragma.">
+<meta name="description" content="Simulador del telémetro de la Leica M11 y del círculo de confusión: visor, parche, base efectiva, desplazamiento de foco, MTF del sistema, disco de Airy y tasa de acierto por diafragma.">
 <script>
 /* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
 (function(){
@@ -298,11 +298,29 @@
 </div>
 
 <div class="card" style="margin-top:16px">
-  <h2 data-lang="es">Curva c(N) · círculo en el peor caso de la zona ciega, por objetivo</h2>
-  <h2 data-lang="en">c(N) curve · worst-case circle within the blind zone, lens by lens</h2>
+  <h2 data-lang="es">MTF del sistema · objetivo × desenfoque × difracción × sensor</h2>
+  <h2 data-lang="en">System MTF · lens × defocus × diffraction × sensor</h2>
+  <canvas id="mtf" width="860" height="280"></canvas>
+  <div class="controls" style="margin-top:10px">
+    <div class="ctrl">
+      <label><span data-lang="es">Umbral de MTF a media Nyquist (66 pl/mm)</span><span data-lang="en">MTF threshold at half Nyquist (66 lp/mm)</span> <span class="val" id="mtfThrVal"></span></label>
+      <input type="range" id="mtfThr" min="10" max="70" value="30">
+    </div>
+    <div class="note" style="margin:0" data-lang="es">La curva ámbar es la MTF total con el desenfoque presente; la azul, el objetivo enfocado a este diafragma (difracción por residuo de aberraciones interpolado de la MTF publicada); la violeta, el fotosito. El criterio “MTF a 66 pl/mm” usa esta cadena en la profundidad de campo, la tabla estadística y la curva por objetivo.</div>
+    <div class="note" style="margin:0" data-lang="en">The amber curve is the total MTF with the defocus present; the blue one is the lens focused at this aperture (diffraction MTF times an aberration residual interpolated from the published MTF); the violet one is the photosite aperture. The “MTF at 66 lp/mm” criterion feeds this chain into the depth of field, the statistics table and the per-lens curve.</div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <h2 data-lang="es">Curva por objetivo · peor caso de la zona ciega</h2>
+  <h2 data-lang="en">Per-lens curve · worst case within the blind zone</h2>
+  <div class="stops" style="margin-bottom:8px">
+    <button class="stop" id="cmC"><span data-lang="es">círculo total (µm)</span><span data-lang="en">total circle (µm)</span></button>
+    <button class="stop" id="cmM"><span data-lang="es">MTF a 66 pl/mm</span><span data-lang="en">MTF at 66 lp/mm</span></button>
+  </div>
   <canvas id="curves" width="860" height="300"></canvas>
-  <div class="note" data-lang="es">Cada punto es el círculo total con el anillo en el borde de la zona ciega del sistema de enfoque, más Airy, desplazamiento de foco y desfase mecánico. Sin ruido aleatorio. La curva gruesa es el objetivo seleccionado.</div>
-  <div class="note" data-lang="en">Each point is the total circle with the ring at the edge of the focusing system's blind zone, plus the Airy disc, focus shift and mechanical offset. Random noise excluded. The heavy curve is the selected lens.</div>
+  <div class="note" data-lang="es">Cada punto corresponde al anillo en el borde de la zona ciega del sistema de enfoque, más Airy, desplazamiento de foco y desfase mecánico. Sin ruido aleatorio. La curva gruesa es el objetivo seleccionado. En modo MTF, la línea de trazos es el techo de difracción por sensor a 66 pl/mm.</div>
+  <div class="note" data-lang="en">Each point corresponds to the ring at the edge of the focusing system's blind zone, plus the Airy disc, focus shift and mechanical offset. Random noise excluded. The heavy curve is the selected lens. In MTF mode, the dashed line is the diffraction ceiling times the sensor at 66 lp/mm.</div>
 </div>
 
 <div class="card" style="margin-top:16px">
@@ -333,6 +351,8 @@
   <label><span data-lang="es">Abertura máxima (f/)</span><span data-lang="en">Maximum aperture (f/)</span></label><input id="nlN" type="number" value="2" step="0.1" min="0.95" max="5.6">
   <label><span data-lang="es">Enfoque mínimo (m)</span><span data-lang="en">Minimum focus (m)</span></label><input id="nlMfd" type="number" value="0.7" step="0.05" min="0.3" max="2">
   <label><span data-lang="es">Desplazamiento de foco (µm en plano imagen, a m→0)</span><span data-lang="en">Focus shift (µm at the image plane, as m→0)</span></label><input id="nlFs" type="number" value="20" step="5" min="0" max="200">
+  <label><span data-lang="es">MTF centro a 10/20/40 pl/mm, plena abertura</span><span data-lang="en">Centre MTF at 10/20/40 lp/mm, full aperture</span></label><input id="nlMwo" value="0.85,0.70,0.50">
+  <label><span data-lang="es">MTF centro a 10/20/40 pl/mm, f/5.6</span><span data-lang="en">Centre MTF at 10/20/40 lp/mm, f/5.6</span></label><input id="nlM56" value="0.95,0.88,0.72">
   <div class="btnrow" style="margin-top:6px">
     <button class="btn primary" id="nlOk"><span data-lang="es">Añadir</span><span data-lang="en">Add</span></button>
     <button class="btn" id="nlCancel"><span data-lang="es">Cancelar</span><span data-lang="en">Cancel</span></button>
@@ -380,8 +400,22 @@ es:{
   histAxis:"c total (µm), escala logarítmica",
   median:"mediana", max:"máx",
   thCmin:"c mín", thMedian:"mediana", thDof:"PdC",
-  /* --- curva c(N) --- */
+  thMedianC:"mediana c", thMTFmed:"MTF66 med",
+  /* --- curva por objetivo --- */
   subjectAt:"sujeto a ", blindEdge:" · borde de la zona ciega", offsetTag:" · desfase ",
+  thresholdLbl:"umbral ", diffXsensor:"difracción × sensor",
+  /* --- criterio de nitidez --- */
+  critMTF:"MTF a 66 pl/mm",
+  /* --- panel de MTF del sistema --- */
+  mtfAxis:"frecuencia espacial (pl/mm)",
+  serDiff:"difracción f/",
+  serLens:"objetivo enfocado (difr. × residuo)",
+  serSensor:"sensor (fotosito 3,78 µm)",
+  serTotal:"total, con el desenfoque actual",
+  mtf50At:" · MTF50 a ", lpmm:" pl/mm",
+  lensResid:"residuo del objetivo: ",
+  wideOpen:" · plena abertura 10/20/40: ",
+  srcEstimate:"estimado", srcUser:"usuario", srcDefault:"por defecto",
   /* --- veredicto de nitidez --- */
   clsSensor:"≤ 2 px, al límite del sensor",
   clsClassic:"pasa el criterio clásico de 30 µm",
@@ -396,7 +430,10 @@ es:{
   rDistErr:"error de distancia",
   rDefocus:"desenfoque en plano imagen",
   rCgeo:"c geométrico", rAiry:"disco de Airy", rCtot:"c total",
-  rDof:"PdC", rPatch:"parche desplazado",
+  rDof:"PdC", dofEmpty:"vacía a este diafragma",
+  rMTF66:"MTF a 66 pl/mm", rPerfect:" · foco perfecto ", rThreshold:" · umbral ",
+  rMTF50:"MTF50 (frecuencia)", rOfNyq:" de ",
+  rPatch:"parche desplazado",
   rEyeSees:"· el ojo lo ve", rUnderEps:"· bajo ε, parece alineado",
   rEbl:"base efectiva",
   /* --- controles escritos por render() --- */
@@ -431,7 +468,19 @@ en:{
   histAxis:"total c (µm), logarithmic scale",
   median:"median", max:"max",
   thCmin:"c min", thMedian:"median", thDof:"DoF",
+  thMedianC:"median c", thMTFmed:"MTF66 med",
   subjectAt:"subject at ", blindEdge:" · edge of the blind zone", offsetTag:" · offset ",
+  thresholdLbl:"threshold ", diffXsensor:"diffraction × sensor",
+  critMTF:"MTF at 66 lp/mm",
+  mtfAxis:"spatial frequency (lp/mm)",
+  serDiff:"diffraction f/",
+  serLens:"focused lens (diffr. × residual)",
+  serSensor:"sensor (photosite 3.78 µm)",
+  serTotal:"total, with the current defocus",
+  mtf50At:" · MTF50 at ", lpmm:" lp/mm",
+  lensResid:"lens residual: ",
+  wideOpen:" · full aperture 10/20/40: ",
+  srcEstimate:"estimate", srcUser:"user", srcDefault:"default",
   clsSensor:"≤ 2 px, at the limit of the sensor",
   clsClassic:"meets the classic 30 µm criterion",
   clsBad:"out of focus by any criterion",
@@ -444,7 +493,10 @@ en:{
   rDistErr:"distance error",
   rDefocus:"defocus at the image plane",
   rCgeo:"geometrical c", rAiry:"Airy disc", rCtot:"total c",
-  rDof:"DoF", rPatch:"patch displacement",
+  rDof:"DoF", dofEmpty:"empty at this aperture",
+  rMTF66:"MTF at 66 lp/mm", rPerfect:" · perfect focus ", rThreshold:" · threshold ",
+  rMTF50:"MTF50 (frequency)", rOfNyq:" of ",
+  rPatch:"patch displacement",
   rEyeSees:"· the eye sees it", rUnderEps:"· below ε, appears aligned",
   rEbl:"effective base length",
   hiddenF:"hidden",
@@ -460,6 +512,10 @@ const LOCALE = ()=> LANG()==="en" ? "en-GB" : "es-ES";
 function t(k){ const D=T[LANG()]||T.es; return D[k]!==undefined ? D[k] : (T.es[k]!==undefined?T.es[k]:k); }
 /* separador decimal para las cadenas ya formateadas con punto (marcas del anillo, etc.) */
 const dec = s => LANG()==="en" ? String(s) : String(s).replace(".",",");
+/* La procedencia de la MTF se guarda como código estable en los datos del objetivo
+   ("Leica", "estimado", "usuario", "por defecto"); sólo se traduce al mostrarla. */
+const SRC_KEY = {"estimado":"srcEstimate", "usuario":"srcUser", "por defecto":"srcDefault"};
+function srcLabel(src){ if(!src) return t("srcDefault"); return SRC_KEY[src] ? t(SRC_KEY[src]) : src; }
 
 /* ================= Constantes de la M11 ================= */
 const BASE = 69.25;          // mm, base mecánica
@@ -478,16 +534,20 @@ const FRAME_PAIRS = {35:135, 135:35, 50:75, 75:50, 28:90, 90:28};
 /* ================= Objetivos =================
    fs: desplazamiento de foco por aberración esférica, en µm de plano imagen,
    entre plena abertura y diafragma muy cerrado. Valores estimados y editables. */
+/* mtf: contraste en el centro del campo a 10, 20 y 40 pl/mm, a plena abertura (wo) y a f/5.6,
+   a mejor foco de cada abertura. src: "Leica" (hoja de datos, redondeado) o "estimado". */
 const LENSES = [
-  {name:"Summicron-M 35 f/2",           f:35,  nmax:2.0, mfd:0.70, fs:10},
-  {name:"Summilux-M 50 f/1.4",          f:50,  nmax:1.4, mfd:0.70, fs:25},
-  {name:"Thypoch Simera 75 f/1.4",      f:75,  nmax:1.4, mfd:0.60, fs:35},
-  {name:"Voigtländer Nokton 35 f/1.2",  f:35,  nmax:1.2, mfd:0.50, fs:55},
-  {name:"LLL 50 f/2 (réplica 1966)",    f:50,  nmax:2.0, mfd:1.00, fs:30},
-  {name:"Noctilux-M 50 f/0.95",         f:50,  nmax:0.95,mfd:1.00, fs:80},
-  {name:"Summicron-M 90 f/2",           f:90,  nmax:2.0, mfd:1.00, fs:15},
-  {name:"APO-Telyt-M 135 f/3.4",        f:135, nmax:3.4, mfd:1.50, fs:0},
+  {name:"Summicron-M 35 f/2",           f:35,  nmax:2.0, mfd:0.70, fs:10, mtf:{wo:[0.92,0.82,0.62], f56:[0.97,0.92,0.80], src:"Leica"}},
+  {name:"Summilux-M 50 f/1.4",          f:50,  nmax:1.4, mfd:0.70, fs:25, mtf:{wo:[0.90,0.78,0.55], f56:[0.97,0.92,0.80], src:"Leica"}},
+  {name:"Thypoch Simera 75 f/1.4",      f:75,  nmax:1.4, mfd:0.60, fs:35, mtf:{wo:[0.80,0.62,0.40], f56:[0.95,0.88,0.72], src:"estimado"}},
+  {name:"Voigtländer Nokton 35 f/1.2",  f:35,  nmax:1.2, mfd:0.50, fs:55, mtf:{wo:[0.70,0.50,0.30], f56:[0.93,0.85,0.65], src:"estimado"}},
+  {name:"LLL 50 f/2 (réplica 1966)",    f:50,  nmax:2.0, mfd:1.00, fs:30, mtf:{wo:[0.82,0.62,0.38], f56:[0.94,0.85,0.68], src:"estimado"}},
+  {name:"Noctilux-M 50 f/0.95",         f:50,  nmax:0.95,mfd:1.00, fs:80, mtf:{wo:[0.75,0.55,0.30], f56:[0.95,0.88,0.72], src:"Leica"}},
+  {name:"Summicron-M 90 f/2",           f:90,  nmax:2.0, mfd:1.00, fs:15, mtf:{wo:[0.95,0.88,0.72], f56:[0.97,0.93,0.82], src:"Leica"}},
+  {name:"APO-Telyt-M 135 f/3.4",        f:135, nmax:3.4, mfd:1.50, fs:0,  mtf:{wo:[0.97,0.93,0.82], f56:[0.98,0.94,0.85], src:"Leica"}},
 ];
+const NYQ = 1000/(2*PITCH);          // 132,3 pl/mm
+const NU_CRIT = NYQ/2;               // 66,1 pl/mm, media Nyquist
 const STOPS_ALL = [0.95,1.2,1.4,2,2.8,4,5.6,8,11,16];
 
 /* ================= Estado ================= */
@@ -500,6 +560,9 @@ const S = {
   psycho: false,             // curva psicométrica en vez de umbral duro
   magX: 1.0,                 // magnificador 1 / 1.25 / 1.4
   c0: 2*PITCH/1000,          // criterio PdC en mm (2 px)
+  crit: "px2",               // px2 | um30 | mtf
+  mtfThr: 0.30,              // umbral de MTF a media Nyquist
+  curveMode: "c",            // c | mtf en el panel de curvas
   alpha: 0,                  // grados de reencuadre tras enfocar
   fs: null,                  // µm, null = valor del objetivo
   fsOn: true,                // aplicar desplazamiento de foco
@@ -515,6 +578,7 @@ const S = {
   blind: false,
   shot: null,                // resultado del disparo en modo a ciegas
   mc: null,                  // último resultado Monte Carlo
+  mcRows: null,              // filas por diafragma, conservadas para repintar al cambiar de idioma
 };
 
 /* ================= Óptica ================= */
@@ -572,6 +636,12 @@ function dSharpPlane(){
 
 function hyperfocal(){ return (S.lens.f*S.lens.f)/(S.N*S.c0) + S.lens.f; } // mm
 function dofLimits(dm){
+  if(S.crit==="mtf"){
+    const f=S.lens.f, dvm=dvMaxForMTF(S.N);
+    const v0 = dm===Infinity? f+1e-9 : vImg(dm,f);
+    const near = dOfV(v0+dvm,f), farV = v0-dvm;
+    return [near, farV<=f? Infinity : dOfV(farV,f)];
+  }
   if(dm===Infinity) return [hyperfocal()/1000, Infinity];
   const d = mm(dm), f = S.lens.f, H = hyperfocal();
   const near = d*(H-f)/(H + d - 2*f);
@@ -639,14 +709,16 @@ function sampleNoise(){ return S.mechNoise>0 ? S.mechNoise*gaussian() : 0; } // 
 /* ================= Monte Carlo ================= */
 function monteCarlo(nRuns, N){
   const cs = new Float64Array(nRuns);
-  let hit2=0, hit30=0;
+  let hit2=0, hit30=0, hitM=0; const ms=new Float64Array(nRuns);
   for(let i=0;i<nRuns;i++){
-    const c = cTotalFor(humanFocus(N), S.dTrue, N, sampleNoise()/1000).c;
-    cs[i]=c; if(c<=2*PITCH) hit2++; if(c<=30) hit30++;
+    const r = cTotalFor(humanFocus(N), S.dTrue, N, sampleNoise()/1000);
+    cs[i]=r.c; if(r.c<=2*PITCH) hit2++; if(r.c<=30) hit30++;
+    const m = mtfAtCrit(N, r.dv); ms[i]=m; if(m>=S.mtfThr) hitM++;
   }
   const sorted = Array.from(cs).sort((a,b)=>a-b);
+  const msorted = Array.from(ms).sort((a,b)=>a-b);
   const q = p => sorted[Math.min(nRuns-1, Math.floor(p*nRuns))];
-  return {N, cs:sorted, hit2:hit2/nRuns, hit30:hit30/nRuns, med:q(.5), p90:q(.9), max:sorted[nRuns-1]};
+  return {N, cs:sorted, hit2:hit2/nRuns, hit30:hit30/nRuns, hitM:hitM/nRuns, medM:msorted[Math.floor(nRuns/2)], med:q(.5), p90:q(.9), max:sorted[nRuns-1]};
 }
 
 /* ================= Curva c(N) por objetivo ================= */
@@ -657,12 +729,65 @@ function cCurveFor(L){
   S.lens=L; S.fs=null; S.nCal=Math.max(save.nCal, L.nmax);
   const out = STOPS_ALL.filter(n=>n>=L.nmax-1e-9 && n<=16).map(N=>{
     const [lo,hi] = blindZone(N);
-    const c1 = cTotalFor(clampDm(lo), S.dTrue, N, 0).c;
-    const c2 = cTotalFor(hi===Infinity? DMAX : clampDm(hi), S.dTrue, N, 0).c;
-    return {N, c:Math.max(c1,c2)};
+    const r1 = cTotalFor(clampDm(lo), S.dTrue, N, 0);
+    const r2 = cTotalFor(hi===Infinity? DMAX : clampDm(hi), S.dTrue, N, 0);
+    const worst = r1.c>=r2.c? r1 : r2;
+    return {N, c:worst.c, m:mtfAtCrit(N, worst.dv, L)};
   });
   S.lens=save.lens; S.fs=save.fs; S.nCal=save.nCal;
   return out;
+}
+
+/* ================= MTF ================= */
+/* OTF de desenfoque con difracción para pupila circular (Hopkins):
+   OTF(s) = (4/π)∫₀^{1−s} sqrt(1−(x+s)²)·cos(4k·W20·s·x) dx,  s = ν·λ·N,  W20 = Δv/(8N²),  k = 2π/λ
+   Se validó contra la MTF de difracción exacta (Δv=0) y contra el disco geométrico (Δv grande). */
+function otfDefocus(nu, N, dv){
+  const s = nu*LAMBDA*N; if(s>=1) return 0;
+  const W20 = dv/(8*N*N), a = 4*(2*Math.PI/LAMBDA)*W20*s, L = 1-s;
+  const n = Math.min(4000, Math.max(120, Math.ceil(a*L*4)));
+  const h = L/n; let sum=0;
+  /* «q» y no «t»: una local llamada t eclipsaría a la función traductora t(). */
+  for(let i=0;i<=n;i++){ const x=i*h, w=(i===0||i===n)?0.5:1; const q=1-(x+s)*(x+s); sum += w*Math.sqrt(q>0?q:0)*Math.cos(a*x); }
+  return (4/Math.PI)*sum*h;
+}
+function mtfDiff(nu,N){ const s=nu*LAMBDA*N; if(s>=1) return 0; return (2/Math.PI)*(Math.acos(s)-s*Math.sqrt(1-s*s)); }
+function mtfSensor(nu){ const x=Math.PI*PITCH/1000*nu; return x<1e-9?1:Math.abs(Math.sin(x)/x); }
+/* Residuo de aberraciones del objetivo R(ν,N) = MTF_publicada / MTF_difracción, interpolado:
+   en N entre plena abertura y f/5.6 (log), tendiendo a 1 por encima de f/5.6; en ν con R(0)=1
+   y extrapolación por encima de 40 pl/mm con exponente (ν/40)^1.3 sobre ln R40. */
+function lensResidual(L, nu, N){
+  const mt = L.mtf || {wo:[0.85,0.70,0.50], f56:[0.95,0.88,0.72]};
+  const rat = (arr,Nref)=>[10,20,40].map((f,i)=>Math.min(1, arr[i]/Math.max(1e-6, mtfDiff(f,Nref))));
+  const Rwo=rat(mt.wo,L.nmax), R56=rat(mt.f56,5.6);
+  let w = N<=L.nmax?0 : N>=5.6?1 : Math.log(N/L.nmax)/Math.log(5.6/L.nmax);
+  let R = Rwo.map((r,i)=>r*(1-w)+R56[i]*w);
+  /* «w2» y no «t»: una local llamada t eclipsaría a la función traductora t(). */
+  if(N>5.6){ const w2=Math.min(1,Math.log(N/5.6)/Math.log(16/5.6))*0.7; R=R.map(r=>r+(1-r)*w2); }
+  const pts=[[0,1],[10,R[0]],[20,R[1]],[40,R[2]]];
+  if(nu<=40){ for(let i=1;i<pts.length;i++) if(nu<=pts[i][0]){ const [x0,y0]=pts[i-1],[x1,y1]=pts[i]; return y0+(y1-y0)*(nu-x0)/(x1-x0); } }
+  return Math.exp(Math.log(Math.max(R[2],1e-3))*Math.pow(nu/40,1.3));
+}
+/* MTF total del sistema a ν para el objetivo actual, diafragma N y desenfoque Δv (mm), sin signo negativo */
+function mtfTotal(nu, N, dv, L){
+  L = L||S.lens;
+  return Math.max(0, otfDefocus(nu,N,dv)) * lensResidual(L,nu,N) * mtfSensor(nu);
+}
+function mtfAtCrit(N, dv, L){ return mtfTotal(NU_CRIT, N, dv, L); }
+/* frecuencia a la que la MTF total cae a 0,5 (MTF50), pl/mm */
+function mtf50(N, dv){
+  let lo=0, hi=NYQ; if(mtfTotal(hi,N,dv)>=0.5) return NYQ;
+  for(let i=0;i<24;i++){ const m=(lo+hi)/2; (mtfTotal(m,N,dv)>=0.5)?(lo=m):(hi=m); } return (lo+hi)/2;
+}
+/* mayor Δv (mm) que mantiene MTF66 ≥ umbral; 0 si ni con foco perfecto se alcanza */
+function dvMaxForMTF(N){
+  if(mtfAtCrit(N,0) < S.mtfThr) return 0;
+  let lo=0, hi=0.05; while(mtfAtCrit(N,hi)>=S.mtfThr && hi<5) hi*=2;
+  for(let i=0;i<30;i++){ const m=(lo+hi)/2; (mtfAtCrit(N,m)>=S.mtfThr)?(lo=m):(hi=m); } return lo;
+}
+function hitOK(res, N){
+  if(S.crit==="mtf") return mtfAtCrit(N, res.dv) >= S.mtfThr;
+  return res.c <= S.c0*1000;
 }
 
 /* ================= Utilidades de lienzo ================= */
@@ -680,6 +805,7 @@ function setupCanvas(cv){
   ctx.clearRect(0,0,w,h);
   return [ctx, w, h];
 }
+/* «nd» y no «dec»: el parámetro eclipsaría al ayudante dec() de separador decimal. */
 const fmt = (x,nd=1) => x===Infinity ? "∞" : x.toLocaleString(LOCALE(),{minimumFractionDigits:nd,maximumFractionDigits:nd});
 
 /* ================= Escena del visor ================= */
@@ -1101,13 +1227,15 @@ function drawStats(){
 }
 function drawStatTable(rowsMC){
   if(!rowsMC){ return; }
-  const head = `<tr><th>f/</th><th>${t("thCmin")}</th><th>≤ 2 px</th><th>≤ 30 µm</th><th>${t("thMedian")}</th><th>p90</th><th>${t("thDof")} (${dec((S.c0*1000).toFixed(1))} µm)</th></tr>`;
+  const critLbl = S.crit==="mtf"? `MTF66≥${dec(S.mtfThr.toFixed(2))}` : dec((S.c0*1000).toFixed(1))+" µm";
+  const head = `<tr><th>f/</th><th>${t("thCmin")}</th><th>≤ 2 px</th><th>≤ 30 µm</th><th>MTF66 ≥ ${dec(S.mtfThr.toFixed(2))}</th><th>${t("thMTFmed")}</th><th>${t("thMedianC")}</th><th>${t("thDof")} (${critLbl})</th></tr>`;
   const body = rowsMC.map(r=>{
     const [dn,df]=dofAt(r.N);
     const cls2 = r.hit2>=.9?"v-ok":r.hit2>=.5?"v-warn":"v-bad";
     const cls30 = r.hit30>=.9?"v-ok":r.hit30>=.5?"v-warn":"v-bad";
     const fl=cFloor(r.N); const clsF = fl<=2*PITCH?"v-ok":fl<=30?"v-warn":"v-bad";
-    return `<tr><td>${r.N}</td><td class="${clsF}">${fmt(fl,1)} µm</td><td class="${cls2}">${(r.hit2*100).toFixed(0)} %</td><td class="${cls30}">${(r.hit30*100).toFixed(0)} %</td><td>${fmt(r.med,1)} µm</td><td>${fmt(r.p90,1)} µm</td><td>${fmt((df===Infinity?9999:df-dn)*1000,0)} mm</td></tr>`;
+    const clsM = r.hitM>=.9?"v-ok":r.hitM>=.5?"v-warn":"v-bad";
+    return `<tr><td>${r.N}</td><td class="${clsF}">${fmt(fl,1)} µm</td><td class="${cls2}">${(r.hit2*100).toFixed(0)} %</td><td class="${cls30}">${(r.hit30*100).toFixed(0)} %</td><td class="${clsM}">${(r.hitM*100).toFixed(0)} %</td><td>${fmt(r.medM,2)}</td><td>${fmt(r.med,1)} µm</td><td>${df===Infinity?"∞":fmt((df-dn)*1000,0)+" mm"}</td></tr>`;
   }).join("");
   el.statTable.innerHTML = `<table class="stat">${head}${body}</table>`;
 }
@@ -1132,27 +1260,36 @@ function drawCurves(){
   ctx.fillStyle="#14161a"; ctx.fillRect(0,0,W,H);
   const L=52, R=W-190, T=22, B=H-38;
   const nLo=Math.log2(0.9), nHi=Math.log2(18);
-  const yMax=40;
+  const mtfMode = S.curveMode==="mtf";
+  const yMax = mtfMode? 1 : 40;
   const xOf=N=>L+(Math.log2(N)-nLo)/(nHi-nLo)*(R-L);
   const yOf=c=>B-Math.min(c,yMax)/yMax*(B-T);
-  // fondos de criterio
-  ctx.fillStyle="rgba(127,176,105,.08)"; ctx.fillRect(L,yOf(2*PITCH),R-L,B-yOf(2*PITCH));
-  ctx.fillStyle="rgba(226,169,79,.06)"; ctx.fillRect(L,yOf(30),R-L,yOf(2*PITCH)-yOf(30));
-  ctx.strokeStyle="rgba(127,176,105,.8)"; ctx.setLineDash([4,3]); ctx.beginPath(); ctx.moveTo(L,yOf(2*PITCH)); ctx.lineTo(R,yOf(2*PITCH)); ctx.stroke();
-  ctx.strokeStyle="rgba(226,169,79,.8)"; ctx.beginPath(); ctx.moveTo(L,yOf(30)); ctx.lineTo(R,yOf(30)); ctx.stroke(); ctx.setLineDash([]);
-  ctx.fillStyle="#7fb069"; ctx.font="11px "+mono; ctx.fillText("2 px",L+4,yOf(2*PITCH)-4);
-  ctx.fillStyle="#e2a94f"; ctx.fillText("30 µm",L+4,yOf(30)-4);
-  // Airy
-  ctx.strokeStyle="rgba(139,144,151,.7)"; ctx.setLineDash([2,3]); ctx.beginPath();
-  STOPS_ALL.forEach((N,i)=>{ const y=yOf(1000*2.44*LAMBDA*N); i?ctx.lineTo(xOf(N),y):ctx.moveTo(xOf(N),y); }); ctx.stroke(); ctx.setLineDash([]);
-  ctx.fillStyle="#8b9097"; ctx.fillText("Airy",xOf(16)+4,yOf(1000*2.44*LAMBDA*16)+4);
-  // ejes
+  ctx.font="11px "+mono;
+  if(!mtfMode){
+    ctx.fillStyle="rgba(127,176,105,.08)"; ctx.fillRect(L,yOf(2*PITCH),R-L,B-yOf(2*PITCH));
+    ctx.fillStyle="rgba(226,169,79,.06)"; ctx.fillRect(L,yOf(30),R-L,yOf(2*PITCH)-yOf(30));
+    ctx.strokeStyle="rgba(127,176,105,.8)"; ctx.setLineDash([4,3]); ctx.beginPath(); ctx.moveTo(L,yOf(2*PITCH)); ctx.lineTo(R,yOf(2*PITCH)); ctx.stroke();
+    ctx.strokeStyle="rgba(226,169,79,.8)"; ctx.beginPath(); ctx.moveTo(L,yOf(30)); ctx.lineTo(R,yOf(30)); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle="#7fb069"; ctx.fillText("2 px",L+4,yOf(2*PITCH)-4);
+    ctx.fillStyle="#e2a94f"; ctx.fillText("30 µm",L+4,yOf(30)-4);
+    ctx.strokeStyle="rgba(139,144,151,.7)"; ctx.setLineDash([2,3]); ctx.beginPath();
+    STOPS_ALL.forEach((N,i)=>{ const y=yOf(1000*2.44*LAMBDA*N); i?ctx.lineTo(xOf(N),y):ctx.moveTo(xOf(N),y); }); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle="#8b9097"; ctx.fillText("Airy",xOf(16)+4,yOf(1000*2.44*LAMBDA*16)+4);
+  } else {
+    ctx.fillStyle="rgba(127,176,105,.08)"; ctx.fillRect(L,T,R-L,yOf(S.mtfThr)-T);
+    ctx.strokeStyle="rgba(127,176,105,.8)"; ctx.setLineDash([4,3]); ctx.beginPath(); ctx.moveTo(L,yOf(S.mtfThr)); ctx.lineTo(R,yOf(S.mtfThr)); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle="#7fb069"; ctx.fillText(t("thresholdLbl")+fmt(S.mtfThr,2),L+4,yOf(S.mtfThr)-4);
+    // techo: difracción × sensor a 66
+    ctx.strokeStyle="rgba(139,144,151,.7)"; ctx.setLineDash([2,3]); ctx.beginPath();
+    STOPS_ALL.forEach((N,i)=>{ const y=yOf(mtfDiff(NU_CRIT,N)*mtfSensor(NU_CRIT)); i?ctx.lineTo(xOf(N),y):ctx.moveTo(xOf(N),y); }); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle="#8b9097"; ctx.fillText(t("diffXsensor"),xOf(0.95)+4,yOf(mtfDiff(NU_CRIT,0.95)*mtfSensor(NU_CRIT))-6);
+  }
   ctx.strokeStyle="#3a3f47"; ctx.beginPath(); ctx.moveTo(L,B); ctx.lineTo(R,B); ctx.moveTo(L,T); ctx.lineTo(L,B); ctx.stroke();
   ctx.fillStyle="#8b9097"; ctx.textAlign="center";
   STOPS_ALL.forEach(N=>{ ctx.fillRect(xOf(N),B,1,4); ctx.fillText(N,xOf(N),B+16); });
   ctx.textAlign="right";
-  [0,10,20,30,40].forEach(c=>{ ctx.fillRect(L-4,yOf(c),4,1); ctx.fillText(c,L-7,yOf(c)+4); });
-  ctx.textAlign="left"; ctx.fillText("µm",L-40,T-8);
+  (mtfMode?[0,.2,.4,.6,.8,1]:[0,10,20,30,40]).forEach(c=>{ ctx.fillRect(L-4,yOf(c),4,1); ctx.fillText(mtfMode?dec(c.toFixed(1)):c,L-7,yOf(c)+4); });
+  ctx.textAlign="left"; ctx.fillText(mtfMode?"MTF66":"µm",L-44,T-8);
   ctx.fillText(t("subjectAt")+fmt(S.dTrue,1)+` m · ε=${fmt(S.eps,1)}′`+t("blindEdge")+(S.visoflex?" · Visoflex":"")+(S.alpha?` · α=${S.alpha}°`:"")+(S.mechOff?t("offsetTag")+S.mechOff+" µm":""), L+50, T-8);
   // curvas
   let ly=T+6;
@@ -1160,8 +1297,9 @@ function drawCurves(){
     const col=CURVE_COLORS[i%CURVE_COLORS.length], cur=Lz===S.lens;
     const pts=cCurveFor(Lz);
     ctx.strokeStyle=col; ctx.lineWidth=cur?3:1.4; ctx.globalAlpha=cur?1:.75;
-    ctx.beginPath(); pts.forEach((p,k)=>{ k?ctx.lineTo(xOf(p.N),yOf(p.c)):ctx.moveTo(xOf(p.N),yOf(p.c)); }); ctx.stroke();
-    pts.forEach(p=>{ ctx.fillStyle=col; ctx.beginPath(); ctx.arc(xOf(p.N),yOf(p.c),cur?3.2:2.2,0,7); ctx.fill(); });
+    const val = p=> mtfMode? p.m : p.c;
+    ctx.beginPath(); pts.forEach((p,k)=>{ k?ctx.lineTo(xOf(p.N),yOf(val(p))):ctx.moveTo(xOf(p.N),yOf(val(p))); }); ctx.stroke();
+    pts.forEach(p=>{ ctx.fillStyle=col; ctx.beginPath(); ctx.arc(xOf(p.N),yOf(val(p)),cur?3.2:2.2,0,7); ctx.fill(); });
     ctx.globalAlpha=1;
     // leyenda
     ctx.fillStyle=col; ctx.fillRect(R+12,ly-4,14,cur?3:2);
@@ -1172,12 +1310,54 @@ function drawCurves(){
   ctx.lineWidth=1;
 }
 
+/* ================= Panel MTF ================= */
+function drawMTF(){
+  const [ctx,W,H] = setupCanvas(el.mtf);
+  const mono = getComputedStyle(document.body).getPropertyValue("--mono");
+  ctx.fillStyle="#14161a"; ctx.fillRect(0,0,W,H);
+  const L=48, R=W-250, T=22, B=H-36;
+  const xOf=nu=>L+nu/NYQ*(R-L), yOf=m=>B-m*(B-T);
+  const hide = S.blind && !S.shot;
+  const dv = hide?0:defocus();
+  // fondo por encima del umbral
+  ctx.fillStyle="rgba(127,176,105,.07)"; ctx.fillRect(L,T,R-L,yOf(S.mtfThr)-T);
+  // ejes y rejilla
+  ctx.strokeStyle="#3a3f47"; ctx.beginPath(); ctx.moveTo(L,B); ctx.lineTo(R,B); ctx.moveTo(L,T); ctx.lineTo(L,B); ctx.stroke();
+  ctx.fillStyle="#8b9097"; ctx.font="11px "+mono; ctx.textAlign="right";
+  [0,.2,.4,.6,.8,1].forEach(m=>{ ctx.fillRect(L-4,yOf(m),4,1); ctx.fillText(dec(m.toFixed(1)),L-7,yOf(m)+4); });
+  ctx.textAlign="center";
+  [10,20,40,66,100,132].forEach(nu=>{ ctx.fillRect(xOf(nu),B,1,4); ctx.fillText(nu===132?"132 Nyq":nu===66?"66":nu, xOf(nu), B+16); });
+  ctx.fillText(t("mtfAxis"), (L+R)/2, H-4);
+  // umbral
+  ctx.strokeStyle="rgba(127,176,105,.8)"; ctx.setLineDash([4,3]); ctx.beginPath(); ctx.moveTo(L,yOf(S.mtfThr)); ctx.lineTo(R,yOf(S.mtfThr)); ctx.stroke();
+  ctx.strokeStyle="rgba(226,169,79,.6)"; ctx.beginPath(); ctx.moveTo(xOf(NU_CRIT),T); ctx.lineTo(xOf(NU_CRIT),B); ctx.stroke(); ctx.setLineDash([]);
+  // curvas
+  const nus=[]; for(let nu=0;nu<=NYQ;nu+=NYQ/110) nus.push(nu);
+  const series=[
+    [t("serDiff")+S.N, "#8b9097", nu=>mtfDiff(nu,S.N), [3,3]],
+    [t("serLens"), "#6f9cc9", nu=>mtfDiff(nu,S.N)*lensResidual(S.lens,nu,S.N), []],
+    [t("serSensor"), "#c98bd8", nu=>mtfSensor(nu), [2,3]],
+    [t("serTotal"), "#e2a94f", nu=>hide?0:mtfTotal(nu,S.N,dv), []],
+  ];
+  series.forEach(([lbl,col,fn,dash],i)=>{
+    ctx.strokeStyle=col; ctx.lineWidth=i===3?2.6:1.5; ctx.setLineDash(dash); ctx.beginPath();
+    nus.forEach((nu,k)=>{ const y=yOf(Math.max(0,Math.min(1,fn(nu)))); k?ctx.lineTo(xOf(nu),y):ctx.moveTo(xOf(nu),y); }); ctx.stroke();
+    ctx.setLineDash([]); ctx.lineWidth=1;
+    ctx.fillStyle=col; ctx.fillRect(R+14,T+8+i*16,14,2); ctx.fillStyle="#cfd2d6"; ctx.textAlign="left"; ctx.font="11px "+mono; ctx.fillText(lbl,R+32,T+12+i*16);
+  });
+  // punto en 66
+  if(!hide){ const m=mtfAtCrit(S.N,dv); ctx.fillStyle=m>=S.mtfThr?"#7fb069":"#e0655c"; ctx.beginPath(); ctx.arc(xOf(NU_CRIT),yOf(m),4,0,7); ctx.fill();
+    ctx.fillText(`MTF66 = ${fmt(m,2)}`+t("mtf50At")+fmt(mtf50(S.N,dv),0)+t("lpmm")+` · Δv = ${fmt(dv*1000,1)} µm`, L+6, T-6); }
+  ctx.fillStyle="#5c6167"; ctx.font="10px "+mono;
+  ctx.fillText(t("lensResid")+srcLabel(S.lens.mtf&&S.lens.mtf.src)+t("wideOpen")+(S.lens.mtf||{wo:[]}).wo.join("/")+" · f/5.6: "+(S.lens.mtf||{f56:[]}).f56.join("/"), L+6, B-6);
+}
+
 /* ================= Persistencia local ================= */
-const LS_KEY="telemetro_m11_v5";
+const LS_KEY="telemetro_m11_v6";
 function saveState(){
   try{
     const custom = LENSES.filter(L=>L.custom);
-    const st = {}; ["N","dTrue","dSet","eps","psycho","magX","c0","alpha","fs","fsOn","fsm","nCal","mechOff","mechNoise","visoflex","cthVis","phase","helicoid"].forEach(k=>st[k]=S[k]);
+    const st = {}; ["N","dTrue","dSet","eps","psycho","magX","c0","crit","mtfThr","curveMode","alpha","fs","fsOn","fsm","nCal","mechOff","mechNoise","visoflex","cthVis","phase","helicoid"].forEach(k=>st[k]=S[k]);
     st.lensName=S.lens.name;
     localStorage.setItem(LS_KEY, JSON.stringify({st, custom}));
   }catch(e){}
@@ -1226,7 +1406,11 @@ function drawReadouts(){
   rows.push([t("rCgeo"), hide?oc:fmt(cg,1)+" µm · "+fmt(cg/PITCH,1)+" px"]);
   rows.push([t("rAiry"), fmt(cAiry(),1)+" µm"]);
   rows.push([t("rCtot"), hide?oc:`<span class="${cls}">${fmt(ct,1)} µm · ${fmt(ct/PITCH,1)} px</span>`]);
-  rows.push([t("rDof")+" ("+dec((S.c0*1000).toFixed(1))+" µm)", fmt(dn,2)+" – "+(df===Infinity?"∞":fmt(df,2))+" m"]);
+  rows.push([t("rDof")+" ("+(S.crit==="mtf"?"MTF66 ≥ "+fmt(S.mtfThr,2):dec((S.c0*1000).toFixed(1))+" µm")+")", (dn>=df&&df!==Infinity)?"<span class='v-bad'>"+t("dofEmpty")+"</span>":fmt(dn,2)+" – "+(df===Infinity?"∞":fmt(df,2))+" m"]);
+  const dvNow = defocus(), m66 = mtfAtCrit(S.N, dvNow), m66best = mtfAtCrit(S.N, 0), f50 = mtf50(S.N, dvNow);
+  const clsM = m66>=S.mtfThr?"v-ok":m66>=S.mtfThr*0.6?"v-warn":"v-bad";
+  rows.push([t("rMTF66"), hide?oc:`<span class="${clsM}">${fmt(m66,2)}</span>`+t("rPerfect")+fmt(m66best,2)+t("rThreshold")+fmt(S.mtfThr,2)]);
+  rows.push([t("rMTF50"), hide?oc:fmt(f50,0)+t("lpmm")+t("rOfNyq")+fmt(NYQ,0)+" Nyquist"]);
   rows.push([t("rPatch"), fmt(Math.abs(arc),2)+"′ "+(seen?'<span class="v-warn">'+t("rEyeSees")+'</span>':'<span class="v-ok">'+t("rUnderEps")+'</span>')]);
   rows.push([t("rEbl"), fmt(BASE*MAG*S.magX,1)+" mm"]);
   el.readTable.innerHTML = rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join("");
@@ -1276,10 +1460,10 @@ function buildMags(){
   });
 }
 function buildCrits(){
-  [[2*PITCH/1000,"2 px"],[0.030,"30 µm"]].forEach(([c,lbl])=>{
+  [["px2",2*PITCH/1000,"2 px"],["um30",0.030,"30 µm"],["mtf",null,t("critMTF")]].forEach(([id,c,lbl])=>{
     const b=document.createElement("button");
-    b.className="stop"+(Math.abs(c-S.c0)<1e-9?" on":""); b.textContent=lbl;
-    b.onclick=()=>{S.c0=c; buildAll(); invalidateMC(); render();};
+    b.className="stop"+(S.crit===id?" on":""); b.textContent=lbl;
+    b.onclick=()=>{S.crit=id; if(c) S.c0=c; buildAll(); invalidateMC(); render();};
     el.crits.appendChild(b);
   });
 }
@@ -1320,7 +1504,9 @@ function render(){
   el.btnBlind.textContent = S.blind ? t("blindOff") : t("blindOn");
   el.btnReset.title = t("resetTitle");
   el.eps.value = Math.round(S.eps*60);
-  drawFinder(); drawLoupe(); drawBarrel(); drawMatrix(); drawReadouts(); drawStats(); drawCurves();
+  el.mtfThrVal.textContent = fmt(S.mtfThr,2); el.mtfThr.value=Math.round(S.mtfThr*100);
+  el.cmC.classList.toggle("on", S.curveMode!=="mtf"); el.cmM.classList.toggle("on", S.curveMode==="mtf");
+  drawFinder(); drawLoupe(); drawBarrel(); drawMatrix(); drawReadouts(); drawStats(); drawCurves(); drawMTF();
   saveState();
 }
 /* cualquier cambio de parámetros invalida la estadística previa */
@@ -1337,8 +1523,8 @@ function aplicarEtiquetas(){
 }
 function aplicarIdioma(){
   aplicarEtiquetas();
-  buildAll();                       // chips, diafragmas, magnificador, criterios, leva
-  render();                         // rótulos, lienzos y lectura
+  buildAll();                             // chips, diafragmas, magnificador, criterios, leva
+  render();                               // rótulos, lienzos (incluido el de MTF) y lectura
   if(S.mcRows) drawStatTable(S.mcRows);   // la tabla generada conserva sus datos
 }
 window.onLangChange=function(){ if(LISTO) aplicarIdioma(); };
@@ -1349,7 +1535,7 @@ window.addEventListener("DOMContentLoaded", ()=>{
    "btnPerfect","btnBlind","btnShoot","footNote",
    "alpha","alphaVal","fs","fsVal","fsOn","fsOff","fsReset","cals","hist","statTable","btnMC",
    "curves","eyeHard","eyePsy","sysRF","sysVis","cth","cthVal","mechOff","mechOffVal","mechNoise","mechNoiseVal",
-   "fsm","fsmVal","scaleLog","scaleHel","btnReset"].forEach(id=>el[id]=$(id));
+   "fsm","fsmVal","scaleLog","scaleHel","btnReset","mtf","mtfThr","mtfThrVal","cmC","cmM"].forEach(id=>el[id]=$(id));
 
   loadState();
   buildAll();
@@ -1377,6 +1563,9 @@ window.addEventListener("DOMContentLoaded", ()=>{
   el.mechNoise.addEventListener("input", e=>{ S.mechNoise=+e.target.value; invalidateMC(); render(); });
   el.fsm.addEventListener("input", e=>{ S.fsm=+e.target.value; invalidateMC(); render(); });
   document.querySelectorAll("[data-phase]").forEach(b=>b.onclick=()=>{ S.phase=b.dataset.phase; render(); });
+  el.mtfThr.addEventListener("input", e=>{ S.mtfThr=+e.target.value/100; invalidateMC(); render(); });
+  el.cmC.onclick = ()=>{ S.curveMode="c"; render(); };
+  el.cmM.onclick = ()=>{ S.curveMode="mtf"; render(); };
   el.scaleLog.onclick = ()=>{ S.helicoid=false; render(); };
   el.scaleHel.onclick = ()=>{ S.helicoid=true;  render(); };
   el.btnReset.onclick = ()=>{ if(confirm(t("resetAsk"))) clearState(); };
@@ -1401,6 +1590,8 @@ window.addEventListener("DOMContentLoaded", ()=>{
 
   el.btnShoot.onclick = ()=>{
     const ct = cTotal();
+    /* sólo se guarda el dato: la clase y el texto se reclasifican al pintar,
+       de modo que el veredicto sigue al idioma en curso */
     S.shot = {ct, err: Math.abs(S.dSet-S.dTrue)};
     render();
   };
@@ -1408,7 +1599,9 @@ window.addEventListener("DOMContentLoaded", ()=>{
   $("nlOk").onclick = e=>{
     e.preventDefault();
     const L = {name:$("nlName").value||t("lensDefault"),
-               f:+$("nlF").value, nmax:+$("nlN").value, mfd:+$("nlMfd").value, fs:Math.max(0,+$("nlFs").value||0), custom:true};
+               f:+$("nlF").value, nmax:+$("nlN").value, mfd:+$("nlMfd").value, fs:Math.max(0,+$("nlFs").value||0), custom:true,
+               mtf:{wo:$("nlMwo").value.split(",").map(Number), f56:$("nlM56").value.split(",").map(Number), src:"usuario"}};
+    if(L.mtf.wo.length!==3||L.mtf.f56.length!==3||L.mtf.wo.some(isNaN)||L.mtf.f56.some(isNaN)) L.mtf={wo:[0.85,0.70,0.50],f56:[0.95,0.88,0.72],src:"por defecto"};
     if(L.f>0&&L.nmax>0&&L.mfd>0){ LENSES.push(L); S.lens=L; S.N=L.nmax; S.fs=null; S.nCal=L.nmax; }
     $("dlgLens").close(); buildAll(); invalidateMC(); render();
   };
@@ -1428,11 +1621,11 @@ window.addEventListener("DOMContentLoaded", ()=>{
   var META={
     es:{
       title:"M11 · Simulador de telémetro y círculo de confusión",
-      desc:"Simulador del telémetro de la Leica M11 y del círculo de confusión: visor, parche, base efectiva, desplazamiento de foco, disco de Airy y tasa de acierto por diafragma."
+      desc:"Simulador del telémetro de la Leica M11 y del círculo de confusión: visor, parche, base efectiva, desplazamiento de foco, MTF del sistema, disco de Airy y tasa de acierto por diafragma."
     },
     en:{
       title:"M11 · Rangefinder and circle of confusion simulator",
-      desc:"A simulator of the Leica M11 rangefinder and of the circle of confusion: viewfinder, patch, effective base length, focus shift, Airy disc and hit rate by aperture."
+      desc:"A simulator of the Leica M11 rangefinder and of the circle of confusion: viewfinder, patch, effective base length, focus shift, system MTF, Airy disc and hit rate by aperture."
     }
   };
   function apply(l){
