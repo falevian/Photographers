@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marco para pensar la fotografía · ficha de consulta</title>
+<meta name="author" content="Rafael Vida">
+<meta name="description" content="Ficha de consulta del «Marco para pensar la fotografía»: cuatro fases de práctica —antes del disparo, el disparo, el procesado, el archivo—, el aparato conceptual (Flusser, Barthes, Sontag, Berger, Shore, Ghirri) y la constelación japonesa.">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EEF1F2;
+    --panel:#F7F8F8;
+    --ink:#15191C;
+    --ink-soft:#4A5257;
+    --rule:#C4CDD1;
+    --rule-soft:#DBE1E3;
+    --p1:#B0742E;   /* antes del disparo · programa */
+    --p2:#2C7C79;   /* el disparo · encuentro */
+    --p3:#4A4A8C;   /* el procesado · neutro */
+    --p4:#8C4A5E;   /* selección y archivo · tiempo */
+    --p1-wash:#EFE3D3;
+    --p2-wash:#D9E8E7;
+    --p3-wash:#E0E0EE;
+    --p4-wash:#EDDDE2;
+    --warn:#9A3B33;
+    --warn-wash:#F0DFDB;
+    --serif:"Spectral",Georgia,serif;
+    --grot:"Space Grotesk","Helvetica Neue",Arial,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--serif);
+    line-height:1.5;
+    padding:clamp(18px,4vw,56px);
+  }
+  .sheet{
+    max-width:1180px;
+    margin:0 auto;
+    background:var(--panel);
+    border:1px solid var(--rule);
+    box-shadow:0 1px 0 #fff inset, 0 24px 60px -40px rgba(10,20,25,.5);
+  }
+
+  /* ---- shared type ---- */
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    font-weight:500;
+  }
+  .mono{font-family:var(--mono);}
+  h1,h2,h3{font-family:var(--grot);font-weight:600;margin:0;line-height:1.08;}
+  i,em{font-style:italic;}
+
+  /* ---- header ---- */
+  .head{
+    padding:clamp(22px,3.5vw,40px) clamp(22px,3.5vw,44px) clamp(20px,2.6vw,30px);
+    border-bottom:1px solid var(--rule);
+  }
+  .head .eyebrow{margin-bottom:16px;}
+  .head h1{
+    font-size:clamp(28px,4.6vw,50px);
+    letter-spacing:-.015em;
+    max-width:22ch;
+  }
+  .head .thesis{
+    margin:16px 0 0;
+    font-size:clamp(15px,1.7vw,18px);
+    color:var(--ink-soft);
+    max-width:66ch;
+    font-weight:300;
+  }
+  .head .thesis b{color:var(--ink);font-weight:500;}
+  .epigraph{
+    margin:18px 0 0;
+    max-width:60ch;
+    font-size:clamp(15px,1.8vw,19px);
+    font-style:italic;
+    color:var(--ink);
+  }
+  .epigraph .src{font-family:var(--mono);font-style:normal;font-size:10.5px;letter-spacing:.08em;color:var(--ink-soft);display:block;margin-top:5px;}
+  .linkrow{margin-top:20px;display:flex;flex-wrap:wrap;gap:9px;}
+  .linkrow a{
+    font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+    color:var(--ink);text-decoration:none;
+    border:1px solid var(--rule);padding:7px 12px;border-radius:7px;
+    background:#fff;transition:border-color .15s,color .15s;
+  }
+  .linkrow a:hover{border-color:var(--p2);color:var(--p2);}
+  .linkrow a .arr{color:var(--ink-soft);}
+
+  /* ---- workflow spine ---- */
+  .axis-wrap{
+    padding:clamp(20px,3vw,34px) clamp(22px,3.5vw,44px) clamp(8px,1.5vw,16px);
+    border-bottom:1px solid var(--rule);
+    background:
+      linear-gradient(90deg,var(--p1-wash),var(--p2-wash) 34%,var(--p3-wash) 66%,var(--p4-wash));
+    background-blend-mode:multiply;
+  }
+  .axis-label{
+    display:flex;justify-content:space-between;align-items:baseline;
+    margin-bottom:6px;flex-wrap:wrap;gap:6px;
+  }
+  .axis-label .eyebrow{color:var(--ink);}
+  .axis-label span.note{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);letter-spacing:.04em;}
+  svg.spine{display:block;width:100%;height:150px;overflow:visible;}
+  svg.spine text{font-family:var(--mono);fill:var(--ink-soft);}
+  svg.spine .tick-lbl{font-size:11px;}
+  svg.spine .node-lbl{font-size:11.5px;font-weight:600;letter-spacing:.02em;}
+  svg.spine .loop-lbl{font-size:10px;letter-spacing:.04em;}
+
+  /* ---- phase columns ---- */
+  .phases{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+  }
+  .phase{
+    padding:clamp(18px,2.4vw,28px) clamp(16px,1.9vw,24px) clamp(20px,2.6vw,30px);
+    border-right:1px solid var(--rule);
+    position:relative;
+  }
+  .phase:last-child{border-right:none;}
+  .phase .cap{
+    display:flex;align-items:center;gap:10px;
+    margin-bottom:4px;
+  }
+  .phase .dot{width:11px;height:11px;border-radius:50%;flex:none;}
+  .phase .idx{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.1em;}
+  .phase h2{font-size:clamp(18px,1.9vw,21px);letter-spacing:-.01em;margin:2px 0 2px;}
+  .phase .window{
+    font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);
+    padding-bottom:14px;margin-bottom:14px;border-bottom:1px dashed var(--rule);
+  }
+  .row{margin:0 0 13px;}
+  .row:last-child{margin-bottom:0;}
+  .row .k{
+    font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;
+    color:var(--ink-soft);display:block;margin-bottom:3px;
+  }
+  .row .v{font-size:14px;color:var(--ink);}
+  .p1 .dot{background:var(--p1);} .p1 .idx{color:var(--p1);}
+  .p2 .dot{background:var(--p2);} .p2 .idx{color:var(--p2);}
+  .p3 .dot{background:var(--p3);} .p3 .idx{color:var(--p3);}
+  .p4 .dot{background:var(--p4);} .p4 .idx{color:var(--p4);}
+
+  .cite{
+    margin:15px 0 0;padding:11px 13px;
+    font-style:italic;font-size:13.5px;line-height:1.45;color:var(--ink);
+  }
+  .cite .src{font-family:var(--mono);font-style:normal;font-size:10px;letter-spacing:.08em;color:var(--ink-soft);display:block;margin-top:5px;}
+  .p1 .cite{background:var(--p1-wash);border-left:3px solid var(--p1);}
+  .p2 .cite{background:var(--p2-wash);border-left:3px solid var(--p2);}
+  .p3 .cite{background:var(--p3-wash);border-left:3px solid var(--p3);}
+  .p4 .cite{background:var(--p4-wash);border-left:3px solid var(--p4);}
+
+  /* ---- confusions band ---- */
+  .confs{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);}
+  .confs-head{padding:clamp(18px,2.4vw,26px) clamp(22px,3.5vw,44px) 6px;}
+  .confs-head .eyebrow{color:var(--warn);}
+  .confs-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(14px,2vw,22px);padding:12px clamp(22px,3.5vw,44px) 0;}
+  .conf{
+    background:var(--warn-wash);border-left:3px solid var(--warn);
+    padding:13px 15px 14px;font-size:13.5px;color:var(--ink);
+  }
+  .conf .t{font-family:var(--grot);font-weight:600;font-size:13.5px;display:block;margin-bottom:4px;}
+  .conf .fix{display:block;margin-top:7px;}
+  .conf .fix b{font-family:var(--mono);font-weight:600;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--warn);}
+  .confs-rule{
+    margin:14px clamp(22px,3.5vw,44px) clamp(18px,2.4vw,26px);
+    font-family:var(--grot);font-weight:600;font-size:14.5px;color:var(--ink);
+    padding-top:12px;border-top:1px dashed var(--rule);
+  }
+  .confs-rule .k{font-family:var(--mono);font-weight:500;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-soft);margin-right:10px;}
+
+  /* ---- conceptual apparatus ---- */
+  .aparato{padding:clamp(20px,2.8vw,32px) clamp(22px,3.5vw,44px) clamp(20px,2.6vw,30px);}
+  .aparato .eyebrow{margin-bottom:4px;color:var(--ink);}
+  .aparato > p.lead{margin:0 0 20px;font-size:14.5px;color:var(--ink-soft);max-width:74ch;font-weight:300;}
+  .aparato .lead b{color:var(--ink);font-weight:500;}
+  .app-grid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--rule);}
+  .app-cell{padding:16px 18px 18px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);}
+  .app-cell:nth-child(3n){border-right:none;}
+  .app-cell:nth-child(n+4){border-bottom:none;}
+  .app-cell .h{
+    display:flex;align-items:baseline;gap:9px;margin-bottom:11px;
+    padding-bottom:8px;border-bottom:2px solid var(--ink);
+  }
+  .app-cell .h .n{font-family:var(--grot);font-size:14.5px;font-weight:600;color:var(--ink);}
+  .app-cell .h .t{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);}
+  .app-cell ul{margin:0;padding:0;list-style:none;}
+  .app-cell li{font-size:13.5px;margin-bottom:10px;padding-left:14px;position:relative;line-height:1.42;}
+  .app-cell li:last-child{margin-bottom:0;}
+  .app-cell li::before{content:"";position:absolute;left:0;top:8px;width:5px;height:5px;border-radius:50%;background:var(--rule);}
+  .app-cell li b{font-family:var(--grot);font-weight:500;font-size:13px;}
+  .app-cell .q{font-family:var(--mono);font-size:11px;color:var(--ink-soft);letter-spacing:.02em;}
+  .app-cell .cite{margin-top:12px;background:var(--p3-wash);border-left:3px solid var(--p3);}
+
+  /* ---- Japanese constellation ---- */
+  .jp{
+    border-top:1px solid var(--rule);
+    background:linear-gradient(90deg,var(--p2-wash),var(--panel) 45%,var(--p4-wash));
+    background-blend-mode:multiply;
+    padding:clamp(20px,2.8vw,32px) clamp(22px,3.5vw,44px) clamp(20px,2.6vw,30px);
+  }
+  .jp .eyebrow{margin-bottom:4px;color:var(--ink);}
+  .jp > p.lead{margin:0 0 20px;font-size:14.5px;color:var(--ink-soft);max-width:74ch;font-weight:300;}
+  .jp .lead b{color:var(--ink);font-weight:500;}
+  .jp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(14px,1.8vw,20px);}
+  .jp-cell{
+    background:var(--panel);border:1px solid var(--rule);
+    padding:14px 15px 16px;
+  }
+  .jp-cell .q{
+    font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--p4);display:block;margin-bottom:6px;font-weight:600;
+  }
+  .jp-cell .c{font-family:var(--grot);font-style:italic;font-weight:600;font-size:16.5px;display:block;margin-bottom:3px;}
+  .jp-cell .rol{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);display:block;margin-bottom:8px;letter-spacing:.03em;}
+  .jp-cell p{margin:0;font-size:13.5px;color:var(--ink);line-height:1.45;}
+  .jp-cell p+p{margin-top:8px;}
+  .jp-cell .cite{margin-top:10px;padding:9px 11px;background:var(--p4-wash);border-left:3px solid var(--p4);font-size:13px;}
+
+  /* ---- footer ---- */
+  .foot{
+    padding:clamp(20px,2.8vw,30px) clamp(22px,3.5vw,44px) clamp(22px,3vw,34px);
+    border-top:1px solid var(--rule);
+  }
+  .refs{
+    font-family:var(--mono);font-size:11px;color:var(--ink-soft);
+    letter-spacing:.02em;line-height:1.9;
+  }
+  .refs b{color:var(--ink);font-weight:600;letter-spacing:.1em;text-transform:uppercase;font-size:10px;display:block;margin-bottom:6px;}
+  .refs a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--rule);}
+  .refs a:hover{color:var(--p2);border-color:var(--p2);}
+
+  /* ---- responsive ---- */
+  @media (max-width:1000px){
+    .phases{grid-template-columns:1fr 1fr;}
+    .phase:nth-child(2n){border-right:none;}
+    .phase:nth-child(-n+2){border-bottom:1px solid var(--rule);}
+    .app-grid{grid-template-columns:1fr 1fr;}
+    .app-cell{border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);}
+    .app-cell:nth-child(2n){border-right:none;}
+    .app-cell:nth-child(n+5){border-bottom:none;}
+    .jp-grid{grid-template-columns:1fr 1fr;}
+    svg.spine{height:170px;}
+  }
+  @media (max-width:640px){
+    .phases{grid-template-columns:1fr;}
+    .phase{border-right:none;border-bottom:1px solid var(--rule);}
+    .phase:last-child{border-bottom:none;}
+    .confs-grid{grid-template-columns:1fr;}
+    .app-grid{grid-template-columns:1fr;}
+    .app-cell{border-right:none;border-bottom:1px solid var(--rule);}
+    .app-cell:nth-child(n+5){border-bottom:1px solid var(--rule);}
+    .app-cell:last-child{border-bottom:none;}
+    .jp-grid{grid-template-columns:1fr;}
+    svg.spine{height:190px;}
+  }
+
+  /* ---- spine draw animation ---- */
+  @media (prefers-reduced-motion:no-preference){
+    .spine .draw{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.1s ease forwards .15s;}
+    .spine .fade{opacity:0;animation:fade .5s ease forwards;}
+    .spine .n1{animation-delay:.45s;} .spine .n2{animation-delay:.65s;}
+    .spine .n3{animation-delay:.85s;} .spine .n4{animation-delay:1.05s;}
+    .spine .loop{animation-delay:1.3s;}
+    @keyframes draw{to{stroke-dashoffset:0;}}
+    @keyframes fade{to{opacity:1;}}
+  }
+
+  @media print{
+    body{padding:0;background:#fff;}
+    .sheet{box-shadow:none;border:none;max-width:100%;}
+    .axis-wrap,.jp,.cite,.conf{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .langbar{display:none!important;}
+    .linkrow a{background:transparent;}
+  }
+
+  /* ---------- conmutador de idioma ---------- */
+  html[lang="es"] [data-lang="en"]{display:none!important}
+  html[lang="en"] [data-lang="es"]{display:none!important}
+  .langbar{position:fixed;top:14px;right:16px;z-index:50;display:flex;
+           background:rgba(247,248,248,.92);border:1px solid var(--rule);border-radius:8px;
+           overflow:hidden;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+           box-shadow:0 2px 10px -6px rgba(10,20,25,.45)}
+  .langbar button{font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;
+                  background:transparent;border:0;color:var(--ink-soft);padding:7px 11px;cursor:pointer;
+                  transition:background .15s,color .15s}
+  .langbar button+button{border-left:1px solid var(--rule)}
+  .langbar button:hover{color:var(--ink)}
+  .langbar button.on{background:var(--p2-wash);color:var(--p2)}
+  .langbar button:focus-visible{outline:2px solid rgba(44,124,121,.6);outline-offset:-2px}
+  @media(max-width:720px){.langbar{top:8px;right:8px}}
+</style>
+</head>
+<body>
+
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
+
+<main class="sheet">
+
+  <header class="head">
+    <div class="eyebrow" data-lang="es">Marco de trabajo · ficha de consulta · serie 2/2</div>
+    <div class="eyebrow" data-lang="en">Working framework · reference sheet · series 2/2</div>
+    <h1 data-lang="es">Marco para pensar la fotografía</h1>
+    <h1 data-lang="en">A framework for thinking photography</h1>
+    <p class="thesis" data-lang="es">Cuatro fases de práctica, un aparato conceptual de seis autores y una constelación de cuatro conceptos japoneses. <b>No recetas: preguntas que hacerse en el momento justo.</b> Para releer antes de salir a fotografiar.</p>
+    <p class="thesis" data-lang="en">Four phases of practice, a conceptual apparatus of six authors and a constellation of four Japanese concepts. <b>Not recipes: questions to put to oneself at the right moment.</b> To be reread before going out to photograph.</p>
+    <p class="epigraph" data-lang="es">«Lo que está agotado son las categorías de imagen, no las instancias.»<span class="src">— del ensayo</span></p>
+    <p class="epigraph" data-lang="en">“What is exhausted are the categories of image, not the instances.”<span class="src">— from the essay, in Spanish</span></p>
+    <nav class="linkrow" aria-label="Enlaces" data-aria-es="Enlaces" data-aria-en="Links">
+      <a href="https://rafaelvida.com/2026/05/06/marco-para-pensar-la-fotografia/" data-lang="es">Ensayo completo <span class="arr">↗</span></a>
+      <a href="https://rafaelvida.com/2026/05/06/marco-para-pensar-la-fotografia/" data-lang="en">Full essay <span class="arr">↗</span></a>
+      <a href="https://rafaelvida.com/2026/05/06/profundizando-en-fotografia-japonesa/" data-lang="es">Artículo hermano · estética japonesa <span class="arr">↗</span></a>
+      <a href="https://rafaelvida.com/2026/05/06/profundizando-en-fotografia-japonesa/" data-lang="en">Companion article · Japanese aesthetics <span class="arr">↗</span></a>
+      <a href="ficha-fases-juicio-estetico.html" data-lang="es">Ficha hermana · cómo se juzga una imagen <span class="arr">→</span></a>
+      <a href="ficha-fases-juicio-estetico.html" data-lang="en">Sister sheet · how an image is judged <span class="arr">→</span></a>
+    </nav>
+  </header>
+
+  <!-- ================= WORKFLOW SPINE ================= -->
+  <section class="axis-wrap" aria-label="Las cuatro fases del ciclo"
+           data-aria-es="Las cuatro fases del ciclo" data-aria-en="The four phases of the cycle">
+    <div class="axis-label">
+      <span class="eyebrow" data-lang="es">Las cuatro fases · un ciclo, no una cadena</span>
+      <span class="eyebrow" data-lang="en">The four phases · a cycle, not a chain</span>
+      <span class="note" data-lang="es">el archivo devuelve la mirada al programa</span>
+      <span class="note" data-lang="en">the archive returns the gaze to the programme</span>
+    </div>
+    <svg class="spine" viewBox="0 0 1000 150" preserveAspectRatio="none" role="img"
+         aria-label="Ciclo de cuatro fases con retorno del archivo al programa"
+         data-aria-es="Ciclo de cuatro fases con retorno del archivo al programa"
+         data-aria-en="Four-phase cycle with a return from the archive to the programme">
+      <!-- baseline -->
+      <line class="draw" x1="40" y1="66" x2="960" y2="66" stroke="#15191C" stroke-width="1.4" pathLength="1"/>
+      <polygon class="fade n4" points="960,66 948,61 948,71" fill="#15191C"/>
+      <!-- return loop -->
+      <path class="draw loop" d="M880,74 C700,132 300,132 110,74" fill="none"
+            stroke="#4A5257" stroke-width="1" stroke-dasharray="4 4" opacity=".6" pathLength="1"/>
+      <polygon class="fade loop" points="110,74 123,78 118,69" fill="#4A5257"/>
+      <text class="loop-lbl fade loop" x="500" y="142" text-anchor="middle" data-lang="es">el archivo madura y reeduca la fase 1 · ciclo</text>
+      <text class="loop-lbl fade loop" x="500" y="142" text-anchor="middle" data-lang="en">the archive matures and re-educates phase 1 · a cycle</text>
+      <!-- nodes -->
+      <g class="fade n1">
+        <circle cx="110" cy="66" r="6.5" fill="#B0742E"/>
+        <text class="node-lbl" x="110" y="26" text-anchor="middle" fill="#B0742E" data-lang="es">FASE 1</text>
+        <text class="node-lbl" x="110" y="26" text-anchor="middle" fill="#B0742E" data-lang="en">PHASE 1</text>
+        <text class="tick-lbl" x="110" y="46" text-anchor="middle" data-lang="es">antes del disparo</text>
+        <text class="tick-lbl" x="110" y="46" text-anchor="middle" data-lang="en">before the shot</text>
+      </g>
+      <g class="fade n2">
+        <circle cx="370" cy="66" r="6.5" fill="#2C7C79"/>
+        <text class="node-lbl" x="370" y="26" text-anchor="middle" fill="#2C7C79" data-lang="es">FASE 2</text>
+        <text class="node-lbl" x="370" y="26" text-anchor="middle" fill="#2C7C79" data-lang="en">PHASE 2</text>
+        <text class="tick-lbl" x="370" y="46" text-anchor="middle" data-lang="es">el disparo</text>
+        <text class="tick-lbl" x="370" y="46" text-anchor="middle" data-lang="en">the shot</text>
+      </g>
+      <g class="fade n3">
+        <circle cx="630" cy="66" r="6.5" fill="#4A4A8C"/>
+        <text class="node-lbl" x="630" y="26" text-anchor="middle" fill="#4A4A8C" data-lang="es">FASE 3</text>
+        <text class="node-lbl" x="630" y="26" text-anchor="middle" fill="#4A4A8C" data-lang="en">PHASE 3</text>
+        <text class="tick-lbl" x="630" y="46" text-anchor="middle" data-lang="es">el procesado</text>
+        <text class="tick-lbl" x="630" y="46" text-anchor="middle" data-lang="en">processing</text>
+      </g>
+      <g class="fade n4">
+        <circle cx="880" cy="66" r="6.5" fill="#8C4A5E"/>
+        <text class="node-lbl" x="880" y="26" text-anchor="middle" fill="#8C4A5E" data-lang="es">FASE 4</text>
+        <text class="node-lbl" x="880" y="26" text-anchor="middle" fill="#8C4A5E" data-lang="en">PHASE 4</text>
+        <text class="tick-lbl" x="880" y="46" text-anchor="middle" data-lang="es">selección y archivo</text>
+        <text class="tick-lbl" x="880" y="46" text-anchor="middle" data-lang="en">selection and archive</text>
+      </g>
+    </svg>
+  </section>
+
+  <!-- ================= PHASE CARDS ================= -->
+  <section class="phases">
+    <article class="phase p1">
+      <div class="cap"><span class="dot"></span><span class="idx"><span data-lang="es">FASE 1</span><span data-lang="en">PHASE 1</span></span></div>
+      <h2 data-lang="es">Antes del disparo</h2>
+      <h2 data-lang="en">Before the shot</h2>
+      <div class="window" data-lang="es">sospechar del programa · buscar la luz antes que el sujeto</div>
+      <div class="window" data-lang="en">suspect the programme · seek the light before the subject</div>
+      <div class="row">
+        <span class="k" data-lang="es">Guardia</span><span class="k" data-lang="en">On guard</span>
+        <span class="v" data-lang="es">Sospechar del programa: del aparato y de los hábitos propios. No fotografiar lo que ya se sabe cómo se fotografía.</span>
+        <span class="v" data-lang="en">Suspect the programme: the camera's and one's own habits. Do not photograph what one already knows how to photograph.</span>
+      </div>
+      <div class="row">
+        <span class="k" data-lang="es">Disposición</span><span class="k" data-lang="en">Disposition</span>
+        <span class="v" data-lang="es">De anfitrión, no de cazador. La luz primero; el sujeto, después.</span>
+        <span class="v" data-lang="en">A host's, not a hunter's. The light first; the subject afterwards.</span>
+      </div>
+      <div class="cite" data-lang="es">«La pregunta útil no es si esta foto se ha hecho ya, sino por qué la estoy haciendo yo, ahora.»<span class="src">— del ensayo</span></div>
+      <div class="cite" data-lang="en">“The useful question is not whether this photograph has been made before, but why I am making it, now.”<span class="src">— from the essay, in Spanish</span></div>
+    </article>
+
+    <article class="phase p2">
+      <div class="cap"><span class="dot"></span><span class="idx"><span data-lang="es">FASE 2</span><span data-lang="en">PHASE 2</span></span></div>
+      <h2 data-lang="es">En el disparo</h2>
+      <h2 data-lang="en">At the shot</h2>
+      <div class="window" data-lang="es">reconocer el tipo de encuentro</div>
+      <div class="window" data-lang="en">recognise the kind of encounter</div>
+      <div class="row">
+        <span class="k" data-lang="es">Encuentro</span><span class="k" data-lang="en">Encounter</span>
+        <span class="v" data-lang="es">¿Atmósfera o composición? ¿Descripción o instante? Honrar cada foto en su propio modo.</span>
+        <span class="v" data-lang="en">Atmosphere or composition? Description or instant? Honour each photograph in its own mode.</span>
+      </div>
+      <div class="row">
+        <span class="k" data-lang="es">Criterio</span><span class="k" data-lang="en">Criterion</span>
+        <span class="v" data-lang="es">La pregunta útil no es «¿será una buena foto?» sino «¿estoy realmente viendo esto?». Si la respuesta es no: no disparar.</span>
+        <span class="v" data-lang="en">The useful question is not “will it be a good photograph?” but “am I really seeing this?”. If the answer is no: do not press the shutter.</span>
+      </div>
+      <div class="cite" data-lang="es">«Mirar no es ver.»<span class="src">— del ensayo</span></div>
+      <div class="cite" data-lang="en">“Looking is not seeing.”<span class="src">— from the essay, in Spanish</span></div>
+    </article>
+
+    <article class="phase p3">
+      <div class="cap"><span class="dot"></span><span class="idx"><span data-lang="es">FASE 3</span><span data-lang="en">PHASE 3</span></span></div>
+      <h2 data-lang="es">En el procesado</h2>
+      <h2 data-lang="en">In processing</h2>
+      <div class="window" data-lang="es">partir de neutro, nunca del preset</div>
+      <div class="window" data-lang="en">start from neutral, never from the preset</div>
+      <div class="row">
+        <span class="k" data-lang="es">Principio</span><span class="k" data-lang="en">Principle</span>
+        <span class="v" data-lang="es">El procesado sirve a la imagen, no la inventa. Resistir el reflejo de subrayar, contrastar, virar.</span>
+        <span class="v" data-lang="en">Processing serves the image; it does not invent it. Resist the reflex to underline, to add contrast, to tone.</span>
+      </div>
+      <div class="row">
+        <span class="k" data-lang="es">Prueba decisiva</span><span class="k" data-lang="en">Decisive test</span>
+        <span class="v" data-lang="es">En el raw neutro: ¿la foto sigue diciendo algo?</span>
+        <span class="v" data-lang="en">In the neutral raw: does the photograph still say something?</span>
+      </div>
+      <div class="cite" data-lang="es">«Si una foto necesita procesado dramático para sostenerse, casi siempre es que no había foto.»<span class="src">— del ensayo</span></div>
+      <div class="cite" data-lang="en">“If a photograph needs dramatic processing to stand, it is almost always because there was no photograph.”<span class="src">— from the essay, in Spanish</span></div>
+    </article>
+
+    <article class="phase p4">
+      <div class="cap"><span class="dot"></span><span class="idx"><span data-lang="es">FASE 4</span><span data-lang="en">PHASE 4</span></span></div>
+      <h2 data-lang="es">Selección y archivo</h2>
+      <h2 data-lang="en">Selection and archive</h2>
+      <div class="window" data-lang="es">dejar pasar tiempo · volver sin propósito</div>
+      <div class="window" data-lang="en">let time pass · return without purpose</div>
+      <div class="row">
+        <span class="k" data-lang="es">Ritmo</span><span class="k" data-lang="en">Rhythm</span>
+        <span class="v" data-lang="es">Volver al archivo cíclicamente, sin propósito. No descartar definitivamente. El archivo es un organismo que madura, no un almacén.</span>
+        <span class="v" data-lang="en">Return to the archive cyclically, without purpose. Never discard for good. The archive is an organism that matures, not a storehouse.</span>
+      </div>
+      <div class="row">
+        <span class="k" data-lang="es">Contra los sesgos</span><span class="k" data-lang="en">Against the biases</span>
+        <span class="v" data-lang="es">Del recuerdo: ¿la salvaría si la hubiera hecho otra persona? Del prestigio: no descartar por no parecerse a los referentes.</span>
+        <span class="v" data-lang="en">Memory: would I keep it had someone else made it? Prestige: do not discard it for failing to resemble the references.</span>
+      </div>
+      <div class="cite" data-lang="es">«La fotografía madura.»<span class="src">— del ensayo</span></div>
+      <div class="cite" data-lang="en">“The photograph matures.”<span class="src">— from the essay, in Spanish</span></div>
+    </article>
+  </section>
+
+  <!-- ================= THE TWO CONFUSIONS ================= -->
+  <section class="confs" aria-label="Las dos confusiones"
+           data-aria-es="Las dos confusiones" data-aria-en="The two confusions">
+    <div class="confs-head">
+      <span class="eyebrow" data-lang="es">Aviso · las dos confusiones: leer una foto en el modo de otra</span>
+      <span class="eyebrow" data-lang="en">Warning · the two confusions: reading a photograph in another's mode</span>
+    </div>
+    <div class="confs-grid">
+      <div class="conf">
+        <span class="t" data-lang="es">A · Exigir intensidad compositiva a una foto descriptiva</span>
+        <span class="t" data-lang="en">A · Demanding compositional intensity of a descriptive photograph</span>
+        <span data-lang="es">Recortarla, subir el contraste… y matarla.</span>
+        <span data-lang="en">Cropping it, raising the contrast… and killing it.</span>
+        <span class="fix" data-lang="es"><b>Remedio</b> — dejar que la atmósfera respire.</span>
+        <span class="fix" data-lang="en"><b>Remedy</b> — let the atmosphere breathe.</span>
+      </div>
+      <div class="conf">
+        <span class="t" data-lang="es">B · Exigir apertura descriptiva a una foto compositiva</span>
+        <span class="t" data-lang="en">B · Demanding descriptive openness of a compositional photograph</span>
+        <span data-lang="es">«Demasiado de manual»… y elegir la versión menos resuelta.</span>
+        <span data-lang="en">“Too textbook”… and choosing the less resolved version.</span>
+        <span class="fix" data-lang="es"><b>Remedio</b> — el mundo regala composiciones; la primera era la foto.</span>
+        <span class="fix" data-lang="en"><b>Remedy</b> — the world gives away compositions; the first one was the photograph.</span>
+      </div>
+    </div>
+    <div class="confs-rule">
+      <span class="k" data-lang="es">Regla</span><span class="k" data-lang="en">Rule</span>
+      <span data-lang="es">Honrar cada foto en su propio modo.</span>
+      <span data-lang="en">Honour each photograph in its own mode.</span>
+    </div>
+  </section>
+
+  <!-- ================= CONCEPTUAL APPARATUS ================= -->
+  <section class="aparato" aria-label="El aparato conceptual"
+           data-aria-es="El aparato conceptual" data-aria-en="The conceptual apparatus">
+    <div class="eyebrow" data-lang="es">El aparato conceptual · seis autores, seis herramientas</div>
+    <div class="eyebrow" data-lang="en">The conceptual apparatus · six authors, six tools</div>
+    <p class="lead" data-lang="es">No son lecturas de adorno: cada autor aporta una <b>pregunta operativa</b> que se puede llevar puesta en el campo.</p>
+    <p class="lead" data-lang="en">These are not ornamental readings: each author supplies an <b>operative question</b> that can be carried into the field.</p>
+    <div class="app-grid">
+
+      <div class="app-cell">
+        <div class="h"><span class="n">Flusser</span><span class="t" data-lang="es">el programa</span><span class="t" data-lang="en">the programme</span></div>
+        <ul data-lang="es">
+          <li>La cámara contiene un programa; imágenes redundantes frente a informativas.</li>
+          <li><span class="q">Pregunta: ¿esta imagen ejecuta un programa o lucha contra uno? ¿De quién es ese programa?</span></li>
+        </ul>
+        <ul data-lang="en">
+          <li>The camera contains a programme; redundant images as against informative ones.</li>
+          <li><span class="q">Question: does this image execute a programme or fight against one? Whose programme is it?</span></li>
+        </ul>
+        <div class="cite" data-lang="es">«Jugar contra el aparato, no por antagonismo, sino por lucidez.»<span class="src">— del ensayo</span></div>
+        <div class="cite" data-lang="en">“To play against the apparatus, not out of antagonism, but out of lucidity.”<span class="src">— from the essay, in Spanish</span></div>
+      </div>
+
+      <div class="app-cell">
+        <div class="h"><span class="n">Barthes</span><span class="t"><i>studium</i> / <i>punctum</i></span></div>
+        <ul data-lang="es">
+          <li><b><i>Studium</i></b> — lo codificado, lo legible por la cultura.</li>
+          <li><b><i>Punctum</i></b> — el detalle que punza; ocurre en el espectador, no en la imagen.</li>
+          <li>El <i>studium</i> está agotado; el <i>punctum</i>, por definición, no puede estarlo.</li>
+        </ul>
+        <ul data-lang="en">
+          <li><b><i>Studium</i></b> — the coded, what culture can read.</li>
+          <li><b><i>Punctum</i></b> — the detail that pricks; it happens in the viewer, not in the image.</li>
+          <li>The <i>studium</i> is exhausted; the <i>punctum</i>, by definition, cannot be.</li>
+        </ul>
+      </div>
+
+      <div class="app-cell">
+        <div class="h"><span class="n">Sontag</span><span class="t" data-lang="es">la atención</span><span class="t" data-lang="en">attention</span></div>
+        <ul data-lang="es">
+          <li>Fotografiar es apropiación y, a la vez, atención. Puede ser una forma de no estar.</li>
+          <li>Mirar para fotografiar obliga a mirar de verdad.</li>
+        </ul>
+        <ul data-lang="en">
+          <li>To photograph is appropriation and, at once, attention. It can be a way of not being present.</li>
+          <li>Looking in order to photograph compels one to look in earnest.</li>
+        </ul>
+      </div>
+
+      <div class="app-cell">
+        <div class="h"><span class="n">Berger</span><span class="t" data-lang="es">la mirada histórica</span><span class="t" data-lang="en">the historical gaze</span></div>
+        <ul data-lang="es">
+          <li>La mirada es histórica: «miras como te han enseñado a mirar».</li>
+          <li>Cuando crees mirar, en parte recuerdas cómo se mira.</li>
+        </ul>
+        <ul data-lang="en">
+          <li>The gaze is historical: “you look as you have been taught to look”.</li>
+          <li>When you believe you are looking, you are in part remembering how one looks.</li>
+        </ul>
+      </div>
+
+      <div class="app-cell">
+        <div class="h"><span class="n">Shore</span><span class="t" data-lang="es">los tres planos</span><span class="t" data-lang="en">the three levels</span></div>
+        <ul data-lang="es">
+          <li><b>Físico</b> (la copia como objeto) · <b>descriptivo</b> · <b>mental</b> (lo completa el espectador).</li>
+          <li><b>El plano</b> — ver cómo se aplanará la escena antes de que se aplane.</li>
+          <li><b>El encuadre</b> — dónde está la frontera; activo o descriptivo.</li>
+          <li><b>El tiempo</b> — 1/1000 y treinta segundos son mundos distintos, no versiones de lo mismo.</li>
+          <li><b>El foco</b> — jerarquía visual: profundidad amplia da libertad, selectiva impone atención.</li>
+        </ul>
+        <ul data-lang="en">
+          <li><b>Physical</b> (the print as object) · <b>depictive</b> · <b>mental</b> (completed by the viewer).</li>
+          <li><b>Flatness</b> — seeing how the scene will flatten before it flattens.</li>
+          <li><b>The frame</b> — where the border lies; active or descriptive.</li>
+          <li><b>Time</b> — 1/1000 and thirty seconds are different worlds, not versions of the same thing.</li>
+          <li><b>Focus</b> — visual hierarchy: broad depth grants freedom, selective depth imposes attention.</li>
+        </ul>
+      </div>
+
+      <div class="app-cell">
+        <div class="h"><span class="n">Ghirri</span><span class="t" data-lang="es">el color</span><span class="t" data-lang="en">colour</span></div>
+        <ul data-lang="es">
+          <li>Tres maneras: <b>código</b> · <b>composición formal</b> · <b>descripción de un momento de luz</b>.</li>
+          <li>«La luz de las cuatro de la tarde de un sábado de octubre tiene un color que no es ningún otro.»</li>
+          <li>Paletas que no gritan: «la imagen no necesita gritar para tener algo».</li>
+        </ul>
+        <ul data-lang="en">
+          <li>Three modes: <b>code</b> · <b>formal composition</b> · <b>the description of a moment of light</b>.</li>
+          <li>“The light at four in the afternoon on a Saturday in October has a colour that is no other.”</li>
+          <li>Palettes that do not shout: “the image does not need to shout to have something”.</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= JAPANESE CONSTELLATION ================= -->
+  <section class="jp" aria-label="La constelación japonesa"
+           data-aria-es="La constelación japonesa" data-aria-en="The Japanese constellation">
+    <div class="eyebrow" data-lang="es">La constelación japonesa · cuatro conceptos, cuatro preguntas distintas</div>
+    <div class="eyebrow" data-lang="en">The Japanese constellation · four concepts, four distinct questions</div>
+    <p class="lead" data-lang="es">No son sinónimos de una misma vaguedad: <b>cada uno responde a una pregunta diferente</b>, y juntos cubren el encuentro completo.</p>
+    <p class="lead" data-lang="en">They are not synonyms for one and the same vagueness: <b>each answers a different question</b>, and together they cover the whole encounter.</p>
+    <div class="jp-grid">
+
+      <div class="jp-cell">
+        <span class="q" data-lang="es">¿Qué mirar?</span>
+        <span class="q" data-lang="en">What to look at?</span>
+        <span class="c">wabi-sabi</span>
+        <span class="rol" data-lang="es">cualidad del mundo</span>
+        <span class="rol" data-lang="en">a quality of the world</span>
+        <p data-lang="es">La belleza de lo incompleto y de lo tocado por el tiempo. Está en las cosas, no en quien mira.</p>
+        <p data-lang="en">The beauty of the incomplete and of what time has touched. It resides in things, not in the one who looks.</p>
+      </div>
+
+      <div class="jp-cell">
+        <span class="q" data-lang="es">¿Qué se siente?</span>
+        <span class="q" data-lang="en">What is felt?</span>
+        <span class="c">mono no aware</span>
+        <span class="rol" data-lang="es">respuesta del sujeto</span>
+        <span class="rol" data-lang="en">the subject's response</span>
+        <p data-lang="es">La conciencia de la transitoriedad. «El cerezo es bello no a pesar de durar pocos días, sino precisamente porque dura pocos días.»</p>
+        <p data-lang="en">The awareness of transience. “The cherry blossom is beautiful not despite lasting a few days, but precisely because it lasts a few days.”</p>
+      </div>
+
+      <div class="jp-cell">
+        <span class="q" data-lang="es">¿Cómo estar?</span>
+        <span class="q" data-lang="en">How to be present?</span>
+        <span class="c">ichigo ichie</span>
+        <span class="rol" data-lang="es">disposición temporal</span>
+        <span class="rol" data-lang="en">a temporal disposition</span>
+        <p data-lang="es">Centrífuga: estar con lo que ya está ocurriendo, sin proyectarse hacia un punto culminante. Contraste con el instante decisivo —centrípeto— de Cartier-Bresson.</p>
+        <p data-lang="en">Centrifugal: being with what is already happening, without projecting oneself towards a culminating point. The contrast with Cartier-Bresson's decisive moment, which is centripetal.</p>
+      </div>
+
+      <div class="jp-cell">
+        <span class="q" data-lang="es">¿Qué tiene la imagen?</span>
+        <span class="q" data-lang="en">What does the image hold?</span>
+        <span class="c">yūgen</span>
+        <span class="rol" data-lang="es">cualidad de la imagen resultante</span>
+        <span class="rol" data-lang="en">a quality of the resulting image</span>
+        <p data-lang="es">Evocar más de lo que muestra. Se puede vivir un encuentro pleno y producir una foto plana.</p>
+        <p data-lang="en">Evoking more than it shows. One can live a full encounter and produce a flat photograph.</p>
+        <div class="cite" data-lang="es">«El trabajo no termina con el clic.»<span class="src">— del ensayo</span></div>
+        <div class="cite" data-lang="en">“The work does not end with the click.”<span class="src">— from the essay, in Spanish</span></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="foot">
+    <div class="refs">
+      <b data-lang="es">Fuente y serie</b>
+      <b data-lang="en">Source and series</b>
+      <span data-lang="es">Condensado de R. Vida, <a href="https://rafaelvida.com/2026/05/06/marco-para-pensar-la-fotografia/">«Marco para pensar la fotografía»</a> (2026) · estética japonesa: <a href="https://rafaelvida.com/2026/05/06/profundizando-en-fotografia-japonesa/">artículo hermano</a> · ficha 2 de 2 — la primera: <a href="ficha-fases-juicio-estetico.html">fases del juicio estético</a>.</span>
+      <span data-lang="en">Condensed from R. Vida, <a href="https://rafaelvida.com/2026/05/06/marco-para-pensar-la-fotografia/">“Marco para pensar la fotografía”</a> (2026, in Spanish) · Japanese aesthetics: <a href="https://rafaelvida.com/2026/05/06/profundizando-en-fotografia-japonesa/">companion article</a> · sheet 2 of 2 — the first: <a href="ficha-fases-juicio-estetico.html">phases of aesthetic judgement</a>.</span>
+      <br>
+      Flusser 1983 · Barthes 1980 · Sontag 1977 · Berger 1972 · Shore 1998 · Ghirri 1970–1992
+    </div>
+  </footer>
+
+</main>
+
+<script>
+"use strict";
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{
+      title:"Marco para pensar la fotografía · ficha de consulta",
+      desc:"Ficha de consulta del «Marco para pensar la fotografía»: cuatro fases de práctica —antes del disparo, el disparo, el procesado, el archivo—, el aparato conceptual (Flusser, Barthes, Sontag, Berger, Shore, Ghirri) y la constelación japonesa."
+    },
+    en:{
+      title:"A framework for thinking photography · reference sheet",
+      desc:"Reference sheet for 'A framework for thinking photography': four phases of practice — before the shot, the shot, processing, the archive — the conceptual apparatus (Flusser, Barthes, Sontag, Berger, Shore, Ghirri) and the Japanese constellation."
+    }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    ["title","ph","alt","aria"].forEach(function(k){
+      [].forEach.call(document.querySelectorAll("[data-"+k+"-"+l+"]"),function(e){
+        var attr = k==="ph" ? "placeholder" : (k==="aria" ? "aria-label" : k);
+        e.setAttribute(attr, e.getAttribute("data-"+k+"-"+l));
+      });
+    });
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,765 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Del sensor al papel · Rafael Vida</title>
+<meta name="author" content="Rafael Vida">
+<meta name="description" content="Del sensor al papel: ¿a qué tamaño puedo imprimir esta foto y desde dónde se va a mirar? Píxeles, difracción, proceso de impresión y agudeza del ojo: el eslabón limitante de la copia.">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0c10; --panel:#13171e; --panel2:#0f131a; --line:#222a35; --line2:#2c3644;
+    --text:#d8dde5; --head:#f3f5f8; --muted:#8a929f; --faint:#5b636f;
+    --amber:#f4b13c; --teal:#3fcab0; --red:#ef6f53; --violet:#9b8cff;
+    --sans:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+    --disp:'Space Grotesk',var(--sans);
+    --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;-webkit-font-smoothing:antialiased}
+  a{color:var(--teal);text-decoration:none;border-bottom:1px solid rgba(63,202,176,.35)}
+  a:hover{border-color:var(--teal)}
+  .wrap{max-width:1080px;margin:0 auto;padding:26px 20px 50px}
+  .topbar{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;padding-right:96px}
+  @media(max-width:720px){.topbar{padding-right:84px}}
+  h1{font-family:var(--disp);font-weight:700;font-size:24px;letter-spacing:-.02em;color:var(--head);margin:0}
+  .topbar .meta{font-family:var(--mono);font-size:12px;color:var(--faint)}
+  .byline{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:4px}
+  .intro{font-size:14px;color:var(--muted);line-height:1.55;max-width:840px;margin:10px 0 0}
+  .intro b{color:var(--text);font-weight:500}
+
+  .grid{display:grid;grid-template-columns:292px minmax(0,1fr);gap:18px;margin-top:20px}
+  @media(max-width:820px){.grid{grid-template-columns:1fr}}
+  .controls{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:16px;align-self:start}
+  .controls .ct{font-size:11px;color:var(--faint);letter-spacing:.08em;text-transform:uppercase;margin:14px 0 10px}
+  .controls .ct:first-child{margin-top:0}
+  .ctl{margin-bottom:12px}
+  .ctl .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;gap:8px}
+  .ctl .row span:first-child{font-size:12px;color:var(--muted)}
+  .ctl .row>span[data-lang]{font-size:12px;color:var(--muted)}
+  .ctl .row .val{font-family:var(--mono);font-size:13px;color:var(--head);white-space:nowrap}
+  input[type=range]{width:100%;cursor:pointer}
+  input[type=number]{width:100%;background:var(--panel);color:var(--text);border:1px solid var(--line2);border-radius:7px;padding:6px 8px;font-family:var(--mono);font-size:13px}
+  select{width:100%;background:var(--panel);color:var(--text);border:1px solid var(--line2);border-radius:7px;
+         padding:6px 8px;font-family:var(--mono);font-size:12.5px}
+  .stops{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+  .stop{font-size:11.5px;padding:5px 9px;border-radius:7px;cursor:pointer;background:none;
+        border:1px solid var(--line2);color:var(--muted);font-family:var(--sans)}
+  .stop:hover{color:var(--text)}
+  .stop.on{border-color:var(--teal);background:rgba(63,202,176,.12);color:var(--teal)}
+  .sep{border-top:1px solid var(--line);margin:10px 0 12px}
+  .subinfo{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:5px}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:18px}
+  .panel h2{font-family:var(--disp);font-size:15px;font-weight:500;color:var(--head);margin:0 0 10px}
+  .verdline{font-family:var(--disp);font-size:21px;font-weight:700;color:var(--head);letter-spacing:-.01em}
+  .verdline .lim{color:var(--amber)}
+  .verdline .eff{color:var(--muted);font-weight:400;font-size:16px;margin-left:8px}
+  .verdexp{font-size:13.5px;color:var(--muted);line-height:1.55;margin:8px 0 0}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+  @media(max-width:560px){.stats{grid-template-columns:repeat(2,1fr)}}
+  .stat{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+  .stat.lim{border-color:var(--amber);background:rgba(244,177,60,.07)}
+  .stat .l{font-size:10px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+  .stat .n{font-family:var(--mono);font-size:19px;margin-top:3px;color:var(--head)}
+  .stat.lim .n{color:var(--amber)}
+  .stat .u{font-size:12px;color:var(--faint);margin-left:4px}
+  .stat .h{font-size:10px;color:var(--faint);margin-top:3px;line-height:1.35}
+
+  canvas{border-radius:10px;border:1px solid var(--line2);display:block;background:var(--panel2);width:100%;height:auto}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:11.5px;color:var(--muted);margin-top:8px;font-family:var(--sans)}
+  .legend i{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:5px;border-radius:2px}
+  .note{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:10px}
+  .note b{color:var(--text);font-weight:500}
+
+  table.res{width:100%;border-collapse:collapse;font-size:13px}
+  table.res th{font-size:11px;color:var(--faint);letter-spacing:.04em;text-transform:uppercase;font-weight:500;text-align:right;padding:4px 6px;border-bottom:1px solid var(--line2)}
+  table.res th:first-child{text-align:left}
+  table.res td{padding:6px;border-bottom:1px solid var(--line);text-align:right;font-family:var(--mono);white-space:nowrap}
+  table.res td:first-child{text-align:left;font-family:var(--sans);color:var(--muted)}
+  .v-ok{color:var(--teal)} .v-mid{color:var(--amber)} .v-bad{color:var(--red)}
+  .tblwrap{overflow-x:auto}
+
+  ol.model{font-size:13px;color:var(--muted);line-height:1.65;padding-left:20px;margin:6px 0}
+  ol.model li{margin-bottom:8px}
+  ol.model code{font-family:var(--mono);font-size:12px;color:var(--text);background:var(--panel2);padding:1px 5px;border-radius:5px;border:1px solid var(--line)}
+  footer{font-size:11px;color:var(--faint);margin-top:30px;line-height:1.6;font-family:var(--mono);border-top:1px solid var(--line);padding-top:16px}
+  .am{color:var(--amber)} .te{color:var(--teal)} .vi{color:var(--violet)} .rd{color:var(--red)}
+
+  /* ---------- conmutador de idioma ---------- */
+  html[lang="es"] [data-lang="en"]{display:none!important}
+  html[lang="en"] [data-lang="es"]{display:none!important}
+  .langbar{position:fixed;top:14px;right:16px;z-index:100;display:flex;
+           background:rgba(15,19,26,.92);border:1px solid var(--line2);border-radius:8px;
+           overflow:hidden;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+  .langbar button{font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;
+                  background:transparent;border:0;color:var(--muted);padding:7px 11px;cursor:pointer;
+                  transition:background .15s,color .15s}
+  .langbar button+button{border-left:1px solid var(--line2)}
+  .langbar button:hover{color:var(--text)}
+  .langbar button.on{background:rgba(63,202,176,.14);color:var(--teal)}
+  .langbar button:focus-visible{outline:2px solid rgba(63,202,176,.6);outline-offset:-2px}
+  @media(max-width:720px){.langbar{top:8px;right:8px}}
+  @media print{.langbar{display:none!important}}
+</style>
+</head>
+<body>
+
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
+
+<div class="wrap">
+<header>
+  <div class="topbar">
+    <h1 data-lang="es">Del sensor al papel</h1>
+    <h1 data-lang="en">From sensor to paper</h1>
+    <span class="meta">ε → px → f/N → ppp</span>
+  </div>
+  <div class="byline">Rafael Vida</div>
+  <p class="intro" data-lang="es">¿A qué tamaño puedo imprimir esta foto y desde dónde se va a mirar? La herramienta une la cadena completa: <b>píxeles del sensor</b> → <b>límite de difracción de la toma</b> → <b>techo del proceso de impresión</b> → <b>agudeza del ojo</b> a la distancia de observación. El veredicto es siempre el mismo: cuál de los cuatro eslabones limita la copia. La agudeza ε usa los mismos presets del <a href="telemetro-m11.html">telémetro de la M11</a>.</p>
+  <p class="intro" data-lang="en">How large can this photograph be printed, and where will it be viewed from? This tool joins the whole chain: <b>sensor pixels</b> → <b>diffraction limit of the capture</b> → <b>ceiling of the printing process</b> → <b>visual acuity</b> at the viewing distance. The verdict is always the same question: which of the four links limits the print. The acuity ε uses the same presets as the <a href="telemetro-m11.html">M11 rangefinder tool</a>.</p>
+</header>
+
+<div class="grid">
+  <aside class="controls">
+    <div class="ct" data-lang="es">Ojo y distancia</div>
+    <div class="ct" data-lang="en">Eye and distance</div>
+    <div class="ctl">
+      <div class="row"><span data-lang="es">Agudeza del ojo ε</span><span data-lang="en">Visual acuity ε</span><span class="val" id="epsVal"></span></div>
+      <input type="range" id="eps" min="0.3" max="2" step="0.05" value="1">
+      <div class="stops">
+        <button type="button" class="stop epspre" data-eps="0.6"><span data-lang="es">buena luz 0,6′</span><span data-lang="en">good light 0.6′</span></button>
+        <button type="button" class="stop epspre" data-eps="1.0"><span data-lang="es">interior 1,0′</span><span data-lang="en">indoors 1.0′</span></button>
+        <button type="button" class="stop epspre" data-eps="1.8"><span data-lang="es">penumbra 1,8′</span><span data-lang="en">dim light 1.8′</span></button>
+      </div>
+    </div>
+    <div class="ctl">
+      <div class="row"><span data-lang="es">Distancia de observación d</span><span data-lang="en">Viewing distance d</span><span class="val" id="dVal"></span></div>
+      <input type="range" id="dist" min="0" max="200" step="1" value="54">
+      <div class="stops">
+        <button type="button" class="stop" id="scBook"><span data-lang="es">libro 35 cm</span><span data-lang="en">book 35 cm</span></button>
+        <button type="button" class="stop" id="scGal"><span data-lang="es">galería 1,5×diag</span><span data-lang="en">gallery 1.5×diag</span></button>
+        <button type="button" class="stop" id="scPoster"><span data-lang="es">cartel 3 m</span><span data-lang="en">poster 3 m</span></button>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+    <div class="ct" data-lang="es">Píxeles</div>
+    <div class="ct" data-lang="en">Pixels</div>
+    <div class="ctl">
+      <div class="row"><span data-lang="es">Cámara (36×24 mm)</span><span data-lang="en">Camera (36×24 mm)</span></div>
+      <select id="cam"></select>
+      <div id="customWrap" style="display:none;margin-top:6px">
+        <div class="row"><span data-lang="es">Mpx totales</span><span data-lang="en">Total Mpx</span></div>
+        <input type="number" id="mpx" min="2" max="200" step="1" value="24">
+      </div>
+      <div class="subinfo" id="camInfo"></div>
+    </div>
+    <div class="ctl">
+      <div class="row"><span data-lang="es">Recorte del encuadre</span><span data-lang="en">Crop of the frame</span><span class="val" id="cropVal"></span></div>
+      <input type="range" id="crop" min="25" max="100" step="1" value="100">
+    </div>
+
+    <div class="sep"></div>
+    <div class="ct" data-lang="es">Toma</div>
+    <div class="ct" data-lang="en">Capture</div>
+    <div class="ctl">
+      <div class="row"><span data-lang="es">Diafragma N (λ = 550 nm)</span><span data-lang="en">Aperture N (λ = 550 nm)</span><span class="val" id="apVal"></span></div>
+      <input type="range" id="ap" min="0" max="8" step="1" value="4">
+    </div>
+
+    <div class="sep"></div>
+    <div class="ct" data-lang="es">Copia e impresión</div>
+    <div class="ct" data-lang="en">Print and process</div>
+    <div class="ctl">
+      <div class="row"><span data-lang="es">Ancho de copia</span><span data-lang="en">Print width</span><span class="val" id="pwVal"></span></div>
+      <input type="range" id="pw" min="100" max="1500" step="5" value="420">
+    </div>
+    <div class="ctl">
+      <div class="row"><span data-lang="es">Proceso de impresión</span><span data-lang="en">Printing process</span></div>
+      <select id="proc"></select>
+    </div>
+  </aside>
+
+  <main>
+    <div class="panel">
+      <div class="verdline"><span data-lang="es">Eslabón limitante:</span><span data-lang="en">Limiting link:</span> <span class="lim" id="verdLim"></span><span class="eff" id="verdEff"></span></div>
+      <p class="verdexp" id="verdExp"></p>
+      <div class="stats">
+        <div class="stat" id="boxEye">
+          <div class="l" data-lang="es">Ojo</div><div class="l" data-lang="en">Eye</div>
+          <div class="n"><span id="sEye"></span><span class="u" id="uEye"></span></div>
+          <div class="h" data-lang="es">lo que la vista aprovecha a d</div>
+          <div class="h" data-lang="en">what the eye can use at d</div>
+        </div>
+        <div class="stat" id="boxPix">
+          <div class="l" data-lang="es">Píxeles</div><div class="l" data-lang="en">Pixels</div>
+          <div class="n"><span id="sPix"></span><span class="u" id="uPix"></span></div>
+          <div class="h" data-lang="es">lo que entrega el archivo</div>
+          <div class="h" data-lang="en">what the file delivers</div>
+        </div>
+        <div class="stat" id="boxDiff">
+          <div class="l" data-lang="es">Difracción</div><div class="l" data-lang="en">Diffraction</div>
+          <div class="n"><span id="sDiff"></span><span class="u" id="uDiff"></span></div>
+          <div class="h" data-lang="es">techo de la toma a f/N</div>
+          <div class="h" data-lang="en">ceiling of the capture at f/N</div>
+        </div>
+        <div class="stat" id="boxProc">
+          <div class="l" data-lang="es">Proceso</div><div class="l" data-lang="en">Process</div>
+          <div class="n"><span id="sProc"></span><span class="u" id="uProc"></span></div>
+          <div class="h" data-lang="es">techo duro de la impresión</div>
+          <div class="h" data-lang="en">hard ceiling of the printing</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2 data-lang="es">Ancho máximo de copia nítida frente a distancia de observación</h2>
+      <h2 data-lang="en">Maximum sharp print width against viewing distance</h2>
+      <canvas id="chart" width="920" height="440"></canvas>
+      <div class="legend">
+        <span><i style="background:var(--amber)"></i><span data-lang="es">techo por píxeles</span><span data-lang="en">pixel ceiling</span></span>
+        <span><i style="background:var(--violet)"></i><span data-lang="es">techo por difracción</span><span data-lang="en">diffraction ceiling</span></span>
+        <span><i style="background:var(--red)"></i><span data-lang="es">zona donde el proceso no alcanza lo que pide la vista</span><span data-lang="en">zone where the process falls short of the eye</span></span>
+        <span><i style="background:var(--faint)"></i><span data-lang="es">distancia natural 1,5 × diagonal</span><span data-lang="en">natural distance 1.5 × diagonal</span></span>
+        <span><i style="background:var(--teal)"></i><span data-lang="es">tu copia</span><span data-lang="en">your print</span></span>
+      </div>
+      <p class="note" id="natLine"></p>
+      <p class="note" data-lang="es">El hallazgo clásico se ve en la línea gris: si el público se coloca a una distancia proporcional a la diagonal, la línea 1,5 × diagonal corre <b>paralela</b> a los techos de píxeles y de difracción (todas son rectas de pendiente 1 en ejes logarítmicos), de modo que los Mpx necesarios apenas dependen del tamaño de la copia.</p>
+      <p class="note" data-lang="en">The classic finding shows up in the grey line: if viewers stand at a distance proportional to the diagonal, the 1.5 × diagonal line runs <b>parallel</b> to the pixel and diffraction ceilings (all of them slope-1 straight lines on logarithmic axes), so the required Mpx barely depend on the print size.</p>
+    </div>
+
+    <div class="panel">
+      <h2 data-lang="es">Lectura por tamaños de papel</h2>
+      <h2 data-lang="en">Reading by paper size</h2>
+      <div class="tblwrap">
+      <table class="res">
+        <thead><tr>
+          <th data-lang="es">Papel</th><th data-lang="en">Paper</th>
+          <th data-lang="es">entregados</th><th data-lang="en">delivered</th>
+          <th data-lang="es">necesarios a d</th><th data-lang="en">needed at d</th>
+          <th data-lang="es">a 1,5×diag</th><th data-lang="en">at 1.5×diag</th>
+          <th data-lang="es">veredicto</th><th data-lang="en">verdict</th>
+        </tr></thead>
+        <tbody id="papersBody"></tbody>
+      </table>
+      </div>
+      <p class="note" data-lang="es">«Entregados» es el mínimo de píxeles, difracción y proceso al ancho de cada papel (lado largo, con el recorte vigente). El veredicto compara lo entregado con lo que la vista pide a la distancia d elegida; la columna 1,5×diag da la exigencia a la distancia «natural» de ese papel. Unidades: ppp.</p>
+      <p class="note" data-lang="en">“Delivered” is the minimum of pixels, diffraction and process at each paper’s width (long side, current crop applied). The verdict compares what is delivered against what the eye demands at the chosen distance d; the 1.5×diag column gives the demand at that paper’s “natural” distance. Units: ppi.</p>
+    </div>
+
+    <div class="panel">
+      <h2 data-lang="es">Conexión con el binning</h2>
+      <h2 data-lang="en">Connection with binning</h2>
+      <p class="note" id="binLine"></p>
+      <p class="note">
+        <span data-lang="es">Más sobre el archivo pequeño en <a href="binning-m11.html">el binning de la M11</a>; para maquetar la copia, <a href="zine-generator.html">el generador de fanzines</a>; la agudeza ε viene del <a href="telemetro-m11.html">telémetro de la M11</a>.</span>
+        <span data-lang="en">More on the small file in <a href="binning-m11.html">M11 binning</a>; to lay out the print, <a href="zine-generator.html">the zine generator</a>; the acuity ε comes from the <a href="telemetro-m11.html">M11 rangefinder tool</a>.</span>
+      </p>
+    </div>
+
+    <div class="panel">
+      <h2 data-lang="es">Modelo</h2>
+      <h2 data-lang="en">Model</h2>
+      <ol class="model">
+        <li data-lang="es"><b>Ojo.</b> A distancia d, el detalle resoluble es <code>s = d·tan ε</code>; un par de líneas necesita 2s, luego <code>ν_ojo = 1/(2·d·tan ε)</code> en pl/mm sobre el papel y <code>ppp_ojo = 2·ν_ojo·25.4</code>. Con ε = 1′ y d = 25 cm salen ≈ 350 ppp: la regla clásica de los «300 ppp a distancia de lectura».</li>
+        <li data-lang="en"><b>Eye.</b> At distance d the resolvable detail is <code>s = d·tan ε</code>; a line pair needs 2s, hence <code>ν_eye = 1/(2·d·tan ε)</code> in lp/mm on the paper and <code>ppi_eye = 2·ν_eye·25.4</code>. With ε = 1′ and d = 25 cm this gives ≈ 350 ppi: the classic “300 ppi at reading distance” rule.</li>
+        <li data-lang="es"><b>Píxeles.</b> Sensor de 36×24 mm; paso de píxel <code>= 36 mm / píxeles_ancho</code>. Con recorte c (fracción del encuadre) quedan <code>píxeles_ancho·c</code>, y los ppp entregados a un ancho de copia dado son <code>ppp_píx = píxeles_ancho·c / (ancho_copia / 25.4)</code>.</li>
+        <li data-lang="en"><b>Pixels.</b> A 36×24 mm sensor; pixel pitch <code>= 36 mm / width_px</code>. With crop c (fraction of the frame) there remain <code>width_px·c</code>, and the ppi delivered at a given print width are <code>ppi_pix = width_px·c / (print_width / 25.4)</code>.</li>
+        <li data-lang="es"><b>Difracción.</b> Disco de Airy <code>c_A = 2.44·λ·N</code> con λ = 550 nm; frecuencia práctica en el sensor <code>ν_sensor ≈ 1/c_A</code> (convención explícita: un par de líneas por diámetro de Airy). Aumento <code>M = ancho_copia / (36 mm·c)</code>; en el papel queda <code>ν_sensor / M</code>, convertida a ppp igual que arriba: <code>ppp_dif = 2·(ν_sensor/M)·25.4</code>.</li>
+        <li data-lang="en"><b>Diffraction.</b> Airy disc <code>c_A = 2.44·λ·N</code> with λ = 550 nm; practical frequency at the sensor <code>ν_sensor ≈ 1/c_A</code> (explicit convention: one line pair per Airy diameter). Magnification <code>M = print_width / (36 mm·c)</code>; on the paper it becomes <code>ν_sensor / M</code>, converted to ppi as above: <code>ppi_diff = 2·(ν_sensor/M)·25.4</code>.</li>
+        <li data-lang="es"><b>Proceso.</b> Techo duro del selector: inyección fine art 360, minilab químico 300, offset 175 lpi ≈ 300 equivalentes, rotulación de gran formato 150, pantalla 220 ppp.</li>
+        <li data-lang="en"><b>Process.</b> Hard ceiling taken by the selector: fine-art inkjet 360, chemical minilab 300, offset 175 lpi ≈ 300 equivalent, wide-format signage 150, screen 220 ppi.</li>
+        <li data-lang="es"><b>Veredicto.</b> Los cuatro se expresan en ppp sobre el papel y el eslabón limitante es el mínimo. La gráfica invierte cada techo: iguala lo entregado a lo que pide la vista y despeja el ancho máximo, <code>ancho_píx = píxeles_ancho·c·d·tan ε</code> y <code>ancho_dif = 2·d·tan ε·ν_sensor·36·c</code>; el proceso da una distancia mínima <code>d_proc = 25.4 / (ppp_proc·tan ε)</code>.</li>
+        <li data-lang="en"><b>Verdict.</b> All four are expressed as ppi on the paper and the limiting link is the minimum. The chart inverts each ceiling: it equates what is delivered with what the eye demands and solves for the maximum width, <code>width_pix = width_px·c·d·tan ε</code> and <code>width_diff = 2·d·tan ε·ν_sensor·36·c</code>; the process yields a minimum distance <code>d_proc = 25.4 / (ppi_proc·tan ε)</code>.</li>
+      </ol>
+      <p class="note" data-lang="es">Simplificaciones declaradas: sensor sin filtro AA ni pérdidas de demosaicado (los píxeles cuentan enteros), difracción como único defecto de la toma (sin trepidación, desenfoque ni aberraciones), y proceso resumido en una sola cifra. Todos los techos son optimistas por separado; el mínimo de los cuatro es, por ello, un techo optimista honesto.</p>
+      <p class="note" data-lang="en">Declared simplifications: a sensor without an AA filter or demosaicing losses (pixels count in full), diffraction as the sole defect of the capture (no shake, defocus or aberrations), and the process reduced to a single figure. Every ceiling is optimistic on its own; the minimum of the four is, for that reason, an honestly optimistic ceiling.</p>
+    </div>
+
+    <div class="panel">
+      <h2 data-lang="es">Verificación numérica</h2>
+      <h2 data-lang="en">Numerical verification</h2>
+      <div class="tblwrap">
+      <table class="res">
+        <thead><tr>
+          <th data-lang="es">Comprobación</th><th data-lang="en">Check</th>
+          <th data-lang="es">esperado</th><th data-lang="en">expected</th>
+          <th data-lang="es">calculado</th><th data-lang="en">computed</th>
+          <th>·</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><span data-lang="es">ε = 1′, d = 25 cm → ppp necesarios (regla de los 300 ppp)</span><span data-lang="en">ε = 1′, d = 25 cm → required ppi (the 300 ppi rule)</span></td>
+            <td><span data-lang="es">≈ 350 ppp</span><span data-lang="en">≈ 350 ppi</span></td>
+            <td id="vc1"></td><td id="vs1"></td>
+          </tr>
+          <tr>
+            <td><span data-lang="es">ν_ojo con ε = 1′ y d = 25 cm</span><span data-lang="en">ν_eye with ε = 1′ and d = 25 cm</span></td>
+            <td><span data-lang="es">≈ 6,9 pl/mm</span><span data-lang="en">≈ 6.9 lp/mm</span></td>
+            <td id="vc2"></td><td id="vs2"></td>
+          </tr>
+          <tr>
+            <td><span data-lang="es">Disco de Airy a f/8, λ = 550 nm → ν_sensor</span><span data-lang="en">Airy disc at f/8, λ = 550 nm → ν_sensor</span></td>
+            <td><span data-lang="es">10,7 µm → ≈ 93 pl/mm</span><span data-lang="en">10.7 µm → ≈ 93 lp/mm</span></td>
+            <td id="vc3"></td><td id="vs3"></td>
+          </tr>
+          <tr>
+            <td><span data-lang="es">Mpx constantes sobre la línea 1,5 × diagonal (ε = 1′, 3:2)</span><span data-lang="en">Constant Mpx along the 1.5 × diagonal line (ε = 1′, 3:2)</span></td>
+            <td><span data-lang="es">≈ 2,4 Mpx</span><span data-lang="en">≈ 2.4 Mpx</span></td>
+            <td id="vc4"></td><td id="vs4"></td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="note" data-lang="es">Las cuatro filas se recalculan con el mismo código del simulador cada vez que se abre la página; si alguna saliera de tolerancia se marcaría FALLA.</p>
+      <p class="note" data-lang="en">All four rows are recomputed with the simulator’s own code every time the page opens; any value out of tolerance would be flagged FAIL.</p>
+    </div>
+  </main>
+</div>
+
+<footer>
+  <span data-lang="es">Del sensor al papel · Rafael Vida · herramientas hermanas: <a href="binning-m11.html">binning-m11</a> · <a href="zine-generator.html">zine-generator</a> · <a href="telemetro-m11.html">telemetro-m11</a> · <a href="simulador-flash.html">simulador-flash</a> · <a href="stack-sensor.html">stack-sensor</a></span>
+  <span data-lang="en">From sensor to paper · Rafael Vida · sibling tools: <a href="binning-m11.html">binning-m11</a> · <a href="zine-generator.html">zine-generator</a> · <a href="telemetro-m11.html">telemetro-m11</a> · <a href="simulador-flash.html">simulador-flash</a> · <a href="stack-sensor.html">stack-sensor</a></span>
+</footer>
+</div>
+
+<script>
+"use strict";
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{
+      title:"Del sensor al papel · Rafael Vida",
+      desc:"Del sensor al papel: ¿a qué tamaño puedo imprimir esta foto y desde dónde se va a mirar? Píxeles, difracción, proceso de impresión y agudeza del ojo: el eslabón limitante de la copia."
+    },
+    en:{
+      title:"From sensor to paper · Rafael Vida",
+      desc:"From sensor to paper: how large can this photograph be printed, and from where will it be viewed? Pixels, diffraction, printing process and visual acuity: the limiting link of the print."
+    }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    ["title","ph","alt","aria"].forEach(function(k){
+      [].forEach.call(document.querySelectorAll("[data-"+k+"-"+l+"]"),function(e){
+        var attr = k==="ph" ? "placeholder" : (k==="aria" ? "aria-label" : k);
+        e.setAttribute(attr, e.getAttribute("data-"+k+"-"+l));
+      });
+    });
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
+
+<script>
+"use strict";
+/* ---------- diccionario de cadenas generadas por JS ----------
+   Como en stack-sensor.html: el diccionario se llama DICT y el ayudante LBL,
+   nunca T ni t() ni S(), para que ningún contador o parámetro local los eclipse. */
+const DICT={
+ es:{
+  cam60:'Leica M11 · DNG 60 Mpx (9528×6328)',
+  cam36:'Leica M11 · M-DNG 36 Mpx (7416×4928)',
+  cam18:'Leica M11 · S-DNG 18 Mpx (5272×3498)',
+  camQ3:'Leica Q3 · 60 Mpx (9520×6336)',
+  camGen:'Genérica 24 Mpx (6000×4000)',
+  camCus:'Personalizada…',
+  procInk:'Inyección fine art · 360 ppp',
+  procLab:'Minilab químico · 300 ppp',
+  procOff:'Offset 175 lpi · ≈300 ppp equiv.',
+  procLgf:'Gran formato · 150 ppp',
+  procScr:'Pantalla · 220 ppp',
+  pnInk:'la inyección fine art', pnLab:'el minilab químico', pnOff:'el offset a 175 lpi',
+  pnLgf:'la rotulación de gran formato', pnScr:'la pantalla',
+  pitchLine:'paso de píxel {p} µm · {m} Mpx útiles',
+  limEye:'el ojo', limPix:'los píxeles', limDiff:'la difracción', limProc:'el proceso',
+  verdEff:'· {v} ppp efectivos en el papel',
+  expEye:'A {d} la vista ya no separa más de {p} ppp: sobra detalle por los cuatro costados. Cabe imprimir más grande o mirar más de cerca.',
+  expPix:'El archivo ({m} Mpx útiles) entrega {p} ppp a {w} de ancho: mandan los píxeles. Haría falta más resolución de cámara, menos recorte o una copia menor.',
+  expDiff:'A f/{N} el disco de Airy ({a} µm) deja la toma en {p} ppp equivalentes con aumento {M}×: la nitidez se quedó en el diafragma. Abrir hacia el óptimo del objetivo sube el techo.',
+  expProc:'{proc} no pasa de {p} ppp: aquí da igual la cámara; solo cambiar de proceso mejora la copia.',
+  axX:'distancia de observación (m)',
+  axY:'ancho máximo de copia nítida (m)',
+  curPix:'píxeles', curDiff:'difracción f/{N}', curNat:'1,5 × diagonal',
+  procZone:'proceso < ojo',
+  mkBook:'libro 35 cm', mkPoster:'cartel 3 m', youAre:'tu copia',
+  natNote:'Sobre la línea gris (público a 1,5 × diagonal, ε = {e}′) bastan ≈ {m} Mpx, sea cual sea el tamaño de la copia.',
+  tSobra:'sobra', tJusto:'justo', tFalta:'falta',
+  binYes:'A {w} de ancho mirado desde {d}, el resto de la cadena se queda en {th} ppp y el S-DNG de 18 Mpx entrega {p} ppp: bastaría el archivo pequeño.',
+  binNo:'A {w} de ancho mirado desde {d}, la cadena aún aprovecharía {th} ppp y el S-DNG de 18 Mpx entrega {p} ppp: conserva los 60 Mpx.',
+  uPpp:' ppp', uPlmm:' pl/mm', uUm:' µm', uMpx:' Mpx',
+  ok:'OK', fail:'FALLA',
+  fmtCm:'{v} cm', fmtM:'{v} m'
+ },
+ en:{
+  cam60:'Leica M11 · DNG 60 Mpx (9528×6328)',
+  cam36:'Leica M11 · M-DNG 36 Mpx (7416×4928)',
+  cam18:'Leica M11 · S-DNG 18 Mpx (5272×3498)',
+  camQ3:'Leica Q3 · 60 Mpx (9520×6336)',
+  camGen:'Generic 24 Mpx (6000×4000)',
+  camCus:'Custom…',
+  procInk:'Fine-art inkjet · 360 ppi',
+  procLab:'Chemical minilab · 300 ppi',
+  procOff:'Offset 175 lpi · ≈300 ppi equiv.',
+  procLgf:'Wide-format signage · 150 ppi',
+  procScr:'Screen · 220 ppi',
+  pnInk:'fine-art inkjet', pnLab:'the chemical minilab', pnOff:'175 lpi offset',
+  pnLgf:'wide-format signage', pnScr:'the screen',
+  pitchLine:'pixel pitch {p} µm · {m} usable Mpx',
+  limEye:'the eye', limPix:'the pixels', limDiff:'diffraction', limProc:'the process',
+  verdEff:'· {v} ppi effective on paper',
+  expEye:'At {d} the eye no longer separates more than {p} ppi: detail to spare on every side. Print larger, or step closer.',
+  expPix:'The file ({m} usable Mpx) delivers {p} ppi at {w} wide: the pixels rule. It would take more camera resolution, less crop, or a smaller print.',
+  expDiff:'At f/{N} the Airy disc ({a} µm) caps the capture at {p} ppi equivalent at {M}× magnification: sharpness was spent at the aperture. Opening towards the lens’s optimum raises the ceiling.',
+  expProc:'{proc} cannot print beyond {p} ppi: the camera is irrelevant here; only a change of process improves the print.',
+  axX:'viewing distance (m)',
+  axY:'maximum sharp print width (m)',
+  curPix:'pixels', curDiff:'diffraction f/{N}', curNat:'1.5 × diagonal',
+  procZone:'process < eye',
+  mkBook:'book 35 cm', mkPoster:'poster 3 m', youAre:'your print',
+  natNote:'Along the grey line (viewers at 1.5 × diagonal, ε = {e}′) about {m} Mpx suffice, whatever the print size.',
+  tSobra:'to spare', tJusto:'borderline', tFalta:'short',
+  binYes:'At {w} wide viewed from {d}, the rest of the chain tops out at {th} ppi while the 18 Mpx S-DNG delivers {p} ppi: the small file would suffice.',
+  binNo:'At {w} wide viewed from {d}, the chain could still use {th} ppi and the 18 Mpx S-DNG delivers {p} ppi: keep the 60 Mpx file.',
+  uPpp:' ppi', uPlmm:' lp/mm', uUm:' µm', uMpx:' Mpx',
+  ok:'OK', fail:'FAIL',
+  fmtCm:'{v} cm', fmtM:'{v} m'
+ }
+};
+const LANG=()=>document.documentElement.lang==='en'?'en':'es';
+function LBL(key,vars){
+  const dd=DICT[LANG()]||DICT.es;
+  let str = dd[key]!==undefined ? dd[key] : (DICT.es[key]!==undefined?DICT.es[key]:key);
+  if(vars) str=str.replace(/\{(\w+)\}/g,(mm,nn)=>vars[nn]!==undefined?vars[nn]:mm);
+  return str;
+}
+/* separador decimal: coma en español, punto en inglés */
+const nf=(x,dec)=>(typeof x==='number'?x.toFixed(dec):String(x)).replace('.',LANG()==='es'?',':'.');
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+/* ---------- constantes del modelo ---------- */
+const LAMBDA=0.00055;            // mm (550 nm)
+const SENSOR_W=36;               // mm
+const FSTOPS=[1.4,2,2.8,4,5.6,8,11,16,22];
+const CAMS=[
+  ['m60','cam60',9528,6328],
+  ['m36','cam36',7416,4928],
+  ['m18','cam18',5272,3498],
+  ['q3','camQ3',9520,6336],
+  ['g24','camGen',6000,4000],
+  ['cus','camCus',0,0]
+];
+const PROCS=[['ink','procInk','pnInk',360],['lab','procLab','pnLab',300],
+             ['off','procOff','pnOff',300],['lgf','procLgf','pnLgf',150],
+             ['scr','procScr','pnScr',220]];
+const PAPERS=[['10×15',152,102],['A4',297,210],['A3',420,297],
+              ['A2',594,420],['50×70',700,500],['70×100',1000,700]];
+const NAT_K=1.5*Math.sqrt(1+4/9); // d_natural = NAT_K · ancho (imagen 3:2) ≈ 1.8028
+const BIN_PXW=5272;               // S-DNG 18 Mpx
+
+/* ---------- física ---------- */
+const tanEps=eps=>Math.tan(eps/60*Math.PI/180);
+const ppiEye=(dmm,eps)=>25.4/(dmm*tanEps(eps));               // = 2·ν_ojo·25.4
+const nuEye=(dmm,eps)=>1/(2*dmm*tanEps(eps));                 // pl/mm en el papel
+const nuSensor=fnum=>1/(2.44*LAMBDA*fnum);                    // ≈ 1/c_A, pl/mm en el sensor
+const ppiPix=(pxwEff,wmm)=>pxwEff/(wmm/25.4);
+const ppiDiff=(fnum,wmm,cfr)=>2*25.4*nuSensor(fnum)*SENSOR_W*cfr/wmm; // ν_sensor/M → ppp
+const mpxNatural=eps=>{ const pxw=1/(NAT_K*tanEps(eps)); return pxw*pxw*(2/3)/1e6; };
+
+/* ---------- estado de la interfaz ---------- */
+function readUI(){
+  const eps=+$('eps').value;
+  const dmm=100*Math.pow(10,+$('dist').value/100);   // 100 mm … 10 000 mm, escala log
+  const camId=$('cam').value;
+  const cam=CAMS.find(cc=>cc[0]===camId)||CAMS[0];
+  let pxw=cam[2];
+  if(camId==='cus'){ const mm=Math.max(2,Math.min(200,+$('mpx').value||24)); pxw=Math.round(Math.sqrt(mm*1e6*1.5)); }
+  const cfr=+$('crop').value/100;
+  const fnum=FSTOPS[+$('ap').value];
+  const procId=$('proc').value;
+  const proc=PROCS.find(pp=>pp[0]===procId)||PROCS[0];
+  const wmm=+$('pw').value;
+  return {eps,dmm,camId,pxw,cfr,fnum,proc,wmm,pxwEff:pxw*cfr};
+}
+function fmtDist(mm){ return mm<1000?LBL('fmtCm',{v:nf(mm/10,0)}):LBL('fmtM',{v:nf(mm/1000,1)}); }
+
+/* ---------- veredicto ---------- */
+function verdict(ui){
+  const eye=ppiEye(ui.dmm,ui.eps);
+  const pix=ppiPix(ui.pxwEff,ui.wmm);
+  const dif=ppiDiff(ui.fnum,ui.wmm,ui.cfr);
+  const pro=ui.proc[3];
+  const four=[['eye',eye],['pix',pix],['dif',dif],['pro',pro]];
+  let lim=four[0]; four.forEach(ff=>{ if(ff[1]<lim[1]) lim=ff; });
+  return {eye,pix,dif,pro,limKey:lim[0],eff:lim[1]};
+}
+function paintVerdict(ui,vd){
+  const names={eye:'limEye',pix:'limPix',dif:'limDiff',pro:'limProc'};
+  $('verdLim').textContent=LBL(names[vd.limKey]);
+  $('verdEff').textContent=LBL('verdEff',{v:nf(vd.eff,0)});
+  const mUse=ui.pxwEff*ui.pxwEff*(2/3)/1e6;
+  let exp='';
+  if(vd.limKey==='eye') exp=LBL('expEye',{d:fmtDist(ui.dmm),p:nf(vd.eye,0)});
+  else if(vd.limKey==='pix') exp=LBL('expPix',{m:nf(mUse,1),p:nf(vd.pix,0),w:fmtDist(ui.wmm)});
+  else if(vd.limKey==='dif') exp=LBL('expDiff',{N:ui.fnum,a:nf(2.44*LAMBDA*ui.fnum*1000,1),
+        p:nf(vd.dif,0),M:nf(ui.wmm/(SENSOR_W*ui.cfr),1)});
+  else exp=LBL('expProc',{proc:LBL(ui.proc[2]),p:nf(vd.pro,0)});
+  $('verdExp').textContent=exp;
+  const boxes={eye:'boxEye',pix:'boxPix',dif:'boxDiff',pro:'boxProc'};
+  const vals={eye:vd.eye,pix:vd.pix,dif:vd.dif,pro:vd.pro};
+  const cells={eye:'sEye',pix:'sPix',dif:'sDiff',pro:'sProc'};
+  const units={eye:'uEye',pix:'uPix',dif:'uDiff',pro:'uProc'};
+  Object.keys(boxes).forEach(kk=>{
+    $(boxes[kk]).classList.toggle('lim',kk===vd.limKey);
+    $(cells[kk]).textContent=nf(vals[kk],0);
+    $(units[kk]).textContent=LBL('uPpp');
+  });
+}
+
+/* ---------- gráfica principal ---------- */
+function drawChart(ui,vd){
+  const cv=$('chart'), gg=cv.getContext('2d');
+  const CW=cv.width, CH=cv.height;
+  gg.clearRect(0,0,CW,CH);
+  const padL=58,padR=14,padT=16,padB=46;
+  const dMin=100,dMax=10000,wMin=80,wMax=3000;   // mm
+  const lgd=Math.log(dMax/dMin), lgw=Math.log(wMax/wMin);
+  const XX=dd=>padL+(CW-padL-padR)*Math.log(dd/dMin)/lgd;
+  const YY=ww=>CH-padB-(CH-padT-padB)*Math.log(ww/wMin)/lgw;
+
+  const tE=tanEps(ui.eps);
+  const kPix=ui.pxwEff*tE;                          // ancho_máx = k·d
+  const kDiff=2*tE*nuSensor(ui.fnum)*SENSOR_W*ui.cfr;
+  const dProc=25.4/(ui.proc[3]*tE);
+
+  // rejilla
+  gg.font='11px IBM Plex Mono, monospace'; gg.lineWidth=1;
+  const xt=[100,200,350,500,1000,2000,3000,5000,10000];
+  const yt=[100,200,300,500,700,1000,1500,2000,3000];
+  xt.forEach(dd=>{ gg.strokeStyle=css('--line'); gg.beginPath(); gg.moveTo(XX(dd),padT); gg.lineTo(XX(dd),CH-padB); gg.stroke();
+    gg.fillStyle=css('--faint'); gg.textAlign='center';
+    gg.fillText(nf(dd/1000,dd<1000?2:(dd<3000?1:0)),XX(dd),CH-padB+16); });
+  yt.forEach(ww=>{ gg.strokeStyle=css('--line'); gg.beginPath(); gg.moveTo(padL,YY(ww)); gg.lineTo(CW-padR,YY(ww)); gg.stroke();
+    gg.fillStyle=css('--faint'); gg.textAlign='right';
+    gg.fillText(nf(ww/1000,ww<1000?1:(ww<3000?1:0)),padL-6,YY(ww)+4); });
+  gg.fillStyle=css('--muted'); gg.textAlign='center';
+  gg.fillText(LBL('axX'),(padL+CW-padR)/2,CH-8);
+  gg.save(); gg.translate(14,(padT+CH-padB)/2); gg.rotate(-Math.PI/2);
+  gg.textAlign='center'; gg.fillText(LBL('axY'),0,0); gg.restore();
+
+  gg.save(); gg.beginPath(); gg.rect(padL,padT,CW-padL-padR,CH-padT-padB); gg.clip();
+
+  // zona donde el proceso no alcanza lo que pide la vista (d < d_proc)
+  if(dProc>dMin){
+    const xEnd=Math.min(XX(dProc),CW-padR);
+    gg.fillStyle='rgba(239,111,83,.10)';
+    gg.fillRect(padL,padT,xEnd-padL,CH-padT-padB);
+    gg.strokeStyle=css('--red'); gg.setLineDash([4,4]);
+    gg.beginPath(); gg.moveTo(XX(dProc),padT); gg.lineTo(XX(dProc),CH-padB); gg.stroke();
+    gg.setLineDash([]);
+    gg.fillStyle=css('--red'); gg.textAlign='left';
+    gg.fillText(LBL('procZone'),padL+6,padT+14);
+  }
+
+  // zona nítida: bajo min(píxeles, difracción) y a la derecha de d_proc
+  const kMin=Math.min(kPix,kDiff);
+  const d0=Math.max(dMin,dProc);
+  if(d0<dMax){
+    gg.fillStyle='rgba(63,202,176,.07)';
+    gg.beginPath();
+    gg.moveTo(XX(d0),CH-padB);
+    for(let ii=0;ii<=60;ii++){
+      const dd=d0*Math.pow(dMax/d0,ii/60);
+      gg.lineTo(XX(dd),YY(Math.max(wMin,Math.min(wMax,kMin*dd))));
+    }
+    gg.lineTo(XX(dMax),CH-padB); gg.closePath(); gg.fill();
+  }
+
+  // rectas de techo (pendiente 1 en log-log)
+  const lineK=(kk,color,wide)=>{
+    gg.strokeStyle=css(color); gg.lineWidth=wide?2.2:1.6;
+    gg.beginPath(); gg.moveTo(XX(dMin),YY(kk*dMin)); gg.lineTo(XX(dMax),YY(kk*dMax)); gg.stroke();
+  };
+  lineK(kPix,'--amber',vd.limKey==='pix');
+  lineK(kDiff,'--violet',vd.limKey==='dif');
+
+  // línea de distancia natural 1,5×diagonal: ancho = d / NAT_K
+  gg.strokeStyle=css('--faint'); gg.setLineDash([6,5]); gg.lineWidth=1.4;
+  gg.beginPath(); gg.moveTo(XX(dMin),YY(dMin/NAT_K)); gg.lineTo(XX(dMax),YY(dMax/NAT_K)); gg.stroke();
+  gg.setLineDash([]);
+
+  // marcadores de escenario
+  const marker=(dd,labelKey)=>{
+    gg.strokeStyle=css('--line2'); gg.setLineDash([2,4]);
+    gg.beginPath(); gg.moveTo(XX(dd),padT); gg.lineTo(XX(dd),CH-padB); gg.stroke(); gg.setLineDash([]);
+    gg.fillStyle=css('--muted'); gg.textAlign='center';
+    gg.fillText(LBL(labelKey),XX(dd),CH-padB-6);
+  };
+  marker(350,'mkBook');
+  marker(3000,'mkPoster');
+
+  // rótulos de las rectas, en el punto en que salen por arriba o por la derecha
+  const placed=[];
+  const lineLabel=(kk,txt,color)=>{
+    let dd=Math.min(dMax,wMax/kk);
+    let xx=XX(dd)-6, yy=YY(Math.min(wMax,kk*dd))+14;
+    if(dd>=dMax){ yy=YY(kk*dMax)-6; }
+    placed.forEach(pv=>{ if(Math.abs(pv-yy)<14) yy=pv+15; });
+    placed.push(yy);
+    gg.fillStyle=css(color); gg.textAlign='right'; gg.fillText(txt,xx,yy);
+  };
+  lineLabel(kPix,LBL('curPix'),'--amber');
+  lineLabel(kDiff,LBL('curDiff',{N:ui.fnum}),'--violet');
+  lineLabel(1/NAT_K,LBL('curNat'),'--faint');
+
+  // tu copia
+  const sharp = Math.min(vd.pix,vd.dif,vd.pro) >= vd.eye*0.999;
+  const px=XX(Math.max(dMin,Math.min(dMax,ui.dmm)));
+  const py=YY(Math.max(wMin,Math.min(wMax,ui.wmm)));
+  gg.fillStyle=sharp?css('--teal'):css('--red');
+  gg.beginPath(); gg.arc(px,py,5.5,0,2*Math.PI); gg.fill();
+  gg.strokeStyle=css('--head'); gg.lineWidth=1.2; gg.beginPath(); gg.arc(px,py,5.5,0,2*Math.PI); gg.stroke();
+  gg.textAlign='left'; gg.fillStyle=sharp?css('--teal'):css('--red');
+  gg.fillText(LBL('youAre'),px+9,py+4);
+  gg.restore();
+
+  $('natLine').textContent=LBL('natNote',{e:nf(ui.eps,1),m:nf(mpxNatural(ui.eps),1)});
+}
+
+/* ---------- tabla de papeles ---------- */
+function paintPapers(ui,vd){
+  const rows=PAPERS.map(pp=>{
+    const wmm=pp[1], hmm=pp[2];
+    const deliv=Math.min(ppiPix(ui.pxwEff,wmm),ppiDiff(ui.fnum,wmm,ui.cfr),ui.proc[3]);
+    const needD=vd.eye;
+    const dNat=1.5*Math.hypot(wmm,hmm);
+    const needNat=ppiEye(dNat,ui.eps);
+    const ratio=deliv/needD;
+    const cls=ratio>=1.15?'v-ok':(ratio>=0.85?'v-mid':'v-bad');
+    const verd=ratio>=1.15?LBL('tSobra'):(ratio>=0.85?LBL('tJusto'):LBL('tFalta'));
+    return '<tr><td>'+pp[0]+' cm</td><td>'+nf(deliv,0)+'</td><td>'+nf(needD,0)+
+           '</td><td>'+nf(needNat,0)+'</td><td class="'+cls+'">'+verd+'</td></tr>';
+  });
+  $('papersBody').innerHTML=rows.join('');
+}
+
+/* ---------- binning ---------- */
+function paintBinning(ui,vd){
+  const pBin=ppiPix(BIN_PXW*ui.cfr,ui.wmm);
+  const th=Math.min(vd.eye,vd.dif,vd.pro);   // lo que la cadena sin píxeles aún aprovecharía
+  const key=pBin>=th?'binYes':'binNo';
+  $('binLine').textContent=LBL(key,{w:fmtDist(ui.wmm),d:fmtDist(ui.dmm),th:nf(th,0),p:nf(pBin,0)});
+}
+
+/* ---------- verificación numérica ---------- */
+function paintVerif(){
+  const rows=[
+    {cell:'vc1',flag:'vs1',val:ppiEye(250,1),unit:'uPpp',dec:1,lo:340,hi:360},
+    {cell:'vc2',flag:'vs2',val:nuEye(250,1),unit:'uPlmm',dec:2,lo:6.6,hi:7.2},
+    {cell:'vc3',flag:'vs3',val:nuSensor(8),unit:'uPlmm',dec:1,lo:90,hi:96},
+    {cell:'vc4',flag:'vs4',val:mpxNatural(1),unit:'uMpx',dec:2,lo:2.2,hi:2.7}
+  ];
+  rows.forEach(rr=>{
+    $(rr.cell).textContent=nf(rr.val,rr.dec)+LBL(rr.unit);
+    const good=rr.val>=rr.lo&&rr.val<=rr.hi;
+    $(rr.flag).textContent=LBL(good?'ok':'fail');
+    $(rr.flag).className=good?'v-ok':'v-bad';
+  });
+  // fila 3: añade el diámetro de Airy junto a la frecuencia
+  $('vc3').textContent=nf(2.44*LAMBDA*8*1000,1)+LBL('uUm')+' → '+nf(nuSensor(8),1)+LBL('uPlmm');
+}
+
+/* ---------- selects traducibles ---------- */
+function setOptions(id,pairs){
+  const sel=$(id), vOld=sel.value;
+  sel.innerHTML=pairs.map(pp=>'<option value="'+pp[0]+'">'+LBL(pp[1])+'</option>').join('');
+  if(vOld) sel.value=vOld;
+  if(!sel.value) sel.selectedIndex=0;
+}
+function fillSelects(){
+  setOptions('cam',CAMS.map(cc=>[cc[0],cc[1]]));
+  setOptions('proc',PROCS.map(pp=>[pp[0],pp[1]]));
+}
+
+/* ---------- repintado global ---------- */
+function paintControls(ui){
+  $('epsVal').textContent=nf(ui.eps,2)+'′';
+  $('dVal').textContent=fmtDist(ui.dmm);
+  $('cropVal').textContent=nf(ui.cfr*100,0)+' %';
+  $('apVal').textContent='f/'+ui.fnum;
+  $('pwVal').textContent=fmtDist(ui.wmm);
+  $('customWrap').style.display=ui.camId==='cus'?'block':'none';
+  const pitch=SENSOR_W*1000/ui.pxw;
+  $('camInfo').textContent=LBL('pitchLine',{p:nf(pitch,2),m:nf(ui.pxwEff*ui.pxwEff*(2/3)/1e6,1)});
+  document.querySelectorAll('.epspre').forEach(bb=>{
+    bb.classList.toggle('on',Math.abs(+bb.getAttribute('data-eps')-ui.eps)<0.011);
+  });
+}
+function recalc(){
+  const ui=readUI();
+  const vd=verdict(ui);
+  paintControls(ui);
+  paintVerdict(ui,vd);
+  drawChart(ui,vd);
+  paintPapers(ui,vd);
+  paintBinning(ui,vd);
+  paintVerif();
+}
+
+/* ---------- eventos ---------- */
+let LISTO=false;
+function init(){
+  fillSelects();
+  $('cam').value='m60'; $('proc').value='ink';
+  ['eps','dist','crop','ap','pw'].forEach(id=>$(id).addEventListener('input',recalc));
+  ['cam','proc'].forEach(id=>$(id).addEventListener('change',recalc));
+  $('mpx').addEventListener('input',recalc);
+  document.querySelectorAll('.epspre').forEach(bb=>{
+    bb.addEventListener('click',()=>{ $('eps').value=bb.getAttribute('data-eps'); recalc(); });
+  });
+  const setDist=mm=>{ const vv=100*Math.log10(mm/100); $('dist').value=Math.max(0,Math.min(200,vv)); recalc(); };
+  $('scBook').addEventListener('click',()=>setDist(350));
+  $('scPoster').addEventListener('click',()=>setDist(3000));
+  $('scGal').addEventListener('click',()=>{ const ui=readUI(); setDist(NAT_K*ui.wmm); });
+  LISTO=true;
+  recalc();
+}
+/* onLangChange llega también en el arranque, antes de init: de ahí LISTO. */
+window.onLangChange=function(){ if(LISTO){ fillSelects(); recalc(); } };
+init();
+</script>
+</body>
+</html>
