@@ -1,0 +1,832 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El taller · Photographers · Rafael Vida</title>
+<meta name="author" content="Rafael Vida">
+<meta name="description" content="El taller: un itinerario guiado en tres estaciones que encadena las herramientas del repositorio sobre tus propias fotografías, en tu ordenador y sin salir de 127.0.0.1.">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0c10; --panel:#13171e; --panel2:#0f131a; --line:#222a35; --line2:#2c3644;
+    --text:#d8dde5; --head:#f3f5f8; --muted:#8a929f; --faint:#5b636f;
+    --amber:#f4b13c; --teal:#3fcab0; --red:#ef6f53; --violet:#9b8cff;
+    --cyan:#59b6e8; --sand:#bfa46f; --film:#d98cb3; --sun:#e8834a;
+    --sans:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+    --disp:'Space Grotesk',var(--sans);
+    --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:var(--teal);text-decoration:none}
+  .wrap{max-width:920px;margin:0 auto;padding:52px 22px 80px}
+  fieldset{border:0;padding:0;margin:0;min-inline-size:0}
+  fieldset:disabled{opacity:.45}
+
+  /* ---------- cabecera ---------- */
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal)}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(32px,6.6vw,54px);letter-spacing:-.025em;color:var(--head);margin:12px 0 10px;line-height:1.02}
+  h1 em{font-style:normal;color:var(--amber)}
+  .lede{font-size:18px;color:#aeb6c1;max-width:66ch;margin:0 0 14px}
+  .lede b{color:var(--head);font-weight:600}
+  .meta{font-family:var(--mono);font-size:12.5px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap;align-items:center;
+        border-top:1px solid var(--line);padding-top:14px;margin-top:20px}
+  .meta a{border-bottom:1px solid rgba(63,202,176,.35)}
+  .meta .dot{width:4px;height:4px;border-radius:50%;background:var(--faint)}
+
+  /* ---------- caja sin servidor ---------- */
+  .offline{margin-top:26px;background:rgba(239,111,83,.07);border:1px solid rgba(239,111,83,.5);border-radius:12px;padding:18px 20px}
+  .offline h2{font-family:var(--disp);font-size:17px;color:var(--red);margin:0 0 8px}
+  .offline p{font-size:14.5px;color:#c4cad3;margin:0 0 10px;max-width:74ch}
+  .offline code{display:block;margin:0 0 8px;width:fit-content}
+
+  /* ---------- estaciones ---------- */
+  .station{display:grid;grid-template-columns:70px 1fr;gap:8px 18px;background:var(--panel);border:1px solid var(--line);
+           border-left:3px solid var(--ac,var(--teal));border-radius:12px;padding:22px 24px;margin-top:24px}
+  @media(max-width:720px){.station{grid-template-columns:1fr;padding:18px}}
+  .acc-teal{--ac:var(--teal)} .acc-film{--ac:var(--film)} .acc-red{--ac:var(--red)}
+  .num{font-family:var(--disp);font-weight:700;font-size:46px;line-height:1;color:var(--ac);opacity:.9}
+  .sthead{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+  .sthead h2{font-family:var(--disp);font-weight:600;font-size:22px;color:var(--head);margin:0;letter-spacing:-.01em}
+  .chip{font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;padding:3px 10px;border-radius:20px;
+        border:1px solid var(--line2);color:var(--muted);white-space:nowrap}
+  .chip.corriendo{color:var(--amber);border-color:rgba(244,177,60,.55)}
+  .chip.hecha{color:var(--teal);border-color:rgba(63,202,176,.55)}
+  .why{font-size:14.5px;color:#a4acb8;margin:0 0 6px;max-width:74ch}
+  .tool{margin-top:18px;border-top:1px dashed var(--line);padding-top:16px}
+  .tool h3{font-family:var(--disp);font-weight:500;font-size:16px;color:var(--head);margin:0 0 10px}
+
+  .lock{background:rgba(239,111,83,.08);border:1px solid rgba(239,111,83,.45);border-radius:9px;
+        padding:11px 13px;font-size:13.5px;color:#c4cad3;margin:10px 0}
+  .lock code{display:block;margin-top:7px;user-select:all;width:fit-content}
+  .warn{background:rgba(244,177,60,.08);border:1px solid rgba(244,177,60,.45);border-radius:9px;
+        padding:11px 13px;font-size:13.5px;color:#cfd5dd;margin:10px 0}
+  .warn b{color:var(--amber)}
+
+  /* ---------- navegador de carpetas y listas ---------- */
+  .browser{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:12px;margin-top:10px}
+  .blbl{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);margin-bottom:7px}
+  .fila{display:flex;gap:8px}
+  .fila input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line2);border-radius:7px;
+              padding:7px 10px;color:var(--text);font-family:var(--mono);font-size:12.5px}
+  .fila input:focus{outline:2px solid rgba(63,202,176,.5);outline-offset:1px}
+  .lista{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;max-height:170px;overflow:auto}
+  button.dir{background:var(--panel);border:1px solid var(--line2);border-radius:7px;color:var(--muted);
+             font-family:var(--mono);font-size:12px;padding:5px 10px;cursor:pointer}
+  button.dir:hover{color:var(--text);border-color:var(--muted)}
+  button.dir.sel{color:var(--teal);border-color:rgba(63,202,176,.6);background:rgba(63,202,176,.09)}
+  button.dir:disabled{cursor:default}
+  .cont{font-family:var(--mono);font-size:12px;color:var(--teal);margin-top:9px;min-height:16px}
+  .cont.mal{color:var(--red)}
+
+  /* ---------- controles ---------- */
+  .controles{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:flex-end;margin-top:14px}
+  .campo{display:flex;flex-direction:column;gap:4px}
+  .campo>span{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+  .campo input[type="number"],.campo select,.campo input[type="text"]{
+    background:var(--bg);border:1px solid var(--line2);border-radius:7px;padding:7px 10px;
+    color:var(--text);font-family:var(--sans);font-size:13.5px}
+  .campo input[type="number"]{width:110px}
+  .campo select{min-width:150px}
+  .check{display:flex;align-items:center;gap:7px;font-size:13.5px;color:var(--muted);cursor:pointer;padding-bottom:7px}
+  .check input{accent-color:var(--teal)}
+  button.go,a.go{display:inline-block;background:rgba(63,202,176,.12);border:1px solid rgba(63,202,176,.55);
+    color:var(--teal);border-radius:8px;padding:9px 18px;font-family:var(--disp);font-size:14.5px;cursor:pointer}
+  button.go:hover,a.go:hover{background:rgba(63,202,176,.2)}
+  button.go:disabled{opacity:.4;cursor:default}
+  a.go.alt{background:rgba(244,177,60,.1);border-color:rgba(244,177,60,.55);color:var(--amber)}
+  a.go.alt:hover{background:rgba(244,177,60,.18)}
+  .msj{font-family:var(--mono);font-size:12.5px;color:var(--red);margin-top:8px;min-height:16px}
+
+  /* ---------- registro y progreso ---------- */
+  details.log{margin-top:10px}
+  details.log summary{font-family:var(--mono);font-size:12px;color:var(--muted);cursor:pointer;user-select:none}
+  details.log pre{margin:8px 0 0;max-height:260px;overflow:auto;background:#07090c;border:1px solid var(--line);
+      border-radius:8px;padding:10px 12px;font-family:var(--mono);font-size:12px;line-height:1.55;
+      white-space:pre-wrap;word-break:break-all;color:#b9c1cc}
+  .barra{height:9px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:12px}
+  .barra>div{height:100%;background:var(--film);width:0%;transition:width .3s}
+  .barratxt{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:5px}
+
+  .ctx{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap}
+  .ctx a{font-size:12.5px;padding:6px 11px;border-radius:7px;border:1px solid var(--line2);color:var(--ac,var(--teal))}
+  .ctx a:hover{border-color:var(--ac,var(--teal))}
+
+  /* ---------- tarjetas de la estación 3 ---------- */
+  .paso3{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+  @media(max-width:720px){.paso3{grid-template-columns:1fr}}
+  .paso3 a{display:block;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:14px 15px}
+  .paso3 a:hover{border-color:var(--ac)}
+  .paso3 .fn{font-family:var(--mono);font-size:11.5px;color:var(--faint)}
+  .paso3 h3{font-family:var(--disp);font-weight:500;font-size:16.5px;color:var(--head);margin:4px 0 6px}
+  .paso3 p{font-size:13.5px;color:var(--muted);margin:0}
+
+  footer{margin-top:46px;border-top:1px solid var(--line);padding-top:20px;font-size:13.5px;color:var(--muted)}
+  footer p{margin:0 0 10px;max-width:78ch}
+  code{font-family:var(--mono);font-size:12.5px;background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:#cfd5dd}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+  /* ---------- conmutador de idioma ---------- */
+  html[lang="es"] [data-lang="en"]{display:none!important}
+  html[lang="en"] [data-lang="es"]{display:none!important}
+  .langbar{position:fixed;top:14px;right:16px;z-index:100;display:flex;
+           background:rgba(15,19,26,.92);border:1px solid var(--line2);border-radius:8px;
+           overflow:hidden;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+  .langbar button{font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;
+                  background:transparent;border:0;color:var(--muted);padding:7px 11px;cursor:pointer;
+                  transition:background .15s,color .15s}
+  .langbar button+button{border-left:1px solid var(--line2)}
+  .langbar button:hover{color:var(--text)}
+  .langbar button.on{background:rgba(63,202,176,.14);color:var(--teal)}
+  .langbar button:focus-visible{outline:2px solid rgba(63,202,176,.6);outline-offset:-2px}
+  @media(max-width:720px){.langbar{top:8px;right:8px}}
+  @media print{.langbar{display:none!important}}
+</style>
+</head>
+<body>
+
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow" data-lang="es">Repositorio · falevian / Photographers</div>
+    <div class="eyebrow" data-lang="en">Repository · falevian / Photographers</div>
+
+    <h1 data-lang="es">El <em>taller</em></h1>
+    <h1 data-lang="en">The <em>workshop</em></h1>
+
+    <p class="lede" data-lang="es">Un itinerario guiado que encadena las herramientas del repositorio sobre tus propias fotografías. <b>Todo corre en tu ordenador</b>: el servidor escucha únicamente en 127.0.0.1, los scripts trabajan sobre tus carpetas y los resultados quedan en tu carpeta de trabajo. Tres estaciones, en orden.</p>
+    <p class="lede" data-lang="en">A guided itinerary that chains the repository's tools over your own photographs. <b>Everything runs on your computer</b>: the server listens only on 127.0.0.1, the scripts work on your folders, and the results stay in your working folder. Three stations, in order.</p>
+
+    <div class="meta">
+      <a href="./index.html"><span data-lang="es">← Portada</span><span data-lang="en">← Home</span></a>
+      <span class="dot"></span>
+      <span id="srvinfo"></span>
+    </div>
+  </header>
+
+  <div class="offline" id="offline" style="display:none">
+    <h2 data-lang="es">El taller corre en tu ordenador</h2>
+    <h2 data-lang="en">The workshop runs on your computer</h2>
+    <p data-lang="es">Esta página se ha abierto sin su servidor local, así que ningún botón puede ejecutar nada. Descarga el repositorio y arranca el taller:</p>
+    <p data-lang="en">This page was opened without its local server, so no button can run anything. Download the repository and start the workshop:</p>
+    <code>git clone https://github.com/falevian/Photographers</code>
+    <code>cd Photographers &amp;&amp; python3 taller.py</code>
+    <p data-lang="es">Las tres estaciones quedan a la vista como lectura, y los enlaces a las páginas estáticas siguen funcionando.</p>
+    <p data-lang="en">The three stations remain visible as reading material, and the links to the static pages keep working.</p>
+  </div>
+
+  <!-- ==================== ESTACIÓN 1 ==================== -->
+  <section class="station acc-teal" id="st1">
+    <div class="num">1</div>
+    <div>
+      <div class="sthead">
+        <h2 data-lang="es">Mirar tu archivo</h2>
+        <h2 data-lang="en">Looking at your archive</h2>
+        <span class="chip" id="chip1"></span>
+      </div>
+      <p class="why" data-lang="es">Antes de tocar el color o el papel, mira lo que ya haces sin darte cuenta: dónde colocas al sujeto, con qué sesgo y con qué dispersión. <code>subject_center.py</code> mide tus fotografías una a una y, al terminar, el análisis se abre ya cargado con tus datos. Primero se mira; después se decide.</p>
+      <p class="why" data-lang="en">Before touching colour or paper, look at what you already do without noticing: where you place the subject, with what bias and what spread. <code>subject_center.py</code> measures your photographs one by one and, once finished, the analysis page opens already loaded with your data. First you look; then you decide.</p>
+
+      <div class="lock" id="lock1" style="display:none">
+        <span data-lang="es">Falta <b>pillow</b>, que el análisis necesita para leer las imágenes. Instálalo y vuelve a arrancar el taller:</span>
+        <span data-lang="en">Missing <b>pillow</b>, which the analysis needs to read the images. Install it and restart the workshop:</span>
+        <code id="ordenPillow1"></code>
+      </div>
+
+      <p style="margin:10px 0 0"><a class="go alt" id="prev1" href="/analisis-live" target="_blank" style="display:none"></a></p>
+
+      <fieldset id="fs1">
+        <div class="browser">
+          <div class="blbl"><span data-lang="es">Carpeta de fotos</span><span data-lang="en">Photo folder</span></div>
+          <div class="fila">
+            <button type="button" class="dir" id="nav1-sub">↑ <span data-lang="es">subir</span><span data-lang="en">up</span></button>
+            <input id="nav1-ruta" type="text" spellcheck="false" autocomplete="off"
+                   data-aria-es="Ruta de la carpeta de fotos" data-aria-en="Photo folder path" aria-label="Ruta de la carpeta de fotos">
+          </div>
+          <div class="lista" id="nav1-lista"></div>
+          <div class="cont" id="nav1-cont"></div>
+        </div>
+        <div class="controles">
+          <label class="campo">
+            <span data-lang="es">Límite (0 = todas)</span><span data-lang="en">Limit (0 = all)</span>
+            <input id="limite1" type="number" min="0" step="50" value="0">
+          </label>
+          <label class="check"><input id="fecha1" type="checkbox">
+            <span data-lang="es">Inferir la fecha del nombre del archivo</span>
+            <span data-lang="en">Infer the date from the file name</span>
+          </label>
+          <label class="check"><input id="norec1" type="checkbox">
+            <span data-lang="es">No entrar en subcarpetas</span>
+            <span data-lang="en">Do not descend into subfolders</span>
+          </label>
+          <button type="button" class="go" id="run1">
+            <span data-lang="es">Analizar esta carpeta</span>
+            <span data-lang="en">Analyse this folder</span>
+          </button>
+        </div>
+      </fieldset>
+
+      <div class="msj" id="msj1"></div>
+      <details class="log" id="det1">
+        <summary><span data-lang="es">Registro</span><span data-lang="en">Log</span></summary>
+        <pre id="pre1"></pre>
+      </details>
+      <p id="done1" style="display:none;margin:12px 0 0"><a class="go alt" id="live1" href="/analisis-live" target="_blank"></a></p>
+
+      <div class="ctx">
+        <a href="./manual-medidas.html"><span data-lang="es">Las medidas, una a una</span><span data-lang="en">The measures, one by one</span></a>
+        <a href="./analisis-centrado.html"><span data-lang="es">La página de análisis, vacía</span><span data-lang="en">The analysis page, empty</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== ESTACIÓN 2 ==================== -->
+  <section class="station acc-film" id="st2">
+    <div class="num">2</div>
+    <div>
+      <div class="sthead">
+        <h2 data-lang="es">El color y el grano</h2>
+        <h2 data-lang="en">Colour and grain</h2>
+        <span class="chip" id="chip2"></span>
+      </div>
+      <p class="why" data-lang="es">El color de una película no se decide con un preset hecho a ojo, sino con la física del material: <code>peliculas.py</code> modela la respuesta publicada del fabricante y la convierte en un perfil ICC que Capture One entiende. El grano, que un perfil no puede llevar, lo añade después <code>grano.py</code> sobre las imágenes ya exportadas.</p>
+      <p class="why" data-lang="en">The colour of a film is not decided with a preset made by eye but with the physics of the material: <code>peliculas.py</code> models the manufacturer's published response and turns it into an ICC profile that Capture One understands. The grain, which a profile cannot carry, is added afterwards by <code>grano.py</code> to the exported images.</p>
+
+      <div class="warn">
+        <span data-lang="es">En Capture One, pon <b>Curve → Linear Response</b> en cada imagen revelada con uno de estos perfiles. El perfil ya lleva dentro la curva de tono del material: si dejas activa la curva guía, ambas se suman y el contraste sale duplicado.</span>
+        <span data-lang="en">In Capture One, set <b>Curve → Linear Response</b> on every image developed with one of these profiles. The profile already carries the material's tone curve inside: if the guide curve is left active, the two are compounded and contrast comes out doubled.</span>
+      </div>
+
+      <div class="lock" id="lock2" style="display:none">
+        <span data-lang="es">Falta <b>numpy</b>, que sostiene todo el cálculo de esta estación. Instálalo y vuelve a arrancar el taller:</span>
+        <span data-lang="en">Missing <b>numpy</b>, which underpins all the computation at this station. Install it and restart the workshop:</span>
+        <code id="ordenNumpy"></code>
+      </div>
+
+      <div class="tool">
+        <h3 data-lang="es">El perfil ICC</h3>
+        <h3 data-lang="en">The ICC profile</h3>
+        <fieldset id="fs2">
+          <div class="controles">
+            <label class="campo">
+              <span data-lang="es">Película</span><span data-lang="en">Film</span>
+              <select id="pelicula2">
+                <option value="k64" selected>Kodachrome 64 · K-14</option>
+                <option value="k25">Kodachrome 25 · K-14</option>
+                <option value="velvia50">Velvia 50 · E-6</option>
+                <option value="pro400h">Pro 400H · RA-4</option>
+                <option value="trix">Tri-X 400 · D-76</option>
+              </select>
+            </label>
+            <label class="campo">
+              <span data-lang="es">Exposición (EV)</span><span data-lang="en">Exposure (EV)</span>
+              <input id="ev2" type="number" min="-4" max="4" step="0.1" value="0">
+            </label>
+            <label class="campo" id="campo-copia" style="display:none">
+              <span data-lang="es">Aclarado de la copia</span><span data-lang="en">Print lightening</span>
+              <input id="copia2" type="number" min="-3" max="3" step="0.25" value="0">
+            </label>
+            <label class="campo" id="campo-virado" style="display:none">
+              <span data-lang="es">Virado</span><span data-lang="en">Toning</span>
+              <select id="virado2">
+                <option value="neutro" selected>neutro</option>
+                <option value="frio">frio</option>
+                <option value="calido">calido</option>
+                <option value="sepia">sepia</option>
+                <option value="selenio">selenio</option>
+              </select>
+            </label>
+            <label class="campo">
+              <span data-lang="es">Lado del CLUT</span><span data-lang="en">CLUT side</span>
+              <select id="n2">
+                <option value="33" selected>33</option>
+                <option value="45">45</option>
+              </select>
+            </label>
+          </div>
+          <div class="browser">
+            <div class="blbl"><span data-lang="es">Perfil de cámara</span><span data-lang="en">Camera profile</span></div>
+            <div class="fila">
+              <input id="perf-filtro" type="text" value="M11" spellcheck="false" autocomplete="off"
+                     data-ph-es="filtrar los perfiles…" data-ph-en="filter the profiles…" placeholder="filtrar los perfiles…"
+                     data-aria-es="Filtro de perfiles de cámara" data-aria-en="Camera profile filter" aria-label="Filtro de perfiles de cámara">
+              <label class="check" style="padding-bottom:0"><input id="generico" type="checkbox">
+                <span data-lang="es">Perfil genérico</span>
+                <span data-lang="en">Generic profile</span>
+              </label>
+            </div>
+            <div class="lista" id="perf-lista"></div>
+            <div class="cont" id="perf-cont"></div>
+          </div>
+          <div class="controles">
+            <label class="check"><input id="instalar2" type="checkbox">
+              <span data-lang="es">Instalar en Capture One al terminar</span>
+              <span data-lang="en">Install into Capture One when finished</span>
+            </label>
+            <button type="button" class="go" id="run2">
+              <span data-lang="es">Generar el perfil</span>
+              <span data-lang="en">Generate the profile</span>
+            </button>
+          </div>
+        </fieldset>
+        <div class="msj" id="msj2"></div>
+        <details class="log" id="det2">
+          <summary><span data-lang="es">Registro</span><span data-lang="en">Log</span></summary>
+          <pre id="pre2"></pre>
+        </details>
+      </div>
+
+      <div class="tool">
+        <h3 data-lang="es">El grano por lotes</h3>
+        <h3 data-lang="en">Grain in batches</h3>
+        <div class="lock" id="lock2b" style="display:none">
+          <span data-lang="es">Falta <b>pillow</b>, que el grano necesita para leer y escribir las imágenes. Instálalo y vuelve a arrancar el taller:</span>
+          <span data-lang="en">Missing <b>pillow</b>, which the grain tool needs to read and write the images. Install it and restart the workshop:</span>
+          <code id="ordenPillow2"></code>
+        </div>
+        <fieldset id="fs2b">
+          <div class="browser">
+            <div class="blbl"><span data-lang="es">Carpeta de imágenes exportadas</span><span data-lang="en">Folder of exported images</span></div>
+            <div class="fila">
+              <button type="button" class="dir" id="nav2-sub">↑ <span data-lang="es">subir</span><span data-lang="en">up</span></button>
+              <input id="nav2-ruta" type="text" spellcheck="false" autocomplete="off"
+                     data-aria-es="Ruta de la carpeta de imágenes exportadas" data-aria-en="Exported images folder path" aria-label="Ruta de la carpeta de imágenes exportadas">
+            </div>
+            <div class="lista" id="nav2-lista"></div>
+            <div class="cont" id="nav2-cont"></div>
+          </div>
+          <div class="controles">
+            <label class="campo">
+              <span data-lang="es">Película</span><span data-lang="en">Film</span>
+              <select id="pelicula2b">
+                <option value="k64">Kodachrome 64 · K-14</option>
+                <option value="k25">Kodachrome 25 · K-14</option>
+                <option value="velvia50">Velvia 50 · E-6</option>
+                <option value="pro400h">Pro 400H · RA-4</option>
+                <option value="trix" selected>Tri-X 400 · D-76</option>
+              </select>
+            </label>
+            <label class="campo">
+              <span data-lang="es">Intensidad</span><span data-lang="en">Strength</span>
+              <input id="intens2" type="number" min="0.1" max="3" step="0.1" value="1">
+            </label>
+            <label class="campo">
+              <span data-lang="es">Límite (0 = todas)</span><span data-lang="en">Limit (0 = all)</span>
+              <input id="limite2" type="number" min="0" step="10" value="0">
+            </label>
+            <button type="button" class="go" id="run2b">
+              <span data-lang="es">Aplicar el grano</span>
+              <span data-lang="en">Apply the grain</span>
+            </button>
+          </div>
+        </fieldset>
+        <div class="msj" id="msj2b"></div>
+        <div id="prog2wrap" style="display:none">
+          <div class="barra"><div id="prog2"></div></div>
+          <div class="barratxt" id="prog2txt"></div>
+        </div>
+        <details class="log" id="det2b">
+          <summary><span data-lang="es">Registro</span><span data-lang="en">Log</span></summary>
+          <pre id="pre2b"></pre>
+        </details>
+      </div>
+
+      <div class="ctx">
+        <a href="./peliculas-icc.html"><span data-lang="es">El manual de los perfiles de película</span><span data-lang="en">The film profiles manual</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== ESTACIÓN 3 ==================== -->
+  <section class="station acc-red" id="st3">
+    <div class="num">3</div>
+    <div>
+      <div class="sthead">
+        <h2 data-lang="es">Del sensor al papel</h2>
+        <h2 data-lang="en">From sensor to paper</h2>
+        <span class="chip" id="chip3"></span>
+      </div>
+      <p class="why" data-lang="es">El cierre del itinerario: decidir el tamaño de la copia con el ojo y no con el ego. Primero, cuántos píxeles buenos tienes de verdad y desde qué distancia se mira una copia; después, la maqueta del zine con su imposición de cuadernillo resuelta. Estas dos páginas funcionan enteras en el navegador, sin el servidor.</p>
+      <p class="why" data-lang="en">The close of the itinerary: deciding print size with the eye and not with the ego. First, how many good pixels you truly have and from what distance a print is viewed; then the zine layout with its booklet imposition solved. These two pages work entirely in the browser, without the server.</p>
+      <div class="paso3">
+        <a href="./sensor-al-papel.html" id="link3a">
+          <span class="fn">sensor-al-papel.html</span>
+          <h3 data-lang="es">Del sensor al papel ↗</h3>
+          <h3 data-lang="en">From sensor to paper ↗</h3>
+          <p data-lang="es">A qué tamaño puedes imprimir lo que acabas de medir y revelar, según la distancia de observación real.</p>
+          <p data-lang="en">How large you can print what you have just measured and developed, given the real viewing distance.</p>
+        </a>
+        <a href="./zine-generator.html" id="link3b">
+          <span class="fn">zine-generator.html</span>
+          <h3 data-lang="es">Generador de zines ↗</h3>
+          <h3 data-lang="en">Zine generator ↗</h3>
+          <p data-lang="es">Maqueta la selección final y resuelve la imposición de cuadernillo, lista de imprimir en casa.</p>
+          <p data-lang="en">Lay out the final selection and solve the booklet imposition, ready to print at home.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p data-lang="es">El taller no envía nada fuera: escucha únicamente en 127.0.0.1 y escribe en tu carpeta de trabajo. El estado de las estaciones se guarda en tu navegador.</p>
+    <p data-lang="en">The workshop sends nothing out: it listens only on 127.0.0.1 and writes to your working folder. The station state is kept in your browser.</p>
+    <p><a href="./index.html"><span data-lang="es">← Portada</span><span data-lang="en">← Home</span></a> · <a href="https://github.com/falevian/Photographers">GitHub</a></p>
+  </footer>
+
+</div>
+
+<script>
+"use strict";
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{ title:"El taller · Photographers · Rafael Vida",
+         desc:"El taller: un itinerario guiado en tres estaciones que encadena las herramientas del repositorio sobre tus propias fotografías, en tu ordenador y sin salir de 127.0.0.1." },
+    en:{ title:"The workshop · Photographers · Rafael Vida",
+         desc:"The workshop: a guided three-station itinerary that chains the repository's tools over your own photographs, on your computer, never leaving 127.0.0.1." }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    ["title","ph","alt","aria"].forEach(function(k){
+      [].forEach.call(document.querySelectorAll("[data-"+k+"-"+l+"]"),function(e){
+        var attr = k==="ph" ? "placeholder" : (k==="aria" ? "aria-label" : k);
+        e.setAttribute(attr, e.getAttribute("data-"+k+"-"+l));
+      });
+    });
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
+
+<script>
+"use strict";
+(function(){
+  /* ---------------- diccionario de las cadenas que escribe el JS ---------------- */
+  var DICT={
+    es:{
+      pendiente:"pendiente", corriendo:"corriendo…", hecha:"hecha ✓",
+      imgs:"{n} imágenes en esta carpeta",
+      perfLoad:"leyendo los perfiles…",
+      perfCount:"{n} de {t} perfiles a la vista · elige uno",
+      perfNone:"ningún perfil coincide con el filtro",
+      perfGen:"se usará el perfil genérico (primarios Rec.709)",
+      prev:"Abrir el análisis anterior ({n} fotos) ↗",
+      live:"Abrir el análisis con tus datos ↗",
+      grano:"{h} de {t} imágenes",
+      errCarpeta:"elige antes una carpeta",
+      errPerfil:"elige un perfil de la lista o marca el genérico",
+      errRed:"no se pudo hablar con el servidor del taller",
+      errTarea:"terminó con error — revisa el registro",
+      lanzando:"lanzando…",
+      srv:"Python {v} · resultados en {w}",
+      virado_neutro:"neutro", virado_frio:"frío", virado_calido:"cálido",
+      virado_sepia:"sepia", virado_selenio:"selenio",
+      n33:"33 · rápido", n45:"45 · fino"
+    },
+    en:{
+      pendiente:"pending", corriendo:"running…", hecha:"done ✓",
+      imgs:"{n} images in this folder",
+      perfLoad:"reading the profiles…",
+      perfCount:"{n} of {t} profiles shown · pick one",
+      perfNone:"no profile matches the filter",
+      perfGen:"the generic profile will be used (Rec.709 primaries)",
+      prev:"Open the previous analysis ({n} photos) ↗",
+      live:"Open the analysis with your data ↗",
+      grano:"{h} of {t} images",
+      errCarpeta:"choose a folder first",
+      errPerfil:"pick a profile from the list or tick the generic one",
+      errRed:"could not reach the workshop server",
+      errTarea:"finished with an error — check the log",
+      lanzando:"launching…",
+      srv:"Python {v} · results in {w}",
+      virado_neutro:"neutral", virado_frio:"cold", virado_calido:"warm",
+      virado_sepia:"sepia", virado_selenio:"selenium",
+      n33:"33 · fast", n45:"45 · fine"
+    }
+  };
+  function LBL(k,vars){
+    var l=document.documentElement.lang==="en"?"en":"es";
+    var s=(DICT[l]&&DICT[l][k]!==undefined)?DICT[l][k]:DICT.es[k];
+    if(s===undefined) s=k;
+    if(vars){ Object.keys(vars).forEach(function(v){ s=s.replace("{"+v+"}",vars[v]); }); }
+    return s;
+  }
+  function $(id){ return document.getElementById(id); }
+
+  /* ---------------- estado persistente de las estaciones ---------------- */
+  var EST={};
+  try{ EST=JSON.parse(localStorage.getItem("taller-estado")||"{}")||{}; }catch(e){ EST={}; }
+  var RUN={1:false,2:false,3:false};
+  function guarda(){ try{ localStorage.setItem("taller-estado",JSON.stringify(EST)); }catch(e){} }
+  function marca(n){ EST["s"+n]="hecha"; guarda(); pintaChips(); }
+  function pintaChips(){
+    [1,2,3].forEach(function(n){
+      var k=RUN[n]?"corriendo":(EST["s"+n]==="hecha"?"hecha":"pendiente");
+      var c=$("chip"+n); c.textContent=LBL(k); c.className="chip "+k;
+    });
+  }
+
+  var ESTADO=null, PERFILES=null, perfSel=null;
+  var ULT={filas:null};
+  var PROG={h:0,t:0,salida:""};
+  var nav1=null, nav2=null;
+
+  /* ---------------- navegador de carpetas ---------------- */
+  function navegador(pref, inicio){
+    var inp=$(pref+"-ruta"), sub=$(pref+"-sub"), lista=$(pref+"-lista"), cont=$(pref+"-cont");
+    var actual="", padre="", nimg=null;
+    function repC(){
+      if(nimg===null) return;
+      cont.classList.remove("mal");
+      cont.textContent=LBL("imgs",{n:nimg});
+    }
+    function carga(ruta){
+      var q=ruta?("?ruta="+encodeURIComponent(ruta)):"";
+      fetch("/api/dirs"+q).then(function(r){ return r.json(); }).then(function(d){
+        if(d.error){ cont.classList.add("mal"); cont.textContent=d.error; return; }
+        actual=d.ruta; padre=d.padre; nimg=d.imagenes;
+        inp.value=d.ruta;
+        lista.innerHTML="";
+        d.carpetas.forEach(function(nombre){
+          var b=document.createElement("button");
+          b.type="button"; b.className="dir"; b.textContent=nombre+"/";
+          b.addEventListener("click",function(){
+            carga((actual==="/"?"":actual)+"/"+nombre);
+          });
+          lista.appendChild(b);
+        });
+        repC();
+      }).catch(function(){ cont.classList.add("mal"); cont.textContent=LBL("errRed"); });
+    }
+    sub.addEventListener("click",function(){ if(padre) carga(padre); });
+    inp.addEventListener("keydown",function(ev){
+      if(ev.key==="Enter"){ ev.preventDefault(); carga(inp.value.trim()); }
+    });
+    inp.addEventListener("change",function(){ if(inp.value.trim()!==actual) carga(inp.value.trim()); });
+    carga(inicio||"");
+    return { ruta:function(){ return actual; }, repinta:repC };
+  }
+
+  /* ---------------- lanzar y sondear tareas ---------------- */
+  function sondea(id, opts){
+    var desde=0;
+    function paso(){
+      fetch("/api/tarea?id="+encodeURIComponent(id)+"&desde="+desde)
+      .then(function(r){ return r.json(); })
+      .then(function(s){
+        if(s.error){ fin("error"); return; }
+        if(s.lineas && s.lineas.length){
+          opts.pre.textContent+=s.lineas.join("\n")+"\n";
+          opts.pre.scrollTop=opts.pre.scrollHeight;
+        }
+        desde=s.total;
+        if(opts.alExtra && s.extra) opts.alExtra(s.extra);
+        if(s.estado==="corriendo"){ setTimeout(paso,700); }
+        else{ fin(s.estado); }
+      })
+      .catch(function(){ fin("error"); });
+    }
+    function fin(estado){
+      RUN[opts.est]=false;
+      opts.boton.disabled=false;
+      if(estado==="ok"){ marca(opts.est); if(opts.alOk) opts.alOk(); }
+      else{
+        pintaChips();
+        opts.pre.textContent+="!! "+LBL("errTarea")+"\n";
+        opts.pre.scrollTop=opts.pre.scrollHeight;
+      }
+    }
+    paso();
+  }
+  function lanza(params, opts){
+    opts.pre.textContent="["+LBL("lanzando")+"]\n";
+    opts.det.open=true;
+    opts.boton.disabled=true;
+    RUN[opts.est]=true; pintaChips();
+    fetch("/api/run",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(params)
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if(!res.id) throw new Error(res.error||"sin id");
+      sondea(res.id, opts);
+    })
+    .catch(function(){
+      RUN[opts.est]=false; opts.boton.disabled=false; pintaChips();
+      opts.pre.textContent+="!! "+LBL("errRed")+"\n";
+    });
+  }
+
+  /* ---------------- estación 1: analizar ---------------- */
+  function pintaPrev(){
+    if(!ESTADO || !ESTADO.csv_existe) return;
+    var n=(ULT.filas!==null)?ULT.filas:ESTADO.csv_filas;
+    var a=$("prev1"); a.style.display=""; a.textContent=LBL("prev",{n:n});
+  }
+  function pintaDone1(){ $("live1").textContent=LBL("live"); }
+
+  $("run1").addEventListener("click",function(){
+    $("msj1").textContent="";
+    var carpeta=nav1?nav1.ruta():"";
+    if(!carpeta){ $("msj1").textContent=LBL("errCarpeta"); return; }
+    var p={herramienta:"analizar", carpeta:carpeta};
+    var lim=parseInt($("limite1").value,10);
+    if(lim>0) p.limite=lim;
+    if($("fecha1").checked) p.inferir_fecha=true;
+    if($("norec1").checked) p.sin_recursion=true;
+    $("done1").style.display="none";
+    lanza(p,{est:1, pre:$("pre1"), det:$("det1"), boton:$("run1"),
+      alExtra:function(x){ if(x && x.filas!==undefined) ULT.filas=x.filas; },
+      alOk:function(){
+        if(ESTADO){ ESTADO.csv_existe=true; if(ULT.filas!==null) ESTADO.csv_filas=ULT.filas; }
+        pintaPrev();
+        pintaDone1();
+        $("done1").style.display="";
+      }});
+  });
+
+  /* ---------------- estación 2: perfiles de cámara ---------------- */
+  function pintaPerfiles(){
+    if(PERFILES===null) return;
+    var lista=$("perf-lista"), cont=$("perf-cont");
+    lista.innerHTML="";
+    if($("generico").checked){ cont.classList.remove("mal"); cont.textContent=LBL("perfGen"); return; }
+    var filtro=$("perf-filtro").value.trim().toLowerCase();
+    var hits=PERFILES.filter(function(p){ return p.nombre.toLowerCase().indexOf(filtro)!==-1; });
+    hits.slice(0,40).forEach(function(p){
+      var b=document.createElement("button");
+      b.type="button";
+      b.className="dir"+((perfSel && perfSel.ruta===p.ruta)?" sel":"");
+      b.textContent=p.nombre;
+      b.addEventListener("click",function(){ perfSel=p; pintaPerfiles(); });
+      lista.appendChild(b);
+    });
+    cont.classList.remove("mal");
+    if(!hits.length){ cont.textContent=LBL("perfNone"); }
+    else{
+      cont.textContent=LBL("perfCount",{n:Math.min(40,hits.length),t:hits.length})
+        +(perfSel?(" · → "+perfSel.nombre):"");
+    }
+  }
+  function cargaPerfiles(){
+    $("perf-cont").textContent=LBL("perfLoad");
+    fetch("/api/perfiles").then(function(r){ return r.json(); }).then(function(d){
+      PERFILES=d.perfiles||[];
+      pintaPerfiles();
+    }).catch(function(){ $("perf-cont").textContent=LBL("errRed"); });
+  }
+  $("perf-filtro").addEventListener("input",pintaPerfiles);
+  $("generico").addEventListener("change",pintaPerfiles);
+
+  function pintaOpcIcc(){
+    var f=$("pelicula2").value;
+    $("campo-copia").style.display=(f==="pro400h"||f==="trix")?"":"none";
+    $("campo-virado").style.display=(f==="trix")?"":"none";
+  }
+  $("pelicula2").addEventListener("change",pintaOpcIcc);
+
+  $("run2").addEventListener("click",function(){
+    $("msj2").textContent="";
+    var p={herramienta:"icc", pelicula:$("pelicula2").value};
+    if(!$("generico").checked){
+      if(!perfSel){ $("msj2").textContent=LBL("errPerfil"); return; }
+      p.perfil=perfSel.ruta;
+    }
+    var ev=parseFloat($("ev2").value);
+    if(ev) p.ev=ev;
+    if(p.pelicula==="pro400h"||p.pelicula==="trix"){
+      var cp=parseFloat($("copia2").value);
+      if(cp) p.copia=cp;
+    }
+    if(p.pelicula==="trix") p.virado=$("virado2").value;
+    var nn=parseInt($("n2").value,10);
+    if(nn===45) p.n=45;
+    if($("instalar2").checked) p.instalar=true;
+    lanza(p,{est:2, pre:$("pre2"), det:$("det2"), boton:$("run2")});
+  });
+
+  /* ---------------- estación 2: grano por lotes ---------------- */
+  function pintaProg(){
+    if(!PROG.t) return;
+    var pct=Math.round(100*PROG.h/PROG.t);
+    $("prog2").style.width=pct+"%";
+    $("prog2txt").textContent=LBL("grano",{h:PROG.h,t:PROG.t})+(PROG.salida?(" · "+PROG.salida):"");
+  }
+  $("run2b").addEventListener("click",function(){
+    $("msj2b").textContent="";
+    var carpeta=nav2?nav2.ruta():"";
+    if(!carpeta){ $("msj2b").textContent=LBL("errCarpeta"); return; }
+    var p={herramienta:"grano", carpeta:carpeta, pelicula:$("pelicula2b").value};
+    var it=parseFloat($("intens2").value);
+    if(it && it!==1) p.intensidad=it;
+    var lim=parseInt($("limite2").value,10);
+    if(lim>0) p.limite=lim;
+    PROG={h:0,t:0,salida:""};
+    $("prog2").style.width="0%";
+    $("prog2txt").textContent="";
+    $("prog2wrap").style.display="";
+    lanza(p,{est:2, pre:$("pre2b"), det:$("det2b"), boton:$("run2b"),
+      alExtra:function(x){
+        if(x && x.total){ PROG.h=x.hechas; PROG.t=x.total; PROG.salida=x.salida||""; pintaProg(); }
+      }});
+  });
+
+  /* ---------------- estación 3: enlaces del cierre ---------------- */
+  $("link3a").addEventListener("click",function(){ marca(3); });
+  $("link3b").addEventListener("click",function(){ marca(3); });
+
+  /* ---------------- opciones traducidas por diccionario ---------------- */
+  function traduceOpciones(){
+    [].forEach.call($("virado2").options,function(o){ o.textContent=LBL("virado_"+o.value); });
+    [].forEach.call($("n2").options,function(o){ o.textContent=LBL("n"+o.value); });
+  }
+
+  /* ---------------- repintado global (idioma) ---------------- */
+  function repinta(){
+    pintaChips();
+    traduceOpciones();
+    if(ESTADO){
+      $("srvinfo").textContent=LBL("srv",{v:ESTADO.python,w:ESTADO.trabajo});
+      pintaPrev();
+      pintaDone1();
+      pintaPerfiles();
+    }
+    if(nav1) nav1.repinta();
+    if(nav2) nav2.repinta();
+    pintaProg();
+  }
+  window.onLangChange=function(){ if(!window.__tallerListo) return; repinta(); };
+
+  /* ---------------- arranque ---------------- */
+  function offline(){
+    $("offline").style.display="";
+    ["fs1","fs2","fs2b"].forEach(function(id){ $(id).disabled=true; });
+    window.__tallerListo=true;
+    repinta();
+  }
+  function arranca(est){
+    ESTADO=est;
+    if(!est.pillow){
+      $("lock1").style.display="";  $("ordenPillow1").textContent=est.orden_pillow;
+      $("lock2b").style.display=""; $("ordenPillow2").textContent=est.orden_pillow;
+      $("fs1").disabled=true; $("fs2b").disabled=true;
+    }
+    if(!est.numpy){
+      $("lock2").style.display="";
+      $("ordenNumpy").textContent=est.ejecutable+" -m pip install numpy";
+      $("fs2").disabled=true; $("fs2b").disabled=true;
+    }
+    nav1=navegador("nav1", est.inicio);
+    nav2=navegador("nav2", est.inicio);
+    cargaPerfiles();
+    pintaOpcIcc();
+    window.__tallerListo=true;
+    repinta();
+  }
+  pintaChips();
+  traduceOpciones();
+  fetch("/api/estado")
+    .then(function(r){ if(!r.ok) throw new Error("estado "+r.status); return r.json(); })
+    .then(arranca)
+    .catch(offline);
+})();
+</script>
+
+</body>
+</html>

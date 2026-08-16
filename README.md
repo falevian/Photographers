@@ -94,6 +94,21 @@ la página es su manual; el código está en [`scripts/`](scripts/).
 | [`manual-stack-sensor.html`](manual-stack-sensor.html) | Manual del simulador del stack: el modelo de trazado, cómo se leen la mancha RMS y la MTF, y qué es heurístico y qué no. |
 | [`manual-medidas.html`](manual-medidas.html) | Referencia de todas las medidas del análisis de centrado: qué es cada una, cómo se define, cómo se interpreta y hasta dónde llega. |
 
+### El taller
+
+Un itinerario guiado que encadena las herramientas: el análisis de centrado sobre tu
+carpeta de fotos (y la página se abre con tus datos ya cargados), la generación e
+instalación de perfiles de película, el grano por lotes, y el cierre del sensor al
+papel. Las páginas web no pueden ejecutar Python; el taller corre en tu ordenador:
+
+```bash
+python3 taller.py
+```
+
+Solo biblioteca estándar; escucha únicamente en 127.0.0.1 y los resultados van a
+`~/Photographers-taller/`. Los scripts necesitan `numpy` y `pillow`, y el propio
+taller comprueba qué falta y te da la orden exacta.
+
 ### El código
 
 Las herramientas de revelado y procesado son scripts de Python; sus páginas son los
@@ -210,6 +225,21 @@ the page is its manual; the code lives in [`scripts/`](scripts/).
 | [`manual-telemetro-m11.html`](manual-telemetro-m11.html) | Manual for the rangefinder simulator, with the physical model, the numerical verification and an illustrated annex on the Airy disc. Six embedded figures. |
 | [`manual-stack-sensor.html`](manual-stack-sensor.html) | Manual for the stack simulator: the tracing model, how to read the RMS spot and the MTF, and what is heuristic and what is not. |
 | [`manual-medidas.html`](manual-medidas.html) | Reference for every measure in the subject-placement analysis: what each one is, how it is defined, how to read it and how far it goes. |
+
+### The workshop
+
+A guided path that chains the tools together: the placement analysis over your folder
+of photographs (with the page opening on your data, already loaded), film-profile
+generation and installation, batch grain, and the sensor-to-paper close. Web pages
+cannot run Python; the workshop runs on your computer:
+
+```bash
+python3 taller.py
+```
+
+Standard library only; it listens on 127.0.0.1 alone and results go to
+`~/Photographers-taller/`. The scripts need `numpy` and `pillow`, and the workshop
+itself checks what is missing and gives you the exact command.
 
 ### The code
 
