@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Niebla para fotografía</title>
+<meta name="author" content="Rafael Vida">
+<meta name="description" content="Herramienta de predicción de niebla para fotografía: índice físico hora a hora y fusión bayesiana multimodelo sobre datos de Open-Meteo, con registro local de observaciones.">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", OLD="niebla_lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){
+    /* Migracion de la clave antigua del paquete suelto. */
+    try{ var o=localStorage.getItem(OLD); if(o==="es"||o==="en"){ u=o; localStorage.setItem(K,o); } }catch(e){}
+  }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#e6eaee;--paper:#f3f5f7;--ink:#1c262e;--ink2:#55636d;--line:#c5ccd3;--fog:#9fb0bd;--warn:#b8862b;--bad:#8c4a3a;--ok:#3e6d8a;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;--sans:"Space Grotesk",system-ui,sans-serif}
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#dfe4e8,var(--bg) 40%,#eef1f3);color:var(--ink);font-family:var(--sans);line-height:1.45}
+  header,main{max-width:1150px;margin:0 auto;padding:0 24px}
+  header{padding-top:24px;padding-bottom:8px}
+  .topbar{display:flex;justify-content:flex-end;align-items:center;gap:14px;font-size:13px}
+  .topbar a{color:var(--ink2)}
+  h1{font-size:clamp(26px,4vw,40px);font-weight:700;letter-spacing:-.02em;margin:6px 0 4px}
+  .sub{color:var(--ink2);font-size:15px;margin:0}
+  main{padding-bottom:48px}
+  .panel{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin:18px 0 14px}
+  label{font-size:12px;color:var(--ink2);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em}
+  input[type=number],select,input[type=date]{font-family:var(--mono);font-size:14px;padding:7px 9px;border:1px solid var(--line);border-radius:5px;background:#fff;color:var(--ink);width:130px}
+  select{width:auto}
+  button{font-family:var(--sans);font-size:14px;font-weight:500;padding:8px 14px;border-radius:5px;border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer}
+  button.ghost{background:transparent;color:var(--ink)}
+  button.small{padding:4px 9px;font-size:12px}
+  :focus-visible{outline:2px solid var(--ok);outline-offset:2px}
+  .tabs{display:flex;border-bottom:2px solid var(--line);margin:6px 0 18px}
+  .tab{background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;color:var(--ink2);font-size:15px;font-weight:500;padding:10px 16px;border-radius:0}
+  .tab.on{color:var(--ink);border-bottom-color:var(--ink);font-weight:700}
+  .pane{display:none}.pane.on{display:block}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-bottom:22px}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:16px 18px}
+  .eyebrow{font-family:var(--mono);font-size:11px;color:var(--ink2);letter-spacing:.08em;text-transform:uppercase}
+  .big{font-family:var(--mono);font-size:40px;font-weight:600;line-height:1.1;margin:6px 0 2px}
+  .verdict{font-weight:700;font-size:17px}
+  .when{font-family:var(--mono);font-size:12px;color:var(--ink2);margin-top:6px}
+  .why{font-size:13px;color:var(--ink2);margin-top:8px}
+  .v-a{color:var(--bad)}.v-m{color:var(--warn)}.v-b{color:var(--ok)}
+  section{margin-top:26px}
+  h2{font-size:16px;font-weight:700;margin:0 0 10px}
+  svg{width:100%;height:auto;display:block;background:#fff;border:1px solid var(--line);border-radius:6px}
+  table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px;background:#fff;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  th,td{padding:5px 8px;text-align:right;border-bottom:1px solid #e4e8eb;white-space:nowrap}
+  th{background:#eaeef1;font-weight:500;color:var(--ink2)}
+  td:first-child,th:first-child{text-align:left}
+  tr.sun td{background:#fbf3e3}
+  .tag{display:inline-block;padding:1px 6px;border-radius:3px;font-size:11px;color:#fff}
+  .tag.a{background:var(--bad)}.tag.m{background:var(--warn)}.tag.b{background:var(--ok)}
+  .note{font-size:13px;color:var(--ink2);max-width:80ch}
+  code{font-family:var(--mono);font-size:12px;background:#e9edf0;padding:1px 4px;border-radius:3px}
+  .status{font-family:var(--mono);font-size:12px;color:var(--ink2);margin-top:8px;min-height:1.2em;flex-basis:100%}
+  .legend{font-family:var(--mono);font-size:11px;color:var(--ink2);margin-top:6px}
+  .legend i{display:inline-block;width:22px;height:3px;vertical-align:middle;margin:0 4px 0 10px}
+  .wrap{overflow-x:auto}
+  .strip{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(26px,1fr);gap:2px;border:1px solid var(--line);background:#fff;border-radius:6px;padding:8px 6px}
+  .hour{display:flex;flex-direction:column;align-items:center;font-family:var(--mono);font-size:10px;color:var(--ink2)}
+  .hour .bar{width:100%;height:90px;border-radius:3px;background:linear-gradient(180deg,transparent,var(--fog));position:relative}
+  .hour .bar span{position:absolute;left:0;right:0;bottom:0;border-radius:3px;background:var(--fog)}
+  .hour .bar span.a{background:var(--bad)}.hour .bar span.m{background:var(--warn)}
+  .hour .t{margin-top:4px}
+  .hour.night{background:#e3e8ec;border-radius:3px}
+  .hour.sun .t{color:var(--bad);font-weight:600}
+  .wbar{height:8px;background:var(--ok);border-radius:2px;display:inline-block;vertical-align:middle}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:800px){.grid2{grid-template-columns:1fr}}
+  .obs-row{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+  .mlist{display:flex;flex-wrap:wrap;gap:8px;font-family:var(--mono);font-size:12px}
+  .mlist label{display:inline-flex;align-items:center;gap:4px;text-transform:none;letter-spacing:0;font-size:12px;color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:3px 7px;background:#fff;margin:0}
+  .mlist .st{color:var(--ink2)}.mlist .st.ok{color:#3e6d8a}.mlist .st.ko{color:#8c4a3a}
+  .netnote{background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--ok);
+    border-radius:6px;padding:10px 14px;margin:14px 0 0;font-size:13.5px;color:var(--ink2);max-width:80ch}
+  .netnote b{color:var(--ink)}
+
+  /* ---------- convenio bilingue del repositorio ---------- */
+  html[lang="es"] [data-lang="en"]{display:none!important}
+  html[lang="en"] [data-lang="es"]{display:none!important}
+  .langbar{position:fixed;top:14px;right:16px;z-index:100;display:flex;
+    border:1px solid var(--ink);border-radius:5px;overflow:hidden;background:var(--paper)}
+  .langbar button{font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;
+    border:0;border-radius:0;padding:5px 10px;background:transparent;color:var(--ink2);cursor:pointer}
+  .langbar button+button{border-left:1px solid var(--line)}
+  .langbar button:hover{color:var(--ink)}
+  .langbar button.on{background:var(--ink);color:#fff}
+  .langbar button:focus-visible{outline:2px solid var(--ok);outline-offset:-2px}
+  /* La barra flota sobre la esquina superior derecha, donde vive .topbar:
+     si no cabe al lado del contenido, se baja la cabecera para que no se solapen. */
+  @media(max-width:1290px){header{padding-top:52px}}
+  @media(max-width:720px){.langbar{top:8px;right:8px} header{padding-top:44px}}
+  @media print{.langbar{display:none!important}}
+</style>
+</head>
+<body>
+
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
+
+<header>
+  <div class="topbar">
+    <a href="manual-niebla.html" id="manual-link" data-i18n="manual"></a>
+    <a href="index.html" data-lang="es">Portada</a>
+    <a href="index.html" data-lang="en">Home</a>
+  </div>
+  <h1 data-i18n="title"></h1>
+  <p class="sub" data-i18n="subtitle"></p>
+  <p class="netnote" data-lang="es"><b>Necesita conexión a internet.</b> Es la única página del sitio que la necesita: cada cálculo descarga la previsión de <b>Open‑Meteo</b> (<code>api.open-meteo.com</code> y, en modo costero, <code>marine-api.open-meteo.com</code>). Sin red la página se abre igual, pero no puede predecir nada. No hay clave ni registro; tus observaciones se quedan en este navegador.</p>
+  <p class="netnote" data-lang="en"><b>An internet connection is required.</b> This is the only page on the site that needs one: every computation downloads the forecast from <b>Open‑Meteo</b> (<code>api.open-meteo.com</code> and, in coastal mode, <code>marine-api.open-meteo.com</code>). With no network the page still opens, but it cannot forecast anything. There is no API key and no sign‑up; your observations stay in this browser.</p>
+</header>
+<main>
+  <div class="panel controls">
+    <div><label for="lat" data-i18n="lat"></label><input id="lat" type="number" step="0.0001" value="43.3623"></div>
+    <div><label for="lon" data-i18n="lon"></label><input id="lon" type="number" step="0.0001" value="-8.4115"></div>
+    <div><label for="costa" data-i18n="env"></label><select id="costa"><option value="costa" data-i18n="env_coast"></option><option value="interior" data-i18n="env_inland"></option></select></div>
+    <button id="geo" class="ghost" type="button" data-i18n="geo"></button>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab on" data-pane="p1" role="tab" data-i18n="tab1"></button>
+    <button class="tab" data-pane="p2" role="tab" data-i18n="tab2"></button>
+  </div>
+
+  <div class="pane on" id="p1">
+    <div class="panel controls" style="margin-top:0">
+      <div><label for="model" data-i18n="model"></label>
+        <select id="model">
+          <option value="best_match" data-i18n="best"></option>
+          <option value="icon_seamless">ICON (DWD)</option><option value="gfs_seamless">GFS (NOAA)</option>
+          <option value="meteofrance_seamless">AROME/ARPEGE</option><option value="ecmwf_ifs025">ECMWF IFS 0.25°</option><option value="ukmo_seamless">UKMO</option>
+        </select></div>
+      <button id="go1" type="button" data-i18n="compute"></button>
+      <div class="status" id="st1"></div>
+    </div>
+    <div class="cards" id="cards1"></div>
+    <section><h2 data-i18n="h_strip"></h2><div class="wrap"><div class="strip" id="strip"></div></div><div class="legend" data-i18n="strip_legend"></div></section>
+    <section><h2 data-i18n="h_conv"></h2><div id="chart1"></div><div class="legend" id="leg1"></div></section>
+    <section><h2 data-i18n="h_table"></h2><div class="wrap"><table id="tabla1"></table></div></section>
+    <section><h2 data-i18n="h_how"></h2><p class="note" data-i18n="how1"></p></section>
+  </div>
+
+  <div class="pane" id="p2">
+    <div class="panel controls" style="margin-top:0">
+      <div style="flex-basis:100%"><label data-i18n="models_lbl"></label><div class="mlist" id="mlist"></div></div>
+      <div><label for="alpha" data-i18n="alpha"></label><input id="alpha" type="number" step="0.1" min="1" max="8" value="1.8"></div>
+      <button id="go2" type="button" data-i18n="compute"></button>
+      <div class="status" id="st2"></div>
+    </div>
+    <div class="cards" id="cards2"></div>
+    <section><h2 data-i18n="h_prob"></h2><div id="chart2"></div><div class="legend" id="legend2"></div></section>
+    <section class="grid2">
+      <div><h2 data-i18n="h_sun"></h2><div class="wrap"><table id="tsun"></table></div></div>
+      <div><h2 data-i18n="h_w"></h2><div class="wrap"><table id="tw"></table></div><p class="note" id="priorinfo"></p></div>
+    </section>
+    <section><h2 data-i18n="h_obs"></h2>
+      <div class="panel">
+        <div class="obs-row">
+          <div><label for="odate" data-i18n="night_of"></label><input id="odate" type="date"></div>
+          <div><label for="oval" data-i18n="observed"></label><select id="oval"><option value="1" data-i18n="o_fog"></option><option value="0.5" data-i18n="o_mist"></option><option value="0" data-i18n="o_none"></option></select></div>
+          <button id="saveobs" type="button" data-i18n="save_obs"></button>
+          <button id="exp" class="ghost" type="button" data-i18n="export"></button>
+          <label style="display:inline-block;margin:0"><span style="cursor:pointer;border:1px solid var(--ink);padding:7px 12px;border-radius:5px;font-size:14px;display:inline-block;text-transform:none;letter-spacing:0;color:var(--ink)" data-i18n="import"></span><input id="imp" type="file" accept="application/json" style="display:none"></label>
+          <button id="clear" class="ghost" type="button" data-i18n="clear"></button>
+        </div>
+        <p class="note" data-i18n="obs_note"></p>
+        <div class="wrap"><table id="tobs"></table></div>
+      </div></section>
+    <section><h2 data-i18n="h_method"></h2><p class="note" data-i18n="method"></p></section>
+  </div>
+</main>
+
+<script>
+"use strict";
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{ title:"Niebla para fotografía",
+         desc:"Herramienta de predicción de niebla para fotografía: índice físico hora a hora y fusión bayesiana multimodelo sobre datos de Open-Meteo, con registro local de observaciones." },
+    en:{ title:"Fog for photography",
+         desc:"Fog forecasting tool for photography: hourly physical index and multi-model Bayesian fusion over Open-Meteo data, with a local observation log." }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    ["title","ph","alt","aria"].forEach(function(k){
+      [].forEach.call(document.querySelectorAll("[data-"+k+"-"+l+"]"),function(e){
+        var attr = k==="ph" ? "placeholder" : (k==="aria" ? "aria-label" : k);
+        e.setAttribute(attr, e.getAttribute("data-"+k+"-"+l));
+      });
+    });
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
+
+<script>
+(function(){
+  const I18N={
+  es:{manual:'Manual',title:'Niebla para fotografía',subtitle:'Pestaña 1: índice físico de niebla con un modelo. Pestaña 2: fusión bayesiana de varios modelos con aprendizaje a partir de tus observaciones. Datos de Open‑Meteo, sin clave.',
+    lat:'Latitud',lon:'Longitud',env:'Entorno',env_coast:'Costero (advección)',env_inland:'Interior',geo:'Usar mi posición',tab1:'Índice de niebla',tab2:'Fusión bayesiana',model:'Modelo',best:'Mejor disponible',compute:'Calcular',
+    h_strip:'Índice horario (48 h)',strip_legend:'Barra: índice 0 a 100. Fondo gris: noche. Hora en rojo: amanecer. Ámbar: bruma posible. Rojizo: niebla probable.',
+    h_conv:'Convergencia de temperatura y punto de rocío',leg1:'<i style="background:#1c262e"></i>T (°C) <i style="background:#3e6d8a"></i>Td (°C) <i style="background:#b8862b"></i>viento (km/h, eje derecho) <i style="background:#d9a0a0"></i>T − Td &lt; 2 °C',
+    h_table:'Tabla horaria',h_how:'Cómo se calcula',
+    how1:'El índice suma contribuciones y se satura en 100. <code>ΔT = T − Td</code>: 40 puntos si ΔT ≤ 0.5 °C, decreciendo linealmente hasta 0 en 4 °C. Viento a 10 m: 2 a 8 km/h (20), calma (14), 8 a 15 (8), &gt; 20 (0). Nubosidad nocturna: &lt; 25 % (20), 25 a 60 % (8), más (0). Visibilidad modelada: &lt; 1 km (20), &lt; 3 km (10), &lt; 6 km (4). HR ≥ 97 %: +10. Lluvia &gt; 0.5 mm: −15. De día se multiplica por 0.65. En modo costero, advección: Td del aire por encima de la SST con viento de 8 a 30 km/h, hasta +30. Umbrales: ≥ 65 niebla probable, 40 a 64 bruma posible.',
+    models_lbl:'Modelos (descarga en paralelo con límite de 12 s; desmarca los lentos)',alpha:'α (fuentes independientes efectivas)',h_prob:'Probabilidad horaria por modelo y posterior',h_sun:'Estado del amanecer por modelo',h_w:'Pesos bayesianos y prior',h_obs:'Registro de observaciones (aprendizaje)',
+    night_of:'Noche del',observed:'Observado al amanecer',o_fog:'Niebla (vis < 1 km)',o_mist:'Bruma o neblina',o_none:'Nada',save_obs:'Guardar observación',export:'Exportar JSON',import:'Importar JSON',clear:'Borrar registro',
+    obs_note:'Cada vez que calculas, la previsión para el próximo amanecer queda congelada automáticamente, asociada a la fecha de esa noche. Por la mañana basta con elegir la noche recién terminada, indicar lo observado y guardar: la observación se empareja con la previsión que se congeló la víspera, nunca con una posterior. Si esa noche no llegaste a calcular, la observación solo actualiza el prior climatológico, no los pesos. El registro se guarda en este navegador; exporta el JSON si cambias de equipo.',
+    snap_info:'Previsión congelada para la noche del {d} ({n} modelos, {h}).',no_snap:'No hay previsión congelada para la noche del {d}; la observación actualiza solo el prior.',obs_saved:'Observación guardada para la noche del {d}.',pending:'pendiente',
+    h_method:'Método',method:'Cada modelo da un índice s por hora (misma heurística de la pestaña 1) que se convierte en probabilidad con <code>p_m = σ((s − 55)/12)</code>, calibrada a la tasa base π₀ = 0.12. Prior climatológico π ~ Beta(a, b), inicial Beta(1.2, 8.8), actualizado con cada noche observada (a += y, b += 1 − y). Posterior por pooling logarítmico: <code>logit P = logit π + α · Σ w_m (logit p_m − logit π₀)</code>, Σ w_m = 1. α = 1 trata a todos los modelos como una sola evidencia; valores mayores asumen independencia parcial. Pesos <code>w_m ∝ exp(0.7 · Σ log P_m(y_obs))</code>: probabilidad a posteriori de que m sea el mejor modelo, con prior uniforme y tempering. Sin observaciones, pesos uniformes.',
+    dl:'Descargando previsión…',dl_n:'Descargando {n} modelos en paralelo…',err:'Error: ',nopos:'Sin posición: ',nossT:' · sin SST, advección desactivada',elev:'elevación',
+    next6:'Próximas 6 horas',max_at:'máximo a las',sunrise:'Amanecer',window:'ventana −2.5 h a +1.5 h, máximo a las',mindt:'Mínima depresión del punto de rocío esta noche',at:'a las',wind:'viento',clouds:'nubes',pressure:'presión',
+    fog:'Niebla probable',mist:'Bruma o neblina posible',unlikely:'Improbable',range:'rango',disp:'Dispersión entre modelos (amanecer)',agree_h:'Acuerdo alto',agree_m:'Acuerdo moderado',agree_l:'Desacuerdo',mean:'media',disp_note:'Desviación típica de las probabilidades de los modelos: incertidumbre epistémica.',
+    th1:['Hora','Índice','T','Td','ΔT','HR','Viento','Dir','Nubes','Bajas','Vis km','SST','P hPa'],thsun:['Modelo','P máx','hora','ΔT','HR','viento','nubes','vis km','señales'],thw:['Modelo','peso w','','log‑veros.'],thobs:['Noche','y'],posterior:'posterior',del:'eliminar',
+    post_leg:'posterior',range_leg:'rango',prior_info:'Prior: Beta({a}, {b}), media {pi} % sobre {n} noches registradas. Calibración p = σ((s − 55)/12), π₀ = 0.12.',
+    sel1:'Selecciona al menos un modelo.',none:'Ningún modelo respondió a tiempo. Reintenta o reduce la selección.',fused:'{k} modelos fusionados',failed:', {f} sin respuesta',first:'Calcula primero.',badjson:'JSON no válido',confirm:'¿Borrar todo el registro de observaciones?',
+    w_dT:'ΔT',w_vis:'vis',w_rain:'lluvia',w_adv:'advección',w_wind:'viento',w_cloud:'nubes',timeout:'timeout',error:'error'},
+  en:{manual:'Manual',title:'Fog for photography',subtitle:'Tab 1: physical fog index from one model. Tab 2: Bayesian fusion of several models that learns from your observations. Open‑Meteo data, no API key.',
+    lat:'Latitude',lon:'Longitude',env:'Setting',env_coast:'Coastal (advection)',env_inland:'Inland',geo:'Use my location',tab1:'Fog index',tab2:'Bayesian fusion',model:'Model',best:'Best available',compute:'Compute',
+    h_strip:'Hourly index (48 h)',strip_legend:'Bar: index 0 to 100. Grey background: night. Red hour: sunrise. Amber: mist possible. Reddish: fog likely.',
+    h_conv:'Temperature and dew point convergence',leg1:'<i style="background:#1c262e"></i>T (°C) <i style="background:#3e6d8a"></i>Td (°C) <i style="background:#b8862b"></i>wind (km/h, right axis) <i style="background:#d9a0a0"></i>T − Td &lt; 2 °C',
+    h_table:'Hourly table',h_how:'How it is computed',
+    how1:'The index adds independent contributions and saturates at 100. <code>ΔT = T − Td</code>: 40 points if ΔT ≤ 0.5 °C, decreasing linearly to 0 at 4 °C. 10 m wind: 2 to 8 km/h (20), calm (14), 8 to 15 (8), &gt; 20 (0). Night cloud cover: &lt; 25 % (20), 25 to 60 % (8), more (0). Model visibility: &lt; 1 km (20), &lt; 3 km (10), &lt; 6 km (4). RH ≥ 97 %: +10. Rain &gt; 0.5 mm: −15. Daytime values are multiplied by 0.65. In coastal mode, advection: air dew point above SST with wind 8 to 30 km/h, up to +30. Thresholds: ≥ 65 fog likely, 40 to 64 mist possible.',
+    models_lbl:'Models (parallel download, 12 s limit; untick slow ones)',alpha:'α (effective independent sources)',h_prob:'Hourly probability per model and posterior',h_sun:'Sunrise state per model',h_w:'Bayesian weights and prior',h_obs:'Observation log (learning)',
+    night_of:'Night of',observed:'Observed at sunrise',o_fog:'Fog (vis < 1 km)',o_mist:'Mist or haze',o_none:'Nothing',save_obs:'Save observation',export:'Export JSON',import:'Import JSON',clear:'Clear log',
+    obs_note:'Every time you compute, the forecast for the next sunrise is frozen automatically and attached to the date of that night. In the morning just pick the night that has just ended, choose what you observed and save: the observation is paired with the forecast frozen the evening before, never with a later one. If you did not compute that night, the observation only updates the climatological prior, not the weights. The log lives in this browser; export the JSON if you change device.',
+    snap_info:'Forecast frozen for the night of {d} ({n} models, {h}).',no_snap:'No frozen forecast for the night of {d}; the observation only updates the prior.',obs_saved:'Observation saved for the night of {d}.',pending:'pending',
+    h_method:'Method',method:'Each model yields an hourly index s (same heuristic as tab 1), mapped to a probability with <code>p_m = σ((s − 55)/12)</code>, calibrated to the base rate π₀ = 0.12. Climatological prior π ~ Beta(a, b), initially Beta(1.2, 8.8), updated with every observed night (a += y, b += 1 − y). Posterior by logarithmic pooling: <code>logit P = logit π + α · Σ w_m (logit p_m − logit π₀)</code>, Σ w_m = 1. α = 1 treats all models as one piece of evidence; larger values assume partial independence. Weights <code>w_m ∝ exp(0.7 · Σ log P_m(y_obs))</code>: posterior probability that m is the best model, uniform prior, tempered. With no observations, uniform weights.',
+    dl:'Downloading forecast…',dl_n:'Downloading {n} models in parallel…',err:'Error: ',nopos:'No position: ',nossT:' · no SST, advection disabled',elev:'elevation',
+    next6:'Next 6 hours',max_at:'peak at',sunrise:'Sunrise',window:'window −2.5 h to +1.5 h, peak at',mindt:'Minimum dew point depression tonight',at:'at',wind:'wind',clouds:'clouds',pressure:'pressure',
+    fog:'Fog likely',mist:'Mist or haze possible',unlikely:'Unlikely',range:'range',disp:'Spread between models (sunrise)',agree_h:'High agreement',agree_m:'Moderate agreement',agree_l:'Disagreement',mean:'mean',disp_note:'Standard deviation of model probabilities: epistemic uncertainty.',
+    th1:['Time','Index','T','Td','ΔT','RH','Wind','Dir','Clouds','Low','Vis km','SST','P hPa'],thsun:['Model','P max','time','ΔT','RH','wind','clouds','vis km','signals'],thw:['Model','weight w','','log‑lik.'],thobs:['Night','y'],posterior:'posterior',del:'delete',
+    post_leg:'posterior',range_leg:'range',prior_info:'Prior: Beta({a}, {b}), mean {pi} % over {n} logged nights. Calibration p = σ((s − 55)/12), π₀ = 0.12.',
+    sel1:'Select at least one model.',none:'No model answered in time. Retry or reduce the selection.',fused:'{k} models fused',failed:', {f} without response',first:'Compute first.',badjson:'Invalid JSON',confirm:'Delete the whole observation log?',
+    w_dT:'ΔT',w_vis:'vis',w_rain:'rain',w_adv:'advection',w_wind:'wind',w_cloud:'clouds',timeout:'timeout',error:'error'}
+  };
+  function $(s){return document.querySelector(s);}
+  /* El idioma lo fija el script canónico del <head> (clave compartida pn-lang) y vive en
+     document.documentElement.lang: aquí solo se lee, nunca se consulta el almacenamiento. */
+  let LANG=document.documentElement.lang; if(!I18N[LANG]) LANG='es';
+  const t=(k,v)=>{let s=I18N[LANG][k]; if(s==null) s=I18N.es[k]; if(v&&typeof s==='string') Object.keys(v).forEach(x=>s=s.replace('{'+x+'}',v[x])); return s;};
+  const LOC=()=>LANG==='en'?'en-GB':'es-ES';
+  function applyLang(){
+    document.documentElement.lang=LANG; document.title=t('title');
+    document.querySelectorAll('[data-i18n]').forEach(e=>{e.innerHTML=t(e.dataset.i18n);});
+    $('#leg1').innerHTML=t('leg1');
+    /* El enlace al manual es estático (manual-niebla.html) y el idioma viaja por pn-lang;
+       los botones ES/EN los marca el conmutador canónico. */
+    if(R1) render1(); if(B.last) render2();
+  }
+  /* El conmutador canónico avisa por aquí al cambiar de idioma. El flag evita repintar
+     antes de que la aplicación esté montada (apply() se invoca también en el arranque). */
+  let APP_READY=false;
+  window.onLangChange=function(l){ LANG=I18N[l]?l:'es'; if(APP_READY) applyLang(); };
+
+  const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const lin=(x,x0,y0,x1,y1)=>y0+(y1-y0)*clamp((x-x0)/(x1-x0),0,1);
+  const logit=p=>Math.log(p/(1-p)), sig=z=>1/(1+Math.exp(-z));
+  const fmtH=iso=>iso.slice(11,16);
+  const fmtD=iso=>new Date(iso).toLocaleDateString(LOC(),{weekday:'short',day:'2-digit'})+' '+iso.slice(11,16);
+  const HOURLY='temperature_2m,relative_humidity_2m,dew_point_2m,wind_speed_10m,wind_direction_10m,cloud_cover,cloud_cover_low,visibility,precipitation,surface_pressure';
+  const coords=()=>({lat:+$('#lat').value,lon:+$('#lon').value,costero:$('#costa').value==='costa'});
+  function fetchJSON(url,ms){const c=new AbortController();const tm=setTimeout(()=>c.abort(),ms);return fetch(url,{signal:c.signal}).then(r=>r.json()).finally(()=>clearTimeout(tm));}
+  let sstCache={key:null,data:null};
+  async function getSST(lat,lon){const key=lat+','+lon; if(sstCache.key===key) return sstCache.data; let m=null;
+    try{m=await fetchJSON(`https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=sea_surface_temperature&timezone=auto&forecast_days=3`,10000); if(m.error) m=null;}catch(e){m=null;}
+    sstCache={key,data:m}; return m;}
+  const sstAt=(m,iso)=>{if(!m||!m.hourly) return null; const j=m.hourly.time.indexOf(iso); return j>=0?m.hourly.sea_surface_temperature[j]:null;};
+  function score(h,costero){
+    const dT=h.t-h.td; let s=0, why=[];
+    s+= dT<=0.5?40:lin(dT,0.5,40,4,0); why.push(['w_dT',dT.toFixed(1)]);
+    const w=h.wind; s+= w<2?14 : w<=8?20 : w<=15?8 : w<=20?3:0;
+    let sC= h.cloud<25?20 : h.cloud<=60?8:0; if(!h.night) sC*=.5; s+=sC;
+    if(h.vis!=null){ s+= h.vis<1000?20 : h.vis<3000?10 : h.vis<6000?4:0; if(h.vis<3000) why.push(['w_vis',(h.vis/1000).toFixed(1)+' km']); }
+    if(h.rh>=97) s+=10;
+    if(h.precip>0.5){ s-=15; why.push(['w_rain','']); }
+    if(costero&&h.sst!=null){ const ex=h.td-h.sst; if(ex>0&&w>=8&&w<=30){ s+=lin(ex,0,8,2,30); why.push(['w_adv','+'+ex.toFixed(1)]);} }
+    if(!h.night) s*=.65;
+    s=clamp(Math.round(s),0,100);
+    if(w>20) why.push(['w_wind',w.toFixed(0)]); if(h.cloud>60&&h.night) why.push(['w_cloud',h.cloud+'%']);
+    return {s,why};
+  }
+  const whyTxt=why=>why.map(([k,v])=>(t(k)+' '+v).trim()).join(', ');
+  const clsS=s=>s>=65?'a':s>=40?'m':'b', verS=s=>t(s>=65?'fog':s>=40?'mist':'unlikely');
+  const clsP=p=>p>=.5?'a':p>=.25?'m':'b', verP=p=>t(p>=.5?'fog':p>=.25?'mist':'unlikely');
+  function dayInfo(d){const sr=d.daily.sunrise.map(x=>new Date(x).getTime()), ss=d.daily.sunset.map(x=>new Date(x).getTime());
+    return {isNight:x=>{for(let i=0;i<sr.length;i++) if(x>=sr[i]&&x<ss[i]) return false; return true;}, nextSunrise:sr.find(x=>x>Date.now())};}
+  const sunLabel=ts=>t('sunrise')+' '+new Date(ts).toLocaleDateString(LOC(),{weekday:'long'})+' '+new Date(ts).toLocaleTimeString(LOC(),{hour:'2-digit',minute:'2-digit'});
+
+  document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));
+    document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id===b.dataset.pane));
+    if(b.dataset.pane==='p2'&&!B.ran){tobs(); run2();}
+  }));
+  $('#geo').addEventListener('click',()=>{navigator.geolocation?.getCurrentPosition(p=>{$('#lat').value=p.coords.latitude.toFixed(4);$('#lon').value=p.coords.longitude.toFixed(4);run1();B.ran=false;},e=>$('#st1').textContent=t('nopos')+e.message);});
+
+  /* ===== pestaña 1 ===== */
+  let R1=null;
+  async function run1(){
+    const {lat,lon,costero}=coords(), model=$('#model').value;
+    $('#st1').textContent=t('dl'); let d;
+    try{d=await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=${HOURLY}&daily=sunrise,sunset&timezone=auto&forecast_days=3&models=${model}`,15000); if(d.error) throw new Error(d.reason);}catch(e){$('#st1').textContent=t('err')+e.message;return;}
+    const m=costero?await getSST(lat,lon):null;
+    const H=d.hourly, now=Date.now(), {isNight,nextSunrise}=dayInfo(d), rows=[];
+    for(let i=0;i<H.time.length;i++){const ts=new Date(H.time[i]).getTime(); if(ts<now-3600e3) continue; if(rows.length>=48) break;
+      const r={time:H.time[i],ts,t:H.temperature_2m[i],td:H.dew_point_2m[i],rh:H.relative_humidity_2m[i],wind:H.wind_speed_10m[i],wdir:H.wind_direction_10m[i],cloud:H.cloud_cover[i],cloudL:H.cloud_cover_low[i],vis:H.visibility?H.visibility[i]:null,precip:H.precipitation[i],p:H.surface_pressure[i],night:isNight(ts),sst:sstAt(m,H.time[i]),sun:Math.abs(ts-nextSunrise)<1800e3};
+      if(r.t==null||r.td==null) continue; const sc=score(r,costero); r.s=sc.s; r.why=sc.why; rows.push(r);}
+    R1={rows,nextSunrise,model,elev:d.elevation,lat,lon,nosst:costero&&!m};
+    render1();
+  }
+  function render1(){const {rows,nextSunrise,model,elev,lat,lon,nosst}=R1;
+    $('#st1').textContent=`${model} · ${lat.toFixed(4)}, ${lon.toFixed(4)} · ${t('elev')} ${elev} m · ${new Date().toLocaleTimeString(LOC())}`+(nosst?t('nossT'):'');
+    cards1(rows,nextSunrise); strip1(rows); chart1(rows); table1(rows);}
+  function cards1(rows,sunrise){
+    const n6=rows.slice(0,6), m6=n6.reduce((a,b)=>b.s>a.s?b:a,n6[0]);
+    const win=rows.filter(r=>r.ts>=sunrise-2.5*3600e3&&r.ts<=sunrise+1.5*3600e3), ms=win.length?win.reduce((a,b)=>b.s>a.s?b:a,win[0]):null;
+    const tonight=rows.filter(r=>r.night&&r.ts<sunrise+3600e3), md=tonight.length?tonight.reduce((a,b)=>(b.t-b.td)<(a.t-a.td)?b:a,tonight[0]):null;
+    const card=(eb,s,when,why)=>`<div class="card"><div class="eyebrow">${eb}</div><div class="big v-${clsS(s)}">${s}</div><div class="verdict">${verS(s)}</div><div class="when">${when}</div><div class="why">${why}</div></div>`;
+    let h=card(t('next6'),m6.s,t('max_at')+' '+fmtD(m6.time),whyTxt(m6.why));
+    if(ms) h+=card(sunLabel(sunrise),ms.s,t('window')+' '+fmtH(ms.time),whyTxt(ms.why));
+    if(md) h+=`<div class="card"><div class="eyebrow">${t('mindt')}</div><div class="big">${(md.t-md.td).toFixed(1)}<span style="font-size:18px"> °C</span></div><div class="verdict">T ${md.t.toFixed(1)} °C · Td ${md.td.toFixed(1)} °C</div><div class="when">${t('at')} ${fmtD(md.time)} · ${t('wind')} ${md.wind.toFixed(0)} km/h · ${t('clouds')} ${md.cloud}%</div><div class="why">${md.sst!=null?'SST '+md.sst.toFixed(1)+' °C · ':''}${t('pressure')} ${md.p.toFixed(0)} hPa</div></div>`;
+    $('#cards1').innerHTML=h;
+  }
+  function strip1(rows){$('#strip').innerHTML=rows.map(r=>`<div class="hour ${r.night?'night':''} ${r.sun?'sun':''}" title="${fmtD(r.time)} · ${r.s} · ${whyTxt(r.why)}"><div class="bar"><span class="${clsS(r.s)}" style="height:${r.s}%"></span></div><div class="t">${fmtH(r.time).slice(0,2)}</div></div>`).join('');}
+  function chart1(rows){
+    const W=1000,Hh=300,pl=44,pr=44,pt=16,pb=30,n=rows.length,x=i=>pl+(W-pl-pr)*i/(n-1);
+    const ts=rows.flatMap(r=>[r.t,r.td]), ymin=Math.floor(Math.min(...ts))-1, ymax=Math.ceil(Math.max(...ts))+1, y=v=>pt+(Hh-pt-pb)*(1-(v-ymin)/(ymax-ymin));
+    const wmax=Math.max(20,Math.ceil(Math.max(...rows.map(r=>r.wind))/10)*10), yw=v=>pt+(Hh-pt-pb)*(1-v/wmax);
+    const path=(k,f)=>rows.map((r,i)=>(i?'L':'M')+x(i).toFixed(1)+','+f(r[k]).toFixed(1)).join(' ');
+    let g='';
+    rows.forEach((r,i)=>{const x0=x(Math.max(i-.5,0)),x1=x(Math.min(i+.5,n-1)); if(r.night) g+=`<rect x="${x0}" y="${pt}" width="${x1-x0}" height="${Hh-pt-pb}" fill="#e3e8ec"/>`; if(r.t-r.td<2) g+=`<rect x="${x0}" y="${pt}" width="${x1-x0}" height="${Hh-pt-pb}" fill="#d9a0a0" opacity="${r.t-r.td<1?.55:.3}"/>`;});
+    for(let v=ymin;v<=ymax;v+=Math.max(1,Math.round((ymax-ymin)/6))) g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}" stroke="#eceff2"/><text x="${pl-6}" y="${y(v)+4}" font-size="10" text-anchor="end" fill="#55636d" font-family="IBM Plex Mono">${v}</text>`;
+    for(let v=0;v<=wmax;v+=10) g+=`<text x="${W-pr+6}" y="${yw(v)+4}" font-size="10" fill="#b8862b" font-family="IBM Plex Mono">${v}</text>`;
+    rows.forEach((r,i)=>{if(i%6===0) g+=`<text x="${x(i)}" y="${Hh-10}" font-size="10" text-anchor="middle" fill="#55636d" font-family="IBM Plex Mono">${fmtH(r.time)}</text>`; if(r.sun) g+=`<line x1="${x(i)}" x2="${x(i)}" y1="${pt}" y2="${Hh-pb}" stroke="#8c4a3a" stroke-dasharray="3 3"/>`;});
+    $('#chart1').innerHTML=`<svg viewBox="0 0 ${W} ${Hh}" role="img">${g}<path d="${path('wind',yw)}" fill="none" stroke="#b8862b" stroke-width="1.3"/><path d="${path('t',y)}" fill="none" stroke="#1c262e" stroke-width="2"/><path d="${path('td',y)}" fill="none" stroke="#3e6d8a" stroke-width="2"/></svg>`;
+  }
+  function table1(rows){
+    $('#tabla1').innerHTML='<tr>'+t('th1').map(h=>'<th>'+h+'</th>').join('')+'</tr>'+rows.map(r=>`<tr class="${r.sun?'sun':''}"><td>${fmtD(r.time)}${r.night?'':' ☼'}</td><td><span class="tag ${clsS(r.s)}">${r.s}</span></td><td>${r.t.toFixed(1)}</td><td>${r.td.toFixed(1)}</td><td>${(r.t-r.td).toFixed(1)}</td><td>${r.rh}%</td><td>${r.wind.toFixed(0)}</td><td>${r.wdir}°</td><td>${r.cloud}%</td><td>${r.cloudL}%</td><td>${r.vis!=null?(r.vis/1000).toFixed(1):'–'}</td><td>${r.sst!=null?r.sst.toFixed(1):'–'}</td><td>${r.p!=null?r.p.toFixed(0):'–'}</td></tr>`).join('');
+  }
+  $('#go1').addEventListener('click',run1);
+
+  /* ===== pestaña 2 ===== */
+  const MODELS=[{id:'icon_seamless',name:'ICON',on:true},{id:'gfs_seamless',name:'GFS',on:true},{id:'meteofrance_seamless',name:'AROME/ARPEGE',on:true},{id:'ecmwf_ifs025',name:'ECMWF',on:true},{id:'ukmo_seamless',name:'UKMO',on:true},{id:'gem_seamless',name:'GEM',on:false},{id:'knmi_seamless',name:'KNMI',on:false}];
+  const COL=['#1c262e','#3e6d8a','#b8862b','#6f8f3a','#8c4a3a','#7a5ea8','#2f9c8a'];
+  const PI0=0.12,A0=1.2,B0=8.8,LAMBDA=0.7,TH=55,KAP=12,TIMEOUT=12000;
+  const p_of=s=>clamp(sig((s-TH)/KAP),0.005,0.995);
+  const B={ran:false,last:null};
+  let store={obs:[],snap:{}}; try{const raw=localStorage.getItem('niebla_bayes'); if(raw) store=JSON.parse(raw);}catch(e){} if(!store.snap) store.snap={}; if(!store.obs) store.obs=[];
+  const isoLocal=d=>{const z=new Date(d); z.setMinutes(z.getMinutes()-z.getTimezoneOffset()); return z.toISOString().slice(0,10);};
+  const nightDate=sunrise=>isoLocal(sunrise-12*3600e3);
+  const save=()=>{try{localStorage.setItem('niebla_bayes',JSON.stringify(store));}catch(e){}};
+  try{const sel=JSON.parse(localStorage.getItem('niebla_models')||'null'); if(sel) MODELS.forEach(m=>m.on=sel.includes(m.id));}catch(e){}
+  function mlist(){$('#mlist').innerHTML=MODELS.map(m=>`<label><input type="checkbox" data-id="${m.id}" ${m.on?'checked':''}> ${m.name} <span class="st" id="st_${m.id}"></span></label>`).join('');
+    document.querySelectorAll('#mlist input').forEach(c=>c.addEventListener('change',()=>{MODELS.find(m=>m.id===c.dataset.id).on=c.checked; try{localStorage.setItem('niebla_models',JSON.stringify(MODELS.filter(m=>m.on).map(m=>m.id)));}catch(e){}}));}
+  mlist();
+  const setSt=(id,txt,k)=>{const e=$('#st_'+id); if(e){e.textContent=txt;e.className='st '+(k||'');}};
+  function weights(){const ll={}; MODELS.forEach(m=>ll[m.id]=0);
+    store.obs.forEach(o=>MODELS.forEach(m=>{const p=o.p&&o.p[m.id]; if(p==null) return; ll[m.id]+=o.y*Math.log(p)+(1-o.y)*Math.log(1-p);}));
+    const mx=Math.max(...MODELS.map(m=>ll[m.id])); let w={},Z=0; MODELS.forEach(m=>{w[m.id]=Math.exp(LAMBDA*(ll[m.id]-mx));Z+=w[m.id];}); MODELS.forEach(m=>w[m.id]/=Z); return {w,ll};}
+  function prior(){let a=A0,b=B0; store.obs.forEach(o=>{a+=o.y;b+=1-o.y;}); return {a,b,pi:a/(a+b)};}
+  async function run2(){
+    const {lat,lon,costero}=coords(), alpha=+$('#alpha').value||1, sel=MODELS.filter(m=>m.on);
+    if(!sel.length){$('#st2').textContent=t('sel1');return;}
+    B.ran=true; $('#st2').textContent=t('dl_n',{n:sel.length}); MODELS.forEach(m=>setSt(m.id,'')); sel.forEach(m=>setSt(m.id,'…'));
+    const t0=performance.now(), sstP=costero?getSST(lat,lon):Promise.resolve(null);
+    const results=await Promise.allSettled(sel.map(m=>fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,wind_speed_10m,cloud_cover,visibility,precipitation&daily=sunrise,sunset&timezone=auto&forecast_days=2&models=${m.id}`,TIMEOUT)
+      .then(d=>{if(d.error) throw new Error(d.reason); setSt(m.id,((performance.now()-t0)/1000).toFixed(1)+' s','ok'); return d;})
+      .catch(e=>{setSt(m.id,t(e.name==='AbortError'?'timeout':'error'),'ko'); throw e;})));
+    const sstM=await sstP, data={}; let ref=null;
+    results.forEach((r,k)=>{if(r.status==='fulfilled'){data[sel[k].id]=r.value; if(!ref) ref=r.value;}});
+    const act=sel.filter(m=>data[m.id]);
+    if(!act.length){$('#st2').textContent=t('none');return;}
+    const {isNight,nextSunrise}=dayInfo(ref), now=Date.now(), rows=[], times=ref.hourly.time;
+    for(let i=0;i<times.length;i++){const ts=new Date(times[i]).getTime(); if(ts<now-3600e3) continue; if(rows.length>=36) break;
+      const r={time:times[i],ts,night:isNight(ts),sun:Math.abs(ts-nextSunrise)<1800e3,per:{},sst:sstAt(sstM,times[i])};
+      act.forEach(mo=>{const H=data[mo.id].hourly, j=H.time.indexOf(times[i]); if(j<0) return;
+        const h={t:H.temperature_2m[j],td:H.dew_point_2m[j],rh:H.relative_humidity_2m[j],wind:H.wind_speed_10m[j],cloud:H.cloud_cover[j],vis:H.visibility?H.visibility[j]:null,precip:H.precipitation[j],night:r.night,sst:r.sst};
+        if(h.t==null||h.td==null||h.wind==null||h.cloud==null) return; const sc=score(h,costero); r.per[mo.id]={...h,s:sc.s,why:sc.why,p:p_of(sc.s)};});
+      rows.push(r);}
+    const {w,ll}=weights(), pr=prior(), Zw=act.reduce((a,mo)=>a+w[mo.id],0), wa={}; act.forEach(mo=>wa[mo.id]=w[mo.id]/Zw);
+    rows.forEach(r=>{let z=logit(pr.pi), ps=[]; act.forEach(mo=>{const q=r.per[mo.id]; if(!q) return; z+=alpha*wa[mo.id]*(logit(q.p)-logit(PI0)); ps.push(q.p);}); r.post=ps.length?sig(z):pr.pi; r.min=ps.length?Math.min(...ps):0; r.max=ps.length?Math.max(...ps):0;});
+    B.last={rows,act,wa,ll,pr,nextSunrise,alpha,lat,lon,fail:sel.length-act.length,secs:((performance.now()-t0)/1000).toFixed(1),nosst:costero&&!sstM};
+    // congelar la previsión del próximo amanecer
+    const win0=sunWin(); if(win0.length){ const p={}; act.forEach(mo=>{const c=win0.filter(r=>r.per[mo.id]); p[mo.id]=c.length?Math.max(...c.map(r=>r.per[mo.id].p)):null;});
+      const nd=nightDate(nextSunrise); store.snap[nd]={p,post:Math.max(...win0.map(r=>r.post)),at:new Date().toISOString(),lat,lon,n:act.length}; save();
+      const ex=store.obs.find(o=>o.date===nd&&!o.p); if(ex){ex.p=p; ex.post=store.snap[nd].post; save();} }
+    render2();
+  }
+  function render2(){const L=B.last, nd=nightDate(L.nextSunrise), sn=store.snap[nd]; $('#st2').textContent=t('fused',{k:L.act.length})+(L.fail?t('failed',{f:L.fail}):'')+` · ${L.secs} s · ${L.lat.toFixed(4)}, ${L.lon.toFixed(4)}`+(L.nosst?t('nossT'):'')+(sn?' · '+t('snap_info',{d:nd,n:sn.n,h:new Date(sn.at).toLocaleTimeString(LOC(),{hour:'2-digit',minute:'2-digit'})}):''); cards2(); chart2(); tsun(); tw(); tobs();}
+  const sunWin=()=>{const {rows,nextSunrise}=B.last; return rows.filter(r=>r.ts>=nextSunrise-2.5*3600e3&&r.ts<=nextSunrise+1.5*3600e3);};
+  function cards2(){
+    const {rows,nextSunrise,act,alpha}=B.last, n6=rows.slice(0,6), m6=n6.reduce((a,b)=>b.post>a.post?b:a,n6[0]), win=sunWin(), ms=win.length?win.reduce((a,b)=>b.post>a.post?b:a,win[0]):null;
+    const card=(eb,r,when)=>`<div class="card"><div class="eyebrow">${eb}</div><div class="big v-${clsP(r.post)}">${(100*r.post).toFixed(0)}<span style="font-size:18px"> %</span></div><div class="verdict">${verP(r.post)}</div><div class="when">${when} · ${t('range')} ${(100*r.min).toFixed(0)} – ${(100*r.max).toFixed(0)} %</div><div class="why">${act.map(mo=>r.per[mo.id]?mo.name+' '+(100*r.per[mo.id].p).toFixed(0)+'%':'').filter(Boolean).join(' · ')}</div></div>`;
+    let h=card(t('next6'),m6,t('max_at')+' '+fmtD(m6.time));
+    if(ms){h+=card(sunLabel(nextSunrise),ms,t('max_at')+' '+fmtH(ms.time));
+      const ps=act.map(mo=>ms.per[mo.id]?.p).filter(x=>x!=null), mean=ps.reduce((a,b)=>a+b,0)/ps.length, sd=Math.sqrt(ps.reduce((a,b)=>a+(b-mean)**2,0)/ps.length);
+      h+=`<div class="card"><div class="eyebrow">${t('disp')}</div><div class="big">${(100*sd).toFixed(0)}<span style="font-size:18px"> pp</span></div><div class="verdict">${t(sd<.1?'agree_h':sd<.2?'agree_m':'agree_l')}</div><div class="when">${t('mean')} ${(100*mean).toFixed(0)} % · α = ${alpha}</div><div class="why">${t('disp_note')}</div></div>`;}
+    $('#cards2').innerHTML=h;
+  }
+  function chart2(){
+    const {rows,act,wa}=B.last, W=1000,Hh=320,pl=40,pr=16,pt=14,pb=30,n=rows.length, x=i=>pl+(W-pl-pr)*i/(n-1), y=p=>pt+(Hh-pt-pb)*(1-p);
+    let g=''; rows.forEach((r,i)=>{const x0=x(Math.max(i-.5,0)),x1=x(Math.min(i+.5,n-1)); if(r.night) g+=`<rect x="${x0}" y="${pt}" width="${x1-x0}" height="${Hh-pt-pb}" fill="#e3e8ec"/>`;});
+    let up='',dn=''; rows.forEach((r,i)=>{up+=(i?'L':'M')+x(i).toFixed(1)+','+y(r.max).toFixed(1)+' ';}); for(let i=n-1;i>=0;i--) dn+='L'+x(i).toFixed(1)+','+y(rows[i].min).toFixed(1)+' ';
+    g+=`<path d="${up}${dn}Z" fill="#9fb0bd" opacity=".25"/>`;
+    for(let v=0;v<=1;v+=.25) g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}" stroke="#eceff2"/><text x="${pl-6}" y="${y(v)+4}" font-size="10" text-anchor="end" fill="#55636d" font-family="IBM Plex Mono">${100*v}</text>`;
+    act.forEach(mo=>{const c=COL[MODELS.indexOf(mo)%COL.length]; let d='',first=true; rows.forEach((r,i)=>{if(!r.per[mo.id]) return; d+=(first?'M':'L')+x(i).toFixed(1)+','+y(r.per[mo.id].p).toFixed(1)+' '; first=false;}); g+=`<path d="${d}" fill="none" stroke="${c}" stroke-width="1.2" opacity=".75"/>`;});
+    g+=`<path d="${rows.map((r,i)=>(i?'L':'M')+x(i).toFixed(1)+','+y(r.post).toFixed(1)).join(' ')}" fill="none" stroke="#1c262e" stroke-width="3"/>`;
+    rows.forEach((r,i)=>{if(i%6===0) g+=`<text x="${x(i)}" y="${Hh-10}" font-size="10" text-anchor="middle" fill="#55636d" font-family="IBM Plex Mono">${fmtH(r.time)}</text>`; if(r.sun) g+=`<line x1="${x(i)}" x2="${x(i)}" y1="${pt}" y2="${Hh-pb}" stroke="#8c4a3a" stroke-dasharray="3 3"/>`;});
+    $('#chart2').innerHTML=`<svg viewBox="0 0 ${W} ${Hh}" role="img">${g}</svg>`;
+    $('#legend2').innerHTML=`<i style="background:#1c262e;height:4px"></i>${t('post_leg')} <i style="background:#9fb0bd;height:8px;opacity:.5"></i>${t('range_leg')} `+act.map(mo=>`<i style="background:${COL[MODELS.indexOf(mo)%COL.length]}"></i>${mo.name} (w=${wa[mo.id].toFixed(2)})`).join('');
+  }
+  function tsun(){const {act}=B.last, win=sunWin(); if(!win.length){$('#tsun').innerHTML='';return;}
+    let h='<tr>'+t('thsun').map(x=>'<th>'+x+'</th>').join('')+'</tr>';
+    act.forEach(mo=>{const c=win.filter(r=>r.per[mo.id]); if(!c.length) return; const best=c.reduce((a,b)=>b.per[mo.id].p>a.per[mo.id].p?b:a), q=best.per[mo.id];
+      h+=`<tr><td>${mo.name}</td><td><span class="tag ${clsP(q.p)}">${(100*q.p).toFixed(0)}%</span></td><td>${fmtH(best.time)}</td><td>${(q.t-q.td).toFixed(1)}</td><td>${q.rh}%</td><td>${q.wind.toFixed(0)}</td><td>${q.cloud}%</td><td>${q.vis!=null?(q.vis/1000).toFixed(1):'–'}</td><td style="text-align:left">${whyTxt(q.why)}</td></tr>`;});
+    $('#tsun').innerHTML=h;}
+  function tw(){const {act,wa,ll,pr}=B.last; let h='<tr>'+t('thw').map(x=>'<th>'+x+'</th>').join('')+'</tr>';
+    act.forEach(mo=>h+=`<tr><td>${mo.name}</td><td>${wa[mo.id].toFixed(3)}</td><td><span class="wbar" style="width:${(120*wa[mo.id]).toFixed(0)}px"></span></td><td>${ll[mo.id].toFixed(2)}</td></tr>`);
+    $('#tw').innerHTML=h; $('#priorinfo').textContent=t('prior_info',{a:pr.a.toFixed(1),b:pr.b.toFixed(1),pi:(100*pr.pi).toFixed(1),n:store.obs.length});}
+  function tobs(){let h='<tr>'+t('thobs').map(x=>'<th>'+x+'</th>').join('')+MODELS.map(m=>'<th>'+m.name+'</th>').join('')+'<th>'+t('posterior')+'</th><th></th></tr>';
+    store.obs.slice().reverse().forEach((o,k)=>{const idx=store.obs.length-1-k; h+=`<tr><td>${o.date}</td><td>${o.y}</td>`+MODELS.map(m=>'<td>'+(o.p&&o.p[m.id]!=null?(100*o.p[m.id]).toFixed(0)+'%':'–')+'</td>').join('')+`<td>${o.post!=null?(100*o.post).toFixed(0)+'%':'<span style="color:var(--warn)">'+t('pending')+'</span>'}</td><td><button class="small ghost" data-i="${idx}">${t('del')}</button></td></tr>`;});
+    $('#tobs').innerHTML=h; document.querySelectorAll('#tobs button').forEach(b=>b.addEventListener('click',()=>{store.obs.splice(+b.dataset.i,1);save(); if(B.last) render2(); else tobs();}));}
+  $('#saveobs').addEventListener('click',()=>{
+    const date=$('#odate').value; if(!date) return; const y=+$('#oval').value, sn=store.snap[date];
+    const ex=store.obs.findIndex(o=>o.date===date);
+    const rec={date,y,p:sn?sn.p:null,post:sn?sn.post:null,lat:sn?sn.lat:null,lon:sn?sn.lon:null};
+    if(ex>=0){ store.obs[ex].y=y; if(!store.obs[ex].p&&sn){store.obs[ex].p=sn.p;store.obs[ex].post=sn.post;} } else store.obs.push(rec);
+    save();
+    const msg=sn?t('obs_saved',{d:date}):t('no_snap',{d:date});
+    if(B.last){ render2(); $('#st2').textContent=msg+' · '+$('#st2').textContent; } else { $('#st2').textContent=msg; tobs(); }
+  });
+  $('#exp').addEventListener('click',()=>{const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(store,null,1)],{type:'application/json'})); a.download='niebla_observaciones.json'; a.click();});
+  $('#imp').addEventListener('change',e=>{const f=e.target.files[0]; if(!f) return; f.text().then(x=>{try{const s=JSON.parse(x); if(Array.isArray(s.obs)){store=s; if(!store.snap) store.snap={}; save(); run2();}}catch(err){$('#st2').textContent=t('badjson');}});});
+  $('#clear').addEventListener('click',()=>{if(confirm(t('confirm'))){store={obs:[],snap:{}};save();run2();}});
+  $('#go2').addEventListener('click',run2);
+  {const now=new Date(); $('#odate').value=isoLocal(now.getHours()<14?now.getTime()-86400e3:now.getTime());}
+
+  APP_READY=true; applyLang(); run1();
+})();
+</script>
+</body>
+</html>

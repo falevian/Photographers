@@ -13,14 +13,15 @@ Photography and light-physics tools that run entirely in the browser.
 
 ## Español
 
-Veintiséis documentos que resuelven cuestiones fotográficas con el modelo físico o estadístico
+Veintiocho documentos que resuelven cuestiones fotográficas con el modelo físico o estadístico
 delante: simuladores, métricas, catálogos, scripts de procesado y su documentación.
 
 Todo el cálculo ocurre en el navegador. No hay servidor, ni cuenta, ni telemetría, y cada
-página es **un solo archivo HTML** que funciona también sin conexión una vez cargado. La
-única dependencia externa es d3, y solo en las páginas de red. Las herramientas de
-revelado y procesado son scripts de Python que se ejecutan en tu ordenador, no en el
-navegador; solo requieren numpy.
+página es **un solo archivo HTML** que funciona también sin conexión una vez cargado —
+con una excepción declarada: la predicción de niebla consulta Open-Meteo y sin red
+carga pero no puede predecir. Por lo demás, la única dependencia externa es d3, y solo
+en las páginas de red. Las herramientas de revelado y procesado son scripts de Python
+que se ejecutan en tu ordenador, no en el navegador; solo requieren numpy.
 
 Cada página tiene un conmutador **ES / EN** arriba a la derecha. La elección se recuerda de
 una página a otra y puede forzarse añadiendo `?lang=es` o `?lang=en` a la dirección. Sin
@@ -33,6 +34,7 @@ elección previa se sigue el idioma del navegador.
 | [`simulador-eclipse-coruna.html`](simulador-eclipse-coruna.html) | Encuadre y exposición del eclipse total del 12 de agosto de 2026: si la corona te cabe en el encuadre, horquilla de exposición por fases con la fotometría de Espenak, extinción atmosférica, trípode frente a seguimiento, y ficha de campo imprimible. | 130 KB |
 | [`simulador-flash.html`](simulador-flash.html) | Banco óptico de flash. La dureza de una sombra la fija el tamaño angular de la fuente vista desde el sujeto: sombras, caída de luz por número guía, vencer al sol y balance con la luz ambiente. | 53 KB |
 | [`programa-camara.html`](programa-camara.html) | La automática no es neutral: contiene un programa. Dibuja la línea que sigue —tiempo, diafragma e ISO a cada nivel de luz—, superpone el borrón y la profundidad de campo que tu intención exigía, y señala dónde chocan. Nace de la sección Flusser del ensayo del marco. | 52 KB |
+| [`niebla.html`](niebla.html) | Si la niebla se va a formar mañana al amanecer. Índice horario a 48 h sobre la convergencia de temperatura y punto de rocío, y una fusión bayesiana de cinco modelos que reajusta sus pesos con tus propias observaciones. La previsión se congela automáticamente cada noche, así que la observación de la mañana se compara con lo que se predijo la víspera y no con nada posterior. Única página que necesita conexión: los datos son de Open-Meteo. Manual: [`manual-niebla.html`](manual-niebla.html). | 47 KB |
 
 ### El objetivo y el plano nítido
 
@@ -91,6 +93,7 @@ la página es su manual; el código está en [`scripts/`](scripts/).
 | [`guia-simulador.html`](guia-simulador.html) | Guía del banco óptico de flash: qué hace cada control y en qué fórmulas se apoya. |
 | [`manual-flash-ttl-q3.html`](manual-flash-ttl-q3.html) | Flash TTL con la Leica Q3 43: cómo mide, cómo sincroniza y por qué a potencia plena el pulso no cabe entero en la ventana de 1/2000 s. Con dos calculadoras. |
 | [`manual-telemetro-m11.html`](manual-telemetro-m11.html) | Manual del simulador de telémetro, con el modelo físico, la verificación numérica y un anexo ilustrado sobre el disco de Airy. Seis figuras incrustadas. |
+| [`manual-niebla.html`](manual-niebla.html) | Manual de la predicción de niebla: el índice horario, la fusión bayesiana de los cinco modelos, el registro de observaciones que la entrena, y dónde se guarda ese registro. |
 | [`manual-stack-sensor.html`](manual-stack-sensor.html) | Manual del simulador del stack: el modelo de trazado, cómo se leen la mancha RMS y la MTF, y qué es heurístico y qué no. |
 | [`manual-medidas.html`](manual-medidas.html) | Referencia de todas las medidas del análisis de centrado: qué es cada una, cómo se define, cómo se interpreta y hasta dónde llega. |
 
@@ -144,12 +147,14 @@ python3 -m http.server 8000
 
 ## English
 
-Twenty-six documents that settle photographic questions with the physical or statistical
+Twenty-eight documents that settle photographic questions with the physical or statistical
 model in plain sight: simulators, metrics, catalogues, processing scripts and their
 documentation.
 
 Every calculation happens in the browser. There is no server, no account and no telemetry,
-and each page is **a single HTML file** that keeps working offline once loaded. The only
+and each page is **a single HTML file** that keeps working offline once loaded — with one
+declared exception: the fog forecast queries Open-Meteo and, without a connection, loads
+but cannot forecast. The only
 external dependency is d3, and only on the network pages. The developing and processing
 tools are Python scripts that run on your own machine rather than in the browser; they
 require only numpy.
@@ -165,6 +170,7 @@ address. With no prior choice, the browser's language is followed.
 | [`simulador-eclipse-coruna.html`](simulador-eclipse-coruna.html) | Framing and exposure for the total solar eclipse of 12 August 2026: whether the corona fits your frame, the exposure bracket phase by phase using Espenak's photometry, atmospheric extinction, tripod against tracking, and a printable field sheet. | 130 KB |
 | [`simulador-flash.html`](simulador-flash.html) | Flash optical bench. The hardness of a shadow is set by the angular size of the source as seen from the subject: shadows, light falloff from the guide number, overpowering the sun, and balance with ambient light. | 53 KB |
 | [`programa-camara.html`](programa-camara.html) | The automatic mode is not neutral: it carries a program. Draws the line it follows — shutter, aperture and ISO at each light level — overlays the blur and depth of field your intent demanded, and marks where they collide. Born of the essay's Flusser section. | 52 KB |
+| [`niebla.html`](niebla.html) | Whether fog will form at tomorrow's sunrise. A 48-hour hourly index on the convergence of temperature and dew point, plus a Bayesian fusion of five models that readjusts its weights from your own observations. The forecast is frozen automatically each night, so the morning's observation is compared against what was predicted the evening before and never against anything later. The only page that needs a connection: the data comes from Open-Meteo. Manual: [`manual-niebla.html`](manual-niebla.html). | 47 KB |
 
 ### The lens and the plane of focus
 
@@ -223,6 +229,7 @@ the page is its manual; the code lives in [`scripts/`](scripts/).
 | [`guia-simulador.html`](guia-simulador.html) | Guide to the flash optical bench: what each control does and which formulas it rests on. |
 | [`manual-flash-ttl-q3.html`](manual-flash-ttl-q3.html) | TTL flash with the Leica Q3 43: how it meters, how it syncs, and why at full power the pulse does not fit inside the 1/2000 s window. With two calculators. |
 | [`manual-telemetro-m11.html`](manual-telemetro-m11.html) | Manual for the rangefinder simulator, with the physical model, the numerical verification and an illustrated annex on the Airy disc. Six embedded figures. |
+| [`manual-niebla.html`](manual-niebla.html) | Manual for the fog forecast: the hourly index, the Bayesian fusion of the five models, the observation log that trains it, and where that log is kept. |
 | [`manual-stack-sensor.html`](manual-stack-sensor.html) | Manual for the stack simulator: the tracing model, how to read the RMS spot and the MTF, and what is heuristic and what is not. |
 | [`manual-medidas.html`](manual-medidas.html) | Reference for every measure in the subject-placement analysis: what each one is, how it is defined, how to read it and how far it goes. |
 
