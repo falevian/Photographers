@@ -6,6 +6,14 @@
 <title>Niebla para fotografía</title>
 <meta name="author" content="Rafael Vida">
 <meta name="description" content="Herramienta de predicción de niebla para fotografía: índice físico hora a hora y fusión bayesiana multimodelo sobre datos de Open-Meteo, con registro local de observaciones.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><defs><linearGradient id='c' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='%232b3844'/><stop offset='1' stop-color='%23161e25'/></linearGradient></defs><rect width='180' height='180' rx='34' fill='url(%23c)'/><circle cx='90' cy='92' r='44' fill='%23e8ad3f'/><g fill='%23b2c2ce'><rect x='-6' y='58' width='192' height='11' rx='5.5' opacity='.42'/><rect x='-10' y='80' width='200' height='15' rx='7.5' opacity='.72'/><rect x='-6' y='104' width='192' height='13' rx='6.5' opacity='.86'/><rect x='6' y='126' width='168' height='11' rx='5.5' opacity='.58'/><rect x='30' y='146' width='120' height='9' rx='4.5' opacity='.34'/></g></svg>">
+<link rel="apple-touch-icon" href="niebla-icon-180.png">
+<meta name="theme-color" content="#e6eaee">
+<!-- Pantalla de inicio de iOS: se abre a pantalla completa, sin barra de Safari. -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Niebla">
 <script>
 /* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
 (function(){
@@ -193,14 +201,16 @@
 (function(){
   var KEY="pn-lang";
   var META={
-    es:{ title:"Niebla para fotografía",
+    es:{ title:"Niebla para fotografía", app:"Niebla",
          desc:"Herramienta de predicción de niebla para fotografía: índice físico hora a hora y fusión bayesiana multimodelo sobre datos de Open-Meteo, con registro local de observaciones." },
-    en:{ title:"Fog for photography",
+    en:{ title:"Fog for photography", app:"Fog",
          desc:"Fog forecasting tool for photography: hourly physical index and multi-model Bayesian fusion over Open-Meteo data, with a local observation log." }
   };
   function apply(l){
     document.documentElement.lang=l;
     document.title=META[l].title;
+    var a=document.querySelector('meta[name="apple-mobile-web-app-title"]');
+    if(a) a.setAttribute("content",META[l].app);
     var d=document.querySelector('meta[name="description"]');
     if(d) d.setAttribute("content",META[l].desc);
     ["title","ph","alt","aria"].forEach(function(k){
