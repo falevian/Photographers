@@ -199,6 +199,7 @@
       <div><h2 data-i18n="h_night"></h2><div class="wrap"><table id="tnight"></table></div></div>
       <div><h2 data-i18n="h_w"></h2><div class="wrap"><table id="tw"></table></div><p class="note" id="priorinfo"></p></div>
     </section>
+    <section><h2 data-i18n="h_cal"></h2><div id="calib" style="max-width:560px"></div><p class="note" id="calread"></p></section>
     <section><h2 data-i18n="h_obs"></h2>
       <div class="panel">
         <div class="obs-row">
@@ -278,6 +279,7 @@
     usable:'Noche útil probable',maybe:'Noche útil posible',unlikely:'Noche útil improbable',
     th1:['Hora','Índice','Nubes','Bajas','Medias','Altas','HR','T−Td','V10','V250','AOD','Luna','Sol°'],thnight:['Modelo','P útil','s₃','nubes','altas','HR','V250','tramo'],thw:['Modelo','peso w','','log‑veros.'],thobs:['Noche','y'],posterior:'posterior',del:'eliminar',
     post_leg:'posterior',range_leg:'rango',prior_info:'Prior: Beta({a}, {b}), media {pi} % sobre {n} noches registradas. Calibración p = σ((s₃ − 58)/12), π₀ = 0.35.',
+    h_cal:'Calibración (diagrama de fiabilidad)',cal_empty:'Se dibuja cuando el registro tenga noches con previsión congelada.',cal_few:'Aún hay pocas noches para leer la calibración (n={n}; orientativo a partir de 10, fiable a partir de 30).',cal_thin:'Los grupos extremos (0–25 % y 75–100 %) tienen pocas noches (n={n}); todavía no hay señal clara sobre α.',cal_mixed:'Los grupos se contradicen entre sí: sin señal clara sobre α; déjalo como está y sigue registrando.',cal_up:'Las frecuencias reales son más extremas que el posterior: sube α.',cal_down:'Las frecuencias reales son menos extremas que el posterior: baja α.',cal_ok:'La calibración es razonable: deja α como está.',cal_diag:'calibración perfecta',cal_x:'posterior predicho (%)',cal_y:'frecuencia real de noches útiles (%)',
     sel1:'Selecciona al menos un modelo.',none:'Ningún modelo respondió a tiempo.',fused:'{k} modelos fusionados',failed:', {f} sin respuesta',first:'Calcula primero.',badjson:'JSON no válido',confirm:'¿Borrar todo el registro de observaciones?',
     w_cloud:'nubes',w_high:'altas',w_aod:'AOD',w_rh:'HR',w_jet:'V250',w_wind:'viento',w_dew:'rocío',w_moon:'Luna',timeout:'timeout',error:'error'},
   en:{m_new:"New moon",m_wax_cres:"Waxing crescent",m_first:"First quarter",m_wax_gib:"Waxing gibbous",m_full:"Full moon",m_wan_gib:"Waning gibbous",m_last:"Last quarter",m_wan_cres:"Waning crescent",fog_link:'Fog',manual:'Manual',title:'Sky for astrophotography',subtitle:'Tab 1: night‑sky quality index from one model (cloud layers, transparency, seeing, humidity, Moon). Tab 2: Bayesian fusion of several models that learns from your nights. Open‑Meteo data, no API key.',
@@ -297,6 +299,7 @@
     usable:'Usable night likely',maybe:'Usable night possible',unlikely:'Usable night unlikely',
     th1:['Time','Index','Clouds','Low','Mid','High','RH','T−Td','W10','W250','AOD','Moon','Sun°'],thnight:['Model','P usable','s₃','clouds','high','RH','W250','stretch'],thw:['Model','weight w','','log‑lik.'],thobs:['Night','y'],posterior:'posterior',del:'delete',
     post_leg:'posterior',range_leg:'range',prior_info:'Prior: Beta({a}, {b}), mean {pi} % over {n} logged nights. Calibration p = σ((s₃ − 58)/12), π₀ = 0.35.',
+    h_cal:'Calibration (reliability diagram)',cal_empty:'Drawn once the log has nights with a frozen forecast.',cal_few:'Too few nights yet to read calibration (n={n}; indicative from 10, reliable from 30).',cal_thin:'The extreme groups (0–25 % and 75–100 %) hold few nights (n={n}); no clear signal on α yet.',cal_mixed:'The groups contradict each other: no clear signal on α; leave it as it is and keep logging.',cal_up:'Actual frequencies are more extreme than the posterior: raise α.',cal_down:'Actual frequencies are less extreme than the posterior: lower α.',cal_ok:'Calibration is reasonable: leave α as it is.',cal_diag:'perfect calibration',cal_x:'predicted posterior (%)',cal_y:'actual usable-night frequency (%)',
     sel1:'Select at least one model.',none:'No model answered in time.',fused:'{k} models fused',failed:', {f} without response',first:'Compute first.',badjson:'Invalid JSON',confirm:'Delete the whole observation log?',
     w_cloud:'clouds',w_high:'high',w_aod:'AOD',w_rh:'RH',w_jet:'W250',w_wind:'wind',w_dew:'dew',w_moon:'Moon',timeout:'timeout',error:'error'}
   };
@@ -313,6 +316,7 @@
     /* Los enlaces cruzados son estáticos (niebla.html, manual-astro.html) y el idioma viaja
        por pn-lang; los botones ES/EN los marca el conmutador canónico. */
     if(R1) render1(); if(B.last) render2();
+    calib();
   }
   /* El conmutador canónico avisa por aquí al cambiar de idioma. El flag evita repintar
      antes de que la aplicación esté montada (apply() se invoca también en el arranque). */
@@ -529,7 +533,53 @@ function moonName(phase,illum){
     $('#tw').innerHTML=h; $('#priorinfo').textContent=t('prior_info',{a:pr.a.toFixed(1),b:pr.b.toFixed(1),pi:(100*pr.pi).toFixed(1),n:store.obs.length});}
   function tobs(){let h='<tr>'+t('thobs').map(x=>'<th>'+x+'</th>').join('')+MODELS.map(m=>'<th>'+m.name+'</th>').join('')+'<th>'+t('posterior')+'</th><th></th></tr>';
     store.obs.slice().reverse().forEach((o,k)=>{const idx=store.obs.length-1-k; h+=`<tr><td>${o.date}</td><td>${o.y}</td>`+MODELS.map(m=>'<td>'+(o.p&&o.p[m.id]!=null?(100*o.p[m.id]).toFixed(0)+'%':'–')+'</td>').join('')+`<td>${o.post!=null?(100*o.post).toFixed(0)+'%':'<span style="color:var(--warn)">'+t('pending')+'</span>'}</td><td><button class="small ghost" data-i="${idx}">${t('del')}</button></td></tr>`;});
-    $('#tobs').innerHTML=h; document.querySelectorAll('#tobs button').forEach(b=>b.addEventListener('click',()=>{store.obs.splice(+b.dataset.i,1);save(); if(B.last) render2(); else tobs();}));}
+    $('#tobs').innerHTML=h; document.querySelectorAll('#tobs button').forEach(b=>b.addEventListener('click',()=>{store.obs.splice(+b.dataset.i,1);save(); if(B.last) render2(); else tobs();})); calib();}
+  /* ---------- calibración: diagrama de fiabilidad sobre el registro ---------- */
+  function calBins(){
+    const scored=store.obs.filter(o=>o.post!=null&&o.y!=null);
+    const raw=[[0,.25],[.25,.5],[.5,.75],[.75,1.001]].map(lim=>{
+      const g=scored.filter(o=>o.post>=lim[0]&&o.post<lim[1]);
+      if(!g.length) return null;
+      return {n:g.length,px:g.reduce((u,o)=>u+o.post,0)/g.length,py:g.reduce((u,o)=>u+o.y,0)/g.length};
+    });
+    return {scored,raw,bins:raw.filter(Boolean)};
+  }
+  function calRead(scored,raw,bins){
+    if(scored.length<10) return t('cal_few',{n:scored.length});
+    const nExt=(raw[0]?raw[0].n:0)+(raw[3]?raw[3].n:0);
+    if(nExt<3) return t('cal_thin',{n:nExt});
+    let up=0,dn=0,acc=0,tot=0;
+    bins.forEach(q=>{const sgn=q.px>0.5?1:q.px<0.5?-1:0, d=sgn*(q.py-q.px);
+      acc+=q.n*d; tot+=q.n; if(q.n>=2){ if(d>0.08) up++; else if(d<-0.08) dn++; }});
+    if(up&&dn) return t('cal_mixed');
+    const mean=acc/tot;
+    return mean>0.05?t('cal_up'):mean<-0.05?t('cal_down'):t('cal_ok');
+  }
+  function calib(){
+    const box=$('#calib'), read=$('#calread'); if(!box||!read) return;
+    const {scored,raw,bins}=calBins();
+    if(!scored.length){ box.innerHTML=''; read.textContent=t('cal_empty'); return; }
+    const W=460,Hh=330,pl=48,pr=16,ptop=16,pb=46;
+    const X=p=>pl+(W-pl-pr)*p, Y=p=>ptop+(Hh-ptop-pb)*(1-p);
+    let g='';
+    for(let v=0;v<=1;v+=.25){
+      g+=`<line x1="${X(v).toFixed(1)}" x2="${X(v).toFixed(1)}" y1="${ptop}" y2="${Hh-pb}" stroke="#222b36"/>`
+        +`<line x1="${pl}" x2="${W-pr}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}" stroke="#222b36"/>`
+        +`<text x="${X(v).toFixed(1)}" y="${Hh-pb+14}" font-size="10" text-anchor="middle" fill="#9aa7b5" font-family="IBM Plex Mono">${100*v}</text>`
+        +`<text x="${pl-7}" y="${(Y(v)+3.5).toFixed(1)}" font-size="10" text-anchor="end" fill="#9aa7b5" font-family="IBM Plex Mono">${100*v}</text>`;
+    }
+    g+=`<line x1="${X(0).toFixed(1)}" y1="${Y(0).toFixed(1)}" x2="${X(1).toFixed(1)}" y2="${Y(1).toFixed(1)}" stroke="#3e4c5c" stroke-width="1.5" stroke-dasharray="5 4"/>`
+      +`<text x="${X(.56).toFixed(1)}" y="${(Y(.56)-8).toFixed(1)}" font-size="10" fill="#5a6b7d" font-family="IBM Plex Mono" transform="rotate(-34 ${X(.56).toFixed(1)} ${(Y(.56)-8).toFixed(1)})">${t('cal_diag')}</text>`;
+    const seq=bins.slice().sort((u,q)=>u.px-q.px);
+    if(seq.length>1) g+=`<path d="${seq.map((q,i)=>(i?'L':'M')+X(q.px).toFixed(1)+','+Y(q.py).toFixed(1)).join(' ')}" fill="none" stroke="#6dbb8a" stroke-width="1" opacity=".55"/>`;
+    seq.forEach(q=>{const rr=Math.min(4.5*Math.sqrt(q.n),22);
+      g+=`<circle cx="${X(q.px).toFixed(1)}" cy="${Y(q.py).toFixed(1)}" r="${rr.toFixed(1)}" fill="#6dbb8a" opacity=".85" stroke="#0f1419"/>`
+        +`<text x="${X(q.px).toFixed(1)}" y="${Math.max(Y(q.py)-rr-5,10).toFixed(1)}" font-size="10" text-anchor="middle" fill="#e6eaf0" font-family="IBM Plex Mono">n=${q.n}</text>`;});
+    g+=`<text x="${((pl+W-pr)/2).toFixed(1)}" y="${Hh-6}" font-size="10" text-anchor="middle" fill="#9aa7b5" font-family="IBM Plex Mono">${t('cal_x')}</text>`
+      +`<text x="12" y="${((ptop+Hh-pb)/2).toFixed(1)}" font-size="10" text-anchor="middle" fill="#9aa7b5" font-family="IBM Plex Mono" transform="rotate(-90 12 ${((ptop+Hh-pb)/2).toFixed(1)})">${t('cal_y')}</text>`;
+    box.innerHTML=`<svg viewBox="0 0 ${W} ${Hh}" role="img">${g}</svg>`;
+    read.textContent=calRead(scored,raw,bins);
+  }
   $('#saveobs').addEventListener('click',()=>{
     const date=$('#odate').value; if(!date) return; const y=+$('#oval').value, sn=store.snap[date];
     const ex=store.obs.findIndex(o=>o.date===date);
@@ -538,8 +588,8 @@ function moonName(phase,illum){
     if(B.last){render2(); $('#st2').textContent=msg+' · '+$('#st2').textContent;} else {$('#st2').textContent=msg; tobs();}
   });
   $('#exp').addEventListener('click',()=>{const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(store,null,1)],{type:'application/json'})); a.download='astro_observaciones.json'; a.click();});
-  $('#imp').addEventListener('change',e=>{const f=e.target.files[0]; if(!f) return; f.text().then(x=>{try{const s=JSON.parse(x); if(Array.isArray(s.obs)){store=s; if(!store.snap) store.snap={}; save(); run2();}}catch(err){$('#st2').textContent=t('badjson');}});});
-  $('#clear').addEventListener('click',()=>{if(confirm(t('confirm'))){store={obs:[],snap:{}};save();run2();}});
+  $('#imp').addEventListener('change',e=>{const f=e.target.files[0]; if(!f) return; f.text().then(x=>{try{const s=JSON.parse(x); if(Array.isArray(s.obs)){store=s; if(!store.snap) store.snap={}; save(); tobs(); run2();}}catch(err){$('#st2').textContent=t('badjson');}});});
+  $('#clear').addEventListener('click',()=>{if(confirm(t('confirm'))){store={obs:[],snap:{}};save();tobs();run2();}});
   $('#go2').addEventListener('click',run2);
   {const now=new Date(); $('#odate').value=isoLocal(now.getHours()<14?now.getTime()-86400e3:now.getTime());}
 
