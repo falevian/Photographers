@@ -116,6 +116,14 @@
   @media(max-width:1290px){header{padding-top:52px}}
   @media(max-width:720px){.langbar{top:8px;right:8px} header{padding-top:44px}}
   @media print{.langbar{display:none!important}}
+  .moonrow{display:flex;align-items:center;gap:11px;margin-top:9px;padding-top:9px;border-top:1px solid var(--line)}
+  /* la página aplica svg{width:100%} a todos los gráficos; el icono lunar
+     necesita tamaño propio, de ahí el override explícito. */
+  .moonrow .moonfig{flex:0 0 auto;width:34px;height:34px;background:none;border:0;border-radius:0;
+                    filter:drop-shadow(0 0 7px rgba(230,234,240,.16))}
+  .moonrow b{display:block;font-size:13px;font-weight:600;color:var(--ink)}
+  .moonrow span{display:block;font-size:12px;color:var(--ink2);margin-top:1px}
+
 </style>
 </head>
 <body>
@@ -242,7 +250,7 @@
 <script>
 (function(){
   const I18N={
-  es:{fog_link:'Niebla',manual:'Manual',title:'Cielo para astrofotografía',subtitle:'Pestaña 1: índice de calidad de cielo nocturno con un modelo (nubes por capas, transparencia, seeing, humedad, Luna). Pestaña 2: fusión bayesiana de varios modelos que aprende de tus noches. Datos de Open‑Meteo, sin clave.',
+  es:{m_new:"Luna nueva",m_wax_cres:"Creciente",m_first:"Cuarto creciente",m_wax_gib:"Gibosa creciente",m_full:"Luna llena",m_wan_gib:"Gibosa menguante",m_last:"Cuarto menguante",m_wan_cres:"Menguante",fog_link:'Niebla',manual:'Manual',title:'Cielo para astrofotografía',subtitle:'Pestaña 1: índice de calidad de cielo nocturno con un modelo (nubes por capas, transparencia, seeing, humedad, Luna). Pestaña 2: fusión bayesiana de varios modelos que aprende de tus noches. Datos de Open‑Meteo, sin clave.',
     lat:'Latitud',lon:'Longitud',target:'Objetivo',t_deep:'Cielo profundo',t_planet:'Planetaria / Luna',t_wide:'Paisaje nocturno / Vía Láctea',geo:'Usar mi posición',tab1:'Índice de cielo',tab2:'Fusión bayesiana',model:'Modelo',best:'Mejor disponible',compute:'Calcular',
     h_strip:'Índice horario (48 h)',strip_legend:'Barra: índice 0 a 100 (verde ≥ 70 excelente, ámbar 50 a 69 aceptable, rojo &lt; 50 malo). Fondo oscuro: noche astronómica. Hora en ámbar: Luna sobre el horizonte.',
     h_chart:'Nubes, Luna e índice',leg1:'<i style="background:#6dbb8a;height:4px"></i>índice <i style="background:#9aa7b5"></i>nubes totales % <i style="background:#5aa0c8"></i>nubes altas % <i style="background:#d9a441;height:8px;opacity:.5"></i>Luna sobre el horizonte (altura) <i style="background:#22304a;height:8px"></i>noche astronómica',
@@ -261,7 +269,7 @@
     post_leg:'posterior',range_leg:'rango',prior_info:'Prior: Beta({a}, {b}), media {pi} % sobre {n} noches registradas. Calibración p = σ((s₃ − 58)/12), π₀ = 0.35.',
     sel1:'Selecciona al menos un modelo.',none:'Ningún modelo respondió a tiempo.',fused:'{k} modelos fusionados',failed:', {f} sin respuesta',first:'Calcula primero.',badjson:'JSON no válido',confirm:'¿Borrar todo el registro de observaciones?',
     w_cloud:'nubes',w_high:'altas',w_aod:'AOD',w_rh:'HR',w_jet:'V250',w_wind:'viento',w_dew:'rocío',w_moon:'Luna',timeout:'timeout',error:'error'},
-  en:{fog_link:'Fog',manual:'Manual',title:'Sky for astrophotography',subtitle:'Tab 1: night‑sky quality index from one model (cloud layers, transparency, seeing, humidity, Moon). Tab 2: Bayesian fusion of several models that learns from your nights. Open‑Meteo data, no API key.',
+  en:{m_new:"New moon",m_wax_cres:"Waxing crescent",m_first:"First quarter",m_wax_gib:"Waxing gibbous",m_full:"Full moon",m_wan_gib:"Waning gibbous",m_last:"Last quarter",m_wan_cres:"Waning crescent",fog_link:'Fog',manual:'Manual',title:'Sky for astrophotography',subtitle:'Tab 1: night‑sky quality index from one model (cloud layers, transparency, seeing, humidity, Moon). Tab 2: Bayesian fusion of several models that learns from your nights. Open‑Meteo data, no API key.',
     lat:'Latitude',lon:'Longitude',target:'Target',t_deep:'Deep sky',t_planet:'Planetary / Moon',t_wide:'Nightscape / Milky Way',geo:'Use my location',tab1:'Sky index',tab2:'Bayesian fusion',model:'Model',best:'Best available',compute:'Compute',
     h_strip:'Hourly index (48 h)',strip_legend:'Bar: index 0 to 100 (green ≥ 70 excellent, amber 50 to 69 acceptable, red &lt; 50 poor). Dark background: astronomical night. Amber hour: Moon above the horizon.',
     h_chart:'Clouds, Moon and index',leg1:'<i style="background:#6dbb8a;height:4px"></i>index <i style="background:#9aa7b5"></i>total clouds % <i style="background:#5aa0c8"></i>high clouds % <i style="background:#d9a441;height:8px;opacity:.5"></i>Moon above horizon (altitude) <i style="background:#22304a;height:8px"></i>astronomical night',
@@ -312,9 +320,36 @@
   function astro(ms,lat,lon){const d=toDays(ms),lw=RAD*-lon,phi=RAD*lat,s=sunCoords(d),m=moonCoords(d),th=sidereal(d,lw);
     const sunAlt=altitude(th-s.ra,phi,s.dec)/RAD; let moonAlt=altitude(th-m.ra,phi,m.dec)/RAD;
     const sd=149598000, phi2=Math.acos(Math.sin(s.dec)*Math.sin(m.dec)+Math.cos(s.dec)*Math.cos(m.dec)*Math.cos(s.ra-m.ra)), inc=Math.atan2(sd*Math.sin(phi2),m.dist-sd*Math.cos(phi2));
-    return {sunAlt,moonAlt,illum:(1+Math.cos(inc))/2};}
+    const angle=Math.atan2(Math.cos(s.dec)*Math.sin(s.ra-m.ra),Math.sin(s.dec)*Math.cos(m.dec)-Math.cos(s.dec)*Math.sin(m.dec)*Math.cos(s.ra-m.ra)); /* fase 0 luna nueva, .25 cuarto creciente, .5 llena, .75 menguante */ const phase=0.5+0.5*inc*(angle<0?-1:1)/Math.PI; return {sunAlt,moonAlt,illum:(1+Math.cos(inc))/2,phase};}
 
-  /* ---------- común ---------- */
+  /* ---------- Luna ---------- */
+/* Terminador real: semicircunferencia exterior más arco elíptico cuyo semieje
+   horizontal es R·|1−2·iluminación|. En cuarto vale 0 (recta) y en llena R. */
+function moonSVG(illum, phase, px){
+  const R=px/2, k=1-2*illum, rx=Math.abs(k)*R, creciente=phase<0.5;
+  const so=creciente?1:0, si=(k>0)===creciente?0:1;
+  const d=`M0,${-R} A${R},${R} 0 0,${so} 0,${R} A${rx.toFixed(2)},${R} 0 0,${si} 0,${-R} Z`;
+  const id='mg'+Math.round(phase*1e4)+px;
+  return `<svg class="moonfig" width="${px}" height="${px}" viewBox="${-R-1} ${-R-1} ${px+2} ${px+2}" role="img" aria-label="${moonName(phase,illum)}">`
+    +`<defs><radialGradient id="${id}" cx="38%" cy="34%" r="72%">`
+    +`<stop offset="0" stop-color="#fdfbf4"/><stop offset="1" stop-color="#d7dbe2"/></radialGradient></defs>`
+    +`<circle r="${R}" fill="#0d1218" stroke="#39434f" stroke-width="1"/>`
+    +(illum>0.004?`<path d="${d}" fill="url(#${id})"/>`:'')
+    +`</svg>`;
+}
+/* Ocho nombres clásicos; los cuartos y los sicigios con margen estrecho. */
+function moonName(phase,illum){
+  const p=((phase%1)+1)%1;
+  if(p<0.02||p>0.98) return t('m_new');
+  if(Math.abs(p-0.25)<0.02) return t('m_first');
+  if(Math.abs(p-0.5)<0.02) return t('m_full');
+  if(Math.abs(p-0.75)<0.02) return t('m_last');
+  if(p<0.25) return t('m_wax_cres');
+  if(p<0.5)  return t('m_wax_gib');
+  if(p<0.75) return t('m_wan_gib');
+  return t('m_wan_cres');
+}
+/* ---------- común ---------- */
   const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
   const logit=p=>Math.log(p/(1-p)), sig=z=>1/(1+Math.exp(-z));
   const fmtH=iso=>iso.slice(11,16);
@@ -354,7 +389,7 @@
     out.forEach(n=>{ const dark=n.rows.filter(r=>r.sunAlt<-18); n.darkStart=dark.length?dark[0].time:null; n.darkEnd=dark.length?dark[dark.length-1].time:null;
       n.date=isoLocal(n.rows[0].ts-(new Date(n.rows[0].time).getHours()<12?86400e3:0));
       const best3=bestWindow(n.rows,3); n.s3=best3.mean; n.s3from=best3.from; n.s3to=best3.to; n.mean=n.rows.reduce((a,r)=>a+r.s,0)/n.rows.length; n.max=Math.max(...n.rows.map(r=>r.s));
-      const up=n.rows.filter(r=>r.moonAlt>0); n.moonUp=up.length; n.illum=n.rows[Math.floor(n.rows.length/2)].illum; n.moonFrom=up.length?up[0].time:null; n.moonTo=up.length?up[up.length-1].time:null; });
+      const up=n.rows.filter(r=>r.moonAlt>0); n.moonUp=up.length; n.illum=n.rows[Math.floor(n.rows.length/2)].illum; n.phase=n.rows[Math.floor(n.rows.length/2)].phase; n.moonFrom=up.length?up[0].time:null; n.moonTo=up.length?up[up.length-1].time:null; });
     return out;}
   function bestWindow(rows,k){ if(rows.length<=k){const m=rows.reduce((a,r)=>a+r.s,0)/rows.length; return {mean:m,from:rows[0].time,to:rows[rows.length-1].time};}
     let best={mean:-1}; for(let i=0;i+k<=rows.length;i++){const m=rows.slice(i,i+k).reduce((a,r)=>a+r.s,0)/k; if(m>best.mean) best={mean:m,from:rows[i].time,to:rows[i+k-1].time};} return best;}
@@ -373,7 +408,7 @@
   function buildRows(H,aodM,lat,lon,target,limit){const now=Date.now(), rows=[];
     for(let i=0;i<H.time.length;i++){const ts=new Date(H.time[i]).getTime(); if(ts<now-3600e3) continue; if(rows.length>=limit) break;
       const a=astro(ts+1800e3,lat,lon);
-      const r={time:H.time[i],ts,t:H.temperature_2m[i],td:H.dew_point_2m[i],rh:H.relative_humidity_2m[i],wind:H.wind_speed_10m[i],cloud:H.cloud_cover[i],cloudL:H.cloud_cover_low[i],cloudM:H.cloud_cover_mid[i],cloudH:H.cloud_cover_high[i],precip:H.precipitation[i],jet:H.wind_speed_250hPa?H.wind_speed_250hPa[i]:null,aod:aodAt(aodM,H.time[i]),sunAlt:a.sunAlt,moonAlt:a.moonAlt,illum:a.illum};
+      const r={time:H.time[i],ts,t:H.temperature_2m[i],td:H.dew_point_2m[i],rh:H.relative_humidity_2m[i],wind:H.wind_speed_10m[i],cloud:H.cloud_cover[i],cloudL:H.cloud_cover_low[i],cloudM:H.cloud_cover_mid[i],cloudH:H.cloud_cover_high[i],precip:H.precipitation[i],jet:H.wind_speed_250hPa?H.wind_speed_250hPa[i]:null,aod:aodAt(aodM,H.time[i]),sunAlt:a.sunAlt,moonAlt:a.moonAlt,illum:a.illum, phase:a.phase};
       if(r.t==null||r.cloud==null||r.rh==null) continue; if(r.cloudL==null) r.cloudL=r.cloud; if(r.cloudM==null) r.cloudM=0; if(r.cloudH==null) r.cloudH=0; if(r.td==null) r.td=r.t-3;
       const sc=score(r,target); r.s=sc.s; r.why=sc.why; rows.push(r);}
     return rows;}
@@ -390,7 +425,7 @@
     cards1(); strip1(rows); chart1(rows); table1(rows);}
   function nightCard(n,label){ if(!n) return `<div class="card"><div class="eyebrow">${label}</div><div class="why">${t('no_night')}</div></div>`;
     const moon=n.moonUp===0?t('moon_down'):(n.moonUp===n.rows.length?t('all_night'):`${fmtH(n.moonFrom)} – ${fmtH(n.moonTo)}`);
-    return `<div class="card"><div class="eyebrow">${label} · ${new Date(n.rows[0].time).toLocaleDateString(LOC(),{weekday:'long',day:'2-digit'})}</div><div class="big v-${clsS(n.s3)}">${Math.round(n.s3)}</div><div class="verdict">${verS(n.s3)}</div><div class="when">${t('best_win')} ${fmtH(n.s3from)} – ${fmtH(n.s3to)} · ${t('mean')} ${Math.round(n.mean)}</div><div class="why">${t('astro')}: ${n.darkStart?fmtH(n.darkStart)+' – '+fmtH(n.darkEnd):'–'} · ${t('moon')} ${Math.round(100*n.illum)}% ${t('illum')}, ${moon}</div></div>`;}
+    return `<div class="card"><div class="eyebrow">${label} · ${new Date(n.rows[0].time).toLocaleDateString(LOC(),{weekday:'long',day:'2-digit'})}</div><div class="big v-${clsS(n.s3)}">${Math.round(n.s3)}</div><div class="verdict">${verS(n.s3)}</div><div class="when">${t('best_win')} ${fmtH(n.s3from)} – ${fmtH(n.s3to)} · ${t('mean')} ${Math.round(n.mean)}</div><div class="why">${t('astro')}: ${n.darkStart?fmtH(n.darkStart)+' – '+fmtH(n.darkEnd):'–'}</div><div class="moonrow">${moonSVG(n.illum,n.phase,34)}<div><b>${moonName(n.phase,n.illum)}</b><span>${Math.round(100*n.illum)}% ${t('illum')} · ${moon}</span></div></div></div>`;}
   function cards1(){const N=R1.nights; $('#cards1').innerHTML=nightCard(N[0],t('tonight'))+nightCard(N[1],t('tomorrow'));}
   function strip1(rows){$('#strip').innerHTML=rows.map(r=>`<div class="hour ${r.sunAlt<-18?'dark':''} ${r.moonAlt>0?'moon':''}" title="${fmtD(r.time)} · ${r.s} · ${whyTxt(r.why)}"><div class="bar"><span class="${clsS(r.s)}" style="height:${r.s}%"></span></div><div class="t">${fmtH(r.time).slice(0,2)}</div></div>`).join('');}
   function chart1(rows){

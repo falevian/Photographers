@@ -13,7 +13,7 @@ Photography and light-physics tools that run entirely in the browser.
 
 ## Español
 
-Treinta documentos que resuelven cuestiones fotográficas con el modelo físico o estadístico
+Veintinueve documentos que resuelven cuestiones fotográficas con el modelo físico o estadístico
 delante: simuladores, métricas, catálogos, scripts de procesado y su documentación.
 
 Todo el cálculo ocurre en el navegador. No hay servidor, ni cuenta, ni telemetría, y cada
@@ -35,7 +35,7 @@ elección previa se sigue el idioma del navegador.
 | [`simulador-flash.html`](simulador-flash.html) | Banco óptico de flash. La dureza de una sombra la fija el tamaño angular de la fuente vista desde el sujeto: sombras, caída de luz por número guía, vencer al sol y balance con la luz ambiente. | 53 KB |
 | [`programa-camara.html`](programa-camara.html) | La automática no es neutral: contiene un programa. Dibuja la línea que sigue —tiempo, diafragma e ISO a cada nivel de luz—, superpone el borrón y la profundidad de campo que tu intención exigía, y señala dónde chocan. Nace de la sección Flusser del ensayo del marco. | 53 KB |
 | [`niebla.html`](niebla.html) | Si la niebla se va a formar mañana al amanecer. Índice horario a 48 h sobre la convergencia de temperatura y punto de rocío, y una fusión bayesiana de cinco modelos que reajusta sus pesos con tus propias observaciones. La previsión se congela automáticamente cada noche, así que la observación de la mañana se compara con lo que se predijo la víspera y no con nada posterior. Necesita conexión: los datos son de Open-Meteo. Manual: [`manual-niebla.html`](manual-niebla.html). | 49 KB |
-| [`astro.html`](astro.html) | Si la noche servirá para fotografiar el cielo. Índice horario que combina nubes por capas, transparencia por aerosoles (AOD de CAMS), seeing por viento en altura, rocío y Luna, con pesos que se reajustan según fotografíes cielo profundo, planetaria o paisaje nocturno. Misma fusión bayesiana y mismo aprendizaje que la niebla. Manual: [`manual-astro.html`](manual-astro.html). | 52 KB |
+| [`astro.html`](astro.html) | Si la noche servirá para fotografiar el cielo. Índice horario que combina nubes por capas, transparencia por aerosoles (AOD de CAMS), seeing por viento en altura, rocío y Luna, con pesos que se reajustan según fotografíes cielo profundo, planetaria o paisaje nocturno. Misma fusión bayesiana y mismo aprendizaje que la niebla. Manual: [`manual-astro.html`](manual-astro.html). | 55 KB |
 
 ### El objetivo y el plano nítido
 
@@ -71,8 +71,7 @@ la página es su manual; el código está en [`scripts/`](scripts/).
 
 | Documento | Qué hace | Peso |
 |---|---|---:|
-| [`red-influencia.html`](red-influencia.html) | 293 autores y 467 relaciones de influencia declaradas. Traza linajes hacia arriba o hacia abajo, busca la ruta entre dos autores y dimensiona los nodos por nivel trófico. | 201 KB |
-| [`index_mobile_ios.html`](index_mobile_ios.html) | La misma red, adaptada a pantalla pequeña y a interacción táctil. | 208 KB |
+| [`red-influencia.html`](red-influencia.html) | 293 autores y 467 relaciones de influencia declaradas. Traza linajes hacia arriba o hacia abajo, busca la ruta entre dos autores y dimensiona los nodos por nivel trófico. Se adapta a pantalla pequeña y a interacción táctil. | 201 KB |
 | [`explorador_distancias.html`](explorador_distancias.html) | 309 autores colocados por parecido entre sus imágenes, con las fotos incrustadas. Da la distancia de contenido de cada pareja y, a la vez, su distancia en la red de influencia. | 6,4 MB |
 | [`ficha-fases-juicio-estetico.html`](ficha-fases-juicio-estetico.html) | Cómo se juzga una imagen a lo largo del tiempo de procesamiento visual, tratado como actualización bayesiana. | 44 KB |
 | [`ficha-marco-pensar.html`](ficha-marco-pensar.html) | Ficha de consulta del ensayo «Marco para pensar la fotografía»: las cuatro fases de la práctica, el aparato conceptual de Flusser a Ghirri y la constelación japonesa, con la pregunta que responde cada concepto. | 43 KB |
@@ -149,7 +148,7 @@ python3 -m http.server 8000
 
 ## English
 
-Thirty documents that settle photographic questions with the physical or statistical
+Twenty-nine documents that settle photographic questions with the physical or statistical
 model in plain sight: simulators, metrics, catalogues, processing scripts and their
 documentation.
 
@@ -173,7 +172,7 @@ address. With no prior choice, the browser's language is followed.
 | [`simulador-flash.html`](simulador-flash.html) | Flash optical bench. The hardness of a shadow is set by the angular size of the source as seen from the subject: shadows, light falloff from the guide number, overpowering the sun, and balance with ambient light. | 53 KB |
 | [`programa-camara.html`](programa-camara.html) | The automatic mode is not neutral: it carries a program. Draws the line it follows — shutter, aperture and ISO at each light level — overlays the blur and depth of field your intent demanded, and marks where they collide. Born of the essay's Flusser section. | 53 KB |
 | [`niebla.html`](niebla.html) | Whether fog will form at tomorrow's sunrise. A 48-hour hourly index on the convergence of temperature and dew point, plus a Bayesian fusion of five models that readjusts its weights from your own observations. The forecast is frozen automatically each night, so the morning's observation is compared against what was predicted the evening before and never against anything later. Needs a connection: the data comes from Open-Meteo. Manual: [`manual-niebla.html`](manual-niebla.html). | 49 KB |
-| [`astro.html`](astro.html) | Whether the night will be worth photographing the sky. An hourly index combining layered cloud, aerosol transparency (CAMS AOD), seeing from upper wind, dew and Moon, with weights that rescale for deep sky, planetary or nightscape work. Same Bayesian fusion and learning as the fog tool. Manual: [`manual-astro.html`](manual-astro.html). | 52 KB |
+| [`astro.html`](astro.html) | Whether the night will be worth photographing the sky. An hourly index combining layered cloud, aerosol transparency (CAMS AOD), seeing from upper wind, dew and Moon, with weights that rescale for deep sky, planetary or nightscape work. Same Bayesian fusion and learning as the fog tool. Manual: [`manual-astro.html`](manual-astro.html). | 55 KB |
 
 ### The lens and the plane of focus
 
@@ -209,8 +208,7 @@ the page is its manual; the code lives in [`scripts/`](scripts/).
 
 | Document | What it does | Size |
 |---|---|---:|
-| [`red-influencia.html`](red-influencia.html) | 293 authors and 467 declared influence relationships. Trace lineages upstream or downstream, look up the route between two authors, and size the nodes by trophic level. | 201 KB |
-| [`index_mobile_ios.html`](index_mobile_ios.html) | The same network, adapted to small screens and touch interaction. | 208 KB |
+| [`red-influencia.html`](red-influencia.html) | 293 authors and 467 declared influence relationships. Trace lineages upstream or downstream, look up the route between two authors, and size the nodes by trophic level. It adapts to small screens and touch interaction. | 201 KB |
 | [`explorador_distancias.html`](explorador_distancias.html) | 309 authors placed by the likeness between their images, with the photographs embedded. Gives the content distance for each pair and, alongside it, their distance in the influence network. | 6.4 MB |
 | [`ficha-fases-juicio-estetico.html`](ficha-fases-juicio-estetico.html) | How an image is judged across the time course of visual processing, treated as Bayesian updating. | 44 KB |
 | [`ficha-marco-pensar.html`](ficha-marco-pensar.html) | Consultation sheet for the essay 'A framework for thinking photography': the four phases of practice, the conceptual apparatus from Flusser to Ghirri, and the Japanese constellation, with the question each concept answers. | 43 KB |
