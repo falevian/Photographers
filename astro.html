@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23161b22'/><path d='M21 5a9.5 9.5 0 1 0 6 15.5A11 11 0 0 1 21 5z' fill='%23e6eaf0'/><circle cx='9' cy='9' r='1.6' fill='%23d9a441'/><circle cx='12' cy='22' r='1.2' fill='%235aa0c8'/><circle cx='6' cy='16' r='1' fill='%236dbb8a'/></svg>">
+<link rel="apple-touch-icon" href="astro-icon-180.png">
+<meta name="theme-color" content="#161b22">
+<!-- Pantalla de inicio de iOS: se abre a pantalla completa, sin barra de Safari. -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Cielo">
+
+
+<title>Cielo para astrofotografía</title>
+<meta name="author" content="Rafael Vida">
+<meta name="description" content="Herramienta de predicción de cielo nocturno para astrofotografía: índice horario de calidad y fusión bayesiana multimodelo sobre datos de Open-Meteo y CAMS, con registro local de observaciones.">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", OLD="niebla_lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){
+    /* Migracion de la clave antigua del paquete suelto. */
+    try{ var o=localStorage.getItem(OLD); if(o==="es"||o==="en"){ u=o; localStorage.setItem(K,o); } }catch(e){}
+  }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#161b22;--paper:#1e252e;--ink:#e6eaf0;--ink2:#9aa7b5;--line:#303a46;--fog:#3e4c5c;--warn:#d9a441;--bad:#c0574a;--ok:#5aa0c8;--good:#6dbb8a;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;--sans:"Space Grotesk",system-ui,sans-serif}
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#22304a 0%,var(--bg) 55%);color:var(--ink);font-family:var(--sans);line-height:1.45}
+  header,main{max-width:1150px;margin:0 auto;padding:0 24px}
+  header{padding-top:24px;padding-bottom:8px}
+  .topbar{display:flex;justify-content:flex-end;align-items:center;gap:14px;font-size:13px}
+  .topbar a{color:var(--ink2)}
+  h1{font-size:clamp(26px,4vw,40px);font-weight:700;letter-spacing:-.02em;margin:6px 0 4px}
+  .sub{color:var(--ink2);font-size:15px;margin:0}
+  main{padding-bottom:48px}
+  .panel{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin:18px 0 14px}
+  label{font-size:12px;color:var(--ink2);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em}
+  input[type=number],select,input[type=date]{font-family:var(--mono);font-size:14px;padding:7px 9px;border:1px solid var(--line);border-radius:5px;background:#0f1419;color:var(--ink);width:130px;color-scheme:dark}
+  select{width:auto}
+  button{font-family:var(--sans);font-size:14px;font-weight:500;padding:8px 14px;border-radius:5px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);cursor:pointer}
+  button.ghost{background:transparent;color:var(--ink)}
+  button.small{padding:4px 9px;font-size:12px}
+  :focus-visible{outline:2px solid var(--ok);outline-offset:2px}
+  .tabs{display:flex;border-bottom:2px solid var(--line);margin:6px 0 18px}
+  .tab{background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;color:var(--ink2);font-size:15px;font-weight:500;padding:10px 16px;border-radius:0}
+  .tab.on{color:var(--ink);border-bottom-color:var(--ink);font-weight:700}
+  .pane{display:none}.pane.on{display:block}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:22px}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:16px 18px}
+  .eyebrow{font-family:var(--mono);font-size:11px;color:var(--ink2);letter-spacing:.08em;text-transform:uppercase}
+  .big{font-family:var(--mono);font-size:40px;font-weight:600;line-height:1.1;margin:6px 0 2px}
+  .verdict{font-weight:700;font-size:17px}
+  .when{font-family:var(--mono);font-size:12px;color:var(--ink2);margin-top:6px}
+  .why{font-size:13px;color:var(--ink2);margin-top:8px}
+  .v-a{color:var(--good)}.v-m{color:var(--warn)}.v-b{color:var(--bad)}
+  section{margin-top:26px}
+  h2{font-size:16px;font-weight:700;margin:0 0 10px}
+  svg{width:100%;height:auto;display:block;background:#0f1419;border:1px solid var(--line);border-radius:6px}
+  table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px;background:#0f1419;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  th,td{padding:5px 8px;text-align:right;border-bottom:1px solid #222b36;white-space:nowrap}
+  th{background:#1a222c;font-weight:500;color:var(--ink2)}
+  td:first-child,th:first-child{text-align:left}
+  tr.dark td{background:#121a24}
+  .tag{display:inline-block;padding:1px 6px;border-radius:3px;font-size:11px;color:#0f1419;font-weight:600}
+  .tag.a{background:var(--good)}.tag.m{background:var(--warn)}.tag.b{background:var(--bad)}
+  .note{font-size:13px;color:var(--ink2);max-width:80ch}
+  code{font-family:var(--mono);font-size:12px;background:#0f1419;padding:1px 4px;border-radius:3px}
+  .status{font-family:var(--mono);font-size:12px;color:var(--ink2);margin-top:8px;min-height:1.2em;flex-basis:100%}
+  .legend{font-family:var(--mono);font-size:11px;color:var(--ink2);margin-top:6px}
+  .legend i{display:inline-block;width:22px;height:3px;vertical-align:middle;margin:0 4px 0 10px}
+  .wrap{overflow-x:auto}
+  .strip{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(26px,1fr);gap:2px;border:1px solid var(--line);background:#0f1419;border-radius:6px;padding:8px 6px}
+  .hour{display:flex;flex-direction:column;align-items:center;font-family:var(--mono);font-size:10px;color:var(--ink2)}
+  .hour .bar{width:100%;height:90px;border-radius:3px;background:linear-gradient(180deg,transparent,var(--fog));position:relative}
+  .hour .bar span{position:absolute;left:0;right:0;bottom:0;border-radius:3px;background:var(--fog)}
+  .hour .bar span.a{background:var(--good)}.hour .bar span.m{background:var(--warn)}.hour .bar span.b{background:var(--bad)}
+  .hour .t{margin-top:4px}
+  .hour.dark{background:#0b1016;border-radius:3px}
+  .hour.moon .t{color:var(--warn)}
+  .wbar{height:8px;background:var(--ok);border-radius:2px;display:inline-block;vertical-align:middle}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:800px){.grid2{grid-template-columns:1fr}}
+  .obs-row{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+  .mlist{display:flex;flex-wrap:wrap;gap:8px;font-family:var(--mono);font-size:12px}
+  .mlist label{display:inline-flex;align-items:center;gap:4px;text-transform:none;letter-spacing:0;font-size:12px;color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:3px 7px;background:#0f1419;margin:0}
+  .mlist .st{color:var(--ink2)}.mlist .st.ok{color:var(--ok)}.mlist .st.ko{color:var(--bad)}
+  .netnote{background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--ok);
+    border-radius:6px;padding:10px 14px;margin:14px 0 0;font-size:13.5px;color:var(--ink2);max-width:80ch}
+  .netnote b{color:var(--ink)}
+
+  /* ---------- convenio bilingue del repositorio ---------- */
+  html[lang="es"] [data-lang="en"]{display:none!important}
+  html[lang="en"] [data-lang="es"]{display:none!important}
+  .langbar{position:fixed;top:14px;right:16px;z-index:100;display:flex;
+    border:1px solid var(--line);border-radius:5px;overflow:hidden;background:var(--paper)}
+  .langbar button{font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;
+    border:0;border-radius:0;padding:5px 10px;background:transparent;color:var(--ink2);cursor:pointer}
+  .langbar button+button{border-left:1px solid var(--line)}
+  .langbar button:hover{color:var(--ink)}
+  .langbar button.on{background:var(--ink);color:var(--bg)}
+  .langbar button:focus-visible{outline:2px solid var(--ok);outline-offset:-2px}
+  /* La barra flota sobre la esquina superior derecha, donde vive .topbar:
+     si no cabe al lado del contenido, se baja la cabecera para que no se solapen. */
+  @media(max-width:1290px){header{padding-top:52px}}
+  @media(max-width:720px){.langbar{top:8px;right:8px} header{padding-top:44px}}
+  @media print{.langbar{display:none!important}}
+</style>
+</head>
+<body>
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
+
+<header>
+  <div class="topbar">
+    <a href="niebla.html" id="fog-link" data-i18n="fog_link"></a>
+    <a href="manual-astro.html" id="manual-link" data-i18n="manual"></a>
+    <a href="index.html" data-lang="es">Portada</a>
+    <a href="index.html" data-lang="en">Home</a>
+  </div>
+  <h1 data-i18n="title"></h1>
+  <p class="sub" data-i18n="subtitle"></p>
+  <p class="netnote" data-lang="es"><b>Necesita conexión a internet.</b> Cada cálculo descarga la previsión de <b>Open‑Meteo</b> (<code>api.open-meteo.com</code>) y la transparencia atmosférica del modelo <b>CAMS</b> (<code>air-quality-api.open-meteo.com</code>). Sin red la página se abre igual, pero no puede predecir nada. No hay clave ni registro; tus observaciones se quedan en este navegador.</p>
+  <p class="netnote" data-lang="en"><b>An internet connection is required.</b> Every computation downloads the forecast from <b>Open‑Meteo</b> (<code>api.open-meteo.com</code>) and the atmospheric transparency from the <b>CAMS</b> model (<code>air-quality-api.open-meteo.com</code>). With no network the page still opens, but it cannot forecast anything. There is no API key and no sign‑up; your observations stay in this browser.</p>
+</header>
+<main>
+  <div class="panel controls">
+    <div><label for="lat" data-i18n="lat"></label><input id="lat" type="number" step="0.0001" value="43.3623"></div>
+    <div><label for="lon" data-i18n="lon"></label><input id="lon" type="number" step="0.0001" value="-8.4115"></div>
+    <div><label for="target" data-i18n="target"></label><select id="target"><option value="deep" data-i18n="t_deep"></option><option value="planet" data-i18n="t_planet"></option><option value="wide" data-i18n="t_wide"></option></select></div>
+    <button id="geo" class="ghost" type="button" data-i18n="geo"></button>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab on" data-pane="p1" role="tab" data-i18n="tab1"></button>
+    <button class="tab" data-pane="p2" role="tab" data-i18n="tab2"></button>
+  </div>
+
+  <div class="pane on" id="p1">
+    <div class="panel controls" style="margin-top:0">
+      <div><label for="model" data-i18n="model"></label>
+        <select id="model">
+          <option value="best_match" data-i18n="best"></option>
+          <option value="icon_seamless">ICON (DWD)</option><option value="gfs_seamless">GFS (NOAA)</option>
+          <option value="meteofrance_seamless">AROME/ARPEGE</option><option value="ecmwf_ifs025">ECMWF IFS 0.25°</option><option value="ukmo_seamless">UKMO</option>
+        </select></div>
+      <button id="go1" type="button" data-i18n="compute"></button>
+      <div class="status" id="st1"></div>
+    </div>
+    <div class="cards" id="cards1"></div>
+    <section><h2 data-i18n="h_strip"></h2><div class="wrap"><div class="strip" id="strip"></div></div><div class="legend" data-i18n="strip_legend"></div></section>
+    <section><h2 data-i18n="h_chart"></h2><div id="chart1"></div><div class="legend" id="leg1"></div></section>
+    <section><h2 data-i18n="h_table"></h2><div class="wrap"><table id="tabla1"></table></div></section>
+    <section><h2 data-i18n="h_how"></h2><p class="note" data-i18n="how1"></p></section>
+  </div>
+
+  <div class="pane" id="p2">
+    <div class="panel controls" style="margin-top:0">
+      <div style="flex-basis:100%"><label data-i18n="models_lbl"></label><div class="mlist" id="mlist"></div></div>
+      <div><label for="alpha" data-i18n="alpha"></label><input id="alpha" type="number" step="0.1" min="1" max="8" value="1.8"></div>
+      <button id="go2" type="button" data-i18n="compute"></button>
+      <div class="status" id="st2"></div>
+    </div>
+    <div class="cards" id="cards2"></div>
+    <section><h2 data-i18n="h_prob"></h2><div id="chart2"></div><div class="legend" id="legend2"></div></section>
+    <section class="grid2">
+      <div><h2 data-i18n="h_night"></h2><div class="wrap"><table id="tnight"></table></div></div>
+      <div><h2 data-i18n="h_w"></h2><div class="wrap"><table id="tw"></table></div><p class="note" id="priorinfo"></p></div>
+    </section>
+    <section><h2 data-i18n="h_obs"></h2>
+      <div class="panel">
+        <div class="obs-row">
+          <div><label for="odate" data-i18n="night_of"></label><input id="odate" type="date"></div>
+          <div><label for="oval" data-i18n="observed"></label><select id="oval"><option value="1" data-i18n="o_clear"></option><option value="0.5" data-i18n="o_part"></option><option value="0" data-i18n="o_bad"></option></select></div>
+          <button id="saveobs" type="button" data-i18n="save_obs"></button>
+          <button id="exp" class="ghost" type="button" data-i18n="export"></button>
+          <label style="display:inline-block;margin:0"><span style="cursor:pointer;border:1px solid var(--ink);padding:7px 12px;border-radius:5px;font-size:14px;display:inline-block;text-transform:none;letter-spacing:0;color:var(--ink)" data-i18n="import"></span><input id="imp" type="file" accept="application/json" style="display:none"></label>
+          <button id="clear" class="ghost" type="button" data-i18n="clear"></button>
+        </div>
+        <p class="note" data-i18n="obs_note"></p>
+        <div class="wrap"><table id="tobs"></table></div>
+      </div></section>
+    <section><h2 data-i18n="h_method"></h2><p class="note" data-i18n="method"></p></section>
+  </div>
+</main>
+
+<script>
+"use strict";
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{ title:"Cielo para astrofotografía", app:"Cielo",
+         desc:"Herramienta de predicción de cielo nocturno para astrofotografía: índice horario de calidad y fusión bayesiana multimodelo sobre datos de Open-Meteo y CAMS, con registro local de observaciones." },
+    en:{ title:"Sky for astrophotography", app:"Sky",
+         desc:"Night-sky forecasting tool for astrophotography: hourly quality index and multi-model Bayesian fusion over Open-Meteo and CAMS data, with a local observation log." }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var a=document.querySelector('meta[name="apple-mobile-web-app-title"]');
+    if(a) a.setAttribute("content",META[l].app);
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    ["title","ph","alt","aria"].forEach(function(k){
+      [].forEach.call(document.querySelectorAll("[data-"+k+"-"+l+"]"),function(e){
+        var attr = k==="ph" ? "placeholder" : (k==="aria" ? "aria-label" : k);
+        e.setAttribute(attr, e.getAttribute("data-"+k+"-"+l));
+      });
+    });
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
+
+<script>
+(function(){
+  const I18N={
+  es:{fog_link:'Niebla',manual:'Manual',title:'Cielo para astrofotografía',subtitle:'Pestaña 1: índice de calidad de cielo nocturno con un modelo (nubes por capas, transparencia, seeing, humedad, Luna). Pestaña 2: fusión bayesiana de varios modelos que aprende de tus noches. Datos de Open‑Meteo, sin clave.',
+    lat:'Latitud',lon:'Longitud',target:'Objetivo',t_deep:'Cielo profundo',t_planet:'Planetaria / Luna',t_wide:'Paisaje nocturno / Vía Láctea',geo:'Usar mi posición',tab1:'Índice de cielo',tab2:'Fusión bayesiana',model:'Modelo',best:'Mejor disponible',compute:'Calcular',
+    h_strip:'Índice horario (48 h)',strip_legend:'Barra: índice 0 a 100 (verde ≥ 70 excelente, ámbar 50 a 69 aceptable, rojo &lt; 50 malo). Fondo oscuro: noche astronómica. Hora en ámbar: Luna sobre el horizonte.',
+    h_chart:'Nubes, Luna e índice',leg1:'<i style="background:#6dbb8a;height:4px"></i>índice <i style="background:#9aa7b5"></i>nubes totales % <i style="background:#5aa0c8"></i>nubes altas % <i style="background:#d9a441;height:8px;opacity:.5"></i>Luna sobre el horizonte (altura) <i style="background:#22304a;height:8px"></i>noche astronómica',
+    h_table:'Tabla horaria',h_how:'Cómo se calcula',
+    how1:'El índice, de 0 a 100, suma: <b>nubes</b> hasta 45 puntos, <code>45·(1 − c/100)²</code> con c = cobertura efectiva = máx(nubes totales, 0.9·bajas + 0.7·medias + 0.45·altas); <b>transparencia</b> hasta 15: AOD 550 nm &lt; 0.08: 15, &lt; 0.15: 11, &lt; 0.3: 6, &lt; 0.5: 2, más: 0; <b>humedad</b> hasta 10: HR &lt; 60 %: 10, &lt; 75: 7, &lt; 85: 4, &lt; 92: 2, más: 0 (añade bruma y rocío); <b>seeing</b> hasta 15: viento a 250 hPa &lt; 50 km/h: 9, &lt; 90: 6, &lt; 130: 3, más: 0, más viento en superficie &lt; 10 km/h: 6, &lt; 20: 4, &lt; 30: 2; <b>rocío en la óptica</b> hasta 5: T − Td &gt; 4 °C: 5, &gt; 2: 3, &gt; 1: 1; <b>Luna</b> hasta 10: bajo el horizonte 10, si no 10·(1 − iluminación)·(1 − 0.7·sen(altura)). Luego se aplica el factor de oscuridad según la altura del Sol: &gt; −6°: 0, −6 a −12°: 0.3, −12 a −18°: 0.7, &lt; −18°: 1. El selector de objetivo reescala los pesos: planetaria premia seeing y tolera la Luna; paisaje nocturno penaliza la Luna y la humedad.',
+    models_lbl:'Modelos (descarga en paralelo con límite de 12 s; desmarca los lentos)',alpha:'α (fuentes independientes efectivas)',h_prob:'Probabilidad horaria de cielo útil por modelo y posterior',h_night:'Esta noche por modelo',h_w:'Pesos bayesianos y prior',h_obs:'Registro de observaciones (aprendizaje)',
+    night_of:'Noche del',observed:'Observado',o_clear:'Útil: despejado la mayor parte',o_part:'Parcial: nubes intermitentes',o_bad:'Inútil: cubierto o bruma',save_obs:'Guardar observación',export:'Exportar JSON',import:'Importar JSON',clear:'Borrar registro',
+    obs_note:'Cada vez que calculas, la previsión de la próxima noche queda congelada automáticamente, asociada a la fecha de esa noche (la del atardecer). Al día siguiente elige esa noche, indica cómo fue y guarda: la observación se empareja con la previsión de la víspera. Si no calculaste esa tarde, la observación solo actualiza el prior. El registro se guarda en este navegador; exporta el JSON si cambias de equipo.',
+    snap_info:'Previsión congelada para la noche del {d} ({n} modelos, {h}).',no_snap:'No hay previsión congelada para la noche del {d}; la observación actualiza solo el prior.',obs_saved:'Observación guardada para la noche del {d}.',pending:'pendiente',
+    h_method:'Método',method:'Para cada modelo se calcula el índice horario s y, en cada noche astronómica, la media del mejor tramo de 3 horas, s₃. La probabilidad de “noche útil” es <code>p_m = σ((s₃ − 58)/12)</code>, calibrada a la tasa base π₀ = 0.35. Prior climatológico π ~ Beta(a, b), inicial Beta(3.5, 6.5), actualizado con cada noche observada (a += y, b += 1 − y). Posterior por pooling logarítmico: <code>logit P = logit π + α · Σ w_m (logit p_m − logit π₀)</code>, Σ w_m = 1. Pesos <code>w_m ∝ exp(0.7 · Σ log P_m(y_obs))</code>. La transparencia (AOD) procede de un único modelo de composición atmosférica (CAMS) y es común a todos; las diferencias entre modelos provienen de nubes, humedad y viento.',
+    dl:'Descargando previsión…',dl_n:'Descargando {n} modelos en paralelo…',err:'Error: ',nopos:'Sin posición: ',noaod:' · sin AOD, transparencia neutra',elev:'elevación',
+    tonight:'Esta noche',tomorrow:'Mañana por la noche',no_night:'Sin noche astronómica en el intervalo',best_win:'mejor tramo',mean:'media',astro:'noche astronómica',moon:'Luna',illum:'iluminación',moon_up:'sobre el horizonte',moon_down:'bajo el horizonte',all_night:'toda la noche',dew:'rocío',
+    exc:'Excelente',acc:'Aceptable',bad:'Malo',range:'rango',disp:'Dispersión entre modelos (esta noche)',agree_h:'Acuerdo alto',agree_m:'Acuerdo moderado',agree_l:'Desacuerdo',disp_note:'Desviación típica de las probabilidades de los modelos: incertidumbre epistémica.',
+    usable:'Noche útil probable',maybe:'Noche útil posible',unlikely:'Noche útil improbable',
+    th1:['Hora','Índice','Nubes','Bajas','Medias','Altas','HR','T−Td','V10','V250','AOD','Luna','Sol°'],thnight:['Modelo','P útil','s₃','nubes','altas','HR','V250','tramo'],thw:['Modelo','peso w','','log‑veros.'],thobs:['Noche','y'],posterior:'posterior',del:'eliminar',
+    post_leg:'posterior',range_leg:'rango',prior_info:'Prior: Beta({a}, {b}), media {pi} % sobre {n} noches registradas. Calibración p = σ((s₃ − 58)/12), π₀ = 0.35.',
+    sel1:'Selecciona al menos un modelo.',none:'Ningún modelo respondió a tiempo.',fused:'{k} modelos fusionados',failed:', {f} sin respuesta',first:'Calcula primero.',badjson:'JSON no válido',confirm:'¿Borrar todo el registro de observaciones?',
+    w_cloud:'nubes',w_high:'altas',w_aod:'AOD',w_rh:'HR',w_jet:'V250',w_wind:'viento',w_dew:'rocío',w_moon:'Luna',timeout:'timeout',error:'error'},
+  en:{fog_link:'Fog',manual:'Manual',title:'Sky for astrophotography',subtitle:'Tab 1: night‑sky quality index from one model (cloud layers, transparency, seeing, humidity, Moon). Tab 2: Bayesian fusion of several models that learns from your nights. Open‑Meteo data, no API key.',
+    lat:'Latitude',lon:'Longitude',target:'Target',t_deep:'Deep sky',t_planet:'Planetary / Moon',t_wide:'Nightscape / Milky Way',geo:'Use my location',tab1:'Sky index',tab2:'Bayesian fusion',model:'Model',best:'Best available',compute:'Compute',
+    h_strip:'Hourly index (48 h)',strip_legend:'Bar: index 0 to 100 (green ≥ 70 excellent, amber 50 to 69 acceptable, red &lt; 50 poor). Dark background: astronomical night. Amber hour: Moon above the horizon.',
+    h_chart:'Clouds, Moon and index',leg1:'<i style="background:#6dbb8a;height:4px"></i>index <i style="background:#9aa7b5"></i>total clouds % <i style="background:#5aa0c8"></i>high clouds % <i style="background:#d9a441;height:8px;opacity:.5"></i>Moon above horizon (altitude) <i style="background:#22304a;height:8px"></i>astronomical night',
+    h_table:'Hourly table',h_how:'How it is computed',
+    how1:'The index, 0 to 100, adds: <b>clouds</b> up to 45 points, <code>45·(1 − c/100)²</code> with c = effective cover = max(total, 0.9·low + 0.7·mid + 0.45·high); <b>transparency</b> up to 15: AOD 550 nm &lt; 0.08: 15, &lt; 0.15: 11, &lt; 0.3: 6, &lt; 0.5: 2, more: 0; <b>humidity</b> up to 10: RH &lt; 60 %: 10, &lt; 75: 7, &lt; 85: 4, &lt; 92: 2, more: 0 (adds haze and dew); <b>seeing</b> up to 15: 250 hPa wind &lt; 50 km/h: 9, &lt; 90: 6, &lt; 130: 3, more: 0, plus surface wind &lt; 10 km/h: 6, &lt; 20: 4, &lt; 30: 2; <b>dew on optics</b> up to 5: T − Td &gt; 4 °C: 5, &gt; 2: 3, &gt; 1: 1; <b>Moon</b> up to 10: below horizon 10, else 10·(1 − illumination)·(1 − 0.7·sin(altitude)). Then a darkness factor from solar altitude: &gt; −6°: 0, −6 to −12°: 0.3, −12 to −18°: 0.7, &lt; −18°: 1. The target selector rescales the weights: planetary rewards seeing and tolerates the Moon; nightscape penalises Moon and humidity.',
+    models_lbl:'Models (parallel download, 12 s limit; untick slow ones)',alpha:'α (effective independent sources)',h_prob:'Hourly probability of usable sky per model and posterior',h_night:'Tonight per model',h_w:'Bayesian weights and prior',h_obs:'Observation log (learning)',
+    night_of:'Night of',observed:'Observed',o_clear:'Usable: clear most of the night',o_part:'Partial: intermittent clouds',o_bad:'Useless: overcast or haze',save_obs:'Save observation',export:'Export JSON',import:'Import JSON',clear:'Clear log',
+    obs_note:'Every time you compute, the forecast for the coming night is frozen automatically under the date of that night (the evening date). The next day pick that night, say how it went and save: the observation is paired with the previous evening’s forecast. If you did not compute that evening, the observation only updates the prior. The log lives in this browser; export the JSON if you change device.',
+    snap_info:'Forecast frozen for the night of {d} ({n} models, {h}).',no_snap:'No frozen forecast for the night of {d}; the observation only updates the prior.',obs_saved:'Observation saved for the night of {d}.',pending:'pending',
+    h_method:'Method',method:'For each model the hourly index s is computed and, within each astronomical night, the mean of the best 3‑hour stretch, s₃. The probability of a “usable night” is <code>p_m = σ((s₃ − 58)/12)</code>, calibrated to the base rate π₀ = 0.35. Climatological prior π ~ Beta(a, b), initially Beta(3.5, 6.5), updated with each observed night (a += y, b += 1 − y). Posterior by logarithmic pooling: <code>logit P = logit π + α · Σ w_m (logit p_m − logit π₀)</code>, Σ w_m = 1. Weights <code>w_m ∝ exp(0.7 · Σ log P_m(y_obs))</code>. Transparency (AOD) comes from a single atmospheric composition model (CAMS) shared by all; model differences come from clouds, humidity and wind.',
+    dl:'Downloading forecast…',dl_n:'Downloading {n} models in parallel…',err:'Error: ',nopos:'No position: ',noaod:' · no AOD, neutral transparency',elev:'elevation',
+    tonight:'Tonight',tomorrow:'Tomorrow night',no_night:'No astronomical night in range',best_win:'best stretch',mean:'mean',astro:'astronomical night',moon:'Moon',illum:'illumination',moon_up:'above horizon',moon_down:'below horizon',all_night:'all night',dew:'dew',
+    exc:'Excellent',acc:'Acceptable',bad:'Poor',range:'range',disp:'Spread between models (tonight)',agree_h:'High agreement',agree_m:'Moderate agreement',agree_l:'Disagreement',disp_note:'Standard deviation of model probabilities: epistemic uncertainty.',
+    usable:'Usable night likely',maybe:'Usable night possible',unlikely:'Usable night unlikely',
+    th1:['Time','Index','Clouds','Low','Mid','High','RH','T−Td','W10','W250','AOD','Moon','Sun°'],thnight:['Model','P usable','s₃','clouds','high','RH','W250','stretch'],thw:['Model','weight w','','log‑lik.'],thobs:['Night','y'],posterior:'posterior',del:'delete',
+    post_leg:'posterior',range_leg:'range',prior_info:'Prior: Beta({a}, {b}), mean {pi} % over {n} logged nights. Calibration p = σ((s₃ − 58)/12), π₀ = 0.35.',
+    sel1:'Select at least one model.',none:'No model answered in time.',fused:'{k} models fused',failed:', {f} without response',first:'Compute first.',badjson:'Invalid JSON',confirm:'Delete the whole observation log?',
+    w_cloud:'clouds',w_high:'high',w_aod:'AOD',w_rh:'RH',w_jet:'W250',w_wind:'wind',w_dew:'dew',w_moon:'Moon',timeout:'timeout',error:'error'}
+  };
+  function $(s){return document.querySelector(s);}
+  /* El idioma lo fija el script canónico del <head> (clave compartida pn-lang) y vive en
+     document.documentElement.lang: aquí solo se lee, nunca se consulta el almacenamiento. */
+  let LANG=document.documentElement.lang; if(!I18N[LANG]) LANG='es';
+  const t=(k,v)=>{let s=I18N[LANG][k]; if(s==null) s=I18N.es[k]; if(v&&typeof s==='string') Object.keys(v).forEach(x=>s=s.replace('{'+x+'}',v[x])); return s;};
+  const LOC=()=>LANG==='en'?'en-GB':'es-ES';
+  function applyLang(){
+    document.documentElement.lang=LANG; document.title=t('title');
+    document.querySelectorAll('[data-i18n]').forEach(e=>{e.innerHTML=t(e.dataset.i18n);});
+    $('#leg1').innerHTML=t('leg1');
+    /* Los enlaces cruzados son estáticos (niebla.html, manual-astro.html) y el idioma viaja
+       por pn-lang; los botones ES/EN los marca el conmutador canónico. */
+    if(R1) render1(); if(B.last) render2();
+  }
+  /* El conmutador canónico avisa por aquí al cambiar de idioma. El flag evita repintar
+     antes de que la aplicación esté montada (apply() se invoca también en el arranque). */
+  let APP_READY=false;
+  window.onLangChange=function(l){ LANG=I18N[l]?l:'es'; if(APP_READY) applyLang(); };
+
+  /* ---------- astronomía (algoritmos de baja precisión tipo suncalc, error < 0.5°) ---------- */
+  const RAD=Math.PI/180, E=RAD*23.4397;
+  const toDays=ms=>ms/86400000-10957.5;
+  const decl=(l,b)=>Math.asin(Math.sin(b)*Math.cos(E)+Math.cos(b)*Math.sin(E)*Math.sin(l));
+  const rasc=(l,b)=>Math.atan2(Math.sin(l)*Math.cos(E)-Math.tan(b)*Math.sin(E),Math.cos(l));
+  const sidereal=(d,lw)=>RAD*(280.16+360.9856235*d)-lw;
+  const altitude=(H,phi,dec)=>Math.asin(Math.sin(phi)*Math.sin(dec)+Math.cos(phi)*Math.cos(dec)*Math.cos(H));
+  function sunCoords(d){const M=RAD*(357.5291+0.98560028*d), L=M+RAD*(1.9148*Math.sin(M)+0.02*Math.sin(2*M)+0.0003*Math.sin(3*M))+RAD*102.9372+Math.PI; return {dec:decl(L,0),ra:rasc(L,0)};}
+  function moonCoords(d){const L=RAD*(218.316+13.176396*d),M=RAD*(134.963+13.064993*d),F=RAD*(93.272+13.229350*d),l=L+RAD*6.289*Math.sin(M),b=RAD*5.128*Math.sin(F),dt=385001-20905*Math.cos(M); return {ra:rasc(l,b),dec:decl(l,b),dist:dt};}
+  function astro(ms,lat,lon){const d=toDays(ms),lw=RAD*-lon,phi=RAD*lat,s=sunCoords(d),m=moonCoords(d),th=sidereal(d,lw);
+    const sunAlt=altitude(th-s.ra,phi,s.dec)/RAD; let moonAlt=altitude(th-m.ra,phi,m.dec)/RAD;
+    const sd=149598000, phi2=Math.acos(Math.sin(s.dec)*Math.sin(m.dec)+Math.cos(s.dec)*Math.cos(m.dec)*Math.cos(s.ra-m.ra)), inc=Math.atan2(sd*Math.sin(phi2),m.dist-sd*Math.cos(phi2));
+    return {sunAlt,moonAlt,illum:(1+Math.cos(inc))/2};}
+
+  /* ---------- común ---------- */
+  const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const logit=p=>Math.log(p/(1-p)), sig=z=>1/(1+Math.exp(-z));
+  const fmtH=iso=>iso.slice(11,16);
+  const fmtD=iso=>new Date(iso).toLocaleDateString(LOC(),{weekday:'short',day:'2-digit'})+' '+iso.slice(11,16);
+  const HOURLY='temperature_2m,relative_humidity_2m,dew_point_2m,wind_speed_10m,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,precipitation,wind_speed_250hPa';
+  const coords=()=>({lat:+$('#lat').value,lon:+$('#lon').value,target:$('#target').value});
+  function fetchJSON(url,ms){const c=new AbortController();const tm=setTimeout(()=>c.abort(),ms);return fetch(url,{signal:c.signal}).then(r=>r.json()).finally(()=>clearTimeout(tm));}
+  let aodCache={key:null,data:null};
+  async function getAOD(lat,lon){const key=lat+','+lon; if(aodCache.key===key) return aodCache.data; let m=null;
+    try{m=await fetchJSON(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&hourly=aerosol_optical_depth&timezone=auto&forecast_days=3`,10000); if(m.error) m=null;}catch(e){m=null;}
+    aodCache={key,data:m}; return m;}
+  const aodAt=(m,iso)=>{if(!m||!m.hourly) return null; const j=m.hourly.time.indexOf(iso); return j>=0?m.hourly.aerosol_optical_depth[j]:null;};
+
+  const WEIGHTS={deep:{cloud:45,aod:15,rh:10,seeing:15,dew:5,moon:10},planet:{cloud:45,aod:8,rh:6,seeing:30,dew:5,moon:1},wide:{cloud:45,aod:12,rh:14,seeing:4,dew:5,moon:20}};
+  function score(h,target){
+    const W=WEIGHTS[target]||WEIGHTS.deep; let why=[];
+    const c=Math.max(h.cloud,0.9*h.cloudL+0.7*h.cloudM+0.45*h.cloudH); const fc=Math.pow(1-clamp(c,0,100)/100,2);
+    let s=W.cloud*fc; if(c>30) why.push(['w_cloud',Math.round(c)+'%']); if(h.cloudH>40&&h.cloud<50) why.push(['w_high',h.cloudH+'%']);
+    let fa=0.7; if(h.aod!=null){fa=h.aod<0.08?1:h.aod<0.15?0.73:h.aod<0.3?0.4:h.aod<0.5?0.13:0; if(h.aod>=0.15) why.push(['w_aod',h.aod.toFixed(2)]);} s+=W.aod*fa;
+    const fr=h.rh<60?1:h.rh<75?0.7:h.rh<85?0.4:h.rh<92?0.2:0; s+=W.rh*fr; if(h.rh>=85) why.push(['w_rh',h.rh+'%']);
+    let fj=0.6; if(h.jet!=null){fj=h.jet<50?1:h.jet<90?0.66:h.jet<130?0.33:0; if(h.jet>=90) why.push(['w_jet',Math.round(h.jet)]);}
+    const fw=h.wind<10?1:h.wind<20?0.66:h.wind<30?0.33:0; if(h.wind>=20) why.push(['w_wind',Math.round(h.wind)]);
+    s+=W.seeing*(0.6*fj+0.4*fw);
+    const dT=h.t-h.td; const fd=dT>4?1:dT>2?0.6:dT>1?0.2:0; s+=W.dew*fd; if(dT<=1) why.push(['w_dew','ΔT '+dT.toFixed(1)]);
+    let fm=1; if(h.moonAlt>0){fm=(1-h.illum)*(1-0.7*Math.sin(h.moonAlt*RAD)); if(h.illum>0.3) why.push(['w_moon',Math.round(100*h.illum)+'%']);} s+=W.moon*fm;
+    const Wsum=Object.values(W).reduce((a,b)=>a+b,0); s=100*s/Wsum;
+    const dark=h.sunAlt>-6?0:h.sunAlt>-12?0.3:h.sunAlt>-18?0.7:1; s*=dark;
+    return {s:clamp(Math.round(s),0,100),why};
+  }
+  const whyTxt=why=>why.map(([k,v])=>(t(k)+' '+v).trim()).join(', ');
+  const clsS=s=>s>=70?'a':s>=50?'m':'b', verS=s=>t(s>=70?'exc':s>=50?'acc':'bad');
+  const clsP=p=>p>=.6?'a':p>=.35?'m':'b', verP=p=>t(p>=.6?'usable':p>=.35?'maybe':'unlikely');
+
+  // segmenta las horas en noches astronómicas (sunAlt < -12 al menos; -18 para "dark")
+  function nights(rows){const out=[]; let cur=null;
+    rows.forEach((r,i)=>{ if(r.sunAlt<-12){ if(!cur){cur={start:i,end:i,rows:[]}; out.push(cur);} cur.end=i; cur.rows.push(r);} else cur=null; });
+    out.forEach(n=>{ const dark=n.rows.filter(r=>r.sunAlt<-18); n.darkStart=dark.length?dark[0].time:null; n.darkEnd=dark.length?dark[dark.length-1].time:null;
+      n.date=isoLocal(n.rows[0].ts-(new Date(n.rows[0].time).getHours()<12?86400e3:0));
+      const best3=bestWindow(n.rows,3); n.s3=best3.mean; n.s3from=best3.from; n.s3to=best3.to; n.mean=n.rows.reduce((a,r)=>a+r.s,0)/n.rows.length; n.max=Math.max(...n.rows.map(r=>r.s));
+      const up=n.rows.filter(r=>r.moonAlt>0); n.moonUp=up.length; n.illum=n.rows[Math.floor(n.rows.length/2)].illum; n.moonFrom=up.length?up[0].time:null; n.moonTo=up.length?up[up.length-1].time:null; });
+    return out;}
+  function bestWindow(rows,k){ if(rows.length<=k){const m=rows.reduce((a,r)=>a+r.s,0)/rows.length; return {mean:m,from:rows[0].time,to:rows[rows.length-1].time};}
+    let best={mean:-1}; for(let i=0;i+k<=rows.length;i++){const m=rows.slice(i,i+k).reduce((a,r)=>a+r.s,0)/k; if(m>best.mean) best={mean:m,from:rows[i].time,to:rows[i+k-1].time};} return best;}
+  const isoLocal=d=>{const z=new Date(d); z.setMinutes(z.getMinutes()-z.getTimezoneOffset()); return z.toISOString().slice(0,10);};
+
+  document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));
+    document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id===b.dataset.pane));
+    if(b.dataset.pane==='p2'&&!B.ran){tobs(); run2();}
+  }));
+  $('#geo').addEventListener('click',()=>{navigator.geolocation?.getCurrentPosition(p=>{$('#lat').value=p.coords.latitude.toFixed(4);$('#lon').value=p.coords.longitude.toFixed(4);run1();B.ran=false;},e=>$('#st1').textContent=t('nopos')+e.message);});
+  $('#target').addEventListener('change',()=>{if(R1) run1(); if(B.ran) run2();});
+
+  /* ===== pestaña 1 ===== */
+  let R1=null;
+  function buildRows(H,aodM,lat,lon,target,limit){const now=Date.now(), rows=[];
+    for(let i=0;i<H.time.length;i++){const ts=new Date(H.time[i]).getTime(); if(ts<now-3600e3) continue; if(rows.length>=limit) break;
+      const a=astro(ts+1800e3,lat,lon);
+      const r={time:H.time[i],ts,t:H.temperature_2m[i],td:H.dew_point_2m[i],rh:H.relative_humidity_2m[i],wind:H.wind_speed_10m[i],cloud:H.cloud_cover[i],cloudL:H.cloud_cover_low[i],cloudM:H.cloud_cover_mid[i],cloudH:H.cloud_cover_high[i],precip:H.precipitation[i],jet:H.wind_speed_250hPa?H.wind_speed_250hPa[i]:null,aod:aodAt(aodM,H.time[i]),sunAlt:a.sunAlt,moonAlt:a.moonAlt,illum:a.illum};
+      if(r.t==null||r.cloud==null||r.rh==null) continue; if(r.cloudL==null) r.cloudL=r.cloud; if(r.cloudM==null) r.cloudM=0; if(r.cloudH==null) r.cloudH=0; if(r.td==null) r.td=r.t-3;
+      const sc=score(r,target); r.s=sc.s; r.why=sc.why; rows.push(r);}
+    return rows;}
+  async function run1(){
+    const {lat,lon,target}=coords(), model=$('#model').value;
+    $('#st1').textContent=t('dl'); let d;
+    try{d=await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=${HOURLY}&timezone=auto&forecast_days=3&models=${model}`,15000); if(d.error) throw new Error(d.reason);}catch(e){$('#st1').textContent=t('err')+e.message;return;}
+    const aodM=await getAOD(lat,lon);
+    const rows=buildRows(d.hourly,aodM,lat,lon,target,48);
+    R1={rows,nights:nights(rows),model,elev:d.elevation,lat,lon,noaod:!aodM}; render1();
+  }
+  function render1(){const {rows,model,elev,lat,lon,noaod}=R1;
+    $('#st1').textContent=`${model} · ${lat.toFixed(4)}, ${lon.toFixed(4)} · ${t('elev')} ${elev} m · ${new Date().toLocaleTimeString(LOC())}`+(noaod?t('noaod'):'');
+    cards1(); strip1(rows); chart1(rows); table1(rows);}
+  function nightCard(n,label){ if(!n) return `<div class="card"><div class="eyebrow">${label}</div><div class="why">${t('no_night')}</div></div>`;
+    const moon=n.moonUp===0?t('moon_down'):(n.moonUp===n.rows.length?t('all_night'):`${fmtH(n.moonFrom)} – ${fmtH(n.moonTo)}`);
+    return `<div class="card"><div class="eyebrow">${label} · ${new Date(n.rows[0].time).toLocaleDateString(LOC(),{weekday:'long',day:'2-digit'})}</div><div class="big v-${clsS(n.s3)}">${Math.round(n.s3)}</div><div class="verdict">${verS(n.s3)}</div><div class="when">${t('best_win')} ${fmtH(n.s3from)} – ${fmtH(n.s3to)} · ${t('mean')} ${Math.round(n.mean)}</div><div class="why">${t('astro')}: ${n.darkStart?fmtH(n.darkStart)+' – '+fmtH(n.darkEnd):'–'} · ${t('moon')} ${Math.round(100*n.illum)}% ${t('illum')}, ${moon}</div></div>`;}
+  function cards1(){const N=R1.nights; $('#cards1').innerHTML=nightCard(N[0],t('tonight'))+nightCard(N[1],t('tomorrow'));}
+  function strip1(rows){$('#strip').innerHTML=rows.map(r=>`<div class="hour ${r.sunAlt<-18?'dark':''} ${r.moonAlt>0?'moon':''}" title="${fmtD(r.time)} · ${r.s} · ${whyTxt(r.why)}"><div class="bar"><span class="${clsS(r.s)}" style="height:${r.s}%"></span></div><div class="t">${fmtH(r.time).slice(0,2)}</div></div>`).join('');}
+  function chart1(rows){
+    const W=1000,Hh=300,pl=40,pr=16,pt=14,pb=30,n=rows.length,x=i=>pl+(W-pl-pr)*i/(n-1),y=v=>pt+(Hh-pt-pb)*(1-v/100);
+    let g='';
+    rows.forEach((r,i)=>{const x0=x(Math.max(i-.5,0)),x1=x(Math.min(i+.5,n-1)); if(r.sunAlt<-18) g+=`<rect x="${x0}" y="${pt}" width="${x1-x0}" height="${Hh-pt-pb}" fill="#22304a"/>`; else if(r.sunAlt<-12) g+=`<rect x="${x0}" y="${pt}" width="${x1-x0}" height="${Hh-pt-pb}" fill="#1a2536"/>`;
+      if(r.moonAlt>0) g+=`<rect x="${x0}" y="${y(Math.min(r.moonAlt,90)*100/90)}" width="${x1-x0}" height="${Hh-pb-y(Math.min(r.moonAlt,90)*100/90)}" fill="#d9a441" opacity="${0.12+0.3*r.illum}"/>`;});
+    for(let v=0;v<=100;v+=25) g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}" stroke="#222b36"/><text x="${pl-6}" y="${y(v)+4}" font-size="10" text-anchor="end" fill="#9aa7b5" font-family="IBM Plex Mono">${v}</text>`;
+    const path=(f)=>rows.map((r,i)=>(i?'L':'M')+x(i).toFixed(1)+','+y(f(r)).toFixed(1)).join(' ');
+    g+=`<path d="${path(r=>r.cloud)}" fill="none" stroke="#9aa7b5" stroke-width="1.3"/><path d="${path(r=>r.cloudH)}" fill="none" stroke="#5aa0c8" stroke-width="1.2" stroke-dasharray="4 3"/><path d="${path(r=>r.s)}" fill="none" stroke="#6dbb8a" stroke-width="3"/>`;
+    rows.forEach((r,i)=>{if(i%6===0) g+=`<text x="${x(i)}" y="${Hh-10}" font-size="10" text-anchor="middle" fill="#9aa7b5" font-family="IBM Plex Mono">${fmtH(r.time)}</text>`;});
+    $('#chart1').innerHTML=`<svg viewBox="0 0 ${W} ${Hh}" role="img">${g}</svg>`;
+  }
+  function table1(rows){
+    $('#tabla1').innerHTML='<tr>'+t('th1').map(h=>'<th>'+h+'</th>').join('')+'</tr>'+rows.map(r=>`<tr class="${r.sunAlt<-18?'dark':''}"><td>${fmtD(r.time)}</td><td><span class="tag ${clsS(r.s)}">${r.s}</span></td><td>${r.cloud}%</td><td>${r.cloudL}%</td><td>${r.cloudM}%</td><td>${r.cloudH}%</td><td>${r.rh}%</td><td>${(r.t-r.td).toFixed(1)}</td><td>${r.wind.toFixed(0)}</td><td>${r.jet!=null?r.jet.toFixed(0):'–'}</td><td>${r.aod!=null?r.aod.toFixed(2):'–'}</td><td>${r.moonAlt>0?Math.round(r.moonAlt)+'° '+Math.round(100*r.illum)+'%':'–'}</td><td>${r.sunAlt.toFixed(0)}</td></tr>`).join('');
+  }
+  $('#go1').addEventListener('click',run1);
+
+  /* ===== pestaña 2 ===== */
+  const MODELS=[{id:'icon_seamless',name:'ICON',on:true},{id:'gfs_seamless',name:'GFS',on:true},{id:'meteofrance_seamless',name:'AROME/ARPEGE',on:true},{id:'ecmwf_ifs025',name:'ECMWF',on:true},{id:'ukmo_seamless',name:'UKMO',on:true},{id:'gem_seamless',name:'GEM',on:false},{id:'knmi_seamless',name:'KNMI',on:false}];
+  const COL=['#e6eaf0','#5aa0c8','#d9a441','#6dbb8a','#c0574a','#a98ad8','#2fb3a0'];
+  const PI0=0.35,A0=3.5,B0=6.5,LAMBDA=0.7,TH=58,KAP=12,TIMEOUT=12000;
+  const p_of=s=>clamp(sig((s-TH)/KAP),0.005,0.995);
+  const B={ran:false,last:null};
+  let store={obs:[],snap:{}}; try{const raw=localStorage.getItem('astro_bayes'); if(raw) store=JSON.parse(raw);}catch(e){} if(!store.snap) store.snap={}; if(!store.obs) store.obs=[];
+  const save=()=>{try{localStorage.setItem('astro_bayes',JSON.stringify(store));}catch(e){}};
+  try{const sel=JSON.parse(localStorage.getItem('astro_models')||'null'); if(sel) MODELS.forEach(m=>m.on=sel.includes(m.id));}catch(e){}
+  function mlist(){$('#mlist').innerHTML=MODELS.map(m=>`<label><input type="checkbox" data-id="${m.id}" ${m.on?'checked':''}> ${m.name} <span class="st" id="st_${m.id}"></span></label>`).join('');
+    document.querySelectorAll('#mlist input').forEach(c=>c.addEventListener('change',()=>{MODELS.find(m=>m.id===c.dataset.id).on=c.checked; try{localStorage.setItem('astro_models',JSON.stringify(MODELS.filter(m=>m.on).map(m=>m.id)));}catch(e){}}));}
+  mlist();
+  const setSt=(id,txt,k)=>{const e=$('#st_'+id); if(e){e.textContent=txt;e.className='st '+(k||'');}};
+  function weights(){const ll={}; MODELS.forEach(m=>ll[m.id]=0);
+    store.obs.forEach(o=>MODELS.forEach(m=>{const p=o.p&&o.p[m.id]; if(p==null) return; ll[m.id]+=o.y*Math.log(p)+(1-o.y)*Math.log(1-p);}));
+    const mx=Math.max(...MODELS.map(m=>ll[m.id])); let w={},Z=0; MODELS.forEach(m=>{w[m.id]=Math.exp(LAMBDA*(ll[m.id]-mx));Z+=w[m.id];}); MODELS.forEach(m=>w[m.id]/=Z); return {w,ll};}
+  function prior(){let a=A0,b=B0; store.obs.forEach(o=>{a+=o.y;b+=1-o.y;}); return {a,b,pi:a/(a+b)};}
+  async function run2(){
+    const {lat,lon,target}=coords(), alpha=+$('#alpha').value||1, sel=MODELS.filter(m=>m.on);
+    if(!sel.length){$('#st2').textContent=t('sel1');return;}
+    B.ran=true; $('#st2').textContent=t('dl_n',{n:sel.length}); MODELS.forEach(m=>setSt(m.id,'')); sel.forEach(m=>setSt(m.id,'…'));
+    const t0=performance.now(), aodP=getAOD(lat,lon);
+    const results=await Promise.allSettled(sel.map(m=>fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=${HOURLY}&timezone=auto&forecast_days=2&models=${m.id}`,TIMEOUT)
+      .then(d=>{if(d.error) throw new Error(d.reason); setSt(m.id,((performance.now()-t0)/1000).toFixed(1)+' s','ok'); return d;})
+      .catch(e=>{setSt(m.id,t(e.name==='AbortError'?'timeout':'error'),'ko'); throw e;})));
+    const aodM=await aodP, per={}; let ref=null;
+    results.forEach((r,k)=>{if(r.status==='fulfilled'){per[sel[k].id]=buildRows(r.value.hourly,aodM,lat,lon,target,36); if(!ref) ref=per[sel[k].id];}});
+    const act=sel.filter(m=>per[m.id]&&per[m.id].length);
+    if(!act.length){$('#st2').textContent=t('none');return;}
+    // filas comunes por hora
+    const times=per[act[0].id].map(r=>r.time), rows=times.map((time,i)=>{const base=per[act[0].id][i]; const r={time,ts:base.ts,sunAlt:base.sunAlt,moonAlt:base.moonAlt,illum:base.illum,per:{}};
+      act.forEach(mo=>{const q=per[mo.id].find(z=>z.time===time); if(q) r.per[mo.id]={...q,p:p_of(q.s)};}); return r;});
+    const {w,ll}=weights(), pr=prior(), Zw=act.reduce((a,mo)=>a+w[mo.id],0), wa={}; act.forEach(mo=>wa[mo.id]=w[mo.id]/Zw);
+    rows.forEach(r=>{let z=logit(pr.pi), ps=[]; act.forEach(mo=>{const q=r.per[mo.id]; if(!q) return; z+=alpha*wa[mo.id]*(logit(q.p)-logit(PI0)); ps.push(q.p);}); r.post=ps.length?sig(z):pr.pi; r.min=ps.length?Math.min(...ps):0; r.max=ps.length?Math.max(...ps):0;});
+    // noche por modelo: s3 y p
+    const nightsPer={}; act.forEach(mo=>{nightsPer[mo.id]=nights(per[mo.id]);});
+    const refN=nights(per[act[0].id])[0]||null; let nightP={}, nightPost=null;
+    if(refN){ let z=logit(pr.pi); act.forEach(mo=>{const n=nightsPer[mo.id][0]; if(!n) return; nightP[mo.id]=p_of(n.s3); z+=alpha*wa[mo.id]*(logit(nightP[mo.id])-logit(PI0));}); nightPost=sig(z); }
+    B.last={rows,act,wa,ll,pr,alpha,lat,lon,nightsPer,refN,nightP,nightPost,fail:sel.length-act.length,secs:((performance.now()-t0)/1000).toFixed(1),noaod:!aodM};
+    if(refN){ store.snap[refN.date]={p:nightP,post:nightPost,at:new Date().toISOString(),lat,lon,n:act.length,target}; save();
+      const ex=store.obs.find(o=>o.date===refN.date&&!o.p); if(ex){ex.p=nightP; ex.post=nightPost; save();} }
+    render2();
+  }
+  function render2(){const L=B.last, sn=L.refN?store.snap[L.refN.date]:null;
+    $('#st2').textContent=t('fused',{k:L.act.length})+(L.fail?t('failed',{f:L.fail}):'')+` · ${L.secs} s · ${L.lat.toFixed(4)}, ${L.lon.toFixed(4)}`+(L.noaod?t('noaod'):'')+(sn?' · '+t('snap_info',{d:L.refN.date,n:sn.n,h:new Date(sn.at).toLocaleTimeString(LOC(),{hour:'2-digit',minute:'2-digit'})}):'');
+    cards2(); chart2(); tnight(); tw(); tobs();}
+  function cards2(){const {act,refN,nightP,nightPost,alpha}=B.last; if(!refN){$('#cards2').innerHTML=`<div class="card"><div class="why">${t('no_night')}</div></div>`;return;}
+    const ps=act.map(mo=>nightP[mo.id]).filter(x=>x!=null), mean=ps.reduce((a,b)=>a+b,0)/ps.length, sd=Math.sqrt(ps.reduce((a,b)=>a+(b-mean)**2,0)/ps.length);
+    let h=`<div class="card"><div class="eyebrow">${t('tonight')} · ${new Date(refN.rows[0].time).toLocaleDateString(LOC(),{weekday:'long',day:'2-digit'})}</div><div class="big v-${clsP(nightPost)}">${(100*nightPost).toFixed(0)}<span style="font-size:18px"> %</span></div><div class="verdict">${verP(nightPost)}</div><div class="when">${t('range')} ${(100*Math.min(...ps)).toFixed(0)} – ${(100*Math.max(...ps)).toFixed(0)} % · ${t('astro')} ${refN.darkStart?fmtH(refN.darkStart)+' – '+fmtH(refN.darkEnd):'–'}</div><div class="why">${act.map(mo=>nightP[mo.id]!=null?mo.name+' '+(100*nightP[mo.id]).toFixed(0)+'%':'').filter(Boolean).join(' · ')}</div></div>`;
+    h+=`<div class="card"><div class="eyebrow">${t('disp')}</div><div class="big">${(100*sd).toFixed(0)}<span style="font-size:18px"> pp</span></div><div class="verdict">${t(sd<.1?'agree_h':sd<.2?'agree_m':'agree_l')}</div><div class="when">${t('mean')} ${(100*mean).toFixed(0)} % · α = ${alpha}</div><div class="why">${t('disp_note')}</div></div>`;
+    h+=`<div class="card"><div class="eyebrow">${t('moon')}</div><div class="big">${Math.round(100*refN.illum)}<span style="font-size:18px"> %</span></div><div class="verdict">${refN.moonUp===0?t('moon_down'):refN.moonUp===refN.rows.length?t('all_night'):fmtH(refN.moonFrom)+' – '+fmtH(refN.moonTo)}</div><div class="when">${t('illum')}</div></div>`;
+    $('#cards2').innerHTML=h;}
+  function chart2(){
+    const {rows,act,wa}=B.last, W=1000,Hh=320,pl=40,pr=16,pt=14,pb=30,n=rows.length, x=i=>pl+(W-pl-pr)*i/(n-1), y=p=>pt+(Hh-pt-pb)*(1-p);
+    let g=''; rows.forEach((r,i)=>{const x0=x(Math.max(i-.5,0)),x1=x(Math.min(i+.5,n-1)); if(r.sunAlt<-18) g+=`<rect x="${x0}" y="${pt}" width="${x1-x0}" height="${Hh-pt-pb}" fill="#22304a"/>`; else if(r.sunAlt<-12) g+=`<rect x="${x0}" y="${pt}" width="${x1-x0}" height="${Hh-pt-pb}" fill="#1a2536"/>`;});
+    let up='',dn=''; rows.forEach((r,i)=>{up+=(i?'L':'M')+x(i).toFixed(1)+','+y(r.max).toFixed(1)+' ';}); for(let i=n-1;i>=0;i--) dn+='L'+x(i).toFixed(1)+','+y(rows[i].min).toFixed(1)+' ';
+    g+=`<path d="${up}${dn}Z" fill="#5aa0c8" opacity=".18"/>`;
+    for(let v=0;v<=1;v+=.25) g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}" stroke="#222b36"/><text x="${pl-6}" y="${y(v)+4}" font-size="10" text-anchor="end" fill="#9aa7b5" font-family="IBM Plex Mono">${100*v}</text>`;
+    act.forEach(mo=>{const c=COL[MODELS.indexOf(mo)%COL.length]; let d='',first=true; rows.forEach((r,i)=>{if(!r.per[mo.id]) return; d+=(first?'M':'L')+x(i).toFixed(1)+','+y(r.per[mo.id].p).toFixed(1)+' '; first=false;}); g+=`<path d="${d}" fill="none" stroke="${c}" stroke-width="1.2" opacity=".7"/>`;});
+    g+=`<path d="${rows.map((r,i)=>(i?'L':'M')+x(i).toFixed(1)+','+y(r.post).toFixed(1)).join(' ')}" fill="none" stroke="#6dbb8a" stroke-width="3"/>`;
+    rows.forEach((r,i)=>{if(i%6===0) g+=`<text x="${x(i)}" y="${Hh-10}" font-size="10" text-anchor="middle" fill="#9aa7b5" font-family="IBM Plex Mono">${fmtH(r.time)}</text>`;});
+    $('#chart2').innerHTML=`<svg viewBox="0 0 ${W} ${Hh}" role="img">${g}</svg>`;
+    $('#legend2').innerHTML=`<i style="background:#6dbb8a;height:4px"></i>${t('post_leg')} <i style="background:#5aa0c8;height:8px;opacity:.4"></i>${t('range_leg')} `+act.map(mo=>`<i style="background:${COL[MODELS.indexOf(mo)%COL.length]}"></i>${mo.name} (w=${wa[mo.id].toFixed(2)})`).join('');
+  }
+  function tnight(){const {act,nightsPer,nightP}=B.last; let h='<tr>'+t('thnight').map(x=>'<th>'+x+'</th>').join('')+'</tr>';
+    act.forEach(mo=>{const n=nightsPer[mo.id][0]; if(!n) return; const mid=n.rows[Math.floor(n.rows.length/2)];
+      const mc=Math.round(n.rows.reduce((a,r)=>a+r.cloud,0)/n.rows.length), mh=Math.round(n.rows.reduce((a,r)=>a+r.cloudH,0)/n.rows.length), mr=Math.round(n.rows.reduce((a,r)=>a+r.rh,0)/n.rows.length), jets=n.rows.filter(r=>r.jet!=null), mj=jets.length?Math.round(jets.reduce((a,r)=>a+r.jet,0)/jets.length):null;
+      h+=`<tr><td>${mo.name}</td><td><span class="tag ${clsP(nightP[mo.id])}">${(100*nightP[mo.id]).toFixed(0)}%</span></td><td>${Math.round(n.s3)}</td><td>${mc}%</td><td>${mh}%</td><td>${mr}%</td><td>${mj!=null?mj:'–'}</td><td>${fmtH(n.s3from)}–${fmtH(n.s3to)}</td></tr>`;});
+    $('#tnight').innerHTML=h;}
+  function tw(){const {act,wa,ll,pr}=B.last; let h='<tr>'+t('thw').map(x=>'<th>'+x+'</th>').join('')+'</tr>';
+    act.forEach(mo=>h+=`<tr><td>${mo.name}</td><td>${wa[mo.id].toFixed(3)}</td><td><span class="wbar" style="width:${(120*wa[mo.id]).toFixed(0)}px"></span></td><td>${ll[mo.id].toFixed(2)}</td></tr>`);
+    $('#tw').innerHTML=h; $('#priorinfo').textContent=t('prior_info',{a:pr.a.toFixed(1),b:pr.b.toFixed(1),pi:(100*pr.pi).toFixed(1),n:store.obs.length});}
+  function tobs(){let h='<tr>'+t('thobs').map(x=>'<th>'+x+'</th>').join('')+MODELS.map(m=>'<th>'+m.name+'</th>').join('')+'<th>'+t('posterior')+'</th><th></th></tr>';
+    store.obs.slice().reverse().forEach((o,k)=>{const idx=store.obs.length-1-k; h+=`<tr><td>${o.date}</td><td>${o.y}</td>`+MODELS.map(m=>'<td>'+(o.p&&o.p[m.id]!=null?(100*o.p[m.id]).toFixed(0)+'%':'–')+'</td>').join('')+`<td>${o.post!=null?(100*o.post).toFixed(0)+'%':'<span style="color:var(--warn)">'+t('pending')+'</span>'}</td><td><button class="small ghost" data-i="${idx}">${t('del')}</button></td></tr>`;});
+    $('#tobs').innerHTML=h; document.querySelectorAll('#tobs button').forEach(b=>b.addEventListener('click',()=>{store.obs.splice(+b.dataset.i,1);save(); if(B.last) render2(); else tobs();}));}
+  $('#saveobs').addEventListener('click',()=>{
+    const date=$('#odate').value; if(!date) return; const y=+$('#oval').value, sn=store.snap[date];
+    const ex=store.obs.findIndex(o=>o.date===date);
+    if(ex>=0){store.obs[ex].y=y; if(!store.obs[ex].p&&sn){store.obs[ex].p=sn.p;store.obs[ex].post=sn.post;}} else store.obs.push({date,y,p:sn?sn.p:null,post:sn?sn.post:null,lat:sn?sn.lat:null,lon:sn?sn.lon:null});
+    save(); const msg=sn?t('obs_saved',{d:date}):t('no_snap',{d:date});
+    if(B.last){render2(); $('#st2').textContent=msg+' · '+$('#st2').textContent;} else {$('#st2').textContent=msg; tobs();}
+  });
+  $('#exp').addEventListener('click',()=>{const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(store,null,1)],{type:'application/json'})); a.download='astro_observaciones.json'; a.click();});
+  $('#imp').addEventListener('change',e=>{const f=e.target.files[0]; if(!f) return; f.text().then(x=>{try{const s=JSON.parse(x); if(Array.isArray(s.obs)){store=s; if(!store.snap) store.snap={}; save(); run2();}}catch(err){$('#st2').textContent=t('badjson');}});});
+  $('#clear').addEventListener('click',()=>{if(confirm(t('confirm'))){store={obs:[],snap:{}};save();run2();}});
+  $('#go2').addEventListener('click',run2);
+  {const now=new Date(); $('#odate').value=isoLocal(now.getHours()<14?now.getTime()-86400e3:now.getTime());}
+
+  APP_READY=true; applyLang(); run1();
+})();
+</script>
+</body>
+</html>
