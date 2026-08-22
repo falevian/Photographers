@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23e6eaee'/><circle cx='16' cy='11' r='5.5' fill='%23d9a441'/><rect x='5' y='16' width='22' height='2.6' rx='1.3' fill='%239fb0bd'/><rect x='8' y='21' width='19' height='2.6' rx='1.3' fill='%23788b99'/><rect x='5' y='26' width='16' height='2.6' rx='1.3' fill='%239fb0bd'/></svg>">
+
+<title>Manual · Niebla para fotografía</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#e6eaee;--paper:#f3f5f7;--ink:#1c262e;--ink2:#55636d;--line:#c5ccd3;--ok:#3e6d8a;--warn:#b8862b;--bad:#8c4a3a;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;--sans:"Space Grotesk",system-ui,sans-serif}
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#dfe4e8,var(--bg) 40%,#eef1f3);color:var(--ink);font-family:var(--sans);line-height:1.55}
+  header,main{max-width:900px;margin:0 auto;padding:0 24px}
+  header{padding-top:24px}
+  .topbar{display:flex;justify-content:flex-end;align-items:center;gap:14px;font-size:13px}
+  .topbar a{color:var(--ink2)}
+  .lang{display:inline-flex;border:1px solid var(--ink);border-radius:5px;overflow:hidden;font-family:var(--mono);font-size:12px}
+  .lang button{border:none;border-radius:0;padding:5px 10px;background:transparent;color:var(--ink);font-family:var(--mono);cursor:pointer}
+  .lang button.on{background:var(--ink);color:#fff}
+  h1{font-size:clamp(26px,4vw,38px);font-weight:700;letter-spacing:-.02em;margin:6px 0 4px}
+  .sub{color:var(--ink2);margin:0 0 18px}
+  main{padding-bottom:60px}
+  nav{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:12px 16px;font-size:14px;margin-bottom:24px}
+  nav a{color:var(--ok);text-decoration:none;margin-right:14px;white-space:nowrap}
+  h2{font-size:20px;font-weight:700;margin:34px 0 8px;letter-spacing:-.01em}
+  h3{font-size:15px;font-weight:700;margin:20px 0 6px;color:var(--ink)}
+  p{margin:0 0 12px;max-width:76ch}
+  code{font-family:var(--mono);font-size:12.5px;background:#e9edf0;padding:1px 5px;border-radius:3px}
+  pre{font-family:var(--mono);font-size:12.5px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:12px 14px;overflow-x:auto}
+  table{border-collapse:collapse;font-family:var(--mono);font-size:12.5px;background:#fff;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:8px 0 16px}
+  th,td{padding:6px 10px;border-bottom:1px solid #e4e8eb;text-align:left;vertical-align:top}
+  th{background:#eaeef1;font-weight:500;color:var(--ink2)}
+  .box{background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--warn);border-radius:6px;padding:10px 14px;margin:12px 0;font-size:14px}
+  .box.ok{border-left-color:var(--ok)}
+  .kbd{font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-radius:4px;padding:0 5px;background:#fff}
+  [lang-es],[lang-en]{display:none}
+  body.es [lang-es]{display:block} body.en [lang-en]{display:block}
+</style>
+</head>
+<body class="es">
+<header>
+  <div class="topbar"><a href="index.html" id="back">← Herramienta</a><a href="guia.html" id="guialink">Guía rápida</a>
+    <div class="lang" role="group" aria-label="Idioma / Language"><button id="lg-es" type="button">ES</button><button id="lg-en" type="button">EN</button></div></div>
+</header>
+
+<!-- ============================ ESPAÑOL ============================ -->
+<main lang-es>
+  <h1>Manual de uso</h1>
+  <p class="sub">Niebla para fotografía: índice físico y fusión bayesiana multimodelo.</p>
+  <nav><a href="#es-0">Qué es</a><a href="#es-1">Instalación</a><a href="#es-2">Controles comunes</a><a href="#es-3">Pestaña 1</a><a href="#es-4">Pestaña 2</a><a href="#es-5">Entrenamiento</a><a href="#es-6">Datos y privacidad</a><a href="#es-7">Interpretación</a><a href="#es-8">Ajustes avanzados</a><a href="#es-9">Problemas</a></nav>
+
+  <h2 id="es-0">1. Qué es y qué no es</h2>
+  <p>Es una página HTML autónoma que consulta la API pública de Open‑Meteo y estima el riesgo de niebla o bruma en las próximas horas y en la ventana del próximo amanecer, pensada para decidir si merece la pena salir a fotografiar. No es un modelo de capa límite ni sustituye al aviso oficial: es una herramienta de favorabilidad, con una segunda capa bayesiana que aprende de tus observaciones locales.</p>
+  <p>Dos pestañas. La primera, “Índice de niebla”, usa un único modelo numérico y muestra el índice hora a hora con toda la física visible. La segunda, “Fusión bayesiana”, descarga varios modelos en paralelo, convierte cada uno en una probabilidad y los combina en un posterior, ponderando cada modelo según lo bien que ha acertado en tu registro.</p>
+
+  <h2 id="es-1">2. Instalación</h2>
+  <p>No hay nada que instalar. Tres formas de usarla:</p>
+  <p><b>Local.</b> Guarda <code>index.html</code> y <code>manual.html</code> en una carpeta y abre <code>index.html</code> con el navegador. Funciona con doble clic (origen <code>file://</code>).</p>
+  <p><b>GitHub Pages.</b> Sube los dos archivos a un repositorio, activa Pages en Settings → Pages (rama main, carpeta raíz) y accede a <code>https://usuario.github.io/repositorio/</code>. El archivo se llama <code>index.html</code> precisamente para que sea la página de entrada.</p>
+  <p><b>Móvil.</b> Abre la URL de Pages en el navegador del teléfono y añádela a la pantalla de inicio. El botón “Usar mi posición” pide permiso de geolocalización; en Pages funciona porque el sitio se sirve por HTTPS.</p>
+  <div class="box">Requisitos: conexión a Internet (la previsión se descarga en cada cálculo) y un navegador moderno. Se cargan dos fuentes desde Google Fonts; si no hay red, se usan las del sistema.</div>
+
+  <h2 id="es-2">3. Controles comunes</h2>
+  <table><tr><th>Control</th><th>Función</th></tr>
+  <tr><td>Latitud, Longitud</td><td>Punto para el que se pide la previsión. Se puede escribir a mano (formato decimal, longitud oeste negativa) o rellenar con “Usar mi posición”.</td></tr>
+  <tr><td>Entorno</td><td><b>Costero</b> activa el término de niebla de advección y descarga la temperatura superficial del mar (SST). <b>Interior</b> lo desactiva y ahorra una petición.</td></tr>
+  <tr><td>ES / EN</td><td>Cambia el idioma de la interfaz y del manual. La elección se recuerda.</td></tr>
+  <tr><td>Manual</td><td>Abre este documento.</td></tr></table>
+
+  <h2 id="es-3">4. Pestaña 1: índice de niebla</h2>
+  <h3>Selector de modelo</h3>
+  <p>“Mejor disponible” deja que Open‑Meteo elija el modelo de mayor resolución para el punto (en Europa occidental suele ser ICON‑EU o AROME). Los demás fuerzan un modelo concreto; útil para comparar.</p>
+  <h3>Tarjetas</h3>
+  <p><b>Próximas 6 horas</b>: máximo del índice en ese intervalo y a qué hora. <b>Amanecer</b>: máximo en la ventana de 2.5 h antes a 1.5 h después de la salida del sol, que es cuando la niebla de radiación alcanza su desarrollo y cuando interesa estar en el sitio. <b>Mínima depresión del punto de rocío</b>: el valor de ΔT = T − Td más bajo previsto esta noche, con T, Td, viento, nubes, SST y presión en ese instante. Es el dato físico más directo: si no baja de 1 °C, difícilmente habrá niebla de radiación.</p>
+  <h3>Banda horaria</h3>
+  <p>Una barra por hora, 48 horas. Altura = índice. Fondo gris = noche. Hora en rojo = amanecer. Color ámbar = bruma posible (40 a 64), rojizo = niebla probable (≥ 65). Al pasar el ratón se ven las señales activas.</p>
+  <h3>Gráfica de convergencia</h3>
+  <p>T y Td en °C sobre el eje izquierdo; viento en km/h sobre el derecho. Las franjas rosadas marcan las horas con ΔT &lt; 2 °C (más intensas si &lt; 1 °C). La línea discontinua roja es el amanecer. La imagen que buscas: T y Td acercándose durante la noche, viento por debajo de 10 km/h y fondo gris sin nubes.</p>
+  <h3>Tabla horaria</h3>
+  <p>Todas las variables usadas más dirección del viento, nubes bajas, SST y presión. La columna “Vis km” es la visibilidad que pronostica el propio modelo; cuando baja de 3 km es la señal más fiable de todas.</p>
+  <h3>Fórmula del índice</h3>
+  <table><tr><th>Término</th><th>Puntos</th><th>Justificación</th></tr>
+  <tr><td>ΔT = T − Td</td><td>40 si ≤ 0.5 °C; lineal a 0 en 4 °C</td><td>Saturación. Condición necesaria.</td></tr>
+  <tr><td>Viento 10 m</td><td>&lt;2: 14 · 2–8: 20 · 8–15: 8 · 15–20: 3 · &gt;20: 0</td><td>Niebla de radiación: algo de mezcla turbulenta la profundiza; calma absoluta da rocío; viento fuerte la impide.</td></tr>
+  <tr><td>Nubosidad (noche)</td><td>&lt;25 %: 20 · 25–60 %: 8 · &gt;60 %: 0 (mitad de día)</td><td>Cielo despejado = enfriamiento radiativo del suelo.</td></tr>
+  <tr><td>Visibilidad modelo</td><td>&lt;1 km: 20 · &lt;3 km: 10 · &lt;6 km: 4</td><td>Diagnóstico directo del modelo.</td></tr>
+  <tr><td>HR ≥ 97 %</td><td>+10</td><td>Redundante con ΔT pero robusto a redondeos.</td></tr>
+  <tr><td>Lluvia &gt; 0.5 mm</td><td>−15</td><td>Precipitación activa suele ir con nubes y viento.</td></tr>
+  <tr><td>Advección (costero)</td><td>hasta +30 si Td − SST &gt; 0 y viento 8–30 km/h</td><td>Aire húmedo sobre mar más frío se enfría hasta saturar. No necesita calma ni cielo despejado.</td></tr>
+  <tr><td>Día</td><td>× 0.65</td><td>La radiación solar disipa la capa.</td></tr></table>
+
+  <h2 id="es-4">5. Pestaña 2: fusión bayesiana</h2>
+  <h3>Selección de modelos</h3>
+  <p>Cada casilla es un modelo. Se descargan en paralelo con un límite de 12 s cada uno; los que no llegan a tiempo se descartan y se indica “timeout”. Tras cada cálculo aparece el tiempo de respuesta de cada modelo. Si alguno es sistemáticamente lento en tu conexión, desmárcalo: la selección se recuerda. Por defecto están activos ICON, GFS, AROME/ARPEGE, ECMWF y UKMO.</p>
+  <h3>Parámetro α</h3>
+  <p>Número efectivo de fuentes independientes. Los modelos globales comparten observaciones y buena parte de la física, así que sus errores están correlacionados; tratarlos como independientes produce posteriores demasiado extremos. α = 1 los trata como una sola evidencia; α = 1.8 (valor por defecto) es un compromiso razonable; α mayor asume más independencia. Tras unas semanas de registro, ajústalo hasta que la calibración sea buena (ver §8).</p>
+  <h3>Tarjetas</h3>
+  <p>Posterior para las próximas 6 horas y para la ventana del amanecer, con el rango mínimo a máximo entre modelos y la probabilidad individual de cada uno. La tercera tarjeta da la desviación típica entre modelos en el amanecer: acuerdo alto (&lt; 10 pp), moderado o desacuerdo. Un posterior del 40 % con acuerdo alto es una previsión más útil que un 55 % con desacuerdo.</p>
+  <h3>Gráfica</h3>
+  <p>Una línea fina por modelo, banda gris con el rango y línea gruesa negra con el posterior. Eje vertical en %.</p>
+  <h3>Tablas</h3>
+  <p>“Estado del amanecer por modelo” muestra, para cada modelo, su probabilidad máxima en la ventana y el estado físico previsto en esa hora. “Pesos bayesianos y prior” muestra w_m, su log‑verosimilitud acumulada y el prior Beta actual.</p>
+
+  <h2 id="es-5">6. Entrenamiento: registro de observaciones</h2>
+  <p>El aprendizaje consiste en comparar lo que cada modelo predijo con lo que tú viste. Para que la comparación sea honesta, la predicción tiene que quedar fijada antes de conocer el resultado. La herramienta lo hace sola:</p>
+  <p><b>Congelación automática.</b> Cada vez que pulsas “Calcular” en la pestaña 2, las probabilidades de cada modelo para la ventana del próximo amanecer se guardan asociadas a la fecha de esa noche (la noche se identifica por la fecha de la tarde, es decir, el día anterior al amanecer). Si calculas varias veces, se conserva la última, que es la previsión más reciente antes del amanecer. La línea de estado indica “Previsión congelada para la noche del …”.</p>
+  <p><b>Por la mañana.</b> El campo “Noche del” aparece ya con la fecha de la noche recién terminada (antes de las 14:00 propone ayer; después, hoy). Elige lo observado (Niebla si la visibilidad fue inferior a 1 km; Bruma o neblina si hubo reducción notable pero superior a 1 km; Nada) y pulsa “Guardar observación”. La observación se empareja con la previsión que se congeló la víspera para esa fecha. No importa que a esa hora ya exista una previsión nueva para mañana: no se usa.</p>
+  <p><b>Si esa noche no calculaste.</b> No hay previsión congelada para esa fecha. La observación se guarda igualmente (aparece como “pendiente” en la columna posterior) y actualiza el prior climatológico, que solo necesita saber si hubo niebla o no; pero no modifica los pesos de los modelos, porque no hay predicción con la que compararla. Si más tarde ese mismo día calculas antes de que el amanecer cambie de fecha, la fila se completa automáticamente.</p>
+  <div class="box ok">Rutina mínima: por la tarde o noche, abrir la página y pulsar Calcular en la pestaña 2 (dos segundos). Por la mañana, elegir lo observado y Guardar. Nada más.</div>
+  <p>Con cada observación ocurren dos cosas. El prior Beta se actualiza (a += y, b += 1 − y, con y = 1, 0.5 o 0), de modo que la tasa base deja de ser el 12 % genérico y pasa a ser tu frecuencia local. Y la log‑verosimilitud de cada modelo acumula log P_m(y): un modelo que daba 80 % y hubo niebla suma log 0.8; uno que daba 10 % suma log 0.1. Los pesos w_m se recalculan como exp(0.7 · log‑verosimilitud) normalizado.</p>
+  <p>Orientación sobre cantidad: con 10 noches los pesos ya empiezan a separarse; con 40 o 50 tienen significado; con más de 100 merece la pena pasar a una regresión logística sobre las variables crudas.</p>
+
+  <h2 id="es-6">7. Datos y privacidad: dónde se guarda el registro</h2>
+  <p>Todo el registro (observaciones, probabilidades, selección de modelos, idioma) se guarda con <code>localStorage</code> en el navegador desde el que se usa la página. Nada se envía a ningún servidor; GitHub solo sirve el HTML estático y no recibe ni conserva tus datos. Implicaciones concretas:</p>
+  <table><tr><th>Situación</th><th>Qué pasa con el registro</th></tr>
+  <tr><td>Misma URL, mismo navegador, mismo dispositivo</td><td>Persiste indefinidamente, aunque cierres el navegador o hagas push de una nueva versión del HTML.</td></tr>
+  <tr><td>Otro navegador u otro dispositivo</td><td>No está: localStorage es por navegador y por origen. Usa Exportar e Importar JSON.</td></tr>
+  <tr><td>Abrir el archivo en local (<code>file://</code>) y también desde Pages (<code>https://</code>)</td><td>Son orígenes distintos; cada uno tiene su propio registro. Exporta de uno e importa en el otro.</td></tr>
+  <tr><td>Borrar datos de navegación o “datos de sitios”</td><td>Se pierde. Exporta el JSON de vez en cuando y guárdalo en el propio repositorio, por ejemplo.</td></tr>
+  <tr><td>Modo incógnito</td><td>Se borra al cerrar la ventana.</td></tr>
+  <tr><td>Otras páginas en el mismo origen (<code>usuario.github.io</code>)</td><td>Comparten el espacio de localStorage; las claves usadas aquí empiezan por <code>niebla_</code> para no colisionar.</td></tr></table>
+  <div class="box ok">Recomendación: tras cada sesión de anotaciones, pulsa “Exportar JSON” y sube el archivo al repositorio. Así el historial queda versionado y reimportable en cualquier dispositivo.</div>
+
+  <h2 id="es-7">8. Interpretación y buenas prácticas</h2>
+  <p>Señal fuerte de niebla de radiación: ΔT previsto por debajo de 1 °C a partir de medianoche, viento entre 2 y 8 km/h, nubes por debajo del 25 %, presión alta y en ascenso, y visibilidad modelada menor de 3 km. Si además varios modelos coinciden (desacuerdo &lt; 10 pp), la probabilidad es alta.</p>
+  <p>Señal de niebla de advección (costa): punto de rocío del aire uno o dos grados por encima de la SST, viento moderado del mar, humedad alta. Puede darse con cielo nublado y viento de 15 o 20 km/h; en esos casos la pestaña 1 en modo interior la infravalora.</p>
+  <p>Cuándo desconfiar: valles estrechos, zonas con suelo muy húmedo tras lluvia reciente o embalses y ríos, donde la niebla local se forma con ΔT previsto de 2 o 3 °C. Los modelos no resuelven esa escala; tu registro sí la captura, de ahí la importancia del prior local.</p>
+  <p>Calibración: cuando tengas 30 o más noches, agrupa las filas del registro por posterior (0–25 %, 25–50 %, 50–75 %, 75–100 %) y compara con la frecuencia real de niebla en cada grupo. Si las frecuencias reales son sistemáticamente más extremas que el posterior, sube α; si son menos extremas, bájalo.</p>
+
+  <h2 id="es-8">9. Ajustes avanzados (editar el HTML)</h2>
+  <p>Todas las constantes están al principio de la sección de la pestaña 2 en <code>index.html</code>:</p>
+  <pre>const PI0=0.12   // tasa base de la calibración logística
+const A0=1.2, B0=8.8   // prior Beta inicial (media 0.12)
+const LAMBDA=0.7 // tempering de los pesos
+const TH=55, KAP=12    // logística p = σ((s − TH)/KAP)
+const TIMEOUT=12000    // ms por modelo</pre>
+  <p>Los pesos del índice están en la función <code>score()</code>, común a ambas pestañas. Para añadir un modelo, amplía el array <code>MODELS</code> con el identificador de Open‑Meteo (por ejemplo <code>jma_seamless</code>). Las coordenadas por defecto están en los atributos <code>value</code> de los campos de latitud y longitud.</p>
+
+  <h2 id="es-9">10. Problemas frecuentes</h2>
+  <table><tr><th>Síntoma</th><th>Causa y solución</th></tr>
+  <tr><td>“Ningún modelo respondió a tiempo”</td><td>Open‑Meteo saturado o conexión lenta. Reintenta, reduce la selección o sube TIMEOUT.</td></tr>
+  <tr><td>Un modelo siempre en “timeout”</td><td>Desmárcalo; la fusión funciona con los que respondan.</td></tr>
+  <tr><td>“sin SST, advección desactivada”</td><td>El punto está tierra adentro para la API marina o la petición falló. En interior es lo esperado; en costa, prueba a mover el punto unos cientos de metros hacia el mar.</td></tr>
+  <tr><td>“Vis km” en blanco para algún modelo</td><td>Ese modelo no publica visibilidad (ECMWF, por ejemplo). El índice se calcula sin ese término.</td></tr>
+  <tr><td>El registro desapareció</td><td>Cambio de navegador, de dispositivo, de origen (file → https) o borrado de datos. Importa el JSON exportado.</td></tr>
+  <tr><td>“Usar mi posición” no hace nada</td><td>Permiso denegado o página servida sin HTTPS. Escribe las coordenadas a mano.</td></tr></table>
+</main>
+
+<!-- ============================ ENGLISH ============================ -->
+<main lang-en>
+  <h1>User manual</h1>
+  <p class="sub">Fog for photography: physical index and multi‑model Bayesian fusion.</p>
+  <nav><a href="#en-0">What it is</a><a href="#en-1">Setup</a><a href="#en-2">Common controls</a><a href="#en-3">Tab 1</a><a href="#en-4">Tab 2</a><a href="#en-5">Training</a><a href="#en-6">Data and privacy</a><a href="#en-7">Interpretation</a><a href="#en-8">Advanced</a><a href="#en-9">Troubleshooting</a></nav>
+
+  <h2 id="en-0">1. What it is and what it is not</h2>
+  <p>A self‑contained HTML page that queries the public Open‑Meteo API and estimates the risk of fog or mist over the next hours and in the next sunrise window, meant to help decide whether a photo outing is worth it. It is not a boundary‑layer model and does not replace official warnings: it is a favourability tool, with a second Bayesian layer that learns from your local observations.</p>
+  <p>Two tabs. The first, “Fog index”, uses a single numerical model and shows the hourly index with all the physics visible. The second, “Bayesian fusion”, downloads several models in parallel, turns each one into a probability and combines them into a posterior, weighting each model by how well it has scored in your log.</p>
+
+  <h2 id="en-1">2. Setup</h2>
+  <p>Nothing to install. Three ways to use it:</p>
+  <p><b>Local.</b> Save <code>index.html</code> and <code>manual.html</code> in a folder and open <code>index.html</code> in the browser. Double click works (<code>file://</code> origin).</p>
+  <p><b>GitHub Pages.</b> Push both files to a repository, enable Pages under Settings → Pages (main branch, root folder) and visit <code>https://user.github.io/repo/</code>. The file is named <code>index.html</code> so it is the entry page.</p>
+  <p><b>Mobile.</b> Open the Pages URL on the phone and add it to the home screen. “Use my location” asks for geolocation permission; it works on Pages because the site is served over HTTPS.</p>
+  <div class="box">Requirements: an Internet connection (the forecast is downloaded on each compute) and a modern browser. Two fonts are loaded from Google Fonts; without network the system fonts are used.</div>
+
+  <h2 id="en-2">3. Common controls</h2>
+  <table><tr><th>Control</th><th>Function</th></tr>
+  <tr><td>Latitude, Longitude</td><td>Point for which the forecast is requested. Type them (decimal, west negative) or fill them with “Use my location”.</td></tr>
+  <tr><td>Setting</td><td><b>Coastal</b> enables the advection fog term and downloads sea surface temperature (SST). <b>Inland</b> disables it and saves one request.</td></tr>
+  <tr><td>ES / EN</td><td>Switches the interface and manual language. The choice is remembered.</td></tr>
+  <tr><td>Manual</td><td>Opens this document.</td></tr></table>
+
+  <h2 id="en-3">4. Tab 1: fog index</h2>
+  <h3>Model selector</h3>
+  <p>“Best available” lets Open‑Meteo pick the highest‑resolution model for the point (in western Europe usually ICON‑EU or AROME). The others force a specific model; useful for comparison.</p>
+  <h3>Cards</h3>
+  <p><b>Next 6 hours</b>: maximum index in that interval and when. <b>Sunrise</b>: maximum in the window from 2.5 h before to 1.5 h after sunrise, when radiation fog is fully developed and when you want to be on site. <b>Minimum dew point depression</b>: the lowest forecast ΔT = T − Td tonight, with T, Td, wind, clouds, SST and pressure at that hour. It is the most direct physical datum: if it does not drop below 1 °C, radiation fog is unlikely.</p>
+  <h3>Hourly strip</h3>
+  <p>One bar per hour, 48 hours. Height = index. Grey background = night. Red hour = sunrise. Amber = mist possible (40 to 64), reddish = fog likely (≥ 65). Hover to see the active signals.</p>
+  <h3>Convergence chart</h3>
+  <p>T and Td in °C on the left axis; wind in km/h on the right. Pink bands mark hours with ΔT &lt; 2 °C (stronger below 1 °C). The dashed red line is sunrise. The picture you are looking for: T and Td converging overnight, wind below 10 km/h and a cloud‑free grey background.</p>
+  <h3>Hourly table</h3>
+  <p>All variables used plus wind direction, low clouds, SST and pressure. “Vis km” is the visibility forecast by the model itself; below 3 km it is the most reliable signal of all.</p>
+  <h3>Index formula</h3>
+  <table><tr><th>Term</th><th>Points</th><th>Rationale</th></tr>
+  <tr><td>ΔT = T − Td</td><td>40 if ≤ 0.5 °C; linear to 0 at 4 °C</td><td>Saturation. Necessary condition.</td></tr>
+  <tr><td>10 m wind</td><td>&lt;2: 14 · 2–8: 20 · 8–15: 8 · 15–20: 3 · &gt;20: 0</td><td>Radiation fog: some turbulent mixing deepens it; dead calm gives dew; strong wind prevents it.</td></tr>
+  <tr><td>Cloud cover (night)</td><td>&lt;25 %: 20 · 25–60 %: 8 · &gt;60 %: 0 (halved by day)</td><td>Clear sky = radiative cooling of the ground.</td></tr>
+  <tr><td>Model visibility</td><td>&lt;1 km: 20 · &lt;3 km: 10 · &lt;6 km: 4</td><td>Direct model diagnostic.</td></tr>
+  <tr><td>RH ≥ 97 %</td><td>+10</td><td>Redundant with ΔT but robust to rounding.</td></tr>
+  <tr><td>Rain &gt; 0.5 mm</td><td>−15</td><td>Active precipitation usually comes with cloud and wind.</td></tr>
+  <tr><td>Advection (coastal)</td><td>up to +30 if Td − SST &gt; 0 and wind 8–30 km/h</td><td>Moist air over colder sea cools to saturation. Needs neither calm nor clear sky.</td></tr>
+  <tr><td>Daytime</td><td>× 0.65</td><td>Solar radiation dissipates the layer.</td></tr></table>
+
+  <h2 id="en-4">5. Tab 2: Bayesian fusion</h2>
+  <h3>Model selection</h3>
+  <p>Each checkbox is a model. They are downloaded in parallel with a 12 s limit each; those that do not answer in time are dropped and marked “timeout”. After each compute the response time of each model is shown. If one is consistently slow on your connection, untick it; the selection is remembered. Default: ICON, GFS, AROME/ARPEGE, ECMWF and UKMO.</p>
+  <h3>Parameter α</h3>
+  <p>Effective number of independent sources. Global models share observations and much of their physics, so their errors are correlated; treating them as independent yields over‑confident posteriors. α = 1 treats them as a single piece of evidence; α = 1.8 (default) is a reasonable compromise; larger α assumes more independence. After a few weeks of logging, tune it until calibration is good (see §8).</p>
+  <h3>Cards</h3>
+  <p>Posterior for the next 6 hours and for the sunrise window, with the min to max range across models and each model’s individual probability. The third card gives the standard deviation across models at sunrise: high agreement (&lt; 10 pp), moderate, or disagreement. A 40 % posterior with high agreement is a more useful forecast than 55 % with disagreement.</p>
+  <h3>Chart</h3>
+  <p>One thin line per model, a grey band for the range and a thick black line for the posterior. Vertical axis in %.</p>
+  <h3>Tables</h3>
+  <p>“Sunrise state per model” shows, for each model, its maximum probability in the window and the forecast physical state at that hour. “Bayesian weights and prior” shows w_m, its cumulative log‑likelihood and the current Beta prior.</p>
+
+  <h2 id="en-5">6. Training: the observation log</h2>
+  <p>Learning means comparing what each model predicted with what you saw. For the comparison to be honest, the prediction must be fixed before the outcome is known. The tool does that by itself:</p>
+  <p><b>Automatic freezing.</b> Every time you press “Compute” in tab 2, each model’s probability for the next sunrise window is stored under the date of that night (a night is identified by the date of its evening, i.e. the day before the sunrise). If you compute several times, the last one is kept, being the most recent forecast before sunrise. The status line reads “Forecast frozen for the night of …”.</p>
+  <p><b>In the morning.</b> The “Night of” field already shows the date of the night that has just ended (before 14:00 it proposes yesterday; after, today). Choose what you observed (Fog if visibility was under 1 km; Mist or haze if there was a noticeable reduction above 1 km; Nothing) and press “Save observation”. The observation is paired with the forecast frozen the evening before for that date. It does not matter that a new forecast for tomorrow already exists at that time: it is not used.</p>
+  <p><b>If you did not compute that night.</b> There is no frozen forecast for that date. The observation is saved anyway (shown as “pending” in the posterior column) and updates the climatological prior, which only needs to know whether fog occurred; but it does not change the model weights, since there is no prediction to compare against. If later the same day you compute before the sunrise date rolls over, the row is completed automatically.</p>
+  <div class="box ok">Minimal routine: in the evening, open the page and press Compute in tab 2 (two seconds). In the morning, choose what you observed and Save. Nothing else.</div>
+  <p>Each observation does two things. The Beta prior is updated (a += y, b += 1 − y, with y = 1, 0.5 or 0), so the base rate stops being the generic 12 % and becomes your local frequency. And each model’s log‑likelihood accumulates log P_m(y): a model that gave 80 % when fog occurred adds log 0.8; one that gave 10 % adds log 0.1. Weights w_m are recomputed as normalized exp(0.7 · log‑likelihood).</p>
+  <p>How many: with 10 nights the weights start to separate; with 40 or 50 they mean something; beyond 100 it is worth moving to a logistic regression on raw variables.</p>
+
+  <h2 id="en-6">7. Data and privacy: where the log is stored</h2>
+  <p>The whole log (observations, probabilities, model selection, language) is stored with <code>localStorage</code> in the browser you use the page from. Nothing is sent to any server; GitHub only serves the static HTML and neither receives nor keeps your data. Concrete implications:</p>
+  <table><tr><th>Situation</th><th>What happens to the log</th></tr>
+  <tr><td>Same URL, same browser, same device</td><td>Persists indefinitely, even if you close the browser or push a new version of the HTML.</td></tr>
+  <tr><td>Another browser or device</td><td>Not there: localStorage is per browser and per origin. Use Export and Import JSON.</td></tr>
+  <tr><td>Opening the file locally (<code>file://</code>) and also from Pages (<code>https://</code>)</td><td>Different origins; each has its own log. Export from one and import into the other.</td></tr>
+  <tr><td>Clearing browsing data or “site data”</td><td>Lost. Export the JSON from time to time and keep it in the repository itself, for instance.</td></tr>
+  <tr><td>Private / incognito mode</td><td>Erased when the window closes.</td></tr>
+  <tr><td>Other pages on the same origin (<code>user.github.io</code>)</td><td>Share the localStorage space; the keys used here start with <code>niebla_</code> to avoid collisions.</td></tr></table>
+  <div class="box ok">Recommendation: after each logging session press “Export JSON” and commit the file to the repository. The history stays versioned and can be re‑imported on any device.</div>
+
+  <h2 id="en-7">8. Interpretation and good practice</h2>
+  <p>Strong radiation‑fog signal: forecast ΔT below 1 °C from midnight on, wind between 2 and 8 km/h, clouds under 25 %, high and rising pressure, model visibility under 3 km. If several models agree (spread &lt; 10 pp), probability is high.</p>
+  <p>Advection‑fog signal (coast): air dew point one or two degrees above SST, moderate onshore wind, high humidity. It can occur with overcast skies and 15 to 20 km/h wind; in such cases tab 1 in inland mode underestimates it.</p>
+  <p>When to be sceptical: narrow valleys, very wet soils after recent rain, reservoirs and rivers, where local fog forms with a forecast ΔT of 2 or 3 °C. Models do not resolve that scale; your log does, hence the importance of the local prior.</p>
+  <p>Calibration: once you have 30 or more nights, group the log rows by posterior (0–25 %, 25–50 %, 50–75 %, 75–100 %) and compare with the actual fog frequency in each group. If actual frequencies are systematically more extreme than the posterior, raise α; if less extreme, lower it.</p>
+
+  <h2 id="en-8">9. Advanced settings (edit the HTML)</h2>
+  <p>All constants sit at the top of the tab‑2 section in <code>index.html</code>:</p>
+  <pre>const PI0=0.12   // base rate of the logistic calibration
+const A0=1.2, B0=8.8   // initial Beta prior (mean 0.12)
+const LAMBDA=0.7 // weight tempering
+const TH=55, KAP=12    // logistic p = σ((s − TH)/KAP)
+const TIMEOUT=12000    // ms per model</pre>
+  <p>Index weights live in <code>score()</code>, shared by both tabs. To add a model, extend the <code>MODELS</code> array with the Open‑Meteo identifier (e.g. <code>jma_seamless</code>). Default coordinates are the <code>value</code> attributes of the latitude and longitude fields.</p>
+
+  <h2 id="en-9">10. Troubleshooting</h2>
+  <table><tr><th>Symptom</th><th>Cause and fix</th></tr>
+  <tr><td>“No model answered in time”</td><td>Open‑Meteo overloaded or slow connection. Retry, reduce the selection or raise TIMEOUT.</td></tr>
+  <tr><td>A model always shows “timeout”</td><td>Untick it; fusion works with whatever responds.</td></tr>
+  <tr><td>“no SST, advection disabled”</td><td>The point is inland for the marine API or the request failed. Expected inland; on the coast, try moving the point a few hundred metres seaward.</td></tr>
+  <tr><td>“Vis km” blank for some model</td><td>That model does not publish visibility (ECMWF, for instance). The index is computed without that term.</td></tr>
+  <tr><td>The log disappeared</td><td>Different browser, device, origin (file → https) or cleared data. Import the exported JSON.</td></tr>
+  <tr><td>“Use my location” does nothing</td><td>Permission denied or page not served over HTTPS. Type the coordinates.</td></tr></table>
+</main>
+
+<script>
+(function(){
+  let lang='es';
+  try{lang=new URLSearchParams(location.search).get('lang')||localStorage.getItem('niebla_lang')||((navigator.language||'es').startsWith('en')?'en':'es');}catch(e){}
+  if(lang!=='en') lang='es';
+  function apply(){document.body.className=lang; document.documentElement.lang=lang;
+    document.title=(lang==='en'?'Manual · Fog for photography':'Manual · Niebla para fotografía');
+    document.getElementById('back').textContent=lang==='en'?'← Tool':'← Herramienta';
+    document.getElementById('back').href='index.html?lang='+lang; const g=document.getElementById('guialink'); g.textContent=lang==='en'?'Quick guide':'Guía rápida'; g.href='guia.html?lang='+lang;
+    document.getElementById('lg-es').classList.toggle('on',lang==='es'); document.getElementById('lg-en').classList.toggle('on',lang==='en');}
+  ['es','en'].forEach(l=>document.getElementById('lg-'+l).addEventListener('click',()=>{lang=l; try{localStorage.setItem('niebla_lang',l);}catch(e){} apply();}));
+  apply();
+})();
+</script>
+</body>
+</html>
