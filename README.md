@@ -13,7 +13,7 @@ Photography and light-physics tools that run entirely in the browser.
 
 ## Español
 
-Treinta y dos documentos que resuelven cuestiones fotográficas con el modelo físico o estadístico
+Treinta y tres documentos que resuelven cuestiones fotográficas con el modelo físico o estadístico
 delante: simuladores, métricas, catálogos, scripts de procesado y su documentación.
 
 Todo el cálculo ocurre en el navegador. No hay servidor, ni cuenta, ni telemetría, y cada
@@ -34,7 +34,7 @@ elección previa se sigue el idioma del navegador.
 | [`simulador-eclipse.html`](simulador-eclipse.html) | Encuadre y exposición del eclipse total del 2 de agosto de 2027 (sur de España, norte de Marruecos, Egipto): si la corona te cabe en el encuadre, horquilla por fases con la fotometría de Espenak, nueve sitios de Tarifa a Luxor con sus horas locales, y ficha de campo imprimible. | 134 KB |
 | [`simulador-flash.html`](simulador-flash.html) | Banco óptico de flash. La dureza de una sombra la fija el tamaño angular de la fuente vista desde el sujeto: sombras, caída de luz por número guía, vencer al sol y balance con la luz ambiente. | 55 KB |
 | [`programa-camara.html`](programa-camara.html) | La automática no es neutral: contiene un programa. Dibuja la línea que sigue —tiempo, diafragma e ISO a cada nivel de luz—, superpone el borrón y la profundidad de campo que tu intención exigía, y señala dónde chocan. Nace de la sección Flusser del ensayo del marco. | 54 KB |
-| [`niebla.html`](niebla.html) | Si la niebla se va a formar mañana al amanecer. Índice horario a 48 h sobre la convergencia de temperatura y punto de rocío, y una fusión bayesiana de cinco modelos que reajusta sus pesos con tus propias observaciones. La previsión se congela automáticamente cada noche, así que la observación de la mañana se compara con lo que se predijo la víspera y no con nada posterior. Necesita conexión: los datos son de Open-Meteo. Manual: [`manual-niebla.html`](manual-niebla.html). | 54 KB |
+| [`niebla.html`](niebla.html) | Si la niebla se va a formar mañana al amanecer. Índice horario a 48 h sobre la convergencia de temperatura y punto de rocío, y una fusión bayesiana de cinco modelos que reajusta sus pesos con tus propias observaciones. La previsión se congela automáticamente cada noche, así que la observación de la mañana se compara con lo que se predijo la víspera y no con nada posterior. Necesita conexión: los datos son de Open-Meteo. Manual: [`manual-niebla.html`](manual-niebla.html); guía rápida: [`guia-niebla.html`](guia-niebla.html). | 54 KB |
 | [`astro.html`](astro.html) | Si la noche servirá para fotografiar el cielo. Índice horario que combina nubes por capas, transparencia por aerosoles (AOD de CAMS), seeing por viento en altura, rocío y Luna, con pesos que se reajustan según fotografíes cielo profundo, planetaria o paisaje nocturno. Misma fusión bayesiana y mismo aprendizaje que la niebla. Manual: [`manual-astro.html`](manual-astro.html). | 61 KB |
 | [`luz-natural.html`](luz-natural.html) | Cuándo hay buena luz y dónde estará la Luna, para cualquier lugar y fecha: horas dorada y azul con su duración real, acimuts de salidas y puestas, fase lunar dibujada, y el buscador de alineaciones para planificar la Luna sobre tu encuadre. Toda la astronomía en local: funciona sin conexión. | 48 KB |
 
@@ -97,6 +97,7 @@ la página es su manual; el código está en [`scripts/`](scripts/).
 | [`manual-flash-ttl-q3.html`](manual-flash-ttl-q3.html) | Flash TTL con la Leica Q3 43: cómo mide, cómo sincroniza y por qué a potencia plena el pulso no cabe entero en la ventana de 1/2000 s. Con dos calculadoras. |
 | [`manual-telemetro-m11.html`](manual-telemetro-m11.html) | Manual del simulador de telémetro, con el modelo físico, la verificación numérica y un anexo ilustrado sobre el disco de Airy. Seis figuras incrustadas. |
 | [`manual-niebla.html`](manual-niebla.html) | Manual de la predicción de niebla: el índice horario, la fusión bayesiana de los cinco modelos, el registro de observaciones que la entrena, y dónde se guarda ese registro. |
+| [`guia-niebla.html`](guia-niebla.html) | Guía rápida de la niebla, sin meteorología: dónde estás, cómo leer las tres tarjetas y la barra de horas, y los dos gestos al día con los que la página aprende tu zona. Complementa al manual, que es más técnico. |
 | [`manual-astro.html`](manual-astro.html) | Manual del índice de cielo: los siete términos del índice y sus pesos por objetivo, la fusión bayesiana, el registro de observaciones y los límites declarados del modelo de seeing. |
 | [`manual-stack-sensor.html`](manual-stack-sensor.html) | Manual del simulador del stack: el modelo de trazado, cómo se leen la mancha RMS y la MTF, y qué es heurístico y qué no. |
 | [`manual-medidas.html`](manual-medidas.html) | Referencia de todas las medidas del análisis de centrado: qué es cada una, cómo se define, cómo se interpreta y hasta dónde llega. |
@@ -148,7 +149,7 @@ python3 -m http.server 8000
 
 ## English
 
-Thirty-two documents that settle photographic questions with the physical or statistical
+Thirty-three documents that settle photographic questions with the physical or statistical
 model in plain sight: simulators, metrics, catalogues, processing scripts and their
 documentation.
 
@@ -171,7 +172,7 @@ address. With no prior choice, the browser's language is followed.
 | [`simulador-eclipse.html`](simulador-eclipse.html) | Framing and exposure for the total solar eclipse of 2 August 2027 (southern Spain, northern Morocco, Egypt): whether the corona fits your frame, the phase-by-phase bracket with Espenak's photometry, nine sites from Tarifa to Luxor each in local time, and a printable field sheet. | 134 KB |
 | [`simulador-flash.html`](simulador-flash.html) | Flash optical bench. The hardness of a shadow is set by the angular size of the source as seen from the subject: shadows, light falloff from the guide number, overpowering the sun, and balance with ambient light. | 55 KB |
 | [`programa-camara.html`](programa-camara.html) | The automatic mode is not neutral: it carries a program. Draws the line it follows — shutter, aperture and ISO at each light level — overlays the blur and depth of field your intent demanded, and marks where they collide. Born of the essay's Flusser section. | 54 KB |
-| [`niebla.html`](niebla.html) | Whether fog will form at tomorrow's sunrise. A 48-hour hourly index on the convergence of temperature and dew point, plus a Bayesian fusion of five models that readjusts its weights from your own observations. The forecast is frozen automatically each night, so the morning's observation is compared against what was predicted the evening before and never against anything later. Needs a connection: the data comes from Open-Meteo. Manual: [`manual-niebla.html`](manual-niebla.html). | 54 KB |
+| [`niebla.html`](niebla.html) | Whether fog will form at tomorrow's sunrise. A 48-hour hourly index on the convergence of temperature and dew point, plus a Bayesian fusion of five models that readjusts its weights from your own observations. The forecast is frozen automatically each night, so the morning's observation is compared against what was predicted the evening before and never against anything later. Needs a connection: the data comes from Open-Meteo. Manual: [`manual-niebla.html`](manual-niebla.html); quick guide: [`guia-niebla.html`](guia-niebla.html). | 54 KB |
 | [`astro.html`](astro.html) | Whether the night will be worth photographing the sky. An hourly index combining layered cloud, aerosol transparency (CAMS AOD), seeing from upper wind, dew and Moon, with weights that rescale for deep sky, planetary or nightscape work. Same Bayesian fusion and learning as the fog tool. Manual: [`manual-astro.html`](manual-astro.html). | 61 KB |
 | [`luz-natural.html`](luz-natural.html) | When the light is good and where the Moon will be, for any place and date: golden and blue hours with their real durations, rise and set azimuths, the lunar phase drawn, and the alignment finder for planning the Moon over your frame. All astronomy computed locally: works offline. | 48 KB |
 
@@ -234,6 +235,7 @@ the page is its manual; the code lives in [`scripts/`](scripts/).
 | [`manual-flash-ttl-q3.html`](manual-flash-ttl-q3.html) | TTL flash with the Leica Q3 43: how it meters, how it syncs, and why at full power the pulse does not fit inside the 1/2000 s window. With two calculators. |
 | [`manual-telemetro-m11.html`](manual-telemetro-m11.html) | Manual for the rangefinder simulator, with the physical model, the numerical verification and an illustrated annex on the Airy disc. Six embedded figures. |
 | [`manual-niebla.html`](manual-niebla.html) | Manual for the fog forecast: the hourly index, the Bayesian fusion of the five models, the observation log that trains it, and where that log is kept. |
+| [`guia-niebla.html`](guia-niebla.html) | Quick, meteorology-free guide to the fog tool: where you are, how to read the three cards and the hour bar, and the two daily gestures that teach the page your area. Complements the more technical manual. |
 | [`manual-astro.html`](manual-astro.html) | Manual for the sky index: the seven index terms and their per-target weights, the Bayesian fusion, the observation log and the declared limits of the seeing model. |
 | [`manual-stack-sensor.html`](manual-stack-sensor.html) | Manual for the stack simulator: the tracing model, how to read the RMS spot and the MTF, and what is heuristic and what is not. |
 | [`manual-medidas.html`](manual-medidas.html) | Reference for every measure in the subject-placement analysis: what each one is, how it is defined, how to read it and how far it goes. |
