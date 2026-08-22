@@ -77,7 +77,7 @@ la página es su manual; el código está en [`scripts/`](scripts/).
 | [`explorador_distancias.html`](explorador_distancias.html) | 309 autores colocados por parecido entre sus imágenes, con las fotos incrustadas. Da la distancia de contenido de cada pareja y, a la vez, su distancia en la red de influencia. | 6,4 MB |
 | [`cronologia-red.html`](cronologia-red.html) | La tercera vista del mismo dato: los 293 autores sobre dos siglos, los movimientos como carriles y las influencias como arcos que cruzan décadas, con el salto medio en años de las 467 relaciones calculado del propio corpus. | 199 KB |
 | [`ficha-fases-juicio-estetico.html`](ficha-fases-juicio-estetico.html) | Cómo se juzga una imagen a lo largo del tiempo de procesamiento visual, tratado como actualización bayesiana. | 45 KB |
-| [`ficha-marco-pensar.html`](ficha-marco-pensar.html) | Ficha de consulta del ensayo «Marco para pensar la fotografía»: las cuatro fases de la práctica, el aparato conceptual de Flusser a Ghirri y la constelación japonesa, con la pregunta que responde cada concepto. | 44 KB |
+| [`ficha-marco-pensar.html`](ficha-marco-pensar.html) | Ficha de consulta del ensayo «Marco para pensar la fotografía»: las cuatro fases de la práctica, el eje técnica frente a sentido —la demostración, el programa cumplido, la repetibilidad— con Szarkowski, Minor White, Robert y Ansel Adams, Provoke y Nakahira; nueve autores y ocho conceptos japoneses con los lemas de campo y las trampas de *La Foto Rota*. | 78 KB |
 
 ### Publicar en papel
 
@@ -215,7 +215,7 @@ the page is its manual; the code lives in [`scripts/`](scripts/).
 | [`explorador_distancias.html`](explorador_distancias.html) | 309 authors placed by the likeness between their images, with the photographs embedded. Gives the content distance for each pair and, alongside it, their distance in the influence network. | 6.4 MB |
 | [`cronologia-red.html`](cronologia-red.html) | The third view of the same data: the 293 authors across two centuries, movements as lanes and influences as arcs leaping across decades, with the mean year-leap of the 467 relationships computed from the corpus itself. | 199 KB |
 | [`ficha-fases-juicio-estetico.html`](ficha-fases-juicio-estetico.html) | How an image is judged across the time course of visual processing, treated as Bayesian updating. | 45 KB |
-| [`ficha-marco-pensar.html`](ficha-marco-pensar.html) | Consultation sheet for the essay 'A framework for thinking photography': the four phases of practice, the conceptual apparatus from Flusser to Ghirri, and the Japanese constellation, with the question each concept answers. | 44 KB |
+| [`ficha-marco-pensar.html`](ficha-marco-pensar.html) | Consultation sheet for the essay 'A framework for thinking photography': the four phases of practice, the technique-versus-meaning axis — the demonstration, the programme fulfilled, repeatability — with Szarkowski, Minor White, Robert and Ansel Adams, Provoke and Nakahira; nine authors and eight Japanese concepts with the field mottos and traps of *La Foto Rota*. | 78 KB |
 
 ### Publishing on paper
 
