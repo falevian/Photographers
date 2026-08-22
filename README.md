@@ -127,6 +127,7 @@ manuales. El código vive en [`scripts/`](scripts/), una carpeta por herramienta
 | [`scripts/peliculas/`](scripts/peliculas/) | `peliculas.py` (los cinco modelos, el lector y el escritor de perfiles ICC), `grano.py`, el `LEEME.md` original y un preset de Capture One. Solo requiere numpy. |
 | [`scripts/eclipse/`](scripts/eclipse/) | `eclipse_hdr.py`, `procesar_sol.py`, `deriva_solar.py` y su `README.md`. |
 | [`scripts/analitica/`](scripts/analitica/) | `subject_center.py`, el análisis que alimenta la página de centrado. |
+| [`perfiles-icc/`](perfiles-icc/) | Cuatro perfiles ICC reales generados con `peliculas.py` para la Leica Q3 43 (ProStandard): Kodachrome 25, Kodachrome 64, Pro 400H sobre Endura y Tri-X sobre Multigrade. Listos para instalar en Capture One; 560 KB cada uno. |
 
 ### Notas
 
@@ -265,6 +266,7 @@ The code lives in [`scripts/`](scripts/), one folder per tool.
 | [`scripts/peliculas/`](scripts/peliculas/) | `peliculas.py` (the five models, the ICC profile reader and writer), `grano.py`, the original `LEEME.md` and a Capture One preset. Requires only numpy. |
 | [`scripts/eclipse/`](scripts/eclipse/) | `eclipse_hdr.py`, `procesar_sol.py`, `deriva_solar.py` and their `README.md`. |
 | [`scripts/analitica/`](scripts/analitica/) | `subject_center.py`, the analysis that feeds the placement page. |
+| [`perfiles-icc/`](perfiles-icc/) | Four real ICC profiles generated with `peliculas.py` for the Leica Q3 43 (ProStandard): Kodachrome 25, Kodachrome 64, Pro 400H on Endura and Tri-X on Multigrade. Ready to install in Capture One; 560 KB each. |
 
 ### Notes
 
