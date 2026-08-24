@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Siril paso a paso · Apilado para Leica M11P + UHC</title>
+<meta name="author" content="Rafael Vida">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Crect%20width%3D%2764%27%20height%3D%2764%27%20rx%3D%2713%27%20fill%3D%27%230a0d15%27/%3E%3Cline%20x1%3D%2710%27%20y1%3D%2746%27%20x2%3D%2754%27%20y2%3D%2746%27%20stroke%3D%27%23243049%27%20stroke-width%3D%272%27/%3E%3Cpath%20d%3D%27M10%2C45%20L20%2C45%20L22%2C18%20L28%2C18%20L30%2C45%20L40%2C45%20L42%2C24%20L48%2C24%20L50%2C45%20L54%2C45%27%20fill%3D%27none%27%20stroke%3D%27%23d9e0ee%27%20stroke-width%3D%272.4%27%20stroke-linejoin%3D%27round%27/%3E%3Cpath%20d%3D%27M22%2C18%20L28%2C18%20L30%2C45%20L20%2C45%20Z%27%20fill%3D%27%233fd6c0%27%20opacity%3D%27.45%27/%3E%3Cpath%20d%3D%27M42%2C24%20L48%2C24%20L50%2C45%20L40%2C45%20Z%27%20fill%3D%27%23ff4d3d%27%20opacity%3D%27.45%27/%3E%3Ccircle%20cx%3D%2714%27%20cy%3D%2712%27%20r%3D%271.3%27%20fill%3D%27%238b96ad%27/%3E%3Ccircle%20cx%3D%2733%27%20cy%3D%278%27%20r%3D%271%27%20fill%3D%27%238b96ad%27/%3E%3Ccircle%20cx%3D%2752%27%20cy%3D%2713%27%20r%3D%271.4%27%20fill%3D%27%238b96ad%27/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="icons/manual-siril-apilado-180.png">
+<meta name="theme-color" content="#0a0d15">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Siril apilado">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Photographers">
+<meta property="og:title" content="Siril paso a paso · Apilado para Leica M11P + UHC">
+<meta property="og:description" content="Manual de preprocesado y apilado en Siril para cielo profundo con un equipo concreto: Leica M11P, filtro UHC frontal y montura ligera. De los DNG al máster: calibración, registro, apilado con rechazo y postprocesado, con modo nocturno rojo para el campo.">
+<meta property="og:url" content="https://falevian.github.io/Photographers/manual-siril-apilado.html">
+<meta property="og:image" content="https://falevian.github.io/Photographers/og/siril.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="es_ES">
+<meta property="og:locale:alternate" content="en_GB">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="description" content="Manual de preprocesado y apilado en Siril para cielo profundo con un equipo concreto: Leica M11P, filtro UHC frontal y montura ligera. De los DNG al máster: calibración, registro, apilado con rechazo y postprocesado, con modo nocturno rojo para el campo.">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0d15;
+  --panel:#111725;
+  --panel-2:#161e30;
+  --line:#243049;
+  --text:#d9e0ee;
+  --muted:#8b96ad;
+  --ha:#ff4d3d;      /* Hα 656 nm */
+  --oiii:#3fd6c0;    /* OIII 500 nm */
+  --code-bg:#0c1120;
+  --ok:#3fd67e;
+  --radius:14px;
+}
+html[data-mode="rojo"]{
+  --bg:#0a0202;
+  --panel:#150404;
+  --panel-2:#1c0606;
+  --line:#3a0d0d;
+  --text:#ff6b5a;
+  --muted:#a33528;
+  --ha:#ff4d3d;
+  --oiii:#ff8a3d;
+  --code-bg:#100303;
+  --ok:#ff9d4d;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto} *{transition:none!important;animation:none!important}}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:16px;
+  line-height:1.65;
+  transition:background .3s,color .3s;
+}
+a{color:var(--oiii)}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+
+/* ---------- cabecera ---------- */
+header{padding:56px 0 28px;border-bottom:1px solid var(--line)}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-weight:800;font-size:clamp(34px,5vw,58px);
+  line-height:1.05;margin:14px 0 10px;letter-spacing:-.01em;
+}
+h1 .ha{color:var(--ha)} h1 .oiii{color:var(--oiii)}
+.sub{color:var(--muted);max-width:62ch;font-size:15px}
+.equip{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.chip{
+  font-family:'JetBrains Mono',monospace;font-size:12px;
+  border:1px solid var(--line);border-radius:999px;padding:5px 12px;color:var(--muted);
+  background:var(--panel);
+}
+.mode-btn{
+  position:fixed;top:16px;right:16px;z-index:50;
+  font-family:'JetBrains Mono',monospace;font-size:12px;
+  background:var(--panel);border:1px solid var(--line);color:var(--text);
+  border-radius:999px;padding:8px 14px;cursor:pointer;transition:border-color .2s;
+}
+.mode-btn:hover,.mode-btn:focus-visible{border-color:var(--ha)}
+.mode-btn:focus-visible{outline:2px solid var(--ha);outline-offset:2px}
+
+/* espectro del filtro */
+.spectrum{margin-top:26px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px 8px}
+.spectrum .cap{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:4px}
+svg{display:block;width:100%;height:auto}
+
+/* ---------- layout con carril ---------- */
+.layout{display:grid;grid-template-columns:250px 1fr;gap:40px;padding:40px 0}
+@media(max-width:880px){.layout{grid-template-columns:1fr}}
+nav.rail{position:sticky;top:20px;align-self:start}
+@media(max-width:880px){nav.rail{position:static}}
+.rail h2{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.rail ol{list-style:none}
+.rail li{margin-bottom:2px}
+.rail a{
+  display:flex;align-items:center;gap:10px;
+  color:var(--muted);text-decoration:none;font-size:14px;
+  padding:7px 10px;border-radius:8px;transition:background .15s,color .15s;
+}
+.rail a:hover{background:var(--panel);color:var(--text)}
+.rail a .dot{
+  width:8px;height:8px;border-radius:50%;
+  border:1.5px solid var(--muted);flex:none;transition:background .2s,border-color .2s;
+}
+.rail li.done a{color:var(--text)}
+.rail li.done .dot{background:var(--ok);border-color:var(--ok)}
+.progress{margin-top:18px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)}
+.bar{height:4px;background:var(--panel-2);border-radius:2px;margin-top:6px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--oiii),var(--ha));transition:width .3s}
+
+/* ---------- pasos ---------- */
+.step{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  padding:26px 28px;margin-bottom:22px;scroll-margin-top:20px;
+}
+.step-head{display:flex;align-items:flex-start;gap:16px}
+.step-num{
+  font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px;
+  color:var(--ha);min-width:44px;line-height:1.2;
+}
+.step h3{font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:22px;line-height:1.25;flex:1}
+.check{display:flex;align-items:center;gap:8px;flex:none;cursor:pointer;user-select:none;font-size:13px;color:var(--muted)}
+.check input{width:18px;height:18px;accent-color:var(--ok);cursor:pointer}
+.step p{margin:12px 0;color:var(--text)}
+.step .note{color:var(--muted);font-size:14px;border-left:3px solid var(--oiii);padding:2px 0 2px 14px;margin:14px 0}
+.step .warn{border-left-color:var(--ha)}
+ul.plain{margin:10px 0 10px 20px}
+ul.plain li{margin-bottom:6px}
+
+/* código */
+pre{
+  background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;overflow-x:auto;margin:14px 0;position:relative;
+  font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.7;color:var(--text);
+}
+pre .c{color:var(--muted)}
+.copy{
+  position:absolute;top:10px;right:10px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  background:var(--panel-2);border:1px solid var(--line);color:var(--muted);
+  border-radius:6px;padding:4px 10px;cursor:pointer;transition:color .15s,border-color .15s;
+}
+.copy:hover,.copy:focus-visible{color:var(--text);border-color:var(--oiii)}
+.copy:focus-visible{outline:2px solid var(--oiii);outline-offset:2px}
+
+/* desplegables */
+details{border:1px solid var(--line);border-radius:10px;margin:14px 0;background:var(--panel-2)}
+summary{
+  cursor:pointer;padding:12px 16px;font-size:14px;font-weight:600;color:var(--oiii);
+  list-style:none;display:flex;align-items:center;gap:8px;
+}
+summary::before{content:"▸";transition:transform .2s;font-size:12px}
+details[open] summary::before{transform:rotate(90deg)}
+details .inner{padding:0 16px 14px;font-size:14.5px;color:var(--text)}
+details .inner p{margin:8px 0}
+
+/* tabla */
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{font-family:'JetBrains Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);background:var(--panel-2)}
+td code,p code,li code{font-family:'JetBrains Mono',monospace;font-size:.9em;background:var(--code-bg);border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+
+footer{border-top:1px solid var(--line);padding:26px 0 46px;color:var(--muted);font-size:13px}
+
+/* ---------- convenio bilingüe del repositorio ---------- */
+html[lang="es"] [data-lang="en"]{display:none!important}
+html[lang="en"] [data-lang="es"]{display:none!important}
+.langbar{position:fixed;top:16px;right:16px;z-index:60;display:flex;
+         background:var(--panel);border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.langbar button{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.06em;
+                background:transparent;border:0;color:var(--muted);padding:8px 12px;cursor:pointer;
+                transition:color .15s,background .15s}
+.langbar button+button{border-left:1px solid var(--line)}
+.langbar button:hover{color:var(--text)}
+.langbar button.on{background:var(--panel-2);color:var(--oiii)}
+.langbar button:focus-visible{outline:2px solid var(--oiii);outline-offset:-2px}
+.langbar a.home{display:flex;align-items:center;padding:0 10px;color:var(--muted);border-right:1px solid var(--line)}
+.langbar a.home:hover{color:var(--text)}
+.langbar a.home svg{width:12px;height:12px;display:block}
+.mode-btn{right:auto;left:16px}
+@media(max-width:880px){.mode-btn{top:16px;left:16px} header{padding-top:72px}}
+</style>
+</head>
+<body>
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <a class="home" href="index.html" title="Portada / Home" aria-label="Portada / Home"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.5 8 2.5l5.5 5v6h-4v-4h-3v4h-4z"/></svg></a>
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
+<button class="mode-btn" id="modeBtn" aria-pressed="false" title="Alterna a rojo sobre negro para conservar la adaptación a la oscuridad en campo"
+        data-title-es="Alterna a rojo sobre negro para conservar la adaptación a la oscuridad en campo"
+        data-title-en="Switches to red on black to preserve dark adaptation in the field">🔴 Modo nocturno</button>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow" data-lang="es">Manual de apilado · Siril 1.2+</div>
+    <div class="eyebrow" data-lang="en">Stacking manual · Siril 1.2+</div>
+    <h1 data-lang="es">Del DNG al máster:<br>apilado con <span class="oiii">OIII</span> y <span class="ha">Hα</span></h1>
+    <h1 data-lang="en">From DNG to master:<br>stacking with <span class="oiii">OIII</span> and <span class="ha">Hα</span></h1>
+    <p class="sub" data-lang="es">Flujo completo de preprocesado y apilado en Siril para series de cielo profundo, adaptado a este equipo concreto: sensor color sin modificar, filtro UHC frontal y montura de seguimiento ligera.</p>
+    <p class="sub" data-lang="en">Complete preprocessing and stacking workflow in Siril for deep-sky series, adapted to this specific kit: unmodified colour sensor, front-mounted UHC filter and a light tracking mount.</p>
+    <div class="equip">
+      <span class="chip">Leica M11P · DNG 60 MP</span>
+      <span class="chip">Ultron 28/2 · Summicron 35/2</span>
+      <span class="chip">Astronomik UHC 50 mm</span>
+      <span class="chip">Benro Polaris</span>
+      <span class="chip">Bortle 5–6 · Sada</span>
+    </div>
+    <div class="spectrum" aria-label="Curva de transmisión aproximada del filtro UHC"
+         data-aria-es="Curva de transmisión aproximada del filtro UHC" data-aria-en="Approximate transmission curve of the UHC filter">
+      <div class="cap"><span data-lang="es">TRANSMISIÓN UHC (esquema)</span><span data-lang="en">UHC TRANSMISSION (schematic)</span><span>400 → 700 nm</span></div>
+      <svg viewBox="0 0 900 180" role="img" aria-label="Bandas de paso del filtro: Hβ y OIII en torno a 486 a 501 nm, Hα y SII en torno a 656 a 672 nm"
+           data-aria-es="Bandas de paso del filtro: Hβ y OIII en torno a 486 a 501 nm, Hα y SII en torno a 656 a 672 nm"
+           data-aria-en="Passbands of the filter: Hβ and OIII around 486 to 501 nm, Hα and SII around 656 to 672 nm">
+        <line x1="40" y1="150" x2="880" y2="150" stroke="var(--line)" stroke-width="1.5"/>
+        <line x1="40" y1="150" x2="40" y2="20" stroke="var(--line)" stroke-width="1.5"/>
+        <path d="M40,148 L270,148 L280,40 L345,40 L355,148 L640,148 L650,55 L740,55 L750,148 L880,148"
+              fill="none" stroke="var(--text)" stroke-width="2.2" stroke-linejoin="round"/>
+        <path d="M280,40 L345,40 L355,148 L270,148 Z" fill="var(--oiii)" opacity="0.22"/>
+        <path d="M650,55 L740,55 L750,148 L640,148 Z" fill="var(--ha)" opacity="0.22"/>
+        <text x="312" y="30" fill="var(--oiii)" font-size="13" font-family="JetBrains Mono" text-anchor="middle">Hβ · OIII</text>
+        <text x="695" y="45" fill="var(--ha)" font-size="13" font-family="JetBrains Mono" text-anchor="middle">Hα · SII</text>
+        <text x="60" y="168" fill="var(--muted)" font-size="11" font-family="JetBrains Mono">400</text>
+        <text x="440" y="168" fill="var(--muted)" font-size="11" font-family="JetBrains Mono">550</text>
+        <text x="855" y="168" fill="var(--muted)" font-size="11" font-family="JetBrains Mono">700</text>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<div class="wrap layout">
+  <nav class="rail" aria-label="Índice de pasos" data-aria-es="Índice de pasos" data-aria-en="Step index">
+    <h2 data-lang="es">Secuencia</h2>
+    <h2 data-lang="en">Sequence</h2>
+    <ol id="railList"></ol>
+    <div class="progress"><span id="progText">0 / 9</span>
+      <div class="bar"><i id="progBar"></i></div>
+    </div>
+  </nav>
+
+  <main>
+
+    <!-- PASO 1 -->
+    <section class="step" id="p1" data-title="Captura y organización" data-title-en="Capture and organisation">
+      <div class="step-head">
+        <div class="step-num">01</div>
+        <h3><span data-lang="es">Captura y organización de los ficheros</span><span data-lang="en">Capture and file organisation</span></h3>
+        <label class="check"><input type="checkbox" data-step> <span data-lang="es">hecho</span><span data-lang="en">done</span></label>
+      </div>
+      <p data-lang="es">Siril trabaja con secuencias homogéneas: mismo objetivo, misma exposición, mismo ISO y misma temperatura aproximada dentro de cada serie. Organiza así la sesión antes de tocar el software:</p>
+      <p data-lang="en">Siril works with homogeneous sequences: same lens, same exposure, same ISO and roughly the same temperature within each series. Organise the session like this before touching the software:</p>
+      <pre><button class="copy">copiar</button>proyecto_cygnus/
+├── lights/    <span class="c"># tomas del objeto, DNG · object frames, DNG</span>
+├── darks/     <span class="c"># mismo tiempo, ISO y temperatura que lights, con tapa · same time, ISO, temp as lights, cap on</span>
+├── flats/     <span class="c"># CON el filtro UHC montado · WITH the UHC filter mounted</span>
+└── biases/    <span class="c"># exposición mínima (1/16000 s), mismo ISO · shortest exposure, same ISO</span></pre>
+      <ul class="plain" data-lang="es">
+        <li><strong>Lights:</strong> 30 a 60 tomas de 60 a 120 s a f/2.8 o f/4, ISO 800 a 1600. Con el Polaris, dithering cada 3 o 4 tomas si la sesión lo permite.</li>
+        <li><strong>Darks:</strong> 20 a 25, al final de la sesión con la cámara ya a temperatura de trabajo.</li>
+        <li><strong>Flats:</strong> 20 a 25, contra panel o cielo crepuscular uniforme, histograma centrado. Con este montaje los flats corrigen a la vez el viñeteo óptico y parte del viñeteo cromático que introduce el UHC frontal en el gran angular.</li>
+        <li><strong>Biases:</strong> 30 a 50, cuestan segundos.</li>
+      </ul>
+      <ul class="plain" data-lang="en">
+        <li><strong>Lights:</strong> 30 to 60 frames of 60 to 120 s at f/2.8 or f/4, ISO 800 to 1600. With the Polaris, dither every 3 or 4 frames if the session allows.</li>
+        <li><strong>Darks:</strong> 20 to 25, at the end of the session with the camera already at working temperature.</li>
+        <li><strong>Flats:</strong> 20 to 25, against a panel or a uniform twilight sky, histogram centred. With this rig the flats correct both the optical vignetting and part of the chromatic vignetting the front UHC introduces on the wide angle.</li>
+        <li><strong>Biases:</strong> 30 to 50, they take seconds.</li>
+      </ul>
+      <div class="note warn" data-lang="es">No cambies el enfoque ni la posición del filtro entre lights y flats: la corrección de campo depende de que la geometría sea idéntica.</div>
+      <div class="note warn" data-lang="en">Do not change the focus or the filter position between lights and flats: field correction depends on the geometry being identical.</div>
+      <details><summary><span data-lang="es">Por qué los flats con filtro son críticos en este equipo</span><span data-lang="en">Why flats with the filter are critical on this kit</span></summary>
+        <div class="inner">
+          <p data-lang="es">El UHC delante de un 28 o un 35 mm recibe los rayos de campo con hasta 32 a 38 grados de incidencia. La banda de paso del filtro interferencial se desplaza al azul con el ángulo, de modo que los bordes del encuadre pierden transmisión de forma dependiente de la longitud de onda. Un flat tomado con el filtro captura ese perfil por canal y lo compensa parcialmente en la calibración. El residuo de color se elimina después con extracción de fondo.</p>
+          <p data-lang="en">A UHC in front of a 28 or 35 mm receives the field rays at up to 32 to 38 degrees of incidence. The passband of an interference filter shifts towards the blue with angle, so the edges of the frame lose transmission in a wavelength-dependent way. A flat taken with the filter captures that per-channel profile and partially compensates it during calibration. The colour residue is removed later with background extraction.</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- PASO 2 -->
+    <section class="step" id="p2" data-title="Configurar Siril" data-title-en="Configuring Siril">
+      <div class="step-head">
+        <div class="step-num">02</div>
+        <h3><span data-lang="es">Instalar y configurar Siril</span><span data-lang="en">Installing and configuring Siril</span></h3>
+        <label class="check"><input type="checkbox" data-step> <span data-lang="es">hecho</span><span data-lang="en">done</span></label>
+      </div>
+      <p data-lang="es">Descarga Siril desde <a href="https://siril.org" target="_blank" rel="noopener">siril.org</a> (Windows, macOS, Linux; licencia GPL). Los DNG de la M11P se leen mediante LibRaw sin conversión previa. Ajustes iniciales en <em>Preferencias</em>:</p>
+      <p data-lang="en">Download Siril from <a href="https://siril.org" target="_blank" rel="noopener">siril.org</a> (Windows, macOS, Linux; GPL licence). The M11P's DNGs are read via LibRaw without prior conversion. Initial settings under <em>Preferences</em>:</p>
+      <ul class="plain" data-lang="es">
+        <li><strong>FITS:</strong> profundidad de 32 bits en coma flotante. Con 60 MP los ficheros intermedios son grandes; reserva 100 GB o más de disco por proyecto.</li>
+        <li><strong>Interpolación Bayer:</strong> déjala en automático; el patrón se lee de los metadatos del DNG.</li>
+        <li><strong>Directorio de trabajo:</strong> fija <code>proyecto_cygnus/</code> como carpeta de trabajo (icono de casa, arriba a la izquierda).</li>
+      </ul>
+      <ul class="plain" data-lang="en">
+        <li><strong>FITS:</strong> 32-bit floating-point depth. At 60 MP the intermediate files are large; allow 100 GB or more of disk per project.</li>
+        <li><strong>Bayer interpolation:</strong> leave it on automatic; the pattern is read from the DNG metadata.</li>
+        <li><strong>Working directory:</strong> set <code>proyecto_cygnus/</code> as the working folder (house icon, top left).</li>
+      </ul>
+      <div class="note" data-lang="es">Si el equipo va justo de RAM, activa en preferencias el uso de secuencias FITS comprimidas o trabaja con la serie recortada al centro del fotograma, que es donde el UHC rinde de verdad.</div>
+      <div class="note" data-lang="en">If the computer is short of RAM, enable compressed FITS sequences in the preferences, or work with the series cropped to the centre of the frame, which is where the UHC really performs.</div>
+    </section>
+
+    <!-- PASO 3 -->
+    <section class="step" id="p3" data-title="Vía rápida: script OSC" data-title-en="Fast lane: OSC script">
+      <div class="step-head">
+        <div class="step-num">03</div>
+        <h3><span data-lang="es">Vía rápida: script OSC_Preprocessing</span><span data-lang="en">Fast lane: the OSC_Preprocessing script</span></h3>
+        <label class="check"><input type="checkbox" data-step> <span data-lang="es">hecho</span><span data-lang="en">done</span></label>
+      </div>
+      <p data-lang="es">Antes del flujo manual, conviene conocer el atajo. Siril incluye scripts que ejecutan toda la cadena. Renombra tus carpetas exactamente como espera el script y lánzalo desde el menú <em>Scripts → OSC_Preprocessing</em>:</p>
+      <p data-lang="en">Before the manual workflow, it is worth knowing the shortcut. Siril ships with scripts that run the whole chain. Rename your folders exactly as the script expects and launch it from the <em>Scripts → OSC_Preprocessing</em> menu:</p>
+      <pre><button class="copy">copiar</button>proyecto_cygnus/
+├── lights/
+├── darks/
+├── flats/
+└── biases/   <span class="c"># el script clásico espera "biases" · the classic script expects "biases"</span></pre>
+      <p data-lang="es">El script convierte, calibra, alinea y apila con parámetros razonables, y deja un <code>result.fit</code> en el directorio de trabajo. Es el camino recomendado para la primera serie; los pasos 04 a 07 describen lo mismo de forma manual, con control sobre cada parámetro.</p>
+      <p data-lang="en">The script converts, calibrates, registers and stacks with sensible parameters, leaving a <code>result.fit</code> in the working directory. It is the recommended path for the first series; steps 04 to 07 describe the same thing manually, with control over every parameter.</p>
+      <details><summary><span data-lang="es">Cuándo abandonar el script y pasar al flujo manual</span><span data-lang="en">When to abandon the script for the manual workflow</span></summary>
+        <div class="inner">
+          <p data-lang="es">Cuando quieras rechazo estadístico ajustado (aviones, satélites Starlink, ráfagas de viento sobre el Polaris), ponderación por FWHM, drizzle, o cuando la serie mezcle noches con encuadres ligeramente distintos. También si los bordes con viñeteo cromático confunden al registro y prefieres recortar antes de alinear.</p>
+          <p data-lang="en">When you want tuned statistical rejection (planes, Starlink satellites, gusts of wind on the Polaris), FWHM weighting, drizzle, or when the series mixes nights with slightly different framings. Also if the chromatically vignetted edges confuse registration and you prefer to crop before aligning.</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- PASO 4 -->
+    <section class="step" id="p4" data-title="Conversión" data-title-en="Conversion">
+      <div class="step-head">
+        <div class="step-num">04</div>
+        <h3><span data-lang="es">Flujo manual · Conversión a secuencia</span><span data-lang="en">Manual workflow · Conversion to sequences</span></h3>
+        <label class="check"><input type="checkbox" data-step> <span data-lang="es">hecho</span><span data-lang="en">done</span></label>
+      </div>
+      <p data-lang="es">En la pestaña <em>Conversión</em> añade los DNG de cada carpeta y crea una secuencia por tipo de toma. Con la consola (pestaña de línea de comandos) es más rápido:</p>
+      <p data-lang="en">In the <em>Conversion</em> tab add the DNGs from each folder and create one sequence per frame type. It is quicker from the console (command-line tab):</p>
+      <pre><button class="copy">copiar</button><span class="c"># desde el directorio de trabajo · from the working directory</span>
+cd biases
+convert bias -out=../process
+cd ../darks
+convert dark -out=../process
+cd ../flats
+convert flat -out=../process
+cd ../lights
+convert light -out=../process
+cd ../process</pre>
+      <p data-lang="es">Cada orden genera una secuencia (<code>bias_.seq</code>, <code>dark_.seq</code>, etc.) en la carpeta <code>process</code>. El demosaicado no se aplica todavía: se conserva el CFA hasta la calibración.</p>
+      <p data-lang="en">Each command creates a sequence (<code>bias_.seq</code>, <code>dark_.seq</code>, etc.) in the <code>process</code> folder. Demosaicing is not applied yet: the CFA is kept until calibration.</p>
+    </section>
+
+    <!-- PASO 5 -->
+    <section class="step" id="p5" data-title="Calibración" data-title-en="Calibration">
+      <div class="step-head">
+        <div class="step-num">05</div>
+        <h3><span data-lang="es">Másters de calibración y calibrado de lights</span><span data-lang="en">Calibration masters and light calibration</span></h3>
+        <label class="check"><input type="checkbox" data-step> <span data-lang="es">hecho</span><span data-lang="en">done</span></label>
+      </div>
+      <p data-lang="es">Se apilan primero los ficheros de calibración por mediana o rechazo, y con ellos se corrigen los lights:</p>
+      <p data-lang="en">The calibration files are stacked first, by median or rejection, and the lights are corrected with them:</p>
+      <pre><button class="copy">copiar</button><span class="c"># máster bias · master bias</span>
+stack bias rej 3 3 -nonorm
+<span class="c"># máster flat, calibrado con el bias · master flat, calibrated with the bias</span>
+calibrate flat -bias=bias_stacked
+stack pp_flat rej 3 3 -norm=mul
+<span class="c"># máster dark · master dark</span>
+stack dark rej 3 3 -nonorm
+<span class="c"># calibrado de lights: dark + flat, cosmética y demosaicado · lights: dark + flat, cosmetic fix, debayer</span>
+calibrate light -dark=dark_stacked -flat=pp_flat_stacked -cc=dark -cfa -equalize_cfa -debayer</pre>
+      <ul class="plain" data-lang="es">
+        <li><code>-cc=dark</code> aplica corrección cosmética de píxeles calientes a partir del máster dark.</li>
+        <li><code>-equalize_cfa</code> iguala la respuesta media de los canales del CFA antes de dividir por el flat, útil con filtros que desequilibran fuertemente los canales, como el UHC.</li>
+        <li><code>-debayer</code> demosaica al final de la calibración; obtienes la secuencia <code>pp_light_</code> ya en color.</li>
+      </ul>
+      <ul class="plain" data-lang="en">
+        <li><code>-cc=dark</code> applies cosmetic hot-pixel correction from the master dark.</li>
+        <li><code>-equalize_cfa</code> equalises the mean response of the CFA channels before dividing by the flat, useful with filters that strongly unbalance the channels, such as the UHC.</li>
+        <li><code>-debayer</code> demosaics at the end of calibration; you get the <code>pp_light_</code> sequence already in colour.</li>
+      </ul>
+      <div class="note warn" data-lang="es">Con el UHC, el canal rojo (Hα atenuado por el corte IR del sensor) tendrá mucho menos nivel que el verde. Es lo esperado; no lo corrijas aquí, se resuelve en la calibración de color del paso 08.</div>
+      <div class="note warn" data-lang="en">With the UHC, the red channel (Hα attenuated by the sensor's IR cut) will sit far below the green. That is expected; do not correct it here — it is resolved in the colour calibration of step 08.</div>
+    </section>
+
+    <!-- PASO 6 -->
+    <section class="step" id="p6" data-title="Registro" data-title-en="Registration">
+      <div class="step-head">
+        <div class="step-num">06</div>
+        <h3><span data-lang="es">Registro (alineado estelar)</span><span data-lang="en">Registration (star alignment)</span></h3>
+        <label class="check"><input type="checkbox" data-step> <span data-lang="es">hecho</span><span data-lang="en">done</span></label>
+      </div>
+      <p data-lang="es">El registro global detecta estrellas en cada toma y calcula la transformación respecto a una referencia. Con seguimiento del Polaris a 28 o 35 mm las traslaciones son pequeñas y las rotaciones mínimas:</p>
+      <p data-lang="en">Global registration detects stars in every frame and computes the transformation relative to a reference. With Polaris tracking at 28 or 35 mm the translations are small and the rotations minimal:</p>
+      <pre><button class="copy">copiar</button>register pp_light -2pass
+seqapplyreg pp_light -framing=min</pre>
+      <ul class="plain" data-lang="es">
+        <li><code>-2pass</code> primero mide todas las tomas, elige la mejor referencia y después aplica; da resultados más consistentes que la pasada única.</li>
+        <li><code>-framing=min</code> recorta al área común, eliminando los bordes que derivan entre tomas (y de paso parte de la zona más afectada por el desplazamiento espectral del filtro).</li>
+      </ul>
+      <ul class="plain" data-lang="en">
+        <li><code>-2pass</code> first measures all frames, chooses the best reference and then applies; more consistent than a single pass.</li>
+        <li><code>-framing=min</code> crops to the common area, removing the edges that drift between frames (and with them part of the zone most affected by the filter's spectral shift).</li>
+      </ul>
+      <details><summary><span data-lang="es">Drizzle y series con dithering</span><span data-lang="en">Drizzle and dithered series</span></summary>
+        <div class="inner">
+          <p data-lang="es">Si hiciste dithering, puedes activar drizzle en el registro (<code>-drizzle</code>) para recuperar resolución, aunque con 60 MP y óptica a f/2.8 el muestreo ya es generoso y el coste en disco y ruido no suele compensar a estas focales.</p>
+          <p data-lang="en">If you dithered, you can enable drizzle during registration (<code>-drizzle</code>) to recover resolution, although at 60 MP and f/2.8 the sampling is already generous and the cost in disk and noise rarely pays off at these focal lengths.</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- PASO 7 -->
+    <section class="step" id="p7" data-title="Apilado" data-title-en="Stacking">
+      <div class="step-head">
+        <div class="step-num">07</div>
+        <h3><span data-lang="es">Apilado con rechazo estadístico</span><span data-lang="en">Stacking with statistical rejection</span></h3>
+        <label class="check"><input type="checkbox" data-step> <span data-lang="es">hecho</span><span data-lang="en">done</span></label>
+      </div>
+      <p data-lang="es">La media con rechazo Winsorized sigma clipping es el estándar para series de 20 o más tomas: promedia el fondo (la SNR crece como √N) y elimina trazas de aviones y satélites:</p>
+      <p data-lang="en">Mean stacking with Winsorized sigma clipping is the standard for series of 20 or more frames: it averages the background (SNR grows as √N) and removes plane and satellite trails:</p>
+      <pre><button class="copy">copiar</button>stack r_pp_light rej w 3 3 -norm=addscale -output_norm -weight_from_wfwhm -out=result
+load result
+save cygnus_master</pre>
+      <ul class="plain" data-lang="es">
+        <li><code>rej w 3 3</code>: rechazo Winsorized con umbrales de 3σ por arriba y por abajo. Si quedan restos de trazas, baja el umbral alto a 2.5.</li>
+        <li><code>-norm=addscale</code>: normaliza nivel y escala entre tomas, necesario si el fondo varió durante la sesión (paso de nubes finas, cambio de altura del objeto).</li>
+        <li><code>-weight_from_wfwhm</code>: pondera cada toma por la calidad de sus estrellas, penalizando las tomas con viento o seguimiento imperfecto.</li>
+      </ul>
+      <ul class="plain" data-lang="en">
+        <li><code>rej w 3 3</code>: Winsorized rejection with 3σ thresholds above and below. If trail remnants survive, lower the high threshold to 2.5.</li>
+        <li><code>-norm=addscale</code>: normalises level and scale between frames, needed if the background varied during the session (thin passing clouds, change in the object's altitude).</li>
+        <li><code>-weight_from_wfwhm</code>: weights each frame by the quality of its stars, penalising frames with wind or imperfect tracking.</li>
+      </ul>
+      <div class="note" data-lang="es">Con 40 tomas de 90 s acumulas una hora de integración: suficiente para el complejo de Cygnus o California con este cielo. El máster queda en 32 bits, listo para el postprocesado.</div>
+      <div class="note" data-lang="en">With 40 frames of 90 s you accumulate an hour of integration: enough for the Cygnus complex or California under this sky. The master is kept in 32 bits, ready for postprocessing.</div>
+    </section>
+
+    <!-- PASO 8 -->
+    <section class="step" id="p8" data-title="Postprocesado" data-title-en="Postprocessing">
+      <div class="step-head">
+        <div class="step-num">08</div>
+        <h3><span data-lang="es">Postprocesado del máster</span><span data-lang="en">Postprocessing the master</span></h3>
+        <label class="check"><input type="checkbox" data-step> <span data-lang="es">hecho</span><span data-lang="en">done</span></label>
+      </div>
+      <p data-lang="es">Orden recomendado sobre la imagen apilada, todo dentro de Siril salvo donde se indica:</p>
+      <p data-lang="en">Recommended order on the stacked image, all inside Siril except where noted:</p>
+      <ul class="plain" data-lang="es">
+        <li><strong>1. Recorte.</strong> Elimina bordes de registro y, en tu caso, valora recortar el 15 a 20 por ciento exterior del encuadre del 28 mm, donde el UHC ya no transmite Hα.</li>
+        <li><strong>2. Extracción de fondo.</strong> <em>Procesamiento de imagen → Extracción de fondo</em>, polinomio de grado 1 o 2 con muestras solo en cielo libre de nebulosa. Alternativa más potente: GraXpert, que se invoca desde el propio Siril.</li>
+        <li><strong>3. Calibración de color fotométrica (SPCC).</strong> Resuelve astrométricamente el campo y ajusta el color contra catálogo (Gaia). En los ajustes de sensor y filtro, indica sensor OSC y selecciona las bandas del UHC si usas la versión con soporte narrowband; recupera un balance físico pese al filtro.</li>
+        <li><strong>4. Estirado.</strong> <em>Transformación de histograma</em> o, con más control, GHS (estirado hiperbólico generalizado). Estira poco y en varias pasadas; vigila que el fondo quede en torno a 0.10 a 0.13.</li>
+        <li><strong>5. Estrellas aparte.</strong> StarNet++ desde Siril separa estrellas y nebulosa; procesas la nebulosa con agresividad (saturación, curvas por canal para levantar Hα) y recompones con estrellas contenidas.</li>
+        <li><strong>6. Saturación y ruido.</strong> Saturación selectiva sobre la nebulosa; reducción de ruido al final y con moderación (la de Siril o GraXpert denoise).</li>
+      </ul>
+      <ul class="plain" data-lang="en">
+        <li><strong>1. Crop.</strong> Remove registration borders and, in this case, consider cropping the outer 15 to 20 percent of the 28 mm frame, where the UHC no longer transmits Hα.</li>
+        <li><strong>2. Background extraction.</strong> <em>Image processing → Background extraction</em>, polynomial of degree 1 or 2 with samples only on nebula-free sky. More powerful alternative: GraXpert, invoked from within Siril.</li>
+        <li><strong>3. Photometric colour calibration (SPCC).</strong> Plate-solves the field and adjusts colour against a catalogue (Gaia). In the sensor and filter settings, select an OSC sensor and the UHC bands if you use the narrowband-aware version; it recovers a physical balance despite the filter.</li>
+        <li><strong>4. Stretching.</strong> <em>Histogram transformation</em> or, with more control, GHS (generalised hyperbolic stretch). Stretch a little at a time, in several passes; keep the background around 0.10 to 0.13.</li>
+        <li><strong>5. Stars apart.</strong> StarNet++ from Siril separates stars and nebula; process the nebula aggressively (saturation, per-channel curves to lift Hα) and recompose with restrained stars.</li>
+        <li><strong>6. Saturation and noise.</strong> Selective saturation on the nebula; noise reduction last and in moderation (Siril's own or GraXpert denoise).</li>
+      </ul>
+      <details><summary><span data-lang="es">Levantar Hα sin romper el fondo</span><span data-lang="en">Lifting Hα without breaking the background</span></summary>
+        <div class="inner">
+          <p data-lang="es">Tras SPCC, si el rojo sigue corto, aplica una curva suave solo al canal R con la nebulosa separada de las estrellas, o usa <em>asinh</em> con factor bajo antes del estirado principal. Evita multiplicar el canal R completo: amplifica también el ruido de lectura del fondo, que en el rojo es proporcionalmente mayor con el UHC.</p>
+          <p data-lang="en">After SPCC, if the red is still short, apply a gentle curve to the R channel alone with the nebula separated from the stars, or use <em>asinh</em> with a low factor before the main stretch. Avoid multiplying the whole R channel: it also amplifies the background read noise, proportionally larger in the red with the UHC.</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- PASO 9 -->
+    <section class="step" id="p9" data-title="Exportación" data-title-en="Export">
+      <div class="step-head">
+        <div class="step-num">09</div>
+        <h3><span data-lang="es">Exportación y archivo</span><span data-lang="en">Export and archiving</span></h3>
+        <label class="check"><input type="checkbox" data-step> <span data-lang="es">hecho</span><span data-lang="en">done</span></label>
+      </div>
+      <p data-lang="es">Guarda tres versiones:</p>
+      <p data-lang="en">Save three versions:</p>
+      <ul class="plain" data-lang="es">
+        <li><code>savetif32 cygnus_final</code> para archivo maestro sin pérdida (TIFF 32 bits).</li>
+        <li><code>savetif cygnus_final_16</code> (TIFF 16 bits) para retoque final en otro editor.</li>
+        <li>JPEG o similar para compartir, ya con el estirado definitivo.</li>
+      </ul>
+      <ul class="plain" data-lang="en">
+        <li><code>savetif32 cygnus_final</code> as a lossless master archive (32-bit TIFF).</li>
+        <li><code>savetif cygnus_final_16</code> (16-bit TIFF) for final retouching in another editor.</li>
+        <li>JPEG or similar for sharing, with the final stretch applied.</li>
+      </ul>
+      <p data-lang="es">Conserva también el <code>result.fit</code> lineal: cada mejora futura de técnica de procesado se reaplica sobre él sin repetir la sesión.</p>
+      <p data-lang="en">Keep the linear <code>result.fit</code> too: every future improvement in processing technique can be reapplied to it without repeating the session.</p>
+      <table data-lang="es">
+        <thead><tr><th>Problema frecuente</th><th>Causa probable</th><th>Corrección</th></tr></thead>
+        <tbody>
+          <tr><td>Gradiente magenta o verde hacia los bordes</td><td>Desplazamiento espectral del UHC en el gran angular</td><td>Flats con filtro, recorte, extracción de fondo por canal</td></tr>
+          <tr><td>Estrellas alargadas en esquinas</td><td>Coma o astigmatismo a plena abertura</td><td>Cerrar a f/2.8 o f/4</td></tr>
+          <tr><td>Trazas residuales tras apilar</td><td>Umbral de rechazo alto</td><td><code>rej w 2.5 3</code></td></tr>
+          <tr><td>Bandas o patrón fijo en el fondo</td><td>Ruido correlacionado sin dithering</td><td>Dithering entre tomas en la siguiente sesión</td></tr>
+          <tr><td>Registro falla en pocas estrellas</td><td>UHC deja pocas estrellas débiles</td><td>Bajar umbral de detección en ajustes de registro</td></tr>
+        </tbody>
+      </table>
+      <table data-lang="en">
+        <thead><tr><th>Frequent problem</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td>Magenta or green gradient towards the edges</td><td>Spectral shift of the UHC on the wide angle</td><td>Flats with the filter, crop, per-channel background extraction</td></tr>
+          <tr><td>Elongated stars in the corners</td><td>Coma or astigmatism wide open</td><td>Stop down to f/2.8 or f/4</td></tr>
+          <tr><td>Residual trails after stacking</td><td>Rejection threshold too high</td><td><code>rej w 2.5 3</code></td></tr>
+          <tr><td>Banding or fixed pattern in the background</td><td>Correlated noise without dithering</td><td>Dither between frames next session</td></tr>
+          <tr><td>Registration fails on few stars</td><td>The UHC leaves few faint stars</td><td>Lower the detection threshold in the registration settings</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span data-lang="es">Manual generado para uso en campo. El progreso marcado se mantiene solo durante la sesión de lectura. Siril, GraXpert, StarNet++, DeepSkyStacker, Sequator y ASTAP son gratuitos. Antes de salir: la <a href="astro.html">previsión de cielo</a> y el <a href="luz-natural.html">planificador de luz natural</a> de este mismo sitio.</span>
+    <span data-lang="en">A manual made for field use. The marked progress lasts only for the reading session. Siril, GraXpert, StarNet++, DeepSkyStacker, Sequator and ASTAP are free. Before going out: this site's <a href="astro.html">sky forecast</a> and <a href="luz-natural.html">natural-light planner</a>.</span>
+  </div>
+</footer>
+
+<script>
+"use strict";
+(function(){
+  var LBL={
+    es:{prog:" completados", copy:"copiar", copied:"copiado ✓", night:"🔴 Modo nocturno", normal:"⚪ Modo normal"},
+    en:{prog:" completed",  copy:"copy",   copied:"copied ✓",  night:"🔴 Night mode",    normal:"⚪ Normal mode"}
+  };
+  function lang(){ return document.documentElement.lang==="en" ? "en" : "es"; }
+  function T(k){ return LBL[lang()][k]; }
+
+  // carril de navegación construido desde los pasos
+  var steps = Array.prototype.slice.call(document.querySelectorAll('.step'));
+  var rail = document.getElementById('railList');
+  function buildRail(){
+    rail.innerHTML='';
+    steps.forEach(function(s,i){
+      var li = document.createElement('li');
+      li.id = 'rail-'+s.id;
+      var a = document.createElement('a');
+      a.href = '#'+s.id;
+      var title = lang()==="en" ? (s.dataset.titleEn||s.dataset.title) : s.dataset.title;
+      a.innerHTML = '<span class="dot"></span><span>'+String(i+1).padStart(2,'0')+' · '+title+'</span>';
+      li.appendChild(a);
+      rail.appendChild(li);
+    });
+  }
+  buildRail();
+
+  // progreso en memoria (sin almacenamiento persistente)
+  var boxes = document.querySelectorAll('input[data-step]');
+  var progText = document.getElementById('progText');
+  var progBar = document.getElementById('progBar');
+  function update(){
+    var done = 0;
+    boxes.forEach(function(b){
+      var sec = b.closest('.step');
+      var railItem = document.getElementById('rail-'+sec.id);
+      if(b.checked){ done++; if(railItem) railItem.classList.add('done'); }
+      else if(railItem) railItem.classList.remove('done');
+    });
+    progText.textContent = done+' / '+boxes.length+T('prog');
+    progBar.style.width = (100*done/boxes.length)+'%';
+  }
+  boxes.forEach(function(b){ b.addEventListener('change',update); });
+
+  // botones de copiar
+  document.querySelectorAll('.copy').forEach(function(btn){
+    btn.textContent=T('copy');
+    btn.addEventListener('click',function(){
+      var pre = btn.parentElement.cloneNode(true);
+      pre.querySelector('.copy').remove();
+      var text = pre.textContent.trim();
+      function ok(){ btn.textContent=T('copied'); setTimeout(function(){btn.textContent=T('copy');},1600); }
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(ok).catch(function(){ fallback(); });
+      } else fallback();
+      function fallback(){
+        var ta=document.createElement('textarea');
+        ta.value=text; document.body.appendChild(ta); ta.select();
+        try{ document.execCommand('copy'); ok(); }catch(e){}
+        document.body.removeChild(ta);
+      }
+    });
+  });
+
+  // modo nocturno rojo
+  var modeBtn = document.getElementById('modeBtn');
+  function paintMode(){
+    var rojo = document.documentElement.getAttribute('data-mode') === 'rojo';
+    modeBtn.textContent = rojo ? T('normal') : T('night');
+    modeBtn.setAttribute('aria-pressed', rojo ? 'true' : 'false');
+    modeBtn.title = modeBtn.getAttribute('data-title-'+lang()) || modeBtn.title;
+  }
+  modeBtn.addEventListener('click',function(){
+    var html = document.documentElement;
+    if(html.getAttribute('data-mode')==='rojo') html.removeAttribute('data-mode');
+    else html.setAttribute('data-mode','rojo');
+    paintMode();
+  });
+
+  var inited=false;
+  window.onLangChange=function(){
+    if(!inited) return;
+    buildRail(); update(); paintMode();
+    document.querySelectorAll('.copy').forEach(function(btn){ btn.textContent=T('copy'); });
+  };
+  update(); paintMode();
+  inited=true;
+})();
+</script>
+
+<script>
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{ title:"Siril paso a paso · Apilado para Leica M11P + UHC",
+         desc:"Manual de preprocesado y apilado en Siril para cielo profundo con un equipo concreto: Leica M11P, filtro UHC frontal y montura ligera. De los DNG al máster: calibración, registro, apilado con rechazo y postprocesado, con modo nocturno rojo para el campo." },
+    en:{ title:"Siril step by step · Stacking for Leica M11P + UHC",
+         desc:"Preprocessing and stacking manual in Siril for deep sky with a specific kit: Leica M11P, front UHC filter and a light mount. From the DNGs to the master: calibration, registration, rejection stacking and postprocessing, with a red night mode for the field." }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    ["aria"].forEach(function(k){
+      [].forEach.call(document.querySelectorAll("[data-"+k+"-"+l+"]"),function(e){
+        e.setAttribute("aria-label", e.getAttribute("data-"+k+"-"+l));
+      });
+    });
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
+</body>
+</html>

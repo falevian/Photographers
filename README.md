@@ -13,7 +13,7 @@ Photography and light-physics tools that run entirely in the browser.
 
 ## Español
 
-Treinta y tres documentos que resuelven cuestiones fotográficas con el modelo físico o estadístico
+Treinta y cuatro documentos que resuelven cuestiones fotográficas con el modelo físico o estadístico
 delante: simuladores, métricas, catálogos, scripts de procesado y su documentación.
 
 Todo el cálculo ocurre en el navegador. No hay servidor, ni cuenta, ni telemetría, y cada
@@ -68,6 +68,7 @@ la página es su manual; el código está en [`scripts/`](scripts/).
 | [`peliculas-icc.html`](peliculas-icc.html) | Cinco películas clásicas modeladas a partir de la respuesta física publicada por el fabricante, no por ajuste visual: el color sale de integrar el espectro a 1 nm entre 380 y 730. Genera perfiles ICC para Capture One, compuestos sobre la respuesta real de tu cámara. Código: [`peliculas.py`](scripts/peliculas/peliculas.py) y [`grano.py`](scripts/peliculas/grano.py). | 78 KB |
 | [`manual-eclipse-hdr.html`](manual-eclipse-hdr.html) | Fusión HDR lineal y aplanado radial de la corona solar a partir de horquillas RAW. El gradiente coronal abarca tres órdenes de magnitud y no se comprime con una curva: se elimina dividiendo por el perfil radial. Código: [`eclipse_hdr.py`](scripts/eclipse/eclipse_hdr.py). | 93 KB |
 | [`manual-procesar-sol.html`](manual-procesar-sol.html) | El disco solar en luz blanca: oscurecimiento del limbo, manchas y granulación. Qué hacer con el gradiente radial antes de tocar el contraste. Código: [`procesar_sol.py`](scripts/eclipse/procesar_sol.py). | 86 KB |
+| [`manual-siril-apilado.html`](manual-siril-apilado.html) | Siril paso a paso para apilar cielo profundo con la M11P y filtro UHC frontal: captura, calibración con flats con el filtro puesto, registro, apilado con rechazo Winsorized y postprocesado (SPCC, GHS, StarNet++), con casillas de progreso y modo nocturno rojo. | 48 KB |
 
 ### Fotógrafos: influencia y parecido
 
@@ -150,7 +151,7 @@ python3 -m http.server 8000
 
 ## English
 
-Thirty-three documents that settle photographic questions with the physical or statistical
+Thirty-four documents that settle photographic questions with the physical or statistical
 model in plain sight: simulators, metrics, catalogues, processing scripts and their
 documentation.
 
@@ -207,6 +208,7 @@ the page is its manual; the code lives in [`scripts/`](scripts/).
 | [`peliculas-icc.html`](peliculas-icc.html) | Five classic films modelled from the physical response published by the manufacturer, not by eyeballing: the colour comes from integrating the spectrum at 1 nm between 380 and 730. Generates ICC profiles for Capture One, composed over your camera's real response. Code: [`peliculas.py`](scripts/peliculas/peliculas.py) and [`grano.py`](scripts/peliculas/grano.py). | 78 KB |
 | [`manual-eclipse-hdr.html`](manual-eclipse-hdr.html) | Linear HDR merge and radial flattening of the solar corona from RAW brackets. The coronal gradient spans three orders of magnitude and does not compress with a curve: it is removed by dividing by the radial profile. Code: [`eclipse_hdr.py`](scripts/eclipse/eclipse_hdr.py). | 93 KB |
 | [`manual-procesar-sol.html`](manual-procesar-sol.html) | The solar disc in white light: limb darkening, sunspots and granulation. What to do with the radial gradient before touching contrast at all. Code: [`procesar_sol.py`](scripts/eclipse/procesar_sol.py). | 86 KB |
+| [`manual-siril-apilado.html`](manual-siril-apilado.html) | Siril step by step for stacking deep sky with the M11P and a front UHC filter: capture, calibration with flats taken with the filter on, registration, Winsorized-rejection stacking and postprocessing (SPCC, GHS, StarNet++), with progress checkboxes and a red night mode. | 48 KB |
 
 ### Photographers: influence and likeness
 
