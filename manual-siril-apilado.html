@@ -414,6 +414,26 @@ html[lang="en"] [data-lang="es"]{display:none!important}
           <p data-lang="en">If you skip the darks, keep the cosmetic correction in calibration based on the master bias or use <code>find_hot</code>, and do not give up dithering.</p>
         </div>
       </details>
+      <details><summary><span data-lang="es">Flats con pantalla de móvil: procedimiento</span><span data-lang="en">Flats with a phone screen: procedure</span></summary>
+        <div class="inner">
+          <p data-lang="es">Una pantalla a pocos centímetros con el objetivo a infinito queda totalmente desenfocada, así que su textura no es problema. Lo que sí hay que corregir es su emisión: no es lambertiana (el color del OLED cambia con el ángulo de visión, y el 28 mm recoge rayos de hasta 37 grados), está polarizada (el UHC a incidencia oblicua transmite distinto según la polarización) y el brillo se regula por PWM, que produce bandeado en exposiciones cortas. Los tres efectos se resuelven igual:</p>
+          <p data-lang="en">A screen a few centimetres away, with the lens at infinity, is completely out of focus, so its texture is no problem. What does need correcting is its emission: it is not Lambertian (an OLED's colour changes with viewing angle, and the 28 mm collects rays at up to 37 degrees), it is polarised (a UHC at oblique incidence transmits differently depending on polarisation) and its brightness is regulated by PWM, which produces banding at short exposures. All three effects are solved the same way:</p>
+          <ul class="plain" data-lang="es">
+            <li>Pantalla en blanco a brillo máximo, con dos o tres folios blancos encima como difusor y despolarizador, apoyados en el parasol o el portafiltros.</li>
+            <li>Obturador mecánico y exposición de 0.5 a 2 s a ISO base, para promediar muchos ciclos de PWM.</li>
+            <li>Exposición ajustada mirando el histograma del canal rojo (el más débil a través del UHC): llévalo a un tercio o la mitad del rango sin saturar el verde.</li>
+            <li>20 a 25 tomas; mover el teléfono entre tomas es opcional, el desenfoque y el promedio ya hacen el trabajo.</li>
+            <li>No cambies enfoque, diafragma ni posición del filtro respecto a los lights.</li>
+          </ul>
+          <ul class="plain" data-lang="en">
+            <li>White screen at maximum brightness, with two or three sheets of white paper on top as diffuser and depolariser, resting on the hood or the filter holder.</li>
+            <li>Mechanical shutter and 0.5 to 2 s exposures at base ISO, to average many PWM cycles.</li>
+            <li>Exposure set by watching the red channel's histogram (the weakest through the UHC): bring it to a third or half of the range without saturating the green.</li>
+            <li>20 to 25 frames; moving the phone between frames is optional — the defocus and the averaging already do the work.</li>
+            <li>Do not change focus, aperture or filter position relative to the lights.</li>
+          </ul>
+        </div>
+      </details>
       <details><summary><span data-lang="es">Por qué los flats con filtro son críticos en este equipo</span><span data-lang="en">Why flats with the filter are critical on this kit</span></summary>
         <div class="inner">
           <p data-lang="es">El UHC delante de un 28 o un 35 mm recibe los rayos de campo con hasta 32 a 38 grados de incidencia. La banda de paso del filtro interferencial se desplaza al azul con el ángulo, de modo que los bordes del encuadre pierden transmisión de forma dependiente de la longitud de onda. Un flat tomado con el filtro captura ese perfil por canal y lo compensa parcialmente en la calibración. El residuo de color se elimina después con extracción de fondo.</p>
@@ -460,6 +480,8 @@ html[lang="en"] [data-lang="es"]{display:none!important}
 ├── flats/
 └── biases/   <span class="c"># el script clásico espera "biases" · the classic script expects "biases"</span></pre>
       <p data-lang="es">El script convierte, calibra, alinea y apila con parámetros razonables, y deja un <code>result.fit</code> en el directorio de trabajo. Es el camino recomendado para la primera serie; los pasos 04 a 07 describen lo mismo de forma manual, con control sobre cada parámetro.</p>
+      <div class="note" data-lang="es">Este repositorio incluye dos scripts ya adaptados a este equipo, con los parámetros de los pasos 04 a 07: <a href="scripts/siril/Apilado_M11P_UHC.ssf" download>Apilado_M11P_UHC.ssf</a> (cadena completa con darks) y <a href="scripts/siril/Apilado_M11P_UHC_sin_darks.ssf" download>Apilado_M11P_UHC_sin_darks.ssf</a> (la variante del paso 01, con el LENR desactivado). Cópialos a la carpeta de scripts de Siril o ejecútalos con <em>Scripts → Ejecutar script…</em></div>
+      <div class="note" data-lang="en">This repository ships two scripts already adapted to this kit, with the parameters of steps 04 to 07: <a href="scripts/siril/Apilado_M11P_UHC.ssf" download>Apilado_M11P_UHC.ssf</a> (full chain with darks) and <a href="scripts/siril/Apilado_M11P_UHC_sin_darks.ssf" download>Apilado_M11P_UHC_sin_darks.ssf</a> (the step-01 variant, with LENR disabled). Copy them to Siril's scripts folder or run them via <em>Scripts → Run script…</em></div>
       <p data-lang="en">The script converts, calibrates, registers and stacks with sensible parameters, leaving a <code>result.fit</code> in the working directory. It is the recommended path for the first series; steps 04 to 07 describe the same thing manually, with control over every parameter.</p>
       <details><summary><span data-lang="es">Cuándo abandonar el script y pasar al flujo manual</span><span data-lang="en">When to abandon the script for the manual workflow</span></summary>
         <div class="inner">
@@ -576,11 +598,11 @@ calibrate light -dark=dark_stacked -flat=pp_flat_stacked -cc=dark -cfa -equalize
       <div class="note warn" data-lang="en">With the UHC, the red channel (Hα attenuated by the sensor's IR cut) will sit far below the green. That is expected; do not correct it here — it is resolved in the colour calibration of step 08.</div>
       <details><summary><span data-lang="es">Variante sin darks (ver paso 01)</span><span data-lang="en">No-darks variant (see step 01)</span></summary>
         <div class="inner">
-          <p data-lang="es">Si decidiste prescindir de los darks, calibra los lights solo con bias y flat, y deja la corrección cosmética apoyada en la estadística del bias:</p>
-          <p data-lang="en">If you decided to skip the darks, calibrate the lights with bias and flat only, and let the cosmetic correction rest on the bias statistics:</p>
-          <pre><button class="copy">copiar</button>calibrate light -bias=bias_stacked -flat=pp_flat_stacked -cc=bpm -cfa -equalize_cfa -debayer</pre>
-          <p data-lang="es">El dithering y el rechazo del apilado se encargan del resto de píxeles calientes.</p>
-          <p data-lang="en">Dithering and the stacking rejection take care of the remaining hot pixels.</p>
+          <p data-lang="es">Si decidiste prescindir de los darks, calibra los lights solo con bias y flat:</p>
+          <p data-lang="en">If you decided to skip the darks, calibrate the lights with bias and flat only:</p>
+          <pre><button class="copy">copiar</button>calibrate light -bias=bias_stacked -flat=pp_flat_stacked -cfa -equalize_cfa -debayer</pre>
+          <p data-lang="es">Sin máster dark no hay corrección cosmética en esta fase (la opción de mapa de píxeles defectuosos exige un fichero previo); el dithering y el rechazo del apilado se encargan de los píxeles calientes.</p>
+          <p data-lang="en">Without a master dark there is no cosmetic correction at this stage (the bad-pixel-map option requires a pre-existing file); dithering and the stacking rejection take care of the hot pixels.</p>
         </div>
       </details>
       <details><summary><span data-lang="es">En la interfaz gráfica</span><span data-lang="en">In the graphical interface</span></summary>

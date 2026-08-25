@@ -3,7 +3,6 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Niebla para fotografía</title>
 <meta name="author" content="Rafael Vida">
 <meta name="description" content="Herramienta de predicción de niebla para fotografía: índice físico hora a hora y fusión bayesiana multimodelo sobre datos de Open-Meteo, con registro local de observaciones.">
 <meta property="og:type" content="website">
@@ -24,21 +23,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Niebla">
-<script>
-/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
-(function(){
-  var K="pn-lang", OLD="niebla_lang", u=null;
-  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
-  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
-  if(u!=="es"&&u!=="en"){
-    /* Migracion de la clave antigua del paquete suelto. */
-    try{ var o=localStorage.getItem(OLD); if(o==="es"||o==="en"){ u=o; localStorage.setItem(K,o); } }catch(e){}
-  }
-  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
-  document.documentElement.lang=u;
-})();
-</script>
+<meta name="apple-mobile-web-app-title" content="Niebla"><rect width='32' height='32' rx='6' fill='%23e6eaee'/><circle cx='16' cy='11' r='5.5' fill='%23d9a441'/><rect x='5' y='16' width='22' height='2.6' rx='1.3' fill='%239fb0bd'/><rect x='8' y='21' width='19' height='2.6' rx='1.3' fill='%23788b99'/><rect x='5' y='26' width='16' height='2.6' rx='1.3' fill='%239fb0bd'/></svg>">
+
+<title>Niebla para fotografía</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -50,6 +37,9 @@
   header{padding-top:24px;padding-bottom:8px}
   .topbar{display:flex;justify-content:flex-end;align-items:center;gap:14px;font-size:13px}
   .topbar a{color:var(--ink2)}
+  .lang{display:inline-flex;border:1px solid var(--ink);border-radius:5px;overflow:hidden;font-family:var(--mono);font-size:12px}
+  .lang button{border:none;border-radius:0;padding:5px 10px;background:transparent;color:var(--ink)}
+  .lang button.on{background:var(--ink);color:#fff}
   h1{font-size:clamp(26px,4vw,40px);font-weight:700;letter-spacing:-.02em;margin:6px 0 4px}
   .sub{color:var(--ink2);font-size:15px;margin:0}
   main{padding-bottom:48px}
@@ -105,213 +95,129 @@
   .mlist{display:flex;flex-wrap:wrap;gap:8px;font-family:var(--mono);font-size:12px}
   .mlist label{display:inline-flex;align-items:center;gap:4px;text-transform:none;letter-spacing:0;font-size:12px;color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:3px 7px;background:#fff;margin:0}
   .mlist .st{color:var(--ink2)}.mlist .st.ok{color:#3e6d8a}.mlist .st.ko{color:#8c4a3a}
-  .netnote{background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--ok);
-    border-radius:6px;padding:10px 14px;margin:14px 0 0;font-size:13.5px;color:var(--ink2);max-width:80ch}
-  .netnote b{color:var(--ink)}
-
-  /* ---------- convenio bilingue del repositorio ---------- */
-  html[lang="es"] [data-lang="en"]{display:none!important}
-  html[lang="en"] [data-lang="es"]{display:none!important}
-  .langbar{position:fixed;top:14px;right:16px;z-index:100;display:flex;
-    border:1px solid var(--ink);border-radius:5px;overflow:hidden;background:var(--paper)}
-  .langbar button{font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;
-    border:0;border-radius:0;padding:5px 10px;background:transparent;color:var(--ink2);cursor:pointer}
-  .langbar button+button{border-left:1px solid var(--line)}
-  .langbar button:hover{color:var(--ink)}
-  .langbar button.on{background:var(--ink);color:#fff}
-  .langbar button:focus-visible{outline:2px solid var(--ok);outline-offset:-2px}
-  /* La barra flota sobre la esquina superior derecha, donde vive .topbar:
-     si no cabe al lado del contenido, se baja la cabecera para que no se solapen. */
-  @media(max-width:1290px){header{padding-top:52px}}
-  @media(max-width:720px){.langbar{top:8px;right:8px} header{padding-top:44px}}
-  @media print{.langbar{display:none!important}}
 </style>
 </head>
 <body>
-
-<div class="langbar" role="group" aria-label="Idioma / Language">
-  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
-  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
-</div>
-
 <header>
-  <div class="topbar">
-    <a href="guia-niebla.html" data-lang="es">Guía rápida</a>
-    <a href="guia-niebla.html" data-lang="en">Quick guide</a>
-    <a href="manual-niebla.html" id="manual-link" data-i18n="manual"></a>
-    <a href="index.html" data-lang="es">Portada</a>
-    <a href="index.html" data-lang="en">Home</a>
-  </div>
-  <h1 data-i18n="title"></h1>
+  <div class="topbar"><a href="index.html" id="portada-link" data-i18n="portada">Portada</a><a href="astro.html" id="astro-link" data-i18n="astro_link">Astrofotografía</a><a href="guia-niebla.html" id="guia-link" data-i18n="guia">Guía rápida</a><a href="manual-niebla.html" id="manual-link" data-i18n="manual">Manual</a>
+    <div class="lang" role="group" aria-label="Idioma / Language"><button id="lg-es" type="button">ES</button><button id="lg-en" type="button">EN</button></div></div>
+  <h1 data-i18n="title">Niebla para fotografía</h1>
   <p class="sub" data-i18n="subtitle"></p>
-  <p class="netnote" data-lang="es"><b>Necesita conexión a internet.</b> Es la única página del sitio que la necesita: cada cálculo descarga la previsión de <b>Open‑Meteo</b> (<code>api.open-meteo.com</code> y, en modo costero, <code>marine-api.open-meteo.com</code>). Sin red la página se abre igual, pero no puede predecir nada. No hay clave ni registro; tus observaciones se quedan en este navegador.</p>
-  <p class="netnote" data-lang="en"><b>An internet connection is required.</b> This is the only page on the site that needs one: every computation downloads the forecast from <b>Open‑Meteo</b> (<code>api.open-meteo.com</code> and, in coastal mode, <code>marine-api.open-meteo.com</code>). With no network the page still opens, but it cannot forecast anything. There is no API key and no sign‑up; your observations stay in this browser.</p>
 </header>
 <main>
   <div class="panel controls">
-    <div><label for="lat" data-i18n="lat"></label><input id="lat" type="number" step="0.0001" value="43.3623"></div>
-    <div><label for="lon" data-i18n="lon"></label><input id="lon" type="number" step="0.0001" value="-8.4115"></div>
-    <div><label for="costa" data-i18n="env"></label><select id="costa"><option value="costa" data-i18n="env_coast"></option><option value="interior" data-i18n="env_inland"></option></select></div>
-    <button id="geo" class="ghost" type="button" data-i18n="geo"></button>
+    <div><label for="lat" data-i18n="lat">Latitud</label><input id="lat" type="number" step="0.0001" value="43.3623"></div>
+    <div><label for="lon" data-i18n="lon">Longitud</label><input id="lon" type="number" step="0.0001" value="-8.4115"></div>
+    <div><label for="costa" data-i18n="env">Entorno</label><select id="costa"><option value="costa" data-i18n="env_coast">Costero (advección)</option><option value="interior" data-i18n="env_inland">Interior</option></select></div>
+    <button id="geo" class="ghost" type="button" data-i18n="geo">Usar mi posición</button>
   </div>
 
   <div class="tabs" role="tablist">
-    <button class="tab on" data-pane="p1" role="tab" data-i18n="tab1"></button>
-    <button class="tab" data-pane="p2" role="tab" data-i18n="tab2"></button>
+    <button class="tab on" data-pane="p1" role="tab" data-i18n="tab1">Índice de niebla</button>
+    <button class="tab" data-pane="p2" role="tab" data-i18n="tab2">Fusión bayesiana</button>
   </div>
 
   <div class="pane on" id="p1">
     <div class="panel controls" style="margin-top:0">
-      <div><label for="model" data-i18n="model"></label>
+      <div><label for="model" data-i18n="model">Modelo</label>
         <select id="model">
-          <option value="best_match" data-i18n="best"></option>
+          <option value="best_match" data-i18n="best">Mejor disponible</option>
           <option value="icon_seamless">ICON (DWD)</option><option value="gfs_seamless">GFS (NOAA)</option>
           <option value="meteofrance_seamless">AROME/ARPEGE</option><option value="ecmwf_ifs025">ECMWF IFS 0.25°</option><option value="ukmo_seamless">UKMO</option>
         </select></div>
-      <button id="go1" type="button" data-i18n="compute"></button>
+      <button id="go1" type="button" data-i18n="compute">Calcular</button>
       <div class="status" id="st1"></div>
     </div>
     <div class="cards" id="cards1"></div>
-    <section><h2 data-i18n="h_strip"></h2><div class="wrap"><div class="strip" id="strip"></div></div><div class="legend" data-i18n="strip_legend"></div></section>
-    <section><h2 data-i18n="h_conv"></h2><div id="chart1"></div><div class="legend" id="leg1"></div></section>
-    <section><h2 data-i18n="h_table"></h2><div class="wrap"><table id="tabla1"></table></div></section>
-    <section><h2 data-i18n="h_how"></h2><p class="note" data-i18n="how1"></p></section>
+    <section><h2 data-i18n="h_strip">Índice horario (48 h)</h2><div class="wrap"><div class="strip" id="strip"></div></div><div class="legend" data-i18n="strip_legend"></div></section>
+    <section><h2 data-i18n="h_conv">Convergencia de temperatura y punto de rocío</h2><div id="chart1"></div><div class="legend" id="leg1"></div></section>
+    <section><h2 data-i18n="h_table">Tabla horaria</h2><div class="wrap"><table id="tabla1"></table></div></section>
+    <section><h2 data-i18n="h_how">Cómo se calcula</h2><p class="note" data-i18n="how1"></p></section>
   </div>
 
   <div class="pane" id="p2">
     <div class="panel controls" style="margin-top:0">
       <div style="flex-basis:100%"><label data-i18n="models_lbl"></label><div class="mlist" id="mlist"></div></div>
-      <div><label for="alpha" data-i18n="alpha"></label><input id="alpha" type="number" step="0.1" min="1" max="8" value="1.8"></div>
-      <button id="go2" type="button" data-i18n="compute"></button>
+      <div><label for="alpha" data-i18n="alpha">α</label><input id="alpha" type="number" step="0.1" min="1" max="8" value="1.8"></div>
+      <button id="go2" type="button" data-i18n="compute">Calcular</button>
       <div class="status" id="st2"></div>
     </div>
     <div class="cards" id="cards2"></div>
-    <section><h2 data-i18n="h_prob"></h2><div id="chart2"></div><div class="legend" id="legend2"></div></section>
+    <section><h2 data-i18n="h_prob">Probabilidad horaria por modelo y posterior</h2><div id="chart2"></div><div class="legend" id="legend2"></div></section>
     <section class="grid2">
-      <div><h2 data-i18n="h_sun"></h2><div class="wrap"><table id="tsun"></table></div></div>
-      <div><h2 data-i18n="h_w"></h2><div class="wrap"><table id="tw"></table></div><p class="note" id="priorinfo"></p></div>
+      <div><h2 data-i18n="h_sun">Estado del amanecer por modelo</h2><div class="wrap"><table id="tsun"></table></div></div>
+      <div><h2 data-i18n="h_w">Pesos bayesianos y prior</h2><div class="wrap"><table id="tw"></table></div><p class="note" id="priorinfo"></p></div>
     </section>
     <section><h2 data-i18n="h_cal"></h2><div id="calib" style="max-width:560px"></div><p class="note" id="calread"></p></section>
-    <section><h2 data-i18n="h_obs"></h2>
+    <section><h2 data-i18n="h_obs">Registro de observaciones (aprendizaje)</h2>
       <div class="panel">
         <div class="obs-row">
-          <div><label for="odate" data-i18n="night_of"></label><input id="odate" type="date"></div>
-          <div><label for="oval" data-i18n="observed"></label><select id="oval"><option value="1" data-i18n="o_fog"></option><option value="0.5" data-i18n="o_mist"></option><option value="0" data-i18n="o_none"></option></select></div>
-          <button id="saveobs" type="button" data-i18n="save_obs"></button>
-          <button id="exp" class="ghost" type="button" data-i18n="export"></button>
-          <label style="display:inline-block;margin:0"><span style="cursor:pointer;border:1px solid var(--ink);padding:7px 12px;border-radius:5px;font-size:14px;display:inline-block;text-transform:none;letter-spacing:0;color:var(--ink)" data-i18n="import"></span><input id="imp" type="file" accept="application/json" style="display:none"></label>
-          <button id="clear" class="ghost" type="button" data-i18n="clear"></button>
+          <div><label for="odate" data-i18n="night_of">Noche del</label><input id="odate" type="date"></div>
+          <div><label for="oval" data-i18n="observed">Observado al amanecer</label><select id="oval"><option value="1" data-i18n="o_fog">Niebla</option><option value="0.5" data-i18n="o_mist">Bruma</option><option value="0" data-i18n="o_none">Nada</option></select></div>
+          <button id="saveobs" type="button" data-i18n="save_obs">Guardar con la previsión actual</button>
+          <button id="exp" class="ghost" type="button" data-i18n="export">Exportar JSON</button>
+          <label style="display:inline-block;margin:0"><span style="cursor:pointer;border:1px solid var(--ink);padding:7px 12px;border-radius:5px;font-size:14px;display:inline-block;text-transform:none;letter-spacing:0;color:var(--ink)" data-i18n="import">Importar JSON</span><input id="imp" type="file" accept="application/json" style="display:none"></label>
+          <button id="clear" class="ghost" type="button" data-i18n="clear">Borrar registro</button>
         </div>
         <p class="note" data-i18n="obs_note"></p>
         <div class="wrap"><table id="tobs"></table></div>
       </div></section>
-    <section><h2 data-i18n="h_method"></h2><p class="note" data-i18n="method"></p></section>
+    <section><h2 data-i18n="h_method">Método</h2><p class="note" data-i18n="method"></p></section>
   </div>
 </main>
 
 <script>
-"use strict";
-/* ---------- conmutador de idioma / language switch ---------- */
-(function(){
-  var KEY="pn-lang";
-  var META={
-    es:{ title:"Niebla para fotografía", app:"Niebla",
-         desc:"Herramienta de predicción de niebla para fotografía: índice físico hora a hora y fusión bayesiana multimodelo sobre datos de Open-Meteo, con registro local de observaciones." },
-    en:{ title:"Fog for photography", app:"Fog",
-         desc:"Fog forecasting tool for photography: hourly physical index and multi-model Bayesian fusion over Open-Meteo data, with a local observation log." }
-  };
-  function apply(l){
-    document.documentElement.lang=l;
-    document.title=META[l].title;
-    var a=document.querySelector('meta[name="apple-mobile-web-app-title"]');
-    if(a) a.setAttribute("content",META[l].app);
-    var d=document.querySelector('meta[name="description"]');
-    if(d) d.setAttribute("content",META[l].desc);
-    ["title","ph","alt","aria"].forEach(function(k){
-      [].forEach.call(document.querySelectorAll("[data-"+k+"-"+l+"]"),function(e){
-        var attr = k==="ph" ? "placeholder" : (k==="aria" ? "aria-label" : k);
-        e.setAttribute(attr, e.getAttribute("data-"+k+"-"+l));
-      });
-    });
-    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
-      var on=b.getAttribute("data-setlang")===l;
-      b.classList.toggle("on",on);
-      b.setAttribute("aria-pressed",on?"true":"false");
-    });
-    if(window.onLangChange) window.onLangChange(l);
-  }
-  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
-    b.addEventListener("click",function(){
-      var l=b.getAttribute("data-setlang");
-      try{ localStorage.setItem(KEY,l); }catch(e){}
-      apply(l);
-    });
-  });
-  apply(document.documentElement.lang==="en"?"en":"es");
-})();
-</script>
-
-<script>
 (function(){
   const I18N={
-  es:{manual:'Manual',title:'Niebla para fotografía',subtitle:'Pestaña 1: índice físico de niebla con un modelo. Pestaña 2: fusión bayesiana de varios modelos con aprendizaje a partir de tus observaciones. Datos de Open‑Meteo, sin clave.',
+  es:{portada:'Portada',guia:'Guía rápida',astro_link:'Astrofotografía',manual:'Manual',title:'Niebla para fotografía',subtitle:'Pestaña 1: índice físico de niebla con un modelo. Pestaña 2: fusión bayesiana de varios modelos con aprendizaje a partir de tus observaciones. Datos de Open‑Meteo, sin clave.',
     lat:'Latitud',lon:'Longitud',env:'Entorno',env_coast:'Costero (advección)',env_inland:'Interior',geo:'Usar mi posición',tab1:'Índice de niebla',tab2:'Fusión bayesiana',model:'Modelo',best:'Mejor disponible',compute:'Calcular',
     h_strip:'Índice horario (48 h)',strip_legend:'Barra: índice 0 a 100. Fondo gris: noche. Hora en rojo: amanecer. Ámbar: bruma posible. Rojizo: niebla probable.',
     h_conv:'Convergencia de temperatura y punto de rocío',leg1:'<i style="background:#1c262e"></i>T (°C) <i style="background:#3e6d8a"></i>Td (°C) <i style="background:#b8862b"></i>viento (km/h, eje derecho) <i style="background:#d9a0a0"></i>T − Td &lt; 2 °C',
     h_table:'Tabla horaria',h_how:'Cómo se calcula',
     how1:'El índice suma contribuciones y se satura en 100. <code>ΔT = T − Td</code>: 40 puntos si ΔT ≤ 0.5 °C, decreciendo linealmente hasta 0 en 4 °C. Viento a 10 m: 2 a 8 km/h (20), calma (14), 8 a 15 (8), &gt; 20 (0). Nubosidad nocturna: &lt; 25 % (20), 25 a 60 % (8), más (0). Visibilidad modelada: &lt; 1 km (20), &lt; 3 km (10), &lt; 6 km (4). HR ≥ 97 %: +10. Lluvia &gt; 0.5 mm: −15. De día se multiplica por 0.65. En modo costero, advección: Td del aire por encima de la SST con viento de 8 a 30 km/h, hasta +30. Umbrales: ≥ 65 niebla probable, 40 a 64 bruma posible.',
-    models_lbl:'Modelos (descarga en paralelo con límite de 12 s; desmarca los lentos)',alpha:'α (fuentes independientes efectivas)',h_prob:'Probabilidad horaria por modelo y posterior',h_sun:'Estado del amanecer por modelo',h_w:'Pesos bayesianos y prior',h_obs:'Registro de observaciones (aprendizaje)',
+    models_lbl:'Modelos y ensembles (descarga en paralelo; EPS/ENS son conjuntos de 30 a 50 miembros y tardan algo más)',alpha:'α (fuentes independientes efectivas)',h_prob:'Probabilidad horaria por modelo y posterior',h_sun:'Estado del amanecer por modelo',h_w:'Pesos bayesianos y prior',h_obs:'Registro de observaciones (aprendizaje)',
     night_of:'Noche del',observed:'Observado al amanecer',o_fog:'Niebla (vis < 1 km)',o_mist:'Bruma o neblina',o_none:'Nada',save_obs:'Guardar observación',export:'Exportar JSON',import:'Importar JSON',clear:'Borrar registro',
     obs_note:'Cada vez que calculas, la previsión para el próximo amanecer queda congelada automáticamente, asociada a la fecha de esa noche. Por la mañana basta con elegir la noche recién terminada, indicar lo observado y guardar: la observación se empareja con la previsión que se congeló la víspera, nunca con una posterior. Si esa noche no llegaste a calcular, la observación solo actualiza el prior climatológico, no los pesos. El registro se guarda en este navegador; exporta el JSON si cambias de equipo.',
     snap_info:'Previsión congelada para la noche del {d} ({n} modelos, {h}).',no_snap:'No hay previsión congelada para la noche del {d}; la observación actualiza solo el prior.',obs_saved:'Observación guardada para la noche del {d}.',pending:'pendiente',
-    h_method:'Método',method:'Cada modelo da un índice s por hora (misma heurística de la pestaña 1) que se convierte en probabilidad con <code>p_m = σ((s − 55)/12)</code>, calibrada a la tasa base π₀ = 0.12. Prior climatológico π ~ Beta(a, b), inicial Beta(1.2, 8.8), actualizado con cada noche observada (a += y, b += 1 − y). Posterior por pooling logarítmico: <code>logit P = logit π + α · Σ w_m (logit p_m − logit π₀)</code>, Σ w_m = 1. α = 1 trata a todos los modelos como una sola evidencia; valores mayores asumen independencia parcial. Pesos <code>w_m ∝ exp(0.7 · Σ log P_m(y_obs))</code>: probabilidad a posteriori de que m sea el mejor modelo, con prior uniforme y tempering. Sin observaciones, pesos uniformes.',
+    h_method:'Método',method:'Cada modelo determinista da un índice s por hora (misma heurística de la pestaña 1) que se convierte en probabilidad con <code>p_m = σ((s − 55)/12)</code>. Las fuentes EPS/ENS son ensembles: se calcula el índice para cada miembro y p_m es la media de las probabilidades de los miembros, una probabilidad genuina que refleja la dispersión del propio modelo. Con 12 o más noches registradas se ajusta además una recalibración de Platt <code>q = σ(a·logit P + b)</code> sobre pares (posterior, observado), con prior a≈1, b≈0. Calibración base a la tasa π₀ = 0.12. Prior climatológico π ~ Beta(a, b), inicial Beta(1.2, 8.8), actualizado con cada noche observada (a += y, b += 1 − y). Posterior por pooling logarítmico: <code>logit P = logit π + α · Σ w_m (logit p_m − logit π₀)</code>, Σ w_m = 1. α = 1 trata a todos los modelos como una sola evidencia; valores mayores asumen independencia parcial. Pesos <code>w_m ∝ exp(0.7 · Σ log P_m(y_obs))</code>: probabilidad a posteriori de que m sea el mejor modelo, con prior uniforme y tempering. Sin observaciones, pesos uniformes.',
     dl:'Descargando previsión…',dl_n:'Descargando {n} modelos en paralelo…',err:'Error: ',nopos:'Sin posición: ',nossT:' · sin SST, advección desactivada',elev:'elevación',
     next6:'Próximas 6 horas',max_at:'máximo a las',sunrise:'Amanecer',window:'ventana −2.5 h a +1.5 h, máximo a las',mindt:'Mínima depresión del punto de rocío esta noche',at:'a las',wind:'viento',clouds:'nubes',pressure:'presión',
     fog:'Niebla probable',mist:'Bruma o neblina posible',unlikely:'Improbable',range:'rango',disp:'Dispersión entre modelos (amanecer)',agree_h:'Acuerdo alto',agree_m:'Acuerdo moderado',agree_l:'Desacuerdo',mean:'media',disp_note:'Desviación típica de las probabilidades de los modelos: incertidumbre epistémica.',
     th1:['Hora','Índice','T','Td','ΔT','HR','Viento','Dir','Nubes','Bajas','Vis km','SST','P hPa'],thsun:['Modelo','P máx','hora','ΔT','HR','viento','nubes','vis km','señales'],thw:['Modelo','peso w','','log‑veros.'],thobs:['Noche','y'],posterior:'posterior',del:'eliminar',
     post_leg:'posterior',range_leg:'rango',prior_info:'Prior: Beta({a}, {b}), media {pi} % sobre {n} noches registradas. Calibración p = σ((s − 55)/12), π₀ = 0.12.',
-    h_cal:'Calibración (diagrama de fiabilidad)',cal_empty:'Se dibuja cuando el registro tenga noches con previsión congelada.',cal_few:'Aún hay pocas noches para leer la calibración (n={n}; orientativo a partir de 10, fiable a partir de 30).',cal_thin:'Los grupos extremos (0–25 % y 75–100 %) tienen pocas noches (n={n}); todavía no hay señal clara sobre α.',cal_mixed:'Los grupos se contradicen entre sí: sin señal clara sobre α; déjalo como está y sigue registrando.',cal_up:'Las frecuencias reales son más extremas que el posterior: sube α.',cal_down:'Las frecuencias reales son menos extremas que el posterior: baja α.',cal_ok:'La calibración es razonable: deja α como está.',cal_diag:'calibración perfecta',cal_x:'posterior predicho (%)',cal_y:'frecuencia real de niebla (%)',
     sel1:'Selecciona al menos un modelo.',none:'Ningún modelo respondió a tiempo. Reintenta o reduce la selección.',fused:'{k} modelos fusionados',failed:', {f} sin respuesta',first:'Calcula primero.',badjson:'JSON no válido',confirm:'¿Borrar todo el registro de observaciones?',
-    w_dT:'ΔT',w_vis:'vis',w_rain:'lluvia',w_adv:'advección',w_wind:'viento',w_cloud:'nubes',timeout:'timeout',error:'error'},
-  en:{manual:'Manual',title:'Fog for photography',subtitle:'Tab 1: physical fog index from one model. Tab 2: Bayesian fusion of several models that learns from your observations. Open‑Meteo data, no API key.',
+    h_cal:'Calibración (diagrama de fiabilidad)',cal_empty:'Se dibuja cuando el registro tenga noches con previsión congelada.',cal_few:'Aún hay pocas noches para leer la calibración (n={n}; orientativo a partir de 10, fiable a partir de 30).',cal_thin:'Los grupos extremos (0–25 % y 75–100 %) tienen pocas noches (n={n}); todavía no hay señal clara sobre α.',cal_mixed:'Los grupos se contradicen entre sí: sin señal clara sobre α; déjalo como está y sigue registrando.',cal_up:'Las frecuencias reales son más extremas que el posterior: sube α.',cal_down:'Las frecuencias reales son menos extremas que el posterior: baja α.',cal_ok:'La calibración es razonable: deja α como está.',cal_diag:'calibración perfecta',cal_x:'posterior predicho (%)',cal_y:'frecuencia real de niebla (%)',w_dT:'ΔT',w_vis:'vis',w_rain:'lluvia',w_adv:'advección',w_wind:'viento',w_cloud:'nubes',timeout:'timeout',error:'error',recal:'recalibrado (n={n}, a={a}, b={b})'},
+  en:{portada:'Home',guia:'Quick guide',astro_link:'Astrophotography',manual:'Manual',title:'Fog for photography',subtitle:'Tab 1: physical fog index from one model. Tab 2: Bayesian fusion of several models that learns from your observations. Open‑Meteo data, no API key.',
     lat:'Latitude',lon:'Longitude',env:'Setting',env_coast:'Coastal (advection)',env_inland:'Inland',geo:'Use my location',tab1:'Fog index',tab2:'Bayesian fusion',model:'Model',best:'Best available',compute:'Compute',
     h_strip:'Hourly index (48 h)',strip_legend:'Bar: index 0 to 100. Grey background: night. Red hour: sunrise. Amber: mist possible. Reddish: fog likely.',
     h_conv:'Temperature and dew point convergence',leg1:'<i style="background:#1c262e"></i>T (°C) <i style="background:#3e6d8a"></i>Td (°C) <i style="background:#b8862b"></i>wind (km/h, right axis) <i style="background:#d9a0a0"></i>T − Td &lt; 2 °C',
     h_table:'Hourly table',h_how:'How it is computed',
     how1:'The index adds independent contributions and saturates at 100. <code>ΔT = T − Td</code>: 40 points if ΔT ≤ 0.5 °C, decreasing linearly to 0 at 4 °C. 10 m wind: 2 to 8 km/h (20), calm (14), 8 to 15 (8), &gt; 20 (0). Night cloud cover: &lt; 25 % (20), 25 to 60 % (8), more (0). Model visibility: &lt; 1 km (20), &lt; 3 km (10), &lt; 6 km (4). RH ≥ 97 %: +10. Rain &gt; 0.5 mm: −15. Daytime values are multiplied by 0.65. In coastal mode, advection: air dew point above SST with wind 8 to 30 km/h, up to +30. Thresholds: ≥ 65 fog likely, 40 to 64 mist possible.',
-    models_lbl:'Models (parallel download, 12 s limit; untick slow ones)',alpha:'α (effective independent sources)',h_prob:'Hourly probability per model and posterior',h_sun:'Sunrise state per model',h_w:'Bayesian weights and prior',h_obs:'Observation log (learning)',
+    models_lbl:'Models and ensembles (parallel download; EPS/ENS are 30 to 50 member ensembles and take a bit longer)',alpha:'α (effective independent sources)',h_prob:'Hourly probability per model and posterior',h_sun:'Sunrise state per model',h_w:'Bayesian weights and prior',h_obs:'Observation log (learning)',
     night_of:'Night of',observed:'Observed at sunrise',o_fog:'Fog (vis < 1 km)',o_mist:'Mist or haze',o_none:'Nothing',save_obs:'Save observation',export:'Export JSON',import:'Import JSON',clear:'Clear log',
     obs_note:'Every time you compute, the forecast for the next sunrise is frozen automatically and attached to the date of that night. In the morning just pick the night that has just ended, choose what you observed and save: the observation is paired with the forecast frozen the evening before, never with a later one. If you did not compute that night, the observation only updates the climatological prior, not the weights. The log lives in this browser; export the JSON if you change device.',
     snap_info:'Forecast frozen for the night of {d} ({n} models, {h}).',no_snap:'No frozen forecast for the night of {d}; the observation only updates the prior.',obs_saved:'Observation saved for the night of {d}.',pending:'pending',
-    h_method:'Method',method:'Each model yields an hourly index s (same heuristic as tab 1), mapped to a probability with <code>p_m = σ((s − 55)/12)</code>, calibrated to the base rate π₀ = 0.12. Climatological prior π ~ Beta(a, b), initially Beta(1.2, 8.8), updated with every observed night (a += y, b += 1 − y). Posterior by logarithmic pooling: <code>logit P = logit π + α · Σ w_m (logit p_m − logit π₀)</code>, Σ w_m = 1. α = 1 treats all models as one piece of evidence; larger values assume partial independence. Weights <code>w_m ∝ exp(0.7 · Σ log P_m(y_obs))</code>: posterior probability that m is the best model, uniform prior, tempered. With no observations, uniform weights.',
+    h_method:'Method',method:'Each deterministic model yields an hourly index s (same heuristic as tab 1), mapped to a probability with <code>p_m = σ((s − 55)/12)</code>. EPS/ENS sources are ensembles: the index is computed for every member and p_m is the mean of member probabilities, a genuine probability reflecting the model&#8217;s own spread. With 12 or more logged nights a Platt recalibration <code>q = σ(a·logit P + b)</code> is also fitted on (posterior, observed) pairs, with prior a≈1, b≈0. Base calibration at rate π₀ = 0.12. Climatological prior π ~ Beta(a, b), initially Beta(1.2, 8.8), updated with every observed night (a += y, b += 1 − y). Posterior by logarithmic pooling: <code>logit P = logit π + α · Σ w_m (logit p_m − logit π₀)</code>, Σ w_m = 1. α = 1 treats all models as one piece of evidence; larger values assume partial independence. Weights <code>w_m ∝ exp(0.7 · Σ log P_m(y_obs))</code>: posterior probability that m is the best model, uniform prior, tempered. With no observations, uniform weights.',
     dl:'Downloading forecast…',dl_n:'Downloading {n} models in parallel…',err:'Error: ',nopos:'No position: ',nossT:' · no SST, advection disabled',elev:'elevation',
     next6:'Next 6 hours',max_at:'peak at',sunrise:'Sunrise',window:'window −2.5 h to +1.5 h, peak at',mindt:'Minimum dew point depression tonight',at:'at',wind:'wind',clouds:'clouds',pressure:'pressure',
     fog:'Fog likely',mist:'Mist or haze possible',unlikely:'Unlikely',range:'range',disp:'Spread between models (sunrise)',agree_h:'High agreement',agree_m:'Moderate agreement',agree_l:'Disagreement',mean:'mean',disp_note:'Standard deviation of model probabilities: epistemic uncertainty.',
     th1:['Time','Index','T','Td','ΔT','RH','Wind','Dir','Clouds','Low','Vis km','SST','P hPa'],thsun:['Model','P max','time','ΔT','RH','wind','clouds','vis km','signals'],thw:['Model','weight w','','log‑lik.'],thobs:['Night','y'],posterior:'posterior',del:'delete',
     post_leg:'posterior',range_leg:'range',prior_info:'Prior: Beta({a}, {b}), mean {pi} % over {n} logged nights. Calibration p = σ((s − 55)/12), π₀ = 0.12.',
-    h_cal:'Calibration (reliability diagram)',cal_empty:'Drawn once the log has nights with a frozen forecast.',cal_few:'Too few nights yet to read calibration (n={n}; indicative from 10, reliable from 30).',cal_thin:'The extreme groups (0–25 % and 75–100 %) hold few nights (n={n}); no clear signal on α yet.',cal_mixed:'The groups contradict each other: no clear signal on α; leave it as it is and keep logging.',cal_up:'Actual frequencies are more extreme than the posterior: raise α.',cal_down:'Actual frequencies are less extreme than the posterior: lower α.',cal_ok:'Calibration is reasonable: leave α as it is.',cal_diag:'perfect calibration',cal_x:'predicted posterior (%)',cal_y:'actual fog frequency (%)',
     sel1:'Select at least one model.',none:'No model answered in time. Retry or reduce the selection.',fused:'{k} models fused',failed:', {f} without response',first:'Compute first.',badjson:'Invalid JSON',confirm:'Delete the whole observation log?',
-    w_dT:'ΔT',w_vis:'vis',w_rain:'rain',w_adv:'advection',w_wind:'wind',w_cloud:'clouds',timeout:'timeout',error:'error'}
+    h_cal:'Calibration (reliability diagram)',cal_empty:'Drawn once the log has nights with a frozen forecast.',cal_few:'Too few nights yet to read calibration (n={n}; indicative from 10, reliable from 30).',cal_thin:'The extreme groups (0–25 % and 75–100 %) hold few nights (n={n}); no clear signal on α yet.',cal_mixed:'The groups contradict each other: no clear signal on α; leave it as it is and keep logging.',cal_up:'Actual frequencies are more extreme than the posterior: raise α.',cal_down:'Actual frequencies are less extreme than the posterior: lower α.',cal_ok:'Calibration is reasonable: leave α as it is.',cal_diag:'perfect calibration',cal_x:'predicted posterior (%)',cal_y:'actual fog frequency (%)',w_dT:'ΔT',w_vis:'vis',w_rain:'rain',w_adv:'advection',w_wind:'wind',w_cloud:'clouds',timeout:'timeout',error:'error',recal:'recalibrated (n={n}, a={a}, b={b})'}
   };
   function $(s){return document.querySelector(s);}
-  /* El idioma lo fija el script canónico del <head> (clave compartida pn-lang) y vive en
-     document.documentElement.lang: aquí solo se lee, nunca se consulta el almacenamiento. */
-  let LANG=document.documentElement.lang; if(!I18N[LANG]) LANG='es';
+  let LANG='es'; try{LANG=new URLSearchParams(location.search).get('lang')||localStorage.getItem('pn-lang')||localStorage.getItem('niebla_lang')||((navigator.language||'es').startsWith('en')?'en':'es');}catch(e){} if(!I18N[LANG]) LANG='es';
   const t=(k,v)=>{let s=I18N[LANG][k]; if(s==null) s=I18N.es[k]; if(v&&typeof s==='string') Object.keys(v).forEach(x=>s=s.replace('{'+x+'}',v[x])); return s;};
   const LOC=()=>LANG==='en'?'en-GB':'es-ES';
   function applyLang(){
     document.documentElement.lang=LANG; document.title=t('title');
     document.querySelectorAll('[data-i18n]').forEach(e=>{e.innerHTML=t(e.dataset.i18n);});
-    $('#leg1').innerHTML=t('leg1');
-    /* El enlace al manual es estático (manual-niebla.html) y el idioma viaja por pn-lang;
-       los botones ES/EN los marca el conmutador canónico. */
-    if(R1) render1(); if(B.last) render2();
-    calib();
+    $('#leg1').innerHTML=t('leg1'); $('#manual-link').href='manual-niebla.html?lang='+LANG; $('#astro-link').href='astro.html?lang='+LANG; $('#guia-link').href='guia-niebla.html?lang='+LANG; $('#portada-link').href='index.html?lang='+LANG;
+    document.documentElement.lang=LANG; $('#lg-es').classList.toggle('on',LANG==='es'); $('#lg-en').classList.toggle('on',LANG==='en');
+    if(R1) render1(); if(B.last) render2(); calib();
   }
-  /* El conmutador canónico avisa por aquí al cambiar de idioma. El flag evita repintar
-     antes de que la aplicación esté montada (apply() se invoca también en el arranque). */
-  let APP_READY=false;
-  window.onLangChange=function(l){ LANG=I18N[l]?l:'es'; if(APP_READY) applyLang(); };
+  ['es','en'].forEach(l=>$('#lg-'+l).addEventListener('click',()=>{LANG=l; try{localStorage.setItem('pn-lang',l);localStorage.setItem('niebla_lang',l);}catch(e){} applyLang();}));
 
   const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
   const lin=(x,x0,y0,x1,y1)=>y0+(y1-y0)*clamp((x-x0)/(x1-x0),0,1);
@@ -400,9 +306,20 @@
   $('#go1').addEventListener('click',run1);
 
   /* ===== pestaña 2 ===== */
-  const MODELS=[{id:'icon_seamless',name:'ICON',on:true},{id:'gfs_seamless',name:'GFS',on:true},{id:'meteofrance_seamless',name:'AROME/ARPEGE',on:true},{id:'ecmwf_ifs025',name:'ECMWF',on:true},{id:'ukmo_seamless',name:'UKMO',on:true},{id:'gem_seamless',name:'GEM',on:false},{id:'knmi_seamless',name:'KNMI',on:false}];
+  const MODELS=[{id:'icon_seamless',name:'ICON',on:true},{id:'gfs_seamless',name:'GFS',on:true},{id:'meteofrance_seamless',name:'AROME/ARPEGE',on:true},{id:'ecmwf_ifs025',name:'ECMWF',on:true},{id:'ukmo_seamless',name:'UKMO',on:true},{id:'gem_seamless',name:'GEM',on:false},{id:'knmi_seamless',name:'KNMI',on:false},
+    {id:'ens_icon',name:'ICON EPS',ens:'icon_seamless',on:true},{id:'ens_gfs',name:'GFS ENS',ens:'gfs_seamless',on:false},{id:'ens_ecmwf',name:'ECMWF ENS',ens:'ecmwf_ifs025',on:false}];
   const COL=['#1c262e','#3e6d8a','#b8862b','#6f8f3a','#8c4a3a','#7a5ea8','#2f9c8a'];
-  const PI0=0.12,A0=1.2,B0=8.8,LAMBDA=0.7,TH=55,KAP=12,TIMEOUT=12000;
+  const PI0=0.12,A0=1.2,B0=8.8,LAMBDA=0.7,TH=55,KAP=12,TIMEOUT=12000,RECAL_N=12,RECAL_TAU=6;
+  function platt(){ // ajusta q=sigma(a*logit(p)+b) sobre el registro, con prior a~1, b~0
+    const D=store.obs.filter(o=>o.post!=null); if(D.length<RECAL_N) return null;
+    let a=1,b=0;
+    for(let it=0;it<300;it++){
+      let ga=(a-1)/RECAL_TAU, gb=b/RECAL_TAU; // gradiente del prior gaussiano
+      D.forEach(o=>{const x=logit(clamp(o.post,0.01,0.99)), q=sig(a*x+b), e=q-o.y; ga+=e*x; gb+=e;});
+      a-=0.02*ga/D.length; b-=0.02*gb/D.length;
+    }
+    return {a,b,n:D.length,apply:p=>sig(a*logit(clamp(p,0.005,0.995))+b)};
+  }
   const p_of=s=>clamp(sig((s-TH)/KAP),0.005,0.995);
   const B={ran:false,last:null};
   let store={obs:[],snap:{}}; try{const raw=localStorage.getItem('niebla_bayes'); if(raw) store=JSON.parse(raw);}catch(e){} if(!store.snap) store.snap={}; if(!store.obs) store.obs=[];
@@ -423,30 +340,49 @@
     if(!sel.length){$('#st2').textContent=t('sel1');return;}
     B.ran=true; $('#st2').textContent=t('dl_n',{n:sel.length}); MODELS.forEach(m=>setSt(m.id,'')); sel.forEach(m=>setSt(m.id,'…'));
     const t0=performance.now(), sstP=costero?getSST(lat,lon):Promise.resolve(null);
-    const results=await Promise.allSettled(sel.map(m=>fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,wind_speed_10m,cloud_cover,visibility,precipitation&daily=sunrise,sunset&timezone=auto&forecast_days=2&models=${m.id}`,TIMEOUT)
+    const urlFor=m=>m.ens
+      ?`https://ensemble-api.open-meteo.com/v1/ensemble?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,wind_speed_10m,cloud_cover,precipitation&timezone=auto&forecast_days=2&models=${m.ens}`
+      :`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,wind_speed_10m,cloud_cover,visibility,precipitation&daily=sunrise,sunset&timezone=auto&forecast_days=2&models=${m.id}`;
+    const results=await Promise.allSettled(sel.map(m=>fetchJSON(urlFor(m),m.ens?TIMEOUT+8000:TIMEOUT)
       .then(d=>{if(d.error) throw new Error(d.reason); setSt(m.id,((performance.now()-t0)/1000).toFixed(1)+' s','ok'); return d;})
       .catch(e=>{setSt(m.id,t(e.name==='AbortError'?'timeout':'error'),'ko'); throw e;})));
     const sstM=await sstP, data={}; let ref=null;
-    results.forEach((r,k)=>{if(r.status==='fulfilled'){data[sel[k].id]=r.value; if(!ref) ref=r.value;}});
+    results.forEach((r,k)=>{if(r.status==='fulfilled'){data[sel[k].id]=r.value; if(!ref||(!ref.daily&&r.value.daily)) ref=r.value; else if(!ref) ref=r.value;}});
+    if(ref&&!ref.daily){ try{ref.daily=(await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=sunrise,sunset&timezone=auto&forecast_days=2`,8000)).daily;}catch(e){$('#st2').textContent=t('none');return;} }
     const act=sel.filter(m=>data[m.id]);
     if(!act.length){$('#st2').textContent=t('none');return;}
     const {isNight,nextSunrise}=dayInfo(ref), now=Date.now(), rows=[], times=ref.hourly.time;
     for(let i=0;i<times.length;i++){const ts=new Date(times[i]).getTime(); if(ts<now-3600e3) continue; if(rows.length>=36) break;
       const r={time:times[i],ts,night:isNight(ts),sun:Math.abs(ts-nextSunrise)<1800e3,per:{},sst:sstAt(sstM,times[i])};
       act.forEach(mo=>{const H=data[mo.id].hourly, j=H.time.indexOf(times[i]); if(j<0) return;
-        const h={t:H.temperature_2m[j],td:H.dew_point_2m[j],rh:H.relative_humidity_2m[j],wind:H.wind_speed_10m[j],cloud:H.cloud_cover[j],vis:H.visibility?H.visibility[j]:null,precip:H.precipitation[j],night:r.night,sst:r.sst};
-        if(h.t==null||h.td==null||h.wind==null||h.cloud==null) return; const sc=score(h,costero); r.per[mo.id]={...h,s:sc.s,why:sc.why,p:p_of(sc.s)};});
+        if(!mo.ens){
+          const h={t:H.temperature_2m[j],td:H.dew_point_2m[j],rh:H.relative_humidity_2m[j],wind:H.wind_speed_10m[j],cloud:H.cloud_cover[j],vis:H.visibility?H.visibility[j]:null,precip:H.precipitation[j],night:r.night,sst:r.sst};
+          if(h.t==null||h.td==null||h.wind==null||h.cloud==null) return; const sc=score(h,costero); r.per[mo.id]={...h,s:sc.s,why:sc.why,p:p_of(sc.s)};
+        } else {
+          if(!mo.sufs){ mo.sufs=['']; Object.keys(H).forEach(k=>{const m2=k.match(/^temperature_2m(_member\d+)$/); if(m2) mo.sufs.push(m2[1]);}); }
+          const ss=[],pp=[]; let ctrl=null;
+          mo.sufs.forEach(suf=>{ const g=v=>{const a=H[v+suf]||H[v]; return a?a[j]:null;};
+            const h={t:g('temperature_2m'),td:g('dew_point_2m'),rh:g('relative_humidity_2m'),wind:g('wind_speed_10m'),cloud:g('cloud_cover'),vis:null,precip:g('precipitation'),night:r.night,sst:r.sst};
+            if(h.t==null||h.td==null||h.wind==null||h.cloud==null) return;
+            const sc=score(h,costero); ss.push(sc.s); pp.push(p_of(sc.s)); if(suf==='') ctrl={h,sc}; });
+          if(!pp.length) return; ss.sort((a,b)=>a-b);
+          const sMed=ss[Math.floor(ss.length/2)], pMean=pp.reduce((a,b)=>a+b,0)/pp.length;
+          const base=ctrl?ctrl.h:{night:r.night,sst:r.sst}, why=ctrl?ctrl.sc.why:[];
+          r.per[mo.id]={...base,s:sMed,why,p:clamp(pMean,0.005,0.995),nm:pp.length};
+        }});
       rows.push(r);}
     const {w,ll}=weights(), pr=prior(), Zw=act.reduce((a,mo)=>a+w[mo.id],0), wa={}; act.forEach(mo=>wa[mo.id]=w[mo.id]/Zw);
-    rows.forEach(r=>{let z=logit(pr.pi), ps=[]; act.forEach(mo=>{const q=r.per[mo.id]; if(!q) return; z+=alpha*wa[mo.id]*(logit(q.p)-logit(PI0)); ps.push(q.p);}); r.post=ps.length?sig(z):pr.pi; r.min=ps.length?Math.min(...ps):0; r.max=ps.length?Math.max(...ps):0;});
-    B.last={rows,act,wa,ll,pr,nextSunrise,alpha,lat,lon,fail:sel.length-act.length,secs:((performance.now()-t0)/1000).toFixed(1),nosst:costero&&!sstM};
+    const rc=platt();
+    rows.forEach(r=>{let z=logit(pr.pi), ps=[]; act.forEach(mo=>{const q=r.per[mo.id]; if(!q) return; z+=alpha*wa[mo.id]*(logit(q.p)-logit(PI0)); ps.push(q.p);}); r.postRaw=ps.length?sig(z):pr.pi; r.post=rc?rc.apply(r.postRaw):r.postRaw; r.min=ps.length?Math.min(...ps):0; r.max=ps.length?Math.max(...ps):0;});
+    B.last={rows,act,wa,ll,pr,nextSunrise,alpha,lat,lon,rc,fail:sel.length-act.length,secs:((performance.now()-t0)/1000).toFixed(1),nosst:costero&&!sstM};
     // congelar la previsión del próximo amanecer
     const win0=sunWin(); if(win0.length){ const p={}; act.forEach(mo=>{const c=win0.filter(r=>r.per[mo.id]); p[mo.id]=c.length?Math.max(...c.map(r=>r.per[mo.id].p)):null;});
-      const nd=nightDate(nextSunrise); store.snap[nd]={p,post:Math.max(...win0.map(r=>r.post)),at:new Date().toISOString(),lat,lon,n:act.length}; save();
+      const feat={}; act.forEach(mo=>{const c=win0.filter(r=>r.per[mo.id]); if(!c.length) return; const q=c.reduce((x,y)=>y.per[mo.id].p>x.per[mo.id].p?y:x).per[mo.id]; feat[mo.id]={dT:+(q.t-q.td).toFixed(2),w:+q.wind.toFixed(1),c:q.cloud,v:q.vis!=null?Math.round(q.vis):null,adv:(q.sst!=null&&q.td!=null)?+(q.td-q.sst).toFixed(2):null};});
+      const nd=nightDate(nextSunrise); store.snap[nd]={p,post:Math.max(...win0.map(r=>r.postRaw)),at:new Date().toISOString(),lat,lon,n:act.length,feat}; save();
       const ex=store.obs.find(o=>o.date===nd&&!o.p); if(ex){ex.p=p; ex.post=store.snap[nd].post; save();} }
-    render2();
+    render2(); calib();
   }
-  function render2(){const L=B.last, nd=nightDate(L.nextSunrise), sn=store.snap[nd]; $('#st2').textContent=t('fused',{k:L.act.length})+(L.fail?t('failed',{f:L.fail}):'')+` · ${L.secs} s · ${L.lat.toFixed(4)}, ${L.lon.toFixed(4)}`+(L.nosst?t('nossT'):'')+(sn?' · '+t('snap_info',{d:nd,n:sn.n,h:new Date(sn.at).toLocaleTimeString(LOC(),{hour:'2-digit',minute:'2-digit'})}):''); cards2(); chart2(); tsun(); tw(); tobs();}
+  function render2(){const L=B.last, nd=nightDate(L.nextSunrise), sn=store.snap[nd]; $('#st2').textContent=t('fused',{k:L.act.length})+(L.fail?t('failed',{f:L.fail}):'')+` · ${L.secs} s · ${L.lat.toFixed(4)}, ${L.lon.toFixed(4)}`+(L.nosst?t('nossT'):'')+(L.rc?' · '+t('recal',{n:L.rc.n,a:L.rc.a.toFixed(2),b:L.rc.b.toFixed(2)}):'')+(sn?' · '+t('snap_info',{d:nd,n:sn.n,h:new Date(sn.at).toLocaleTimeString(LOC(),{hour:'2-digit',minute:'2-digit'})}):''); cards2(); chart2(); tsun(); tw(); tobs();}
   const sunWin=()=>{const {rows,nextSunrise}=B.last; return rows.filter(r=>r.ts>=nextSunrise-2.5*3600e3&&r.ts<=nextSunrise+1.5*3600e3);};
   function cards2(){
     const {rows,nextSunrise,act,alpha}=B.last, n6=rows.slice(0,6), m6=n6.reduce((a,b)=>b.post>a.post?b:a,n6[0]), win=sunWin(), ms=win.length?win.reduce((a,b)=>b.post>a.post?b:a,win[0]):null;
@@ -479,8 +415,8 @@
     $('#tw').innerHTML=h; $('#priorinfo').textContent=t('prior_info',{a:pr.a.toFixed(1),b:pr.b.toFixed(1),pi:(100*pr.pi).toFixed(1),n:store.obs.length});}
   function tobs(){let h='<tr>'+t('thobs').map(x=>'<th>'+x+'</th>').join('')+MODELS.map(m=>'<th>'+m.name+'</th>').join('')+'<th>'+t('posterior')+'</th><th></th></tr>';
     store.obs.slice().reverse().forEach((o,k)=>{const idx=store.obs.length-1-k; h+=`<tr><td>${o.date}</td><td>${o.y}</td>`+MODELS.map(m=>'<td>'+(o.p&&o.p[m.id]!=null?(100*o.p[m.id]).toFixed(0)+'%':'–')+'</td>').join('')+`<td>${o.post!=null?(100*o.post).toFixed(0)+'%':'<span style="color:var(--warn)">'+t('pending')+'</span>'}</td><td><button class="small ghost" data-i="${idx}">${t('del')}</button></td></tr>`;});
-    $('#tobs').innerHTML=h; document.querySelectorAll('#tobs button').forEach(b=>b.addEventListener('click',()=>{store.obs.splice(+b.dataset.i,1);save(); if(B.last) render2(); else tobs();})); calib();}
-  /* ---------- calibración: diagrama de fiabilidad sobre el registro ---------- */
+    $('#tobs').innerHTML=h; document.querySelectorAll('#tobs button').forEach(b=>b.addEventListener('click',()=>{store.obs.splice(+b.dataset.i,1);save(); if(B.last) render2(); else tobs(); calib();}));}
+/* ---------- calibración: diagrama de fiabilidad sobre el registro ---------- */
   function calBins(){
     const scored=store.obs.filter(o=>o.post!=null&&o.y!=null);
     const raw=[[0,.25],[.25,.5],[.5,.75],[.75,1.001]].map(lim=>{
@@ -526,6 +462,7 @@
     box.innerHTML=`<svg viewBox="0 0 ${W} ${Hh}" role="img">${g}</svg>`;
     read.textContent=calRead(scored,raw,bins);
   }
+
   $('#saveobs').addEventListener('click',()=>{
     const date=$('#odate').value; if(!date) return; const y=+$('#oval').value, sn=store.snap[date];
     const ex=store.obs.findIndex(o=>o.date===date);
@@ -533,15 +470,15 @@
     if(ex>=0){ store.obs[ex].y=y; if(!store.obs[ex].p&&sn){store.obs[ex].p=sn.p;store.obs[ex].post=sn.post;} } else store.obs.push(rec);
     save();
     const msg=sn?t('obs_saved',{d:date}):t('no_snap',{d:date});
-    if(B.last){ render2(); $('#st2').textContent=msg+' · '+$('#st2').textContent; } else { $('#st2').textContent=msg; tobs(); }
+    if(B.last){ render2(); calib(); $('#st2').textContent=msg+' · '+$('#st2').textContent; } else { $('#st2').textContent=msg; tobs(); }
   });
   $('#exp').addEventListener('click',()=>{const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(store,null,1)],{type:'application/json'})); a.download='niebla_observaciones.json'; a.click();});
-  $('#imp').addEventListener('change',e=>{const f=e.target.files[0]; if(!f) return; f.text().then(x=>{try{const s=JSON.parse(x); if(Array.isArray(s.obs)){store=s; if(!store.snap) store.snap={}; save(); tobs(); run2();}}catch(err){$('#st2').textContent=t('badjson');}});});
-  $('#clear').addEventListener('click',()=>{if(confirm(t('confirm'))){store={obs:[],snap:{}};save();tobs();run2();}});
+  $('#imp').addEventListener('change',e=>{const f=e.target.files[0]; if(!f) return; f.text().then(x=>{try{const s=JSON.parse(x); if(Array.isArray(s.obs)){store=s; if(!store.snap) store.snap={}; save(); run2();}}catch(err){$('#st2').textContent=t('badjson');}});});
+  $('#clear').addEventListener('click',()=>{if(confirm(t('confirm'))){store={obs:[],snap:{}};save();run2();}});
   $('#go2').addEventListener('click',run2);
   {const now=new Date(); $('#odate').value=isoLocal(now.getHours()<14?now.getTime()-86400e3:now.getTime());}
 
-  APP_READY=true; applyLang(); run1();
+  applyLang(); run1(); calib();
 })();
 </script>
 </body>
