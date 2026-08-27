@@ -4,43 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23161b22'/><path d='M21 5a9.5 9.5 0 1 0 6 15.5A11 11 0 0 1 21 5z' fill='%23e6eaf0'/><circle cx='9' cy='9' r='1.6' fill='%23d9a441'/><circle cx='12' cy='22' r='1.2' fill='%235aa0c8'/><circle cx='6' cy='16' r='1' fill='%236dbb8a'/></svg>">
-<link rel="apple-touch-icon" href="astro-icon-180.png">
-<meta name="theme-color" content="#161b22">
-<!-- Pantalla de inicio de iOS: se abre a pantalla completa, sin barra de Safari. -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="Cielo">
-
 
 <title>Cielo para astrofotografía</title>
-<meta name="author" content="Rafael Vida">
-<meta name="description" content="Herramienta de predicción de cielo nocturno para astrofotografía: índice horario de calidad y fusión bayesiana multimodelo sobre datos de Open-Meteo y CAMS, con registro local de observaciones.">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Photographers">
-<meta property="og:title" content="Cielo para astrofotografía">
-<meta property="og:description" content="Herramienta de predicción de cielo nocturno para astrofotografía: índice horario de calidad y fusión bayesiana multimodelo sobre datos de Open-Meteo y CAMS, con registro local de observaciones.">
-<meta property="og:url" content="https://falevian.github.io/Photographers/astro.html">
-<meta property="og:image" content="https://falevian.github.io/Photographers/og/astro.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:locale" content="es_ES">
-<meta property="og:locale:alternate" content="en_GB">
-<meta name="twitter:card" content="summary_large_image">
-<script>
-/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
-(function(){
-  var K="pn-lang", OLD="niebla_lang", u=null;
-  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
-  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
-  if(u!=="es"&&u!=="en"){
-    /* Migracion de la clave antigua del paquete suelto. */
-    try{ var o=localStorage.getItem(OLD); if(o==="es"||o==="en"){ u=o; localStorage.setItem(K,o); } }catch(e){}
-  }
-  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
-  document.documentElement.lang=u;
-})();
-</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -52,6 +17,9 @@
   header{padding-top:24px;padding-bottom:8px}
   .topbar{display:flex;justify-content:flex-end;align-items:center;gap:14px;font-size:13px}
   .topbar a{color:var(--ink2)}
+  .lang{display:inline-flex;border:1px solid var(--ink2);border-radius:5px;overflow:hidden;font-family:var(--mono);font-size:12px}
+  .lang button{border:none;border-radius:0;padding:5px 10px;background:transparent;color:var(--ink)}
+  .lang button.on{background:var(--ink);color:var(--bg)}
   h1{font-size:clamp(26px,4vw,40px);font-weight:700;letter-spacing:-.02em;margin:6px 0 4px}
   .sub{color:var(--ink2);font-size:15px;margin:0}
   main{padding-bottom:48px}
@@ -107,165 +75,83 @@
   .mlist{display:flex;flex-wrap:wrap;gap:8px;font-family:var(--mono);font-size:12px}
   .mlist label{display:inline-flex;align-items:center;gap:4px;text-transform:none;letter-spacing:0;font-size:12px;color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:3px 7px;background:#0f1419;margin:0}
   .mlist .st{color:var(--ink2)}.mlist .st.ok{color:var(--ok)}.mlist .st.ko{color:var(--bad)}
-  .netnote{background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--ok);
-    border-radius:6px;padding:10px 14px;margin:14px 0 0;font-size:13.5px;color:var(--ink2);max-width:80ch}
-  .netnote b{color:var(--ink)}
-
-  /* ---------- convenio bilingue del repositorio ---------- */
-  html[lang="es"] [data-lang="en"]{display:none!important}
-  html[lang="en"] [data-lang="es"]{display:none!important}
-  .langbar{position:fixed;top:14px;right:16px;z-index:100;display:flex;
-    border:1px solid var(--line);border-radius:5px;overflow:hidden;background:var(--paper)}
-  .langbar button{font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;
-    border:0;border-radius:0;padding:5px 10px;background:transparent;color:var(--ink2);cursor:pointer}
-  .langbar button+button{border-left:1px solid var(--line)}
-  .langbar button:hover{color:var(--ink)}
-  .langbar button.on{background:var(--ink);color:var(--bg)}
-  .langbar button:focus-visible{outline:2px solid var(--ok);outline-offset:-2px}
-  /* La barra flota sobre la esquina superior derecha, donde vive .topbar:
-     si no cabe al lado del contenido, se baja la cabecera para que no se solapen. */
-  @media(max-width:1290px){header{padding-top:52px}}
-  @media(max-width:720px){.langbar{top:8px;right:8px} header{padding-top:44px}}
-  @media print{.langbar{display:none!important}}
-  .moonrow{display:flex;align-items:center;gap:11px;margin-top:9px;padding-top:9px;border-top:1px solid var(--line)}
-  /* la página aplica svg{width:100%} a todos los gráficos; el icono lunar
-     necesita tamaño propio, de ahí el override explícito. */
-  .moonrow .moonfig{flex:0 0 auto;width:34px;height:34px;background:none;border:0;border-radius:0;
-                    filter:drop-shadow(0 0 7px rgba(230,234,240,.16))}
-  .moonrow b{display:block;font-size:13px;font-weight:600;color:var(--ink)}
-  .moonrow span{display:block;font-size:12px;color:var(--ink2);margin-top:1px}
-
 </style>
 </head>
 <body>
-<div class="langbar" role="group" aria-label="Idioma / Language">
-  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
-  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
-</div>
-
 <header>
-  <div class="topbar">
-    <a href="niebla.html" id="fog-link" data-i18n="fog_link"></a>
-    <a href="manual-astro.html" id="manual-link" data-i18n="manual"></a>
-    <a href="index.html" data-lang="es">Portada</a>
-    <a href="index.html" data-lang="en">Home</a>
-  </div>
-  <h1 data-i18n="title"></h1>
+  <div class="topbar"><a href="index.html" id="fog-link" data-i18n="fog_link">Niebla</a><a href="manual_astro.html" id="manual-link" data-i18n="manual">Manual</a>
+    <div class="lang" role="group" aria-label="Idioma / Language"><button id="lg-es" type="button">ES</button><button id="lg-en" type="button">EN</button></div></div>
+  <h1 data-i18n="title">Cielo para astrofotografía</h1>
   <p class="sub" data-i18n="subtitle"></p>
-  <p class="netnote" data-lang="es"><b>Necesita conexión a internet.</b> Cada cálculo descarga la previsión de <b>Open‑Meteo</b> (<code>api.open-meteo.com</code>) y la transparencia atmosférica del modelo <b>CAMS</b> (<code>air-quality-api.open-meteo.com</code>). Sin red la página se abre igual, pero no puede predecir nada. No hay clave ni registro; tus observaciones se quedan en este navegador.</p>
-  <p class="netnote" data-lang="en"><b>An internet connection is required.</b> Every computation downloads the forecast from <b>Open‑Meteo</b> (<code>api.open-meteo.com</code>) and the atmospheric transparency from the <b>CAMS</b> model (<code>air-quality-api.open-meteo.com</code>). With no network the page still opens, but it cannot forecast anything. There is no API key and no sign‑up; your observations stay in this browser.</p>
 </header>
 <main>
   <div class="panel controls">
-    <div><label for="lat" data-i18n="lat"></label><input id="lat" type="number" step="0.0001" value="43.3623"></div>
-    <div><label for="lon" data-i18n="lon"></label><input id="lon" type="number" step="0.0001" value="-8.4115"></div>
-    <div><label for="target" data-i18n="target"></label><select id="target"><option value="deep" data-i18n="t_deep"></option><option value="planet" data-i18n="t_planet"></option><option value="wide" data-i18n="t_wide"></option></select></div>
-    <button id="geo" class="ghost" type="button" data-i18n="geo"></button>
+    <div><label for="lat" data-i18n="lat">Latitud</label><input id="lat" type="number" step="0.0001" value="43.3623"></div>
+    <div><label for="lon" data-i18n="lon">Longitud</label><input id="lon" type="number" step="0.0001" value="-8.4115"></div>
+    <div><label for="target" data-i18n="target">Objetivo</label><select id="target"><option value="deep" data-i18n="t_deep">Cielo profundo</option><option value="planet" data-i18n="t_planet">Planetaria / Luna</option><option value="wide" data-i18n="t_wide">Paisaje nocturno / Vía Láctea</option></select></div>
+    <button id="geo" class="ghost" type="button" data-i18n="geo">Usar mi posición</button>
   </div>
 
   <div class="tabs" role="tablist">
-    <button class="tab on" data-pane="p1" role="tab" data-i18n="tab1"></button>
-    <button class="tab" data-pane="p2" role="tab" data-i18n="tab2"></button>
+    <button class="tab on" data-pane="p1" role="tab" data-i18n="tab1">Índice de cielo</button>
+    <button class="tab" data-pane="p2" role="tab" data-i18n="tab2">Fusión bayesiana</button>
   </div>
 
   <div class="pane on" id="p1">
     <div class="panel controls" style="margin-top:0">
-      <div><label for="model" data-i18n="model"></label>
+      <div><label for="model" data-i18n="model">Modelo</label>
         <select id="model">
-          <option value="best_match" data-i18n="best"></option>
+          <option value="best_match" data-i18n="best">Mejor disponible</option>
           <option value="icon_seamless">ICON (DWD)</option><option value="gfs_seamless">GFS (NOAA)</option>
           <option value="meteofrance_seamless">AROME/ARPEGE</option><option value="ecmwf_ifs025">ECMWF IFS 0.25°</option><option value="ukmo_seamless">UKMO</option>
         </select></div>
-      <button id="go1" type="button" data-i18n="compute"></button>
+      <button id="go1" type="button" data-i18n="compute">Calcular</button>
       <div class="status" id="st1"></div>
     </div>
     <div class="cards" id="cards1"></div>
-    <section><h2 data-i18n="h_strip"></h2><div class="wrap"><div class="strip" id="strip"></div></div><div class="legend" data-i18n="strip_legend"></div></section>
-    <section><h2 data-i18n="h_chart"></h2><div id="chart1"></div><div class="legend" id="leg1"></div></section>
-    <section><h2 data-i18n="h_table"></h2><div class="wrap"><table id="tabla1"></table></div></section>
-    <section><h2 data-i18n="h_how"></h2><p class="note" data-i18n="how1"></p></section>
+    <section><h2 data-i18n="h_strip">Índice horario (48 h)</h2><div class="wrap"><div class="strip" id="strip"></div></div><div class="legend" data-i18n="strip_legend"></div></section>
+    <section><h2 data-i18n="h_chart">Nubes, Luna e índice</h2><div id="chart1"></div><div class="legend" id="leg1"></div></section>
+    <section><h2 data-i18n="h_table">Tabla horaria</h2><div class="wrap"><table id="tabla1"></table></div></section>
+    <section><h2 data-i18n="h_how">Cómo se calcula</h2><p class="note" data-i18n="how1"></p></section>
   </div>
 
   <div class="pane" id="p2">
     <div class="panel controls" style="margin-top:0">
       <div style="flex-basis:100%"><label data-i18n="models_lbl"></label><div class="mlist" id="mlist"></div></div>
-      <div><label for="alpha" data-i18n="alpha"></label><input id="alpha" type="number" step="0.1" min="1" max="8" value="1.8"></div>
-      <button id="go2" type="button" data-i18n="compute"></button>
+      <div><label for="alpha" data-i18n="alpha">α</label><input id="alpha" type="number" step="0.1" min="1" max="8" value="1.8"></div>
+      <button id="go2" type="button" data-i18n="compute">Calcular</button>
       <div class="status" id="st2"></div>
     </div>
     <div class="cards" id="cards2"></div>
-    <section><h2 data-i18n="h_prob"></h2><div id="chart2"></div><div class="legend" id="legend2"></div></section>
+    <section><h2 data-i18n="h_prob">Probabilidad horaria de cielo útil por modelo y posterior</h2><div id="chart2"></div><div class="legend" id="legend2"></div></section>
     <section class="grid2">
-      <div><h2 data-i18n="h_night"></h2><div class="wrap"><table id="tnight"></table></div></div>
-      <div><h2 data-i18n="h_w"></h2><div class="wrap"><table id="tw"></table></div><p class="note" id="priorinfo"></p></div>
+      <div><h2 data-i18n="h_night">Esta noche por modelo</h2><div class="wrap"><table id="tnight"></table></div></div>
+      <div><h2 data-i18n="h_w">Pesos bayesianos y prior</h2><div class="wrap"><table id="tw"></table></div><p class="note" id="priorinfo"></p></div>
     </section>
-    <section><h2 data-i18n="h_cal"></h2><div id="calib" style="max-width:560px"></div><p class="note" id="calread"></p></section>
-    <section><h2 data-i18n="h_obs"></h2>
+    <section><h2 data-i18n="h_obs">Registro de observaciones (aprendizaje)</h2>
       <div class="panel">
         <div class="obs-row">
-          <div><label for="odate" data-i18n="night_of"></label><input id="odate" type="date"></div>
-          <div><label for="oval" data-i18n="observed"></label><select id="oval"><option value="1" data-i18n="o_clear"></option><option value="0.5" data-i18n="o_part"></option><option value="0" data-i18n="o_bad"></option></select></div>
-          <button id="saveobs" type="button" data-i18n="save_obs"></button>
-          <button id="exp" class="ghost" type="button" data-i18n="export"></button>
-          <label style="display:inline-block;margin:0"><span style="cursor:pointer;border:1px solid var(--ink);padding:7px 12px;border-radius:5px;font-size:14px;display:inline-block;text-transform:none;letter-spacing:0;color:var(--ink)" data-i18n="import"></span><input id="imp" type="file" accept="application/json" style="display:none"></label>
-          <button id="clear" class="ghost" type="button" data-i18n="clear"></button>
+          <div><label for="odate" data-i18n="night_of">Noche del</label><input id="odate" type="date"></div>
+          <div><label for="oval" data-i18n="observed">Observado</label><select id="oval"><option value="1" data-i18n="o_clear">Útil: despejado la mayor parte</option><option value="0.5" data-i18n="o_part">Parcial: nubes intermitentes</option><option value="0" data-i18n="o_bad">Inútil: cubierto o bruma</option></select></div>
+          <button id="saveobs" type="button" data-i18n="save_obs">Guardar observación</button>
+          <button id="exp" class="ghost" type="button" data-i18n="export">Exportar JSON</button>
+          <label style="display:inline-block;margin:0"><span style="cursor:pointer;border:1px solid var(--ink);padding:7px 12px;border-radius:5px;font-size:14px;display:inline-block;text-transform:none;letter-spacing:0;color:var(--ink)" data-i18n="import">Importar JSON</span><input id="imp" type="file" accept="application/json" style="display:none"></label>
+          <button id="clear" class="ghost" type="button" data-i18n="clear">Borrar registro</button>
         </div>
         <p class="note" data-i18n="obs_note"></p>
         <div class="wrap"><table id="tobs"></table></div>
       </div></section>
-    <section><h2 data-i18n="h_method"></h2><p class="note" data-i18n="method"></p></section>
+    <section><h2 data-i18n="h_method">Método</h2><p class="note" data-i18n="method"></p></section>
   </div>
 </main>
 
 <script>
-"use strict";
-/* ---------- conmutador de idioma / language switch ---------- */
-(function(){
-  var KEY="pn-lang";
-  var META={
-    es:{ title:"Cielo para astrofotografía", app:"Cielo",
-         desc:"Herramienta de predicción de cielo nocturno para astrofotografía: índice horario de calidad y fusión bayesiana multimodelo sobre datos de Open-Meteo y CAMS, con registro local de observaciones." },
-    en:{ title:"Sky for astrophotography", app:"Sky",
-         desc:"Night-sky forecasting tool for astrophotography: hourly quality index and multi-model Bayesian fusion over Open-Meteo and CAMS data, with a local observation log." }
-  };
-  function apply(l){
-    document.documentElement.lang=l;
-    document.title=META[l].title;
-    var a=document.querySelector('meta[name="apple-mobile-web-app-title"]');
-    if(a) a.setAttribute("content",META[l].app);
-    var d=document.querySelector('meta[name="description"]');
-    if(d) d.setAttribute("content",META[l].desc);
-    ["title","ph","alt","aria"].forEach(function(k){
-      [].forEach.call(document.querySelectorAll("[data-"+k+"-"+l+"]"),function(e){
-        var attr = k==="ph" ? "placeholder" : (k==="aria" ? "aria-label" : k);
-        e.setAttribute(attr, e.getAttribute("data-"+k+"-"+l));
-      });
-    });
-    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
-      var on=b.getAttribute("data-setlang")===l;
-      b.classList.toggle("on",on);
-      b.setAttribute("aria-pressed",on?"true":"false");
-    });
-    if(window.onLangChange) window.onLangChange(l);
-  }
-  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
-    b.addEventListener("click",function(){
-      var l=b.getAttribute("data-setlang");
-      try{ localStorage.setItem(KEY,l); }catch(e){}
-      apply(l);
-    });
-  });
-  apply(document.documentElement.lang==="en"?"en":"es");
-})();
-</script>
-
-<script>
 (function(){
   const I18N={
-  es:{m_new:"Luna nueva",m_wax_cres:"Creciente",m_first:"Cuarto creciente",m_wax_gib:"Gibosa creciente",m_full:"Luna llena",m_wan_gib:"Gibosa menguante",m_last:"Cuarto menguante",m_wan_cres:"Menguante",fog_link:'Niebla',manual:'Manual',title:'Cielo para astrofotografía',subtitle:'Pestaña 1: índice de calidad de cielo nocturno con un modelo (nubes por capas, transparencia, seeing, humedad, Luna). Pestaña 2: fusión bayesiana de varios modelos que aprende de tus noches. Datos de Open‑Meteo, sin clave.',
+  es:{fog_link:'Niebla',manual:'Manual',title:'Cielo para astrofotografía',subtitle:'Pestaña 1: índice de calidad de cielo nocturno con un modelo (nubes por capas, transparencia, seeing, humedad, Luna). Pestaña 2: fusión bayesiana de varios modelos que aprende de tus noches. Datos de Open‑Meteo, sin clave.',
     lat:'Latitud',lon:'Longitud',target:'Objetivo',t_deep:'Cielo profundo',t_planet:'Planetaria / Luna',t_wide:'Paisaje nocturno / Vía Láctea',geo:'Usar mi posición',tab1:'Índice de cielo',tab2:'Fusión bayesiana',model:'Modelo',best:'Mejor disponible',compute:'Calcular',
     h_strip:'Índice horario (48 h)',strip_legend:'Barra: índice 0 a 100 (verde ≥ 70 excelente, ámbar 50 a 69 aceptable, rojo &lt; 50 malo). Fondo oscuro: noche astronómica. Hora en ámbar: Luna sobre el horizonte.',
-    h_chart:'Nubes, Luna e índice',leg1:'<i style="background:#6dbb8a;height:4px"></i>índice <i style="background:#9aa7b5"></i>nubes totales % <i style="background:#5aa0c8"></i>nubes altas % <i style="background:#d9a441;height:8px;opacity:.5"></i>Luna sobre el horizonte (altura) <i style="background:#22304a;height:8px"></i>noche astronómica',
+    h_chart:'Nubes, Luna e índice',leg1:'<i style="background:#6dbb8a;height:4px"></i>índice <i style="background:#9aa7b5"></i>nubes totales % <i style="background:#5aa0c8"></i>nubes altas % (trazos largos) <i style="background:#a98ad8"></i>nubes bajas % (trazos cortos) <i style="background:#d9a441;height:8px;opacity:.5"></i>Luna sobre el horizonte (altura) <i style="background:#22304a;height:8px"></i>noche astronómica',
     h_table:'Tabla horaria',h_how:'Cómo se calcula',
     how1:'El índice, de 0 a 100, suma: <b>nubes</b> hasta 45 puntos, <code>45·(1 − c/100)²</code> con c = cobertura efectiva = máx(nubes totales, 0.9·bajas + 0.7·medias + 0.45·altas); <b>transparencia</b> hasta 15: AOD 550 nm &lt; 0.08: 15, &lt; 0.15: 11, &lt; 0.3: 6, &lt; 0.5: 2, más: 0; <b>humedad</b> hasta 10: HR &lt; 60 %: 10, &lt; 75: 7, &lt; 85: 4, &lt; 92: 2, más: 0 (añade bruma y rocío); <b>seeing</b> hasta 15: viento a 250 hPa &lt; 50 km/h: 9, &lt; 90: 6, &lt; 130: 3, más: 0, más viento en superficie &lt; 10 km/h: 6, &lt; 20: 4, &lt; 30: 2; <b>rocío en la óptica</b> hasta 5: T − Td &gt; 4 °C: 5, &gt; 2: 3, &gt; 1: 1; <b>Luna</b> hasta 10: bajo el horizonte 10, si no 10·(1 − iluminación)·(1 − 0.7·sen(altura)). Luego se aplica el factor de oscuridad según la altura del Sol: &gt; −6°: 0, −6 a −12°: 0.3, −12 a −18°: 0.7, &lt; −18°: 1. El selector de objetivo reescala los pesos: planetaria premia seeing y tolera la Luna; paisaje nocturno penaliza la Luna y la humedad.',
     models_lbl:'Modelos (descarga en paralelo con límite de 12 s; desmarca los lentos)',alpha:'α (fuentes independientes efectivas)',h_prob:'Probabilidad horaria de cielo útil por modelo y posterior',h_night:'Esta noche por modelo',h_w:'Pesos bayesianos y prior',h_obs:'Registro de observaciones (aprendizaje)',
@@ -273,19 +159,18 @@
     obs_note:'Cada vez que calculas, la previsión de la próxima noche queda congelada automáticamente, asociada a la fecha de esa noche (la del atardecer). Al día siguiente elige esa noche, indica cómo fue y guarda: la observación se empareja con la previsión de la víspera. Si no calculaste esa tarde, la observación solo actualiza el prior. El registro se guarda en este navegador; exporta el JSON si cambias de equipo.',
     snap_info:'Previsión congelada para la noche del {d} ({n} modelos, {h}).',no_snap:'No hay previsión congelada para la noche del {d}; la observación actualiza solo el prior.',obs_saved:'Observación guardada para la noche del {d}.',pending:'pendiente',
     h_method:'Método',method:'Para cada modelo se calcula el índice horario s y, en cada noche astronómica, la media del mejor tramo de 3 horas, s₃. La probabilidad de “noche útil” es <code>p_m = σ((s₃ − 58)/12)</code>, calibrada a la tasa base π₀ = 0.35. Prior climatológico π ~ Beta(a, b), inicial Beta(3.5, 6.5), actualizado con cada noche observada (a += y, b += 1 − y). Posterior por pooling logarítmico: <code>logit P = logit π + α · Σ w_m (logit p_m − logit π₀)</code>, Σ w_m = 1. Pesos <code>w_m ∝ exp(0.7 · Σ log P_m(y_obs))</code>. La transparencia (AOD) procede de un único modelo de composición atmosférica (CAMS) y es común a todos; las diferencias entre modelos provienen de nubes, humedad y viento.',
-    dl:'Descargando previsión…',dl_n:'Descargando {n} modelos en paralelo…',err:'Error: ',nopos:'Sin posición: ',noaod:' · sin AOD, transparencia neutra',elev:'elevación',
+    dl:'Descargando previsión…',dl_n:'Descargando {n} modelos en paralelo…',err:'Error: ',nopos:'Sin posición: ',geo_wait:'Obteniendo posición… (acepta el permiso si el navegador lo pide)',geo_denied:'Permiso de ubicación denegado. Actívalo en el candado de la barra de direcciones, o escribe las coordenadas a mano.',geo_timeout:'La posición tardó demasiado. Reintenta, o escribe las coordenadas a mano.',geo_unavail:'Posición no disponible en este dispositivo. Escribe las coordenadas a mano.',geo_insecure:'La geolocalización solo funciona con HTTPS (por ejemplo en GitHub Pages) o en localhost; abierto como archivo local el navegador la bloquea. Escribe las coordenadas a mano.',geo_unsupported:'Este navegador no ofrece geolocalización. Escribe las coordenadas a mano.',noaod:' · sin AOD, transparencia neutra',elev:'elevación',
     tonight:'Esta noche',tomorrow:'Mañana por la noche',no_night:'Sin noche astronómica en el intervalo',best_win:'mejor tramo',mean:'media',astro:'noche astronómica',moon:'Luna',illum:'iluminación',moon_up:'sobre el horizonte',moon_down:'bajo el horizonte',all_night:'toda la noche',dew:'rocío',
     exc:'Excelente',acc:'Aceptable',bad:'Malo',range:'rango',disp:'Dispersión entre modelos (esta noche)',agree_h:'Acuerdo alto',agree_m:'Acuerdo moderado',agree_l:'Desacuerdo',disp_note:'Desviación típica de las probabilidades de los modelos: incertidumbre epistémica.',
     usable:'Noche útil probable',maybe:'Noche útil posible',unlikely:'Noche útil improbable',
     th1:['Hora','Índice','Nubes','Bajas','Medias','Altas','HR','T−Td','V10','V250','AOD','Luna','Sol°'],thnight:['Modelo','P útil','s₃','nubes','altas','HR','V250','tramo'],thw:['Modelo','peso w','','log‑veros.'],thobs:['Noche','y'],posterior:'posterior',del:'eliminar',
     post_leg:'posterior',range_leg:'rango',prior_info:'Prior: Beta({a}, {b}), media {pi} % sobre {n} noches registradas. Calibración p = σ((s₃ − 58)/12), π₀ = 0.35.',
-    h_cal:'Calibración (diagrama de fiabilidad)',cal_empty:'Se dibuja cuando el registro tenga noches con previsión congelada.',cal_few:'Aún hay pocas noches para leer la calibración (n={n}; orientativo a partir de 10, fiable a partir de 30).',cal_thin:'Los grupos extremos (0–25 % y 75–100 %) tienen pocas noches (n={n}); todavía no hay señal clara sobre α.',cal_mixed:'Los grupos se contradicen entre sí: sin señal clara sobre α; déjalo como está y sigue registrando.',cal_up:'Las frecuencias reales son más extremas que el posterior: sube α.',cal_down:'Las frecuencias reales son menos extremas que el posterior: baja α.',cal_ok:'La calibración es razonable: deja α como está.',cal_diag:'calibración perfecta',cal_x:'posterior predicho (%)',cal_y:'frecuencia real de noches útiles (%)',
     sel1:'Selecciona al menos un modelo.',none:'Ningún modelo respondió a tiempo.',fused:'{k} modelos fusionados',failed:', {f} sin respuesta',first:'Calcula primero.',badjson:'JSON no válido',confirm:'¿Borrar todo el registro de observaciones?',
     w_cloud:'nubes',w_high:'altas',w_aod:'AOD',w_rh:'HR',w_jet:'V250',w_wind:'viento',w_dew:'rocío',w_moon:'Luna',timeout:'timeout',error:'error'},
-  en:{m_new:"New moon",m_wax_cres:"Waxing crescent",m_first:"First quarter",m_wax_gib:"Waxing gibbous",m_full:"Full moon",m_wan_gib:"Waning gibbous",m_last:"Last quarter",m_wan_cres:"Waning crescent",fog_link:'Fog',manual:'Manual',title:'Sky for astrophotography',subtitle:'Tab 1: night‑sky quality index from one model (cloud layers, transparency, seeing, humidity, Moon). Tab 2: Bayesian fusion of several models that learns from your nights. Open‑Meteo data, no API key.',
+  en:{fog_link:'Fog',manual:'Manual',title:'Sky for astrophotography',subtitle:'Tab 1: night‑sky quality index from one model (cloud layers, transparency, seeing, humidity, Moon). Tab 2: Bayesian fusion of several models that learns from your nights. Open‑Meteo data, no API key.',
     lat:'Latitude',lon:'Longitude',target:'Target',t_deep:'Deep sky',t_planet:'Planetary / Moon',t_wide:'Nightscape / Milky Way',geo:'Use my location',tab1:'Sky index',tab2:'Bayesian fusion',model:'Model',best:'Best available',compute:'Compute',
     h_strip:'Hourly index (48 h)',strip_legend:'Bar: index 0 to 100 (green ≥ 70 excellent, amber 50 to 69 acceptable, red &lt; 50 poor). Dark background: astronomical night. Amber hour: Moon above the horizon.',
-    h_chart:'Clouds, Moon and index',leg1:'<i style="background:#6dbb8a;height:4px"></i>index <i style="background:#9aa7b5"></i>total clouds % <i style="background:#5aa0c8"></i>high clouds % <i style="background:#d9a441;height:8px;opacity:.5"></i>Moon above horizon (altitude) <i style="background:#22304a;height:8px"></i>astronomical night',
+    h_chart:'Clouds, Moon and index',leg1:'<i style="background:#6dbb8a;height:4px"></i>index <i style="background:#9aa7b5"></i>total clouds % <i style="background:#5aa0c8"></i>high clouds % (long dashes) <i style="background:#a98ad8"></i>low clouds % (short dashes) <i style="background:#d9a441;height:8px;opacity:.5"></i>Moon above horizon (altitude) <i style="background:#22304a;height:8px"></i>astronomical night',
     h_table:'Hourly table',h_how:'How it is computed',
     how1:'The index, 0 to 100, adds: <b>clouds</b> up to 45 points, <code>45·(1 − c/100)²</code> with c = effective cover = max(total, 0.9·low + 0.7·mid + 0.45·high); <b>transparency</b> up to 15: AOD 550 nm &lt; 0.08: 15, &lt; 0.15: 11, &lt; 0.3: 6, &lt; 0.5: 2, more: 0; <b>humidity</b> up to 10: RH &lt; 60 %: 10, &lt; 75: 7, &lt; 85: 4, &lt; 92: 2, more: 0 (adds haze and dew); <b>seeing</b> up to 15: 250 hPa wind &lt; 50 km/h: 9, &lt; 90: 6, &lt; 130: 3, more: 0, plus surface wind &lt; 10 km/h: 6, &lt; 20: 4, &lt; 30: 2; <b>dew on optics</b> up to 5: T − Td &gt; 4 °C: 5, &gt; 2: 3, &gt; 1: 1; <b>Moon</b> up to 10: below horizon 10, else 10·(1 − illumination)·(1 − 0.7·sin(altitude)). Then a darkness factor from solar altitude: &gt; −6°: 0, −6 to −12°: 0.3, −12 to −18°: 0.7, &lt; −18°: 1. The target selector rescales the weights: planetary rewards seeing and tolerates the Moon; nightscape penalises Moon and humidity.',
     models_lbl:'Models (parallel download, 12 s limit; untick slow ones)',alpha:'α (effective independent sources)',h_prob:'Hourly probability of usable sky per model and posterior',h_night:'Tonight per model',h_w:'Bayesian weights and prior',h_obs:'Observation log (learning)',
@@ -293,35 +178,27 @@
     obs_note:'Every time you compute, the forecast for the coming night is frozen automatically under the date of that night (the evening date). The next day pick that night, say how it went and save: the observation is paired with the previous evening’s forecast. If you did not compute that evening, the observation only updates the prior. The log lives in this browser; export the JSON if you change device.',
     snap_info:'Forecast frozen for the night of {d} ({n} models, {h}).',no_snap:'No frozen forecast for the night of {d}; the observation only updates the prior.',obs_saved:'Observation saved for the night of {d}.',pending:'pending',
     h_method:'Method',method:'For each model the hourly index s is computed and, within each astronomical night, the mean of the best 3‑hour stretch, s₃. The probability of a “usable night” is <code>p_m = σ((s₃ − 58)/12)</code>, calibrated to the base rate π₀ = 0.35. Climatological prior π ~ Beta(a, b), initially Beta(3.5, 6.5), updated with each observed night (a += y, b += 1 − y). Posterior by logarithmic pooling: <code>logit P = logit π + α · Σ w_m (logit p_m − logit π₀)</code>, Σ w_m = 1. Weights <code>w_m ∝ exp(0.7 · Σ log P_m(y_obs))</code>. Transparency (AOD) comes from a single atmospheric composition model (CAMS) shared by all; model differences come from clouds, humidity and wind.',
-    dl:'Downloading forecast…',dl_n:'Downloading {n} models in parallel…',err:'Error: ',nopos:'No position: ',noaod:' · no AOD, neutral transparency',elev:'elevation',
+    dl:'Downloading forecast…',dl_n:'Downloading {n} models in parallel…',err:'Error: ',nopos:'No position: ',geo_wait:'Getting position… (accept the permission prompt if shown)',geo_denied:'Location permission denied. Enable it from the padlock in the address bar, or type the coordinates.',geo_timeout:'Position took too long. Retry, or type the coordinates.',geo_unavail:'Position unavailable on this device. Type the coordinates.',geo_insecure:'Geolocation only works over HTTPS (e.g. GitHub Pages) or on localhost; browsers block it for local files. Type the coordinates.',geo_unsupported:'This browser does not offer geolocation. Type the coordinates.',noaod:' · no AOD, neutral transparency',elev:'elevation',
     tonight:'Tonight',tomorrow:'Tomorrow night',no_night:'No astronomical night in range',best_win:'best stretch',mean:'mean',astro:'astronomical night',moon:'Moon',illum:'illumination',moon_up:'above horizon',moon_down:'below horizon',all_night:'all night',dew:'dew',
     exc:'Excellent',acc:'Acceptable',bad:'Poor',range:'range',disp:'Spread between models (tonight)',agree_h:'High agreement',agree_m:'Moderate agreement',agree_l:'Disagreement',disp_note:'Standard deviation of model probabilities: epistemic uncertainty.',
     usable:'Usable night likely',maybe:'Usable night possible',unlikely:'Usable night unlikely',
     th1:['Time','Index','Clouds','Low','Mid','High','RH','T−Td','W10','W250','AOD','Moon','Sun°'],thnight:['Model','P usable','s₃','clouds','high','RH','W250','stretch'],thw:['Model','weight w','','log‑lik.'],thobs:['Night','y'],posterior:'posterior',del:'delete',
     post_leg:'posterior',range_leg:'range',prior_info:'Prior: Beta({a}, {b}), mean {pi} % over {n} logged nights. Calibration p = σ((s₃ − 58)/12), π₀ = 0.35.',
-    h_cal:'Calibration (reliability diagram)',cal_empty:'Drawn once the log has nights with a frozen forecast.',cal_few:'Too few nights yet to read calibration (n={n}; indicative from 10, reliable from 30).',cal_thin:'The extreme groups (0–25 % and 75–100 %) hold few nights (n={n}); no clear signal on α yet.',cal_mixed:'The groups contradict each other: no clear signal on α; leave it as it is and keep logging.',cal_up:'Actual frequencies are more extreme than the posterior: raise α.',cal_down:'Actual frequencies are less extreme than the posterior: lower α.',cal_ok:'Calibration is reasonable: leave α as it is.',cal_diag:'perfect calibration',cal_x:'predicted posterior (%)',cal_y:'actual usable-night frequency (%)',
     sel1:'Select at least one model.',none:'No model answered in time.',fused:'{k} models fused',failed:', {f} without response',first:'Compute first.',badjson:'Invalid JSON',confirm:'Delete the whole observation log?',
     w_cloud:'clouds',w_high:'high',w_aod:'AOD',w_rh:'RH',w_jet:'W250',w_wind:'wind',w_dew:'dew',w_moon:'Moon',timeout:'timeout',error:'error'}
   };
   function $(s){return document.querySelector(s);}
-  /* El idioma lo fija el script canónico del <head> (clave compartida pn-lang) y vive en
-     document.documentElement.lang: aquí solo se lee, nunca se consulta el almacenamiento. */
-  let LANG=document.documentElement.lang; if(!I18N[LANG]) LANG='es';
+  let LANG='es'; try{LANG=new URLSearchParams(location.search).get('lang')||localStorage.getItem('niebla_lang')||((navigator.language||'es').startsWith('en')?'en':'es');}catch(e){} if(!I18N[LANG]) LANG='es';
   const t=(k,v)=>{let s=I18N[LANG][k]; if(s==null) s=I18N.es[k]; if(v&&typeof s==='string') Object.keys(v).forEach(x=>s=s.replace('{'+x+'}',v[x])); return s;};
   const LOC=()=>LANG==='en'?'en-GB':'es-ES';
   function applyLang(){
     document.documentElement.lang=LANG; document.title=t('title');
     document.querySelectorAll('[data-i18n]').forEach(e=>{e.innerHTML=t(e.dataset.i18n);});
-    $('#leg1').innerHTML=t('leg1');
-    /* Los enlaces cruzados son estáticos (niebla.html, manual-astro.html) y el idioma viaja
-       por pn-lang; los botones ES/EN los marca el conmutador canónico. */
+    $('#leg1').innerHTML=t('leg1'); $('#manual-link').href='manual_astro.html?lang='+LANG; $('#fog-link').href='index.html?lang='+LANG;
+    $('#lg-es').classList.toggle('on',LANG==='es'); $('#lg-en').classList.toggle('on',LANG==='en');
     if(R1) render1(); if(B.last) render2();
-    calib();
   }
-  /* El conmutador canónico avisa por aquí al cambiar de idioma. El flag evita repintar
-     antes de que la aplicación esté montada (apply() se invoca también en el arranque). */
-  let APP_READY=false;
-  window.onLangChange=function(l){ LANG=I18N[l]?l:'es'; if(APP_READY) applyLang(); };
+  ['es','en'].forEach(l=>$('#lg-'+l).addEventListener('click',()=>{LANG=l; try{localStorage.setItem('niebla_lang',l);}catch(e){} applyLang();}));
 
   /* ---------- astronomía (algoritmos de baja precisión tipo suncalc, error < 0.5°) ---------- */
   const RAD=Math.PI/180, E=RAD*23.4397;
@@ -335,36 +212,9 @@
   function astro(ms,lat,lon){const d=toDays(ms),lw=RAD*-lon,phi=RAD*lat,s=sunCoords(d),m=moonCoords(d),th=sidereal(d,lw);
     const sunAlt=altitude(th-s.ra,phi,s.dec)/RAD; let moonAlt=altitude(th-m.ra,phi,m.dec)/RAD;
     const sd=149598000, phi2=Math.acos(Math.sin(s.dec)*Math.sin(m.dec)+Math.cos(s.dec)*Math.cos(m.dec)*Math.cos(s.ra-m.ra)), inc=Math.atan2(sd*Math.sin(phi2),m.dist-sd*Math.cos(phi2));
-    const angle=Math.atan2(Math.cos(s.dec)*Math.sin(s.ra-m.ra),Math.sin(s.dec)*Math.cos(m.dec)-Math.cos(s.dec)*Math.sin(m.dec)*Math.cos(s.ra-m.ra)); /* fase 0 luna nueva, .25 cuarto creciente, .5 llena, .75 menguante */ const phase=0.5+0.5*inc*(angle<0?-1:1)/Math.PI; return {sunAlt,moonAlt,illum:(1+Math.cos(inc))/2,phase};}
+    return {sunAlt,moonAlt,illum:(1+Math.cos(inc))/2};}
 
-  /* ---------- Luna ---------- */
-/* Terminador real: semicircunferencia exterior más arco elíptico cuyo semieje
-   horizontal es R·|1−2·iluminación|. En cuarto vale 0 (recta) y en llena R. */
-function moonSVG(illum, phase, px){
-  const R=px/2, k=1-2*illum, rx=Math.abs(k)*R, creciente=phase<0.5;
-  const so=creciente?1:0, si=(k>0)===creciente?0:1;
-  const d=`M0,${-R} A${R},${R} 0 0,${so} 0,${R} A${rx.toFixed(2)},${R} 0 0,${si} 0,${-R} Z`;
-  const id='mg'+Math.round(phase*1e4)+px;
-  return `<svg class="moonfig" width="${px}" height="${px}" viewBox="${-R-1} ${-R-1} ${px+2} ${px+2}" role="img" aria-label="${moonName(phase,illum)}">`
-    +`<defs><radialGradient id="${id}" cx="38%" cy="34%" r="72%">`
-    +`<stop offset="0" stop-color="#fdfbf4"/><stop offset="1" stop-color="#d7dbe2"/></radialGradient></defs>`
-    +`<circle r="${R}" fill="#0d1218" stroke="#39434f" stroke-width="1"/>`
-    +(illum>0.004?`<path d="${d}" fill="url(#${id})"/>`:'')
-    +`</svg>`;
-}
-/* Ocho nombres clásicos; los cuartos y los sicigios con margen estrecho. */
-function moonName(phase,illum){
-  const p=((phase%1)+1)%1;
-  if(p<0.02||p>0.98) return t('m_new');
-  if(Math.abs(p-0.25)<0.02) return t('m_first');
-  if(Math.abs(p-0.5)<0.02) return t('m_full');
-  if(Math.abs(p-0.75)<0.02) return t('m_last');
-  if(p<0.25) return t('m_wax_cres');
-  if(p<0.5)  return t('m_wax_gib');
-  if(p<0.75) return t('m_wan_gib');
-  return t('m_wan_cres');
-}
-/* ---------- común ---------- */
+  /* ---------- común ---------- */
   const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
   const logit=p=>Math.log(p/(1-p)), sig=z=>1/(1+Math.exp(-z));
   const fmtH=iso=>iso.slice(11,16);
@@ -404,7 +254,7 @@ function moonName(phase,illum){
     out.forEach(n=>{ const dark=n.rows.filter(r=>r.sunAlt<-18); n.darkStart=dark.length?dark[0].time:null; n.darkEnd=dark.length?dark[dark.length-1].time:null;
       n.date=isoLocal(n.rows[0].ts-(new Date(n.rows[0].time).getHours()<12?86400e3:0));
       const best3=bestWindow(n.rows,3); n.s3=best3.mean; n.s3from=best3.from; n.s3to=best3.to; n.mean=n.rows.reduce((a,r)=>a+r.s,0)/n.rows.length; n.max=Math.max(...n.rows.map(r=>r.s));
-      const up=n.rows.filter(r=>r.moonAlt>0); n.moonUp=up.length; n.illum=n.rows[Math.floor(n.rows.length/2)].illum; n.phase=n.rows[Math.floor(n.rows.length/2)].phase; n.moonFrom=up.length?up[0].time:null; n.moonTo=up.length?up[up.length-1].time:null; });
+      const up=n.rows.filter(r=>r.moonAlt>0); n.moonUp=up.length; n.illum=n.rows[Math.floor(n.rows.length/2)].illum; n.moonFrom=up.length?up[0].time:null; n.moonTo=up.length?up[up.length-1].time:null; });
     return out;}
   function bestWindow(rows,k){ if(rows.length<=k){const m=rows.reduce((a,r)=>a+r.s,0)/rows.length; return {mean:m,from:rows[0].time,to:rows[rows.length-1].time};}
     let best={mean:-1}; for(let i=0;i+k<=rows.length;i++){const m=rows.slice(i,i+k).reduce((a,r)=>a+r.s,0)/k; if(m>best.mean) best={mean:m,from:rows[i].time,to:rows[i+k-1].time};} return best;}
@@ -415,7 +265,15 @@ function moonName(phase,illum){
     document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id===b.dataset.pane));
     if(b.dataset.pane==='p2'&&!B.ran){tobs(); run2();}
   }));
-  $('#geo').addEventListener('click',()=>{navigator.geolocation?.getCurrentPosition(p=>{$('#lat').value=p.coords.latitude.toFixed(4);$('#lon').value=p.coords.longitude.toFixed(4);run1();B.ran=false;},e=>$('#st1').textContent=t('nopos')+e.message);});
+  $('#geo').addEventListener('click',()=>{
+    if(!('geolocation' in navigator)){$('#st1').textContent=t('geo_unsupported');return;}
+    if(!window.isSecureContext){$('#st1').textContent=t('geo_insecure');return;}
+    $('#st1').textContent=t('geo_wait');
+    navigator.geolocation.getCurrentPosition(
+      p=>{$('#lat').value=p.coords.latitude.toFixed(4);$('#lon').value=p.coords.longitude.toFixed(4);run1();B.ran=false;},
+      e=>{$('#st1').textContent=e.code===1?t('geo_denied'):e.code===3?t('geo_timeout'):t('geo_unavail');},
+      {enableHighAccuracy:false,timeout:10000,maximumAge:600000});
+  });
   $('#target').addEventListener('change',()=>{if(R1) run1(); if(B.ran) run2();});
 
   /* ===== pestaña 1 ===== */
@@ -423,7 +281,7 @@ function moonName(phase,illum){
   function buildRows(H,aodM,lat,lon,target,limit){const now=Date.now(), rows=[];
     for(let i=0;i<H.time.length;i++){const ts=new Date(H.time[i]).getTime(); if(ts<now-3600e3) continue; if(rows.length>=limit) break;
       const a=astro(ts+1800e3,lat,lon);
-      const r={time:H.time[i],ts,t:H.temperature_2m[i],td:H.dew_point_2m[i],rh:H.relative_humidity_2m[i],wind:H.wind_speed_10m[i],cloud:H.cloud_cover[i],cloudL:H.cloud_cover_low[i],cloudM:H.cloud_cover_mid[i],cloudH:H.cloud_cover_high[i],precip:H.precipitation[i],jet:H.wind_speed_250hPa?H.wind_speed_250hPa[i]:null,aod:aodAt(aodM,H.time[i]),sunAlt:a.sunAlt,moonAlt:a.moonAlt,illum:a.illum, phase:a.phase};
+      const r={time:H.time[i],ts,t:H.temperature_2m[i],td:H.dew_point_2m[i],rh:H.relative_humidity_2m[i],wind:H.wind_speed_10m[i],cloud:H.cloud_cover[i],cloudL:H.cloud_cover_low[i],cloudM:H.cloud_cover_mid[i],cloudH:H.cloud_cover_high[i],precip:H.precipitation[i],jet:H.wind_speed_250hPa?H.wind_speed_250hPa[i]:null,aod:aodAt(aodM,H.time[i]),sunAlt:a.sunAlt,moonAlt:a.moonAlt,illum:a.illum};
       if(r.t==null||r.cloud==null||r.rh==null) continue; if(r.cloudL==null) r.cloudL=r.cloud; if(r.cloudM==null) r.cloudM=0; if(r.cloudH==null) r.cloudH=0; if(r.td==null) r.td=r.t-3;
       const sc=score(r,target); r.s=sc.s; r.why=sc.why; rows.push(r);}
     return rows;}
@@ -440,7 +298,7 @@ function moonName(phase,illum){
     cards1(); strip1(rows); chart1(rows); table1(rows);}
   function nightCard(n,label){ if(!n) return `<div class="card"><div class="eyebrow">${label}</div><div class="why">${t('no_night')}</div></div>`;
     const moon=n.moonUp===0?t('moon_down'):(n.moonUp===n.rows.length?t('all_night'):`${fmtH(n.moonFrom)} – ${fmtH(n.moonTo)}`);
-    return `<div class="card"><div class="eyebrow">${label} · ${new Date(n.rows[0].time).toLocaleDateString(LOC(),{weekday:'long',day:'2-digit'})}</div><div class="big v-${clsS(n.s3)}">${Math.round(n.s3)}</div><div class="verdict">${verS(n.s3)}</div><div class="when">${t('best_win')} ${fmtH(n.s3from)} – ${fmtH(n.s3to)} · ${t('mean')} ${Math.round(n.mean)}</div><div class="why">${t('astro')}: ${n.darkStart?fmtH(n.darkStart)+' – '+fmtH(n.darkEnd):'–'}</div><div class="moonrow">${moonSVG(n.illum,n.phase,34)}<div><b>${moonName(n.phase,n.illum)}</b><span>${Math.round(100*n.illum)}% ${t('illum')} · ${moon}</span></div></div></div>`;}
+    return `<div class="card"><div class="eyebrow">${label} · ${new Date(n.rows[0].time).toLocaleDateString(LOC(),{weekday:'long',day:'2-digit'})}</div><div class="big v-${clsS(n.s3)}">${Math.round(n.s3)}</div><div class="verdict">${verS(n.s3)}</div><div class="when">${t('best_win')} ${fmtH(n.s3from)} – ${fmtH(n.s3to)} · ${t('mean')} ${Math.round(n.mean)}</div><div class="why">${t('astro')}: ${n.darkStart?fmtH(n.darkStart)+' – '+fmtH(n.darkEnd):'–'} · ${t('moon')} ${Math.round(100*n.illum)}% ${t('illum')}, ${moon}</div></div>`;}
   function cards1(){const N=R1.nights; $('#cards1').innerHTML=nightCard(N[0],t('tonight'))+nightCard(N[1],t('tomorrow'));}
   function strip1(rows){$('#strip').innerHTML=rows.map(r=>`<div class="hour ${r.sunAlt<-18?'dark':''} ${r.moonAlt>0?'moon':''}" title="${fmtD(r.time)} · ${r.s} · ${whyTxt(r.why)}"><div class="bar"><span class="${clsS(r.s)}" style="height:${r.s}%"></span></div><div class="t">${fmtH(r.time).slice(0,2)}</div></div>`).join('');}
   function chart1(rows){
@@ -450,7 +308,7 @@ function moonName(phase,illum){
       if(r.moonAlt>0) g+=`<rect x="${x0}" y="${y(Math.min(r.moonAlt,90)*100/90)}" width="${x1-x0}" height="${Hh-pb-y(Math.min(r.moonAlt,90)*100/90)}" fill="#d9a441" opacity="${0.12+0.3*r.illum}"/>`;});
     for(let v=0;v<=100;v+=25) g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}" stroke="#222b36"/><text x="${pl-6}" y="${y(v)+4}" font-size="10" text-anchor="end" fill="#9aa7b5" font-family="IBM Plex Mono">${v}</text>`;
     const path=(f)=>rows.map((r,i)=>(i?'L':'M')+x(i).toFixed(1)+','+y(f(r)).toFixed(1)).join(' ');
-    g+=`<path d="${path(r=>r.cloud)}" fill="none" stroke="#9aa7b5" stroke-width="1.3"/><path d="${path(r=>r.cloudH)}" fill="none" stroke="#5aa0c8" stroke-width="1.2" stroke-dasharray="4 3"/><path d="${path(r=>r.s)}" fill="none" stroke="#6dbb8a" stroke-width="3"/>`;
+    g+=`<path d="${path(r=>r.cloud)}" fill="none" stroke="#9aa7b5" stroke-width="1.3"/><path d="${path(r=>r.cloudH)}" fill="none" stroke="#5aa0c8" stroke-width="1.2" stroke-dasharray="4 3"/><path d="${path(r=>r.cloudL)}" fill="none" stroke="#a98ad8" stroke-width="1.2" stroke-dasharray="2 3"/><path d="${path(r=>r.s)}" fill="none" stroke="#6dbb8a" stroke-width="3"/>`;
     rows.forEach((r,i)=>{if(i%6===0) g+=`<text x="${x(i)}" y="${Hh-10}" font-size="10" text-anchor="middle" fill="#9aa7b5" font-family="IBM Plex Mono">${fmtH(r.time)}</text>`;});
     $('#chart1').innerHTML=`<svg viewBox="0 0 ${W} ${Hh}" role="img">${g}</svg>`;
   }
@@ -533,53 +391,7 @@ function moonName(phase,illum){
     $('#tw').innerHTML=h; $('#priorinfo').textContent=t('prior_info',{a:pr.a.toFixed(1),b:pr.b.toFixed(1),pi:(100*pr.pi).toFixed(1),n:store.obs.length});}
   function tobs(){let h='<tr>'+t('thobs').map(x=>'<th>'+x+'</th>').join('')+MODELS.map(m=>'<th>'+m.name+'</th>').join('')+'<th>'+t('posterior')+'</th><th></th></tr>';
     store.obs.slice().reverse().forEach((o,k)=>{const idx=store.obs.length-1-k; h+=`<tr><td>${o.date}</td><td>${o.y}</td>`+MODELS.map(m=>'<td>'+(o.p&&o.p[m.id]!=null?(100*o.p[m.id]).toFixed(0)+'%':'–')+'</td>').join('')+`<td>${o.post!=null?(100*o.post).toFixed(0)+'%':'<span style="color:var(--warn)">'+t('pending')+'</span>'}</td><td><button class="small ghost" data-i="${idx}">${t('del')}</button></td></tr>`;});
-    $('#tobs').innerHTML=h; document.querySelectorAll('#tobs button').forEach(b=>b.addEventListener('click',()=>{store.obs.splice(+b.dataset.i,1);save(); if(B.last) render2(); else tobs();})); calib();}
-  /* ---------- calibración: diagrama de fiabilidad sobre el registro ---------- */
-  function calBins(){
-    const scored=store.obs.filter(o=>o.post!=null&&o.y!=null);
-    const raw=[[0,.25],[.25,.5],[.5,.75],[.75,1.001]].map(lim=>{
-      const g=scored.filter(o=>o.post>=lim[0]&&o.post<lim[1]);
-      if(!g.length) return null;
-      return {n:g.length,px:g.reduce((u,o)=>u+o.post,0)/g.length,py:g.reduce((u,o)=>u+o.y,0)/g.length};
-    });
-    return {scored,raw,bins:raw.filter(Boolean)};
-  }
-  function calRead(scored,raw,bins){
-    if(scored.length<10) return t('cal_few',{n:scored.length});
-    const nExt=(raw[0]?raw[0].n:0)+(raw[3]?raw[3].n:0);
-    if(nExt<3) return t('cal_thin',{n:nExt});
-    let up=0,dn=0,acc=0,tot=0;
-    bins.forEach(q=>{const sgn=q.px>0.5?1:q.px<0.5?-1:0, d=sgn*(q.py-q.px);
-      acc+=q.n*d; tot+=q.n; if(q.n>=2){ if(d>0.08) up++; else if(d<-0.08) dn++; }});
-    if(up&&dn) return t('cal_mixed');
-    const mean=acc/tot;
-    return mean>0.05?t('cal_up'):mean<-0.05?t('cal_down'):t('cal_ok');
-  }
-  function calib(){
-    const box=$('#calib'), read=$('#calread'); if(!box||!read) return;
-    const {scored,raw,bins}=calBins();
-    if(!scored.length){ box.innerHTML=''; read.textContent=t('cal_empty'); return; }
-    const W=460,Hh=330,pl=48,pr=16,ptop=16,pb=46;
-    const X=p=>pl+(W-pl-pr)*p, Y=p=>ptop+(Hh-ptop-pb)*(1-p);
-    let g='';
-    for(let v=0;v<=1;v+=.25){
-      g+=`<line x1="${X(v).toFixed(1)}" x2="${X(v).toFixed(1)}" y1="${ptop}" y2="${Hh-pb}" stroke="#222b36"/>`
-        +`<line x1="${pl}" x2="${W-pr}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}" stroke="#222b36"/>`
-        +`<text x="${X(v).toFixed(1)}" y="${Hh-pb+14}" font-size="10" text-anchor="middle" fill="#9aa7b5" font-family="IBM Plex Mono">${100*v}</text>`
-        +`<text x="${pl-7}" y="${(Y(v)+3.5).toFixed(1)}" font-size="10" text-anchor="end" fill="#9aa7b5" font-family="IBM Plex Mono">${100*v}</text>`;
-    }
-    g+=`<line x1="${X(0).toFixed(1)}" y1="${Y(0).toFixed(1)}" x2="${X(1).toFixed(1)}" y2="${Y(1).toFixed(1)}" stroke="#3e4c5c" stroke-width="1.5" stroke-dasharray="5 4"/>`
-      +`<text x="${X(.56).toFixed(1)}" y="${(Y(.56)-8).toFixed(1)}" font-size="10" fill="#5a6b7d" font-family="IBM Plex Mono" transform="rotate(-34 ${X(.56).toFixed(1)} ${(Y(.56)-8).toFixed(1)})">${t('cal_diag')}</text>`;
-    const seq=bins.slice().sort((u,q)=>u.px-q.px);
-    if(seq.length>1) g+=`<path d="${seq.map((q,i)=>(i?'L':'M')+X(q.px).toFixed(1)+','+Y(q.py).toFixed(1)).join(' ')}" fill="none" stroke="#6dbb8a" stroke-width="1" opacity=".55"/>`;
-    seq.forEach(q=>{const rr=Math.min(4.5*Math.sqrt(q.n),22);
-      g+=`<circle cx="${X(q.px).toFixed(1)}" cy="${Y(q.py).toFixed(1)}" r="${rr.toFixed(1)}" fill="#6dbb8a" opacity=".85" stroke="#0f1419"/>`
-        +`<text x="${X(q.px).toFixed(1)}" y="${Math.max(Y(q.py)-rr-5,10).toFixed(1)}" font-size="10" text-anchor="middle" fill="#e6eaf0" font-family="IBM Plex Mono">n=${q.n}</text>`;});
-    g+=`<text x="${((pl+W-pr)/2).toFixed(1)}" y="${Hh-6}" font-size="10" text-anchor="middle" fill="#9aa7b5" font-family="IBM Plex Mono">${t('cal_x')}</text>`
-      +`<text x="12" y="${((ptop+Hh-pb)/2).toFixed(1)}" font-size="10" text-anchor="middle" fill="#9aa7b5" font-family="IBM Plex Mono" transform="rotate(-90 12 ${((ptop+Hh-pb)/2).toFixed(1)})">${t('cal_y')}</text>`;
-    box.innerHTML=`<svg viewBox="0 0 ${W} ${Hh}" role="img">${g}</svg>`;
-    read.textContent=calRead(scored,raw,bins);
-  }
+    $('#tobs').innerHTML=h; document.querySelectorAll('#tobs button').forEach(b=>b.addEventListener('click',()=>{store.obs.splice(+b.dataset.i,1);save(); if(B.last) render2(); else tobs();}));}
   $('#saveobs').addEventListener('click',()=>{
     const date=$('#odate').value; if(!date) return; const y=+$('#oval').value, sn=store.snap[date];
     const ex=store.obs.findIndex(o=>o.date===date);
@@ -588,12 +400,12 @@ function moonName(phase,illum){
     if(B.last){render2(); $('#st2').textContent=msg+' · '+$('#st2').textContent;} else {$('#st2').textContent=msg; tobs();}
   });
   $('#exp').addEventListener('click',()=>{const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(store,null,1)],{type:'application/json'})); a.download='astro_observaciones.json'; a.click();});
-  $('#imp').addEventListener('change',e=>{const f=e.target.files[0]; if(!f) return; f.text().then(x=>{try{const s=JSON.parse(x); if(Array.isArray(s.obs)){store=s; if(!store.snap) store.snap={}; save(); tobs(); run2();}}catch(err){$('#st2').textContent=t('badjson');}});});
-  $('#clear').addEventListener('click',()=>{if(confirm(t('confirm'))){store={obs:[],snap:{}};save();tobs();run2();}});
+  $('#imp').addEventListener('change',e=>{const f=e.target.files[0]; if(!f) return; f.text().then(x=>{try{const s=JSON.parse(x); if(Array.isArray(s.obs)){store=s; if(!store.snap) store.snap={}; save(); run2();}}catch(err){$('#st2').textContent=t('badjson');}});});
+  $('#clear').addEventListener('click',()=>{if(confirm(t('confirm'))){store={obs:[],snap:{}};save();run2();}});
   $('#go2').addEventListener('click',run2);
   {const now=new Date(); $('#odate').value=isoLocal(now.getHours()<14?now.getTime()-86400e3:now.getTime());}
 
-  APP_READY=true; applyLang(); run1();
+  applyLang(); run1();
 })();
 </script>
 </body>
