@@ -1,0 +1,1165 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: 'self'; base-uri 'none'; form-action 'none'">
+<meta name="description" content="Física del filtro de densidad neutra: dónde deja de ser neutro, qué hace el filtro del propio sensor, cómo intervienen el grosor, el ángulo de incidencia y la focal, y cómo medir la fuga infrarroja con la cámara.">
+<title>El filtro ND y la fuga infrarroja</title>
+<meta name="author" content="Rafael Vida">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Crect%20width%3D%2764%27%20height%3D%2764%27%20rx%3D%2713%27%20fill%3D%27%231B2530%27/%3E%3Crect%20x%3D%278%27%20y%3D%2740%27%20width%3D%2748%27%20height%3D%272%27%20fill%3D%27%235A6978%27/%3E%3Crect%20x%3D%278%27%20y%3D%2714%27%20width%3D%276%27%20height%3D%2726%27%20fill%3D%27%237B4FB0%27%20opacity%3D%27.9%27/%3E%3Crect%20x%3D%2714%27%20y%3D%2714%27%20width%3D%276%27%20height%3D%2726%27%20fill%3D%27%232E6FB7%27%20opacity%3D%27.9%27/%3E%3Crect%20x%3D%2720%27%20y%3D%2714%27%20width%3D%276%27%20height%3D%2726%27%20fill%3D%27%232E8B57%27%20opacity%3D%27.9%27/%3E%3Crect%20x%3D%2726%27%20y%3D%2714%27%20width%3D%276%27%20height%3D%2726%27%20fill%3D%27%23E0B030%27%20opacity%3D%27.9%27/%3E%3Crect%20x%3D%2732%27%20y%3D%2714%27%20width%3D%276%27%20height%3D%2726%27%20fill%3D%27%23C0392B%27%20opacity%3D%27.9%27/%3E%3Crect%20x%3D%2738%27%20y%3D%2714%27%20width%3D%2718%27%20height%3D%2726%27%20fill%3D%27%23A8322E%27%20opacity%3D%27.35%27/%3E%3Cpath%20d%3D%27M8%2C30%20L38%2C30%20L42%2C22%20L56%2C16%27%20fill%3D%27none%27%20stroke%3D%27%23F3F5F7%27%20stroke-width%3D%272.4%27%20stroke-linejoin%3D%27round%27/%3E%3Crect%20x%3D%278%27%20y%3D%2748%27%20width%3D%2748%27%20height%3D%276%27%20rx%3D%272%27%20fill%3D%27%235A6978%27%20opacity%3D%27.7%27/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="icons/filtro-nd-infrarrojo-180.png">
+<meta name="theme-color" content="#F3F5F7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Filtro ND">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Photographers">
+<meta property="og:title" content="El filtro ND y la fuga infrarroja">
+<meta property="og:description" content="Física del filtro de densidad neutra: dónde deja de ser neutro, qué hace el filtro del propio sensor, cómo intervienen el grosor, el ángulo de incidencia y la focal, y cómo medir la fuga infrarroja con la cámara.">
+<meta property="og:url" content="https://falevian.github.io/Photographers/filtro-nd-infrarrojo.html">
+<meta property="og:image" content="https://falevian.github.io/Photographers/og/nd.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="es_ES">
+<meta property="og:locale:alternate" content="en_GB">
+<meta name="twitter:card" content="summary_large_image">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
+<style>
+:root{
+  --bg:#F3F5F7; --surface:#FFFFFF; --ink:#1B2530; --muted:#5A6978; --line:#D3DAE1;
+  --vis:#2A6F8F; --ir:#A8322E; --ir-soft:rgba(168,50,46,.06);
+  --r:#C0392B; --g:#2E8B57; --b:#2E6FB7; --hot:#7A5C9E; --qe:#6E7680;
+  --serif:"Charter","Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{background:var(--bg);color:var(--ink);font-family:var(--serif);font-size:18px;line-height:1.55;-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0}
+a{color:var(--vis)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--vis);outline-offset:2px}
+.wrap{max-width:720px;margin:0 auto;padding:0 20px}
+.wide{max-width:900px;margin:0 auto;padding:0 20px}
+header.portada{padding:64px 0 28px}
+h1{font-size:2.6rem;line-height:1.1;font-weight:400;margin:0 0 16px;letter-spacing:-.01em}
+.sub{font-size:1.25rem;line-height:1.4;color:var(--muted);margin:0 0 20px;max-width:640px}
+.lede{font-family:var(--sans);font-size:.92rem;line-height:1.5;color:var(--muted);border-left:3px solid var(--ir);padding-left:12px;max-width:600px;margin:0}
+nav.indice{position:sticky;top:0;background:rgba(243,245,247,.94);backdrop-filter:blur(6px);border-top:1px solid var(--line);border-bottom:1px solid var(--line);z-index:5}
+nav.indice ol{list-style:none;margin:0 auto;padding:10px 20px;max-width:900px;display:flex;flex-wrap:wrap;gap:6px 18px;font-family:var(--sans);font-size:.86rem}
+nav.indice a{text-decoration:none;color:var(--ink)}
+nav.indice a:hover{text-decoration:underline}
+section{padding:56px 0 8px}
+h2{font-size:1.75rem;font-weight:400;line-height:1.2;margin:0 0 18px}
+h3{font-size:1.15rem;font-weight:600;margin:28px 0 10px}
+p{margin:0 0 16px}
+ul,ol{padding-left:22px;margin:0 0 16px}
+li{margin-bottom:6px}
+.eq{font-size:1.15rem;text-align:center;margin:18px 0;padding:6px 0;line-height:1.7}
+.eq i{font-style:italic}
+.nota{font-family:var(--sans);font-size:.9rem;line-height:1.5;color:var(--muted)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:18px 20px 16px;margin:22px 0 28px;font-family:var(--sans)}
+.panel h4{margin:0 0 14px;font-size:.95rem;font-weight:600;color:var(--ink)}
+.controls{display:flex;flex-wrap:wrap;gap:14px 22px;margin-bottom:14px}
+.controls label{display:flex;flex-direction:column;gap:5px;font-size:.84rem;color:var(--muted);min-width:150px}
+.controls select,.controls input[type=number]{font:inherit;font-size:.95rem;color:var(--ink);padding:6px 8px;border:1px solid var(--line);border-radius:3px;background:#fff;max-width:320px}
+.controls input[type=range]{width:180px;accent-color:var(--vis)}
+.controls .val{color:var(--ink);font-variant-numeric:tabular-nums}
+.toggles{display:flex;flex-wrap:wrap;gap:10px 18px;font-size:.84rem;color:var(--muted);margin-bottom:10px}
+.toggles label{display:flex;align-items:center;gap:6px}
+.toggles input{accent-color:var(--vis)}
+svg.chart{width:100%;height:auto;display:block}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px 18px;margin-top:14px;font-size:.88rem}
+.readout div{border-top:1px solid var(--line);padding-top:8px}
+.readout b{display:block;font-size:1.25rem;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink)}
+.readout span{color:var(--muted)}
+.swatches{display:flex;gap:16px;margin:14px 0 6px;flex-wrap:wrap}
+.swatch{flex:1 1 160px}
+.swatch .color{height:64px;border-radius:3px;border:1px solid var(--line)}
+.swatch p{font-size:.84rem;color:var(--muted);margin:6px 0 0}
+table{border-collapse:collapse;font-family:var(--sans);font-size:.9rem;width:100%;margin:12px 0 20px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--muted)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+details{margin:10px 0;font-family:var(--sans);font-size:.92rem}
+summary{cursor:pointer;font-weight:600}
+details ul{margin-top:10px}
+footer{padding:40px 0 60px;font-family:var(--sans);font-size:.86rem;color:var(--muted);border-top:1px solid var(--line);margin-top:40px}
+.leyenda{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:.8rem;color:var(--muted);margin-top:8px}
+.leyenda i{display:inline-block;width:18px;height:0;border-top:3px solid;vertical-align:middle;margin-right:6px}
+@media (max-width:600px){html{font-size:17px}h1{font-size:2.05rem}.controls input[type=range]{width:140px}header.portada{padding-top:44px}nav.indice ol{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;gap:0 18px;padding:10px 20px;-webkit-overflow-scrolling:touch}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* ---------- convenio bilingüe del repositorio ---------- */
+html[lang="es"] [data-lang="en"]{display:none!important}
+html[lang="en"] [data-lang="es"]{display:none!important}
+.langbar{position:fixed;top:12px;right:14px;z-index:50;display:flex;background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:8px;overflow:hidden;font-family:var(--sans);backdrop-filter:blur(6px)}
+.langbar button{font-size:12px;letter-spacing:.08em;background:transparent;border:0;color:var(--muted);padding:7px 11px;cursor:pointer}
+.langbar button+button{border-left:1px solid var(--line)}
+.langbar button:hover{color:var(--ink)}
+.langbar button.on{background:var(--bg);color:var(--vis)}
+.langbar a.home{display:flex;align-items:center;padding:0 9px;color:var(--muted);border-right:1px solid var(--line)}
+.langbar a.home:hover{color:var(--ink)}
+.langbar a.home svg{width:12px;height:12px;display:block}
+@media print{.langbar{display:none!important}}
+</style>
+</head>
+<body>
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <a class="home" href="index.html" title="Portada / Home" aria-label="Portada / Home"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.5 8 2.5l5.5 5v6h-4v-4h-3v4h-4z"/></svg></a>
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
+<header class="portada">
+  <div class="wrap">
+    <h1 data-lang="es">El filtro ND y la fuga infrarroja</h1>
+<h1 data-lang="en">The ND filter and infrared leakage</h1>
+    <p data-lang="es" class="sub">Por qué un filtro de diez pasos puede teñir una fotografía, qué parte es responsabilidad del filtro, cuál del sensor y cuál del objetivo, y cómo medirlo con la propia cámara.</p>
+<p data-lang="en" class="sub">Why a ten-stop filter can tint a photograph, which part is the filter's fault, which the sensor's and which the lens's, and how to measure it with the camera itself.</p>
+    <p data-lang="es" class="lede">Página autocontenida: sin librerías externas ni peticiones de red, todo el cálculo ocurre en el navegador. Las curvas espectrales son modelos cualitativos construidos a partir de la física de cada componente. Ninguna reproduce la medida de un producto concreto.</p>
+<p data-lang="en" class="lede">Self-contained page: no external libraries or network requests, all the computation happens in the browser. The spectral curves are qualitative models built from the physics of each component. None reproduces the measurement of a specific product.</p>
+  </div>
+</header>
+
+<nav class="indice" aria-label="Contenido" data-aria-es="Contenido" data-aria-en="Contents">
+  <ol>
+    <li><a href="#nd"><span data-lang="es">Qué hace un ND</span><span data-lang="en">What an ND does</span></a></li>
+    <li><a href="#espectro"><span data-lang="es">Dónde deja de ser neutro</span><span data-lang="en">Where it stops being neutral</span></a></li>
+    <li><a href="#sensor"><span data-lang="es">El filtro del sensor</span><span data-lang="en">The sensor's filter</span></a></li>
+    <li><a href="#dominante"><span data-lang="es">Simulador de dominante</span><span data-lang="en">Cast simulator</span></a></li>
+    <li><a href="#angulo"><span data-lang="es">Ángulo y focal</span><span data-lang="en">Angle and focal length</span></a></li>
+    <li><a href="#difraccion"><span data-lang="es">Difracción</span><span data-lang="en">Diffraction</span></a></li>
+    <li><a href="#medir"><span data-lang="es">Cómo medirlo</span><span data-lang="en">How to measure it</span></a></li>
+    <li><a href="#modelo"><span data-lang="es">Modelo y límites</span><span data-lang="en">Model and limits</span></a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section id="nd">
+  <div class="wrap">
+    <h2 data-lang="es">Qué hace un filtro de densidad neutra</h2>
+<h2 data-lang="en">What a neutral-density filter does</h2>
+    <p data-lang="es">Un filtro ND atenúa la luz por un factor que, idealmente, no depende de la longitud de onda. Se describe de tres maneras equivalentes: por su factor (ND1000), por los pasos de exposición que resta (10) o por su densidad óptica (OD 3.0). Las tres relaciones son exactas; lo que no es exacto es la nomenclatura comercial, que redondea 2<sup>10</sup> = 1024 a 1000. Un "ND1000" honesto es un ND1024, y algunos fabricantes lo etiquetan así.</p>
+<p data-lang="en">An ND filter attenuates light by a factor that, ideally, does not depend on wavelength. It is described in three equivalent ways: by its factor (ND1000), by the stops of exposure it removes (10) or by its optical density (OD 3.0). The three relations are exact; what is not exact is the commercial naming, which rounds 2<sup>10</sup> = 1024 to 1000. An honest "ND1000" is an ND1024, and some manufacturers label it so.</p>
+    <p class="eq"><i>OD</i> = −log<sub>10</sub> <i>T</i> &nbsp;&nbsp;&nbsp; <i>T</i> = 2<sup>−<i>n</i></sup> &nbsp;&nbsp;&nbsp; factor = 2<sup><i>n</i></sup> = 10<sup><i>OD</i></sup></p>
+    <p data-lang="es">La densidad óptica es la magnitud útil porque es aditiva: dos filtros apilados suman sus OD. Y es aditiva también fuera del visible, lo que tendrá consecuencias en la sección siguiente. El tiempo de exposición se multiplica por el factor: con ND1000, 1/125 s pasa a 8 s.</p>
+<p data-lang="en">Optical density is the useful quantity because it is additive: two stacked filters add their ODs. And it is additive outside the visible too, which will have consequences in the next section. The exposure time is multiplied by the factor: with ND1000, 1/125 s becomes 8 s.</p>
+
+    <div class="panel">
+      <h4 data-lang="es">Conversor de densidad y tiempo de exposición</h4>
+<h4 data-lang="en">Density and exposure-time converter</h4>
+      <div class="controls">
+        <label><span data-lang="es">Introducir como</span><span data-lang="en">Enter as</span>
+          <select id="c1-mode">
+            <option value="stops" data-es="pasos" data-en="stops">pasos</option>
+            <option value="factor" selected data-es="factor ND" data-en="ND factor">factor ND</option>
+            <option value="od" data-es="densidad óptica" data-en="optical density">densidad óptica</option>
+            <option value="t" data-es="transmitancia (%)" data-en="transmittance (%)">transmitancia (%)</option>
+          </select>
+        </label>
+        <label><span data-lang="es">Valor</span><span data-lang="en">Value</span>
+          <input type="number" id="c1-value" value="1000" step="any" min="0">
+        </label>
+        <label><span data-lang="es">Tiempo base sin filtro (s)</span><span data-lang="en">Base time without filter (s)</span>
+          <input type="number" id="c1-t0" value="0.008" step="any" min="0">
+        </label>
+      </div>
+      <div class="readout">
+        <div><b id="c1-stops">10.0</b><span data-lang="es">pasos</span><span data-lang="en">stops</span></div>
+        <div><b id="c1-factor">1000</b><span data-lang="es">factor</span><span data-lang="en">factor</span></div>
+        <div><b id="c1-od">3.00</b><span data-lang="es">densidad óptica</span><span data-lang="en">optical density</span></div>
+        <div><b id="c1-T">0.100 %</b><span data-lang="es">transmitancia</span><span data-lang="en">transmittance</span></div>
+        <div><b id="c1-tres">8.0 s</b><span data-lang="es">tiempo con filtro</span><span data-lang="en">time with filter</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="espectro">
+  <div class="wrap">
+    <h2 data-lang="es">Dónde deja de ser neutro</h2>
+<h2 data-lang="en">Where it stops being neutral</h2>
+    <p data-lang="es">"Neutro" se especifica entre unos 400 y 700 nm. Fuera de esa banda la densidad óptica no está garantizada, y en la mayoría de construcciones cae. El sensor, como se verá después, sigue siendo sensible hasta cerca de 1100 nm, así que lo que ocurra entre 700 y 1000 nm no es una curiosidad espectroscópica: es señal que llega a los fotodiodos.</p>
+<p data-lang="en">"Neutral" is specified between roughly 400 and 700 nm. Outside that band the optical density is not guaranteed, and in most constructions it drops. The sensor, as we will see, stays sensitive up to nearly 1100 nm, so what happens between 700 and 1000 nm is not a spectroscopic curiosity: it is signal that reaches the photodiodes.</p>
+    <p data-lang="es">Cada tecnología de fabricación falla de una forma distinta:</p>
+<p data-lang="en">Each manufacturing technology fails in a different way:</p>
+    <ul data-lang="es">
+      <li><strong>Vidrio absorbente teñido.</strong> La absorción la producen iones metálicos disueltos en el vidrio, con bandas de absorción centradas en el visible. Más allá de 700 nm el coeficiente de absorción se desploma, y la OD con él. Además suelen absorber algo más en el azul, lo que añade una dominante cálida ya en el visible.</li>
+      <li><strong>Película metálica evaporada.</strong> Una capa delgada de aleación de níquel y cromo depositada en vacío. Atenúa por absorción y reflexión, con una respuesta bastante plana en el visible y un ascenso lento de la transmitancia hacia el NIR. Es la base de la mayoría de ND fotográficos de gama media y alta.</li>
+      <li><strong>Metálico con corte IR dieléctrico (IRND).</strong> A la película metálica se le añade un apilamiento dieléctrico que refleja el infrarrojo cercano. La OD en el NIR puede quedar igual o por encima de la del visible. Es lo que los fabricantes anuncian como "corte IR" o "IRND". Su punto débil es el ángulo de incidencia, tratado más abajo.</li>
+      <li><strong>ND variable (dos polarizadores).</strong> Los polarizadores de yodo en alcohol polivinílico dejan de polarizar por encima de 750 nm. Dos polarizadores cruzados que en el visible bloquean OD 3 o más son casi transparentes a 900 nm. Cuanto más se cierra el ND variable, mayor es el exceso de fuga. A esto se suma el patrón en cruz en gran angular, propio de la dependencia angular de la polarización.</li>
+      <li><strong>Resina teñida.</strong> Los filtros cuadrados de resina usan tintes orgánicos, que son los materiales más transparentes al NIR de toda la lista. Es el caso más desfavorable.</li>
+    </ul>
+    <ul data-lang="en">
+      <li><strong>Dyed absorbing glass.</strong> Absorption comes from metal ions dissolved in the glass, with absorption bands centred in the visible. Beyond 700 nm the absorption coefficient collapses, and the OD with it. They also tend to absorb a little more in the blue, adding a warm cast already in the visible.</li>
+      <li><strong>Evaporated metal film.</strong> A thin layer of nickel-chromium alloy deposited in vacuum. It attenuates by absorption and reflection, with a fairly flat response in the visible and a slow rise in transmittance towards the NIR. It is the basis of most mid- and high-range photographic NDs.</li>
+      <li><strong>Metal with dielectric IR cut (IRND).</strong> A dielectric stack that reflects the near infrared is added to the metal film. The OD in the NIR can be equal to or above that in the visible. It is what manufacturers advertise as "IR cut" or "IRND". Its weak point is the angle of incidence, treated below.</li>
+      <li><strong>Variable ND (two polarisers).</strong> Iodine-in-polyvinyl-alcohol polarisers stop polarising above 750 nm. Two crossed polarisers that block OD 3 or more in the visible are almost transparent at 900 nm. The more the variable ND is closed, the larger the excess leakage. Add to that the cross pattern on wide angles, inherent to the angular dependence of polarisation.</li>
+      <li><strong>Dyed resin.</strong> Square resin filters use organic dyes, the most NIR-transparent materials of the whole list. It is the worst case.</li>
+    </ul>
+
+    <div class="panel">
+      <h4 data-lang="es">Transmitancia espectral por tipo de filtro</h4>
+<h4 data-lang="en">Spectral transmittance by filter type</h4>
+      <div class="controls">
+        <label><span data-lang="es">Tecnología del filtro</span><span data-lang="en">Filter technology</span>
+          <select id="c2-type">
+            <option value="absorbente" data-es="Vidrio absorbente teñido" data-en="Dyed absorbing glass">Vidrio absorbente teñido</option>
+            <option value="metalico" selected data-es="Película metálica evaporada" data-en="Evaporated metal film">Película metálica evaporada</option>
+            <option value="irnd" data-es="Metálico con corte IR (IRND)" data-en="Metal with IR cut (IRND)">Metálico con corte IR (IRND)</option>
+            <option value="variable" data-es="ND variable (dos polarizadores)" data-en="Variable ND (two polarisers)">ND variable (dos polarizadores)</option>
+            <option value="resina" data-es="Resina teñida" data-en="Dyed resin">Resina teñida</option>
+          </select>
+        </label>
+        <label><span data-lang="es">Densidad nominal</span><span data-lang="en">Nominal density</span>
+          <select id="c2-dens">
+            <option value="0.9" data-es="ND8 (3 pasos)" data-en="ND8 (3 stops)">ND8 (3 pasos)</option>
+            <option value="1.8" data-es="ND64 (6 pasos)" data-en="ND64 (6 stops)">ND64 (6 pasos)</option>
+            <option value="3.0" selected data-es="ND1000 (10 pasos)" data-en="ND1000 (10 stops)">ND1000 (10 pasos)</option>
+            <option value="3.9" data-es="ND8000 (13 pasos)" data-en="ND8000 (13 stops)">ND8000 (13 pasos)</option>
+            <option value="5.0" data-es="ND100000 (16.6 pasos)" data-en="ND100000 (16.6 stops)">ND100000 (16.6 pasos)</option>
+          </select>
+        </label>
+      </div>
+      <div class="toggles">
+        <label><input type="checkbox" id="c2-hot" checked> <span data-lang="es">filtro del sensor (1 mm, con dieléctrico)</span><span data-lang="en">sensor filter (1 mm, with dielectric)</span></label>
+        <label><input type="checkbox" id="c2-qe" checked> <span data-lang="es">eficiencia cuántica del silicio</span><span data-lang="en">silicon quantum efficiency</span></label>
+        <label><input type="checkbox" id="c2-cfa"> <span data-lang="es">filtros del mosaico Bayer</span><span data-lang="en">Bayer mosaic filters</span></label>
+      </div>
+      <svg class="chart" id="chart2" viewBox="0 0 760 360" role="img" aria-label="Transmitancia espectral del filtro ND seleccionado" data-aria-es="Transmitancia espectral del filtro ND seleccionado" data-aria-en="Spectral transmittance of the selected ND filter"></svg>
+      <div class="leyenda" id="c2-leg"></div>
+      <div class="readout">
+        <div><b id="c2-od550">3.00</b><span data-lang="es">OD a 550 nm</span><span data-lang="en">OD at 550 nm</span></div>
+        <div><b id="c2-od750">2.64</b><span data-lang="es">OD a 750 nm</span><span data-lang="en">OD at 750 nm</span></div>
+        <div><b id="c2-od850">2.25</b><span data-lang="es">OD a 850 nm</span><span data-lang="en">OD at 850 nm</span></div>
+        <div><b id="c2-delta">0.75</b><span data-lang="es">exceso Δ = OD(550) − OD(850)</span><span data-lang="en">excess Δ = OD(550) − OD(850)</span></div>
+      </div>
+      <p data-lang="es" class="nota">Δ es la magnitud que importa. Un exceso de 2 significa que, respecto al visible, el infrarrojo atraviesa el filtro cien veces mejor de lo que debería. Apilar dos filtros no lo arregla: los excesos se suman igual que las densidades.</p>
+<p data-lang="en" class="nota">Δ is the quantity that matters. An excess of 2 means that, relative to the visible, infrared gets through the filter a hundred times better than it should. Stacking two filters does not fix it: the excesses add up just like the densities.</p>
+    </div>
+  </div>
+</section>
+
+<section id="sensor">
+  <div class="wrap">
+    <h2 data-lang="es">El filtro del propio sensor</h2>
+<h2 data-lang="en">The sensor's own filter</h2>
+    <p data-lang="es">El silicio tiene una banda prohibida de 1.12 eV. Un fotón con menos energía no genera par electrón hueco, y ese límite corresponde a 1107 nm. Entre 700 y 1000 nm la eficiencia cuántica sigue siendo alta, del orden de la mitad del máximo. Sin nada que lo impida, una cámara vería el infrarrojo cercano casi tan bien como el rojo.</p>
+<p data-lang="en">Silicon has a band gap of 1.12 eV. A photon with less energy does not generate an electron-hole pair, and that limit corresponds to 1107 nm. Between 700 and 1000 nm the quantum efficiency is still high, around half the maximum. With nothing to stop it, a camera would see the near infrared almost as well as red.</p>
+    <p data-lang="es">Lo que lo impide es el conjunto de filtros pegado sobre el sensor, que combina dos mecanismos:</p>
+<p data-lang="en">What stops it is the filter stack glued over the sensor, which combines two mechanisms:</p>
+    <ul data-lang="es">
+      <li><strong>Vidrio absorbente azul verdoso.</strong> Absorbe por transiciones electrónicas del cobre en el vidrio, con máxima absorción entre 750 y 950 nm. Obedece la ley de Beer y Lambert: la densidad óptica es proporcional al grosor. Un vidrio de 0.5 mm bloquea la mitad de la OD que uno de 1 mm, es decir, deja pasar la raíz cuadrada de la transmitancia.</li>
+      <li><strong>Apilamiento dieléctrico reflectante.</strong> Decenas de capas alternas de alto y bajo índice, ajustadas para reflejar una banda a partir de unos 650 a 690 nm. Es muy eficaz y no depende del grosor, pero su borde de corte se desplaza con el ángulo de incidencia.</li>
+    </ul>
+    <ul data-lang="en">
+      <li><strong>Blue-green absorbing glass.</strong> It absorbs through electronic transitions of copper in the glass, with maximum absorption between 750 and 950 nm. It obeys the Beer-Lambert law: optical density is proportional to thickness. A 0.5 mm glass blocks half the OD of a 1 mm one, that is, it passes the square root of the transmittance.</li>
+      <li><strong>Reflective dielectric stack.</strong> Dozens of alternating high- and low-index layers, tuned to reflect a band starting around 650 to 690 nm. It is very effective and does not depend on thickness, but its cut-off edge shifts with the angle of incidence.</li>
+    </ul>
+    <p data-lang="es">Los filtros de color del mosaico Bayer no ayudan: son tintes orgánicos y se vuelven transparentes en el NIR. El filtro rojo transmite de forma continua desde unos 600 nm; los filtros verde y azul reabren ventanas secundarias más allá de 800 nm. Por eso una fuga concentrada entre 700 y 800 nm sube el canal R casi en exclusiva, y da rojo o magenta, mientras que una fuga más allá de 850 nm sube los tres canales y produce un velo casi gris.</p>
+<p data-lang="en">The colour filters of the Bayer mosaic do not help: they are organic dyes and become transparent in the NIR. The red filter transmits continuously from about 600 nm; the green and blue filters reopen secondary windows beyond 800 nm. That is why a leak concentrated between 700 and 800 nm raises the R channel almost exclusively, giving red or magenta, whereas a leak beyond 850 nm raises all three channels and produces an almost grey veil.</p>
+
+    <h3 data-lang="es">Por qué el grosor es un compromiso</h3>
+<h3 data-lang="en">Why thickness is a compromise</h3>
+    <p data-lang="es">Si bloquear el infrarrojo fuera lo único que importa, el vidrio absorbente sería grueso y asunto resuelto. No lo es, porque una lámina plano paralela colocada en un haz convergente introduce aberraciones, sobre todo astigmatismo y coma, que crecen con el grosor y con el ángulo de incidencia. Los objetivos simétricos de telémetro, con la pupila de salida muy cerca del sensor, envían a las esquinas haces con 30 o 40 grados de inclinación. Un apilamiento grueso emborrona esas esquinas.</p>
+<p data-lang="en">If blocking infrared were all that mattered, the absorbing glass would be thick and the matter settled. It is not, because a plane-parallel plate placed in a converging beam introduces aberrations, above all astigmatism and coma, which grow with thickness and with the angle of incidence. Symmetrical rangefinder lenses, with the exit pupil very close to the sensor, send beams tilted 30 or 40 degrees into the corners. A thick stack smears those corners.</p>
+    <p data-lang="es">El caso histórico es la Leica M8 de 2006: para preservar el rendimiento de las ópticas M en las esquinas montó un filtro absorbente de solo 0.5 mm, y el resultado fue un exceso de infrarrojo que teñía de magenta los tejidos sintéticos negros. La solución que ofreció el fabricante fue externa: filtros de corte UV e IR roscados en cada objetivo. Los modelos posteriores engrosaron el apilamiento y mejoraron el recubrimiento, y el problema pasó a ser marginal. Con un ND que fuga, ese margen se agota.</p>
+<p data-lang="en">The historic case is the 2006 Leica M8: to preserve the corner performance of M lenses it mounted an absorbing filter of only 0.5 mm, and the result was an excess of infrared that tinted black synthetic fabrics magenta. The manufacturer's remedy was external: UV/IR-cut filters screwed onto every lens. Later models thickened the stack and improved the coating, and the problem became marginal. With a leaking ND, that margin runs out.</p>
+
+    <div class="panel">
+      <h4 data-lang="es">Transmitancia del filtro del sensor</h4>
+<h4 data-lang="en">Transmittance of the sensor filter</h4>
+      <div class="controls">
+        <label><span><span data-lang="es">Grosor del vidrio absorbente</span><span data-lang="en">Absorbing glass thickness</span> <span class="val" id="c3-dval">1.0 mm</span></span>
+          <input type="range" id="c3-d" min="0.3" max="3" step="0.1" value="1.0">
+        </label>
+        <label><span><span data-lang="es">Borde del apilamiento dieléctrico</span><span data-lang="en">Dielectric stack edge</span> <span class="val" id="c3-lcval">690 nm</span></span>
+          <input type="range" id="c3-lc" min="640" max="720" step="5" value="690">
+        </label>
+      </div>
+      <div class="toggles">
+        <label><input type="checkbox" id="c3-diel" checked> <span data-lang="es">apilamiento dieléctrico activo</span><span data-lang="en">dielectric stack active</span></label>
+        <label><input type="checkbox" id="c3-qe" checked> <span data-lang="es">mostrar eficiencia cuántica</span><span data-lang="en">show quantum efficiency</span></label>
+      </div>
+      <svg class="chart" id="chart3" viewBox="0 0 760 360" role="img" aria-label="Transmitancia del filtro del sensor en función de la longitud de onda" data-aria-es="Transmitancia del filtro del sensor en función de la longitud de onda" data-aria-en="Transmittance of the sensor filter against wavelength"></svg>
+      <div class="leyenda" id="c3-leg"></div>
+      <div class="readout">
+        <div><b id="c3-t750">1·10<sup>−4</sup></b><span data-lang="es">T a 750 nm</span><span data-lang="en">T at 750 nm</span></div>
+        <div><b id="c3-t850">6·10<sup>−6</sup></b><span data-lang="es">T a 850 nm</span><span data-lang="en">T at 850 nm</span></div>
+        <div><b id="c3-t1000">2·10<sup>−5</sup></b><span data-lang="es">T a 1000 nm</span><span data-lang="en">T at 1000 nm</span></div>
+        <div><b id="c3-od850">5.2</b><span data-lang="es">OD del sensor a 850 nm</span><span data-lang="en">sensor OD at 850 nm</span></div>
+      </div>
+      <p data-lang="es" class="nota">Ponga el grosor en 0.5 mm y desactive el dieléctrico para reproducir cualitativamente el escenario de la M8. Con el dieléctrico activo el residuo de la banda de reflexión es pequeño, pero fuera de esa banda, más allá de 1000 nm, vuelve a mandar el vidrio absorbente.</p>
+<p data-lang="en" class="nota">Set the thickness to 0.5 mm and disable the dielectric to reproduce the M8 scenario qualitatively. With the dielectric active the residue of the reflection band is small, but outside that band, beyond 1000 nm, the absorbing glass is in charge again.</p>
+    </div>
+  </div>
+</section>
+
+<section id="dominante">
+  <div class="wrap">
+    <h2 data-lang="es">Simulador de dominante</h2>
+<h2 data-lang="en">Cast simulator</h2>
+    <p data-lang="es">La señal de cada canal es una integral sobre la longitud de onda del producto de todos los factores de la cadena: radiancia de la escena, transmitancia del ND, transmitancia del filtro del sensor, eficiencia cuántica y respuesta del filtro de color del píxel.</p>
+<p data-lang="en">The signal of each channel is an integral over wavelength of the product of every factor in the chain: scene radiance, ND transmittance, sensor-filter transmittance, quantum efficiency and the response of the pixel's colour filter.</p>
+    <p class="eq"><i>S<sub>c</sub></i> = ∫ <i>E</i>(λ) <i>ρ</i>(λ) <i>T</i><sub>ND</sub>(λ) <i>T</i><sub>sensor</sub>(λ) <i>QE</i>(λ) <i>f<sub>c</sub></i>(λ) dλ</p>
+    <p data-lang="es">Sin ND, la parte infrarroja de esa integral es despreciable frente a la visible porque el filtro del sensor la reduce tres o cuatro órdenes de magnitud. Con un ND1000 que tenga exceso Δ, el visible baja mil veces y el infrarrojo solo 1000/10<sup>Δ</sup>. La relación entre ambos se multiplica por 10<sup>Δ</sup>, y lo que era despreciable deja de serlo.</p>
+<p data-lang="en">Without an ND, the infrared part of that integral is negligible against the visible because the sensor filter reduces it by three or four orders of magnitude. With an ND1000 that has an excess Δ, the visible drops a thousandfold and the infrared only 1000/10<sup>Δ</sup>. The ratio between them is multiplied by 10<sup>Δ</sup>, and what was negligible no longer is.</p>
+    <p data-lang="es">El simulador define el balance de blancos sobre una carta gris sin filtro, con el mismo sensor, y luego compara el color de cada elemento de la escena con y sin el ND, a exposición compensada. La desviación resultante es la dominante que introduce el filtro, separada del color propio del objeto. El efecto depende de la escena: la vegetación refleja hasta diez veces más en el NIR que en el rojo por el borde de absorción de la clorofila a 700 nm, los tejidos sintéticos negros son negros solo en el visible, y el cielo azul, dominado por dispersión Rayleigh proporcional a λ<sup>−4</sup>, es pobre en infrarrojo. Las nubes, en cambio, dispersan por Mie y son casi neutras hasta el NIR: no sirven como referencia libre de infrarrojo.</p>
+<p data-lang="en">The simulator sets the white balance on a grey card without the filter, with the same sensor, and then compares the colour of each scene element with and without the ND, at compensated exposure. The resulting deviation is the cast introduced by the filter, separated from the object's own colour. The effect depends on the scene: vegetation reflects up to ten times more in the NIR than in the red because of the chlorophyll absorption edge at 700 nm, black synthetic fabrics are black only in the visible, and blue sky, dominated by Rayleigh scattering proportional to λ<sup>−4</sup>, is poor in infrared. Clouds, on the other hand, scatter by Mie and are almost neutral up to the NIR: they do not serve as an infrared-free reference.</p>
+
+    <div class="panel">
+      <h4 data-lang="es">Dominante por elemento de escena, filtro y sensor</h4>
+<h4 data-lang="en">Cast by scene element, filter and sensor</h4>
+      <div class="controls">
+        <label><span data-lang="es">Elemento de la escena</span><span data-lang="en">Scene element</span>
+          <select id="c4-scene">
+            <option value="gris" data-es="Carta gris 18 %" data-en="18 % grey card">Carta gris 18 %</option>
+            <option value="hoja" selected data-es="Follaje verde al sol" data-en="Green foliage in sunlight">Follaje verde al sol</option>
+            <option value="paja" data-es="Hierba seca" data-en="Dry grass">Hierba seca</option>
+            <option value="tela" data-es="Tejido sintético negro" data-en="Black synthetic fabric">Tejido sintético negro</option>
+            <option value="piel" data-es="Piel" data-en="Skin">Piel</option>
+            <option value="cielo" data-es="Cielo azul despejado" data-en="Clear blue sky">Cielo azul despejado</option>
+            <option value="nube" data-es="Nube" data-en="Cloud">Nube</option>
+          </select>
+        </label>
+        <label><span data-lang="es">Tecnología del ND</span><span data-lang="en">ND technology</span>
+          <select id="c4-type">
+            <option value="absorbente" selected data-es="Vidrio absorbente teñido" data-en="Dyed absorbing glass">Vidrio absorbente teñido</option>
+            <option value="metalico" data-es="Película metálica evaporada" data-en="Evaporated metal film">Película metálica evaporada</option>
+            <option value="irnd" data-es="Metálico con corte IR (IRND)" data-en="Metal with IR cut (IRND)">Metálico con corte IR (IRND)</option>
+            <option value="variable" data-es="ND variable" data-en="Variable ND">ND variable</option>
+            <option value="resina" data-es="Resina teñida" data-en="Dyed resin">Resina teñida</option>
+          </select>
+        </label>
+        <label><span data-lang="es">Densidad nominal</span><span data-lang="en">Nominal density</span>
+          <select id="c4-dens">
+            <option value="0.9">ND8</option>
+            <option value="1.8">ND64</option>
+            <option value="3.0" selected>ND1000</option>
+            <option value="3.9">ND8000</option>
+            <option value="5.0">ND100000</option>
+          </select>
+        </label>
+        <label><span><span data-lang="es">Grosor absorbente del sensor</span><span data-lang="en">Sensor absorbing thickness</span> <span class="val" id="c4-dval">1.0 mm</span></span>
+          <input type="range" id="c4-d" min="0.3" max="3" step="0.1" value="1.0">
+        </label>
+      </div>
+      <div class="toggles">
+        <label><input type="checkbox" id="c4-diel" checked> <span data-lang="es">apilamiento dieléctrico del sensor activo</span><span data-lang="en">sensor dielectric stack active</span></label>
+        <label><input type="checkbox" id="c4-show0"> <span data-lang="es">superponer la aportación sin filtro</span><span data-lang="en">overlay the contribution without filter</span></label>
+      </div>
+      <div class="swatches">
+        <div class="swatch"><div class="color" id="c4-sw0"></div><p data-lang="es">Sin filtro, balance sobre carta gris</p><p data-lang="en">Without filter, balanced on the grey card</p></div>
+        <div class="swatch"><div class="color" id="c4-sw1"></div><p data-lang="es">Con el ND, misma exposición equivalente</p><p data-lang="en">With the ND, same equivalent exposure</p></div>
+      </div>
+      <div class="readout">
+        <div><b id="c4-rg">+15 %</b><span data-lang="es">desviación de R/G</span><span data-lang="en">R/G deviation</span></div>
+        <div><b id="c4-bg">−10 %</b><span data-lang="es">desviación de B/G</span><span data-lang="en">B/G deviation</span></div>
+        <div><b id="c4-od">2.94 / 3.00 / 3.04</b><span data-lang="es">OD efectiva R / G / B</span><span data-lang="en">effective OD R / G / B</span></div>
+        <div><b id="c4-ir">6.5 / 1.1 / 2.1 %</b><span data-lang="es">fracción IR de la señal R / G / B con filtro</span><span data-lang="en">IR fraction of the R / G / B signal with filter</span></div>
+        <div><b id="c4-ir0">0.1 / 0.0 / 0.0 %</b><span data-lang="es">fracción IR sin filtro</span><span data-lang="en">IR fraction without filter</span></div>
+        <div><b id="c4-factor">1000</b><span data-lang="es">factor real de exposición (canal G)</span><span data-lang="en">real exposure factor (G channel)</span></div>
+      </div>
+      <svg class="chart" id="chart4" viewBox="0 0 760 360" role="img" aria-label="Aportación espectral relativa a la señal de cada canal" data-aria-es="Aportación espectral relativa a la señal de cada canal" data-aria-en="Relative spectral contribution to each channel's signal"></svg>
+      <div class="leyenda" id="c4-leg"></div>
+      <p data-lang="es" class="nota">Cómo leerlo. Si la desviación de R/G es apreciable pero la fracción IR es pequeña, la dominante está en el visible y un balance de blancos la corrige. Si la fracción IR es grande, la dominante depende del objeto, no del iluminante, y ningún balance global la elimina: compare el mismo filtro sobre follaje y sobre cielo. Las muestras de color son orientativas, sin matriz de color de cámara.</p>
+<p data-lang="en" class="nota">How to read it. If the R/G deviation is noticeable but the IR fraction is small, the cast is in the visible and a white balance corrects it. If the IR fraction is large, the cast depends on the object, not on the illuminant, and no global balance removes it: compare the same filter on foliage and on sky. The colour swatches are indicative, with no camera colour matrix.</p>
+    </div>
+  </div>
+</section>
+<section id="angulo">
+  <div class="wrap">
+    <h2 data-lang="es">Ángulo de incidencia: focales y esquinas</h2>
+<h2 data-lang="en">Angle of incidence: focal lengths and corners</h2>
+    <p data-lang="es">Todo lo que atenúa por absorción es indiferente al ángulo, salvo por el camino óptico algo más largo dentro del vidrio. Todo lo que atenúa por interferencia no lo es. En un apilamiento dieléctrico la condición de reflexión depende del camino óptico entre capas, que va como <i>n d</i> cos <i>θ'</i>, y el borde de corte se desplaza hacia el azul al aumentar la inclinación:</p>
+<p data-lang="en">Everything that attenuates by absorption is indifferent to angle, except for the slightly longer optical path inside the glass. Everything that attenuates by interference is not. In a dielectric stack the reflection condition depends on the optical path between layers, which goes as <i>n d</i> cos <i>θ'</i>, and the cut-off edge shifts towards the blue as the tilt increases:</p>
+    <p class="eq">λ<sub>c</sub>(<i>θ</i>) = λ<sub>c</sub>(0) · √(1 − sen<sup>2</sup><i>θ</i> / <i>n</i><sub>ef</sub><sup>2</sup>)</p>
+    <p data-lang="es">Con <i>n</i><sub>ef</sub> ≈ 1.85, a 35 grados el borde retrocede un 5 por ciento. Un corte diseñado en 690 nm queda en 642 nm y se come parte del canal rojo. Esto ocurre en dos sitios distintos, y conviene no confundirlos:</p>
+<p data-lang="en">With <i>n</i><sub>ef</sub> ≈ 1.85, at 35 degrees the edge recedes by 5 percent. A cut designed at 690 nm ends up at 642 nm and eats part of the red channel. This happens in two different places, and it pays not to confuse them:</p>
+    <ul data-lang="es">
+      <li><strong>En el filtro ND roscado delante del objetivo.</strong> El ángulo relevante es el semiángulo de campo: la esquina del fotograma llega al filtro con una inclinación igual a arctan(21.6 / <i>f</i>) en formato completo. Un 28 mm pone las esquinas a 38 grados; un 90 mm, a 13. Si el ND lleva corte IR dieléctrico, en gran angular ese corte invade el rojo en las esquinas y aparece un gradiente radial hacia el cian, o hacia el magenta si el borde del recubrimiento estaba muy pegado al rojo.</li>
+      <li><strong>En el filtro del sensor.</strong> Aquí el ángulo no lo fija la focal sino la distancia de la pupila de salida al plano del sensor. Un objetivo simétrico de telémetro, con la pupila a 30 o 40 mm, inclina los haces de esquina 30 o 35 grados. Un retrofocus de réflex de la misma focal, con la pupila a 60 o 70 mm, los inclina 18 o 20. Es el origen de la deriva cian de esquinas que se hizo célebre con grandes angulares simétricos sobre sensores con corte dieléctrico agresivo.</li>
+    </ul>
+    <ul data-lang="en">
+      <li><strong>In the ND filter screwed in front of the lens.</strong> The relevant angle is the half field angle: the corner of the frame reaches the filter tilted by arctan(21.6 / <i>f</i>) on full frame. A 28 mm puts the corners at 38 degrees; a 90 mm, at 13. If the ND has a dielectric IR cut, on a wide angle that cut invades the red in the corners and a radial gradient towards cyan appears, or towards magenta if the coating edge sat very close to the red.</li>
+      <li><strong>In the sensor filter.</strong> Here the angle is fixed not by the focal length but by the distance from the exit pupil to the sensor plane. A symmetrical rangefinder lens, with the pupil at 30 or 40 mm, tilts the corner beams 30 or 35 degrees. A retrofocus SLR lens of the same focal length, with the pupil at 60 or 70 mm, tilts them 18 or 20. This is the origin of the corner cyan drift that became famous with symmetrical wide angles on sensors with an aggressive dielectric cut.</li>
+    </ul>
+    <p data-lang="es">Las dos derivas se superponen, y ninguna es corregible con un balance de blancos global porque varían con la posición en el encuadre. Sí se corrigen con un perfil de viñeteo de color medido sobre una superficie uniforme, que es lo que hacen las cámaras que permiten codificar el objetivo montado.</p>
+<p data-lang="en">The two drifts overlap, and neither can be corrected with a global white balance because they vary with position in the frame. They can be corrected with a colour-vignetting profile measured on a uniform surface, which is what cameras that can code the mounted lens do.</p>
+
+    <div class="panel">
+      <h4 data-lang="es">Deriva en las esquinas por ángulo de incidencia</h4>
+<h4 data-lang="en">Corner drift from the angle of incidence</h4>
+      <div class="controls">
+        <label><span data-lang="es">Objetivo orientativo</span><span data-lang="en">Indicative lens</span>
+          <select id="c5-preset">
+            <option value="28,32" data-es="28 mm simétrico de telémetro" data-en="28 mm symmetrical rangefinder">28 mm simétrico de telémetro</option>
+            <option value="35,38" selected data-es="35 mm de telémetro" data-en="35 mm rangefinder">35 mm de telémetro</option>
+            <option value="50,45" data-es="50 mm doble Gauss" data-en="50 mm double Gauss">50 mm doble Gauss</option>
+            <option value="28,65" data-es="28 mm retrofocus de réflex" data-en="28 mm SLR retrofocus">28 mm retrofocus de réflex</option>
+            <option value="90,75" data-es="90 mm tele" data-en="90 mm tele">90 mm tele</option>
+            <option value="custom" data-es="Valores manuales" data-en="Manual values">Valores manuales</option>
+          </select>
+        </label>
+        <label><span data-lang="es">Focal (mm)</span><span data-lang="en">Focal length (mm)</span>
+          <input type="number" id="c5-f" value="35" min="8" max="400" step="1">
+        </label>
+        <label><span><span data-lang="es">Pupila de salida al sensor</span><span data-lang="en">Exit pupil to sensor</span> <span class="val" id="c5-pval">38 mm</span></span>
+          <input type="range" id="c5-pupil" min="20" max="150" step="1" value="38">
+        </label>
+        <label><span data-lang="es">ND delante del objetivo</span><span data-lang="en">ND in front of the lens</span>
+          <select id="c5-type">
+            <option value="none" data-es="ninguno" data-en="none">ninguno</option>
+            <option value="irnd" selected data-es="IRND con corte dieléctrico" data-en="IRND with dielectric cut">IRND con corte dieléctrico</option>
+            <option value="metalico" data-es="película metálica" data-en="metal film">película metálica</option>
+            <option value="absorbente" data-es="vidrio absorbente" data-en="absorbing glass">vidrio absorbente</option>
+          </select>
+        </label>
+        <label><span><span data-lang="es">Grosor absorbente del sensor</span><span data-lang="en">Sensor absorbing thickness</span> <span class="val" id="c5-dval">1.0 mm</span></span>
+          <input type="range" id="c5-d" min="0.3" max="3" step="0.1" value="1.0">
+        </label>
+      </div>
+      <div class="toggles">
+        <label><input type="checkbox" id="c5-diel" checked> <span data-lang="es">apilamiento dieléctrico del sensor activo</span><span data-lang="en">sensor dielectric stack active</span></label>
+      </div>
+      <div class="readout">
+        <div><b id="c5-thfield">31.7°</b><span data-lang="es">inclinación en el filtro ND (esquina)</span><span data-lang="en">tilt at the ND filter (corner)</span></div>
+        <div><b id="c5-thsensor">29.6°</b><span data-lang="es">inclinación en el sensor (esquina)</span><span data-lang="en">tilt at the sensor (corner)</span></div>
+        <div><b id="c5-edgeS">690 → 649 nm</b><span data-lang="es">borde del sensor, centro → esquina</span><span data-lang="en">sensor edge, centre → corner</span></div>
+        <div><b id="c5-edgeN">705 → 690 nm</b><span data-lang="es">borde del ND, centro → esquina</span><span data-lang="en">ND edge, centre → corner</span></div>
+        <div><b id="c5-cornerRG">−12 %</b><span data-lang="es">R/G en la esquina respecto al centro, carta gris</span><span data-lang="en">R/G in the corner relative to the centre, grey card</span></div>
+        <div><b id="c5-cornerBG">+1 %</b><span data-lang="es">B/G en la esquina respecto al centro</span><span data-lang="en">B/G in the corner relative to the centre</span></div>
+      </div>
+      <svg class="chart" id="chart5" viewBox="0 0 760 360" role="img" aria-label="Transmitancia en el centro y en la esquina del fotograma" data-aria-es="Transmitancia en el centro y en la esquina del fotograma" data-aria-en="Transmittance at the centre and at the corner of the frame"></svg>
+      <div class="leyenda" id="c5-leg"></div>
+      <p data-lang="es" class="nota">La deriva de esquina se calcula sobre una carta gris uniforme, con el mismo balance de blancos que en el centro. Sin filtro dieléctrico en el sensor y con un ND de absorción o metálico, el único efecto angular que queda es el alargamiento del camino en el vidrio absorbente, que bloquea un poco más de infrarrojo en las esquinas, de signo contrario y mucho menor. El modelo supone un corte dieléctrico agresivo; los sensores pensados para ópticas simétricas suavizan ese borde y confían más en el vidrio absorbente, y las cámaras que codifican el objetivo corrigen el resto por perfil.</p>
+<p data-lang="en" class="nota">The corner drift is computed on a uniform grey card, with the same white balance as at the centre. Without a dielectric filter on the sensor and with an absorbing or metal ND, the only angular effect left is the longer path through the absorbing glass, which blocks a little more infrared in the corners, of opposite sign and much smaller. The model assumes an aggressive dielectric cut; sensors designed for symmetrical lenses soften that edge and rely more on the absorbing glass, and cameras that code the lens correct the rest by profile.</p>
+    </div>
+  </div>
+</section>
+
+<section id="difraccion">
+  <div class="wrap">
+    <h2 data-lang="es">Difracción y elección del diafragma</h2>
+<h2 data-lang="en">Diffraction and choice of aperture</h2>
+    <p data-lang="es">La larga exposición invita a cerrar el diafragma para ganar tiempo. Es un mal negocio. El diámetro del disco de Airy es <i>d</i> = 2.44 λ <i>N</i>, que a 550 nm son 1.34 <i>N</i> micras, y no depende de la focal. Cuando ese disco alcanza dos veces el paso de píxel, la difracción pasa a ser el factor limitante:</p>
+<p data-lang="en">Long exposure invites stopping down to gain time. It is a bad bargain. The diameter of the Airy disc is <i>d</i> = 2.44 λ <i>N</i>, which at 550 nm is 1.34 <i>N</i> microns, and does not depend on focal length. When that disc reaches twice the pixel pitch, diffraction becomes the limiting factor:</p>
+    <p class="eq"><i>N</i><sub>crítico</sub> ≈ 1.49 · <i>p</i> &nbsp;&nbsp;&nbsp;&nbsp; <i>N</i><sub>óptimo</sub> ≈ 0.61 · <i>f</i> / √<i>s</i></p>
+    <p data-lang="es">La segunda expresión minimiza en cuadratura el desenfoque geométrico frente a la difracción para una escena cuyo sujeto más cercano está a <i>s</i> metros, con <i>f</i> en milímetros y el foco colocado en el punto óptimo, no en el primer plano. Pasado ese diafragma solo se pierde. La difracción, además, es proporcional a λ: la contaminación infrarroja a 850 nm difracta un 55 por ciento más que el verde y llega, por aberración cromática longitudinal, enfocada en otro plano. Un ND que fuga no solo tiñe, también vela.</p>
+<p data-lang="en">The second expression minimises in quadrature the geometric defocus against diffraction for a scene whose nearest subject is at <i>s</i> metres, with <i>f</i> in millimetres and the focus placed at the optimum point, not on the foreground. Beyond that aperture there is only loss. Diffraction, moreover, is proportional to λ: infrared contamination at 850 nm diffracts 55 percent more than green and arrives, through longitudinal chromatic aberration, focused on another plane. A leaking ND does not only tint; it also veils.</p>
+
+    <div class="panel">
+      <h4 data-lang="es">Diafragma crítico y diafragma óptimo</h4>
+<h4 data-lang="en">Critical aperture and optimum aperture</h4>
+      <div class="controls">
+        <label><span data-lang="es">Paso de píxel</span><span data-lang="en">Pixel pitch</span>
+          <select id="c6-pitch">
+            <option value="3.76" selected data-es="3.76 µm (60 MP, formato completo)" data-en="3.76 µm (60 MP, full frame)">3.76 µm (60 MP, formato completo)</option>
+            <option value="4.6" data-es="4.6 µm (40 MP)" data-en="4.6 µm (40 MP)">4.6 µm (40 MP)</option>
+            <option value="5.97" data-es="5.97 µm (24 MP)" data-en="5.97 µm (24 MP)">5.97 µm (24 MP)</option>
+            <option value="3.3" data-es="3.3 µm (APS-C 26 MP)" data-en="3.3 µm (APS-C 26 MP)">3.3 µm (APS-C 26 MP)</option>
+          </select>
+        </label>
+        <label><span data-lang="es">Focal (mm)</span><span data-lang="en">Focal length (mm)</span>
+          <input type="number" id="c6-f" value="28" min="8" max="400" step="1">
+        </label>
+        <label><span data-lang="es">Sujeto más cercano (m)</span><span data-lang="en">Nearest subject (m)</span>
+          <input type="number" id="c6-s" value="2" min="0.2" max="1000" step="any">
+        </label>
+      </div>
+      <div class="readout">
+        <div><b id="c6-ncrit">f/5.6</b><span data-lang="es">diafragma crítico para ese píxel</span><span data-lang="en">critical aperture for that pixel</span></div>
+        <div><b id="c6-nopt">f/12.1</b><span data-lang="es">diafragma óptimo para esa profundidad</span><span data-lang="en">optimum aperture for that depth</span></div>
+        <div><b id="c6-airy">16.2 µm</b><span data-lang="es">disco de Airy en el óptimo</span><span data-lang="en">Airy disc at the optimum</span></div>
+        <div><b id="c6-mtf">61 lp/mm</b><span data-lang="es">MTF50 por difracción en el óptimo</span><span data-lang="en">diffraction MTF50 at the optimum</span></div>
+        <div><b id="c6-nyq">133 lp/mm</b><span data-lang="es">límite de Nyquist del sensor</span><span data-lang="en">sensor Nyquist limit</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="medir">
+  <div class="wrap">
+    <h2 data-lang="es">Cómo medirlo con la cámara</h2>
+<h2 data-lang="en">How to measure it with the camera</h2>
+    <p data-lang="es">Ningún fabricante publica la curva de transmitancia más allá de 700 nm. Lo que existe son declaraciones de mecanismo, como "atenuación equivalente en visible e infrarrojo" o "capa de bloqueo infrarrojo", y comparativas cualitativas de archivos raw. La cámara permite ir más lejos con tres ensayos de coste nulo. Todos exigen raw lineal, exposición manual, ISO fijo, balance de blancos fijo y resta del nivel de negro.</p>
+<p data-lang="en">No manufacturer publishes the transmittance curve beyond 700 nm. What exists are statements of mechanism, such as "equivalent attenuation in visible and infrared" or "infrared blocking layer", and qualitative comparisons of raw files. The camera lets you go further with three zero-cost tests. All require linear raw, manual exposure, fixed ISO, fixed white balance and black-level subtraction.</p>
+
+    <h3 data-lang="es">Medida puntual con un LED infrarrojo</h3>
+<h3 data-lang="en">Spot measurement with an infrared LED</h3>
+    <p data-lang="es">Un mando a distancia emite en una banda estrecha, casi siempre a 940 nm; un iluminador de cámara de seguridad, a 850. Se fotografía el LED en una habitación oscura con y sin filtro, misma exposición, y se lee el valor medio del LED en el raw una vez restado el negro. La eficiencia cuántica y el filtro del sensor aparecen en numerador y denominador, así que se cancelan:</p>
+<p data-lang="en">A remote control emits in a narrow band, almost always at 940 nm; a security-camera illuminator, at 850. Photograph the LED in a dark room with and without the filter, same exposure, and read the mean value of the LED in the raw once the black is subtracted. Quantum efficiency and the sensor filter appear in numerator and denominator, so they cancel:</p>
+    <p class="eq"><i>OD</i>(λ) = log<sub>10</sub> ( DN<sub>sin</sub> / DN<sub>con</sub> )</p>
+    <p data-lang="es">Si con filtro no queda nada por encima del ruido, el resultado es una cota: <i>OD</i> ≥ log<sub>10</sub>(DN<sub>sin</sub> / 3σ). Para obtener el valor, se alarga la exposición con filtro por un factor conocido y se suma su logaritmo. Cuatro cosas invalidan el ensayo: el mando emite ráfagas moduladas a 38 kHz, no luz continua, así que hacen falta exposiciones largas con el botón pulsado; el cono de emisión ronda los 15 grados y cualquier cambio de puntería arruina la comparación; la exposición automática y el JPEG están descartados; y a 940 nm el margen dinámico es estrecho porque el propio sensor ya corta fuerte. Lo que importa al final no es OD(940) aislada, sino el exceso respecto a la densidad medida en el visible sobre el mismo filtro.</p>
+<p data-lang="en">If with the filter nothing remains above the noise, the result is a bound: <i>OD</i> ≥ log<sub>10</sub>(DN<sub>without</sub> / 3σ). To get the value, lengthen the exposure with the filter by a known factor and add its logarithm. Four things invalidate the test: the remote emits bursts modulated at 38 kHz, not continuous light, so long exposures with the button held down are needed; the emission cone is around 15 degrees and any change of aim ruins the comparison; automatic exposure and JPEG are out; and at 940 nm the dynamic range is narrow because the sensor itself already cuts hard. What matters in the end is not OD(940) in isolation, but the excess relative to the density measured in the visible on the same filter.</p>
+
+    <h3 data-lang="es">Par de tomas: densidad por canal</h3>
+<h3 data-lang="en">Pair of shots: density per channel</h3>
+    <p data-lang="es">Trípode, misma escena, balance de blancos manual en un Kelvin fijo, mismo diafragma e ISO. Una toma sin filtro a <i>t</i> y otra con filtro a 2<sup><i>n</i></sup> <i>t</i>, con <i>n</i> los pasos nominales. El cociente por canal entre las dos imágenes lineales devuelve la densidad efectiva de cada canal:</p>
+<p data-lang="en">Tripod, same scene, manual white balance at a fixed Kelvin, same aperture and ISO. One shot without the filter at <i>t</i> and another with the filter at 2<sup><i>n</i></sup> <i>t</i>, with <i>n</i> the nominal stops. The per-channel ratio between the two linear images returns the effective density of each channel:</p>
+    <p class="eq"><i>OD<sub>c</sub></i> = <i>n</i> log<sub>10</sub> 2 + log<sub>10</sub> ( DN<sub>c,sin</sub> / DN<sub>c,con</sub> )</p>
+    <p data-lang="es">Las diferencias entre OD<sub>R</sub>, OD<sub>G</sub> y OD<sub>B</sub> son la dominante del filtro, visible e infrarroja juntas. Y la dependencia de esas diferencias con el objeto fotografiado separa las dos: una dominante visible es la misma sobre una carta gris que sobre una hoja; una dominante infrarroja es mayor sobre la hoja.</p>
+<p data-lang="en">The differences between OD<sub>R</sub>, OD<sub>G</sub> and OD<sub>B</sub> are the filter's cast, visible and infrared together. And the dependence of those differences on the photographed object separates the two: a visible cast is the same on a grey card as on a leaf; an infrared cast is larger on the leaf.</p>
+
+    <h3 data-lang="es">Ensayo diferencial en una sola toma</h3>
+<h3 data-lang="en">Differential test in a single shot</h3>
+    <p data-lang="es">Escena con vegetación verde iluminada por el sol y cielo azul despejado en el mismo encuadre. Se mide el cociente R/G en el raw sobre las hojas y sobre el cielo. Si sube solo sobre la vegetación, hay fuga: la clorofila es el emisor infrarrojo de la escena y el cielo Rayleigh no lo es. El ensayo falla con cielo cubierto, porque las nubes dispersan por Mie y son casi neutras hasta el NIR, y falla con vegetación en sombra profunda o seca.</p>
+<p data-lang="en">A scene with sunlit green vegetation and clear blue sky in the same frame. Measure the R/G ratio in the raw on the leaves and on the sky. If it rises only on the vegetation, there is leakage: chlorophyll is the scene's infrared emitter and the Rayleigh sky is not. The test fails with overcast sky, because clouds scatter by Mie and are nearly neutral up to the NIR, and it fails with vegetation in deep shade or dry.</p>
+
+    <h3 data-lang="es">Un caso real, y por qué no concluye</h3>
+<h3 data-lang="en">A real case, and why it is inconclusive</h3>
+    <p data-lang="es">Toma de 8 segundos a ISO 64 con un ND1000 metálico, sensor de 60 megapíxeles, jardín bajo cielo cubierto al atardecer. Análisis sobre el mosaico Bayer lineal, negro 1023 restado, normalizado con el balance de luz de día:</p>
+<p data-lang="en">An 8-second shot at ISO 64 with a metal ND1000, 60-megapixel sensor, a garden under overcast sky at dusk. Analysis on the linear Bayer mosaic, black 1023 subtracted, normalised with the daylight balance:</p>
+    <table data-lang="es">
+      <thead><tr><th>Región</th><th class="num">Nivel G (DN)</th><th class="num">R/G</th><th class="num">B/G</th></tr></thead>
+      <tbody>
+        <tr><td>Nubes, tres zonas separadas</td><td class="num">500 a 1600</td><td class="num">1.105</td><td class="num">0.928</td></tr>
+        <tr><td>Copa de árbol verde</td><td class="num">200 a 600</td><td class="num">1.16</td><td class="num">0.76 a 0.86</td></tr>
+        <tr><td>Seto verde</td><td class="num">160</td><td class="num">1.21</td><td class="num">0.69</td></tr>
+        <tr><td>Arbusto inferior</td><td class="num">80</td><td class="num">1.27</td><td class="num">0.60</td></tr>
+        <tr><td>Gramíneas secas</td><td class="num">120</td><td class="num">1.34</td><td class="num">0.69</td></tr>
+      </tbody>
+    </table>
+    <table data-lang="en">
+      <thead><tr><th>Region</th><th class="num">G level (DN)</th><th class="num">R/G</th><th class="num">B/G</th></tr></thead>
+      <tbody>
+        <tr><td>Clouds, three separate zones</td><td class="num">500 to 1600</td><td class="num">1.105</td><td class="num">0.928</td></tr>
+        <tr><td>Green tree crown</td><td class="num">200 to 600</td><td class="num">1.16</td><td class="num">0.76 to 0.86</td></tr>
+        <tr><td>Green hedge</td><td class="num">160</td><td class="num">1.21</td><td class="num">0.69</td></tr>
+        <tr><td>Lower shrub</td><td class="num">80</td><td class="num">1.27</td><td class="num">0.60</td></tr>
+        <tr><td>Dry grasses</td><td class="num">120</td><td class="num">1.34</td><td class="num">0.69</td></tr>
+      </tbody>
+    </table>
+    <p data-lang="es">La dirección es la que predice una fuga entre 700 y 800 nm: rojo arriba y azul abajo sobre la vegetación, no sobre las nubes. Pero la toma no puede demostrarlo, por cuatro razones acumuladas: el balance de blancos era automático y ya había compensado parte del efecto; el cielo cubierto no es una referencia libre de infrarrojo; los cocientes de canal del mosaico no son colorimetría, y el filtro rojo del Bayer responde ya a 580 nm, con lo que una hoja puede dar R/G cercano a 1 sin patología; y la vegetación oscura mezcla hojas verdes con hierba seca, cálida de verdad. La lección metodológica es que una toma aislada nunca cierra la pregunta. El par de tomas de arriba sí.</p>
+<p data-lang="en">The direction is the one a leak between 700 and 800 nm predicts: red up and blue down on the vegetation, not on the clouds. But the shot cannot prove it, for four accumulated reasons: the white balance was automatic and had already compensated part of the effect; overcast sky is not an infrared-free reference; the mosaic's channel ratios are not colorimetry, and the Bayer red filter already responds at 580 nm, so a leaf can give R/G close to 1 without pathology; and the dark vegetation mixes green leaves with dry grass, genuinely warm. The methodological lesson is that an isolated shot never settles the question. The pair of shots above does.</p>
+  </div>
+</section>
+
+<section id="modelo">
+  <div class="wrap">
+    <h2 data-lang="es">Modelo y límites</h2>
+<h2 data-lang="en">Model and limits</h2>
+    <p data-lang="es">Los cálculos de esta página son modelos cualitativos con la forma funcional correcta y magnitudes plausibles, útiles para entender el mecanismo y el orden de magnitud. No sustituyen a una medida. Esto es lo que hay detrás de cada curva:</p>
+<p data-lang="en">The calculations on this page are qualitative models with the right functional form and plausible magnitudes, useful for understanding the mechanism and the order of magnitude. They do not replace a measurement. This is what lies behind each curve:</p>
+    <details open>
+      <summary><span data-lang="es">Supuestos del modelo</span><span data-lang="en">Model assumptions</span></summary>
+      <ul data-lang="es">
+        <li>Rejilla espectral de 380 a 1100 nm en pasos de 5 nm. Iluminante: cuerpo negro a 5600 K, sin bandas de absorción atmosférica.</li>
+        <li>Eficiencia cuántica del silicio: interpolación lineal entre puntos de anclaje, con máximo en 550 a 600 nm y corte en 1100 nm.</li>
+        <li>Mosaico Bayer: rojo como paso alto a partir de 585 nm; verde y azul gaussianos con ventanas secundarias por encima de 800 y 820 nm.</li>
+        <li>Filtro del sensor: vidrio absorbente con OD proporcional al grosor y máximo de absorción entre 800 y 950 nm, más una banda de reflexión dieléctrica de OD 2 y 230 nm de anchura, con borde en 690 nm por defecto. Desplazamiento angular con <i>n</i><sub>ef</sub> = 1.85.</li>
+        <li>Filtros ND: la OD nominal se multiplica por una función de forma propia de cada tecnología. El IRND añade una banda de reflexión de OD 1.8 con borde en 705 nm. El ND variable se modela como el mínimo entre la densidad ajustada y la densidad máxima que pueden alcanzar dos polarizadores a esa longitud de onda, unos OD 4 en el visible y por debajo de 1 más allá de 850 nm.</li>
+        <li>Escena: reflectancias tabuladas para follaje, hierba seca, tejido sintético, piel y carta gris; radiancia proporcional a λ<sup>−4</sup> para el cielo despejado y neutra para la nube.</li>
+        <li>El color mostrado en las muestras es el cociente de canales normalizado a la carta gris, sin matriz de color. Sirve para ver la dirección y el tamaño de la deriva, no el color final de una cámara real.</li>
+        <li>Difracción: λ = 550 nm, disco de Airy hasta el primer mínimo, MTF50 por difracción igual a 0.404 / (λ <i>N</i>).</li>
+      </ul>
+      <ul data-lang="en">
+        <li>Spectral grid from 380 to 1100 nm in 5 nm steps. Illuminant: black body at 5600 K, without atmospheric absorption bands.</li>
+        <li>Silicon quantum efficiency: linear interpolation between anchor points, with maximum at 550 to 600 nm and cut-off at 1100 nm.</li>
+        <li>Bayer mosaic: red as a high-pass from 585 nm; green and blue Gaussian with secondary windows above 800 and 820 nm.</li>
+        <li>Sensor filter: absorbing glass with OD proportional to thickness and maximum absorption between 800 and 950 nm, plus a dielectric reflection band of OD 2 and 230 nm width, with edge at 690 nm by default. Angular shift with <i>n</i><sub>ef</sub> = 1.85.</li>
+        <li>ND filters: the nominal OD is multiplied by a shape function specific to each technology. The IRND adds a reflection band of OD 1.8 with edge at 705 nm. The variable ND is modelled as the minimum between the set density and the maximum density two polarisers can reach at that wavelength, about OD 4 in the visible and below 1 beyond 850 nm.</li>
+        <li>Scene: tabulated reflectances for foliage, dry grass, synthetic fabric, skin and grey card; radiance proportional to λ<sup>−4</sup> for clear sky and neutral for cloud.</li>
+        <li>The colour shown in the swatches is the channel ratio normalised to the grey card, with no colour matrix. It serves to see the direction and size of the drift, not the final colour of a real camera.</li>
+        <li>Diffraction: λ = 550 nm, Airy disc to the first minimum, diffraction MTF50 equal to 0.404 / (λ <i>N</i>).</li>
+      </ul>
+    </details>
+    <details>
+      <summary><span data-lang="es">Qué es afirmación de fabricante y qué es medida</span><span data-lang="en">What is a manufacturer's claim and what is a measurement</span></summary>
+      <ul data-lang="es">
+        <li>"Atenuación equivalente en visible e infrarrojo" y "capa de bloqueo infrarrojo" son declaraciones de mecanismo de los fabricantes que las usan. Indican diseño, no una densidad óptica medida.</li>
+        <li>"Alta fidelidad de color" no dice nada sobre el infrarrojo. Es una afirmación sobre el visible.</li>
+        <li>Que un fabricante venda además un filtro de corte UV e IR separado indica que su ND, por sí solo, no cierra el problema en todos los casos.</li>
+        <li>Las comparativas publicadas por usuarios miden dominantes en archivos raw, que es un ensayo válido pero integrado sobre toda la banda y dependiente de la escena. No son curvas espectrales.</li>
+      </ul>
+      <ul data-lang="en">
+        <li>"Equivalent attenuation in visible and infrared" and "infrared blocking layer" are statements of mechanism by the manufacturers who use them. They indicate design, not a measured optical density.</li>
+        <li>"High colour fidelity" says nothing about the infrared. It is a claim about the visible.</li>
+        <li>That a manufacturer also sells a separate UV/IR-cut filter indicates that its ND, on its own, does not close the problem in every case.</li>
+        <li>Comparisons published by users measure casts in raw files, which is a valid test but integrated over the whole band and scene-dependent. They are not spectral curves.</li>
+      </ul>
+    </details>
+    <details>
+      <summary><span data-lang="es">Referencias de la física empleada</span><span data-lang="en">References for the physics used</span></summary>
+      <ul data-lang="es">
+        <li>Desplazamiento angular de filtros de interferencia: H. A. Macleod, <i>Thin-Film Optical Filters</i>.</li>
+        <li>Banda prohibida del silicio y respuesta espectral de fotodiodos: S. M. Sze, <i>Physics of Semiconductor Devices</i>.</li>
+        <li>Absorción de vidrios de filtro por iones metálicos y ley de Beer y Lambert: catálogos de vidrio de filtro de los fabricantes de vidrio óptico.</li>
+        <li>Reflectancia espectral de la vegetación y borde de la clorofila: bibliografía de teledetección, índice NDVI.</li>
+        <li>Dispersión Rayleigh y Mie: cualquier texto de óptica atmosférica.</li>
+        <li>Difracción, disco de Airy y MTF de una pupila circular: M. Born y E. Wolf, <i>Principles of Optics</i>.</li>
+      </ul>
+      <ul data-lang="en">
+        <li>Angular shift of interference filters: H. A. Macleod, <i>Thin-Film Optical Filters</i>.</li>
+        <li>Silicon band gap and spectral response of photodiodes: S. M. Sze, <i>Physics of Semiconductor Devices</i>.</li>
+        <li>Absorption of filter glasses by metal ions and the Beer-Lambert law: filter-glass catalogues of the optical-glass manufacturers.</li>
+        <li>Spectral reflectance of vegetation and the chlorophyll edge: remote-sensing literature, NDVI index.</li>
+        <li>Rayleigh and Mie scattering: any text on atmospheric optics.</li>
+        <li>Diffraction, Airy disc and MTF of a circular pupil: M. Born and E. Wolf, <i>Principles of Optics</i>.</li>
+      </ul>
+    </details>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p data-lang="es">Documento en un solo archivo HTML, sin dependencias externas. El motor de cálculo está en el propio código fuente de la página y puede leerse, modificarse y verificarse. La política de seguridad de contenido bloquea cualquier recurso remoto. Del mismo sitio: la <a href="caracter-optico-leica-m.html">carta de carácter óptico</a> y el <a href="stack-sensor.html">stack del sensor</a>.</p>
+<p data-lang="en">A single-file HTML document with no external dependencies. The calculation engine is in the page's own source code and can be read, modified and verified. The content security policy blocks any remote resource. From this same site: the <a href="caracter-optico-leica-m.html">optical character chart</a> and the <a href="stack-sensor.html">sensor stack</a>.</p>
+  </div>
+</footer>
+<script>
+/* ============================================================
+   Motor espectral. Modelos cualitativos, no medidas de ningún
+   producto. Todas las curvas se evalúan sobre una rejilla común
+   de 380 a 1100 nm en pasos de 5 nm.
+   ============================================================ */
+'use strict';
+
+const LAMBDA = [];
+for (let l = 380; l <= 1100; l += 5) LAMBDA.push(l);
+const DL = 5;
+const VIS_MAX = 700;
+
+function interp(pts, x) {
+  if (x <= pts[0][0]) return pts[0][1];
+  const n = pts.length;
+  if (x >= pts[n - 1][0]) return pts[n - 1][1];
+  for (let i = 1; i < n; i++) {
+    if (x <= pts[i][0]) {
+      const [x0, y0] = pts[i - 1], [x1, y1] = pts[i];
+      return y0 + (y1 - y0) * (x - x0) / (x1 - x0);
+    }
+  }
+  return pts[n - 1][1];
+}
+const sig = (x) => 1 / (1 + Math.exp(-x));
+const gauss = (x, mu, s) => Math.exp(-((x - mu) ** 2) / (2 * s * s));
+const log10 = (x) => Math.log(x) / Math.LN10;
+
+/* ---------- Sensor ---------- */
+// Eficiencia cuántica del silicio (esquemática). Banda prohibida 1.12 eV -> corte 1107 nm.
+const QE_PTS = [[380, 0.25], [450, 0.45], [550, 0.62], [650, 0.60], [750, 0.50],
+  [850, 0.35], [950, 0.18], [1000, 0.07], [1050, 0.02], [1100, 0.0]];
+const qeSi = (l) => interp(QE_PTS, l);
+
+// Filtros del mosaico Bayer. Los tintes orgánicos se vuelven transparentes en el NIR.
+function cfa(l) {
+  const r = 0.90 * sig((l - 585) / 12);
+  const g = 0.90 * gauss(l, 540, 45) + 0.75 * sig((l - 800) / 25);
+  const b = 0.90 * gauss(l, 460, 40) + 0.60 * sig((l - 820) / 30);
+  return { r, g, b };
+}
+
+// Absorción del vidrio azul verdoso del hot mirror, en OD por milímetro (Beer y Lambert).
+const KABS_PTS = [[380, 0.15], [420, 0.08], [500, 0.02], [550, 0.03], [600, 0.10], [650, 0.30],
+  [680, 0.55], [700, 0.85], [720, 1.25], [750, 1.90], [800, 2.70], [850, 3.20], [900, 3.30],
+  [950, 3.20], [1000, 3.00], [1050, 2.60], [1100, 2.10]];
+const kAbs = (l) => interp(KABS_PTS, l);
+
+// Desplazamiento del borde de un recubrimiento de interferencia con el ángulo de incidencia.
+const N_EFF = 1.85;
+function edgeShift(lc0, thetaDeg) {
+  const s = Math.sin(thetaDeg * Math.PI / 180);
+  return lc0 * Math.sqrt(1 - (s * s) / (N_EFF * N_EFF));
+}
+
+// Banda de reflexión dieléctrica: OD alta entre lc y lc+230, con bordes suaves y fuga más allá.
+function odDielBand(l, lc, odMax, width) {
+  const s1 = sig((l - lc) / 12);
+  const s2 = sig(((lc + width) - l) / 30);
+  return odMax * s1 * s2;
+}
+
+// Transmitancia total del filtro del sensor. d en mm, theta en grados, lc0 borde dieléctrico.
+function hotMirrorT(l, d, thetaDeg, useDiel, lc0) {
+  const th = (thetaDeg * Math.PI / 180);
+  // camino geométrico dentro del vidrio aumenta como 1/cos(theta') con sin(theta') = sin(theta)/n
+  const sinIn = Math.sin(th) / 1.52;
+  const pathFactor = 1 / Math.sqrt(1 - sinIn * sinIn);
+  let od = kAbs(l) * d * pathFactor;
+  if (useDiel) od += odDielBand(l, edgeShift(lc0, thetaDeg), 2.0, 360);
+  return Math.pow(10, -od);
+}
+
+/* ---------- Filtros ND ---------- */
+const ND_TYPES = {
+  absorbente: {
+    nombre: 'Vidrio absorbente teñido',
+    g: [[380, 1.15], [420, 1.08], [450, 1.03], [500, 1.0], [550, 1.0], [600, 1.0], [640, 0.98],
+      [680, 0.92], [700, 0.80], [720, 0.60], [750, 0.42], [800, 0.30], [850, 0.24], [900, 0.20], [1000, 0.15], [1100, 0.12]]
+  },
+  metalico: {
+    nombre: 'Película metálica evaporada',
+    g: [[380, 0.98], [450, 1.0], [550, 1.0], [650, 0.99], [700, 0.95], [750, 0.88], [800, 0.80],
+      [900, 0.70], [1000, 0.62], [1100, 0.56]]
+  },
+  irnd: {
+    nombre: 'Metálico con corte IR dieléctrico (IRND)',
+    g: [[380, 0.98], [450, 1.0], [550, 1.0], [650, 0.99], [700, 0.95], [750, 0.88], [800, 0.80],
+      [900, 0.70], [1000, 0.62], [1100, 0.56]],
+    irCut: { lc0: 705, od: 1.8, width: 320 }
+  },
+  variable: {
+    nombre: 'ND variable (dos polarizadores)',
+    dmax: [[380, 3.0], [450, 3.8], [550, 4.0], [650, 3.8], [700, 3.0], [750, 2.0], [800, 1.2],
+      [850, 0.7], [900, 0.4], [1000, 0.25], [1100, 0.2]]
+  },
+  resina: {
+    nombre: 'Resina teñida (cuadrado)',
+    g: [[380, 1.2], [450, 1.08], [550, 1.0], [650, 0.96], [680, 0.85], [700, 0.65], [720, 0.42], [750, 0.28],
+      [800, 0.16], [900, 0.10], [1000, 0.07], [1100, 0.06]]
+  }
+};
+
+// Densidad óptica del ND en lambda. D es la OD nominal a 550 nm. theta: incidencia sobre el filtro.
+function ndOD(l, type, D, thetaDeg) {
+  const t = ND_TYPES[type];
+  if (type === 'variable') {
+    const dmax = interp(t.dmax, l);
+    return Math.max(Math.min(D, dmax), 0.3);
+  }
+  let od = D * interp(t.g, l);
+  if (t.irCut) od += odDielBand(l, edgeShift(t.irCut.lc0, thetaDeg || 0), t.irCut.od, t.irCut.width);
+  return od;
+}
+const ndT = (l, type, D, th) => Math.pow(10, -ndOD(l, type, D, th));
+
+/* ---------- Escena ---------- */
+function planck(l, T) {
+  const lm = l * 1e-9;
+  const c1 = 3.7418e-16, c2 = 1.4388e-2;
+  return c1 / (Math.pow(lm, 5) * (Math.exp(c2 / (lm * T)) - 1));
+}
+const T_SUN = 5600;
+
+const SCENES = {
+  gris: { nombre: 'Carta gris 18 %', refl: () => 0.18 },
+  hoja: { nombre: 'Follaje verde al sol',
+    refl: (l) => interp([[380, 0.05], [450, 0.05], [500, 0.08], [550, 0.15], [600, 0.09], [650, 0.05],
+      [680, 0.05], [700, 0.15], [720, 0.35], [750, 0.48], [800, 0.50], [900, 0.50], [1000, 0.48], [1100, 0.45]], l) },
+  paja: { nombre: 'Hierba seca',
+    refl: (l) => interp([[380, 0.08], [500, 0.15], [550, 0.22], [600, 0.30], [650, 0.35], [700, 0.40],
+      [800, 0.48], [900, 0.50], [1100, 0.48]], l) },
+  tela: { nombre: 'Tejido sintético negro',
+    refl: (l) => 0.04 + 0.55 * sig((l - 720) / 30) },
+  piel: { nombre: 'Piel',
+    refl: (l) => interp([[380, 0.12], [450, 0.20], [500, 0.25], [550, 0.30], [600, 0.35], [650, 0.45],
+      [700, 0.55], [800, 0.60], [900, 0.58], [1000, 0.55], [1100, 0.50]], l) },
+  cielo: { nombre: 'Cielo azul despejado (Rayleigh)', radiance: (l) => planck(l, 5800) * Math.pow(550 / l, 4) * 0.25 },
+  nube: { nombre: 'Nube (Mie, casi neutra)', radiance: (l) => planck(l, 5800) * 0.6 }
+};
+
+function sceneRadiance(key, l) {
+  const s = SCENES[key];
+  if (s.radiance) return s.radiance(l);
+  return planck(l, T_SUN) * s.refl(l);
+}
+
+/* ---------- Integración ---------- */
+// Devuelve señal por canal, separada en visible (<=700) y NIR (>700).
+function integrate(sceneKey, sensor, nd) {
+  const out = { r: 0, g: 0, b: 0, rv: 0, gv: 0, bv: 0, rn: 0, gn: 0, bn: 0 };
+  for (const l of LAMBDA) {
+    let e = sceneRadiance(sceneKey, l) * hotMirrorT(l, sensor.d, sensor.theta, sensor.diel, sensor.lc0) * qeSi(l);
+    if (nd) e *= ndT(l, nd.type, nd.D, nd.theta || 0);
+    const f = cfa(l);
+    const r = e * f.r * DL, g = e * f.g * DL, b = e * f.b * DL;
+    out.r += r; out.g += g; out.b += b;
+    if (l <= VIS_MAX) { out.rv += r; out.gv += g; out.bv += b; }
+    else { out.rn += r; out.gn += g; out.bn += b; }
+  }
+  return out;
+}
+
+// Balance de blancos: carta gris, mismo sensor, sin ND, incidencia normal.
+function whiteBalance(sensor) {
+  const s = integrate('gris', { ...sensor, theta: 0 }, null);
+  return { r: 1 / s.r, g: 1 / s.g, b: 1 / s.b };
+}
+
+// Resultado completo para el simulador.
+function simulate(sceneKey, sensor, nd) {
+  const wb = whiteBalance(sensor);
+  const a = integrate(sceneKey, sensor, null);
+  const b = integrate(sceneKey, sensor, nd);
+  const col = (s) => ({ rg: (s.r * wb.r) / (s.g * wb.g), bg: (s.b * wb.b) / (s.g * wb.g) });
+  const c0 = col(a), c1 = col(b);
+  return {
+    sinFiltro: c0,
+    conFiltro: c1,
+    desvioRG: c1.rg / c0.rg - 1,
+    desvioBG: c1.bg / c0.bg - 1,
+    odR: log10(a.r / b.r), odG: log10(a.g / b.g), odB: log10(a.b / b.b),
+    fracIR: { r: b.rn / b.r, g: b.gn / b.g, b: b.bn / b.b },
+    fracIR0: { r: a.rn / a.r, g: a.gn / a.g, b: a.bn / a.b },
+    factorG: a.g / b.g
+  };
+}
+
+/* ---------- Conversiones ND ---------- */
+function ndFromStops(st) { return { stops: st, factor: Math.pow(2, st), od: st * Math.log10(2), T: Math.pow(2, -st) }; }
+function ndFromFactor(f) { return ndFromStops(Math.log2(f)); }
+function ndFromOD(od) { return ndFromStops(od / Math.log10(2)); }
+function ndFromT(T) { return ndFromStops(-Math.log2(T)); }
+
+/* ---------- Difracción y profundidad de campo ---------- */
+const LAMBDA_REF = 0.55; // micras
+function airyDiameter(N) { return 2.44 * LAMBDA_REF * N; } // micras
+function nCritical(pitchUm) { return 2 * pitchUm / (2.44 * LAMBDA_REF); }
+function nOptimo(fmm, sMetros) { return 0.61 * fmm / Math.sqrt(sMetros); }
+function mtf50Diff(N) { return 0.404 / (LAMBDA_REF * 1e-3 * N); } // lp/mm
+
+/* ---------- Color aproximado por longitud de onda, para la franja del eje ---------- */
+function wavelengthToRGB(l) {
+  let r = 0, g = 0, b = 0;
+  if (l >= 380 && l < 440) { r = -(l - 440) / 60; b = 1; }
+  else if (l < 490) { g = (l - 440) / 50; b = 1; }
+  else if (l < 510) { g = 1; b = -(l - 510) / 20; }
+  else if (l < 580) { r = (l - 510) / 70; g = 1; }
+  else if (l < 645) { r = 1; g = -(l - 645) / 65; }
+  else if (l <= 780) { r = 1; }
+  let f = 1;
+  if (l < 420) f = 0.3 + 0.7 * (l - 380) / 40;
+  else if (l > 700) f = 0.3 + 0.7 * (780 - l) / 80;
+  if (l > 780) f = 0;
+  const c = (v) => Math.round(255 * Math.pow(Math.max(0, v * f), 0.8));
+  return `rgb(${c(r)},${c(g)},${c(b)})`;
+}
+
+if (typeof module !== 'undefined') {
+  module.exports = { LAMBDA, interp, qeSi, cfa, hotMirrorT, ndOD, ndT, ND_TYPES, SCENES, integrate,
+    simulate, whiteBalance, edgeShift, ndFromStops, ndFromFactor, ndFromOD, ndFromT, airyDiameter,
+    nCritical, nOptimo, mtf50Diff, wavelengthToRGB, planck };
+}
+
+/* ============================================================
+   Interfaz: gráficas SVG sin dependencias y conexión de controles.
+   ============================================================ */
+const $ = (id) => document.getElementById(id);
+const LANG = () => (document.documentElement.lang === 'en' ? 'en' : 'es');
+const DICT = {
+  es: { visible: 'visible', nir: 'infrarrojo cercano', nirShort: 'infrarrojo', tr: 'transmitancia', contrib: 'aportación relativa a la señal',
+        ndT: 'transmitancia del ND', hot1: 'filtro del sensor, 1 mm', qe: 'eficiencia cuántica del silicio', cfaR: 'filtro R del mosaico', cfaG: 'filtro G', cfaB: 'filtro B',
+        hotFull: 'filtro del sensor completo', hotAbs: 'solo el vidrio absorbente',
+        chR: 'canal R con filtro', chG: 'canal G con filtro', chB: 'canal B con filtro', r0: 'R sin filtro', g0: 'G sin filtro', b0: 'B sin filtro',
+        sC: 'sensor, centro', sE: 'sensor, esquina', nC: 'ND1000, centro', nE: 'ND1000, esquina',
+        noDiel: 'sin dieléctrico', noFilter: 'sin filtro', noEdge: 'sin borde de interferencia', min: 'min' },
+  en: { visible: 'visible', nir: 'near infrared', nirShort: 'infrared', tr: 'transmittance', contrib: 'relative contribution to the signal',
+        ndT: 'ND transmittance', hot1: 'sensor filter, 1 mm', qe: 'silicon quantum efficiency', cfaR: 'mosaic R filter', cfaG: 'G filter', cfaB: 'B filter',
+        hotFull: 'complete sensor filter', hotAbs: 'absorbing glass only',
+        chR: 'R channel with filter', chG: 'G channel with filter', chB: 'B channel with filter', r0: 'R without filter', g0: 'G without filter', b0: 'B without filter',
+        sC: 'sensor, centre', sE: 'sensor, corner', nC: 'ND1000, centre', nE: 'ND1000, corner',
+        noDiel: 'no dielectric', noFilter: 'no filter', noEdge: 'no interference edge', min: 'min' }
+};
+const L = (k) => DICT[LANG()][k];
+
+function fmtSci(x) {
+  if (!(x > 0)) return '0';
+  const e = Math.floor(log10(x));
+  const m = x / Math.pow(10, e);
+  if (e === 0) return m.toFixed(2);
+  return m.toFixed(1) + '·10<sup>' + (e < 0 ? '−' + (-e) : e) + '</sup>';
+}
+function pct(x, d) {
+  const v = 100 * x;
+  const s = v.toFixed(d === undefined ? 1 : d);
+  return (v > 0 ? '+' : (v < 0 ? '−' : '')) + s.replace('-', '') + ' %';
+}
+function fmtF(N) { return 'f/' + (N >= 10 ? N.toFixed(0) : N.toFixed(1)); }
+
+/* ---------- gráfica base: eje x común de 380 a 1100 nm ---------- */
+const CH = { W: 760, H: 360, L: 58, R: 16, T: 16, B: 48 };
+const xOf = (l) => CH.L + (l - 380) / (1100 - 380) * (CH.W - CH.L - CH.R);
+// en pantallas estrechas se reduce la anchura del lienzo para que el texto siga siendo legible
+function fitCanvas(svg) {
+  const w = svg.clientWidth || svg.parentNode.clientWidth || 760;
+  CH.W = w < 560 ? 430 : 760;
+  svg.setAttribute('viewBox', `0 0 ${CH.W} ${CH.H}`);
+}
+const SUP = { '-1': '10⁻¹', '-2': '10⁻²', '-3': '10⁻³', '-4': '10⁻⁴', '-5': '10⁻⁵', '-6': '10⁻⁶', '-7': '10⁻⁷' };
+const LOG_TICKS = [1, 1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6].map(v => ({ v, label: v === 1 ? '1' : SUP[String(Math.round(log10(v)))] }));
+const LIN_TICKS = [0, 0.2, 0.4, 0.6, 0.8, 1].map(v => ({ v, label: v.toFixed(1) }));
+const FONT = 'font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif"';
+
+function renderChart(svg, o) {
+  svg.__opts = o;
+  fitCanvas(svg);
+  const yTop = CH.T, yBot = CH.H - CH.B;
+  const fs = CH.W < 600 ? 13 : 11, fs2 = CH.W < 600 ? 12 : 10.5;
+  const y = (v) => {
+    if (o.yKind === 'log') {
+      const lv = log10(Math.max(v, o.yMin));
+      return yBot - (lv - log10(o.yMin)) / (log10(o.yMax) - log10(o.yMin)) * (yBot - yTop);
+    }
+    const c = Math.min(Math.max(v, o.yMin), o.yMax);
+    return yBot - (c - o.yMin) / (o.yMax - o.yMin) * (yBot - yTop);
+  };
+  let s = '';
+  s += `<rect x="${xOf(700).toFixed(1)}" y="${yTop}" width="${(xOf(1100) - xOf(700)).toFixed(1)}" height="${yBot - yTop}" fill="rgba(168,50,46,0.06)"/>`;
+  for (const t of o.yTicks) {
+    const yy = y(t.v).toFixed(1);
+    s += `<line x1="${CH.L}" x2="${CH.W - CH.R}" y1="${yy}" y2="${yy}" stroke="#E3E8ED"/>`;
+    s += `<text x="${CH.L - 8}" y="${(+yy + 4).toFixed(1)}" text-anchor="end" font-size="${fs}" fill="#5A6978" ${FONT}>${t.label}</text>`;
+  }
+  for (let l = 400; l <= 1100; l += 100) {
+    s += `<line x1="${xOf(l).toFixed(1)}" x2="${xOf(l).toFixed(1)}" y1="${yBot}" y2="${yBot + 4}" stroke="#5A6978"/>`;
+    s += `<text x="${xOf(l).toFixed(1)}" y="${yBot + 27}" text-anchor="middle" font-size="${fs}" fill="#5A6978" ${FONT}>${l}</text>`;
+  }
+  for (let l = 380; l < 700; l += 5) {
+    s += `<rect x="${xOf(l).toFixed(1)}" y="${yBot + 6}" width="${(xOf(l + 5) - xOf(l) + 0.4).toFixed(2)}" height="6" fill="${wavelengthToRGB(l + 2)}"/>`;
+  }
+  s += `<rect x="${xOf(700).toFixed(1)}" y="${yBot + 6}" width="${(xOf(1100) - xOf(700)).toFixed(1)}" height="6" fill="#6B4A48"/>`;
+  s += `<text x="${xOf(540).toFixed(1)}" y="${yBot + 43}" text-anchor="middle" font-size="${fs2}" fill="#5A6978" ${FONT}>${L('visible')}</text>`;
+  s += `<text x="${xOf(900).toFixed(1)}" y="${yBot + 43}" text-anchor="middle" font-size="${fs2}" fill="#5A6978" ${FONT}>${CH.W < 600 ? L('nirShort') : L('nir')}</text>`;
+  s += `<text x="${CH.W - CH.R}" y="${yBot + 43}" text-anchor="end" font-size="${fs2}" fill="#5A6978" ${FONT}>nm</text>`;
+  s += `<line x1="${CH.L}" x2="${CH.L}" y1="${yTop}" y2="${yBot}" stroke="#5A6978"/>`;
+  s += `<line x1="${CH.L}" x2="${CH.W - CH.R}" y1="${yBot}" y2="${yBot}" stroke="#5A6978"/>`;
+  s += `<text transform="translate(14 ${((yTop + yBot) / 2).toFixed(1)}) rotate(-90)" text-anchor="middle" font-size="${fs}" fill="#5A6978" ${FONT}>${o.yLabel}</text>`;
+  for (const se of o.series) {
+    const d = se.pts.map((p, i) => (i ? 'L' : 'M') + xOf(p[0]).toFixed(1) + ' ' + y(p[1]).toFixed(1)).join(' ');
+    s += `<path d="${d}" fill="none" stroke="${se.color}" stroke-width="${se.width || 2}" stroke-linejoin="round"${se.dash ? ` stroke-dasharray="${se.dash}"` : ''}/>`;
+  }
+  svg.innerHTML = s;
+  if (o.legendEl) {
+    o.legendEl.innerHTML = o.series.map(se =>
+      `<span><i style="border-color:${se.color};${se.dash ? 'border-top-style:dashed' : ''}"></i>${se.name}</span>`).join('');
+  }
+}
+const curve = (fn) => LAMBDA.map(l => [l, fn(l)]);
+
+/* ---------- sección 1: conversor ---------- */
+function updateC1() {
+  const mode = $('c1-mode').value;
+  let v = parseFloat($('c1-value').value);
+  if (!(v >= 0)) v = 0;
+  let r;
+  if (mode === 'stops') r = ndFromStops(v);
+  else if (mode === 'factor') r = ndFromFactor(Math.max(v, 1e-9));
+  else if (mode === 'od') r = ndFromOD(v);
+  else r = ndFromT(Math.min(Math.max(v / 100, 1e-12), 1));
+  $('c1-stops').textContent = r.stops.toFixed(1);
+  $('c1-factor').textContent = (Math.abs(r.factor - Math.round(r.factor)) < 0.005 || r.factor >= 100) ? Math.round(r.factor).toString() : r.factor.toFixed(2);
+  $('c1-od').textContent = r.od.toFixed(2);
+  $('c1-T').innerHTML = (100 * r.T >= 0.01 ? (100 * r.T).toFixed(3) + ' %' : fmtSci(100 * r.T) + ' %');
+  const t0 = parseFloat($('c1-t0').value);
+  const t1 = t0 * r.factor;
+  let txt;
+  if (!(t0 > 0)) txt = '…';
+  else if (t1 < 1) txt = '1/' + Math.round(1 / t1) + ' s';
+  else if (t1 < 120) txt = t1.toFixed(1) + ' s';
+  else txt = (t1 / 60).toFixed(1) + ' ' + L('min');
+  $('c1-tres').textContent = txt;
+}
+
+/* ---------- sección 2: espectro del ND ---------- */
+function updateC2() {
+  const type = $('c2-type').value, D = parseFloat($('c2-dens').value);
+  const series = [{ pts: curve(l => ndT(l, type, D, 0)), color: '#1B2530', width: 2.6, name: L('ndT') }];
+  if ($('c2-hot').checked) series.push({ pts: curve(l => hotMirrorT(l, 1.0, 0, true, 690)), color: '#7A5C9E', dash: '6 4', name: L('hot1') });
+  if ($('c2-qe').checked) series.push({ pts: curve(qeSi), color: '#6E7680', dash: '2 3', name: L('qe') });
+  if ($('c2-cfa').checked) {
+    series.push({ pts: curve(l => cfa(l).r), color: '#C0392B', width: 1.3, name: L('cfaR') });
+    series.push({ pts: curve(l => cfa(l).g), color: '#2E8B57', width: 1.3, name: L('cfaG') });
+    series.push({ pts: curve(l => cfa(l).b), color: '#2E6FB7', width: 1.3, name: L('cfaB') });
+  }
+  renderChart($('chart2'), { yKind: 'log', yMin: 1e-6, yMax: 1, yLabel: L('tr'), yTicks: LOG_TICKS, series, legendEl: $('c2-leg') });
+  const o550 = ndOD(550, type, D, 0), o750 = ndOD(750, type, D, 0), o850 = ndOD(850, type, D, 0);
+  $('c2-od550').textContent = o550.toFixed(2);
+  $('c2-od750').textContent = o750.toFixed(2);
+  $('c2-od850').textContent = o850.toFixed(2);
+  const delta = o550 - o850;
+  $('c2-delta').textContent = (delta < 0 ? '−' : '') + Math.abs(delta).toFixed(2);
+}
+
+/* ---------- sección 3: filtro del sensor ---------- */
+function updateC3() {
+  const d = parseFloat($('c3-d').value), lc = parseFloat($('c3-lc').value), diel = $('c3-diel').checked;
+  $('c3-dval').textContent = d.toFixed(1) + ' mm';
+  $('c3-lcval').textContent = lc + ' nm';
+  const series = [{ pts: curve(l => hotMirrorT(l, d, 0, diel, lc)), color: '#7A5C9E', width: 2.6, name: L('hotFull') }];
+  series.push({ pts: curve(l => hotMirrorT(l, d, 0, false, lc)), color: '#7A5C9E', width: 1.2, dash: '6 4', name: L('hotAbs') });
+  if ($('c3-qe').checked) series.push({ pts: curve(qeSi), color: '#6E7680', dash: '2 3', name: L('qe') });
+  renderChart($('chart3'), { yKind: 'log', yMin: 1e-6, yMax: 1, yLabel: L('tr'), yTicks: LOG_TICKS, series, legendEl: $('c3-leg') });
+  const t750 = hotMirrorT(750, d, 0, diel, lc), t850 = hotMirrorT(850, d, 0, diel, lc), t1000 = hotMirrorT(1000, d, 0, diel, lc);
+  $('c3-t750').innerHTML = fmtSci(t750);
+  $('c3-t850').innerHTML = fmtSci(t850);
+  $('c3-t1000').innerHTML = fmtSci(t1000);
+  $('c3-od850').textContent = (-log10(t850)).toFixed(1);
+}
+
+/* ---------- sección 4: simulador ---------- */
+function swatchColor(rg, bg) {
+  const k = 0.62;
+  const conv = (v) => Math.round(255 * Math.pow(Math.min(Math.max(v * k, 0), 1), 1 / 2.2));
+  return `rgb(${conv(rg)},${conv(1)},${conv(bg)})`;
+}
+function updateC4() {
+  const scene = $('c4-scene').value, type = $('c4-type').value, D = parseFloat($('c4-dens').value);
+  const d = parseFloat($('c4-d').value), diel = $('c4-diel').checked;
+  $('c4-dval').textContent = d.toFixed(1) + ' mm';
+  const sensor = { d, theta: 0, diel, lc0: 690 };
+  const nd = { type, D, theta: 0 };
+  const r = simulate(scene, sensor, nd);
+  $('c4-sw0').style.background = swatchColor(r.sinFiltro.rg, r.sinFiltro.bg);
+  $('c4-sw1').style.background = swatchColor(r.conFiltro.rg, r.conFiltro.bg);
+  $('c4-rg').textContent = pct(r.desvioRG, 1);
+  $('c4-bg').textContent = pct(r.desvioBG, 1);
+  $('c4-od').textContent = `${r.odR.toFixed(2)} / ${r.odG.toFixed(2)} / ${r.odB.toFixed(2)}`;
+  const p = (x) => (100 * x).toFixed(x < 0.01 ? 2 : 1);
+  $('c4-ir').textContent = `${p(r.fracIR.r)} / ${p(r.fracIR.g)} / ${p(r.fracIR.b)} %`;
+  $('c4-ir0').textContent = `${p(r.fracIR0.r)} / ${p(r.fracIR0.g)} / ${p(r.fracIR0.b)} %`;
+  $('c4-factor').textContent = r.factorG >= 100 ? Math.round(r.factorG).toString() : r.factorG.toFixed(1);
+
+  // aportación espectral de cada canal, con y sin filtro, normalizada al máximo de las tres curvas con filtro
+  const contrib = (withNd) => {
+    const arr = LAMBDA.map(l => {
+      let e = sceneRadianceUI(scene, l) * hotMirrorT(l, d, 0, diel, 690) * qeSi(l);
+      if (withNd) e *= ndT(l, type, D, 0);
+      const f = cfa(l);
+      return [e * f.r, e * f.g, e * f.b];
+    });
+    return arr;
+  };
+  const a1 = contrib(true), a0 = contrib(false);
+  const m1 = Math.max(...a1.map(v => Math.max(v[0], v[1], v[2])));
+  const m0 = Math.max(...a0.map(v => Math.max(v[0], v[1], v[2])));
+  const series = [
+    { pts: LAMBDA.map((l, i) => [l, a1[i][0] / m1]), color: '#C0392B', width: 2.2, name: L('chR') },
+    { pts: LAMBDA.map((l, i) => [l, a1[i][1] / m1]), color: '#2E8B57', width: 2.2, name: L('chG') },
+    { pts: LAMBDA.map((l, i) => [l, a1[i][2] / m1]), color: '#2E6FB7', width: 2.2, name: L('chB') }
+  ];
+  if ($('c4-show0').checked) {
+    series.push({ pts: LAMBDA.map((l, i) => [l, a0[i][0] / m0]), color: '#C0392B', width: 1.2, dash: '5 4', name: L('r0') });
+    series.push({ pts: LAMBDA.map((l, i) => [l, a0[i][1] / m0]), color: '#2E8B57', width: 1.2, dash: '5 4', name: L('g0') });
+    series.push({ pts: LAMBDA.map((l, i) => [l, a0[i][2] / m0]), color: '#2E6FB7', width: 1.2, dash: '5 4', name: L('b0') });
+  }
+  renderChart($('chart4'), { yKind: 'lin', yMin: 0, yMax: 1, yLabel: L('contrib'), yTicks: LIN_TICKS, series, legendEl: $('c4-leg') });
+}
+function sceneRadianceUI(key, l) {
+  const s = SCENES[key];
+  return s.radiance ? s.radiance(l) : planck(l, 5600) * s.refl(l);
+}
+
+/* ---------- sección 5: ángulo ---------- */
+const HALF_DIAG = 21.6; // mm, formato completo
+function updateC5(fromPreset) {
+  if (fromPreset) {
+    const v = $('c5-preset').value;
+    if (v !== 'custom') { const [f, p] = v.split(',').map(Number); $('c5-f').value = f; $('c5-pupil').value = p; }
+  } else {
+    $('c5-preset').value = 'custom';
+  }
+  const f = Math.max(parseFloat($('c5-f').value) || 35, 4);
+  const p = parseFloat($('c5-pupil').value);
+  const d = parseFloat($('c5-d').value), diel = $('c5-diel').checked, type = $('c5-type').value;
+  $('c5-pval').textContent = p + ' mm';
+  $('c5-dval').textContent = d.toFixed(1) + ' mm';
+  const thF = Math.atan(HALF_DIAG / f) * 180 / Math.PI;
+  const thS = Math.atan(HALF_DIAG / p) * 180 / Math.PI;
+  $('c5-thfield').textContent = thF.toFixed(1) + '°';
+  $('c5-thsensor').textContent = thS.toFixed(1) + '°';
+  $('c5-edgeS').textContent = diel ? `690 → ${edgeShift(690, thS).toFixed(0)} nm` : L('noDiel');
+  $('c5-edgeN').textContent = type === 'irnd' ? `705 → ${edgeShift(705, thF).toFixed(0)} nm` : (type === 'none' ? L('noFilter') : L('noEdge'));
+
+  const sensorC = { d, theta: 0, diel, lc0: 690 }, sensorE = { d, theta: thS, diel, lc0: 690 };
+  const ndC = type === 'none' ? null : { type, D: 3.0, theta: 0 };
+  const ndE = type === 'none' ? null : { type, D: 3.0, theta: thF };
+  const wb = whiteBalance(sensorC);
+  const col = (s) => ({ rg: (s.r * wb.r) / (s.g * wb.g), bg: (s.b * wb.b) / (s.g * wb.g) });
+  const cC = col(integrate('gris', sensorC, ndC)), cE = col(integrate('gris', sensorE, ndE));
+  $('c5-cornerRG').textContent = pct(cE.rg / cC.rg - 1, 1);
+  $('c5-cornerBG').textContent = pct(cE.bg / cC.bg - 1, 1);
+
+  const series = [
+    { pts: curve(l => hotMirrorT(l, d, 0, diel, 690)), color: '#7A5C9E', width: 2.4, name: L('sC') },
+    { pts: curve(l => hotMirrorT(l, d, thS, diel, 690)), color: '#7A5C9E', width: 1.6, dash: '6 4', name: L('sE') }
+  ];
+  if (ndC) {
+    series.push({ pts: curve(l => ndT(l, type, 3.0, 0)), color: '#1B2530', width: 2.4, name: L('nC') });
+    series.push({ pts: curve(l => ndT(l, type, 3.0, thF)), color: '#1B2530', width: 1.6, dash: '6 4', name: L('nE') });
+  }
+  renderChart($('chart5'), { yKind: 'log', yMin: 1e-6, yMax: 1, yLabel: L('tr'), yTicks: LOG_TICKS, series, legendEl: $('c5-leg') });
+}
+
+/* ---------- sección 6: difracción ---------- */
+function updateC6() {
+  const p = parseFloat($('c6-pitch').value);
+  const f = parseFloat($('c6-f').value) || 28;
+  const s = parseFloat($('c6-s').value) || 2;
+  const nc = nCritical(p), no = nOptimo(f, s);
+  $('c6-ncrit').textContent = fmtF(nc);
+  $('c6-nopt').textContent = fmtF(no);
+  $('c6-airy').textContent = airyDiameter(no).toFixed(1) + ' µm';
+  $('c6-mtf').textContent = Math.round(mtf50Diff(no)) + ' lp/mm';
+  $('c6-nyq').textContent = Math.round(1000 / (2 * p)) + ' lp/mm';
+}
+
+/* ---------- conexión ---------- */
+function bind(ids, fn) { for (const id of ids) { const el = $(id); el.addEventListener('input', fn); el.addEventListener('change', fn); } }
+document.addEventListener('DOMContentLoaded', () => {
+  bind(['c1-mode', 'c1-value', 'c1-t0'], updateC1);
+  bind(['c2-type', 'c2-dens', 'c2-hot', 'c2-qe', 'c2-cfa'], updateC2);
+  bind(['c3-d', 'c3-lc', 'c3-diel', 'c3-qe'], updateC3);
+  bind(['c4-scene', 'c4-type', 'c4-dens', 'c4-d', 'c4-diel', 'c4-show0'], updateC4);
+  bind(['c5-f', 'c5-pupil', 'c5-type', 'c5-d', 'c5-diel'], () => updateC5(false));
+  $('c5-preset').addEventListener('change', () => updateC5(true));
+  bind(['c6-pitch', 'c6-f', 'c6-s'], updateC6);
+  function relabelOptions() {
+    document.querySelectorAll('option[data-es]').forEach(o => { o.textContent = o.getAttribute('data-' + LANG()) || o.textContent; });
+  }
+  relabelOptions();
+  updateC1(); updateC2(); updateC3(); updateC4(); updateC5(true); updateC6();
+  window.onLangChange = () => { relabelOptions(); updateC1(); updateC2(); updateC3(); updateC4(); updateC5(false); updateC6(); };
+  let timer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => { document.querySelectorAll('svg.chart').forEach(s => { if (s.__opts) renderChart(s, s.__opts); }); }, 150);
+  });
+});
+
+</script>
+<script>
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{ title:"El filtro ND y la fuga infrarroja", desc:"Física del filtro de densidad neutra: dónde deja de ser neutro, qué hace el filtro del propio sensor, cómo intervienen el grosor, el ángulo de incidencia y la focal, y cómo medir la fuga infrarroja con la cámara." },
+    en:{ title:"The ND filter and infrared leakage", desc:"Physics of the neutral-density filter: where it stops being neutral, what the sensor's own filter does, how thickness, angle of incidence and focal length come into play, and how to measure infrared leakage with the camera." }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    [].forEach.call(document.querySelectorAll("[data-aria-"+l+"]"),function(e){ e.setAttribute("aria-label",e.getAttribute("data-aria-"+l)); });
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
+</body>
+</html>

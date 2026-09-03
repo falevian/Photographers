@@ -3,9 +3,41 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23e6eaee'/><circle cx='16' cy='11' r='5.5' fill='%23d9a441'/><rect x='5' y='16' width='22' height='2.6' rx='1.3' fill='%239fb0bd'/><rect x='8' y='21' width='19' height='2.6' rx='1.3' fill='%23788b99'/><rect x='5' y='26' width='16' height='2.6' rx='1.3' fill='%239fb0bd'/></svg>">
-
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27b%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%270%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%231b2029%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%2312171e%27%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%2764%27%20height%3D%2764%27%20rx%3D%2713%27%20fill%3D%27url%28%23b%29%27%2F%3E%3Ccircle%20cx%3D%2732%27%20cy%3D%2733%27%20r%3D%2715%27%20fill%3D%27%23e8ad3f%27%2F%3E%3Crect%20x%3D%27-2%27%20y%3D%2721%27%20width%3D%2768%27%20height%3D%274%27%20rx%3D%272.0%27%20fill%3D%27%23b2c2ce%27%20opacity%3D%27.42%27%2F%3E%3Crect%20x%3D%27-3%27%20y%3D%2728%27%20width%3D%2770%27%20height%3D%275%27%20rx%3D%272.5%27%20fill%3D%27%23b2c2ce%27%20opacity%3D%27.72%27%2F%3E%3Crect%20x%3D%27-2%27%20y%3D%2737%27%20width%3D%2768%27%20height%3D%274.5%27%20rx%3D%272.25%27%20fill%3D%27%23b2c2ce%27%20opacity%3D%27.86%27%2F%3E%3Crect%20x%3D%272%27%20y%3D%2745%27%20width%3D%2760%27%20height%3D%274%27%20rx%3D%272.0%27%20fill%3D%27%23b2c2ce%27%20opacity%3D%27.55%27%2F%3E%3C%2Fsvg%3E">
+<link rel="apple-touch-icon" href="niebla-icon-180.png">
+<meta name="theme-color" content="#e6eaee">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Manual niebla">
 <title>Manual · Niebla para fotografía</title>
+<meta name="author" content="Rafael Vida">
+<meta name="description" content="Manual de uso de la herramienta de predicción de niebla para fotografía: índice físico hora a hora, fusión bayesiana multimodelo con conjuntos (EPS/ENS) sobre datos de Open-Meteo, consenso y contracción hacia la climatología, recalibración de Platt y registro local de observaciones.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Photographers">
+<meta property="og:title" content="Manual · Niebla para fotografía">
+<meta property="og:description" content="Manual de uso de la herramienta de predicción de niebla para fotografía: índice físico hora a hora, fusión bayesiana multimodelo con conjuntos (EPS/ENS) sobre datos de Open-Meteo, consenso y contracción hacia la climatología, recalibración de Platt y registro local de observaciones.">
+<meta property="og:url" content="https://falevian.github.io/Photographers/manual-niebla.html">
+<meta property="og:image" content="https://falevian.github.io/Photographers/og/niebla.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="es_ES">
+<meta property="og:locale:alternate" content="en_GB">
+<meta name="twitter:card" content="summary_large_image">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", OLD="niebla_lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){
+    /* Migracion de la clave antigua del paquete suelto. */
+    try{ var o=localStorage.getItem(OLD); if(o==="es"||o==="en"){ u=o; localStorage.setItem(K,o); } }catch(e){}
+  }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -17,9 +49,6 @@
   header{padding-top:24px}
   .topbar{display:flex;justify-content:flex-end;align-items:center;gap:14px;font-size:13px}
   .topbar a{color:var(--ink2)}
-  .lang{display:inline-flex;border:1px solid var(--ink);border-radius:5px;overflow:hidden;font-family:var(--mono);font-size:12px}
-  .lang button{border:none;border-radius:0;padding:5px 10px;background:transparent;color:var(--ink);font-family:var(--mono);cursor:pointer}
-  .lang button.on{background:var(--ink);color:#fff}
   h1{font-size:clamp(26px,4vw,38px);font-weight:700;letter-spacing:-.02em;margin:6px 0 4px}
   .sub{color:var(--ink2);margin:0 0 18px}
   main{padding-bottom:60px}
@@ -36,18 +65,48 @@
   .box{background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--warn);border-radius:6px;padding:10px 14px;margin:12px 0;font-size:14px}
   .box.ok{border-left-color:var(--ok)}
   .kbd{font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-radius:4px;padding:0 5px;background:#fff}
-  [lang-es],[lang-en]{display:none}
-  body.es [lang-es]{display:block} body.en [lang-en]{display:block}
+
+  /* ---------- convenio bilingue del repositorio ---------- */
+  html[lang="es"] [data-lang="en"]{display:none!important}
+  html[lang="en"] [data-lang="es"]{display:none!important}
+  .langbar{position:fixed;top:14px;right:16px;z-index:100;display:flex;
+    border:1px solid var(--ink);border-radius:5px;overflow:hidden;background:var(--paper)}
+  .langbar button{font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;
+    border:0;border-radius:0;padding:5px 10px;background:transparent;color:var(--ink2);cursor:pointer}
+  .langbar button+button{border-left:1px solid var(--line)}
+  .langbar button:hover{color:var(--ink)}
+  .langbar button.on{background:var(--ink);color:#fff}
+  .langbar button:focus-visible{outline:2px solid var(--ok);outline-offset:-2px}
+  /* La barra flota sobre la esquina superior derecha, donde vive .topbar:
+     en pantallas estrechas se baja la cabecera para que no se solapen. */
+  @media(max-width:1020px){header{padding-top:52px}}
+  @media(max-width:720px){.langbar{top:8px;right:8px} header{padding-top:44px}}
+  @media print{.langbar{display:none!important}}
+
+
 </style>
 </head>
-<body class="es">
+<body>
+
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
+
 <header>
-  <div class="topbar"><a href="index.html" id="back">← Herramienta</a><a href="guia.html" id="guialink">Guía rápida</a>
-    <div class="lang" role="group" aria-label="Idioma / Language"><button id="lg-es" type="button">ES</button><button id="lg-en" type="button">EN</button></div></div>
+  <div class="topbar">
+    <a href="niebla.html" data-lang="es">← Herramienta</a>
+    <a href="niebla.html" data-lang="en">← Tool</a>
+    <a href="guia-niebla.html" data-lang="es">Guía rápida</a>
+    <a href="guia-niebla.html" data-lang="en">Quick guide</a>
+    <a href="manual-astro.html" data-lang="es">Manual de cielo</a>
+    <a href="manual-astro.html" data-lang="en">Sky manual</a>
+    <a href="index.html" data-lang="es">Portada</a>
+    <a href="index.html" data-lang="en">Home</a>
+  </div>
 </header>
 
-<!-- ============================ ESPAÑOL ============================ -->
-<main lang-es>
+<main data-lang="es">
   <h1>Manual de uso</h1>
   <p class="sub">Niebla para fotografía: índice físico y fusión bayesiana multimodelo.</p>
   <nav><a href="#es-0">Qué es</a><a href="#es-1">Instalación</a><a href="#es-2">Controles comunes</a><a href="#es-3">Pestaña 1</a><a href="#es-4">Pestaña 2</a><a href="#es-5">Entrenamiento</a><a href="#es-6">Datos y privacidad</a><a href="#es-7">Interpretación</a><a href="#es-8">Ajustes avanzados</a><a href="#es-9">Problemas</a></nav>
@@ -58,8 +117,8 @@
 
   <h2 id="es-1">2. Instalación</h2>
   <p>No hay nada que instalar. Tres formas de usarla:</p>
-  <p><b>Local.</b> Guarda <code>index.html</code> y <code>manual.html</code> en una carpeta y abre <code>index.html</code> con el navegador. Funciona con doble clic (origen <code>file://</code>).</p>
-  <p><b>GitHub Pages.</b> Sube los dos archivos a un repositorio, activa Pages en Settings → Pages (rama main, carpeta raíz) y accede a <code>https://usuario.github.io/repositorio/</code>. El archivo se llama <code>index.html</code> precisamente para que sea la página de entrada.</p>
+  <p><b>Local.</b> Guarda <code>niebla.html</code> y <code>manual-niebla.html</code> en una carpeta y abre <code>niebla.html</code> con el navegador. Funciona con doble clic (origen <code>file://</code>).</p>
+  <p><b>GitHub Pages.</b> Sube los dos archivos a un repositorio, activa Pages en Settings → Pages (rama main, carpeta raíz) y accede a <code>https://usuario.github.io/repositorio/</code>. El archivo se llama <code>niebla.html</code> precisamente para que sea la página de entrada.</p>
   <p><b>Móvil.</b> Abre la URL de Pages en el navegador del teléfono y añádela a la pantalla de inicio. El botón “Usar mi posición” pide permiso de geolocalización; en Pages funciona porque el sitio se sirve por HTTPS.</p>
   <div class="box">Requisitos: conexión a Internet (la previsión se descarga en cada cálculo) y un navegador moderno. Se cargan dos fuentes desde Google Fonts; si no hay red, se usan las del sistema.</div>
 
@@ -135,10 +194,10 @@
   <p>Señal fuerte de niebla de radiación: ΔT previsto por debajo de 1 °C a partir de medianoche, viento entre 2 y 8 km/h, nubes por debajo del 25 %, presión alta y en ascenso, y visibilidad modelada menor de 3 km. Si además varios modelos coinciden (desacuerdo &lt; 10 pp), la probabilidad es alta.</p>
   <p>Señal de niebla de advección (costa): punto de rocío del aire uno o dos grados por encima de la SST, viento moderado del mar, humedad alta. Puede darse con cielo nublado y viento de 15 o 20 km/h; en esos casos la pestaña 1 en modo interior la infravalora.</p>
   <p>Cuándo desconfiar: valles estrechos, zonas con suelo muy húmedo tras lluvia reciente o embalses y ríos, donde la niebla local se forma con ΔT previsto de 2 o 3 °C. Los modelos no resuelven esa escala; tu registro sí la captura, de ahí la importancia del prior local.</p>
-  <p>Calibración: cuando tengas 30 o más noches, agrupa las filas del registro por posterior (0–25 %, 25–50 %, 50–75 %, 75–100 %) y compara con la frecuencia real de niebla en cada grupo. Si las frecuencias reales son sistemáticamente más extremas que el posterior, sube γ; si son menos extremas, bájalo. A partir de 12 noches la recalibración automática hace este ajuste sola; el diagrama de fiabilidad de la propia aplicación te muestra ambas cosas.</p>
+  <p>Calibración: la pestaña 2 dibuja ahora este diagrama de fiabilidad por ti, en la sección «Calibración» junto a la tabla de pesos: agrupa las filas del registro por posterior congelado (0–25 %, 25–50 %, 50–75 %, 75–100 %) y pinta cada grupo como un punto (posterior medio, frecuencia real de niebla) sobre la diagonal de calibración perfecta, con área proporcional al número de noches. La lectura sigue siendo la misma que harías a mano: si las frecuencias reales son sistemáticamente más extremas que el posterior, sube α; si son menos extremas, bájalo; si los puntos se pegan a la diagonal, deja α como está. La herramienta orienta a partir de unas 10 noches; la lectura es fiable a partir de 30.</p>
 
   <h2 id="es-8">9. Ajustes avanzados (editar el HTML)</h2>
-  <p>Todas las constantes están al principio de la sección de la pestaña 2 en <code>index.html</code>:</p>
+  <p>Todas las constantes están al principio de la sección de la pestaña 2 en <code>niebla.html</code>:</p>
   <pre>const A0=1.2, B0=8.8   // prior Beta inicial (media 0.12)
 const LAMBDA=0.7 // tempering de los pesos
 const TH=70, KAP=11    // logística p = σ((s − TH)/KAP)
@@ -158,7 +217,7 @@ const TIMEOUT=12000    // ms por modelo (los ensembles usan +8 s)</pre>
 </main>
 
 <!-- ============================ ENGLISH ============================ -->
-<main lang-en>
+<main data-lang="en">
   <h1>User manual</h1>
   <p class="sub">Fog for photography: physical index and multi‑model Bayesian fusion.</p>
   <nav><a href="#en-0">What it is</a><a href="#en-1">Setup</a><a href="#en-2">Common controls</a><a href="#en-3">Tab 1</a><a href="#en-4">Tab 2</a><a href="#en-5">Training</a><a href="#en-6">Data and privacy</a><a href="#en-7">Interpretation</a><a href="#en-8">Advanced</a><a href="#en-9">Troubleshooting</a></nav>
@@ -169,8 +228,8 @@ const TIMEOUT=12000    // ms por modelo (los ensembles usan +8 s)</pre>
 
   <h2 id="en-1">2. Setup</h2>
   <p>Nothing to install. Three ways to use it:</p>
-  <p><b>Local.</b> Save <code>index.html</code> and <code>manual.html</code> in a folder and open <code>index.html</code> in the browser. Double click works (<code>file://</code> origin).</p>
-  <p><b>GitHub Pages.</b> Push both files to a repository, enable Pages under Settings → Pages (main branch, root folder) and visit <code>https://user.github.io/repo/</code>. The file is named <code>index.html</code> so it is the entry page.</p>
+  <p><b>Local.</b> Save <code>niebla.html</code> and <code>manual-niebla.html</code> in a folder and open <code>niebla.html</code> in the browser. Double click works (<code>file://</code> origin).</p>
+  <p><b>GitHub Pages.</b> Push both files to a repository, enable Pages under Settings → Pages (main branch, root folder) and visit <code>https://user.github.io/repo/</code>. The file is named <code>niebla.html</code> so it is the entry page.</p>
   <p><b>Mobile.</b> Open the Pages URL on the phone and add it to the home screen. “Use my location” asks for geolocation permission; it works on Pages because the site is served over HTTPS.</p>
   <div class="box">Requirements: an Internet connection (the forecast is downloaded on each compute) and a modern browser. Two fonts are loaded from Google Fonts; without network the system fonts are used.</div>
 
@@ -246,10 +305,10 @@ const TIMEOUT=12000    // ms por modelo (los ensembles usan +8 s)</pre>
   <p>Strong radiation‑fog signal: forecast ΔT below 1 °C from midnight on, wind between 2 and 8 km/h, clouds under 25 %, high and rising pressure, model visibility under 3 km. If several models agree (spread &lt; 10 pp), probability is high.</p>
   <p>Advection‑fog signal (coast): air dew point one or two degrees above SST, moderate onshore wind, high humidity. It can occur with overcast skies and 15 to 20 km/h wind; in such cases tab 1 in inland mode underestimates it.</p>
   <p>When to be sceptical: narrow valleys, very wet soils after recent rain, reservoirs and rivers, where local fog forms with a forecast ΔT of 2 or 3 °C. Models do not resolve that scale; your log does, hence the importance of the local prior.</p>
-  <p>Calibration: once you have 30 or more nights, group the log rows by posterior (0–25 %, 25–50 %, 50–75 %, 75–100 %) and compare with the actual fog frequency in each group. If actual frequencies are systematically more extreme than the posterior, raise γ; if less extreme, lower it. From 12 nights on, the automatic recalibration does this by itself; the app&#8217;s own reliability diagram shows both.</p>
+  <p>Calibration: tab 2 now draws this reliability diagram for you, in the “Calibration” section next to the weights table: it groups the log rows by frozen posterior (0–25 %, 25–50 %, 50–75 %, 75–100 %) and plots each group as a point (mean posterior, actual fog frequency) against the perfect-calibration diagonal, with area proportional to the number of nights. The reading is still the one you would do by hand: if actual frequencies are systematically more extreme than the posterior, raise α; if less extreme, lower it; if the points hug the diagonal, leave α as it is. The tool gives guidance from about 10 nights; the reading is reliable from 30.</p>
 
   <h2 id="en-8">9. Advanced settings (edit the HTML)</h2>
-  <p>All constants sit at the top of the tab‑2 section in <code>index.html</code>:</p>
+  <p>All constants sit at the top of the tab‑2 section in <code>niebla.html</code>:</p>
   <pre>const A0=1.2, B0=8.8   // initial Beta prior (mean 0.12)
 const LAMBDA=0.7 // weight tempering
 const TH=70, KAP=11    // logistic p = σ((s − TH)/KAP)
@@ -269,17 +328,40 @@ const TIMEOUT=12000    // ms per model (ensembles use +8 s)</pre>
 </main>
 
 <script>
+"use strict";
+/* ---------- conmutador de idioma / language switch ---------- */
 (function(){
-  let lang='es';
-  try{lang=new URLSearchParams(location.search).get('lang')||localStorage.getItem('niebla_lang')||((navigator.language||'es').startsWith('en')?'en':'es');}catch(e){}
-  if(lang!=='en') lang='es';
-  function apply(){document.body.className=lang; document.documentElement.lang=lang;
-    document.title=(lang==='en'?'Manual · Fog for photography':'Manual · Niebla para fotografía');
-    document.getElementById('back').textContent=lang==='en'?'← Tool':'← Herramienta';
-    document.getElementById('back').href='index.html?lang='+lang; const g=document.getElementById('guialink'); g.textContent=lang==='en'?'Quick guide':'Guía rápida'; g.href='guia.html?lang='+lang;
-    document.getElementById('lg-es').classList.toggle('on',lang==='es'); document.getElementById('lg-en').classList.toggle('on',lang==='en');}
-  ['es','en'].forEach(l=>document.getElementById('lg-'+l).addEventListener('click',()=>{lang=l; try{localStorage.setItem('niebla_lang',l);}catch(e){} apply();}));
-  apply();
+  var KEY="pn-lang";
+  var META={
+    es:{ title:"Manual · Niebla para fotografía", desc:"Manual de uso de la herramienta de predicción de niebla para fotografía: índice físico hora a hora, fusión bayesiana multimodelo con conjuntos (EPS/ENS) sobre datos de Open-Meteo, consenso y contracción hacia la climatología, recalibración de Platt y registro local de observaciones." },
+    en:{ title:"Manual · Fog for photography", desc:"User manual for the fog forecasting tool for photography: hourly physical index, multi-model Bayesian fusion with ensembles (EPS/ENS) over Open-Meteo data, consensus and shrinkage towards climatology, Platt recalibration and a local observation log." }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    ["title","ph","alt","aria"].forEach(function(k){
+      [].forEach.call(document.querySelectorAll("[data-"+k+"-"+l+"]"),function(e){
+        var attr = k==="ph" ? "placeholder" : (k==="aria" ? "aria-label" : k);
+        e.setAttribute(attr, e.getAttribute("data-"+k+"-"+l));
+      });
+    });
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
 })();
 </script>
 </body>
