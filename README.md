@@ -13,7 +13,7 @@ Photography and light-physics tools that run entirely in the browser.
 
 ## Español
 
-Treinta y cinco documentos que resuelven cuestiones fotográficas con el modelo físico o estadístico
+Treinta y siete documentos que resuelven cuestiones fotográficas con el modelo físico o estadístico
 delante: simuladores, métricas, catálogos, scripts de procesado y su documentación.
 
 Todo el cálculo ocurre en el navegador. No hay servidor, ni cuenta, ni telemetría, y cada
@@ -51,6 +51,8 @@ ojo aciertan a ponerlo donde uno cree, y qué le hace al objetivo el vidrio del 
 | [`stack-sensor.html`](stack-sensor.html) | Por qué un gran angular calculado para película se deshace en las esquinas de una cámara digital: el vidrio que cubre el sensor es una lámina plano-paralela que el objetivo nunca tuvo en cuenta. Traza los rayos reales por hasta tres láminas y compara dos sensores a la vez. Manual: [`manual-stack-sensor.html`](manual-stack-sensor.html). | 53 KB |
 | [`binning-m11.html`](binning-m11.html) | L, M o S: qué DNG conviene en la M11. Modelo de transferencia fotónica contrastado con las medidas del artículo: la ganancia real del remuestreo es ~3 dB a ISO medio-alto, nula a ISO base, y S-DNG nunca es la mejor opción. | 47 KB |
 | [`filtro-nd-infrarrojo.html`](filtro-nd-infrarrojo.html) | Por qué un filtro ND de diez pasos puede teñir una fotografía: dónde deja de ser neutro cada tecnología (vidrio teñido, película metálica, IRND, ND variable, resina), qué hace el filtro del propio sensor, la deriva de esquinas por ángulo de incidencia, el diafragma óptimo frente a la difracción y cómo medir la fuga infrarroja con la cámara. Seis simuladores espectrales sin dependencias. | 99 KB |
+| [`leica-sensores.html`](leica-sensores.html) | Los datos del sensor de M11, Q3 y SL3-S según PhotonsToPhotos: ruido de lectura referido a la entrada, conmutación de ganancia dual, rango dinámico fotográfico, calculadora de relación señal/ruido por píxel y a igual área, difracción frente a paso de píxel y veredictos por uso (astro, paisaje, costa). Las gráficas cargan Chart.js desde CDN. | 58 KB |
+| [`multishot-sl3s.html`](multishot-sl3s.html) | Cuaderno técnico del multishot del SL3-S: mosaico Bayer animado, ganancia √N, Nyquist y MTF de difracción, deriva sidérea frente a NPF y regla 500, software de apilado en macOS y un asistente que recomienda 24, 48 o 96 MP según las condiciones. | 65 KB |
 
 ### Analizar tus propias fotos
 
@@ -153,7 +155,7 @@ python3 -m http.server 8000
 
 ## English
 
-Thirty-five documents that settle photographic questions with the physical or statistical
+Thirty-seven documents that settle photographic questions with the physical or statistical
 model in plain sight: simulators, metrics, catalogues, processing scripts and their
 documentation.
 
@@ -193,6 +195,8 @@ and the eye manage to put it where you think, and what the sensor's glass does t
 | [`stack-sensor.html`](stack-sensor.html) | Why a wide-angle computed for film falls apart in the corners of a digital camera: the glass covering the sensor is a plane-parallel plate the lens never accounted for. Traces the real rays through up to three plates and compares two sensors at once. Manual: [`manual-stack-sensor.html`](manual-stack-sensor.html). | 53 KB |
 | [`binning-m11.html`](binning-m11.html) | L, M or S: which DNG to pick on the M11. A photon-transfer model set against the article's measurements: the real gain from downsampling is ~3 dB at mid-to-high ISO, nil at base, and S-DNG is never the best option. | 47 KB |
 | [`filtro-nd-infrarrojo.html`](filtro-nd-infrarrojo.html) | Why a ten-stop ND filter can tint a photograph: where each technology stops being neutral (dyed glass, metal film, IRND, variable ND, resin), what the sensor's own filter does, corner drift from the angle of incidence, the optimum aperture against diffraction, and how to measure infrared leakage with the camera. Six dependency-free spectral simulators. | 99 KB |
+| [`leica-sensores.html`](leica-sensores.html) | The sensor data of the M11, Q3 and SL3-S per PhotonsToPhotos: input-referred read noise, dual-gain switching, photographic dynamic range, a signal-to-noise calculator per pixel and at equal area, diffraction against pixel pitch and verdicts by use (astro, landscape, coast). The charts load Chart.js from a CDN. | 58 KB |
+| [`multishot-sl3s.html`](multishot-sl3s.html) | Technical notebook on the SL3-S multishot: animated Bayer mosaic, √N gain, Nyquist and diffraction MTF, sidereal drift against NPF and the 500 rule, stacking software on macOS and an assistant recommending 24, 48 or 96 MP from the conditions. | 65 KB |
 
 ### Analysing your own photographs
 

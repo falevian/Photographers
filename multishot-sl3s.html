@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multishot SL3-S, ruido y apilado: cuaderno técnico</title>
+<meta name="author" content="Rafael Vida">
+<meta name="description" content="Cuaderno técnico con calculadoras sobre el multishot del Leica SL3-S: cómo funciona el desplazamiento de píxel (48 y 96 MP), ganancia de relación señal/ruido con √N, color y demosaico, Nyquist y difracción, deriva sidérea y regla NPF, software de apilado en macOS y un asistente para elegir modo.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Crect%20width%3D%2764%27%20height%3D%2764%27%20rx%3D%2713%27%20fill%3D%27%231D2733%27/%3E%3Cg%20opacity%3D%27.55%27%3E%3Crect%20x%3D%2712%27%20y%3D%2712%27%20width%3D%2718%27%20height%3D%2718%27%20rx%3D%272%27%20fill%3D%27%23D6584A%27/%3E%3Crect%20x%3D%2730%27%20y%3D%2712%27%20width%3D%2718%27%20height%3D%2718%27%20rx%3D%272%27%20fill%3D%27%234E9E5A%27/%3E%3Crect%20x%3D%2712%27%20y%3D%2730%27%20width%3D%2718%27%20height%3D%2718%27%20rx%3D%272%27%20fill%3D%27%234E9E5A%27/%3E%3Crect%20x%3D%2730%27%20y%3D%2730%27%20width%3D%2718%27%20height%3D%2718%27%20rx%3D%272%27%20fill%3D%27%233D6FCB%27/%3E%3C/g%3E%3Cg%3E%3Crect%20x%3D%2718%27%20y%3D%2718%27%20width%3D%2718%27%20height%3D%2718%27%20rx%3D%272%27%20fill%3D%27%23D6584A%27/%3E%3Crect%20x%3D%2736%27%20y%3D%2718%27%20width%3D%2718%27%20height%3D%2718%27%20rx%3D%272%27%20fill%3D%27%234E9E5A%27/%3E%3Crect%20x%3D%2718%27%20y%3D%2736%27%20width%3D%2718%27%20height%3D%2718%27%20rx%3D%272%27%20fill%3D%27%234E9E5A%27/%3E%3Crect%20x%3D%2736%27%20y%3D%2736%27%20width%3D%2718%27%20height%3D%2718%27%20rx%3D%272%27%20fill%3D%27%233D6FCB%27/%3E%3C/g%3E%3Cpath%20d%3D%27M14%2C14%20L20%2C20%27%20stroke%3D%27%23F5F7FA%27%20stroke-width%3D%272.5%27%20stroke-linecap%3D%27round%27/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="icons/multishot-sl3s-180.png">
+<meta name="theme-color" content="#F5F7FA">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Multishot SL3-S">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Photographers">
+<meta property="og:title" content="Multishot SL3-S, ruido y apilado: cuaderno técnico">
+<meta property="og:description" content="Cuaderno técnico con calculadoras sobre el multishot del Leica SL3-S: cómo funciona el desplazamiento de píxel (48 y 96 MP), ganancia de relación señal/ruido con √N, color y demosaico, Nyquist y difracción, deriva sidérea y regla NPF, software de apilado en macOS y un asistente para elegir modo.">
+<meta property="og:url" content="https://falevian.github.io/Photographers/multishot-sl3s.html">
+<meta property="og:image" content="https://falevian.github.io/Photographers/og/multishot.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="es_ES">
+<meta property="og:locale:alternate" content="en_GB">
+<meta name="twitter:card" content="summary_large_image">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
+<style>
+:root{
+  --bg:#F5F7FA; --panel:#FFFFFF; --ink:#1D2733; --ink2:#4A5866; --rule:#CFD7E0;
+  --blue:#245BA3; --blue-soft:#E3ECF8; --amber:#B8781A; --amber-soft:#FBF1DE;
+  --green:#2F7D5B; --red:#B23A3A; --cyan:#2A8FA6;
+  --r:#D6584A; --g:#4E9E5A; --b:#3D6FCB;
+}
+*{box-sizing:border-box}
+html{font-size:17px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Avenir Next","Helvetica Neue",Helvetica,Arial,sans-serif;line-height:1.55;font-variant-numeric:tabular-nums}
+a{color:var(--blue)}
+.wrap{display:grid;grid-template-columns:230px minmax(0,72ch);gap:40px;max-width:1080px;margin:0 auto;padding:36px 24px 80px}
+nav{position:sticky;top:24px;align-self:start;font-size:.92rem}
+nav a{display:block;color:var(--ink2);text-decoration:none;padding:5px 0 5px 12px;border-left:2px solid var(--rule)}
+nav a:hover,nav a:focus-visible{color:var(--ink);border-left-color:var(--blue);outline:none}
+header h1{font-size:1.9rem;font-weight:600;letter-spacing:-.01em;margin:0 0 6px;line-height:1.2}
+header p{color:var(--ink2);margin:0 0 8px}
+section{margin-top:56px;padding-top:8px}
+h2{font-size:1.35rem;font-weight:600;margin:0 0 14px;padding-bottom:8px;border-bottom:2px solid var(--ink)}
+h3{font-size:1.02rem;font-weight:600;margin:26px 0 8px;color:var(--ink)}
+p{margin:0 0 12px}
+.note{background:var(--amber-soft);border-left:3px solid var(--amber);padding:10px 14px;margin:14px 0;font-size:.95rem}
+.formula{background:var(--blue-soft);padding:10px 14px;margin:12px 0;font-size:1.02rem;border-radius:4px}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:18px 18px 14px;margin:16px 0}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px 18px;margin-bottom:12px}
+label{display:block;font-size:.85rem;color:var(--ink2);margin-bottom:3px}
+input[type=number],select{width:100%;font:inherit;padding:6px 8px;border:1px solid var(--rule);border-radius:4px;background:#fff;color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--blue)}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.out{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 16px;margin:12px 0 6px}
+.out div{border-top:1px solid var(--rule);padding-top:6px}
+.out b{display:block;font-size:1.35rem;font-weight:600;color:var(--amber)}
+.out span{font-size:.82rem;color:var(--ink2)}
+svg.chart{width:100%;height:auto;display:block;margin-top:8px}
+svg.chart text{font-family:inherit;font-size:11px;fill:var(--ink2)}
+svg.chart .axis{stroke:var(--ink2);stroke-width:1}
+svg.chart .grid{stroke:var(--rule);stroke-width:1}
+svg.chart .line{fill:none;stroke:var(--blue);stroke-width:2}
+svg.chart .line2{fill:none;stroke:var(--amber);stroke-width:2;stroke-dasharray:5 4}
+svg.chart .marker{fill:var(--amber)}
+table{width:100%;border-collapse:collapse;font-size:.92rem;margin:10px 0}
+th,td{text-align:left;padding:8px 8px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:600;border-bottom:2px solid var(--ink)}
+.tag{display:inline-block;font-size:.75rem;padding:1px 7px;border-radius:10px;background:var(--blue-soft);color:var(--blue);margin-right:4px}
+.tag.pay{background:var(--amber-soft);color:var(--amber)}
+.tag.win{background:#F4E1E1;color:var(--red)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+button.f{font:inherit;font-size:.85rem;padding:5px 12px;border:1px solid var(--rule);background:#fff;border-radius:16px;cursor:pointer;color:var(--ink2)}
+button.f[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.bayer{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.bayer svg{width:100%;height:auto;display:block}
+.legend{font-size:.85rem;color:var(--ink2)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:middle;margin-right:4px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+ul{padding-left:20px;margin:0 0 12px}
+li{margin-bottom:5px}
+footer{margin-top:60px;font-size:.85rem;color:var(--ink2);border-top:1px solid var(--rule);padding-top:12px}
+@media (max-width:820px){.wrap{grid-template-columns:1fr;gap:12px}nav{position:static;display:flex;flex-wrap:wrap;gap:4px 14px}nav a{border-left:none;padding:2px 0}.bayer,.two{grid-template-columns:1fr}html{font-size:16px}}
+@media (prefers-reduced-motion:no-preference){.bayer rect{transition:transform .35s ease}}
+
+/* ---------- convenio bilingüe del repositorio ---------- */
+html[lang="es"] [data-lang="en"]{display:none!important}
+html[lang="en"] [data-lang="es"]{display:none!important}
+.langbar{position:fixed;top:12px;right:14px;z-index:50;display:flex;background:rgba(255,255,255,.94);border:1px solid var(--rule);border-radius:6px;overflow:hidden;backdrop-filter:blur(6px)}
+.langbar button{font:inherit;font-size:12px;letter-spacing:.08em;background:transparent;border:0;color:var(--ink2);padding:7px 11px;cursor:pointer}
+.langbar button+button{border-left:1px solid var(--rule)}
+.langbar button:hover{color:var(--ink)}
+.langbar button.on{background:var(--ink);color:#fff}
+.langbar a.home{display:flex;align-items:center;padding:0 9px;color:var(--ink2);border-right:1px solid var(--rule)}
+.langbar a.home:hover{color:var(--ink)}
+.langbar a.home svg{width:12px;height:12px;display:block}
+@media print{.langbar{display:none!important}}
+</style>
+</head>
+<body>
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <a class="home" href="index.html" title="Portada / Home" aria-label="Portada / Home"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.5 8 2.5l5.5 5v6h-4v-4h-3v4h-4z"/></svg></a>
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
+<div class="wrap">
+<nav aria-label="Secciones" data-aria-es="Secciones" data-aria-en="Sections">
+  <a href="#multishot"><span data-lang="es">1. Multishot del SL3-S</span><span data-lang="en">1. SL3-S multishot</span></a>
+  <a href="#snr"><span data-lang="es">2. Relación señal ruido</span><span data-lang="en">2. Signal-to-noise ratio</span></a>
+  <a href="#color"><span data-lang="es">3. Color y demosaico</span><span data-lang="en">3. Colour and demosaicing</span></a>
+  <a href="#optica"><span data-lang="es">4. Muestreo y óptica</span><span data-lang="en">4. Sampling and optics</span></a>
+  <a href="#astro"><span data-lang="es">5. Deriva sidérea y exposición</span><span data-lang="en">5. Sidereal drift and exposure</span></a>
+  <a href="#software"><span data-lang="es">6. Software de apilado en macOS</span><span data-lang="en">6. Stacking software on macOS</span></a>
+  <a href="#flujo"><span data-lang="es">7. Flujo recomendado</span><span data-lang="en">7. Recommended workflow</span></a>
+  <a href="#eleccion"><span data-lang="es">8. Qué modo elegir en fotografía general</span><span data-lang="en">8. Which mode to choose in general photography</span></a>
+</nav>
+
+<main>
+<header>
+  <h1 data-lang="es">Multishot del Leica SL3-S, ruido y apilado astronómico</h1>
+<h1 data-lang="en">Leica SL3-S multishot, noise and astronomical stacking</h1>
+  <p data-lang="es">Cuaderno técnico con calculadoras. Recoge las conclusiones de la conversación del 1 al 5 de septiembre de 2026 y las herramientas numéricas para reutilizarlas.</p>
+<p data-lang="en">Technical notebook with calculators. It gathers the conclusions of the 1–5 September 2026 conversation and the numerical tools to reuse them.</p>
+  <p data-lang="es">Datos del sensor usados por defecto: formato completo 36×24 mm, 24 MP (6000×4000), paso de píxel 6,0 µm. Se pueden cambiar en cada calculadora.</p>
+<p data-lang="en">Sensor data used by default: full frame 36×24 mm, 24 MP (6000×4000), pixel pitch 6.0 µm. They can be changed in each calculator.</p>
+</header>
+
+<section id="multishot">
+<h2 data-lang="es">1. Cómo funciona el multishot del SL3-S</h2>
+<h2 data-lang="en">1. How the SL3-S multishot works</h2>
+<p data-lang="es">Es un modo de desplazamiento de píxel (pixel shift). La cámara toma una secuencia de exposiciones desplazando el sensor entre cada una con el sistema de estabilización de cinco ejes, y combina los fotogramas en un único DNG en la propia cámara. El sensor tiene 24 MP nativos; el multishot ofrece 48 y 96 MP, con variantes de trípode y a pulso. Los archivos resultantes miden 12000×8000 píxeles.</p>
+<p data-lang="en">It is a pixel-shift mode. The camera takes a sequence of exposures, shifting the sensor between each with the five-axis stabilisation system, and merges the frames into a single DNG in camera. The sensor has 24 MP natively; multishot offers 48 and 96 MP, with tripod and handheld variants. The resulting files measure 12000×8000 pixels.</p>
+<p data-lang="es">Un sensor Bayer solo muestrea un color por fotodiodo y el resto se interpola. Con cuatro desplazamientos de un píxel completo cada punto queda registrado por un fotodiodo rojo, dos verdes y uno azul: desaparece la interpolación cromática y el moiré. Esa es la variante de 48 MP (misma cuadrícula, RGB completo, mejor SNR). Añadiendo desplazamientos de medio píxel se duplica la frecuencia de muestreo en ambos ejes: variante de 96 MP.</p>
+<p data-lang="en">A Bayer sensor samples only one colour per photodiode and the rest is interpolated. With four full-pixel shifts each point is recorded by one red, two green and one blue photodiode: chromatic interpolation and moiré disappear. That is the 48 MP variant (same grid, full RGB, better SNR). Adding half-pixel shifts doubles the sampling frequency on both axes: the 96 MP variant.</p>
+
+<div class="panel bayer">
+  <div>
+    <label for="shift"><span data-lang="es">Posición del sensor en la secuencia</span><span data-lang="en">Sensor position in the sequence</span></label>
+    <input type="range" id="shift" min="0" max="7" value="0" step="1">
+    <p id="shiftLabel" style="margin:6px 0 0;font-weight:600"></p>
+    <p class="legend" style="margin-top:8px"><i style="background:var(--r)"></i>R &nbsp; <i style="background:var(--g)"></i>G &nbsp; <i style="background:var(--b)"></i>B &nbsp; <span data-lang="es">La cruz marca un punto fijo de la escena. La tabla registra qué filtro lo ha muestreado en cada posición.</span><span data-lang="en">The cross marks a fixed point of the scene. The table records which filter has sampled it at each position.</span></p>
+    <table id="sampled" style="font-size:.85rem"><thead><tr data-lang="es"><th>Paso</th><th>Desplazamiento</th><th>Filtro sobre el punto</th></tr><tr data-lang="en"><th>Step</th><th>Shift</th><th>Filter over the point</th></tr></thead><tbody></tbody></table>
+  </div>
+  <div>
+    <svg viewBox="0 0 220 220" id="bayerSvg" aria-label="Diagrama de mosaico Bayer desplazado" data-aria-es="Diagrama de mosaico Bayer desplazado" data-aria-en="Diagram of the shifted Bayer mosaic"></svg>
+  </div>
+</div>
+
+<h3 data-lang="es">Variantes y límites</h3>
+<h3 data-lang="en">Variants and limits</h3>
+<ul data-lang="es">
+  <li>Trípode: los desplazamientos los ejecuta el IBIS de forma controlada. Fusión más rápida.</li>
+  <li>A pulso: el algoritmo usa el temblor natural de la mano como desplazamiento subpíxel aleatorio, registra los fotogramas y resuelve el mosaico por correlación. Fusión de unos 12 s.</li>
+  <li>Solo escenas estáticas: el movimiento entre exposiciones produce artefactos aunque el algoritmo intente enmascararlos.</li>
+  <li>El modo de 96 MP tiene un límite práctico de ISO 3200: el ruido de lectura dificulta el registro subpíxel.</li>
+  <li>La ganancia real de resolución en 96 MP depende de que la óptica resuelva por encima del límite de Nyquist del sensor nativo (sección 4).</li>
+</ul>
+<ul data-lang="en">
+  <li>Tripod: the shifts are executed by the IBIS in a controlled way. Faster merge.</li>
+  <li>Handheld: the algorithm uses natural hand tremor as random sub-pixel displacement, registers the frames and resolves the mosaic by correlation. Merge of about 12 s.</li>
+  <li>Static scenes only: movement between exposures produces artefacts even though the algorithm tries to mask them.</li>
+  <li>The 96 MP mode has a practical limit of ISO 3200: read noise hampers sub-pixel registration.</li>
+  <li>The real resolution gain at 96 MP depends on the lens resolving above the native sensor's Nyquist limit (section 4).</li>
+</ul>
+<p data-lang="es">Propósito: cubrir el hueco entre este cuerpo, orientado a velocidad (30 fps, ISO alto, archivos ligeros), y el SL3 de 60 MP. Sirve para arte, arquitectura, paisaje y retrato pausado.</p>
+<p data-lang="en">Purpose: to fill the gap between this speed-oriented body (30 fps, high ISO, light files) and the 60 MP SL3. It serves art, architecture, landscape and unhurried portraiture.</p>
+</section>
+
+<section id="snr">
+<h2 data-lang="es">2. Relación señal ruido</h2>
+<h2 data-lang="en">2. Signal-to-noise ratio</h2>
+<p data-lang="es">Al promediar N exposiciones, el ruido de disparo (poissoniano) y el de lectura, no correlacionados entre tomas, se reducen en √N mientras la señal se suma coherentemente. En el modo de 48 MP cada posición se muestrea 4 veces: mejora teórica de factor 2, un paso de exposición. En el modo de 96 MP las exposiciones adicionales se invierten en frecuencia espacial, no en promediado: la SNR por píxel de salida es similar a la nativa y la ganancia por unidad de área se conserva.</p>
+<p data-lang="en">When averaging N exposures, shot noise (Poissonian) and read noise, uncorrelated between frames, are reduced by √N while the signal adds coherently. In the 48 MP mode each position is sampled 4 times: a theoretical improvement of factor 2, one stop of exposure. In the 96 MP mode the additional exposures are spent on spatial frequency, not averaging: SNR per output pixel is similar to native and the gain per unit area is preserved.</p>
+<div class="formula">SNR<sub>N</sub> = SNR<sub>1</sub> · √N &nbsp;&nbsp;&nbsp; <span data-lang="es">Ganancia</span><span data-lang="en">Gain</span> = 10·log<sub>10</sub>(N) dB = log<sub>2</sub>(√N) <span data-lang="es">pasos</span><span data-lang="en">stops</span></div>
+<div data-lang="es" class="note">El promediado solo suprime ruido temporal. El ruido de patrón fijo (variación de ganancia u offset entre fotodiodos) es idéntico en cada toma y no se reduce; para eso hacen falta darks y flats, o dithering entre tomas para que un mismo punto de la escena caiga en fotodiodos distintos.</div>
+<div data-lang="en" class="note">Averaging only suppresses temporal noise. Fixed-pattern noise (gain or offset variation between photodiodes) is identical in every frame and is not reduced; that takes darks and flats, or dithering between frames so that the same scene point falls on different photodiodes.</div>
+
+<div class="panel">
+  <div class="controls">
+    <div><label for="nExp"><span data-lang="es">Número de exposiciones N</span><span data-lang="en">Number of exposures N</span></label><input type="number" id="nExp" value="4" min="1" max="1000" step="1"></div>
+    <div><label for="snr1"><span data-lang="es">SNR de una toma (lineal, opcional)</span><span data-lang="en">SNR of one frame (linear, optional)</span></label><input type="number" id="snr1" value="10" min="0.1" step="0.1"></div>
+  </div>
+  <div class="out">
+    <div><b id="oGain"></b><span data-lang="es">factor de mejora de SNR</span><span data-lang="en">SNR improvement factor</span></div>
+    <div><b id="oDb"></b><span>dB</span></div>
+    <div><b id="oStops"></b><span data-lang="es">pasos equivalentes</span><span data-lang="en">equivalent stops</span></div>
+    <div><b id="oSnrN"></b><span data-lang="es">SNR final (lineal)</span><span data-lang="en">final SNR (linear)</span></div>
+  </div>
+  <svg class="chart" id="snrChart" viewBox="0 0 640 260" aria-label="Ganancia de SNR frente a número de exposiciones" data-aria-es="Ganancia de SNR frente a número de exposiciones" data-aria-en="SNR gain against number of exposures"></svg>
+  <p data-lang="es" class="legend">Línea continua: √N. Punto: el valor de N introducido. Referencia: 4 tomas (48 MP) → 2×; 16 tomas → 4×; 64 tomas → 8×. Rendimientos decrecientes: doblar N añade siempre medio paso.</p>
+<p data-lang="en" class="legend">Solid line: √N. Dot: the entered value of N. Reference: 4 frames (48 MP) → 2×; 16 frames → 4×; 64 frames → 8×. Diminishing returns: doubling N always adds half a stop.</p>
+</div>
+</section>
+
+<section id="color">
+<h2 data-lang="es">3. Color: qué mejora y qué no</h2>
+<h2 data-lang="en">3. Colour: what improves and what does not</h2>
+<p data-lang="es">En Bayer la crominancia se muestrea a la mitad de frecuencia que la luminancia y el demosaico la reconstruye por interpolación: falso color en bordes de alto contraste, moiré cromático y pérdida de saturación en detalle fino. Con desplazamiento de píxel completo cada punto obtiene medidas directas R, G y B; la resolución cromática iguala a la luminosa y esos artefactos desaparecen.</p>
+<p data-lang="en">In Bayer, chrominance is sampled at half the frequency of luminance and demosaicing reconstructs it by interpolation: false colour on high-contrast edges, chromatic moiré and loss of saturation in fine detail. With full-pixel shift each point gets direct R, G and B measurements; chromatic resolution equals luminance resolution and those artefacts disappear.</p>
+<p data-lang="es">Lo que no cambia es la colorimetría. Los filtros del CFA son los mismos, con las mismas sensibilidades espectrales: gamut efectivo, metamerismo y precisión de la matriz de conversión a XYZ son idénticos. Mejora la fidelidad espacial del color, no la fidelidad espectral.</p>
+<p data-lang="en">What does not change is colorimetry. The CFA filters are the same, with the same spectral sensitivities: effective gamut, metamerism and the accuracy of the conversion matrix to XYZ are identical. Spatial colour fidelity improves, not spectral fidelity.</p>
+<p data-lang="es">En fuentes puntuales (estrellas) el problema Bayer es real: una estrella de tamaño subpíxel que cae sobre un único fotodiodo rojo o azul sale con color falso o brillo erróneo tras el demosaico. El muestreo RGB completo lo corrige, pero en cielo el registro se rompe por la deriva sidérea (sección 5).</p>
+<p data-lang="en">For point sources (stars) the Bayer problem is real: a sub-pixel star landing on a single red or blue photodiode comes out with false colour or wrong brightness after demosaicing. Full RGB sampling corrects it, but on the sky registration breaks down because of sidereal drift (section 5).</p>
+</section>
+
+<section id="optica">
+<h2 data-lang="es">4. Muestreo, Nyquist y escala angular</h2>
+<h2 data-lang="en">4. Sampling, Nyquist and angular scale</h2>
+<p data-lang="es">La frecuencia de Nyquist del sensor es f<sub>N</sub> = 1/(2p) con p el paso de píxel. El modo de 96 MP equivale a un paso efectivo p/2, lo que dobla f<sub>N</sub>. Si la MTF del objetivo a la frecuencia de Nyquist nativa ya es baja, el modo de 96 MP añade información de color pero no detalle.</p>
+<p data-lang="en">The sensor's Nyquist frequency is f<sub>N</sub> = 1/(2p) with p the pixel pitch. The 96 MP mode is equivalent to an effective pitch of p/2, which doubles f<sub>N</sub>. If the lens MTF at the native Nyquist frequency is already low, the 96 MP mode adds colour information but no detail.</p>
+<div class="formula">f<sub>N</sub> = 1 / (2p) &nbsp;&nbsp;&nbsp; <span data-lang="es">Escala = 206,265 · p[µm] / f[mm]</span><span data-lang="en">Scale = 206.265 · p[µm] / f[mm]</span> &nbsp;["/px] &nbsp;&nbsp;&nbsp; <span data-lang="es">Diámetro de Airy (primer cero) = 2,44 · λ · N</span><span data-lang="en">Airy diameter (first zero) = 2.44 · λ · N</span></div>
+<div class="panel">
+  <div class="controls">
+    <div><label for="pitch"><span data-lang="es">Paso de píxel p (µm)</span><span data-lang="en">Pixel pitch p (µm)</span></label><input type="number" id="pitch" value="6.0" min="1" max="20" step="0.1"></div>
+    <div><label for="focal"><span data-lang="es">Focal f (mm)</span><span data-lang="en">Focal length f (mm)</span></label><input type="number" id="focal" value="24" min="5" max="2000" step="1"></div>
+    <div><label for="fnum"><span data-lang="es">Número f (N)</span><span data-lang="en">f-number (N)</span></label><input type="number" id="fnum" value="2.8" min="0.95" max="32" step="0.1"></div>
+    <div><label for="lambda"><span data-lang="es">Longitud de onda λ (nm)</span><span data-lang="en">Wavelength λ (nm)</span></label><input type="number" id="lambda" value="550" min="380" max="780" step="10"></div>
+  </div>
+  <div class="out">
+    <div><b id="oNyq"></b><span data-lang="es">Nyquist nativo (lp/mm)</span><span data-lang="en">native Nyquist (lp/mm)</span></div>
+    <div><b id="oNyq2"></b><span>Nyquist 96 MP (lp/mm)</span></div>
+    <div><b id="oScale"></b><span data-lang="es">escala nativa ("/px)</span><span data-lang="en">native scale ("/px)</span></div>
+    <div><b id="oAiry"></b><span data-lang="es">disco de Airy (µm) vs paso</span><span data-lang="en">Airy disc (µm) vs pitch</span></div>
+    <div><b id="oFov"></b><span data-lang="es">campo horizontal (°) a 36 mm</span><span data-lang="en">horizontal field (°) over 36 mm</span></div>
+    <div><b id="oCut"></b><span data-lang="es">corte de difracción 1/(λN) (lp/mm)</span><span data-lang="en">diffraction cut-off 1/(λN) (lp/mm)</span></div>
+    <div><b id="oMtf1"></b><span data-lang="es">MTF difracción en Nyquist nativo</span><span data-lang="en">diffraction MTF at native Nyquist</span></div>
+    <div><b id="oMtf2"></b><span data-lang="es">MTF difracción en Nyquist 96 MP</span><span data-lang="en">diffraction MTF at 96 MP Nyquist</span></div>
+  </div>
+  <p class="legend" id="airyNote"></p>
+</div>
+</section>
+
+<section id="astro">
+<h2 data-lang="es">5. Deriva sidérea y tiempo de exposición</h2>
+<h2 data-lang="en">5. Sidereal drift and exposure time</h2>
+<p data-lang="es">La rotación terrestre desplaza el cielo 15,041 "/s · cos δ, con δ la declinación. La secuencia multishot dura varios segundos entre exposiciones largas, así que el registro subpíxel se rompe salvo montura de seguimiento, y con seguimiento el suelo se mueve respecto al cielo. Para cielo, apilado convencional con software (sección 6).</p>
+<p data-lang="en">The Earth's rotation shifts the sky by 15.041 "/s · cos δ, with δ the declination. The multishot sequence lasts several seconds between long exposures, so sub-pixel registration breaks down without a tracking mount, and with tracking the ground moves relative to the sky. For the sky, conventional software stacking (section 6).</p>
+<div class="formula"><span data-lang="es">Deriva = 15,041 · cos δ &nbsp;["/s] &nbsp;&nbsp;&nbsp; t<sub>1px</sub> = Escala / Deriva</span><span data-lang="en">Drift = 15.041 · cos δ &nbsp;["/s] &nbsp;&nbsp;&nbsp; t<sub>1px</sub> = Scale / Drift</span> &nbsp;&nbsp;&nbsp; NPF ≈ (35·N + 30·p) / f &nbsp;[s] &nbsp;&nbsp;&nbsp; <span data-lang="es">Regla 500</span><span data-lang="en">500 rule</span> = 500 / f &nbsp;[s]</div>
+<div class="panel">
+  <div class="controls">
+    <div><label for="aFocal"><span data-lang="es">Focal f (mm)</span><span data-lang="en">Focal length f (mm)</span></label><input type="number" id="aFocal" value="24" min="5" max="2000" step="1"></div>
+    <div><label for="aPitch"><span data-lang="es">Paso de píxel p (µm)</span><span data-lang="en">Pixel pitch p (µm)</span></label><input type="number" id="aPitch" value="6.0" min="1" max="20" step="0.1"></div>
+    <div><label for="aFnum"><span data-lang="es">Número f (N)</span><span data-lang="en">f-number (N)</span></label><input type="number" id="aFnum" value="2.8" min="0.95" max="32" step="0.1"></div>
+    <div><label for="dec"><span data-lang="es">Declinación δ (°)</span><span data-lang="en">Declination δ (°)</span></label><input type="number" id="dec" value="0" min="0" max="89" step="1"></div>
+    <div><label for="tol"><span data-lang="es">Traza tolerada (px)</span><span data-lang="en">Tolerated trail (px)</span></label><input type="number" id="tol" value="1" min="0.25" max="10" step="0.25"></div>
+  </div>
+  <div class="out">
+    <div><b id="oDrift"></b><span data-lang="es">deriva ("/s)</span><span data-lang="en">drift ("/s)</span></div>
+    <div><b id="oT1"></b><span data-lang="es">s para la traza tolerada</span><span data-lang="en">s for the tolerated trail</span></div>
+    <div><b id="oNpf"></b><span data-lang="es">NPF simplificada (s)</span><span data-lang="en">simplified NPF (s)</span></div>
+    <div><b id="o500"></b><span data-lang="es">regla 500 (s)</span><span data-lang="en">500 rule (s)</span></div>
+  </div>
+  <svg class="chart" id="driftChart" viewBox="0 0 640 260" aria-label="Tiempo hasta traza tolerada frente a focal" data-aria-es="Tiempo hasta traza tolerada frente a focal" data-aria-en="Time to tolerated trail against focal length"></svg>
+  <p data-lang="es" class="legend">Continua: segundos hasta la traza tolerada con los parámetros actuales (eje vertical logarítmico). Discontinua: regla NPF. Punto: focal introducida. A f = 24 mm y δ = 0, una estrella cruza un píxel de 6 µm en unos 3,4 s; cualquier secuencia multishot de varios segundos excede ese margen.</p>
+<p data-lang="en" class="legend">Solid: seconds to the tolerated trail with the current parameters (logarithmic vertical axis). Dashed: NPF rule. Dot: entered focal length. At f = 24 mm and δ = 0, a star crosses a 6 µm pixel in about 3.4 s; any multishot sequence of several seconds exceeds that margin.</p>
+</div>
+<div data-lang="es" class="note">La regla 500 es una aproximación de la era de 12 MP; con paso de 6 µm sobreestima el tiempo permitido. NPF (Frédéric Michaud) tiene en cuenta apertura y paso de píxel; la versión completa añade un término en focal y divide por cos δ.</div>
+<div data-lang="en" class="note">The 500 rule is an approximation from the 12 MP era; with a 6 µm pitch it overestimates the allowed time. NPF (Frédéric Michaud) accounts for aperture and pixel pitch; the full version adds a focal-length term and divides by cos δ.</div>
+</section>
+
+<section id="software">
+<h2 data-lang="es">6. Software de apilado en macOS</h2>
+<h2 data-lang="en">6. Stacking software on macOS</h2>
+<p data-lang="es">Sequator y DeepSkyStacker son solo Windows. Alternativas que funcionan en Mac:</p>
+<p data-lang="en">Sequator and DeepSkyStacker are Windows-only. Alternatives that work on a Mac:</p>
+<div class="filters" role="group" aria-label="Filtrar software" data-aria-es="Filtrar software" data-aria-en="Filter software">
+  <button class="f" data-f="all" aria-pressed="true"><span data-lang="es">Todo</span><span data-lang="en">All</span></button>
+  <button class="f" data-f="free" aria-pressed="false"><span data-lang="es">Gratuito</span><span data-lang="en">Free</span></button>
+  <button class="f" data-f="pay" aria-pressed="false"><span data-lang="es">De pago</span><span data-lang="en">Paid</span></button>
+  <button class="f" data-f="land" aria-pressed="false"><span data-lang="es">Paisaje nocturno</span><span data-lang="en">Night landscape</span></button>
+  <button class="f" data-f="deep" aria-pressed="false"><span data-lang="es">Cielo profundo</span><span data-lang="en">Deep sky</span></button>
+  <button class="f" data-f="plan" aria-pressed="false"><span data-lang="es">Planetaria</span><span data-lang="en">Planetary</span></button>
+</div>
+<table class="swTable" data-lang="es">
+<thead><tr><th>Software</th><th>Coste</th><th>Uso</th><th>Observaciones</th></tr></thead>
+<tbody>
+<tr data-c="free deep land"><td>Siril</td><td><span class="tag">gratis</span></td><td>Cielo profundo, paisaje con máscara</td><td>Estándar de facto libre. Registro astrométrico, rechazo estadístico, calibración con darks/flats/bias, scripting y cientos de scripts comunitarios. GraXpert como complemento para gradientes. Convertir DNG a FITS con su propio conversor.</td></tr>
+<tr data-c="free deep"><td>ASTAP</td><td><span class="tag">gratis</span></td><td>Cielo profundo, resolución astrométrica</td><td>Interfaz espartana, motor sólido. Útil también como solver para Siril.</td></tr>
+<tr data-c="free plan"><td>Lynkeos</td><td><span class="tag">gratis</span></td><td>Planetaria y Luna</td><td>Nativo de macOS. Apilado de vídeo tipo lucky imaging. No para cielo profundo.</td></tr>
+<tr data-c="pay land"><td>Starry Landscape Stacker</td><td><span class="tag pay">~40 USD</span></td><td>Paisaje nocturno sin montura</td><td>Separa cielo y suelo con máscara, alinea estrellas y promedia cada parte. Lo más directo para nightscapes con la SL3-S. App Store.</td></tr>
+<tr data-c="pay deep land"><td>Astro Pixel Processor</td><td><span class="tag pay">~90 EUR o suscripción</span></td><td>Cielo profundo, mosaicos</td><td>Extracción de gradientes de referencia, mosaicos casi automáticos, integración de sesiones heterogéneas con pesado por calidad. Flujo guiado en pestañas. Cerrado, más lento, desarrollo más pausado.</td></tr>
+<tr data-c="pay deep"><td>PixInsight</td><td><span class="tag pay">~250 EUR</span></td><td>Cielo profundo avanzado</td><td>Estándar profesional. Potencia máxima, curva de aprendizaje considerable. Excesivo para paisajes nocturnos.</td></tr>
+<tr data-c="win"><td>Sequator, DeepSkyStacker, AutoStakkert</td><td><span class="tag win">solo Windows</span></td><td>Referencia en Windows</td><td>No hay versión macOS. Posibles vía máquina virtual o Wine/CrossOver.</td></tr>
+</tbody>
+</table>
+<table class="swTable" data-lang="en">
+<thead><tr><th>Software</th><th>Cost</th><th>Use</th><th>Notes</th></tr></thead>
+<tbody>
+<tr data-c="free deep land"><td>Siril</td><td><span class="tag">free</span></td><td>Deep sky, landscape with mask</td><td>The de facto free standard. Astrometric registration, statistical rejection, calibration with darks/flats/bias, scripting and hundreds of community scripts. GraXpert as a complement for gradients. Convert DNG to FITS with its own converter.</td></tr>
+<tr data-c="free deep"><td>ASTAP</td><td><span class="tag">free</span></td><td>Deep sky, plate solving</td><td>Spartan interface, solid engine. Also useful as a solver for Siril.</td></tr>
+<tr data-c="free plan"><td>Lynkeos</td><td><span class="tag">free</span></td><td>Planetary and lunar</td><td>Native to macOS. Lucky-imaging video stacking. Not for deep sky.</td></tr>
+<tr data-c="pay land"><td>Starry Landscape Stacker</td><td><span class="tag pay">~40 USD</span></td><td>Night landscape without a mount</td><td>Separates sky and ground with a mask, aligns stars and averages each part. The most direct route for nightscapes with the SL3-S. App Store.</td></tr>
+<tr data-c="pay deep land"><td>Astro Pixel Processor</td><td><span class="tag pay">~90 EUR or subscription</span></td><td>Deep sky, mosaics</td><td>Reference gradient extraction, near-automatic mosaics, integration of heterogeneous sessions with quality weighting. Guided tabbed workflow. Closed, slower, more leisurely development.</td></tr>
+<tr data-c="pay deep"><td>PixInsight</td><td><span class="tag pay">~250 EUR</span></td><td>Advanced deep sky</td><td>The professional standard. Maximum power, considerable learning curve. Overkill for night landscapes.</td></tr>
+<tr data-c="win"><td>Sequator, DeepSkyStacker, AutoStakkert</td><td><span class="tag win">Windows only</span></td><td>Reference on Windows</td><td>No macOS version. Possible via virtual machine or Wine/CrossOver.</td></tr>
+</tbody>
+</table>
+
+<h3 data-lang="es">Astro Pixel Processor frente a Siril</h3>
+<h3 data-lang="en">Astro Pixel Processor versus Siril</h3>
+<div class="two" data-lang="es">
+  <div>
+    <p><strong>Siril gana en</strong></p>
+    <ul>
+      <li>Coste cero y código abierto.</li>
+      <li>Ecosistema: comunidad enorme, scripts, lenguaje de automatización.</li>
+      <li>Ritmo de desarrollo: deconvolución, fotometría, solver local, integración con GraXpert.</li>
+      <li>Calidad de registro y apilado equiparable a APP en cielo profundo estándar.</li>
+    </ul>
+  </div>
+  <div>
+    <p><strong>APP justifica su precio en</strong></p>
+    <ul>
+      <li>Extracción de gradientes y contaminación lumínica severa.</li>
+      <li>Mosaicos multipanel con normalización fotométrica.</li>
+      <li>Combinación de sesiones, ópticas y escalas distintas.</li>
+      <li>Interfaz guiada sin necesidad de scripting.</li>
+    </ul>
+  </div>
+</div>
+<div class="two" data-lang="en">
+  <div>
+    <p><strong>Siril wins on</strong></p>
+    <ul>
+      <li>Zero cost and open source.</li>
+      <li>Ecosystem: huge community, scripts, automation language.</li>
+      <li>Pace of development: deconvolution, photometry, local solver, GraXpert integration.</li>
+      <li>Registration and stacking quality comparable to APP for standard deep sky.</li>
+    </ul>
+  </div>
+  <div>
+    <p><strong>APP justifies its price on</strong></p>
+    <ul>
+      <li>Gradient extraction and severe light pollution.</li>
+      <li>Multi-panel mosaics with photometric normalisation.</li>
+      <li>Combining sessions, optics and different scales.</li>
+      <li>Guided interface with no need for scripting.</li>
+    </ul>
+  </div>
+</div>
+<p data-lang="es">Criterio práctico: sesión única con la SL3-S y cielo razonable → Siril. Mosaicos, muchas sesiones o contaminación lumínica severa → APP. Combinar ambos complica el flujo sin necesidad al empezar.</p>
+<p data-lang="en">Practical criterion: a single session with the SL3-S and a reasonable sky → Siril. Mosaics, many sessions or severe light pollution → APP. Combining both complicates the workflow needlessly when starting out.</p>
+</section>
+
+<section id="flujo">
+<h2 data-lang="es">7. Flujo recomendado</h2>
+<h2 data-lang="en">7. Recommended workflow</h2>
+<table data-lang="es">
+<thead><tr><th>Situación</th><th>Modo o herramienta</th><th>Motivo</th></tr></thead>
+<tbody>
+<tr><td>Arquitectura, interior o nocturna urbana, escena estática</td><td>Multishot 48 MP</td><td>Un paso de SNR y color RGB completo sin cambiar de flujo.</td></tr>
+<tr><td>Arte, reproducción, paisaje con óptica que resuelve</td><td>Multishot 96 MP, trípode, ISO ≤ 3200</td><td>Detalle real solo si la MTF del objetivo lo permite (sección 4).</td></tr>
+<tr><td>Paisaje nocturno con suelo</td><td>Tomas individuales ≤ NPF + Starry Landscape Stacker</td><td>Alineación separada de cielo y suelo.</td></tr>
+<tr><td>Solo cielo, sin montura</td><td>Tomas individuales ≤ NPF + Siril con dithering</td><td>Apilado de N grande con rechazo de aviones y satélites; el dithering promedia el CFA.</td></tr>
+<tr><td>Cielo profundo con montura</td><td>Siril, o APP si hay mosaicos o gradientes fuertes</td><td>Ver sección 6.</td></tr>
+<tr><td>Cualquier astro</td><td>Evitar multishot</td><td>Apilado rígido de N pequeño sin alineación astrométrica, deriva > 1 px durante la secuencia.</td></tr>
+</tbody>
+</table>
+<table data-lang="en">
+<thead><tr><th>Situation</th><th>Mode or tool</th><th>Reason</th></tr></thead>
+<tbody>
+<tr><td>Architecture, interiors or urban night, static scene</td><td>Multishot 48 MP</td><td>One stop of SNR and full RGB colour without changing the workflow.</td></tr>
+<tr><td>Art, reproduction, landscape with a lens that resolves</td><td>Multishot 96 MP, tripod, ISO ≤ 3200</td><td>Real detail only if the lens MTF allows it (section 4).</td></tr>
+<tr><td>Night landscape with foreground</td><td>Single frames ≤ NPF + Starry Landscape Stacker</td><td>Separate alignment of sky and ground.</td></tr>
+<tr><td>Sky only, no mount</td><td>Single frames ≤ NPF + Siril with dithering</td><td>Large-N stacking with rejection of planes and satellites; dithering averages out the CFA.</td></tr>
+<tr><td>Deep sky with a mount</td><td>Siril, or APP if there are mosaics or strong gradients</td><td>See section 6.</td></tr>
+<tr><td>Any astro</td><td>Avoid multishot</td><td>Rigid stacking of small N without astrometric alignment, drift > 1 px during the sequence.</td></tr>
+</tbody>
+</table>
+</section>
+
+<section id="eleccion">
+<h2 data-lang="es">8. Qué modo elegir en fotografía general y paisaje</h2>
+<h2 data-lang="en">8. Which mode to choose in general and landscape photography</h2>
+<p data-lang="es">La respuesta corta: el modo por defecto para casi todo es el sensor nativo de 24 MP. El multishot solo se activa cuando se cumplen a la vez tres condiciones: escena estática durante varios segundos, destino que aproveche la resolución o la limpieza (impresión grande, recorte fuerte, reproducción) y, para el modo de 96 MP, una combinación de objetivo y diafragma que resuelva por encima del Nyquist nativo.</p>
+<p data-lang="en">The short answer: the default mode for almost everything is the native 24 MP sensor. Multishot is only switched on when three conditions hold at once: a scene static for several seconds, a destination that uses the resolution or the cleanliness (large print, heavy crop, reproduction) and, for the 96 MP mode, a lens-and-aperture combination that resolves above the native Nyquist.</p>
+
+<h3 data-lang="es">Por qué el diafragma decide entre 48 y 96 MP</h3>
+<h3 data-lang="en">Why the aperture decides between 48 and 96 MP</h3>
+<p data-lang="es">Con paso de 6 µm el Nyquist nativo está en 83 lp/mm y el de 96 MP en 167 lp/mm. La difracción, con λ = 550 nm, corta en 1/(λN): 325 lp/mm a f/5,6, 227 lp/mm a f/8, 165 lp/mm a f/11. La MTF de difracción en 167 lp/mm vale aproximadamente 38 % a f/5,6, 16 % a f/8 y 0 % a f/11, antes de descontar las aberraciones del objetivo. Conclusión: a partir de f/8 el modo de 96 MP ya casi no captura detalle adicional, y a f/11 o más cerrado ninguno. Los diafragmas habituales de paisaje están justo en esa frontera. La calculadora de la sección 4 da las cifras para cualquier combinación.</p>
+<p data-lang="en">With a 6 µm pitch the native Nyquist is at 83 lp/mm and the 96 MP one at 167 lp/mm. Diffraction, with λ = 550 nm, cuts off at 1/(λN): 325 lp/mm at f/5.6, 227 lp/mm at f/8, 165 lp/mm at f/11. The diffraction MTF at 167 lp/mm is roughly 38 % at f/5.6, 16 % at f/8 and 0 % at f/11, before discounting the lens aberrations. Conclusion: from f/8 the 96 MP mode captures almost no additional detail, and at f/11 or smaller none. The usual landscape apertures sit right on that border. The calculator in section 4 gives the figures for any combination.</p>
+
+<h3 data-lang="es">Por qué el movimiento decide entre multishot y sensor nativo</h3>
+<h3 data-lang="en">Why movement decides between multishot and native sensor</h3>
+<p data-lang="es">Hojas, agua, nubes rápidas, hierba, personas o tráfico se desplazan entre exposiciones y el algoritmo de fusión no puede resolverlo: enmascara la zona con datos de un solo fotograma, con lo que esa región vuelve a ser Bayer de 24 MP escalado, o deja artefactos. La secuencia de 96 MP (8 tomas) es más larga y más vulnerable que la de 48 MP (4 tomas). En paisaje con viento moderado el modo de 48 MP suele salir limpio y el de 96 MP no.</p>
+<p data-lang="en">Leaves, water, fast clouds, grass, people or traffic move between exposures and the merge algorithm cannot resolve it: it masks the zone with data from a single frame, so that region becomes upscaled 24 MP Bayer again, or leaves artefacts. The 96 MP sequence (8 frames) is longer and more vulnerable than the 48 MP one (4 frames). In landscape with moderate wind the 48 MP mode usually comes out clean and the 96 MP one does not.</p>
+
+<h3 data-lang="es">Cuadro de decisión</h3>
+<h3 data-lang="en">Decision table</h3>
+<table data-lang="es">
+<thead><tr><th>Situación</th><th>Modo</th><th>Motivo</th></tr></thead>
+<tbody>
+<tr><td>Uso general, gente, calle, viaje, cualquier cosa a pulso con prisa</td><td>24 MP nativo</td><td>El multishot exige inmovilidad de escena y varios segundos; su ventaja no compensa el riesgo de artefactos ni el tiempo de fusión.</td></tr>
+<tr><td>Paisaje en trípode, aire quieto, objetivo de calidad a f/4 a f/5,6, impresión grande</td><td>96 MP trípode</td><td>MTF de difracción suficiente en 167 lp/mm; ganancia de detalle real además del color RGB completo.</td></tr>
+<tr><td>Paisaje en trípode a f/8 o más cerrado</td><td>48 MP trípode</td><td>El detalle adicional de 96 MP queda anulado por la difracción; 48 MP da el color completo y un paso de SNR con la mitad de tomas y menos riesgo.</td></tr>
+<tr><td>Paisaje con viento, agua o nubes en movimiento</td><td>48 MP, o 24 MP nativo si el movimiento es amplio</td><td>Secuencia más corta, menos probabilidad de artefactos. Con mucho movimiento, ningún multishot es fiable.</td></tr>
+<tr><td>Interior oscuro, arquitectura nocturna, escena estática sin trípode</td><td>48 MP a pulso</td><td>Es el caso donde el promediado de 4 tomas aporta más: sombras un paso más limpias sin trípode ni ISO más alto.</td></tr>
+<tr><td>Arquitectura, arte, reproducción, producto en estudio con trípode</td><td>96 MP trípode, ISO bajo</td><td>Escena controlada, luz controlada, diafragma elegible; el modo rinde todo lo que promete.</td></tr>
+<tr><td>Cualquier cielo nocturno</td><td>24 MP nativo y apilado externo</td><td>Sección 5.</td></tr>
+</tbody>
+</table>
+<table data-lang="en">
+<thead><tr><th>Situation</th><th>Mode</th><th>Reason</th></tr></thead>
+<tbody>
+<tr><td>General use, people, street, travel, anything handheld in a hurry</td><td>24 MP native</td><td>Multishot demands a still scene and several seconds; its advantage does not offset the risk of artefacts or the merge time.</td></tr>
+<tr><td>Landscape on a tripod, still air, quality lens at f/4 to f/5.6, large print</td><td>96 MP tripod</td><td>Sufficient diffraction MTF at 167 lp/mm; real detail gain in addition to full RGB colour.</td></tr>
+<tr><td>Landscape on a tripod at f/8 or smaller</td><td>48 MP tripod</td><td>The additional 96 MP detail is cancelled by diffraction; 48 MP gives full colour and one stop of SNR with half the frames and less risk.</td></tr>
+<tr><td>Landscape with wind, water or moving clouds</td><td>48 MP, or 24 MP native if the movement is broad</td><td>Shorter sequence, lower chance of artefacts. With a lot of movement, no multishot is reliable.</td></tr>
+<tr><td>Dark interior, night architecture, static scene without tripod</td><td>48 MP handheld</td><td>The case where averaging 4 frames helps most: shadows one stop cleaner without tripod or higher ISO.</td></tr>
+<tr><td>Architecture, art, reproduction, studio product on a tripod</td><td>96 MP tripod, low ISO</td><td>Controlled scene, controlled light, selectable aperture; the mode delivers everything it promises.</td></tr>
+<tr><td>Any night sky</td><td>24 MP native and external stacking</td><td>Section 5.</td></tr>
+</tbody>
+</table>
+<p data-lang="es">Coste práctico a tener en cuenta: un DNG de 96 MP ocupa unas cuatro veces el nativo, la fusión bloquea la cámara varios segundos y el ISO queda limitado a 3200. Por eso conviene guardar también la toma individual, opción que la cámara ofrece, como respaldo si la fusión falla.</p>
+<p data-lang="en">Practical cost to bear in mind: a 96 MP DNG takes about four times the native size, the merge locks the camera for several seconds and ISO is limited to 3200. Hence it is wise to also save the single frame, an option the camera offers, as a fallback if the merge fails.</p>
+
+<div class="panel">
+  <p style="margin-bottom:10px" data-lang="es"><strong>Asistente de decisión</strong>. Introduce las condiciones de la toma y obtén el modo recomendado con su justificación.</p>
+  <p style="margin-bottom:10px" data-lang="en"><strong>Decision assistant</strong>. Enter the shooting conditions and get the recommended mode with its justification.</p>
+  <div class="controls">
+    <div><label for="dSupport"><span data-lang="es">Soporte</span><span data-lang="en">Support</span></label><select id="dSupport"><option value="tripod" data-es="Trípode" data-en="Tripod">Trípode</option><option value="hand" data-es="A pulso" data-en="Handheld">A pulso</option></select></div>
+    <div><label for="dMotion"><span data-lang="es">Movimiento en la escena</span><span data-lang="en">Movement in the scene</span></label><select id="dMotion"><option value="none" data-es="Ninguno" data-en="None">Ninguno</option><option value="some" data-es="Leve (hojas, nubes lentas)" data-en="Slight (leaves, slow clouds)">Leve (hojas, nubes lentas)</option><option value="much" data-es="Evidente (agua, gente, viento)" data-en="Obvious (water, people, wind)">Evidente (agua, gente, viento)</option></select></div>
+    <div><label for="dF"><span data-lang="es">Número f</span><span data-lang="en">f-number</span></label><input type="number" id="dF" value="5.6" min="0.95" max="32" step="0.1"></div>
+    <div><label for="dIso"><span data-lang="es">ISO previsto</span><span data-lang="en">Expected ISO</span></label><input type="number" id="dIso" value="100" min="50" max="200000" step="50"></div>
+    <div><label for="dOut"><span data-lang="es">Destino</span><span data-lang="en">Destination</span></label><select id="dOut"><option value="screen" data-es="Pantalla o impresión pequeña" data-en="Screen or small print">Pantalla o impresión pequeña</option><option value="print" data-es="Impresión grande o recorte fuerte" data-en="Large print or heavy crop">Impresión grande o recorte fuerte</option><option value="repro" data-es="Reproducción o archivo" data-en="Reproduction or archive">Reproducción o archivo</option></select></div>
+    <div><label for="dLight"><span data-lang="es">Nivel de luz</span><span data-lang="en">Light level</span></label><select id="dLight"><option value="good" data-es="Suficiente" data-en="Sufficient">Suficiente</option><option value="low" data-es="Escaso, sombras importantes" data-en="Scarce, significant shadows">Escaso, sombras importantes</option></select></div>
+  </div>
+  <div class="out" style="grid-template-columns:1fr">
+    <div><b id="dMode"></b><span id="dWhy"></span></div>
+  </div>
+</div>
+</section>
+
+<footer><span data-lang="es">Constantes: velocidad sidérea 15,041 "/s; 206265 "/rad. NPF simplificada de F. Michaud. Cifras del SL3-S según documentación de Leica y pruebas publicadas en 2025; verificar con el firmware instalado. Del mismo sitio: <a href="leica-sensores.html">los datos del sensor de M11, Q3 y SL3-S</a>, el <a href="manual-siril-apilado.html">manual de Siril</a> y el <a href="binning-m11.html">binning de la M11</a>.</span><span data-lang="en">Constants: sidereal rate 15.041 "/s; 206265 "/rad. Simplified NPF after F. Michaud. SL3-S figures per Leica documentation and tests published in 2025; verify against the installed firmware. From this same site: <a href="leica-sensores.html">the sensor data of the M11, Q3 and SL3-S</a>, the <a href="manual-siril-apilado.html">Siril manual</a> and the <a href="binning-m11.html">M11 binning</a>.</span></footer>
+</main>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const LANG=()=>document.documentElement.lang==="en"?"en":"es";
+const LOC=()=>LANG()==="en"?"en-GB":"es-ES";
+const D={
+ es:{steps:["Origen","+1 px en x","+1 px en x, +1 px en y","+1 px en y","+½ px en x e y","+1½ px en x, +½ px en y","+1½ px en x e y","+½ px en x, +1½ px en y"],
+     stepOf:(k)=>`Paso ${k+1} de 8: `, b48:" (bloque de 48 MP)", b96:" (bloque adicional para 96 MP)", edge:"borde entre fotodiodos (muestreo subpíxel)", scenePt:"punto de la escena",
+     xN:"N exposiciones promediadas", yGain:"ganancia de SNR (×)", xF:"focal (mm)", ySec:"segundos",
+     airy1:a=>`El disco de Airy (${a} µm) es menor que el paso de píxel: el sistema está limitado por el sensor y el modo de 96 MP puede aportar detalle real, si las aberraciones del objetivo lo permiten.`,
+     airy2:a=>`El disco de Airy (${a} µm) es comparable al paso de píxel: región de transición. El modo de 96 MP aportará algo de detalle, decreciente al cerrar el diafragma.`,
+     airy3:a=>`El disco de Airy (${a} µm) supera claramente el paso de píxel: difracción dominante. El modo de 96 MP añade color RGB completo pero apenas detalle; abrir el diafragma o quedarse en 48 MP.`,
+     m24:"24 MP nativo", m48h:"48 MP a pulso o trípode", m48hand:"48 MP a pulso", m48t:"48 MP trípode", m96t:"96 MP trípode",
+     wMuch:"Con movimiento evidente ningún multishot registra bien; el resultado tendría zonas enmascaradas o artefactos. Si hace falta más resolución, panorámica por barrido y unión en software.",
+     wIso:(iso,low)=>"ISO "+iso+" supera el límite del modo de 96 MP. "+(low?"El promediado de 4 tomas recupera un paso de SNR, útil con sombras importantes.":"Sin necesidad de limpiar sombras, el nativo es más rápido y seguro."),
+     wScreen:"El destino no aprovecha la resolución adicional y la luz no exige promediado. El multishot solo añadiría tiempo de fusión y tamaño de archivo.",
+     wHand:(some)=>"A pulso el registro subpíxel de 96 MP es menos fiable y la secuencia más larga. El modo de 48 MP da color RGB completo y un paso de SNR"+(some?", y con movimiento leve tolera mejor la escena.":"."),
+     wSome:"Con movimiento leve la secuencia de 4 tomas tiene menos probabilidad de artefactos que la de 8. Se conserva el color completo y la ganancia de SNR.",
+     wMtf:(N,m)=>"A f/"+N+" la MTF de difracción en el Nyquist de 96 MP es de "+m+" %: el detalle adicional queda anulado. Abre a f/4 a f/5,6 si quieres 96 MP; si no, 48 MP aprovecha lo que hay.",
+     w96:(N,m)=>"Escena estática, trípode, ISO ≤ 3200 y MTF de difracción del "+m+" % en 167 lp/mm a f/"+N+": condiciones para ganancia de detalle real. Guarda también la toma individual como respaldo."},
+ en:{steps:["Origin","+1 px in x","+1 px in x, +1 px in y","+1 px in y","+½ px in x and y","+1½ px in x, +½ px in y","+1½ px in x and y","+½ px in x, +1½ px in y"],
+     stepOf:(k)=>`Step ${k+1} of 8: `, b48:" (48 MP block)", b96:" (additional block for 96 MP)", edge:"boundary between photodiodes (sub-pixel sampling)", scenePt:"scene point",
+     xN:"N averaged exposures", yGain:"SNR gain (×)", xF:"focal length (mm)", ySec:"seconds",
+     airy1:a=>`The Airy disc (${a} µm) is smaller than the pixel pitch: the system is sensor-limited and the 96 MP mode can add real detail, if the lens aberrations allow it.`,
+     airy2:a=>`The Airy disc (${a} µm) is comparable to the pixel pitch: transition region. The 96 MP mode will add some detail, decreasing as the aperture closes.`,
+     airy3:a=>`The Airy disc (${a} µm) clearly exceeds the pixel pitch: diffraction dominates. The 96 MP mode adds full RGB colour but hardly any detail; open the aperture or stay at 48 MP.`,
+     m24:"24 MP native", m48h:"48 MP handheld or tripod", m48hand:"48 MP handheld", m48t:"48 MP tripod", m96t:"96 MP tripod",
+     wMuch:"With obvious movement no multishot registers well; the result would have masked zones or artefacts. If more resolution is needed, a swept panorama stitched in software.",
+     wIso:(iso,low)=>"ISO "+iso+" exceeds the limit of the 96 MP mode. "+(low?"Averaging 4 frames recovers one stop of SNR, useful with significant shadows.":"With no shadows to clean, native is faster and safer."),
+     wScreen:"The destination does not use the additional resolution and the light does not call for averaging. Multishot would only add merge time and file size.",
+     wHand:(some)=>"Handheld, the 96 MP sub-pixel registration is less reliable and the sequence longer. The 48 MP mode gives full RGB colour and one stop of SNR"+(some?", and with slight movement it tolerates the scene better.":"."),
+     wSome:"With slight movement the 4-frame sequence is less likely to show artefacts than the 8-frame one. Full colour and the SNR gain are kept.",
+     wMtf:(N,m)=>"At f/"+N+" the diffraction MTF at the 96 MP Nyquist is "+m+" %: the additional detail is cancelled. Open to f/4–f/5.6 if you want 96 MP; otherwise 48 MP makes the most of what there is.",
+     w96:(N,m)=>"Static scene, tripod, ISO ≤ 3200 and a diffraction MTF of "+m+" % at 167 lp/mm at f/"+N+": conditions for real detail gain. Save the single frame too as a fallback."}
+};
+const T=k=>D[LANG()][k];
+const fmt=(x,d)=>Number.isFinite(x)?x.toLocaleString(LOC(),{maximumFractionDigits:d,minimumFractionDigits:d}):"—";
+
+/* ---------- Bayer diagram ---------- */
+const steps=[{dx:0,dy:0},{dx:1,dy:0},{dx:1,dy:1},{dx:0,dy:1},{dx:.5,dy:.5},{dx:1.5,dy:.5},{dx:1.5,dy:1.5},{dx:.5,dy:1.5}];
+const stepLabel=k=>T("steps")[k];
+const cell=40, n=4, off=30;
+const svg=$("bayerSvg");
+const col=(i,j)=>((i+j)%2===1)?"G":((i%2===0)?"R":"B");
+const fill={R:"var(--r)",G:"var(--g)",B:"var(--b)"};
+let g='<g id="grid">';
+for(let j=0;j<n;j++)for(let i=0;i<n;i++){
+  const c=col(i,j);
+  g+=`<rect x="${off+i*cell}" y="${off+j*cell}" width="${cell-1}" height="${cell-1}" fill="${fill[c]}" opacity=".85" rx="2"/>`;
+  g+=`<text x="${off+i*cell+cell/2}" y="${off+j*cell+cell/2+4}" text-anchor="middle" font-size="12" fill="#fff" font-weight="600">${c}</text>`;
+}
+g+='</g>';
+const px=off+cell*1.5, py=off+cell*1.5;
+g+=`<g stroke="#1D2733" stroke-width="2"><line x1="${px-9}" y1="${py}" x2="${px+9}" y2="${py}"/><line x1="${px}" y1="${py-9}" x2="${px}" y2="${py+9}"/></g>`;
+g+=`<text x="${px+12}" y="${py-10}" font-size="10" fill="#1D2733" id="scenePt">${T("scenePt")}</text>`;
+svg.innerHTML=g;
+const grid=svg.querySelector("#grid");
+const tbody=$("sampled").querySelector("tbody");
+function sampleColor(dx,dy){
+  const i=Math.floor(1.5-dx), j=Math.floor(1.5-dy);
+  const fx=(1.5-dx)%1, fy=(1.5-dy)%1;
+  if(Math.abs(fx-.5)<1e-9||Math.abs(fy-.5)<1e-9) return T("edge");
+  return col(((i%2)+2)%2,((j%2)+2)%2);
+}
+let curShift=0;
+function drawShift(k){
+  curShift=k;
+  const s=steps[k];
+  grid.setAttribute("transform",`translate(${s.dx*cell} ${s.dy*cell})`);
+  $("shiftLabel").textContent=T("stepOf")(k)+stepLabel(k)+(k<4?T("b48"):T("b96"));
+  let rows="";
+  for(let t=0;t<=k;t++){rows+=`<tr><td>${t+1}</td><td>${stepLabel(t)}</td><td>${sampleColor(steps[t].dx,steps[t].dy)}</td></tr>`;}
+  tbody.innerHTML=rows;
+  const sp=$("scenePt"); if(sp) sp.textContent=T("scenePt");
+}
+$("shift").addEventListener("input",e=>drawShift(+e.target.value));
+drawShift(0);
+
+/* ---------- generic line chart ---------- */
+function chart(svgEl,series,opt){
+  const W=640,H=260,L=56,R=16,T=14,B=38;
+  const xs=series.flatMap(s=>s.x), ys=series.flatMap(s=>s.y).filter(Number.isFinite);
+  const xmin=opt.xmin??Math.min(...xs), xmax=opt.xmax??Math.max(...xs);
+  const logy=!!opt.logy;
+  const ty=v=>logy?Math.log10(v):v;
+  let ymin=opt.ymin??Math.min(...ys), ymax=opt.ymax??Math.max(...ys);
+  const X=v=>L+(v-xmin)/(xmax-xmin)*(W-L-R);
+  const Y=v=>H-B-(ty(v)-ty(ymin))/(ty(ymax)-ty(ymin))*(H-T-B);
+  let out="";
+  const yt=opt.yticks||[];
+  yt.forEach(v=>{out+=`<line class="grid" x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end">${v}</text>`;});
+  (opt.xticks||[]).forEach(v=>{out+=`<line class="grid" y1="${T}" y2="${H-B}" x1="${X(v)}" x2="${X(v)}"/><text x="${X(v)}" y="${H-B+14}" text-anchor="middle">${v}</text>`;});
+  out+=`<line class="axis" x1="${L}" x2="${L}" y1="${T}" y2="${H-B}"/><line class="axis" x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}"/>`;
+  out+=`<text x="${(L+W-R)/2}" y="${H-4}" text-anchor="middle">${opt.xlabel}</text>`;
+  out+=`<text transform="translate(12 ${(T+H-B)/2}) rotate(-90)" text-anchor="middle">${opt.ylabel}</text>`;
+  series.forEach(s=>{
+    const pts=s.x.map((x,i)=>[x,s.y[i]]).filter(p=>Number.isFinite(p[1])&&p[1]>=ymin&&p[1]<=ymax).map(p=>`${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join(" ");
+    out+=`<polyline class="${s.cls}" points="${pts}"/>`;
+  });
+  if(opt.marker&&Number.isFinite(opt.marker[1])){const [mx,my]=opt.marker;if(mx>=xmin&&mx<=xmax&&my>=ymin&&my<=ymax)out+=`<circle class="marker" cx="${X(mx)}" cy="${Y(my)}" r="5"/>`;}
+  svgEl.innerHTML=out;
+}
+
+/* ---------- SNR ---------- */
+function snr(){
+  const N=Math.max(1,+$("nExp").value||1), s1=+$("snr1").value||0;
+  const gain=Math.sqrt(N);
+  $("oGain").textContent=fmt(gain,2)+"×";
+  $("oDb").textContent=fmt(10*Math.log10(N),2);
+  $("oStops").textContent=fmt(Math.log2(gain),2);
+  $("oSnrN").textContent=fmt(s1*gain,1);
+  const xmax=Math.max(16,Math.ceil(N*1.25));
+  const xs=[],ys=[];for(let i=1;i<=xmax;i+=Math.max(1,Math.floor(xmax/200))){xs.push(i);ys.push(Math.sqrt(i));}
+  const ymax=Math.ceil(Math.sqrt(xmax));
+  const xt=[1,Math.round(xmax/4),Math.round(xmax/2),Math.round(3*xmax/4),xmax];
+  const ytk=[];for(let v=0;v<=ymax;v+=Math.max(1,Math.ceil(ymax/6)))ytk.push(v);
+  chart($("snrChart"),[{x:xs,y:ys,cls:"line"}],{xmin:1,xmax,ymin:0,ymax,xticks:xt,yticks:ytk,xlabel:T("xN"),ylabel:T("yGain"),marker:[N,gain]});
+}
+["nExp","snr1"].forEach(id=>$(id).addEventListener("input",snr));snr();
+
+/* ---------- Optics ---------- */
+function optics(){
+  const p=+$("pitch").value||6, f=+$("focal").value||24, N=+$("fnum").value||2.8, lam=(+$("lambda").value||550)/1000;
+  const nyq=1/(2*p/1000);
+  $("oNyq").textContent=fmt(nyq,1);
+  $("oNyq2").textContent=fmt(2*nyq,1);
+  $("oScale").textContent=fmt(206.265*p/f,2);
+  const airy=2.44*lam*N;
+  $("oAiry").textContent=fmt(airy,1)+" / "+fmt(p,1);
+  $("oFov").textContent=fmt(2*Math.atan(18/f)*180/Math.PI,1);
+  const cut=1/(lam/1000*N);
+  const mtf=v=>{const x=v/cut;return x>=1?0:(2/Math.PI)*(Math.acos(x)-x*Math.sqrt(1-x*x));};
+  $("oCut").textContent=fmt(cut,0);
+  $("oMtf1").textContent=fmt(mtf(nyq)*100,0)+" %";
+  $("oMtf2").textContent=fmt(mtf(2*nyq)*100,0)+" %";
+  const ratio=airy/p;
+  $("airyNote").textContent=(ratio<1?T("airy1"):ratio<2?T("airy2"):T("airy3"))(fmt(airy,1));
+}
+["pitch","focal","fnum","lambda"].forEach(id=>$(id).addEventListener("input",optics));optics();
+
+/* ---------- Drift ---------- */
+const SID=15.041;
+function drift(){
+  const f=+$("aFocal").value||24, p=+$("aPitch").value||6, N=+$("aFnum").value||2.8, dec=+$("dec").value||0, tol=+$("tol").value||1;
+  const cd=Math.cos(dec*Math.PI/180);
+  const rate=SID*cd;
+  const scale=206.265*p/f;
+  const t1=tol*scale/rate;
+  const npf=(35*N+30*p)/f;
+  $("oDrift").textContent=fmt(rate,2);
+  $("oT1").textContent=fmt(t1,1);
+  $("oNpf").textContent=fmt(npf,1);
+  $("o500").textContent=fmt(500/f,1);
+  const xs=[],y1=[],y2=[];
+  for(let ff=10;ff<=400;ff+=2){xs.push(ff);y1.push(tol*206.265*p/ff/rate);y2.push((35*N+30*p)/ff);}
+  chart($("driftChart"),[{x:xs,y:y1,cls:"line"},{x:xs,y:y2,cls:"line2"}],{xmin:10,xmax:400,ymin:0.1,ymax:100,logy:true,xticks:[10,50,100,200,300,400],yticks:[0.1,1,10,100],xlabel:T("xF"),ylabel:T("ySec"),marker:[f,t1]});
+}
+["aFocal","aPitch","aFnum","dec","tol"].forEach(id=>$(id).addEventListener("input",drift));drift();
+
+/* ---------- Decision helper ---------- */
+function decide(){
+  const sup=$("dSupport").value, mot=$("dMotion").value, N=+$("dF").value||5.6, iso=+$("dIso").value||100, out=$("dOut").value, light=$("dLight").value;
+  const p=+$("pitch").value||6, lam=(+$("lambda").value||550)/1000;
+  const cut=1/(lam*N), nyq96=2/(2*p/1000);
+  const x=nyq96/cut, mtf96=x>=1?0:(2/Math.PI)*(Math.acos(x)-x*Math.sqrt(1-x*x));
+  let mode, why;
+  if(mot==="much"){ mode=T("m24"); why=T("wMuch"); }
+  else if(iso>3200){ mode=light==="low"?T("m48h"):T("m24"); why=T("wIso")(iso,light==="low"); }
+  else if(out==="screen"&&light==="good"){ mode=T("m24"); why=T("wScreen"); }
+  else if(sup==="hand"){ mode=T("m48hand"); why=T("wHand")(mot==="some"); }
+  else if(mot==="some"){ mode=T("m48t"); why=T("wSome"); }
+  else if(mtf96<0.1){ mode=T("m48t"); why=T("wMtf")(N,fmt(mtf96*100,0)); }
+  else { mode=T("m96t"); why=T("w96")(N,fmt(mtf96*100,0)); }
+  $("dMode").textContent=mode;
+  $("dWhy").textContent=why;
+}
+["dSupport","dMotion","dF","dIso","dOut","dLight","pitch","lambda"].forEach(id=>$(id).addEventListener("input",decide));
+["dSupport","dMotion","dOut","dLight"].forEach(id=>$(id).addEventListener("change",decide));
+decide();
+
+/* ---------- Software filter ---------- */
+const btns=document.querySelectorAll("button.f"), rows=document.querySelectorAll(".swTable tbody tr");
+btns.forEach(b=>b.addEventListener("click",()=>{
+  btns.forEach(x=>x.setAttribute("aria-pressed","false"));
+  b.setAttribute("aria-pressed","true");
+  const f=b.dataset.f;
+  rows.forEach(r=>{r.style.display=(f==="all"||r.dataset.c.split(" ").includes(f))?"":"none";});
+}));
+function relabelOptions(){ document.querySelectorAll("option[data-es]").forEach(o=>{o.textContent=o.getAttribute("data-"+LANG())||o.textContent;}); }
+relabelOptions();
+window.onLangChange=function(){ relabelOptions(); drawShift(curShift); snr(); optics(); drift(); decide(); };
+})();
+</script>
+<script>
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{ title:"Multishot SL3-S, ruido y apilado: cuaderno técnico", desc:"Cuaderno técnico con calculadoras sobre el multishot del Leica SL3-S: cómo funciona el desplazamiento de píxel (48 y 96 MP), ganancia de relación señal/ruido con √N, color y demosaico, Nyquist y difracción, deriva sidérea y regla NPF, software de apilado en macOS y un asistente para elegir modo." },
+    en:{ title:"SL3-S multishot, noise and stacking: technical notebook", desc:"Technical notebook with calculators on the Leica SL3-S multishot: how pixel shift works (48 and 96 MP), signal-to-noise gain with √N, colour and demosaicing, Nyquist and diffraction, sidereal drift and the NPF rule, stacking software on macOS and a mode-choice assistant." }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    [].forEach.call(document.querySelectorAll("[data-aria-"+l+"]"),function(e){ e.setAttribute("aria-label",e.getAttribute("data-aria-"+l)); });
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
+</body>
+</html>

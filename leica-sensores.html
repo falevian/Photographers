@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M11, Q3 y SL3-S: lectura de los datos del sensor</title>
+<meta name="author" content="Rafael Vida">
+<meta name="description" content="Ruido de lectura referido a la entrada, rango dinámico fotográfico y calculadora de relación señal/ruido de las Leica M11, Q3 y SL3-S a partir de las medidas de PhotonsToPhotos, con las conclusiones para astrofotografía, paisaje a ISO base y trabajo en costa.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Crect%20width%3D%2764%27%20height%3D%2764%27%20rx%3D%2713%27%20fill%3D%27%23F4F5F2%27/%3E%3Crect%20x%3D%2710%27%20y%3D%2750%27%20width%3D%2744%27%20height%3D%271.5%27%20fill%3D%27%235F6662%27/%3E%3Cpath%20d%3D%27M10%2C20%20L20%2C21%20L24%2C34%20L54%2C40%27%20fill%3D%27none%27%20stroke%3D%27%234C9A3B%27%20stroke-width%3D%273%27%20stroke-linejoin%3D%27round%27/%3E%3Cpath%20d%3D%27M10%2C16%20L22%2C17%20L28%2C32%20L54%2C38%27%20fill%3D%27none%27%20stroke%3D%27%23262626%27%20stroke-width%3D%273%27%20stroke-linejoin%3D%27round%27/%3E%3Cpath%20d%3D%27M10%2C12%20L30%2C13%20L34%2C28%20L54%2C36%27%20fill%3D%27none%27%20stroke%3D%27%233C7BC7%27%20stroke-width%3D%273%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="icons/leica-sensores-180.png">
+<meta name="theme-color" content="#F4F5F2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sensores Leica">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Photographers">
+<meta property="og:title" content="M11, Q3 y SL3-S: lectura de los datos del sensor">
+<meta property="og:description" content="Ruido de lectura referido a la entrada, rango dinámico fotográfico y calculadora de relación señal/ruido de las Leica M11, Q3 y SL3-S a partir de las medidas de PhotonsToPhotos, con las conclusiones para astrofotografía, paisaje a ISO base y trabajo en costa.">
+<meta property="og:url" content="https://falevian.github.io/Photographers/leica-sensores.html">
+<meta property="og:image" content="https://falevian.github.io/Photographers/og/sensores.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="es_ES">
+<meta property="og:locale:alternate" content="en_GB">
+<meta name="twitter:card" content="summary_large_image">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --paper:#F4F5F2; --panel:#EBEEEA; --ink:#1B1D1B; --muted:#5F6662; --rule:#D3D8D2;
+  --m11:#4C9A3B; --q3:#262626; --sl3s:#3C7BC7; --warn:#B8861B; --bad:#B5432F;
+  --serif:"Fraunces","Iowan Old Style","Palatino Linotype",Georgia,serif;
+  --sans:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%}
+body{margin:0}
+main{max-width:920px;margin:0 auto;padding:0 20px 80px}
+header{padding:56px 0 28px;border-bottom:2px solid var(--ink)}
+h1{font-family:var(--serif);font-weight:600;font-size:clamp(30px,5.5vw,48px);line-height:1.08;margin:0 0 14px;letter-spacing:-0.01em}
+header p{max-width:62ch;margin:0;color:var(--muted);font-size:17px}
+nav{display:flex;flex-wrap:wrap;gap:6px 18px;padding:14px 0;border-bottom:1px solid var(--rule);font-size:14px}
+nav a{color:var(--ink);text-decoration:none;border-bottom:1px solid transparent}
+nav a:hover,nav a:focus-visible{border-bottom-color:var(--ink);outline:none}
+section{padding:44px 0 8px}
+h2{font-family:var(--serif);font-weight:600;font-size:clamp(24px,3.6vw,32px);line-height:1.15;margin:0 0 10px}
+h3{font-family:var(--sans);font-weight:600;font-size:17px;margin:26px 0 8px}
+p{max-width:68ch;margin:0 0 14px}
+.lead{font-size:17px}
+.legend{display:flex;flex-wrap:wrap;gap:14px 22px;margin:8px 0 12px;font-size:14px}
+.legend span::before{content:"";display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:7px;vertical-align:-1px}
+.legend .m11::before{background:var(--m11)} .legend .q3::before{background:var(--q3)} .legend .sl3s::before{background:var(--sl3s)}
+table{border-collapse:collapse;width:100%;font-size:15px;font-variant-numeric:tabular-nums;margin:8px 0 18px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:600;background:var(--panel)}
+td.num,th.num{text-align:right}
+.spec th:first-child{width:38%}
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:8px 0 18px}
+.tscroll table{margin:0;min-width:560px}
+.tscroll.wide table{min-width:760px}
+@media (max-width:600px){.tscroll table{font-size:13px} th,td{padding:8px 7px} .panel{padding:16px 14px}}
+.chart-wrap{position:relative;height:380px;margin:6px 0 6px}
+@media (max-width:600px){.chart-wrap{height:320px}}
+.controls{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin:10px 0 4px;font-size:14px}
+.seg{display:inline-flex;border:1px solid var(--ink);border-radius:4px;overflow:hidden}
+.seg button{background:transparent;border:0;padding:6px 12px;font:inherit;color:var(--ink);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.seg button:focus-visible{outline:2px solid var(--sl3s);outline-offset:-2px}
+label.chk{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.note{font-size:14px;color:var(--muted);max-width:68ch}
+.panel{background:var(--panel);padding:20px 22px;margin:18px 0 22px;border-left:4px solid var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px 18px}
+.field label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+.field input,.field select{width:100%;font:inherit;padding:7px 9px;border:1px solid var(--rule);border-radius:4px;background:#fff;color:var(--ink)}
+.field input:focus-visible,.field select:focus-visible{outline:2px solid var(--sl3s)}
+.presets{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px}
+.presets button{font:inherit;font-size:13px;padding:5px 10px;border:1px solid var(--rule);background:#fff;border-radius:4px;cursor:pointer;color:var(--ink)}
+.presets button:hover{border-color:var(--ink)}
+.out{margin-top:14px}
+.bar{height:10px;background:#fff;border:1px solid var(--rule);border-radius:2px;overflow:hidden;margin-top:4px}
+.bar i{display:block;height:100%}
+.tag{display:inline-block;font-size:12px;padding:1px 7px;border-radius:3px;border:1px solid currentColor}
+.tag.ok{color:var(--m11)} .tag.warn{color:var(--warn)} .tag.bad{color:var(--bad)}
+dl{margin:0 0 14px}
+dt{font-weight:600;margin-top:12px}
+dd{margin:2px 0 0;max-width:68ch}
+.verdict{display:grid;grid-template-columns:1fr;gap:14px;margin:12px 0 20px}
+.verdict article{padding:16px 18px;border:1px solid var(--rule);background:#fff}
+.verdict h3{margin:0 0 6px;font-family:var(--serif);font-size:20px;font-weight:600}
+.verdict p{margin:0 0 8px;font-size:15px}
+.verdict .who{font-weight:600}
+.sl3s-c{color:var(--sl3s)} .m11-c{color:var(--m11)} .q3-c{color:var(--q3)}
+footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--rule);font-size:13px;color:var(--muted)}
+footer a{color:inherit}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ---------- convenio bilingüe del repositorio ---------- */
+html[lang="es"] [data-lang="en"]{display:none!important}
+html[lang="en"] [data-lang="es"]{display:none!important}
+.langbar{position:fixed;top:12px;right:14px;z-index:50;display:flex;background:rgba(244,245,242,.94);border:1px solid var(--ink);border-radius:4px;overflow:hidden;backdrop-filter:blur(6px)}
+.langbar button{font:inherit;font-size:12px;letter-spacing:.08em;background:transparent;border:0;color:var(--muted);padding:7px 11px;cursor:pointer}
+.langbar button+button{border-left:1px solid var(--rule)}
+.langbar button:hover{color:var(--ink)}
+.langbar button.on{background:var(--ink);color:var(--paper)}
+.langbar a.home{display:flex;align-items:center;padding:0 9px;color:var(--muted);border-right:1px solid var(--rule)}
+.langbar a.home:hover{color:var(--ink)}
+.langbar a.home svg{width:12px;height:12px;display:block}
+@media print{.langbar{display:none!important}}
+</style>
+</head>
+<body>
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <a class="home" href="index.html" title="Portada / Home" aria-label="Portada / Home"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.5 8 2.5l5.5 5v6h-4v-4h-3v4h-4z"/></svg></a>
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
+<main>
+<header>
+  <h1 data-lang="es">M11, Q3 y SL3-S: lo que dicen los datos del sensor</h1>
+<h1 data-lang="en">M11, Q3 and SL3-S: what the sensor data say</h1>
+  <p data-lang="es">Ruido de lectura, rango dinámico fotográfico y modelo de relación señal/ruido a partir de las medidas de PhotonsToPhotos, con las conclusiones para astrofotografía, paisaje a ISO base y trabajo en costa.</p>
+<p data-lang="en">Read noise, photographic dynamic range and a signal-to-noise model from the PhotonsToPhotos measurements, with the conclusions for astrophotography, base-ISO landscape and coastal work.</p>
+</header>
+<nav aria-label="Secciones" data-aria-es="Secciones" data-aria-en="Sections">
+  <a href="#ficha"><span data-lang="es">Ficha</span><span data-lang="en">Data sheet</span></a>
+  <a href="#ruido"><span data-lang="es">Ruido de lectura</span><span data-lang="en">Read noise</span></a>
+  <a href="#pdr"><span data-lang="es">Rango dinámico</span><span data-lang="en">Dynamic range</span></a>
+  <a href="#snr"><span data-lang="es">Calculadora SNR</span><span data-lang="en">SNR calculator</span></a>
+  <a href="#difraccion"><span data-lang="es">Difracción</span><span data-lang="en">Diffraction</span></a>
+  <a href="#guia"><span data-lang="es">Cómo leer las curvas</span><span data-lang="en">How to read the curves</span></a>
+  <a href="#conclusiones"><span data-lang="es">Conclusiones</span><span data-lang="en">Conclusions</span></a>
+  <a href="#metodo"><span data-lang="es">Método</span><span data-lang="en">Method</span></a>
+</nav>
+
+<section id="ficha">
+  <h2 data-lang="es">Ficha de los tres sensores</h2>
+<h2 data-lang="en">Data sheet of the three sensors</h2>
+  <p data-lang="es" class="lead">Valores extraídos de las series de PhotonsToPhotos, salvo paso de píxel y resolución, que son datos de fabricante.</p>
+<p data-lang="en" class="lead">Values extracted from the PhotonsToPhotos series, except pixel pitch and resolution, which are manufacturer data.</p>
+  <div class="tscroll"><table class="spec">
+    <thead><tr><th><span data-lang="es">Parámetro</span><span data-lang="en">Parameter</span></th><th class="num">M11</th><th class="num">Q3</th><th class="num">SL3-S</th></tr></thead>
+    <tbody id="specBody"></tbody>
+  </table></div>
+  <p data-lang="es" class="note">La Q3 está medida sobre 13 bits efectivos (sufijo _13 en la web), lo que recorta ligeramente su techo de rango dinámico respecto a la M11 aunque comparten sensor. Los ISO 50, 64 y 80 de la SL3-S son extendidos por software.</p>
+<p data-lang="en" class="note">The Q3 is measured on 13 effective bits (suffix _13 on the website), which slightly trims its dynamic-range ceiling relative to the M11 although they share the sensor. ISO 50, 64 and 80 on the SL3-S are software-extended.</p>
+</section>
+
+<section id="ruido">
+  <h2 data-lang="es">Ruido de lectura referido a la entrada</h2>
+<h2 data-lang="en">Input-referred read noise</h2>
+  <p data-lang="es">Ruido de lectura en electrones rms, obtenido dividiendo el ruido medido en DN por la ganancia del sistema (DN por electrón) a cada ISO. Es la magnitud comparable entre cámaras, a diferencia de la curva en DN, que depende de la profundidad de bits y de la ganancia de cada modelo.</p>
+<p data-lang="en">Read noise in rms electrons, obtained by dividing the noise measured in DN by the system gain (DN per electron) at each ISO. It is the quantity comparable between cameras, unlike the curve in DN, which depends on each model's bit depth and gain.</p>
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Normalización" data-aria-es="Normalización" data-aria-en="Normalisation">
+      <button id="btnPx" aria-pressed="true"><span data-lang="es">Por píxel</span><span data-lang="en">Per pixel</span></button>
+      <button id="btnArea" aria-pressed="false"><span data-lang="es">A igual área (24,6 Mpx)</span><span data-lang="en">Equal area (24.6 Mpx)</span></button>
+    </div>
+    <label class="chk"><input type="checkbox" id="chkNR" checked> <span data-lang="es">Mostrar puntos con filtrado del RAW</span><span data-lang="en">Show points with RAW filtering</span></label>
+  </div>
+  <div class="legend" data-lang="es"><span class="m11">M11, 3,76 µm</span><span class="q3">Q3, 3,76 µm</span><span class="sl3s">SL3-S, 5,94 µm</span></div>
+  <div class="legend" data-lang="en"><span class="m11">M11, 3.76 µm</span><span class="q3">Q3, 3.76 µm</span><span class="sl3s">SL3-S, 5.94 µm</span></div>
+  <div class="chart-wrap"><canvas id="rnChart" aria-label="Ruido de lectura frente a ISO" data-aria-es="Ruido de lectura frente a ISO" data-aria-en="Read noise against ISO"></canvas></div>
+  <p data-lang="es" class="note">Triángulo invertido: el firmware aplica reducción de ruido al RAW en ese ISO. Círculo hueco: ISO extendido, fuera del rango analógico. Rombo: escalado digital y filtrado a la vez. La normalización a igual área multiplica los valores de los sensores de 60 Mpx por √(60,3/24,6) ≈ 1,57, que es el factor con que se combina el ruido de lectura al agrupar píxeles hasta el tamaño de píxel de la SL3-S.</p>
+<p data-lang="en" class="note">Inverted triangle: the firmware applies noise reduction to the RAW at that ISO. Hollow circle: extended ISO, outside the analogue range. Diamond: digital scaling and filtering at once. Equal-area normalisation multiplies the values of the 60 Mpx sensors by √(60.3/24.6) ≈ 1.57, the factor by which read noise combines when binning pixels up to the SL3-S pixel size.</p>
+  <h3 data-lang="es">Puntos de conmutación de la ganancia dual</h3>
+<h3 data-lang="en">Dual-gain switching points</h3>
+  <p data-lang="es">El escalón brusco de cada curva marca el ISO en que el sensor pasa a la ganancia de conversión alta: la M11 en ISO 200, la Q3 en ISO 400 y la SL3-S en ISO 640. A partir de ese punto el ruido de lectura cae por debajo de 2 e⁻ y la cámara se comporta de forma casi invariante al ISO: subir más el ISO en cámara aporta poco frente a levantar la exposición en revelado, y cuesta rango dinámico en las altas luces.</p>
+<p data-lang="en">The sharp step in each curve marks the ISO at which the sensor switches to high conversion gain: the M11 at ISO 200, the Q3 at ISO 400 and the SL3-S at ISO 640. From that point read noise falls below 2 e⁻ and the camera behaves almost ISO-invariantly: raising ISO further in camera adds little over lifting exposure in development, and costs dynamic range in the highlights.</p>
+</section>
+
+<section id="pdr">
+  <h2 data-lang="es">Rango dinámico fotográfico (PDR)</h2>
+<h2 data-lang="en">Photographic dynamic range (PDR)</h2>
+  <p data-lang="es">El PDR de Claff mide los pasos entre la saturación y el nivel de señal en que la relación señal/ruido cae por debajo de 20 sobre un círculo de confusión normalizado al tamaño de la imagen. Ya está normalizado por área, por lo que es directamente comparable entre cámaras de distinta resolución.</p>
+<p data-lang="en">Claff's PDR measures the stops between saturation and the signal level at which the signal-to-noise ratio drops below 20 over a circle of confusion normalised to image size. It is already area-normalised, so it is directly comparable between cameras of different resolution.</p>
+  <div class="legend"><span class="m11">M11</span><span class="q3">Q3</span><span class="sl3s">SL3-S</span></div>
+  <div class="chart-wrap"><canvas id="pdrChart" aria-label="Rango dinámico fotográfico frente a ISO" data-aria-es="Rango dinámico fotográfico frente a ISO" data-aria-en="Photographic dynamic range against ISO"></canvas></div>
+  <p data-lang="es" class="note">A ISO base la M11 alcanza 11,8 EV (ISO 64) frente a 11,1 EV de la Q3 (ISO 100) y 10,45 EV de la SL3-S (ISO 100). El parámetro Low-Light EV que calcula la web, un índice de rendimiento con poca luz derivado de esta curva, empata a la M11 (10,62) con la SL3-S (10,64) y deja a la Q3 en 10,31.</p>
+<p data-lang="en" class="note">At base ISO the M11 reaches 11.8 EV (ISO 64) against 11.1 EV for the Q3 (ISO 100) and 10.45 EV for the SL3-S (ISO 100). The Low-Light EV parameter the website computes, a low-light performance index derived from this curve, ties the M11 (10.62) with the SL3-S (10.64) and leaves the Q3 at 10.31.</p>
+</section>
+
+<section id="snr">
+  <h2 data-lang="es">Calculadora de relación señal/ruido</h2>
+<h2 data-lang="en">Signal-to-noise calculator</h2>
+  <p data-lang="es">Modelo por píxel: la señal es el flujo de fotoelectrones por el área del píxel y el tiempo; el ruido combina en cuadratura el ruido fotónico, el de corriente de oscuridad y el de lectura interpolado de las series anteriores al ISO elegido. La columna normalizada refiere el resultado al área del píxel de la SL3-S, de modo que las tres cámaras se comparan a igual tamaño de salida.</p>
+<p data-lang="en">Per-pixel model: the signal is the photoelectron flux times pixel area and time; the noise combines in quadrature the photon noise, the dark-current noise and the read noise interpolated from the series above at the chosen ISO. The normalised column refers the result to the SL3-S pixel area, so the three cameras are compared at equal output size.</p>
+  <div class="panel">
+    <div class="grid">
+      <div class="field"><label for="flux"><span data-lang="es">Flujo de fotoelectrones (e⁻/µm²/s)</span><span data-lang="en">Photoelectron flux (e⁻/µm²/s)</span></label><input id="flux" type="number" step="any" min="0" value="0.2"></div>
+      <div class="field"><label for="texp"><span data-lang="es">Tiempo de exposición (s)</span><span data-lang="en">Exposure time (s)</span></label><input id="texp" type="number" step="any" min="0" value="20"></div>
+      <div class="field"><label for="iso">ISO</label><select id="iso"></select></div>
+      <div class="field"><label for="nfr"><span data-lang="es">Tomas apiladas</span><span data-lang="en">Stacked frames</span></label><input id="nfr" type="number" step="1" min="1" value="1"></div>
+      <div class="field"><label for="dark"><span data-lang="es">Corriente de oscuridad a 20 °C (e⁻/µm²/s)</span><span data-lang="en">Dark current at 20 °C (e⁻/µm²/s)</span></label><input id="dark" type="number" step="any" min="0" value="0.003"></div>
+      <div class="field"><label for="temp"><span data-lang="es">Temperatura del sensor (°C):</span><span data-lang="en">Sensor temperature (°C):</span> <span id="tempV">20</span></label><input id="temp" type="range" min="-5" max="40" value="20"></div>
+    </div>
+    <div class="presets" aria-label="Valores orientativos de flujo" data-aria-es="Valores orientativos de flujo" data-aria-en="Indicative flux values">
+      <button data-flux="0.05" data-t="30"><span data-lang="es">Cielo rural, f/2,8</span><span data-lang="en">Rural sky, f/2.8</span></button>
+      <button data-flux="0.3" data-t="15"><span data-lang="es">Cielo suburbano, f/2,8</span><span data-lang="en">Suburban sky, f/2.8</span></button>
+      <button data-flux="2" data-t="10"><span data-lang="es">Vía Láctea con luna</span><span data-lang="en">Milky Way with moon</span></button>
+      <button data-flux="30" data-t="30"><span data-lang="es">Paisaje nocturno urbano</span><span data-lang="en">Urban night landscape</span></button>
+      <button data-flux="3000" data-t="0.5"><span data-lang="es">Paisaje diurno, sombras</span><span data-lang="en">Daylight landscape, shadows</span></button>
+    </div>
+    <p data-lang="es" class="note">Los valores de flujo son orientativos y dependen de óptica, transmisión y eficiencia cuántica. La corriente de oscuridad se supone que se duplica cada 6 °C.</p>
+<p data-lang="en" class="note">The flux values are indicative and depend on optics, transmission and quantum efficiency. Dark current is assumed to double every 6 °C.</p>
+    <div class="out">
+      <div class="tscroll wide"><table>
+        <thead><tr data-lang="es"><th>Cámara</th><th class="num">Señal (e⁻/px)</th><th class="num">σ fotónico</th><th class="num">σ lectura</th><th class="num">σ oscuridad</th><th class="num">SNR/px</th><th class="num">SNR a igual área</th><th>Régimen</th><th>Saturación</th></tr>
+        <tr data-lang="en"><th>Camera</th><th class="num">Signal (e⁻/px)</th><th class="num">σ photon</th><th class="num">σ read</th><th class="num">σ dark</th><th class="num">SNR/px</th><th class="num">SNR at equal area</th><th>Regime</th><th>Saturation</th></tr></thead>
+        <tbody id="snrBody"></tbody>
+      </table></div>
+      <div id="snrBars"></div>
+      <p class="note" id="snrHint" style="margin-top:12px"></p>
+    </div>
+  </div>
+  <h3 data-lang="es">Cómo leer el resultado</h3>
+<h3 data-lang="en">How to read the result</h3>
+  <p data-lang="es">Cuando el ruido fotónico domina (régimen limitado por fotones), la relación señal/ruido a igual área es la misma para los tres sensores salvo por diferencias de eficiencia cuántica, y el tamaño de píxel deja de importar. Solo cuando la varianza de lectura pesa más que la fotónica, es decir, con exposiciones muy cortas o cielos muy oscuros, aparece la ventaja de la SL3-S, y es de unos 0,3 EV. Apilar N tomas multiplica la SNR por √N en cualquiera de los dos regímenes.</p>
+<p data-lang="en">When photon noise dominates (photon-limited regime), the signal-to-noise ratio at equal area is the same for the three sensors except for differences in quantum efficiency, and pixel size stops mattering. Only when read variance outweighs photon variance, that is, with very short exposures or very dark skies, does the SL3-S advantage appear, and it is about 0.3 EV. Stacking N frames multiplies SNR by √N in either regime.</p>
+</section>
+
+<section id="difraccion">
+  <h2 data-lang="es">Difracción y paso de píxel</h2>
+<h2 data-lang="en">Diffraction and pixel pitch</h2>
+  <p data-lang="es">El disco de Airy tiene un diámetro hasta el primer cero de 2,44·λ·N y una resolución de Rayleigh de 1,22·λ·N. Cuando la resolución de Rayleigh supera el paso de píxel, el sensor ya no aprovecha toda su resolución; cuando la dobla, la difracción domina claramente.</p>
+<p data-lang="en">The Airy disc has a diameter to the first zero of 2.44·λ·N and a Rayleigh resolution of 1.22·λ·N. When the Rayleigh resolution exceeds the pixel pitch, the sensor no longer uses all its resolution; when it doubles it, diffraction clearly dominates.</p>
+  <div class="panel">
+    <div class="grid">
+      <div class="field"><label for="fnum"><span data-lang="es">Apertura:</span><span data-lang="en">Aperture:</span> f/<span id="fnumV">8</span></label><input id="fnum" type="range" min="0" max="10" value="5" step="1"></div>
+      <div class="field"><label for="lambda"><span data-lang="es">Longitud de onda</span><span data-lang="en">Wavelength</span></label><select id="lambda"><option value="0.45" data-es="450 nm (azul)" data-en="450 nm (blue)">450 nm (azul)</option><option value="0.55" selected data-es="550 nm (verde)" data-en="550 nm (green)">550 nm (verde)</option><option value="0.65" data-es="650 nm (rojo)" data-en="650 nm (red)">650 nm (rojo)</option></select></div>
+    </div>
+    <div class="out">
+      <div class="tscroll"><table>
+        <thead><tr data-lang="es"><th>Cámara</th><th class="num">Paso (µm)</th><th class="num">Airy 2,44λN (µm)</th><th class="num">Rayleigh / paso</th><th>Estado</th></tr>
+        <tr data-lang="en"><th>Camera</th><th class="num">Pitch (µm)</th><th class="num">Airy 2.44λN (µm)</th><th class="num">Rayleigh / pitch</th><th>Status</th></tr></thead>
+        <tbody id="difBody"></tbody>
+      </table></div>
+    </div>
+  </div>
+  <p data-lang="es">Consecuencia práctica: los sensores de 60 Mpx rinden todo su detalle hasta f/5,6 y lo pierden progresivamente a partir de f/8, lo que en paisaje empuja a trabajar más abierto y apilar enfoques. El píxel de 5,94 µm de la SL3-S tolera f/8 sin pérdida y f/11 con pérdida leve.</p>
+<p data-lang="en">Practical consequence: the 60 Mpx sensors deliver all their detail up to f/5.6 and lose it progressively from f/8, which in landscape pushes towards working more open and focus stacking. The 5.94 µm pixel of the SL3-S tolerates f/8 without loss and f/11 with slight loss.</p>
+</section>
+
+<section id="guia">
+  <h2 data-lang="es">Cómo leer las curvas de PhotonsToPhotos</h2>
+<h2 data-lang="en">How to read the PhotonsToPhotos curves</h2>
+  <dl data-lang="es">
+    <dt>Curva en DN con pendiente 1 en escala log-log</dt>
+    <dd>El ruido en DN crece proporcionalmente al ISO: la fuente dominante está antes del amplificador (fotodiodo y conversión) y se amplifica con la señal. Indica dominio del ruido de fotositio y comportamiento invariante al ISO.</dd>
+    <dt>Curva que se aplana a ISO bajo</dt>
+    <dd>Una componente constante en DN, añadida después de la ganancia, domina: el convertidor analógico digital. Subir el ISO en cámara sí reduce el ruido relativo hasta que la curva recupera la pendiente 1.</dd>
+    <dt>Escalón descendente en el rango analógico</dt>
+    <dd>Conmutación de ganancia de conversión dual: el sensor cambia la capacidad del nodo de lectura y reduce el ruido referido a la entrada. Conviene trabajar en o por encima de ese ISO cuando la escena es oscura.</dd>
+    <dt>Curva dentada</dt>
+    <dd>Escalado digital o un segundo amplificador para los ISO intermedios; los valores intermedios no aportan ganancia analógica real.</dd>
+    <dt>Símbolos huecos</dt>
+    <dd>ISO extendidos fuera del rango analógico. Los bajos recortan altas luces sin ganar rango; los altos son multiplicación digital.</dd>
+    <dt>Triángulo hacia arriba, triángulo invertido, rombo</dt>
+    <dd>Escalado digital, reducción de ruido aplicada al RAW, y ambas cosas a la vez. El triángulo invertido es el marcador que importa en astrofotografía: un RAW filtrado puede eliminar estrellas débiles.</dd>
+  </dl>
+  <dl data-lang="en">
+    <dt>Curve in DN with slope 1 on a log-log scale</dt>
+    <dd>Noise in DN grows proportionally to ISO: the dominant source lies before the amplifier (photodiode and conversion) and is amplified with the signal. It indicates photosite-noise dominance and ISO-invariant behaviour.</dd>
+    <dt>Curve that flattens at low ISO</dt>
+    <dd>A constant component in DN, added after the gain, dominates: the analogue-to-digital converter. Raising ISO in camera does reduce relative noise until the curve regains slope 1.</dd>
+    <dt>Downward step within the analogue range</dt>
+    <dd>Dual conversion-gain switching: the sensor changes the capacitance of the read node and reduces input-referred noise. Best to work at or above that ISO when the scene is dark.</dd>
+    <dt>Jagged curve</dt>
+    <dd>Digital scaling or a second amplifier for the intermediate ISOs; the intermediate values add no real analogue gain.</dd>
+    <dt>Hollow symbols</dt>
+    <dd>Extended ISOs outside the analogue range. The low ones clip highlights without gaining range; the high ones are digital multiplication.</dd>
+    <dt>Upward triangle, inverted triangle, diamond</dt>
+    <dd>Digital scaling, noise reduction applied to the RAW, and both at once. The inverted triangle is the marker that matters in astrophotography: a filtered RAW can wipe out faint stars.</dd>
+  </dl>
+</section>
+
+<section id="conclusiones">
+  <h2 data-lang="es">Conclusiones por uso</h2>
+<h2 data-lang="en">Conclusions by use</h2>
+  <div class="verdict" data-lang="es">
+    <article>
+      <h3>Astrofotografía y paisaje nocturno</h3>
+      <p><span class="who sl3s-c">SL3-S</span> entre ISO 640 y 3200: mejor ruido de lectura a igual área, unos 0,3 EV sobre la M11. Evitar ISO 6400 o más: el RAW se filtra y las estrellas débiles peligran.</p>
+      <p><span class="who m11-c">M11</span> desde ISO 200: invariante al ISO, RAW sin filtrar en todo el rango y 60 Mpx. En apilados largos con seguimiento, donde el fondo de cielo domina, iguala a la SL3-S.</p>
+      <p><span class="who q3-c">Q3</span> desde ISO 400: unos 0,3 EV por detrás, RAW limpio hasta ISO 12800. Óptica fija de 28 mm f/1,7 muy apta para Vía Láctea.</p>
+      <p class="note">La diferencia real la marcarán la óptica (apertura, coma en las esquinas) y la corriente de oscuridad en exposiciones de minutos, no el sensor.</p>
+    </article>
+    <article>
+      <h3>Paisaje a ISO base</h3>
+      <p><span class="who m11-c">M11</span> gana en rango dinámico (1,35 EV sobre la SL3-S) y en resolución (factor 1,57 lineal), por su mayor capacidad de pozo por unidad de área y menor ruido de lectura normalizado a ISO base.</p>
+      <p><span class="who sl3s-c">SL3-S</span> compensa con multidisparo (96 Mpx, color completo por posición, promediado de ruido) y horquillado, pero solo con trípode y escena estática. Aporta enfoque preciso, visor de 5,76 Mpx, pantalla inclinable y vista del polarizador.</p>
+      <p><span class="who q3-c">Q3</span> ofrece el sensor de la M11 con visor y pantalla de la SL3-S. Limitada a 28 mm.</p>
+    </article>
+    <article>
+      <h3>Costa: humedad, salpicaduras y niebla</h3>
+      <p><span class="who sl3s-c">SL3-S</span> IP54 con ópticas selladas. La opción coherente si se necesitan varias focales.</p>
+      <p><span class="who q3-c">Q3</span> IP52 y sin cambio de objetivo: nunca expone el sensor ni la montura al aerosol salino. Con olas y niebla en movimiento el multidisparo de la SL3-S apenas es utilizable, así que la Q3 retiene la ventaja de la toma única en 60 Mpx y más PDR.</p>
+      <p><span class="who m11-c">M11</span> sin certificación, ópticas M sin juntas y contactos del Visoflex expuestos. Es la que menos encaja con este entorno.</p>
+      <p class="note">En cualquier caso: filtro protector como elemento de sacrificio, aclimatación dentro de la bolsa para evitar condensación y limpieza con paño humedecido en agua dulce tras cada salida.</p>
+    </article>
+    <article>
+      <h3>Lo que los datos no muestran</h3>
+      <p>La etiqueta de “cuerpo para poca luz” de la SL3-S no se sostiene a nivel de sensor: el ruido fotónico por unidad de área no depende del tamaño de píxel y el ruido de lectura de ambos diseños ya está en torno a 1 e⁻. Su ventaja en poca luz es operativa: estabilización en cuerpo, autofoco por detección de fase que funciona con niebla y penumbra, visor con ganancia y lectura rápida. Sobre trípode y con sujeto estático nada de eso interviene.</p>
+    </article>
+  </div>
+  <div class="verdict" data-lang="en">
+    <article>
+      <h3>Astrophotography and night landscape</h3>
+      <p><span class="who sl3s-c">SL3-S</span> between ISO 640 and 3200: best read noise at equal area, about 0.3 EV over the M11. Avoid ISO 6400 or more: the RAW is filtered and faint stars are at risk.</p>
+      <p><span class="who m11-c">M11</span> from ISO 200: ISO-invariant, unfiltered RAW across the whole range and 60 Mpx. In long tracked stacks, where sky background dominates, it matches the SL3-S.</p>
+      <p><span class="who q3-c">Q3</span> from ISO 400: about 0.3 EV behind, clean RAW up to ISO 12800. Fixed 28 mm f/1.7 lens very well suited to the Milky Way.</p>
+      <p class="note">The real difference will be set by the lens (aperture, corner coma) and by dark current in minutes-long exposures, not by the sensor.</p>
+    </article>
+    <article>
+      <h3>Landscape at base ISO</h3>
+      <p><span class="who m11-c">M11</span> wins on dynamic range (1.35 EV over the SL3-S) and on resolution (1.57× linear), through its larger well capacity per unit area and lower area-normalised read noise at base ISO.</p>
+      <p><span class="who sl3s-c">SL3-S</span> compensates with multishot (96 Mpx, full colour per position, noise averaging) and bracketing, but only on a tripod with a static scene. It brings precise focusing, a 5.76 Mpx viewfinder, a tilting screen and a view of the polariser.</p>
+      <p><span class="who q3-c">Q3</span> offers the M11 sensor with the SL3-S viewfinder and screen. Limited to 28 mm.</p>
+    </article>
+    <article>
+      <h3>Coast: humidity, spray and fog</h3>
+      <p><span class="who sl3s-c">SL3-S</span> IP54 with sealed lenses. The coherent option if several focal lengths are needed.</p>
+      <p><span class="who q3-c">Q3</span> IP52 and no lens changes: it never exposes sensor or mount to the salt aerosol. With moving waves and fog the SL3-S multishot is barely usable, so the Q3 keeps the advantage of the 60 Mpx single shot and more PDR.</p>
+      <p><span class="who m11-c">M11</span> uncertified, M lenses without gaskets and exposed Visoflex contacts. The one that fits this environment least.</p>
+      <p class="note">In any case: a protective filter as a sacrificial element, acclimatisation inside the bag to avoid condensation, and cleaning with a cloth dampened in fresh water after every outing.</p>
+    </article>
+    <article>
+      <h3>What the data do not show</h3>
+      <p>The "low-light body" label of the SL3-S does not hold at sensor level: photon noise per unit area does not depend on pixel size and the read noise of both designs is already around 1 e⁻. Its low-light advantage is operational: in-body stabilisation, phase-detection autofocus that works in fog and dusk, a gained-up viewfinder and fast readout. On a tripod with a static subject none of that comes into play.</p>
+    </article>
+  </div>
+</section>
+
+<section id="metodo">
+  <h2 data-lang="es">Método y fuentes</h2>
+<h2 data-lang="en">Method and sources</h2>
+  <div data-lang="es">
+  <p>Series de ruido de lectura referido a la entrada y de PDR extraídas de los datos publicados por PhotonsToPhotos (William J. Claff) el 4 de septiembre de 2026. La abscisa original está en pasos de exposición Ev y se convierte con ISO = 3,125·2^Ev. Los valores de ruido están en log₂ de electrones y se han convertido a electrones rms.</p>
+  <p>Normalización por área: al agrupar k píxeles la señal se suma y el ruido se combina en cuadratura, de modo que el ruido de lectura equivalente escala con √k y la relación señal/ruido con √k. Con 60,3 y 24,6 Mpx sobre el mismo formato, k = 2,45 y √k = 1,57.</p>
+  <p>Capacidad de pozo: valor fwc de las series, a ISO base. La saturación a un ISO dado se estima como fwc·ISO_base/ISO. El paso de píxel de la SL3-S se toma como 5,94 µm (35,6 mm / 6000 px) y el de M11 y Q3 como 3,76 µm.</p>
+  <p>Limitaciones: la eficiencia cuántica no está en estas series y se supone igual entre los tres; la corriente de oscuridad del modelo es una suposición editable, no una medida; el modelo no incluye patrón fijo, banding ni la respuesta del procesado a exposiciones largas.</p>
+  </div>
+  <div data-lang="en">
+  <p>Input-referred read-noise and PDR series extracted from the data published by PhotonsToPhotos (William J. Claff) on 4 September 2026. The original abscissa is in exposure steps Ev and is converted with ISO = 3.125·2^Ev. Noise values are in log₂ of electrons and have been converted to rms electrons.</p>
+  <p>Area normalisation: when binning k pixels the signal adds and the noise combines in quadrature, so the equivalent read noise scales with √k and the signal-to-noise ratio with √k. With 60.3 and 24.6 Mpx on the same format, k = 2.45 and √k = 1.57.</p>
+  <p>Well capacity: the fwc value of the series, at base ISO. Saturation at a given ISO is estimated as fwc·ISO_base/ISO. The SL3-S pixel pitch is taken as 5.94 µm (35.6 mm / 6000 px) and that of the M11 and Q3 as 3.76 µm.</p>
+  <p>Limitations: quantum efficiency is not in these series and is assumed equal for the three; the model's dark current is an editable assumption, not a measurement; the model does not include fixed pattern, banding or the processing response to long exposures.</p>
+  </div>
+  <footer><span data-lang="es">Datos: <a href="https://www.photonstophotos.net/Charts/RN_e.htm">PhotonsToPhotos, Input-referred Read Noise</a> y <a href="https://www.photonstophotos.net/Charts/PDR.htm">Photographic Dynamic Range</a>. Las gráficas usan Chart.js desde CDN: es la única parte de la página que necesita conexión. Del mismo sitio: el <a href="multishot-sl3s.html">cuaderno del multishot del SL3-S</a>, el <a href="stack-sensor.html">stack del sensor</a> y el <a href="binning-m11.html">binning de la M11</a>.</span><span data-lang="en">Data: <a href="https://www.photonstophotos.net/Charts/RN_e.htm">PhotonsToPhotos, Input-referred Read Noise</a> and <a href="https://www.photonstophotos.net/Charts/PDR.htm">Photographic Dynamic Range</a>. The charts use Chart.js from a CDN: the only part of the page that needs a connection. From this same site: the <a href="multishot-sl3s.html">SL3-S multishot notebook</a>, the <a href="stack-sensor.html">sensor stack</a> and the <a href="binning-m11.html">M11 binning</a>.</span></footer>
+</section>
+</main>
+
+<script>
+const RAW = {"rn":{"Leica M11_14":{"meta":{"fwc":"47875","unityEv":"5.97","loEv":"4.33","hiEv":"14.00"},"pts":[{"ev":4.33,"y":1.99,"m":""},{"ev":4.67,"y":1.92,"m":""},{"ev":5.0,"y":1.84,"m":""},{"ev":5.33,"y":1.74,"m":""},{"ev":5.67,"y":1.61,"m":""},{"ev":6.0,"y":0.6,"m":""},{"ev":6.33,"y":0.51,"m":""},{"ev":6.67,"y":0.46,"m":""},{"ev":7.0,"y":0.44,"m":""},{"ev":7.33,"y":0.34,"m":""},{"ev":7.67,"y":0.3,"m":""},{"ev":8.0,"y":0.3,"m":""},{"ev":8.33,"y":0.19,"m":""},{"ev":8.67,"y":0.12,"m":""},{"ev":9.0,"y":0.08,"m":""},{"ev":9.33,"y":0.05,"m":""},{"ev":9.67,"y":-0.02,"m":""},{"ev":10.0,"y":-0.01,"m":""},{"ev":10.33,"y":-0.06,"m":""},{"ev":10.67,"y":-0.13,"m":""},{"ev":11.0,"y":-0.13,"m":""},{"ev":11.33,"y":-0.16,"m":""},{"ev":11.67,"y":-0.22,"m":""},{"ev":12.0,"y":-0.2,"m":""},{"ev":12.33,"y":-0.25,"m":""},{"ev":12.67,"y":-0.27,"m":""},{"ev":13.0,"y":-0.19,"m":""},{"ev":13.33,"y":-0.27,"m":""},{"ev":13.67,"y":-0.29,"m":""},{"ev":14.0,"y":-0.24,"m":""}]},"Leica Q3_13":{"meta":{"fwc":"31135","unityEv":"6.02","loEv":"4.00","hiEv":"14.00"},"pts":[{"ev":4.0,"y":2.66,"m":""},{"ev":5.0,"y":2.1,"m":""},{"ev":6.0,"y":1.74,"m":""},{"ev":7.0,"y":0.61,"m":""},{"ev":8.0,"y":0.41,"m":""},{"ev":9.0,"y":0.33,"m":""},{"ev":10.0,"y":0.22,"m":""},{"ev":11.0,"y":0.2,"m":""},{"ev":12.0,"y":0.03,"m":""},{"ev":13.0,"y":-0.29,"m":"nr"},{"ev":14.0,"y":-0.38,"m":"nr"},{"ev":14.33,"y":-0.41,"m":"both"},{"ev":14.67,"y":-0.47,"m":"both"},{"ev":15.0,"y":-0.51,"m":"both"}]},"Leica SL3-S_14":{"meta":{"fwc":"95292","unityEv":"7.59","loEv":"5.00","hiEv":"16.00"},"pts":[{"ev":4.0,"y":3.03,"m":"ext"},{"ev":4.33,"y":3.14,"m":"ext"},{"ev":4.67,"y":3.26,"m":"ext"},{"ev":5.0,"y":3.29,"m":""},{"ev":5.33,"y":3.09,"m":""},{"ev":5.67,"y":2.9,"m":""},{"ev":6.0,"y":2.71,"m":""},{"ev":6.33,"y":2.57,"m":""},{"ev":6.67,"y":2.48,"m":""},{"ev":7.0,"y":2.38,"m":""},{"ev":7.33,"y":2.28,"m":""},{"ev":7.67,"y":0.92,"m":""},{"ev":8.0,"y":0.75,"m":""},{"ev":8.33,"y":0.63,"m":""},{"ev":8.67,"y":0.53,"m":""},{"ev":9.0,"y":0.43,"m":""},{"ev":9.33,"y":0.39,"m":""},{"ev":9.67,"y":0.33,"m":""},{"ev":10.0,"y":0.28,"m":""},{"ev":10.33,"y":0.21,"m":""},{"ev":10.67,"y":0.19,"m":""},{"ev":11.0,"y":-0.01,"m":"nr"},{"ev":11.33,"y":-0.09,"m":"nr"},{"ev":11.67,"y":-0.12,"m":"nr"},{"ev":12.0,"y":-0.17,"m":"nr"},{"ev":12.33,"y":-0.25,"m":"nr"},{"ev":12.67,"y":-0.29,"m":"nr"},{"ev":13.0,"y":-0.34,"m":"nr"},{"ev":13.33,"y":-0.39,"m":"nr"},{"ev":13.67,"y":-0.44,"m":"nr"},{"ev":14.0,"y":-0.51,"m":"nr"},{"ev":14.33,"y":-0.58,"m":"nr"},{"ev":14.67,"y":-0.61,"m":"nr"},{"ev":15.0,"y":-0.64,"m":"nr"},{"ev":15.33,"y":-0.69,"m":"nr"},{"ev":15.67,"y":-0.71,"m":"nr"},{"ev":16.0,"y":-0.74,"m":"nr"}]}},"pdr":{"Leica M11":{"meta":{"lowLightEv":"10.6239"},"pts":[{"ev":4.33,"y":11.82,"m":""},{"ev":4.67,"y":11.47,"m":""},{"ev":5.0,"y":11.19,"m":""},{"ev":5.33,"y":10.9,"m":""},{"ev":5.67,"y":10.61,"m":""},{"ev":6.0,"y":10.79,"m":""},{"ev":6.33,"y":10.56,"m":""},{"ev":6.67,"y":10.2,"m":""},{"ev":7.0,"y":9.84,"m":""},{"ev":7.33,"y":9.62,"m":""},{"ev":7.67,"y":9.23,"m":""},{"ev":8.0,"y":8.92,"m":""},{"ev":8.33,"y":8.59,"m":""},{"ev":8.67,"y":8.34,"m":""},{"ev":9.0,"y":8.0,"m":""},{"ev":9.33,"y":7.66,"m":""},{"ev":9.67,"y":7.4,"m":""},{"ev":10.0,"y":7.04,"m":""},{"ev":10.33,"y":6.76,"m":""},{"ev":10.67,"y":6.46,"m":""},{"ev":11.0,"y":6.11,"m":""},{"ev":11.33,"y":5.8,"m":""},{"ev":11.67,"y":5.53,"m":""},{"ev":12.0,"y":5.13,"m":""},{"ev":12.33,"y":4.87,"m":""},{"ev":12.67,"y":4.52,"m":""},{"ev":13.0,"y":4.13,"m":""},{"ev":13.33,"y":3.74,"m":""},{"ev":13.67,"y":3.41,"m":""},{"ev":14.0,"y":3.02,"m":""}]},"Leica Q3":{"meta":{"lowLightEv":"10.3116"},"pts":[{"ev":4.0,"y":10.62,"m":""},{"ev":5.0,"y":11.07,"m":""},{"ev":6.0,"y":10.31,"m":""},{"ev":7.0,"y":9.78,"m":""},{"ev":8.0,"y":8.8,"m":""},{"ev":9.0,"y":7.82,"m":""},{"ev":10.0,"y":6.81,"m":""},{"ev":11.0,"y":5.82,"m":""},{"ev":12.0,"y":4.86,"m":""},{"ev":13.0,"y":4.04,"m":"nr"},{"ev":14.0,"y":3.11,"m":"nr"},{"ev":14.33,"y":2.85,"m":"both"},{"ev":14.67,"y":2.49,"m":"both"},{"ev":15.0,"y":2.23,"m":"both"}]},"Leica SL3-S":{"meta":{"lowLightEv":"10.6447"},"pts":[{"ev":4.0,"y":10.07,"m":"ext"},{"ev":4.33,"y":10.89,"m":"ext"},{"ev":4.67,"y":10.72,"m":"ext"},{"ev":5.0,"y":10.45,"m":""},{"ev":5.33,"y":10.21,"m":""},{"ev":5.67,"y":9.92,"m":""},{"ev":6.0,"y":9.66,"m":""},{"ev":6.33,"y":9.78,"m":""},{"ev":6.67,"y":9.49,"m":""},{"ev":7.0,"y":8.95,"m":""},{"ev":7.33,"y":8.88,"m":""},{"ev":7.67,"y":9.39,"m":""},{"ev":8.0,"y":8.96,"m":""},{"ev":8.33,"y":8.73,"m":""},{"ev":8.67,"y":8.4,"m":""},{"ev":9.0,"y":8.07,"m":""},{"ev":9.33,"y":7.74,"m":""},{"ev":9.67,"y":7.42,"m":""},{"ev":10.0,"y":7.12,"m":""},{"ev":10.33,"y":6.75,"m":""},{"ev":10.67,"y":6.48,"m":""},{"ev":11.0,"y":6.41,"m":"nr"},{"ev":11.33,"y":6.01,"m":"nr"},{"ev":11.67,"y":5.78,"m":"nr"},{"ev":12.0,"y":5.46,"m":"nr"},{"ev":12.33,"y":5.19,"m":"nr"},{"ev":12.67,"y":4.92,"m":"nr"},{"ev":13.0,"y":4.6,"m":"nr"},{"ev":13.33,"y":4.28,"m":"nr"},{"ev":13.67,"y":3.98,"m":"nr"},{"ev":14.0,"y":3.65,"m":"nr"},{"ev":14.33,"y":3.4,"m":"nr"},{"ev":14.67,"y":3.13,"m":"nr"},{"ev":15.0,"y":2.81,"m":"nr"},{"ev":15.33,"y":2.5,"m":"nr"},{"ev":15.67,"y":2.2,"m":"nr"},{"ev":16.0,"y":1.86,"m":"nr"}]}}};
+
+const CAMS = [
+  {id:"m11", name:"M11", rn:"Leica M11_14", pdr:"Leica M11", color:"#4C9A3B", pitch:3.76, mpx:60.3, isoBase:64, fwc:47875, dual:200, nrFrom:null, ip:"sin certificar"},
+  {id:"q3",  name:"Q3",  rn:"Leica Q3_13",  pdr:"Leica Q3",  color:"#262626", pitch:3.76, mpx:60.3, isoBase:100, fwc:31135, dual:400, nrFrom:25600, ip:"IP52"},
+  {id:"sl3s",name:"SL3-S",rn:"Leica SL3-S_14",pdr:"Leica SL3-S",color:"#3C7BC7", pitch:5.94, mpx:24.6, isoBase:100, fwc:95292, dual:640, nrFrom:6400, ip:"IP54"}
+];
+const AREA_REF = CAMS[2].pitch**2;
+const evToIso = ev => 3.125*Math.pow(2,ev);
+const fmtIso = iso => { const std=[25,32,40,50,64,80,100,125,160,200,250,320,400,500,640,800,1000,1250,1600,2000,2500,3200,4000,5000,6400,8000,10000,12500,16000,20000,25000,32000,40000,50000,64000,80000,100000,125000,160000,200000]; let best=std[0]; for(const s of std){ if(Math.abs(Math.log2(s/iso))<Math.abs(Math.log2(best/iso))) best=s;} return best; };
+const LANG=()=>document.documentElement.lang==="en"?"en":"es";
+const LOC=()=>LANG()==="en"?"en-GB":"es-ES";
+const DICT={
+  es:{rows:["Resolución (Mpx)","Paso de píxel (µm)","Área del píxel (µm²)","Capacidad de pozo (e⁻ por píxel)","Capacidad de pozo por área (e⁻/µm²)","ISO base","Ruido de lectura a ISO base (e⁻)","Conmutación de ganancia dual (ISO)","Ruido de lectura tras la conmutación (e⁻)","Ruido mínimo sin filtrado (e⁻)","Filtrado del RAW desde ISO","PDR a ISO base (EV)","Low-Light EV (PhotonsToPhotos)","Sellado"],
+      none:"ninguno", nocert:"sin certificar", yRn:"Ruido de lectura (e⁻ rms)", yPdr:"PDR (EV)", nr:" (RAW filtrado)", ext:" (ISO extendido)", both:" (escalado y filtrado)",
+      read:"lectura", mixed:"mixto", photon:"fotones", sat:"saturado", well:"% del pozo", rawf:"RAW filtrado", readvar:"% varianza de lectura", snrArea:"SNR a igual área: ",
+      hint1:(b,w,ev)=>`Con estos parámetros la mejor SNR normalizada es la de la ${b}; la diferencia con la ${w} equivale a ${ev} EV de exposición.`,
+      hint2:" Las tres están limitadas por fotones: el tamaño de píxel no interviene y solo cuenta la eficiencia cuántica y la óptica.",
+      hint3:" Al menos una cámara aplica reducción de ruido al RAW a este ISO; el valor de ruido es engañoso para estrellas débiles.",
+      hint4:(N,r)=>` Las ${N} tomas apiladas multiplican la SNR por √${N} = ${r}.`,
+      dOk:"sin limitación", dWarn:"pérdida parcial de detalle", dBad:"limitado por difracción"},
+  en:{rows:["Resolution (Mpx)","Pixel pitch (µm)","Pixel area (µm²)","Well capacity (e⁻ per pixel)","Well capacity per area (e⁻/µm²)","Base ISO","Read noise at base ISO (e⁻)","Dual-gain switching (ISO)","Read noise after switching (e⁻)","Minimum noise without filtering (e⁻)","RAW filtering from ISO","PDR at base ISO (EV)","Low-Light EV (PhotonsToPhotos)","Sealing"],
+      none:"none", nocert:"uncertified", yRn:"Read noise (e⁻ rms)", yPdr:"PDR (EV)", nr:" (filtered RAW)", ext:" (extended ISO)", both:" (scaled and filtered)",
+      read:"read", mixed:"mixed", photon:"photon", sat:"saturated", well:"% of the well", rawf:"filtered RAW", readvar:"% read variance", snrArea:"SNR at equal area: ",
+      hint1:(b,w,ev)=>`With these parameters the best normalised SNR is the ${b}'s; the difference from the ${w} amounts to ${ev} EV of exposure.`,
+      hint2:" All three are photon-limited: pixel size plays no part and only quantum efficiency and optics count.",
+      hint3:" At least one camera applies noise reduction to the RAW at this ISO; the noise value is misleading for faint stars.",
+      hint4:(N,r)=>` The ${N} stacked frames multiply SNR by √${N} = ${r}.`,
+      dOk:"no limitation", dWarn:"partial loss of detail", dBad:"diffraction-limited"}
+};
+const L=k=>DICT[LANG()][k];
+const nf = (x,d=2)=> x.toLocaleString(LOC(),{minimumFractionDigits:d,maximumFractionDigits:d});
+
+/* Ficha */
+function buildSpec(){
+  const fns = [
+    c=>nf(c.mpx,1), c=>nf(c.pitch,2), c=>nf(c.pitch**2,1), c=>c.fwc.toLocaleString(LOC()), c=>nf(c.fwc/c.pitch**2,0),
+    c=>String(c.isoBase), c=>nf(rnAt(c,c.isoBase),2), c=>String(c.dual), c=>nf(rnAt(c,c.dual),2), c=>nf(minRnClean(c),2),
+    c=>c.nrFrom?String(c.nrFrom):L("none"), c=>nf(pdrAt(c,c.isoBase),2), c=>nf(parseFloat(RAW.pdr[c.pdr].meta.lowLightEv),2),
+    c=>c.ip==="sin certificar"?L("nocert"):c.ip
+  ];
+  const tb=document.getElementById("specBody"); tb.innerHTML="";
+  L("rows").forEach((label,i)=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<th>${label}</th>`+CAMS.map(c=>`<td class="num">${fns[i](c)}</td>`).join("");
+    tb.appendChild(tr);
+  });
+}
+buildSpec();
+
+function interp(pts, ev){
+  const p=pts; if(ev<=p[0].ev) return p[0].y; if(ev>=p[p.length-1].ev) return p[p.length-1].y;
+  for(let i=0;i<p.length-1;i++){ if(ev>=p[i].ev && ev<=p[i+1].ev){ const t=(ev-p[i].ev)/(p[i+1].ev-p[i].ev); return p[i].y+t*(p[i+1].y-p[i].y);} }
+  return p[p.length-1].y;
+}
+function rnAt(c, iso){ const ev=Math.log2(iso/3.125); return Math.pow(2, interp(RAW.rn[c.rn].pts, ev)); }
+function pdrAt(c, iso){ const ev=Math.log2(iso/3.125); return interp(RAW.pdr[c.pdr].pts, ev); }
+function minRnClean(c){ return Math.pow(2, Math.min(...RAW.rn[c.rn].pts.filter(p=>p.m==="").map(p=>p.y))); }
+function rnIsFiltered(c, iso){ const ev=Math.log2(iso/3.125); const p=RAW.rn[c.rn].pts; let near=p[0]; for(const q of p){ if(Math.abs(q.ev-ev)<Math.abs(near.ev-ev)) near=q; } return near.m==="nr"||near.m==="both"; }
+
+/* Charts */
+Chart.defaults.font.family = getComputedStyle(document.documentElement).getPropertyValue("--sans");
+Chart.defaults.color = "#1B1D1B";
+const isoTicks=[50,100,200,400,800,1600,3200,6400,12800,25600,51200,102400,204800];
+const xScale = {type:"logarithmic", min:40, max:220000, title:{display:true,text:"ISO"},
+  grid:{color:"#DDE1DC"},
+  ticks:{callback:v=> isoTicks.includes(v)?v.toLocaleString(LOC()):"", maxRotation:0, autoSkip:false}, 
+  afterBuildTicks: s=>{ s.ticks = isoTicks.map(v=>({value:v})); }};
+
+function pointStyleFor(m){ return m==="nr"?"triangle":(m==="both"?"rectRot":"circle"); }
+function buildRn(normalize, showNR){
+  return CAMS.map(c=>{
+    const k = normalize? Math.sqrt(c.mpx/CAMS[2].mpx) : 1;
+    const pts = RAW.rn[c.rn].pts.filter(p=> showNR || (p.m!=="nr" && p.m!=="both"));
+    return {
+      label:c.name, borderColor:c.color, backgroundColor:c.color, tension:0.15, borderWidth:2,
+      data: pts.map(p=>({x:evToIso(p.ev), y:Math.pow(2,p.y)*k, m:p.m})),
+      pointStyle: ctx=>pointStyleFor(ctx.raw?.m), pointRotation: ctx=> ctx.raw?.m==="nr"?180:0,
+      pointRadius: ctx=> (ctx.raw?.m)?6:3.5, pointBackgroundColor: ctx=> ctx.raw?.m==="ext"||ctx.raw?.m==="both" ? "#fff" : c.color,
+      pointBorderWidth:1.5
+    };
+  });
+}
+const rnChart = new Chart(document.getElementById("rnChart"),{
+  type:"line", data:{datasets:buildRn(false,true)},
+  options:{responsive:true,maintainAspectRatio:false, parsing:false,
+    scales:{x:xScale, y:{type:"logarithmic", min:0.5, max:16, title:{display:true,text:L("yRn")}, grid:{color:"#DDE1DC"},
+      ticks:{callback:v=>[0.5,1,2,4,8,16].includes(v)?nf(v,v<1?1:0):""}, afterBuildTicks:s=>{s.ticks=[0.5,1,2,4,8,16].map(v=>({value:v}));}}},
+    plugins:{legend:{display:false}, tooltip:{callbacks:{
+      title: items=>"ISO "+fmtIso(items[0].raw.x).toLocaleString(LOC()),
+      label: item=>{ const m=item.raw.m; const tag = m==="nr"?L("nr"):m==="ext"?L("ext"):m==="both"?L("both"):""; return `${item.dataset.label}: ${nf(item.raw.y,2)} e⁻${tag}`; }}}}}
+});
+let normalize=false, showNR=true;
+function refreshRn(){ rnChart.data.datasets=buildRn(normalize,showNR); rnChart.update(); }
+document.getElementById("btnPx").addEventListener("click",e=>{normalize=false; e.target.setAttribute("aria-pressed","true"); document.getElementById("btnArea").setAttribute("aria-pressed","false"); refreshRn();});
+document.getElementById("btnArea").addEventListener("click",e=>{normalize=true; e.target.setAttribute("aria-pressed","true"); document.getElementById("btnPx").setAttribute("aria-pressed","false"); refreshRn();});
+document.getElementById("chkNR").addEventListener("change",e=>{showNR=e.target.checked; refreshRn();});
+
+const pdrChart = new Chart(document.getElementById("pdrChart"),{
+  type:"line", data:{datasets:CAMS.map(c=>({label:c.name,borderColor:c.color,backgroundColor:c.color,tension:0.15,borderWidth:2,
+    data:RAW.pdr[c.pdr].pts.map(p=>({x:evToIso(p.ev),y:p.y,m:p.m})),
+    pointStyle:ctx=>pointStyleFor(ctx.raw?.m), pointRotation:ctx=>ctx.raw?.m==="nr"?180:0, pointRadius:ctx=>(ctx.raw?.m)?6:3.5,
+    pointBackgroundColor:ctx=>ctx.raw?.m==="ext"||ctx.raw?.m==="both"?"#fff":c.color, pointBorderWidth:1.5}))},
+  options:{responsive:true,maintainAspectRatio:false,parsing:false,
+    scales:{x:xScale, y:{min:1,max:12.5,title:{display:true,text:L("yPdr")},grid:{color:"#DDE1DC"}}},
+    plugins:{legend:{display:false},tooltip:{callbacks:{title:items=>"ISO "+fmtIso(items[0].raw.x).toLocaleString(LOC()),
+      label:item=>`${item.dataset.label}: ${nf(item.raw.y,2)} EV`}}}}
+});
+
+/* SNR calculator */
+const isoSel=document.getElementById("iso");
+[64,100,125,160,200,250,320,400,500,640,800,1000,1250,1600,2000,2500,3200,4000,5000,6400,8000,10000,12800,16000,20000,25600].forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v.toLocaleString(LOC());if(v===1600)o.selected=true;isoSel.appendChild(o);});
+function relabelIso(){ [...isoSel.options].forEach(o=>{o.textContent=(+o.value).toLocaleString(LOC());}); document.querySelectorAll("option[data-es]").forEach(o=>{o.textContent=o.getAttribute("data-"+LANG())||o.textContent;}); }
+const $=id=>document.getElementById(id);
+function calc(){
+  const F=parseFloat($("flux").value)||0, t=parseFloat($("texp").value)||0, iso=parseFloat(isoSel.value), N=Math.max(1,parseInt($("nfr").value)||1);
+  const T=parseFloat($("temp").value); $("tempV").textContent=T;
+  const D0=parseFloat($("dark").value)||0; const D=D0*Math.pow(2,(T-20)/6);
+  const tb=$("snrBody"); tb.innerHTML=""; const bars=$("snrBars"); bars.innerHTML="";
+  const results=CAMS.map(c=>{
+    const A=c.pitch**2, S=F*A*t, dk=D*A*t, rn=rnAt(c,iso);
+    const varTot=S+dk+rn*rn; const snr=S>0?S/Math.sqrt(varTot):0;
+    const snrN=snr*Math.sqrt(AREA_REF/A)*Math.sqrt(N);
+    const fracRead=rn*rn/varTot;
+    const fwcIso=c.fwc*c.isoBase/Math.max(iso,c.isoBase); const sat=(S+dk)/fwcIso;
+    const reg= fracRead>0.5?L("read"):(fracRead>0.2?L("mixed"):L("photon")); const regKey=fracRead>0.5?"read":(fracRead>0.2?"mixed":"photon");
+    return {c,S,dk,rn,snr,snrN,fracRead,sat,reg,regKey,filtered:rnIsFiltered(c,iso),iso};
+  });
+  const maxN=Math.max(...results.map(r=>r.snrN),1e-9);
+  for(const r of results){
+    const satTag = r.sat>=1?`<span class="tag bad">${L("sat")} (${nf(r.sat*100,0)} %)</span>`:(r.sat>0.7?`<span class="tag warn">${nf(r.sat*100,0)} ${L("well")}</span>`:`<span class="tag ok">${nf(r.sat*100,r.sat<0.01?2:0)} ${L("well")}</span>`);
+    const nrTag = r.filtered?` <span class="tag warn">${L("rawf")}</span>`:"";
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td style="color:${r.c.color};font-weight:600">${r.c.name}</td><td class="num">${nf(r.S,r.S<10?2:0)}</td><td class="num">${nf(Math.sqrt(r.S),2)}</td><td class="num">${nf(r.rn,2)}</td><td class="num">${nf(Math.sqrt(r.dk),2)}</td><td class="num">${nf(r.snr,2)}</td><td class="num">${nf(r.snrN,2)}</td><td>${r.reg} (${nf(r.fracRead*100,0)} ${L("readvar")})${nrTag}</td><td>${satTag}</td>`;
+    tb.appendChild(tr);
+    const b=document.createElement("div"); b.style.marginTop="8px";
+    b.innerHTML=`<div style="font-size:13px;display:flex;justify-content:space-between"><span style="color:${r.c.color};font-weight:600">${r.c.name}</span><span>${L("snrArea")}${nf(r.snrN,1)}</span></div><div class="bar"><i style="width:${(r.snrN/maxN*100).toFixed(1)}%;background:${r.c.color}"></i></div>`;
+    bars.appendChild(b);
+  }
+  const best=results.reduce((a,b)=>b.snrN>a.snrN?b:a);
+  const worst=results.reduce((a,b)=>b.snrN<a.snrN?b:a);
+  const evDiff=Math.log2(best.snrN/Math.max(worst.snrN,1e-9))*2;
+  let hint=L("hint1")(best.c.name,worst.c.name,nf(evDiff,2));
+  if(results.every(r=>r.regKey==="photon")) hint+=L("hint2");
+  if(results.some(r=>r.filtered)) hint+=L("hint3");
+  if(N>1) hint+=L("hint4")(N,nf(Math.sqrt(N),2));
+  $("snrHint").textContent=hint;
+}
+["flux","texp","iso","nfr","dark","temp"].forEach(id=>$(id).addEventListener("input",calc));
+document.querySelectorAll(".presets button").forEach(b=>b.addEventListener("click",()=>{$("flux").value=b.dataset.flux;$("texp").value=b.dataset.t;calc();}));
+calc();
+
+/* Diffraction */
+const FN=[1.4,2,2.8,4,5.6,8,11,16,22,32,45];
+function dif(){
+  const N=FN[parseInt($("fnum").value)]; $("fnumV").textContent=N; const lam=parseFloat($("lambda").value);
+  const airy=2.44*lam*N, ray=1.22*lam*N; const tb=$("difBody"); tb.innerHTML="";
+  for(const c of CAMS){
+    const ratio=ray/c.pitch;
+    const st= ratio<=1?`<span class="tag ok">${L("dOk")}</span>`:(ratio<=2?`<span class="tag warn">${L("dWarn")}</span>`:`<span class="tag bad">${L("dBad")}</span>`);
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td style="color:${c.color};font-weight:600">${c.name}</td><td class="num">${nf(c.pitch,2)}</td><td class="num">${nf(airy,1)}</td><td class="num">${nf(ratio,2)}</td><td>${st}</td>`;
+    tb.appendChild(tr);
+  }
+}
+$("fnum").addEventListener("input",dif); $("lambda").addEventListener("change",dif); dif();
+relabelIso();
+window.onLangChange=function(){
+  buildSpec(); relabelIso();
+  rnChart.options.scales.y.title.text=L("yRn"); rnChart.update();
+  pdrChart.options.scales.y.title.text=L("yPdr"); pdrChart.update();
+  calc(); dif();
+};
+</script>
+<script>
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{ title:"M11, Q3 y SL3-S: lectura de los datos del sensor", desc:"Ruido de lectura referido a la entrada, rango dinámico fotográfico y calculadora de relación señal/ruido de las Leica M11, Q3 y SL3-S a partir de las medidas de PhotonsToPhotos, con las conclusiones para astrofotografía, paisaje a ISO base y trabajo en costa." },
+    en:{ title:"M11, Q3 and SL3-S: reading the sensor data", desc:"Input-referred read noise, photographic dynamic range and a signal-to-noise calculator for the Leica M11, Q3 and SL3-S from the PhotonsToPhotos measurements, with the conclusions for astrophotography, base-ISO landscape and coastal work." }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    [].forEach.call(document.querySelectorAll("[data-aria-"+l+"]"),function(e){ e.setAttribute("aria-label",e.getAttribute("data-aria-"+l)); });
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
+</body>
+</html>
