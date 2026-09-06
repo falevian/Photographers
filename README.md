@@ -13,7 +13,7 @@ Photography and light-physics tools that run entirely in the browser.
 
 ## Español
 
-Treinta y siete documentos que resuelven cuestiones fotográficas con el modelo físico o estadístico
+Treinta y cuatro documentos que resuelven cuestiones fotográficas con el modelo físico o estadístico
 delante: simuladores, métricas, catálogos, scripts de procesado y su documentación.
 
 Todo el cálculo ocurre en el navegador. No hay servidor, ni cuenta, ni telemetría, y cada
@@ -48,11 +48,8 @@ ojo aciertan a ponerlo donde uno cree, y qué le hace al objetivo el vidrio del 
 |---|---|---:|
 | [`caracter-optico-leica-m.html`](caracter-optico-leica-m.html) | 128 objetivos de montura Leica M, de 1925 a 2026, con 32 descriptores cada uno. Reconstruye el disco de desenfoque por trazado geométrico, mide la distancia de carácter entre dos objetivos y devuelve sus vecinos más próximos. | 169 KB |
 | [`telemetro-m11.html`](telemetro-m11.html) | Qué ve el ojo por el visor de la M11 y qué queda de ello en el sensor. Seis lienzos que van del parche del telémetro a la rejilla de fotositos, con el error de coseno al recomponer y una tasa de acierto por Montecarlo. | 92 KB |
-| [`stack-sensor.html`](stack-sensor.html) | Por qué un gran angular calculado para película se deshace en las esquinas de una cámara digital: el vidrio que cubre el sensor es una lámina plano-paralela que el objetivo nunca tuvo en cuenta. Traza los rayos reales por hasta tres láminas y compara dos sensores a la vez. Manual: [`manual-stack-sensor.html`](manual-stack-sensor.html). | 53 KB |
-| [`binning-m11.html`](binning-m11.html) | L, M o S: qué DNG conviene en la M11. Modelo de transferencia fotónica contrastado con las medidas del artículo: la ganancia real del remuestreo es ~3 dB a ISO medio-alto, nula a ISO base, y S-DNG nunca es la mejor opción. | 47 KB |
-| [`filtro-nd-infrarrojo.html`](filtro-nd-infrarrojo.html) | Por qué un filtro ND de diez pasos puede teñir una fotografía: dónde deja de ser neutro cada tecnología (vidrio teñido, película metálica, IRND, ND variable, resina), qué hace el filtro del propio sensor, la deriva de esquinas por ángulo de incidencia, el diafragma óptimo frente a la difracción y cómo medir la fuga infrarroja con la cámara. Seis simuladores espectrales sin dependencias. | 99 KB |
-| [`leica-sensores.html`](leica-sensores.html) | Los datos del sensor de M11, Q3 y SL3-S según PhotonsToPhotos: ruido de lectura referido a la entrada, conmutación de ganancia dual, rango dinámico fotográfico, calculadora de relación señal/ruido por píxel y a igual área, difracción frente a paso de píxel y veredictos por uso (astro, paisaje, costa). Las gráficas cargan Chart.js desde CDN. | 58 KB |
-| [`multishot-sl3s.html`](multishot-sl3s.html) | Cuaderno técnico del multishot del SL3-S: mosaico Bayer animado, ganancia √N, Nyquist y MTF de difracción, deriva sidérea frente a NPF y regla 500, software de apilado en macOS y un asistente que recomienda 24, 48 o 96 MP según las condiciones. | 65 KB |
+| [`sensor.html`](sensor.html) | El sensor en cuatro pestañas: datos medidos de M11, Q3 y SL3-S (ruido de lectura, ganancia dual, PDR, calculadora SNR), el multishot del SL3-S (Bayer animado, √N, Nyquist, deriva sidérea, software de apilado, asistente de decisión), la Triple Resolution de la M11 y una calculadora común de difracción y diafragma óptimo. Fusiona las antiguas leica-sensores, multishot-sl3s y binning-m11, que redirigen aquí. La pestaña de datos carga Chart.js desde CDN. | 175 KB |
+| [`filtro-sensor.html`](filtro-sensor.html) | El filtro del sensor y el ND en dos pestañas: la fuga infrarroja del ND (tecnologías, filtro del propio sensor, dominante por escena, deriva de esquinas, cómo medirla) y el stack óptico con trazado de rayos, MTF y simulación de esquina. Fusiona las antiguas filtro-nd-infrarrojo y stack-sensor, que redirigen aquí. Manual: [`manual-stack-sensor.html`](manual-stack-sensor.html). | 148 KB |
 
 ### Analizar tus propias fotos
 
@@ -132,6 +129,7 @@ manuales. El código vive en [`scripts/`](scripts/), una carpeta por herramienta
 | [`scripts/eclipse/`](scripts/eclipse/) | `eclipse_hdr.py`, `procesar_sol.py`, `deriva_solar.py` y su `README.md`. |
 | [`scripts/analitica/`](scripts/analitica/) | `subject_center.py`, el análisis que alimenta la página de centrado. |
 | [`scripts/siril/`](scripts/siril/) | Dos scripts de Siril listos para este equipo: `Apilado_M11P_UHC.ssf` (cadena completa) y `Apilado_M11P_UHC_sin_darks.ssf`. Los documenta `manual-siril-apilado.html`. |
+| [`scripts/sitio/`](scripts/sitio/) | `fusionar.py`, el constructor con el que se han fusionado páginas en una sola con pestañas (aísla el CSS de cada fuente, renombra los ids que chocan, encadena los conmutadores de idioma), y las especificaciones de `sensor.html` y `filtro-sensor.html`. Las fuentes originales quedan en el histórico de git. |
 | [`perfiles-icc/`](perfiles-icc/) | Cuatro perfiles ICC reales generados con `peliculas.py` para la Leica Q3 43 (ProStandard): Kodachrome 25, Kodachrome 64, Pro 400H sobre Endura y Tri-X sobre Multigrade. Listos para instalar en Capture One; 560 KB cada uno. |
 
 ### Notas
@@ -139,6 +137,7 @@ manuales. El código vive en [`scripts/`](scripts/), una carpeta por herramienta
 - El explorador de distancias pesa 6,4 MB porque lleva las fotografías incrustadas en
   base64. Es lo que le permite funcionar sin conexión, pero conviene abrirlo con red
   decente y no es el mejor candidato para un móvil con datos.
+- Cinco nombres antiguos (`leica-sensores`, `multishot-sl3s`, `binning-m11`, `stack-sensor`, `filtro-nd-infrarrojo`) se conservan como redirecciones a las páginas fusionadas `sensor.html` y `filtro-sensor.html`; no cuentan como documentos.
 - El simulador del eclipse apunta al del 2 de agosto de 2027 (sur de España, Marruecos,
   Egipto). Las efemérides del evento de 2026 quedan en el histórico de git.
 
@@ -155,7 +154,7 @@ python3 -m http.server 8000
 
 ## English
 
-Thirty-seven documents that settle photographic questions with the physical or statistical
+Thirty-four documents that settle photographic questions with the physical or statistical
 model in plain sight: simulators, metrics, catalogues, processing scripts and their
 documentation.
 
@@ -192,11 +191,8 @@ and the eye manage to put it where you think, and what the sensor's glass does t
 |---|---|---:|
 | [`caracter-optico-leica-m.html`](caracter-optico-leica-m.html) | 128 Leica M-mount lenses, from 1925 to 2026, with 32 descriptors each. Reconstructs the defocus disc by geometric tracing, measures the character distance between two lenses and returns their nearest neighbours. | 169 KB |
 | [`telemetro-m11.html`](telemetro-m11.html) | What the eye sees through the M11 viewfinder and what survives of it on the sensor. Six canvases running from the rangefinder patch to the grid of photosites, with the cosine error from recomposing and a Monte Carlo hit rate. | 92 KB |
-| [`stack-sensor.html`](stack-sensor.html) | Why a wide-angle computed for film falls apart in the corners of a digital camera: the glass covering the sensor is a plane-parallel plate the lens never accounted for. Traces the real rays through up to three plates and compares two sensors at once. Manual: [`manual-stack-sensor.html`](manual-stack-sensor.html). | 53 KB |
-| [`binning-m11.html`](binning-m11.html) | L, M or S: which DNG to pick on the M11. A photon-transfer model set against the article's measurements: the real gain from downsampling is ~3 dB at mid-to-high ISO, nil at base, and S-DNG is never the best option. | 47 KB |
-| [`filtro-nd-infrarrojo.html`](filtro-nd-infrarrojo.html) | Why a ten-stop ND filter can tint a photograph: where each technology stops being neutral (dyed glass, metal film, IRND, variable ND, resin), what the sensor's own filter does, corner drift from the angle of incidence, the optimum aperture against diffraction, and how to measure infrared leakage with the camera. Six dependency-free spectral simulators. | 99 KB |
-| [`leica-sensores.html`](leica-sensores.html) | The sensor data of the M11, Q3 and SL3-S per PhotonsToPhotos: input-referred read noise, dual-gain switching, photographic dynamic range, a signal-to-noise calculator per pixel and at equal area, diffraction against pixel pitch and verdicts by use (astro, landscape, coast). The charts load Chart.js from a CDN. | 58 KB |
-| [`multishot-sl3s.html`](multishot-sl3s.html) | Technical notebook on the SL3-S multishot: animated Bayer mosaic, √N gain, Nyquist and diffraction MTF, sidereal drift against NPF and the 500 rule, stacking software on macOS and an assistant recommending 24, 48 or 96 MP from the conditions. | 65 KB |
+| [`sensor.html`](sensor.html) | The sensor in four tabs: measured data of the M11, Q3 and SL3-S (read noise, dual gain, PDR, SNR calculator), the SL3-S multishot (animated Bayer, √N, Nyquist, sidereal drift, stacking software, decision assistant), the M11 Triple Resolution and a shared diffraction and optimum-aperture calculator. Merges the former leica-sensores, multishot-sl3s and binning-m11, which redirect here. The data tab loads Chart.js from a CDN. | 175 KB |
+| [`filtro-sensor.html`](filtro-sensor.html) | The sensor filter and the ND in two tabs: the ND's infrared leakage (technologies, the sensor's own filter, cast by scene, corner drift, how to measure it) and the optical stack with ray tracing, MTF and corner simulation. Merges the former filtro-nd-infrarrojo and stack-sensor, which redirect here. Manual: [`manual-stack-sensor.html`](manual-stack-sensor.html). | 148 KB |
 
 ### Analysing your own photographs
 
@@ -276,6 +272,7 @@ The code lives in [`scripts/`](scripts/), one folder per tool.
 | [`scripts/eclipse/`](scripts/eclipse/) | `eclipse_hdr.py`, `procesar_sol.py`, `deriva_solar.py` and their `README.md`. |
 | [`scripts/analitica/`](scripts/analitica/) | `subject_center.py`, the analysis that feeds the placement page. |
 | [`scripts/siril/`](scripts/siril/) | Two Siril scripts ready for this kit: `Apilado_M11P_UHC.ssf` (full chain) and `Apilado_M11P_UHC_sin_darks.ssf`. Documented by `manual-siril-apilado.html`. |
+| [`scripts/sitio/`](scripts/sitio/) | `fusionar.py`, the builder used to merge pages into a single tabbed one (isolates each source's CSS, renames colliding ids, chains the language switchers), and the specs for `sensor.html` and `filtro-sensor.html`. The original sources remain in the git history. |
 | [`perfiles-icc/`](perfiles-icc/) | Four real ICC profiles generated with `peliculas.py` for the Leica Q3 43 (ProStandard): Kodachrome 25, Kodachrome 64, Pro 400H on Endura and Tri-X on Multigrade. Ready to install in Capture One; 560 KB each. |
 
 ### Notes
@@ -283,6 +280,7 @@ The code lives in [`scripts/`](scripts/), one folder per tool.
 - The distance explorer weighs 6.4 MB because it carries the photographs embedded as
   base64. That is what lets it run offline, but it is worth opening on a decent connection
   and it is not the best candidate for a phone on mobile data.
+- Five old names (`leica-sensores`, `multishot-sl3s`, `binning-m11`, `stack-sensor`, `filtro-nd-infrarrojo`) are kept as redirects to the merged pages `sensor.html` and `filtro-sensor.html`; they do not count as documents.
 - The eclipse simulator targets 2 August 2027 (southern Spain, Morocco, Egypt). The
   ephemerides of the 2026 event remain in the git history.
 

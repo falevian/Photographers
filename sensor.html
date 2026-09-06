@@ -1,0 +1,1996 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El sensor: ruido, desplazamiento de píxel, binning y difracción</title>
+<meta name="author" content="Rafael Vida">
+<meta name="description" content="Lo que hace el sensor con los fotones, en una sola página: ruido de lectura y rango dinámico de M11, Q3 y SL3-S según PhotonsToPhotos con calculadora SNR; el multishot del SL3-S (48 y 96 MP, √N, Nyquist, deriva sidérea, software de apilado); la Triple Resolution de la M11 (binning o remuestreo) y una calculadora común de difracción y diafragma óptimo.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Crect%20width%3D%2764%27%20height%3D%2764%27%20rx%3D%2713%27%20fill%3D%27%23F4F5F2%27/%3E%3Crect%20x%3D%2710%27%20y%3D%2750%27%20width%3D%2744%27%20height%3D%271.5%27%20fill%3D%27%235F6662%27/%3E%3Cpath%20d%3D%27M10%2C20%20L20%2C21%20L24%2C34%20L54%2C40%27%20fill%3D%27none%27%20stroke%3D%27%234C9A3B%27%20stroke-width%3D%273%27%20stroke-linejoin%3D%27round%27/%3E%3Cpath%20d%3D%27M10%2C16%20L22%2C17%20L28%2C32%20L54%2C38%27%20fill%3D%27none%27%20stroke%3D%27%23262626%27%20stroke-width%3D%273%27%20stroke-linejoin%3D%27round%27/%3E%3Cpath%20d%3D%27M10%2C12%20L30%2C13%20L34%2C28%20L54%2C36%27%20fill%3D%27none%27%20stroke%3D%27%233C7BC7%27%20stroke-width%3D%273%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="icons/sensor-180.png">
+<meta name="theme-color" content="#F4F5F2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sensor">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Photographers">
+<meta property="og:title" content="El sensor: ruido, desplazamiento de píxel, binning y difracción">
+<meta property="og:description" content="Lo que hace el sensor con los fotones, en una sola página: ruido de lectura y rango dinámico de M11, Q3 y SL3-S según PhotonsToPhotos con calculadora SNR; el multishot del SL3-S (48 y 96 MP, √N, Nyquist, deriva sidérea, software de apilado); la Triple Resolution de la M11 (binning o remuestreo) y una calculadora común de difracción y diafragma óptimo.">
+<meta property="og:url" content="https://falevian.github.io/Photographers/sensor.html">
+<meta property="og:image" content="https://falevian.github.io/Photographers/og/sensor.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="es_ES">
+<meta property="og:locale:alternate" content="en_GB">
+<meta name="twitter:card" content="summary_large_image">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* ---------- cáscara de pestañas ---------- */
+:root{--sh-bg:#F4F5F2;--sh-ink:#1B1D1B;--sh-muted:#5F6662;--sh-rule:#D3D8D2;--sh-acc:#3C7BC7;}
+*{box-sizing:border-box}
+html{background:var(--sh-bg)}
+body{margin:0;background:var(--sh-bg);color:var(--sh-ink);font-family:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif}
+.shell-head{max-width:1080px;margin:0 auto;padding:52px 20px 10px}
+.shell-head h1{font-family:"Fraunces","Iowan Old Style",Georgia,serif;font-weight:600;font-size:clamp(28px,4.6vw,44px);line-height:1.1;margin:0 0 10px;letter-spacing:-.01em}
+.shell-head p{max-width:68ch;margin:0;color:var(--sh-muted);font-size:16px;line-height:1.5}
+.tabs{position:sticky;top:0;z-index:20;background:var(--sh-bg);border-bottom:1px solid var(--sh-rule)}
+.tabs .in{max-width:1080px;margin:0 auto;padding:0 20px;display:flex;gap:4px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tabs button{font:inherit;font-size:14px;background:transparent;border:0;border-bottom:3px solid transparent;padding:12px 12px 10px;color:var(--sh-muted);cursor:pointer;white-space:nowrap}
+.tabs button:hover{color:var(--sh-ink)}
+.tabs button[aria-selected="true"]{color:var(--sh-ink);border-bottom-color:var(--sh-acc);font-weight:600}
+.tabs button:focus-visible{outline:2px solid var(--sh-acc);outline-offset:-2px}
+.tab[hidden]{display:block!important;position:absolute;left:0;right:0;visibility:hidden;height:0;overflow:hidden;pointer-events:none}
+.tab{position:relative}
+[class^="part-"]{padding-top:1px}
+[class^="part-"] header{padding-top:20px}
+.shell-foot{max-width:1080px;margin:0 auto;padding:20px 20px 60px;font-size:13px;color:var(--sh-muted)}
+.shell-foot a{color:inherit}
+/* ---------- convenio bilingüe ---------- */
+html[lang="es"] [data-lang="en"]{display:none!important}
+html[lang="en"] [data-lang="es"]{display:none!important}
+.langbar{position:fixed;top:12px;right:14px;z-index:50;display:flex;background:rgba(255,255,255,.94);border:1px solid var(--sh-rule);border-radius:6px;overflow:hidden;backdrop-filter:blur(6px)}
+.langbar button{font:inherit;font-size:12px;letter-spacing:.08em;background:transparent;border:0;color:var(--sh-muted);padding:7px 11px;cursor:pointer}
+.langbar button+button{border-left:1px solid var(--sh-rule)}
+.langbar button:hover{color:var(--sh-ink)}
+.langbar button.on{background:var(--sh-ink);color:#fff}
+.langbar a.home{display:flex;align-items:center;padding:0 9px;color:var(--sh-muted);border-right:1px solid var(--sh-rule)}
+.langbar a.home:hover{color:var(--sh-ink)}
+.langbar a.home svg{width:12px;height:12px;display:block}
+@media print{.langbar,.tabs{display:none!important} .tab[hidden]{position:static;visibility:visible;height:auto}}
+/* ---------- estilos de cada parte, aislados ---------- */
+.part-sens{
+  --paper:#F4F5F2; --panel:#EBEEEA; --ink:#1B1D1B; --muted:#5F6662; --rule:#D3D8D2;
+  --m11:#4C9A3B; --q3:#262626; --sl3s:#3C7BC7; --warn:#B8861B; --bad:#B5432F;
+  --serif:"Fraunces","Iowan Old Style","Palatino Linotype",Georgia,serif;
+  --sans:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+}
+.part-sens *{box-sizing:border-box}
+.part-sens{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%}
+.part-sens{margin:0}
+.part-sens main{max-width:920px;margin:0 auto;padding:0 20px 80px}
+.part-sens header{padding:56px 0 28px;border-bottom:2px solid var(--ink)}
+.part-sens h1{font-family:var(--serif);font-weight:600;font-size:clamp(30px,5.5vw,48px);line-height:1.08;margin:0 0 14px;letter-spacing:-0.01em}
+.part-sens header p{max-width:62ch;margin:0;color:var(--muted);font-size:17px}
+.part-sens nav{display:flex;flex-wrap:wrap;gap:6px 18px;padding:14px 0;border-bottom:1px solid var(--rule);font-size:14px}
+.part-sens nav a{color:var(--ink);text-decoration:none;border-bottom:1px solid transparent}
+.part-sens nav a:hover,.part-sens nav a:focus-visible{border-bottom-color:var(--ink);outline:none}
+.part-sens section{padding:44px 0 8px}
+.part-sens h2{font-family:var(--serif);font-weight:600;font-size:clamp(24px,3.6vw,32px);line-height:1.15;margin:0 0 10px}
+.part-sens h3{font-family:var(--sans);font-weight:600;font-size:17px;margin:26px 0 8px}
+.part-sens p{max-width:68ch;margin:0 0 14px}
+.part-sens .lead{font-size:17px}
+.part-sens .legend{display:flex;flex-wrap:wrap;gap:14px 22px;margin:8px 0 12px;font-size:14px}
+.part-sens .legend span::before{content:"";display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:7px;vertical-align:-1px}
+.part-sens .legend .m11::before{background:var(--m11)}
+.part-sens .legend .q3::before{background:var(--q3)}
+.part-sens .legend .sl3s::before{background:var(--sl3s)}
+.part-sens table{border-collapse:collapse;width:100%;font-size:15px;font-variant-numeric:tabular-nums;margin:8px 0 18px}
+.part-sens th,.part-sens td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+.part-sens th{font-weight:600;background:var(--panel)}
+.part-sens td.num,.part-sens th.num{text-align:right}
+.part-sens .spec th:first-child{width:38%}
+.part-sens .tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:8px 0 18px}
+.part-sens .tscroll table{margin:0;min-width:560px}
+.part-sens .tscroll.wide table{min-width:760px}
+@media (max-width:600px){.part-sens .tscroll table{font-size:13px}
+.part-sens th,.part-sens td{padding:8px 7px}
+.part-sens .panel{padding:16px 14px}}
+.part-sens .chart-wrap{position:relative;height:380px;margin:6px 0 6px}
+@media (max-width:600px){.part-sens .chart-wrap{height:320px}}
+.part-sens .controls{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin:10px 0 4px;font-size:14px}
+.part-sens .seg{display:inline-flex;border:1px solid var(--ink);border-radius:4px;overflow:hidden}
+.part-sens .seg button{background:transparent;border:0;padding:6px 12px;font:inherit;color:var(--ink);cursor:pointer}
+.part-sens .seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.part-sens .seg button:focus-visible{outline:2px solid var(--sl3s);outline-offset:-2px}
+.part-sens label.chk{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.part-sens .note{font-size:14px;color:var(--muted);max-width:68ch}
+.part-sens .panel{background:var(--panel);padding:20px 22px;margin:18px 0 22px;border-left:4px solid var(--ink)}
+.part-sens .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px 18px}
+.part-sens .field label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+.part-sens .field input,.part-sens .field select{width:100%;font:inherit;padding:7px 9px;border:1px solid var(--rule);border-radius:4px;background:#fff;color:var(--ink)}
+.part-sens .field input:focus-visible,.part-sens .field select:focus-visible{outline:2px solid var(--sl3s)}
+.part-sens .presets{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px}
+.part-sens .presets button{font:inherit;font-size:13px;padding:5px 10px;border:1px solid var(--rule);background:#fff;border-radius:4px;cursor:pointer;color:var(--ink)}
+.part-sens .presets button:hover{border-color:var(--ink)}
+.part-sens .out{margin-top:14px}
+.part-sens .bar{height:10px;background:#fff;border:1px solid var(--rule);border-radius:2px;overflow:hidden;margin-top:4px}
+.part-sens .bar i{display:block;height:100%}
+.part-sens .tag{display:inline-block;font-size:12px;padding:1px 7px;border-radius:3px;border:1px solid currentColor}
+.part-sens .tag.ok{color:var(--m11)}
+.part-sens .tag.warn{color:var(--warn)}
+.part-sens .tag.bad{color:var(--bad)}
+.part-sens dl{margin:0 0 14px}
+.part-sens dt{font-weight:600;margin-top:12px}
+.part-sens dd{margin:2px 0 0;max-width:68ch}
+.part-sens .verdict{display:grid;grid-template-columns:1fr;gap:14px;margin:12px 0 20px}
+.part-sens .verdict article{padding:16px 18px;border:1px solid var(--rule);background:#fff}
+.part-sens .verdict h3{margin:0 0 6px;font-family:var(--serif);font-size:20px;font-weight:600}
+.part-sens .verdict p{margin:0 0 8px;font-size:15px}
+.part-sens .verdict .who{font-weight:600}
+.part-sens .sl3s-c{color:var(--sl3s)}
+.part-sens .m11-c{color:var(--m11)}
+.part-sens .q3-c{color:var(--q3)}
+.part-sens footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--rule);font-size:13px;color:var(--muted)}
+.part-sens footer a{color:inherit}
+@media (prefers-reduced-motion:reduce){.part-sens *{transition:none!important;animation:none!important}}
+@media print{}
+.part-ms{
+  --bg:#F5F7FA; --panel:#FFFFFF; --ink:#1D2733; --ink2:#4A5866; --rule:#CFD7E0;
+  --blue:#245BA3; --blue-soft:#E3ECF8; --amber:#B8781A; --amber-soft:#FBF1DE;
+  --green:#2F7D5B; --red:#B23A3A; --cyan:#2A8FA6;
+  --r:#D6584A; --g:#4E9E5A; --b:#3D6FCB;
+}
+.part-ms *{box-sizing:border-box}
+.part-ms{font-size:17px}
+.part-ms{margin:0;background:var(--bg);color:var(--ink);font-family:"Avenir Next","Helvetica Neue",Helvetica,Arial,sans-serif;line-height:1.55;font-variant-numeric:tabular-nums}
+.part-ms a{color:var(--blue)}
+.part-ms .wrap{display:grid;grid-template-columns:230px minmax(0,72ch);gap:40px;max-width:1080px;margin:0 auto;padding:36px 24px 80px}
+.part-ms nav{position:sticky;top:24px;align-self:start;font-size:.92rem}
+.part-ms nav a{display:block;color:var(--ink2);text-decoration:none;padding:5px 0 5px 12px;border-left:2px solid var(--rule)}
+.part-ms nav a:hover,.part-ms nav a:focus-visible{color:var(--ink);border-left-color:var(--blue);outline:none}
+.part-ms header h1{font-size:1.9rem;font-weight:600;letter-spacing:-.01em;margin:0 0 6px;line-height:1.2}
+.part-ms header p{color:var(--ink2);margin:0 0 8px}
+.part-ms section{margin-top:56px;padding-top:8px}
+.part-ms h2{font-size:1.35rem;font-weight:600;margin:0 0 14px;padding-bottom:8px;border-bottom:2px solid var(--ink)}
+.part-ms h3{font-size:1.02rem;font-weight:600;margin:26px 0 8px;color:var(--ink)}
+.part-ms p{margin:0 0 12px}
+.part-ms .note{background:var(--amber-soft);border-left:3px solid var(--amber);padding:10px 14px;margin:14px 0;font-size:.95rem}
+.part-ms .formula{background:var(--blue-soft);padding:10px 14px;margin:12px 0;font-size:1.02rem;border-radius:4px}
+.part-ms .panel{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:18px 18px 14px;margin:16px 0}
+.part-ms .controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px 18px;margin-bottom:12px}
+.part-ms label{display:block;font-size:.85rem;color:var(--ink2);margin-bottom:3px}
+.part-ms input[type=number],.part-ms select{width:100%;font:inherit;padding:6px 8px;border:1px solid var(--rule);border-radius:4px;background:#fff;color:var(--ink)}
+.part-ms input[type=range]{width:100%;accent-color:var(--blue)}
+.part-ms input:focus-visible,.part-ms select:focus-visible,.part-ms button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.part-ms .out{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 16px;margin:12px 0 6px}
+.part-ms .out div{border-top:1px solid var(--rule);padding-top:6px}
+.part-ms .out b{display:block;font-size:1.35rem;font-weight:600;color:var(--amber)}
+.part-ms .out span{font-size:.82rem;color:var(--ink2)}
+.part-ms svg.chart{width:100%;height:auto;display:block;margin-top:8px}
+.part-ms svg.chart text{font-family:inherit;font-size:11px;fill:var(--ink2)}
+.part-ms svg.chart .axis{stroke:var(--ink2);stroke-width:1}
+.part-ms svg.chart .grid{stroke:var(--rule);stroke-width:1}
+.part-ms svg.chart .line{fill:none;stroke:var(--blue);stroke-width:2}
+.part-ms svg.chart .line2{fill:none;stroke:var(--amber);stroke-width:2;stroke-dasharray:5 4}
+.part-ms svg.chart .marker{fill:var(--amber)}
+.part-ms table{width:100%;border-collapse:collapse;font-size:.92rem;margin:10px 0}
+.part-ms th,.part-ms td{text-align:left;padding:8px 8px;border-bottom:1px solid var(--rule);vertical-align:top}
+.part-ms th{font-weight:600;border-bottom:2px solid var(--ink)}
+.part-ms .tag{display:inline-block;font-size:.75rem;padding:1px 7px;border-radius:10px;background:var(--blue-soft);color:var(--blue);margin-right:4px}
+.part-ms .tag.pay{background:var(--amber-soft);color:var(--amber)}
+.part-ms .tag.win{background:#F4E1E1;color:var(--red)}
+.part-ms .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.part-ms button.f{font:inherit;font-size:.85rem;padding:5px 12px;border:1px solid var(--rule);background:#fff;border-radius:16px;cursor:pointer;color:var(--ink2)}
+.part-ms button.f[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.part-ms .bayer{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.part-ms .bayer svg{width:100%;height:auto;display:block}
+.part-ms .legend{font-size:.85rem;color:var(--ink2)}
+.part-ms .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:middle;margin-right:4px}
+.part-ms .two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.part-ms ul{padding-left:20px;margin:0 0 12px}
+.part-ms li{margin-bottom:5px}
+.part-ms footer{margin-top:60px;font-size:.85rem;color:var(--ink2);border-top:1px solid var(--rule);padding-top:12px}
+@media (max-width:820px){.part-ms .wrap{grid-template-columns:1fr;gap:12px}
+.part-ms nav{position:static;display:flex;flex-wrap:wrap;gap:4px 14px}
+.part-ms nav a{border-left:none;padding:2px 0}
+.part-ms .bayer,.part-ms .two{grid-template-columns:1fr}
+.part-ms{font-size:16px}}
+@media (prefers-reduced-motion:no-preference){.part-ms .bayer rect{transition:transform .35s ease}}
+@media print{}
+.part-bn{
+    --bg:#e9ecef; --panel:#f7f8f9; --ink:#1b2430; --mute:#5b6773; --line:#c9d0d6;
+    --sag:#0b6e99; --tan:#b3541e; --col:#7a3d9e; --sph:#2f7d4a; --ref:#8a949c; --eff:#a8871a;
+  }
+@media (prefers-color-scheme: dark){.part-bn{ --bg:#14181c; --panel:#1d2329; --ink:#e6eaee; --mute:#98a3ad; --line:#3a444d;
+      --sag:#4fb0dc; --tan:#e08a52; --col:#b58ad6; --sph:#6cc48a; --ref:#7d878f; --eff:#d6b24a; }}
+.part-bn *{box-sizing:border-box}
+.part-bn{margin:0;background:var(--bg);color:var(--ink);font:14.5px/1.5 "IBM Plex Sans","Segoe UI",system-ui,sans-serif}
+.part-bn header{padding:24px 28px 6px;max-width:1300px;margin:0 auto}
+.part-bn h1{font-size:23px;line-height:1.2;margin:0 0 6px;font-weight:600}
+.part-bn header p{margin:0;color:var(--mute);max-width:960px}
+.part-bn main{max-width:1300px;margin:0 auto;padding:12px 28px 40px;display:grid;grid-template-columns:350px 1fr;gap:20px}
+@media (max-width:960px){.part-bn main{grid-template-columns:1fr}}
+.part-bn .panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px 18px}
+.part-bn .panel h2{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--mute);margin:0 0 10px;font-weight:600}
+.part-bn h3{font-size:13px;margin:16px 0 4px;font-weight:600}
+.part-bn label{display:block;font-size:12.5px;color:var(--mute);margin-top:9px}
+.part-bn label span.v{float:right;color:var(--ink);font-family:"IBM Plex Mono",ui-monospace,monospace}
+.part-bn input[type=range]{width:100%;margin:3px 0 0}
+.part-bn input[type=number]{width:100%;margin-top:3px;padding:4px 6px;border:1px solid var(--line);border-radius:4px;background:transparent;color:var(--ink);font:inherit;font-size:13px}
+.part-bn .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.part-bn canvas{width:100%;height:auto;display:block;background:var(--panel)}
+.part-bn .grid2{display:grid;grid-template-columns:1fr;gap:20px}
+.part-bn table.res{width:100%;border-collapse:collapse;font-size:13px}
+.part-bn table.res th{font-weight:500;color:var(--mute);text-align:right;padding:5px 4px;border-bottom:1px solid var(--line)}
+.part-bn table.res th:first-child{text-align:left}
+.part-bn table.res td{padding:5px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+.part-bn table.res td:not(:first-child){text-align:right;font-family:"IBM Plex Mono",ui-monospace,monospace;white-space:nowrap}
+.part-bn table.res td.k{color:var(--mute)}
+.part-bn .legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--mute);margin:8px 0 0}
+.part-bn .legend i{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:5px;border-radius:2px}
+.part-bn .legend i.dash{background:repeating-linear-gradient(90deg,var(--ref) 0 4px,transparent 4px 8px)!important}
+.part-bn .note{font-size:12.5px;color:var(--mute);margin-top:10px}
+.part-bn .note b{color:var(--ink);font-weight:600}
+.part-bn .verdict{margin-top:12px;padding:10px 12px;border-left:3px solid var(--tan);font-size:13.5px}
+.part-bn code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px}
+.part-bn .sim{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.part-bn .sim figure{margin:0}
+.part-bn .sim figcaption{font-size:12px;color:var(--mute);margin-top:4px;text-align:center}
+.part-bn .sim canvas{image-rendering:pixelated;border:1px solid var(--line)}
+.part-bn button{font:inherit;font-size:13px;padding:6px 10px;border:1px solid var(--line);border-radius:4px;background:transparent;color:var(--ink);cursor:pointer;margin-right:8px;margin-top:8px}
+.part-bn button:hover{background:var(--line)}
+.part-bn .tbls{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+@media (max-width:720px){.part-bn .tbls{grid-template-columns:1fr}}
+.part-bn a{color:var(--sag)}
+.part-bn .okc{color:var(--sph)}
+.part-bn .badc{color:var(--tan)}
+.part-bn .hbar{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.part-bn .hbar h1{flex:1 1 520px}
+.part-bn header p.srclinks{margin:9px 0 0;font-size:12.5px;display:flex;gap:16px;flex-wrap:wrap}
+.part-bn .srclinks a{color:var(--sag);text-decoration:none;border-bottom:1px solid var(--line)}
+.part-bn .srclinks a:hover{color:var(--tan);border-bottom-color:var(--tan)}
+@media print{}
+.part-nd6{
+  --bg:#F3F5F7; --surface:#FFFFFF; --ink:#1B2530; --muted:#5A6978; --line:#D3DAE1;
+  --vis:#2A6F8F; --ir:#A8322E; --ir-soft:rgba(168,50,46,.06);
+  --r:#C0392B; --g:#2E8B57; --b:#2E6FB7; --hot:#7A5C9E; --qe:#6E7680;
+  --serif:"Charter","Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+.part-nd6 *{box-sizing:border-box}
+.part-nd6{background:var(--bg);color:var(--ink);font-family:var(--serif);font-size:18px;line-height:1.55;-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+.part-nd6{margin:0}
+.part-nd6 a{color:var(--vis)}
+.part-nd6 a:focus-visible,.part-nd6 button:focus-visible,.part-nd6 input:focus-visible,.part-nd6 select:focus-visible,.part-nd6 summary:focus-visible{outline:3px solid var(--vis);outline-offset:2px}
+.part-nd6 .wrap{max-width:720px;margin:0 auto;padding:0 20px}
+.part-nd6 .wide{max-width:900px;margin:0 auto;padding:0 20px}
+.part-nd6 header.portada{padding:64px 0 28px}
+.part-nd6 h1{font-size:2.6rem;line-height:1.1;font-weight:400;margin:0 0 16px;letter-spacing:-.01em}
+.part-nd6 .sub{font-size:1.25rem;line-height:1.4;color:var(--muted);margin:0 0 20px;max-width:640px}
+.part-nd6 .lede{font-family:var(--sans);font-size:.92rem;line-height:1.5;color:var(--muted);border-left:3px solid var(--ir);padding-left:12px;max-width:600px;margin:0}
+.part-nd6 nav.indice{position:sticky;top:0;background:rgba(243,245,247,.94);backdrop-filter:blur(6px);border-top:1px solid var(--line);border-bottom:1px solid var(--line);z-index:5}
+.part-nd6 nav.indice ol{list-style:none;margin:0 auto;padding:10px 20px;max-width:900px;display:flex;flex-wrap:wrap;gap:6px 18px;font-family:var(--sans);font-size:.86rem}
+.part-nd6 nav.indice a{text-decoration:none;color:var(--ink)}
+.part-nd6 nav.indice a:hover{text-decoration:underline}
+.part-nd6 section{padding:56px 0 8px}
+.part-nd6 h2{font-size:1.75rem;font-weight:400;line-height:1.2;margin:0 0 18px}
+.part-nd6 h3{font-size:1.15rem;font-weight:600;margin:28px 0 10px}
+.part-nd6 p{margin:0 0 16px}
+.part-nd6 ul,.part-nd6 ol{padding-left:22px;margin:0 0 16px}
+.part-nd6 li{margin-bottom:6px}
+.part-nd6 .eq{font-size:1.15rem;text-align:center;margin:18px 0;padding:6px 0;line-height:1.7}
+.part-nd6 .eq i{font-style:italic}
+.part-nd6 .nota{font-family:var(--sans);font-size:.9rem;line-height:1.5;color:var(--muted)}
+.part-nd6 .panel{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:18px 20px 16px;margin:22px 0 28px;font-family:var(--sans)}
+.part-nd6 .panel h4{margin:0 0 14px;font-size:.95rem;font-weight:600;color:var(--ink)}
+.part-nd6 .controls{display:flex;flex-wrap:wrap;gap:14px 22px;margin-bottom:14px}
+.part-nd6 .controls label{display:flex;flex-direction:column;gap:5px;font-size:.84rem;color:var(--muted);min-width:150px}
+.part-nd6 .controls select,.part-nd6 .controls input[type=number]{font:inherit;font-size:.95rem;color:var(--ink);padding:6px 8px;border:1px solid var(--line);border-radius:3px;background:#fff;max-width:320px}
+.part-nd6 .controls input[type=range]{width:180px;accent-color:var(--vis)}
+.part-nd6 .controls .val{color:var(--ink);font-variant-numeric:tabular-nums}
+.part-nd6 .toggles{display:flex;flex-wrap:wrap;gap:10px 18px;font-size:.84rem;color:var(--muted);margin-bottom:10px}
+.part-nd6 .toggles label{display:flex;align-items:center;gap:6px}
+.part-nd6 .toggles input{accent-color:var(--vis)}
+.part-nd6 svg.chart{width:100%;height:auto;display:block}
+.part-nd6 .readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px 18px;margin-top:14px;font-size:.88rem}
+.part-nd6 .readout div{border-top:1px solid var(--line);padding-top:8px}
+.part-nd6 .readout b{display:block;font-size:1.25rem;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink)}
+.part-nd6 .readout span{color:var(--muted)}
+.part-nd6 .swatches{display:flex;gap:16px;margin:14px 0 6px;flex-wrap:wrap}
+.part-nd6 .swatch{flex:1 1 160px}
+.part-nd6 .swatch .color{height:64px;border-radius:3px;border:1px solid var(--line)}
+.part-nd6 .swatch p{font-size:.84rem;color:var(--muted);margin:6px 0 0}
+.part-nd6 table{border-collapse:collapse;font-family:var(--sans);font-size:.9rem;width:100%;margin:12px 0 20px}
+.part-nd6 th,.part-nd6 td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.part-nd6 th{font-weight:600;color:var(--muted)}
+.part-nd6 td.num,.part-nd6 th.num{text-align:right;font-variant-numeric:tabular-nums}
+.part-nd6 details{margin:10px 0;font-family:var(--sans);font-size:.92rem}
+.part-nd6 summary{cursor:pointer;font-weight:600}
+.part-nd6 details ul{margin-top:10px}
+.part-nd6 footer{padding:40px 0 60px;font-family:var(--sans);font-size:.86rem;color:var(--muted);border-top:1px solid var(--line);margin-top:40px}
+.part-nd6 .leyenda{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:.8rem;color:var(--muted);margin-top:8px}
+.part-nd6 .leyenda i{display:inline-block;width:18px;height:0;border-top:3px solid;vertical-align:middle;margin-right:6px}
+@media (max-width:600px){.part-nd6{font-size:17px}
+.part-nd6 h1{font-size:2.05rem}
+.part-nd6 .controls input[type=range]{width:140px}
+.part-nd6 header.portada{padding-top:44px}
+.part-nd6 nav.indice ol{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;gap:0 18px;padding:10px 20px;-webkit-overflow-scrolling:touch}}
+@media (prefers-reduced-motion:reduce){.part-nd6{scroll-behavior:auto}}
+@media print{}
+</style>
+</head>
+<body>
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <a class="home" href="index.html" title="Portada / Home" aria-label="Portada / Home"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.5 8 2.5l5.5 5v6h-4v-4h-3v4h-4z"/></svg></a>
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
+<div class="shell-head">
+  <h1 data-lang="es">El sensor</h1>
+  <h1 data-lang="en">The sensor</h1>
+  <p data-lang="es">Cuatro pestañas sobre lo que el sensor hace con los fotones: los datos medidos de tres cuerpos Leica, el desplazamiento de píxel del SL3-S, la Triple Resolution de la M11 y la difracción, que a todos les afecta igual y aquí se calcula una sola vez.</p>
+  <p data-lang="en">Four tabs on what the sensor does with photons: the measured data of three Leica bodies, the SL3-S pixel shift, the M11 Triple Resolution, and diffraction, which affects them all alike and is computed here once.</p>
+</div>
+<nav class="tabs" aria-label="Pestañas" data-aria-es="Pestañas" data-aria-en="Tabs"><div class="in" role="tablist"><button type="button" role="tab" data-tab="datos" aria-selected="false"><span data-lang="es">Datos del sensor · M11, Q3, SL3-S</span><span data-lang="en">Sensor data · M11, Q3, SL3-S</span></button><button type="button" role="tab" data-tab="pixelshift" aria-selected="false"><span data-lang="es">Multishot del SL3-S</span><span data-lang="en">SL3-S multishot</span></button><button type="button" role="tab" data-tab="binning" aria-selected="false"><span data-lang="es">Triple Resolution de la M11</span><span data-lang="en">M11 Triple Resolution</span></button><button type="button" role="tab" data-tab="difraccion" aria-selected="false"><span data-lang="es">Difracción y diafragma</span><span data-lang="en">Diffraction and aperture</span></button></div></nav>
+<section class="tab" id="tab-datos" role="tabpanel" hidden>
+<div class="part-sens">
+
+<main>
+<header>
+  <h1 data-lang="es">M11, Q3 y SL3-S: lo que dicen los datos del sensor</h1>
+<h1 data-lang="en">M11, Q3 and SL3-S: what the sensor data say</h1>
+  <p data-lang="es">Ruido de lectura, rango dinámico fotográfico y modelo de relación señal/ruido a partir de las medidas de PhotonsToPhotos, con las conclusiones para astrofotografía, paisaje a ISO base y trabajo en costa.</p>
+<p data-lang="en">Read noise, photographic dynamic range and a signal-to-noise model from the PhotonsToPhotos measurements, with the conclusions for astrophotography, base-ISO landscape and coastal work.</p>
+</header>
+<nav aria-label="Secciones" data-aria-es="Secciones" data-aria-en="Sections">
+  <a href="#ficha"><span data-lang="es">Ficha</span><span data-lang="en">Data sheet</span></a>
+  <a href="#ruido"><span data-lang="es">Ruido de lectura</span><span data-lang="en">Read noise</span></a>
+  <a href="#pdr"><span data-lang="es">Rango dinámico</span><span data-lang="en">Dynamic range</span></a>
+  <a href="#snr"><span data-lang="es">Calculadora SNR</span><span data-lang="en">SNR calculator</span></a>
+  <a href="#difraccion"><span data-lang="es">Difracción</span><span data-lang="en">Diffraction</span></a>
+  <a href="#guia"><span data-lang="es">Cómo leer las curvas</span><span data-lang="en">How to read the curves</span></a>
+  <a href="#conclusiones"><span data-lang="es">Conclusiones</span><span data-lang="en">Conclusions</span></a>
+  <a href="#metodo"><span data-lang="es">Método</span><span data-lang="en">Method</span></a>
+</nav>
+
+<section id="ficha">
+  <h2 data-lang="es">Ficha de los tres sensores</h2>
+<h2 data-lang="en">Data sheet of the three sensors</h2>
+  <p data-lang="es" class="lead">Valores extraídos de las series de PhotonsToPhotos, salvo paso de píxel y resolución, que son datos de fabricante.</p>
+<p data-lang="en" class="lead">Values extracted from the PhotonsToPhotos series, except pixel pitch and resolution, which are manufacturer data.</p>
+  <div class="tscroll"><table class="spec">
+    <thead><tr><th><span data-lang="es">Parámetro</span><span data-lang="en">Parameter</span></th><th class="num">M11</th><th class="num">Q3</th><th class="num">SL3-S</th></tr></thead>
+    <tbody id="specBody"></tbody>
+  </table></div>
+  <p data-lang="es" class="note">La Q3 está medida sobre 13 bits efectivos (sufijo _13 en la web), lo que recorta ligeramente su techo de rango dinámico respecto a la M11 aunque comparten sensor. Los ISO 50, 64 y 80 de la SL3-S son extendidos por software.</p>
+<p data-lang="en" class="note">The Q3 is measured on 13 effective bits (suffix _13 on the website), which slightly trims its dynamic-range ceiling relative to the M11 although they share the sensor. ISO 50, 64 and 80 on the SL3-S are software-extended.</p>
+</section>
+
+<section id="ruido">
+  <h2 data-lang="es">Ruido de lectura referido a la entrada</h2>
+<h2 data-lang="en">Input-referred read noise</h2>
+  <p data-lang="es">Ruido de lectura en electrones rms, obtenido dividiendo el ruido medido en DN por la ganancia del sistema (DN por electrón) a cada ISO. Es la magnitud comparable entre cámaras, a diferencia de la curva en DN, que depende de la profundidad de bits y de la ganancia de cada modelo.</p>
+<p data-lang="en">Read noise in rms electrons, obtained by dividing the noise measured in DN by the system gain (DN per electron) at each ISO. It is the quantity comparable between cameras, unlike the curve in DN, which depends on each model's bit depth and gain.</p>
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Normalización" data-aria-es="Normalización" data-aria-en="Normalisation">
+      <button id="btnPx" aria-pressed="true"><span data-lang="es">Por píxel</span><span data-lang="en">Per pixel</span></button>
+      <button id="btnArea" aria-pressed="false"><span data-lang="es">A igual área (24,6 Mpx)</span><span data-lang="en">Equal area (24.6 Mpx)</span></button>
+    </div>
+    <label class="chk"><input type="checkbox" id="chkNR" checked> <span data-lang="es">Mostrar puntos con filtrado del RAW</span><span data-lang="en">Show points with RAW filtering</span></label>
+  </div>
+  <div class="legend" data-lang="es"><span class="m11">M11, 3,76 µm</span><span class="q3">Q3, 3,76 µm</span><span class="sl3s">SL3-S, 5,94 µm</span></div>
+  <div class="legend" data-lang="en"><span class="m11">M11, 3.76 µm</span><span class="q3">Q3, 3.76 µm</span><span class="sl3s">SL3-S, 5.94 µm</span></div>
+  <div class="chart-wrap"><canvas id="rnChart" aria-label="Ruido de lectura frente a ISO" data-aria-es="Ruido de lectura frente a ISO" data-aria-en="Read noise against ISO"></canvas></div>
+  <p data-lang="es" class="note">Triángulo invertido: el firmware aplica reducción de ruido al RAW en ese ISO. Círculo hueco: ISO extendido, fuera del rango analógico. Rombo: escalado digital y filtrado a la vez. La normalización a igual área multiplica los valores de los sensores de 60 Mpx por √(60,3/24,6) ≈ 1,57, que es el factor con que se combina el ruido de lectura al agrupar píxeles hasta el tamaño de píxel de la SL3-S.</p>
+<p data-lang="en" class="note">Inverted triangle: the firmware applies noise reduction to the RAW at that ISO. Hollow circle: extended ISO, outside the analogue range. Diamond: digital scaling and filtering at once. Equal-area normalisation multiplies the values of the 60 Mpx sensors by √(60.3/24.6) ≈ 1.57, the factor by which read noise combines when binning pixels up to the SL3-S pixel size.</p>
+  <h3 data-lang="es">Puntos de conmutación de la ganancia dual</h3>
+<h3 data-lang="en">Dual-gain switching points</h3>
+  <p data-lang="es">El escalón brusco de cada curva marca el ISO en que el sensor pasa a la ganancia de conversión alta: la M11 en ISO 200, la Q3 en ISO 400 y la SL3-S en ISO 640. A partir de ese punto el ruido de lectura cae por debajo de 2 e⁻ y la cámara se comporta de forma casi invariante al ISO: subir más el ISO en cámara aporta poco frente a levantar la exposición en revelado, y cuesta rango dinámico en las altas luces.</p>
+<p data-lang="en">The sharp step in each curve marks the ISO at which the sensor switches to high conversion gain: the M11 at ISO 200, the Q3 at ISO 400 and the SL3-S at ISO 640. From that point read noise falls below 2 e⁻ and the camera behaves almost ISO-invariantly: raising ISO further in camera adds little over lifting exposure in development, and costs dynamic range in the highlights.</p>
+</section>
+
+<section id="pdr">
+  <h2 data-lang="es">Rango dinámico fotográfico (PDR)</h2>
+<h2 data-lang="en">Photographic dynamic range (PDR)</h2>
+  <p data-lang="es">El PDR de Claff mide los pasos entre la saturación y el nivel de señal en que la relación señal/ruido cae por debajo de 20 sobre un círculo de confusión normalizado al tamaño de la imagen. Ya está normalizado por área, por lo que es directamente comparable entre cámaras de distinta resolución.</p>
+<p data-lang="en">Claff's PDR measures the stops between saturation and the signal level at which the signal-to-noise ratio drops below 20 over a circle of confusion normalised to image size. It is already area-normalised, so it is directly comparable between cameras of different resolution.</p>
+  <div class="legend"><span class="m11">M11</span><span class="q3">Q3</span><span class="sl3s">SL3-S</span></div>
+  <div class="chart-wrap"><canvas id="pdrChart" aria-label="Rango dinámico fotográfico frente a ISO" data-aria-es="Rango dinámico fotográfico frente a ISO" data-aria-en="Photographic dynamic range against ISO"></canvas></div>
+  <p data-lang="es" class="note">A ISO base la M11 alcanza 11,8 EV (ISO 64) frente a 11,1 EV de la Q3 (ISO 100) y 10,45 EV de la SL3-S (ISO 100). El parámetro Low-Light EV que calcula la web, un índice de rendimiento con poca luz derivado de esta curva, empata a la M11 (10,62) con la SL3-S (10,64) y deja a la Q3 en 10,31.</p>
+<p data-lang="en" class="note">At base ISO the M11 reaches 11.8 EV (ISO 64) against 11.1 EV for the Q3 (ISO 100) and 10.45 EV for the SL3-S (ISO 100). The Low-Light EV parameter the website computes, a low-light performance index derived from this curve, ties the M11 (10.62) with the SL3-S (10.64) and leaves the Q3 at 10.31.</p>
+</section>
+
+<section id="snr">
+  <h2 data-lang="es">Calculadora de relación señal/ruido</h2>
+<h2 data-lang="en">Signal-to-noise calculator</h2>
+  <p data-lang="es">Modelo por píxel: la señal es el flujo de fotoelectrones por el área del píxel y el tiempo; el ruido combina en cuadratura el ruido fotónico, el de corriente de oscuridad y el de lectura interpolado de las series anteriores al ISO elegido. La columna normalizada refiere el resultado al área del píxel de la SL3-S, de modo que las tres cámaras se comparan a igual tamaño de salida.</p>
+<p data-lang="en">Per-pixel model: the signal is the photoelectron flux times pixel area and time; the noise combines in quadrature the photon noise, the dark-current noise and the read noise interpolated from the series above at the chosen ISO. The normalised column refers the result to the SL3-S pixel area, so the three cameras are compared at equal output size.</p>
+  <div class="panel">
+    <div class="grid">
+      <div class="field"><label for="flux"><span data-lang="es">Flujo de fotoelectrones (e⁻/µm²/s)</span><span data-lang="en">Photoelectron flux (e⁻/µm²/s)</span></label><input id="flux" type="number" step="any" min="0" value="0.2"></div>
+      <div class="field"><label for="texp"><span data-lang="es">Tiempo de exposición (s)</span><span data-lang="en">Exposure time (s)</span></label><input id="texp" type="number" step="any" min="0" value="20"></div>
+      <div class="field"><label for="iso">ISO</label><select id="iso"></select></div>
+      <div class="field"><label for="nfr"><span data-lang="es">Tomas apiladas</span><span data-lang="en">Stacked frames</span></label><input id="nfr" type="number" step="1" min="1" value="1"></div>
+      <div class="field"><label for="dark"><span data-lang="es">Corriente de oscuridad a 20 °C (e⁻/µm²/s)</span><span data-lang="en">Dark current at 20 °C (e⁻/µm²/s)</span></label><input id="dark" type="number" step="any" min="0" value="0.003"></div>
+      <div class="field"><label for="temp"><span data-lang="es">Temperatura del sensor (°C):</span><span data-lang="en">Sensor temperature (°C):</span> <span id="tempV">20</span></label><input id="temp" type="range" min="-5" max="40" value="20"></div>
+    </div>
+    <div class="presets" aria-label="Valores orientativos de flujo" data-aria-es="Valores orientativos de flujo" data-aria-en="Indicative flux values">
+      <button data-flux="0.05" data-t="30"><span data-lang="es">Cielo rural, f/2,8</span><span data-lang="en">Rural sky, f/2.8</span></button>
+      <button data-flux="0.3" data-t="15"><span data-lang="es">Cielo suburbano, f/2,8</span><span data-lang="en">Suburban sky, f/2.8</span></button>
+      <button data-flux="2" data-t="10"><span data-lang="es">Vía Láctea con luna</span><span data-lang="en">Milky Way with moon</span></button>
+      <button data-flux="30" data-t="30"><span data-lang="es">Paisaje nocturno urbano</span><span data-lang="en">Urban night landscape</span></button>
+      <button data-flux="3000" data-t="0.5"><span data-lang="es">Paisaje diurno, sombras</span><span data-lang="en">Daylight landscape, shadows</span></button>
+    </div>
+    <p data-lang="es" class="note">Los valores de flujo son orientativos y dependen de óptica, transmisión y eficiencia cuántica. La corriente de oscuridad se supone que se duplica cada 6 °C.</p>
+<p data-lang="en" class="note">The flux values are indicative and depend on optics, transmission and quantum efficiency. Dark current is assumed to double every 6 °C.</p>
+    <div class="out">
+      <div class="tscroll wide"><table>
+        <thead><tr data-lang="es"><th>Cámara</th><th class="num">Señal (e⁻/px)</th><th class="num">σ fotónico</th><th class="num">σ lectura</th><th class="num">σ oscuridad</th><th class="num">SNR/px</th><th class="num">SNR a igual área</th><th>Régimen</th><th>Saturación</th></tr>
+        <tr data-lang="en"><th>Camera</th><th class="num">Signal (e⁻/px)</th><th class="num">σ photon</th><th class="num">σ read</th><th class="num">σ dark</th><th class="num">SNR/px</th><th class="num">SNR at equal area</th><th>Regime</th><th>Saturation</th></tr></thead>
+        <tbody id="snrBody"></tbody>
+      </table></div>
+      <div id="snrBars"></div>
+      <p class="note" id="snrHint" style="margin-top:12px"></p>
+    </div>
+  </div>
+  <h3 data-lang="es">Cómo leer el resultado</h3>
+<h3 data-lang="en">How to read the result</h3>
+  <p data-lang="es">Cuando el ruido fotónico domina (régimen limitado por fotones), la relación señal/ruido a igual área es la misma para los tres sensores salvo por diferencias de eficiencia cuántica, y el tamaño de píxel deja de importar. Solo cuando la varianza de lectura pesa más que la fotónica, es decir, con exposiciones muy cortas o cielos muy oscuros, aparece la ventaja de la SL3-S, y es de unos 0,3 EV. Apilar N tomas multiplica la SNR por √N en cualquiera de los dos regímenes.</p>
+<p data-lang="en">When photon noise dominates (photon-limited regime), the signal-to-noise ratio at equal area is the same for the three sensors except for differences in quantum efficiency, and pixel size stops mattering. Only when read variance outweighs photon variance, that is, with very short exposures or very dark skies, does the SL3-S advantage appear, and it is about 0.3 EV. Stacking N frames multiplies SNR by √N in either regime.</p>
+</section>
+
+<section id="guia">
+  <h2 data-lang="es">Cómo leer las curvas de PhotonsToPhotos</h2>
+<h2 data-lang="en">How to read the PhotonsToPhotos curves</h2>
+  <dl data-lang="es">
+    <dt>Curva en DN con pendiente 1 en escala log-log</dt>
+    <dd>El ruido en DN crece proporcionalmente al ISO: la fuente dominante está antes del amplificador (fotodiodo y conversión) y se amplifica con la señal. Indica dominio del ruido de fotositio y comportamiento invariante al ISO.</dd>
+    <dt>Curva que se aplana a ISO bajo</dt>
+    <dd>Una componente constante en DN, añadida después de la ganancia, domina: el convertidor analógico digital. Subir el ISO en cámara sí reduce el ruido relativo hasta que la curva recupera la pendiente 1.</dd>
+    <dt>Escalón descendente en el rango analógico</dt>
+    <dd>Conmutación de ganancia de conversión dual: el sensor cambia la capacidad del nodo de lectura y reduce el ruido referido a la entrada. Conviene trabajar en o por encima de ese ISO cuando la escena es oscura.</dd>
+    <dt>Curva dentada</dt>
+    <dd>Escalado digital o un segundo amplificador para los ISO intermedios; los valores intermedios no aportan ganancia analógica real.</dd>
+    <dt>Símbolos huecos</dt>
+    <dd>ISO extendidos fuera del rango analógico. Los bajos recortan altas luces sin ganar rango; los altos son multiplicación digital.</dd>
+    <dt>Triángulo hacia arriba, triángulo invertido, rombo</dt>
+    <dd>Escalado digital, reducción de ruido aplicada al RAW, y ambas cosas a la vez. El triángulo invertido es el marcador que importa en astrofotografía: un RAW filtrado puede eliminar estrellas débiles.</dd>
+  </dl>
+  <dl data-lang="en">
+    <dt>Curve in DN with slope 1 on a log-log scale</dt>
+    <dd>Noise in DN grows proportionally to ISO: the dominant source lies before the amplifier (photodiode and conversion) and is amplified with the signal. It indicates photosite-noise dominance and ISO-invariant behaviour.</dd>
+    <dt>Curve that flattens at low ISO</dt>
+    <dd>A constant component in DN, added after the gain, dominates: the analogue-to-digital converter. Raising ISO in camera does reduce relative noise until the curve regains slope 1.</dd>
+    <dt>Downward step within the analogue range</dt>
+    <dd>Dual conversion-gain switching: the sensor changes the capacitance of the read node and reduces input-referred noise. Best to work at or above that ISO when the scene is dark.</dd>
+    <dt>Jagged curve</dt>
+    <dd>Digital scaling or a second amplifier for the intermediate ISOs; the intermediate values add no real analogue gain.</dd>
+    <dt>Hollow symbols</dt>
+    <dd>Extended ISOs outside the analogue range. The low ones clip highlights without gaining range; the high ones are digital multiplication.</dd>
+    <dt>Upward triangle, inverted triangle, diamond</dt>
+    <dd>Digital scaling, noise reduction applied to the RAW, and both at once. The inverted triangle is the marker that matters in astrophotography: a filtered RAW can wipe out faint stars.</dd>
+  </dl>
+</section>
+
+<section id="conclusiones">
+  <h2 data-lang="es">Conclusiones por uso</h2>
+<h2 data-lang="en">Conclusions by use</h2>
+  <div class="verdict" data-lang="es">
+    <article>
+      <h3>Astrofotografía y paisaje nocturno</h3>
+      <p><span class="who sl3s-c">SL3-S</span> entre ISO 640 y 3200: mejor ruido de lectura a igual área, unos 0,3 EV sobre la M11. Evitar ISO 6400 o más: el RAW se filtra y las estrellas débiles peligran.</p>
+      <p><span class="who m11-c">M11</span> desde ISO 200: invariante al ISO, RAW sin filtrar en todo el rango y 60 Mpx. En apilados largos con seguimiento, donde el fondo de cielo domina, iguala a la SL3-S.</p>
+      <p><span class="who q3-c">Q3</span> desde ISO 400: unos 0,3 EV por detrás, RAW limpio hasta ISO 12800. Óptica fija de 28 mm f/1,7 muy apta para Vía Láctea.</p>
+      <p class="note">La diferencia real la marcarán la óptica (apertura, coma en las esquinas) y la corriente de oscuridad en exposiciones de minutos, no el sensor.</p>
+    </article>
+    <article>
+      <h3>Paisaje a ISO base</h3>
+      <p><span class="who m11-c">M11</span> gana en rango dinámico (1,35 EV sobre la SL3-S) y en resolución (factor 1,57 lineal), por su mayor capacidad de pozo por unidad de área y menor ruido de lectura normalizado a ISO base.</p>
+      <p><span class="who sl3s-c">SL3-S</span> compensa con multidisparo (96 Mpx, color completo por posición, promediado de ruido) y horquillado, pero solo con trípode y escena estática. Aporta enfoque preciso, visor de 5,76 Mpx, pantalla inclinable y vista del polarizador.</p>
+      <p><span class="who q3-c">Q3</span> ofrece el sensor de la M11 con visor y pantalla de la SL3-S. Limitada a 28 mm.</p>
+    </article>
+    <article>
+      <h3>Costa: humedad, salpicaduras y niebla</h3>
+      <p><span class="who sl3s-c">SL3-S</span> IP54 con ópticas selladas. La opción coherente si se necesitan varias focales.</p>
+      <p><span class="who q3-c">Q3</span> IP52 y sin cambio de objetivo: nunca expone el sensor ni la montura al aerosol salino. Con olas y niebla en movimiento el multidisparo de la SL3-S apenas es utilizable, así que la Q3 retiene la ventaja de la toma única en 60 Mpx y más PDR.</p>
+      <p><span class="who m11-c">M11</span> sin certificación, ópticas M sin juntas y contactos del Visoflex expuestos. Es la que menos encaja con este entorno.</p>
+      <p class="note">En cualquier caso: filtro protector como elemento de sacrificio, aclimatación dentro de la bolsa para evitar condensación y limpieza con paño humedecido en agua dulce tras cada salida.</p>
+    </article>
+    <article>
+      <h3>Lo que los datos no muestran</h3>
+      <p>La etiqueta de “cuerpo para poca luz” de la SL3-S no se sostiene a nivel de sensor: el ruido fotónico por unidad de área no depende del tamaño de píxel y el ruido de lectura de ambos diseños ya está en torno a 1 e⁻. Su ventaja en poca luz es operativa: estabilización en cuerpo, autofoco por detección de fase que funciona con niebla y penumbra, visor con ganancia y lectura rápida. Sobre trípode y con sujeto estático nada de eso interviene.</p>
+    </article>
+  </div>
+  <div class="verdict" data-lang="en">
+    <article>
+      <h3>Astrophotography and night landscape</h3>
+      <p><span class="who sl3s-c">SL3-S</span> between ISO 640 and 3200: best read noise at equal area, about 0.3 EV over the M11. Avoid ISO 6400 or more: the RAW is filtered and faint stars are at risk.</p>
+      <p><span class="who m11-c">M11</span> from ISO 200: ISO-invariant, unfiltered RAW across the whole range and 60 Mpx. In long tracked stacks, where sky background dominates, it matches the SL3-S.</p>
+      <p><span class="who q3-c">Q3</span> from ISO 400: about 0.3 EV behind, clean RAW up to ISO 12800. Fixed 28 mm f/1.7 lens very well suited to the Milky Way.</p>
+      <p class="note">The real difference will be set by the lens (aperture, corner coma) and by dark current in minutes-long exposures, not by the sensor.</p>
+    </article>
+    <article>
+      <h3>Landscape at base ISO</h3>
+      <p><span class="who m11-c">M11</span> wins on dynamic range (1.35 EV over the SL3-S) and on resolution (1.57× linear), through its larger well capacity per unit area and lower area-normalised read noise at base ISO.</p>
+      <p><span class="who sl3s-c">SL3-S</span> compensates with multishot (96 Mpx, full colour per position, noise averaging) and bracketing, but only on a tripod with a static scene. It brings precise focusing, a 5.76 Mpx viewfinder, a tilting screen and a view of the polariser.</p>
+      <p><span class="who q3-c">Q3</span> offers the M11 sensor with the SL3-S viewfinder and screen. Limited to 28 mm.</p>
+    </article>
+    <article>
+      <h3>Coast: humidity, spray and fog</h3>
+      <p><span class="who sl3s-c">SL3-S</span> IP54 with sealed lenses. The coherent option if several focal lengths are needed.</p>
+      <p><span class="who q3-c">Q3</span> IP52 and no lens changes: it never exposes sensor or mount to the salt aerosol. With moving waves and fog the SL3-S multishot is barely usable, so the Q3 keeps the advantage of the 60 Mpx single shot and more PDR.</p>
+      <p><span class="who m11-c">M11</span> uncertified, M lenses without gaskets and exposed Visoflex contacts. The one that fits this environment least.</p>
+      <p class="note">In any case: a protective filter as a sacrificial element, acclimatisation inside the bag to avoid condensation, and cleaning with a cloth dampened in fresh water after every outing.</p>
+    </article>
+    <article>
+      <h3>What the data do not show</h3>
+      <p>The "low-light body" label of the SL3-S does not hold at sensor level: photon noise per unit area does not depend on pixel size and the read noise of both designs is already around 1 e⁻. Its low-light advantage is operational: in-body stabilisation, phase-detection autofocus that works in fog and dusk, a gained-up viewfinder and fast readout. On a tripod with a static subject none of that comes into play.</p>
+    </article>
+  </div>
+</section>
+
+<section id="metodo">
+  <h2 data-lang="es">Método y fuentes</h2>
+<h2 data-lang="en">Method and sources</h2>
+  <div data-lang="es">
+  <p>Series de ruido de lectura referido a la entrada y de PDR extraídas de los datos publicados por PhotonsToPhotos (William J. Claff) el 4 de septiembre de 2026. La abscisa original está en pasos de exposición Ev y se convierte con ISO = 3,125·2^Ev. Los valores de ruido están en log₂ de electrones y se han convertido a electrones rms.</p>
+  <p>Normalización por área: al agrupar k píxeles la señal se suma y el ruido se combina en cuadratura, de modo que el ruido de lectura equivalente escala con √k y la relación señal/ruido con √k. Con 60,3 y 24,6 Mpx sobre el mismo formato, k = 2,45 y √k = 1,57.</p>
+  <p>Capacidad de pozo: valor fwc de las series, a ISO base. La saturación a un ISO dado se estima como fwc·ISO_base/ISO. El paso de píxel de la SL3-S se toma como 5,94 µm (35,6 mm / 6000 px) y el de M11 y Q3 como 3,76 µm.</p>
+  <p>Limitaciones: la eficiencia cuántica no está en estas series y se supone igual entre los tres; la corriente de oscuridad del modelo es una suposición editable, no una medida; el modelo no incluye patrón fijo, banding ni la respuesta del procesado a exposiciones largas.</p>
+  </div>
+  <div data-lang="en">
+  <p>Input-referred read-noise and PDR series extracted from the data published by PhotonsToPhotos (William J. Claff) on 4 September 2026. The original abscissa is in exposure steps Ev and is converted with ISO = 3.125·2^Ev. Noise values are in log₂ of electrons and have been converted to rms electrons.</p>
+  <p>Area normalisation: when binning k pixels the signal adds and the noise combines in quadrature, so the equivalent read noise scales with √k and the signal-to-noise ratio with √k. With 60.3 and 24.6 Mpx on the same format, k = 2.45 and √k = 1.57.</p>
+  <p>Well capacity: the fwc value of the series, at base ISO. Saturation at a given ISO is estimated as fwc·ISO_base/ISO. The SL3-S pixel pitch is taken as 5.94 µm (35.6 mm / 6000 px) and that of the M11 and Q3 as 3.76 µm.</p>
+  <p>Limitations: quantum efficiency is not in these series and is assumed equal for the three; the model's dark current is an editable assumption, not a measurement; the model does not include fixed pattern, banding or the processing response to long exposures.</p>
+  </div>
+  <footer><span data-lang="es">Datos: <a href="https://www.photonstophotos.net/Charts/RN_e.htm">PhotonsToPhotos, Input-referred Read Noise</a> y <a href="https://www.photonstophotos.net/Charts/PDR.htm">Photographic Dynamic Range</a>. Las gráficas usan Chart.js desde CDN: es la única parte de la página que necesita conexión. Del mismo sitio: el <a href="#pixelshift">cuaderno del multishot del SL3-S</a>, el <a href="filtro-sensor.html#stack">stack del sensor</a> y el <a href="#binning">binning de la M11</a>.</span><span data-lang="en">Data: <a href="https://www.photonstophotos.net/Charts/RN_e.htm">PhotonsToPhotos, Input-referred Read Noise</a> and <a href="https://www.photonstophotos.net/Charts/PDR.htm">Photographic Dynamic Range</a>. The charts use Chart.js from a CDN: the only part of the page that needs a connection. From this same site: the <a href="#pixelshift">SL3-S multishot notebook</a>, the <a href="filtro-sensor.html#stack">sensor stack</a> and the <a href="#binning">M11 binning</a>.</span></footer>
+</section>
+</main>
+
+
+
+</div>
+</section>
+<section class="tab" id="tab-pixelshift" role="tabpanel" hidden>
+<div class="part-ms">
+
+<div class="wrap">
+<nav aria-label="Secciones" data-aria-es="Secciones" data-aria-en="Sections">
+  <a href="#multishot"><span data-lang="es">1. Multishot del SL3-S</span><span data-lang="en">1. SL3-S multishot</span></a>
+  <a href="#ms-snr"><span data-lang="es">2. Relación señal ruido</span><span data-lang="en">2. Signal-to-noise ratio</span></a>
+  <a href="#color"><span data-lang="es">3. Color y demosaico</span><span data-lang="en">3. Colour and demosaicing</span></a>
+  <a href="#optica"><span data-lang="es">4. Muestreo y óptica</span><span data-lang="en">4. Sampling and optics</span></a>
+  <a href="#astro"><span data-lang="es">5. Deriva sidérea y exposición</span><span data-lang="en">5. Sidereal drift and exposure</span></a>
+  <a href="#software"><span data-lang="es">6. Software de apilado en macOS</span><span data-lang="en">6. Stacking software on macOS</span></a>
+  <a href="#flujo"><span data-lang="es">7. Flujo recomendado</span><span data-lang="en">7. Recommended workflow</span></a>
+  <a href="#eleccion"><span data-lang="es">8. Qué modo elegir en fotografía general</span><span data-lang="en">8. Which mode to choose in general photography</span></a>
+</nav>
+
+<main>
+<header>
+  <h1 data-lang="es">Multishot del Leica SL3-S, ruido y apilado astronómico</h1>
+<h1 data-lang="en">Leica SL3-S multishot, noise and astronomical stacking</h1>
+  <p data-lang="es">Cuaderno técnico con calculadoras. Recoge las conclusiones de la conversación del 1 al 5 de septiembre de 2026 y las herramientas numéricas para reutilizarlas.</p>
+<p data-lang="en">Technical notebook with calculators. It gathers the conclusions of the 1–5 September 2026 conversation and the numerical tools to reuse them.</p>
+  <p data-lang="es">Datos del sensor usados por defecto: formato completo 36×24 mm, 24 MP (6000×4000), paso de píxel 6,0 µm. Se pueden cambiar en cada calculadora.</p>
+<p data-lang="en">Sensor data used by default: full frame 36×24 mm, 24 MP (6000×4000), pixel pitch 6.0 µm. They can be changed in each calculator.</p>
+</header>
+
+<section id="multishot">
+<h2 data-lang="es">1. Cómo funciona el multishot del SL3-S</h2>
+<h2 data-lang="en">1. How the SL3-S multishot works</h2>
+<p data-lang="es">Es un modo de desplazamiento de píxel (pixel shift). La cámara toma una secuencia de exposiciones desplazando el sensor entre cada una con el sistema de estabilización de cinco ejes, y combina los fotogramas en un único DNG en la propia cámara. El sensor tiene 24 MP nativos; el multishot ofrece 48 y 96 MP, con variantes de trípode y a pulso. Los archivos resultantes miden 12000×8000 píxeles.</p>
+<p data-lang="en">It is a pixel-shift mode. The camera takes a sequence of exposures, shifting the sensor between each with the five-axis stabilisation system, and merges the frames into a single DNG in camera. The sensor has 24 MP natively; multishot offers 48 and 96 MP, with tripod and handheld variants. The resulting files measure 12000×8000 pixels.</p>
+<p data-lang="es">Un sensor Bayer solo muestrea un color por fotodiodo y el resto se interpola. Con cuatro desplazamientos de un píxel completo cada punto queda registrado por un fotodiodo rojo, dos verdes y uno azul: desaparece la interpolación cromática y el moiré. Esa es la variante de 48 MP (misma cuadrícula, RGB completo, mejor SNR). Añadiendo desplazamientos de medio píxel se duplica la frecuencia de muestreo en ambos ejes: variante de 96 MP.</p>
+<p data-lang="en">A Bayer sensor samples only one colour per photodiode and the rest is interpolated. With four full-pixel shifts each point is recorded by one red, two green and one blue photodiode: chromatic interpolation and moiré disappear. That is the 48 MP variant (same grid, full RGB, better SNR). Adding half-pixel shifts doubles the sampling frequency on both axes: the 96 MP variant.</p>
+
+<div class="panel bayer">
+  <div>
+    <label for="shift"><span data-lang="es">Posición del sensor en la secuencia</span><span data-lang="en">Sensor position in the sequence</span></label>
+    <input type="range" id="shift" min="0" max="7" value="0" step="1">
+    <p id="shiftLabel" style="margin:6px 0 0;font-weight:600"></p>
+    <p class="legend" style="margin-top:8px"><i style="background:var(--r)"></i>R &nbsp; <i style="background:var(--g)"></i>G &nbsp; <i style="background:var(--b)"></i>B &nbsp; <span data-lang="es">La cruz marca un punto fijo de la escena. La tabla registra qué filtro lo ha muestreado en cada posición.</span><span data-lang="en">The cross marks a fixed point of the scene. The table records which filter has sampled it at each position.</span></p>
+    <table id="sampled" style="font-size:.85rem"><thead><tr data-lang="es"><th>Paso</th><th>Desplazamiento</th><th>Filtro sobre el punto</th></tr><tr data-lang="en"><th>Step</th><th>Shift</th><th>Filter over the point</th></tr></thead><tbody></tbody></table>
+  </div>
+  <div>
+    <svg viewBox="0 0 220 220" id="bayerSvg" aria-label="Diagrama de mosaico Bayer desplazado" data-aria-es="Diagrama de mosaico Bayer desplazado" data-aria-en="Diagram of the shifted Bayer mosaic"></svg>
+  </div>
+</div>
+
+<h3 data-lang="es">Variantes y límites</h3>
+<h3 data-lang="en">Variants and limits</h3>
+<ul data-lang="es">
+  <li>Trípode: los desplazamientos los ejecuta el IBIS de forma controlada. Fusión más rápida.</li>
+  <li>A pulso: el algoritmo usa el temblor natural de la mano como desplazamiento subpíxel aleatorio, registra los fotogramas y resuelve el mosaico por correlación. Fusión de unos 12 s.</li>
+  <li>Solo escenas estáticas: el movimiento entre exposiciones produce artefactos aunque el algoritmo intente enmascararlos.</li>
+  <li>El modo de 96 MP tiene un límite práctico de ISO 3200: el ruido de lectura dificulta el registro subpíxel.</li>
+  <li>La ganancia real de resolución en 96 MP depende de que la óptica resuelva por encima del límite de Nyquist del sensor nativo (sección 4).</li>
+</ul>
+<ul data-lang="en">
+  <li>Tripod: the shifts are executed by the IBIS in a controlled way. Faster merge.</li>
+  <li>Handheld: the algorithm uses natural hand tremor as random sub-pixel displacement, registers the frames and resolves the mosaic by correlation. Merge of about 12 s.</li>
+  <li>Static scenes only: movement between exposures produces artefacts even though the algorithm tries to mask them.</li>
+  <li>The 96 MP mode has a practical limit of ISO 3200: read noise hampers sub-pixel registration.</li>
+  <li>The real resolution gain at 96 MP depends on the lens resolving above the native sensor's Nyquist limit (section 4).</li>
+</ul>
+<p data-lang="es">Propósito: cubrir el hueco entre este cuerpo, orientado a velocidad (30 fps, ISO alto, archivos ligeros), y el SL3 de 60 MP. Sirve para arte, arquitectura, paisaje y retrato pausado.</p>
+<p data-lang="en">Purpose: to fill the gap between this speed-oriented body (30 fps, high ISO, light files) and the 60 MP SL3. It serves art, architecture, landscape and unhurried portraiture.</p>
+</section>
+
+<section id="ms-snr">
+<h2 data-lang="es">2. Relación señal ruido</h2>
+<h2 data-lang="en">2. Signal-to-noise ratio</h2>
+<p data-lang="es">Al promediar N exposiciones, el ruido de disparo (poissoniano) y el de lectura, no correlacionados entre tomas, se reducen en √N mientras la señal se suma coherentemente. En el modo de 48 MP cada posición se muestrea 4 veces: mejora teórica de factor 2, un paso de exposición. En el modo de 96 MP las exposiciones adicionales se invierten en frecuencia espacial, no en promediado: la SNR por píxel de salida es similar a la nativa y la ganancia por unidad de área se conserva.</p>
+<p data-lang="en">When averaging N exposures, shot noise (Poissonian) and read noise, uncorrelated between frames, are reduced by √N while the signal adds coherently. In the 48 MP mode each position is sampled 4 times: a theoretical improvement of factor 2, one stop of exposure. In the 96 MP mode the additional exposures are spent on spatial frequency, not averaging: SNR per output pixel is similar to native and the gain per unit area is preserved.</p>
+<div class="formula">SNR<sub>N</sub> = SNR<sub>1</sub> · √N &nbsp;&nbsp;&nbsp; <span data-lang="es">Ganancia</span><span data-lang="en">Gain</span> = 10·log<sub>10</sub>(N) dB = log<sub>2</sub>(√N) <span data-lang="es">pasos</span><span data-lang="en">stops</span></div>
+<div data-lang="es" class="note">El promediado solo suprime ruido temporal. El ruido de patrón fijo (variación de ganancia u offset entre fotodiodos) es idéntico en cada toma y no se reduce; para eso hacen falta darks y flats, o dithering entre tomas para que un mismo punto de la escena caiga en fotodiodos distintos.</div>
+<div data-lang="en" class="note">Averaging only suppresses temporal noise. Fixed-pattern noise (gain or offset variation between photodiodes) is identical in every frame and is not reduced; that takes darks and flats, or dithering between frames so that the same scene point falls on different photodiodes.</div>
+
+<div class="panel">
+  <div class="controls">
+    <div><label for="nExp"><span data-lang="es">Número de exposiciones N</span><span data-lang="en">Number of exposures N</span></label><input type="number" id="nExp" value="4" min="1" max="1000" step="1"></div>
+    <div><label for="snr1"><span data-lang="es">SNR de una toma (lineal, opcional)</span><span data-lang="en">SNR of one frame (linear, optional)</span></label><input type="number" id="snr1" value="10" min="0.1" step="0.1"></div>
+  </div>
+  <div class="out">
+    <div><b id="oGain"></b><span data-lang="es">factor de mejora de SNR</span><span data-lang="en">SNR improvement factor</span></div>
+    <div><b id="oDb"></b><span>dB</span></div>
+    <div><b id="oStops"></b><span data-lang="es">pasos equivalentes</span><span data-lang="en">equivalent stops</span></div>
+    <div><b id="oSnrN"></b><span data-lang="es">SNR final (lineal)</span><span data-lang="en">final SNR (linear)</span></div>
+  </div>
+  <svg class="chart" id="snrChart" viewBox="0 0 640 260" aria-label="Ganancia de SNR frente a número de exposiciones" data-aria-es="Ganancia de SNR frente a número de exposiciones" data-aria-en="SNR gain against number of exposures"></svg>
+  <p data-lang="es" class="legend">Línea continua: √N. Punto: el valor de N introducido. Referencia: 4 tomas (48 MP) → 2×; 16 tomas → 4×; 64 tomas → 8×. Rendimientos decrecientes: doblar N añade siempre medio paso.</p>
+<p data-lang="en" class="legend">Solid line: √N. Dot: the entered value of N. Reference: 4 frames (48 MP) → 2×; 16 frames → 4×; 64 frames → 8×. Diminishing returns: doubling N always adds half a stop.</p>
+</div>
+</section>
+
+<section id="color">
+<h2 data-lang="es">3. Color: qué mejora y qué no</h2>
+<h2 data-lang="en">3. Colour: what improves and what does not</h2>
+<p data-lang="es">En Bayer la crominancia se muestrea a la mitad de frecuencia que la luminancia y el demosaico la reconstruye por interpolación: falso color en bordes de alto contraste, moiré cromático y pérdida de saturación en detalle fino. Con desplazamiento de píxel completo cada punto obtiene medidas directas R, G y B; la resolución cromática iguala a la luminosa y esos artefactos desaparecen.</p>
+<p data-lang="en">In Bayer, chrominance is sampled at half the frequency of luminance and demosaicing reconstructs it by interpolation: false colour on high-contrast edges, chromatic moiré and loss of saturation in fine detail. With full-pixel shift each point gets direct R, G and B measurements; chromatic resolution equals luminance resolution and those artefacts disappear.</p>
+<p data-lang="es">Lo que no cambia es la colorimetría. Los filtros del CFA son los mismos, con las mismas sensibilidades espectrales: gamut efectivo, metamerismo y precisión de la matriz de conversión a XYZ son idénticos. Mejora la fidelidad espacial del color, no la fidelidad espectral.</p>
+<p data-lang="en">What does not change is colorimetry. The CFA filters are the same, with the same spectral sensitivities: effective gamut, metamerism and the accuracy of the conversion matrix to XYZ are identical. Spatial colour fidelity improves, not spectral fidelity.</p>
+<p data-lang="es">En fuentes puntuales (estrellas) el problema Bayer es real: una estrella de tamaño subpíxel que cae sobre un único fotodiodo rojo o azul sale con color falso o brillo erróneo tras el demosaico. El muestreo RGB completo lo corrige, pero en cielo el registro se rompe por la deriva sidérea (sección 5).</p>
+<p data-lang="en">For point sources (stars) the Bayer problem is real: a sub-pixel star landing on a single red or blue photodiode comes out with false colour or wrong brightness after demosaicing. Full RGB sampling corrects it, but on the sky registration breaks down because of sidereal drift (section 5).</p>
+</section>
+
+<section id="optica">
+<h2 data-lang="es">4. Muestreo, Nyquist y escala angular</h2>
+<h2 data-lang="en">4. Sampling, Nyquist and angular scale</h2>
+<p data-lang="es">La frecuencia de Nyquist del sensor es f<sub>N</sub> = 1/(2p) con p el paso de píxel. El modo de 96 MP equivale a un paso efectivo p/2, lo que dobla f<sub>N</sub>. Si la MTF del objetivo a la frecuencia de Nyquist nativa ya es baja, el modo de 96 MP añade información de color pero no detalle.</p>
+<p data-lang="en">The sensor's Nyquist frequency is f<sub>N</sub> = 1/(2p) with p the pixel pitch. The 96 MP mode is equivalent to an effective pitch of p/2, which doubles f<sub>N</sub>. If the lens MTF at the native Nyquist frequency is already low, the 96 MP mode adds colour information but no detail.</p>
+<div class="formula">f<sub>N</sub> = 1 / (2p) &nbsp;&nbsp;&nbsp; <span data-lang="es">Escala = 206,265 · p[µm] / f[mm]</span><span data-lang="en">Scale = 206.265 · p[µm] / f[mm]</span> &nbsp;["/px] &nbsp;&nbsp;&nbsp; <span data-lang="es">Diámetro de Airy (primer cero) = 2,44 · λ · N</span><span data-lang="en">Airy diameter (first zero) = 2.44 · λ · N</span></div>
+<div class="panel">
+  <div class="controls">
+    <div><label for="pitch"><span data-lang="es">Paso de píxel p (µm)</span><span data-lang="en">Pixel pitch p (µm)</span></label><input type="number" id="pitch" value="6.0" min="1" max="20" step="0.1"></div>
+    <div><label for="focal"><span data-lang="es">Focal f (mm)</span><span data-lang="en">Focal length f (mm)</span></label><input type="number" id="focal" value="24" min="5" max="2000" step="1"></div>
+    <div><label for="ms-fnum"><span data-lang="es">Número f (N)</span><span data-lang="en">f-number (N)</span></label><input type="number" id="ms-fnum" value="2.8" min="0.95" max="32" step="0.1"></div>
+    <div><label for="ms-lambda"><span data-lang="es">Longitud de onda λ (nm)</span><span data-lang="en">Wavelength λ (nm)</span></label><input type="number" id="ms-lambda" value="550" min="380" max="780" step="10"></div>
+  </div>
+  <div class="out">
+    <div><b id="oNyq"></b><span data-lang="es">Nyquist nativo (lp/mm)</span><span data-lang="en">native Nyquist (lp/mm)</span></div>
+    <div><b id="oNyq2"></b><span>Nyquist 96 MP (lp/mm)</span></div>
+    <div><b id="oScale"></b><span data-lang="es">escala nativa ("/px)</span><span data-lang="en">native scale ("/px)</span></div>
+    <div><b id="oAiry"></b><span data-lang="es">disco de Airy (µm) vs paso</span><span data-lang="en">Airy disc (µm) vs pitch</span></div>
+    <div><b id="oFov"></b><span data-lang="es">campo horizontal (°) a 36 mm</span><span data-lang="en">horizontal field (°) over 36 mm</span></div>
+    <div><b id="oCut"></b><span data-lang="es">corte de difracción 1/(λN) (lp/mm)</span><span data-lang="en">diffraction cut-off 1/(λN) (lp/mm)</span></div>
+    <div><b id="oMtf1"></b><span data-lang="es">MTF difracción en Nyquist nativo</span><span data-lang="en">diffraction MTF at native Nyquist</span></div>
+    <div><b id="oMtf2"></b><span data-lang="es">MTF difracción en Nyquist 96 MP</span><span data-lang="en">diffraction MTF at 96 MP Nyquist</span></div>
+  </div>
+  <p class="legend" id="airyNote"></p>
+</div>
+</section>
+
+<section id="astro">
+<h2 data-lang="es">5. Deriva sidérea y tiempo de exposición</h2>
+<h2 data-lang="en">5. Sidereal drift and exposure time</h2>
+<p data-lang="es">La rotación terrestre desplaza el cielo 15,041 "/s · cos δ, con δ la declinación. La secuencia multishot dura varios segundos entre exposiciones largas, así que el registro subpíxel se rompe salvo montura de seguimiento, y con seguimiento el suelo se mueve respecto al cielo. Para cielo, apilado convencional con software (sección 6).</p>
+<p data-lang="en">The Earth's rotation shifts the sky by 15.041 "/s · cos δ, with δ the declination. The multishot sequence lasts several seconds between long exposures, so sub-pixel registration breaks down without a tracking mount, and with tracking the ground moves relative to the sky. For the sky, conventional software stacking (section 6).</p>
+<div class="formula"><span data-lang="es">Deriva = 15,041 · cos δ &nbsp;["/s] &nbsp;&nbsp;&nbsp; t<sub>1px</sub> = Escala / Deriva</span><span data-lang="en">Drift = 15.041 · cos δ &nbsp;["/s] &nbsp;&nbsp;&nbsp; t<sub>1px</sub> = Scale / Drift</span> &nbsp;&nbsp;&nbsp; NPF ≈ (35·N + 30·p) / f &nbsp;[s] &nbsp;&nbsp;&nbsp; <span data-lang="es">Regla 500</span><span data-lang="en">500 rule</span> = 500 / f &nbsp;[s]</div>
+<div class="panel">
+  <div class="controls">
+    <div><label for="aFocal"><span data-lang="es">Focal f (mm)</span><span data-lang="en">Focal length f (mm)</span></label><input type="number" id="aFocal" value="24" min="5" max="2000" step="1"></div>
+    <div><label for="aPitch"><span data-lang="es">Paso de píxel p (µm)</span><span data-lang="en">Pixel pitch p (µm)</span></label><input type="number" id="aPitch" value="6.0" min="1" max="20" step="0.1"></div>
+    <div><label for="aFnum"><span data-lang="es">Número f (N)</span><span data-lang="en">f-number (N)</span></label><input type="number" id="aFnum" value="2.8" min="0.95" max="32" step="0.1"></div>
+    <div><label for="dec"><span data-lang="es">Declinación δ (°)</span><span data-lang="en">Declination δ (°)</span></label><input type="number" id="dec" value="0" min="0" max="89" step="1"></div>
+    <div><label for="tol"><span data-lang="es">Traza tolerada (px)</span><span data-lang="en">Tolerated trail (px)</span></label><input type="number" id="tol" value="1" min="0.25" max="10" step="0.25"></div>
+  </div>
+  <div class="out">
+    <div><b id="oDrift"></b><span data-lang="es">deriva ("/s)</span><span data-lang="en">drift ("/s)</span></div>
+    <div><b id="oT1"></b><span data-lang="es">s para la traza tolerada</span><span data-lang="en">s for the tolerated trail</span></div>
+    <div><b id="oNpf"></b><span data-lang="es">NPF simplificada (s)</span><span data-lang="en">simplified NPF (s)</span></div>
+    <div><b id="o500"></b><span data-lang="es">regla 500 (s)</span><span data-lang="en">500 rule (s)</span></div>
+  </div>
+  <svg class="chart" id="driftChart" viewBox="0 0 640 260" aria-label="Tiempo hasta traza tolerada frente a focal" data-aria-es="Tiempo hasta traza tolerada frente a focal" data-aria-en="Time to tolerated trail against focal length"></svg>
+  <p data-lang="es" class="legend">Continua: segundos hasta la traza tolerada con los parámetros actuales (eje vertical logarítmico). Discontinua: regla NPF. Punto: focal introducida. A f = 24 mm y δ = 0, una estrella cruza un píxel de 6 µm en unos 3,4 s; cualquier secuencia multishot de varios segundos excede ese margen.</p>
+<p data-lang="en" class="legend">Solid: seconds to the tolerated trail with the current parameters (logarithmic vertical axis). Dashed: NPF rule. Dot: entered focal length. At f = 24 mm and δ = 0, a star crosses a 6 µm pixel in about 3.4 s; any multishot sequence of several seconds exceeds that margin.</p>
+</div>
+<div data-lang="es" class="note">La regla 500 es una aproximación de la era de 12 MP; con paso de 6 µm sobreestima el tiempo permitido. NPF (Frédéric Michaud) tiene en cuenta apertura y paso de píxel; la versión completa añade un término en focal y divide por cos δ.</div>
+<div data-lang="en" class="note">The 500 rule is an approximation from the 12 MP era; with a 6 µm pitch it overestimates the allowed time. NPF (Frédéric Michaud) accounts for aperture and pixel pitch; the full version adds a focal-length term and divides by cos δ.</div>
+</section>
+
+<section id="software">
+<h2 data-lang="es">6. Software de apilado en macOS</h2>
+<h2 data-lang="en">6. Stacking software on macOS</h2>
+<p data-lang="es">Sequator y DeepSkyStacker son solo Windows. Alternativas que funcionan en Mac:</p>
+<p data-lang="en">Sequator and DeepSkyStacker are Windows-only. Alternatives that work on a Mac:</p>
+<div class="filters" role="group" aria-label="Filtrar software" data-aria-es="Filtrar software" data-aria-en="Filter software">
+  <button class="f" data-f="all" aria-pressed="true"><span data-lang="es">Todo</span><span data-lang="en">All</span></button>
+  <button class="f" data-f="free" aria-pressed="false"><span data-lang="es">Gratuito</span><span data-lang="en">Free</span></button>
+  <button class="f" data-f="pay" aria-pressed="false"><span data-lang="es">De pago</span><span data-lang="en">Paid</span></button>
+  <button class="f" data-f="land" aria-pressed="false"><span data-lang="es">Paisaje nocturno</span><span data-lang="en">Night landscape</span></button>
+  <button class="f" data-f="deep" aria-pressed="false"><span data-lang="es">Cielo profundo</span><span data-lang="en">Deep sky</span></button>
+  <button class="f" data-f="plan" aria-pressed="false"><span data-lang="es">Planetaria</span><span data-lang="en">Planetary</span></button>
+</div>
+<table class="swTable" data-lang="es">
+<thead><tr><th>Software</th><th>Coste</th><th>Uso</th><th>Observaciones</th></tr></thead>
+<tbody>
+<tr data-c="free deep land"><td>Siril</td><td><span class="tag">gratis</span></td><td>Cielo profundo, paisaje con máscara</td><td>Estándar de facto libre. Registro astrométrico, rechazo estadístico, calibración con darks/flats/bias, scripting y cientos de scripts comunitarios. GraXpert como complemento para gradientes. Convertir DNG a FITS con su propio conversor.</td></tr>
+<tr data-c="free deep"><td>ASTAP</td><td><span class="tag">gratis</span></td><td>Cielo profundo, resolución astrométrica</td><td>Interfaz espartana, motor sólido. Útil también como solver para Siril.</td></tr>
+<tr data-c="free plan"><td>Lynkeos</td><td><span class="tag">gratis</span></td><td>Planetaria y Luna</td><td>Nativo de macOS. Apilado de vídeo tipo lucky imaging. No para cielo profundo.</td></tr>
+<tr data-c="pay land"><td>Starry Landscape Stacker</td><td><span class="tag pay">~40 USD</span></td><td>Paisaje nocturno sin montura</td><td>Separa cielo y suelo con máscara, alinea estrellas y promedia cada parte. Lo más directo para nightscapes con la SL3-S. App Store.</td></tr>
+<tr data-c="pay deep land"><td>Astro Pixel Processor</td><td><span class="tag pay">~90 EUR o suscripción</span></td><td>Cielo profundo, mosaicos</td><td>Extracción de gradientes de referencia, mosaicos casi automáticos, integración de sesiones heterogéneas con pesado por calidad. Flujo guiado en pestañas. Cerrado, más lento, desarrollo más pausado.</td></tr>
+<tr data-c="pay deep"><td>PixInsight</td><td><span class="tag pay">~250 EUR</span></td><td>Cielo profundo avanzado</td><td>Estándar profesional. Potencia máxima, curva de aprendizaje considerable. Excesivo para paisajes nocturnos.</td></tr>
+<tr data-c="win"><td>Sequator, DeepSkyStacker, AutoStakkert</td><td><span class="tag win">solo Windows</span></td><td>Referencia en Windows</td><td>No hay versión macOS. Posibles vía máquina virtual o Wine/CrossOver.</td></tr>
+</tbody>
+</table>
+<table class="swTable" data-lang="en">
+<thead><tr><th>Software</th><th>Cost</th><th>Use</th><th>Notes</th></tr></thead>
+<tbody>
+<tr data-c="free deep land"><td>Siril</td><td><span class="tag">free</span></td><td>Deep sky, landscape with mask</td><td>The de facto free standard. Astrometric registration, statistical rejection, calibration with darks/flats/bias, scripting and hundreds of community scripts. GraXpert as a complement for gradients. Convert DNG to FITS with its own converter.</td></tr>
+<tr data-c="free deep"><td>ASTAP</td><td><span class="tag">free</span></td><td>Deep sky, plate solving</td><td>Spartan interface, solid engine. Also useful as a solver for Siril.</td></tr>
+<tr data-c="free plan"><td>Lynkeos</td><td><span class="tag">free</span></td><td>Planetary and lunar</td><td>Native to macOS. Lucky-imaging video stacking. Not for deep sky.</td></tr>
+<tr data-c="pay land"><td>Starry Landscape Stacker</td><td><span class="tag pay">~40 USD</span></td><td>Night landscape without a mount</td><td>Separates sky and ground with a mask, aligns stars and averages each part. The most direct route for nightscapes with the SL3-S. App Store.</td></tr>
+<tr data-c="pay deep land"><td>Astro Pixel Processor</td><td><span class="tag pay">~90 EUR or subscription</span></td><td>Deep sky, mosaics</td><td>Reference gradient extraction, near-automatic mosaics, integration of heterogeneous sessions with quality weighting. Guided tabbed workflow. Closed, slower, more leisurely development.</td></tr>
+<tr data-c="pay deep"><td>PixInsight</td><td><span class="tag pay">~250 EUR</span></td><td>Advanced deep sky</td><td>The professional standard. Maximum power, considerable learning curve. Overkill for night landscapes.</td></tr>
+<tr data-c="win"><td>Sequator, DeepSkyStacker, AutoStakkert</td><td><span class="tag win">Windows only</span></td><td>Reference on Windows</td><td>No macOS version. Possible via virtual machine or Wine/CrossOver.</td></tr>
+</tbody>
+</table>
+
+<h3 data-lang="es">Astro Pixel Processor frente a Siril</h3>
+<h3 data-lang="en">Astro Pixel Processor versus Siril</h3>
+<div class="two" data-lang="es">
+  <div>
+    <p><strong>Siril gana en</strong></p>
+    <ul>
+      <li>Coste cero y código abierto.</li>
+      <li>Ecosistema: comunidad enorme, scripts, lenguaje de automatización.</li>
+      <li>Ritmo de desarrollo: deconvolución, fotometría, solver local, integración con GraXpert.</li>
+      <li>Calidad de registro y apilado equiparable a APP en cielo profundo estándar.</li>
+    </ul>
+  </div>
+  <div>
+    <p><strong>APP justifica su precio en</strong></p>
+    <ul>
+      <li>Extracción de gradientes y contaminación lumínica severa.</li>
+      <li>Mosaicos multipanel con normalización fotométrica.</li>
+      <li>Combinación de sesiones, ópticas y escalas distintas.</li>
+      <li>Interfaz guiada sin necesidad de scripting.</li>
+    </ul>
+  </div>
+</div>
+<div class="two" data-lang="en">
+  <div>
+    <p><strong>Siril wins on</strong></p>
+    <ul>
+      <li>Zero cost and open source.</li>
+      <li>Ecosystem: huge community, scripts, automation language.</li>
+      <li>Pace of development: deconvolution, photometry, local solver, GraXpert integration.</li>
+      <li>Registration and stacking quality comparable to APP for standard deep sky.</li>
+    </ul>
+  </div>
+  <div>
+    <p><strong>APP justifies its price on</strong></p>
+    <ul>
+      <li>Gradient extraction and severe light pollution.</li>
+      <li>Multi-panel mosaics with photometric normalisation.</li>
+      <li>Combining sessions, optics and different scales.</li>
+      <li>Guided interface with no need for scripting.</li>
+    </ul>
+  </div>
+</div>
+<p data-lang="es">Criterio práctico: sesión única con la SL3-S y cielo razonable → Siril. Mosaicos, muchas sesiones o contaminación lumínica severa → APP. Combinar ambos complica el flujo sin necesidad al empezar.</p>
+<p data-lang="en">Practical criterion: a single session with the SL3-S and a reasonable sky → Siril. Mosaics, many sessions or severe light pollution → APP. Combining both complicates the workflow needlessly when starting out.</p>
+</section>
+
+<section id="flujo">
+<h2 data-lang="es">7. Flujo recomendado</h2>
+<h2 data-lang="en">7. Recommended workflow</h2>
+<table data-lang="es">
+<thead><tr><th>Situación</th><th>Modo o herramienta</th><th>Motivo</th></tr></thead>
+<tbody>
+<tr><td>Arquitectura, interior o nocturna urbana, escena estática</td><td>Multishot 48 MP</td><td>Un paso de SNR y color RGB completo sin cambiar de flujo.</td></tr>
+<tr><td>Arte, reproducción, paisaje con óptica que resuelve</td><td>Multishot 96 MP, trípode, ISO ≤ 3200</td><td>Detalle real solo si la MTF del objetivo lo permite (sección 4).</td></tr>
+<tr><td>Paisaje nocturno con suelo</td><td>Tomas individuales ≤ NPF + Starry Landscape Stacker</td><td>Alineación separada de cielo y suelo.</td></tr>
+<tr><td>Solo cielo, sin montura</td><td>Tomas individuales ≤ NPF + Siril con dithering</td><td>Apilado de N grande con rechazo de aviones y satélites; el dithering promedia el CFA.</td></tr>
+<tr><td>Cielo profundo con montura</td><td>Siril, o APP si hay mosaicos o gradientes fuertes</td><td>Ver sección 6.</td></tr>
+<tr><td>Cualquier astro</td><td>Evitar multishot</td><td>Apilado rígido de N pequeño sin alineación astrométrica, deriva > 1 px durante la secuencia.</td></tr>
+</tbody>
+</table>
+<table data-lang="en">
+<thead><tr><th>Situation</th><th>Mode or tool</th><th>Reason</th></tr></thead>
+<tbody>
+<tr><td>Architecture, interiors or urban night, static scene</td><td>Multishot 48 MP</td><td>One stop of SNR and full RGB colour without changing the workflow.</td></tr>
+<tr><td>Art, reproduction, landscape with a lens that resolves</td><td>Multishot 96 MP, tripod, ISO ≤ 3200</td><td>Real detail only if the lens MTF allows it (section 4).</td></tr>
+<tr><td>Night landscape with foreground</td><td>Single frames ≤ NPF + Starry Landscape Stacker</td><td>Separate alignment of sky and ground.</td></tr>
+<tr><td>Sky only, no mount</td><td>Single frames ≤ NPF + Siril with dithering</td><td>Large-N stacking with rejection of planes and satellites; dithering averages out the CFA.</td></tr>
+<tr><td>Deep sky with a mount</td><td>Siril, or APP if there are mosaics or strong gradients</td><td>See section 6.</td></tr>
+<tr><td>Any astro</td><td>Avoid multishot</td><td>Rigid stacking of small N without astrometric alignment, drift > 1 px during the sequence.</td></tr>
+</tbody>
+</table>
+</section>
+
+<section id="eleccion">
+<h2 data-lang="es">8. Qué modo elegir en fotografía general y paisaje</h2>
+<h2 data-lang="en">8. Which mode to choose in general and landscape photography</h2>
+<p data-lang="es">La respuesta corta: el modo por defecto para casi todo es el sensor nativo de 24 MP. El multishot solo se activa cuando se cumplen a la vez tres condiciones: escena estática durante varios segundos, destino que aproveche la resolución o la limpieza (impresión grande, recorte fuerte, reproducción) y, para el modo de 96 MP, una combinación de objetivo y diafragma que resuelva por encima del Nyquist nativo.</p>
+<p data-lang="en">The short answer: the default mode for almost everything is the native 24 MP sensor. Multishot is only switched on when three conditions hold at once: a scene static for several seconds, a destination that uses the resolution or the cleanliness (large print, heavy crop, reproduction) and, for the 96 MP mode, a lens-and-aperture combination that resolves above the native Nyquist.</p>
+
+<h3 data-lang="es">Por qué el diafragma decide entre 48 y 96 MP</h3>
+<h3 data-lang="en">Why the aperture decides between 48 and 96 MP</h3>
+<p data-lang="es">Con paso de 6 µm el Nyquist nativo está en 83 lp/mm y el de 96 MP en 167 lp/mm. La difracción, con λ = 550 nm, corta en 1/(λN): 325 lp/mm a f/5,6, 227 lp/mm a f/8, 165 lp/mm a f/11. La MTF de difracción en 167 lp/mm vale aproximadamente 38 % a f/5,6, 16 % a f/8 y 0 % a f/11, antes de descontar las aberraciones del objetivo. Conclusión: a partir de f/8 el modo de 96 MP ya casi no captura detalle adicional, y a f/11 o más cerrado ninguno. Los diafragmas habituales de paisaje están justo en esa frontera. La calculadora de la sección 4 da las cifras para cualquier combinación.</p>
+<p data-lang="en">With a 6 µm pitch the native Nyquist is at 83 lp/mm and the 96 MP one at 167 lp/mm. Diffraction, with λ = 550 nm, cuts off at 1/(λN): 325 lp/mm at f/5.6, 227 lp/mm at f/8, 165 lp/mm at f/11. The diffraction MTF at 167 lp/mm is roughly 38 % at f/5.6, 16 % at f/8 and 0 % at f/11, before discounting the lens aberrations. Conclusion: from f/8 the 96 MP mode captures almost no additional detail, and at f/11 or smaller none. The usual landscape apertures sit right on that border. The calculator in section 4 gives the figures for any combination.</p>
+
+<h3 data-lang="es">Por qué el movimiento decide entre multishot y sensor nativo</h3>
+<h3 data-lang="en">Why movement decides between multishot and native sensor</h3>
+<p data-lang="es">Hojas, agua, nubes rápidas, hierba, personas o tráfico se desplazan entre exposiciones y el algoritmo de fusión no puede resolverlo: enmascara la zona con datos de un solo fotograma, con lo que esa región vuelve a ser Bayer de 24 MP escalado, o deja artefactos. La secuencia de 96 MP (8 tomas) es más larga y más vulnerable que la de 48 MP (4 tomas). En paisaje con viento moderado el modo de 48 MP suele salir limpio y el de 96 MP no.</p>
+<p data-lang="en">Leaves, water, fast clouds, grass, people or traffic move between exposures and the merge algorithm cannot resolve it: it masks the zone with data from a single frame, so that region becomes upscaled 24 MP Bayer again, or leaves artefacts. The 96 MP sequence (8 frames) is longer and more vulnerable than the 48 MP one (4 frames). In landscape with moderate wind the 48 MP mode usually comes out clean and the 96 MP one does not.</p>
+
+<h3 data-lang="es">Cuadro de decisión</h3>
+<h3 data-lang="en">Decision table</h3>
+<table data-lang="es">
+<thead><tr><th>Situación</th><th>Modo</th><th>Motivo</th></tr></thead>
+<tbody>
+<tr><td>Uso general, gente, calle, viaje, cualquier cosa a pulso con prisa</td><td>24 MP nativo</td><td>El multishot exige inmovilidad de escena y varios segundos; su ventaja no compensa el riesgo de artefactos ni el tiempo de fusión.</td></tr>
+<tr><td>Paisaje en trípode, aire quieto, objetivo de calidad a f/4 a f/5,6, impresión grande</td><td>96 MP trípode</td><td>MTF de difracción suficiente en 167 lp/mm; ganancia de detalle real además del color RGB completo.</td></tr>
+<tr><td>Paisaje en trípode a f/8 o más cerrado</td><td>48 MP trípode</td><td>El detalle adicional de 96 MP queda anulado por la difracción; 48 MP da el color completo y un paso de SNR con la mitad de tomas y menos riesgo.</td></tr>
+<tr><td>Paisaje con viento, agua o nubes en movimiento</td><td>48 MP, o 24 MP nativo si el movimiento es amplio</td><td>Secuencia más corta, menos probabilidad de artefactos. Con mucho movimiento, ningún multishot es fiable.</td></tr>
+<tr><td>Interior oscuro, arquitectura nocturna, escena estática sin trípode</td><td>48 MP a pulso</td><td>Es el caso donde el promediado de 4 tomas aporta más: sombras un paso más limpias sin trípode ni ISO más alto.</td></tr>
+<tr><td>Arquitectura, arte, reproducción, producto en estudio con trípode</td><td>96 MP trípode, ISO bajo</td><td>Escena controlada, luz controlada, diafragma elegible; el modo rinde todo lo que promete.</td></tr>
+<tr><td>Cualquier cielo nocturno</td><td>24 MP nativo y apilado externo</td><td>Sección 5.</td></tr>
+</tbody>
+</table>
+<table data-lang="en">
+<thead><tr><th>Situation</th><th>Mode</th><th>Reason</th></tr></thead>
+<tbody>
+<tr><td>General use, people, street, travel, anything handheld in a hurry</td><td>24 MP native</td><td>Multishot demands a still scene and several seconds; its advantage does not offset the risk of artefacts or the merge time.</td></tr>
+<tr><td>Landscape on a tripod, still air, quality lens at f/4 to f/5.6, large print</td><td>96 MP tripod</td><td>Sufficient diffraction MTF at 167 lp/mm; real detail gain in addition to full RGB colour.</td></tr>
+<tr><td>Landscape on a tripod at f/8 or smaller</td><td>48 MP tripod</td><td>The additional 96 MP detail is cancelled by diffraction; 48 MP gives full colour and one stop of SNR with half the frames and less risk.</td></tr>
+<tr><td>Landscape with wind, water or moving clouds</td><td>48 MP, or 24 MP native if the movement is broad</td><td>Shorter sequence, lower chance of artefacts. With a lot of movement, no multishot is reliable.</td></tr>
+<tr><td>Dark interior, night architecture, static scene without tripod</td><td>48 MP handheld</td><td>The case where averaging 4 frames helps most: shadows one stop cleaner without tripod or higher ISO.</td></tr>
+<tr><td>Architecture, art, reproduction, studio product on a tripod</td><td>96 MP tripod, low ISO</td><td>Controlled scene, controlled light, selectable aperture; the mode delivers everything it promises.</td></tr>
+<tr><td>Any night sky</td><td>24 MP native and external stacking</td><td>Section 5.</td></tr>
+</tbody>
+</table>
+<p data-lang="es">Coste práctico a tener en cuenta: un DNG de 96 MP ocupa unas cuatro veces el nativo, la fusión bloquea la cámara varios segundos y el ISO queda limitado a 3200. Por eso conviene guardar también la toma individual, opción que la cámara ofrece, como respaldo si la fusión falla.</p>
+<p data-lang="en">Practical cost to bear in mind: a 96 MP DNG takes about four times the native size, the merge locks the camera for several seconds and ISO is limited to 3200. Hence it is wise to also save the single frame, an option the camera offers, as a fallback if the merge fails.</p>
+
+<div class="panel">
+  <p style="margin-bottom:10px" data-lang="es"><strong>Asistente de decisión</strong>. Introduce las condiciones de la toma y obtén el modo recomendado con su justificación.</p>
+  <p style="margin-bottom:10px" data-lang="en"><strong>Decision assistant</strong>. Enter the shooting conditions and get the recommended mode with its justification.</p>
+  <div class="controls">
+    <div><label for="dSupport"><span data-lang="es">Soporte</span><span data-lang="en">Support</span></label><select id="dSupport"><option value="tripod" data-es="Trípode" data-en="Tripod">Trípode</option><option value="hand" data-es="A pulso" data-en="Handheld">A pulso</option></select></div>
+    <div><label for="dMotion"><span data-lang="es">Movimiento en la escena</span><span data-lang="en">Movement in the scene</span></label><select id="dMotion"><option value="none" data-es="Ninguno" data-en="None">Ninguno</option><option value="some" data-es="Leve (hojas, nubes lentas)" data-en="Slight (leaves, slow clouds)">Leve (hojas, nubes lentas)</option><option value="much" data-es="Evidente (agua, gente, viento)" data-en="Obvious (water, people, wind)">Evidente (agua, gente, viento)</option></select></div>
+    <div><label for="dF"><span data-lang="es">Número f</span><span data-lang="en">f-number</span></label><input type="number" id="dF" value="5.6" min="0.95" max="32" step="0.1"></div>
+    <div><label for="dIso"><span data-lang="es">ISO previsto</span><span data-lang="en">Expected ISO</span></label><input type="number" id="dIso" value="100" min="50" max="200000" step="50"></div>
+    <div><label for="dOut"><span data-lang="es">Destino</span><span data-lang="en">Destination</span></label><select id="dOut"><option value="screen" data-es="Pantalla o impresión pequeña" data-en="Screen or small print">Pantalla o impresión pequeña</option><option value="print" data-es="Impresión grande o recorte fuerte" data-en="Large print or heavy crop">Impresión grande o recorte fuerte</option><option value="repro" data-es="Reproducción o archivo" data-en="Reproduction or archive">Reproducción o archivo</option></select></div>
+    <div><label for="dLight"><span data-lang="es">Nivel de luz</span><span data-lang="en">Light level</span></label><select id="dLight"><option value="good" data-es="Suficiente" data-en="Sufficient">Suficiente</option><option value="low" data-es="Escaso, sombras importantes" data-en="Scarce, significant shadows">Escaso, sombras importantes</option></select></div>
+  </div>
+  <div class="out" style="grid-template-columns:1fr">
+    <div><b id="dMode"></b><span id="dWhy"></span></div>
+  </div>
+</div>
+</section>
+
+<footer><span data-lang="es">Constantes: velocidad sidérea 15,041 "/s; 206265 "/rad. NPF simplificada de F. Michaud. Cifras del SL3-S según documentación de Leica y pruebas publicadas en 2025; verificar con el firmware instalado. Del mismo sitio: <a href="#datos">los datos del sensor de M11, Q3 y SL3-S</a>, el <a href="manual-siril-apilado.html">manual de Siril</a> y el <a href="#binning">binning de la M11</a>.</span><span data-lang="en">Constants: sidereal rate 15.041 "/s; 206265 "/rad. Simplified NPF after F. Michaud. SL3-S figures per Leica documentation and tests published in 2025; verify against the installed firmware. From this same site: <a href="#datos">the sensor data of the M11, Q3 and SL3-S</a>, the <a href="manual-siril-apilado.html">Siril manual</a> and the <a href="#binning">M11 binning</a>.</span></footer>
+</main>
+</div>
+
+
+
+</div>
+</section>
+<section class="tab" id="tab-binning" role="tabpanel" hidden>
+<div class="part-bn">
+<header>
+  <div class="hbar">
+    <h1 data-lang="es">Triple Resolution de la Leica M11: ¿binning o remuestreo? Modelo frente a medidas</h1>
+    <h1 data-lang="en">Leica M11 Triple Resolution: binning or resampling? Model against measurements</h1>
+    
+  </div>
+  <p data-lang="es">La Leica M11 escribe tres tamaños de DNG desde el mismo sensor de 60 Mpx: L-DNG (60), M-DNG (36) y S-DNG (18). ¿Hace binning físico el Maestro III o remuestrea? Las medidas del artículo — imagen-diferencia de dos tomas idénticas, demosaico AHD lineal, canal G, parche subexpuesto (μ ≈ 0,08), tres disparos por modo — dicen que remuestrea aplicando un filtrado suave del ruido: la ganancia real ronda los 3 dB (medio paso) a ISO medio-alto, es la misma en M y en S pese al factor 2 de píxeles, y a ISO base es nula o negativa. Esta herramienta deja explorar un modelo de transferencia fotónica calibrado sobre esas medidas y contrastarlo con el binning ideal.</p>
+  <p data-lang="en">The Leica M11 writes three DNG sizes from the same 60 MP sensor: L-DNG (60), M-DNG (36) and S-DNG (18). Does the Maestro III perform physical binning, or does it resample? The article’s measurements — difference image of two identical exposures, linear AHD demosaicing, G channel, underexposed patch (μ ≈ 0.08), three frames per mode — say it resamples while applying gentle noise filtering: the real gain sits around 3 dB (half a stop) at medium-to-high ISO, it is identical in M and in S despite the factor of 2 in pixel count, and at base ISO it is nil or negative. This tool lets you explore a photon-transfer model calibrated on those measurements and set it against ideal binning.</p>
+  <p class="srclinks">
+    <a href="https://rafaelvida.com/2026/04/25/binning-en-leica/" data-lang="es">Artículo con las medidas ↗</a>
+    <a href="https://rafaelvida.com/2026/04/25/binning-en-leica/" data-lang="en">Article with the measurements ↗</a>
+    <a href="sensor-al-papel.html" data-lang="es">Del sensor al papel: ¿cuántos píxeles necesitas de verdad?</a>
+    <a href="sensor-al-papel.html" data-lang="en">From sensor to paper: how many pixels do you really need?</a>
+  </p>
+</header>
+<main>
+  <section class="panel" id="controls">
+    <h2 data-lang="es">Parámetros</h2>
+    <h2 data-lang="en">Parameters</h2>
+    <label>ISO <span class="v"><span id="isoV"></span></span>
+      <input type="range" id="bn-iso" min="6" max="12.6439" step="0.01" value="10.6439"></label>
+    <label><span data-lang="es">Exposición del parche (EV bajo saturación)</span><span data-lang="en">Patch exposure (EV below saturation)</span> <span class="v"><span id="evV"></span> EV · μ = <span id="muV"></span></span>
+      <input type="range" id="ev" min="-8" max="-1" step="0.02" value="-3.64"></label>
+    <button id="btnPatch"><span data-lang="es">Volver al parche del artículo (μ ≈ 0,08)</span><span data-lang="en">Back to the article’s patch (μ ≈ 0.08)</span></button>
+
+    <h3 data-lang="es">Sensor efectivo (calibración)</h3>
+    <h3 data-lang="en">Effective sensor (calibration)</h3>
+    <div class="row3">
+      <label>FWC<sub>ef</sub> (e⁻)<input type="number" id="fwc" step="500" value="28500"></label>
+      <label>σ<sub>r</sub> (e⁻)<input type="number" id="rn" step="0.1" value="1.5"></label>
+      <label>γ<input type="number" id="gam" step="0.01" value="0.93"></label>
+    </div>
+    <p class="note" data-lang="es">FWC<sub>ef</sub> y σ<sub>r</sub> son valores <b>efectivos</b> del canal G tras el demosaico, ajustados a las tres medidas de L-DNG; γ &lt; 1 recoge que el sensor cae algo menos deprisa de lo fotónico puro (doble ganancia de conversión). No son datos de fábrica.</p>
+    <p class="note" data-lang="en">FWC<sub>ef</sub> and σ<sub>r</sub> are <b>effective</b> values of the G channel after demosaicing, fitted to the three L-DNG measurements; γ &lt; 1 captures the sensor falling somewhat less steeply than pure photon behaviour (dual conversion gain). They are not factory data.</p>
+
+    <h3 data-lang="es">Simulación visual</h3>
+    <h3 data-lang="en">Visual simulation</h3>
+    <label><span data-lang="es">Realce de visualización</span><span data-lang="en">Display lift</span> <span class="v"><span id="liftV"></span> EV</span>
+      <input type="range" id="lift" min="-2" max="3" step="0.1" value="0.5"></label>
+    <button id="btnSeed"><span data-lang="es">Nueva realización de ruido</span><span data-lang="en">New noise realisation</span></button>
+    <p class="note" data-lang="es">El ruido sale de un generador congruente sembrado (nunca <code>Math.random</code>): la misma configuración reproduce siempre la misma imagen, igual que en el resto del repositorio.</p>
+    <p class="note" data-lang="en">The noise comes from a seeded congruential generator (never <code>Math.random</code>): the same settings always reproduce the same image, as everywhere else in this repository.</p>
+  </section>
+
+  <section class="grid2">
+    <div class="panel">
+      <h2 data-lang="es">SNR frente a ISO, a resolución nativa</h2>
+      <h2 data-lang="en">SNR against ISO, at native resolution</h2>
+      <canvas id="chartSNR" width="900" height="400"></canvas>
+      <div class="legend">
+        <span><i style="background:var(--sag)"></i><span data-lang="es">L-DNG nativo (modelo)</span><span data-lang="en">native L-DNG (model)</span></span>
+        <span><i style="background:var(--tan)"></i><span data-lang="es">M-DNG, pipeline Maestro (modelo)</span><span data-lang="en">M-DNG, Maestro pipeline (model)</span></span>
+        <span><i style="background:var(--sph)"></i><span data-lang="es">S-DNG, pipeline Maestro (modelo)</span><span data-lang="en">S-DNG, Maestro pipeline (model)</span></span>
+        <span><i class="dash" style="background:var(--ref)"></i><span data-lang="es">binning ideal (+2,2 / +5,2 dB)</span><span data-lang="en">ideal binning (+2.2 / +5.2 dB)</span></span>
+        <span data-lang="es">Puntos: medidas del artículo (μ ≈ 0,08).</span>
+        <span data-lang="en">Dots: article measurements (μ ≈ 0.08).</span>
+      </div>
+      <p class="note" data-lang="es">Que M y S midan casi lo mismo — y que S quede lejos de su curva discontinua de binning ideal — es la firma de que no hay binning físico: el Maestro III remuestrea con un filtrado de ruido de fuerza fija, independiente del factor de reducción.</p>
+      <p class="note" data-lang="en">That M and S measure almost the same — and that S falls far below its dashed ideal-binning curve — is the signature that no physical binning takes place: the Maestro III resamples with noise filtering of fixed strength, independent of the reduction factor.</p>
+    </div>
+
+    <div class="panel">
+      <h2 data-lang="es">Ganancia de SNR frente a L-DNG</h2>
+      <h2 data-lang="en">SNR gain over L-DNG</h2>
+      <canvas id="chartGain" width="900" height="300"></canvas>
+      <p class="note" data-lang="es">El binning ideal de k píxeles daría +10·log₁₀(k) dB: +2,2 dB en M (k = 5/3) y +5,2 dB en S (k = 10/3). Lo medido: ≈ +3 dB en <b>ambos</b> a ISO ≥ 1600, y ganancia nula o negativa a ISO 64. Los ratios lineales medidos (L→M 1,28×, L→S 1,81×) no son enteros: descartan por sí solos un binning 2×2 limpio.</p>
+      <p class="note" data-lang="en">Ideal binning of k pixels would give +10·log₁₀(k) dB: +2.2 dB in M (k = 5/3) and +5.2 dB in S (k = 10/3). What was measured: ≈ +3 dB in <b>both</b> at ISO ≥ 1600, and nil or negative gain at ISO 64. The measured linear ratios (L→M 1.28×, L→S 1.81×) are non-integer: on their own they rule out clean 2×2 binning.</p>
+    </div>
+
+    <div class="panel">
+      <h2 data-lang="es">Rango dinámico ingenieril por ISO (medido)</h2>
+      <h2 data-lang="en">Engineering dynamic range by ISO (measured)</h2>
+      <canvas id="chartDR" width="900" height="260"></canvas>
+      <p class="note" data-lang="es">Solo datos medidos; el eje empieza en 30 dB. A ISO base los tres modos empatan; a ISO alto M y S ganan entre 1,7 y 2,7 dB de DR sobre L — coherente con un filtrado de ruido en las sombras, no con binning.</p>
+      <p class="note" data-lang="en">Measured data only; the axis starts at 30 dB. At base ISO the three modes tie; at high ISO M and S gain 1.7 to 2.7 dB of DR over L — consistent with noise filtering in the shadows, not binning.</p>
+    </div>
+
+    <div class="panel">
+      <h2 data-lang="es">Todo reducido a 18 Mpx: comparación a tamaño común (medido)</h2>
+      <h2 data-lang="en">Everything reduced to 18 MP: comparison at a common size (measured)</h2>
+      <canvas id="chart18" width="900" height="260"></canvas>
+      <p class="note" data-lang="es">L y M reducidos con Lanczos a 18 Mpx, S nativo. A ISO 64 gana L→18 (35,81 dB); a ISO 1600 y 6400 gana M→18. S-DNG no es el mejor en ningún caso.</p>
+      <p class="note" data-lang="en">L and M reduced with Lanczos to 18 MP, S native. At ISO 64, L→18 wins (35.81 dB); at ISO 1600 and 6400, M→18 wins. S-DNG comes first in no case.</p>
+      <div class="verdict" id="verdict"></div>
+      <p class="note" data-lang="es">La resolución que de verdad necesitas la fija el destino, no el sensor: si el destino es un A3 mirado a un metro, mira cuántos píxeles hacen falta en <a href="sensor-al-papel.html">Del sensor al papel</a>.</p>
+      <p class="note" data-lang="en">The resolution you actually need is set by the destination, not the sensor: if the destination is an A3 print viewed at one metre, check how many pixels it takes in <a href="sensor-al-papel.html">From sensor to paper</a>.</p>
+    </div>
+
+    <div class="panel">
+      <h2 data-lang="es">Simulación visual del parche de sombra, a tamaño común (18 Mpx)</h2>
+      <h2 data-lang="en">Visual simulation of the shadow patch, at a common size (18 MP)</h2>
+      <div class="sim">
+        <figure><canvas id="cvL" width="176" height="176"></canvas><figcaption id="capL"></figcaption></figure>
+        <figure><canvas id="cvM" width="176" height="176"></canvas><figcaption id="capM"></figcaption></figure>
+        <figure><canvas id="cvBin" width="176" height="176"></canvas><figcaption id="capBin"></figcaption></figure>
+      </div>
+      <p class="note" id="simInfo"></p>
+      <p class="note" data-lang="es">Parche sintético (gradiente, textura tenue y una banda central de barras finas) generado a «60 Mpx» con ruido de Poisson más ruido de lectura al ISO elegido, y reducido ×1,81 lineal por tres caminos: L reescalado con Lanczos-3, pipeline «Maestro» (prefiltro gaussiano suave + diezmado bilineal) y binning ideal (media de bloques). La SNR de cada recuadro se mide como en el artículo, por imagen-diferencia de dos realizaciones independientes. El prefiltro del camino «Maestro» se modula con la ganancia calibrada: a ISO base apenas filtra; fíjate entonces en cómo el binning ideal borra las barras finas mientras Lanczos las conserva.</p>
+      <p class="note" data-lang="en">A synthetic patch (gradient, faint texture and a central band of fine bars) generated at “60 MP” with Poisson noise plus read noise at the chosen ISO, then reduced ×1.81 linear along three paths: L downsampled with Lanczos-3, the “Maestro” pipeline (gentle Gaussian pre-filter + bilinear decimation) and ideal binning (block average). The SNR of each tile is measured as in the article, by the difference image of two independent realisations. The “Maestro” pre-filter is modulated by the calibrated gain: at base ISO it barely filters; notice then how ideal binning wipes out the fine bars while Lanczos keeps them.</p>
+    </div>
+
+    <div class="panel">
+      <h2 data-lang="es">Modelo, supuestos y datos medidos</h2>
+      <h2 data-lang="en">Model, assumptions and measured data</h2>
+      <p class="note" data-lang="es"><b>Transferencia fotónica.</b> SNR = S/√(S + σ<sub>r</sub>²), en dB 20·log₁₀, con S = FWC<sub>ef</sub> · 2<sup>EV</sup> · (64/ISO)<sup>γ</sup> electrones de señal y σ<sub>r</sub> de ruido de lectura. <b>Convención de decibelios:</b> la SNR es un cociente de amplitudes, así que SNR(dB) = 20·log₁₀(μ/σ). Promediar k píxeles independientes divide σ entre √k: la mejora es 20·log₁₀(√k) = <b>10·log₁₀(k) dB</b>. Con k = 60/36 = 5/3 salen +2,22 dB (M) y con k = 60/18 = 10/3, +5,23 dB (S): los «+2,2» y «+5,2» del artículo.</p>
+      <p class="note" data-lang="en"><b>Photon transfer.</b> SNR = S/√(S + σ<sub>r</sub>²), in dB 20·log₁₀, with S = FWC<sub>ef</sub> · 2<sup>EV</sup> · (64/ISO)<sup>γ</sup> signal electrons and σ<sub>r</sub> of read noise. <b>Decibel convention:</b> the SNR is a ratio of amplitudes, so SNR(dB) = 20·log₁₀(μ/σ). Averaging k independent pixels divides σ by √k: the improvement is 20·log₁₀(√k) = <b>10·log₁₀(k) dB</b>. With k = 60/36 = 5/3 that yields +2.22 dB (M) and with k = 60/18 = 10/3, +5.23 dB (S): the article’s “+2.2” and “+5.2”.</p>
+      <p class="note" data-lang="es"><b>Pipeline «Maestro».</b> Ganancia G(ISO) por modo: interpolación suave (smoothstep en log₂ ISO, de 64 a 1600) entre el valor medido a ISO 64 (−1,88 dB en M; −0,89 dB en S) y la meseta medida a 1600–6400 (media: +3,10 dB en M; +3,28 dB en S). <b>Advertencia honesta:</b> es una calibración fenomenológica sobre tres ISOs, no ingeniería inversa del procesador; fuera de esos puntos la curva es solo una interpolación plausible.</p>
+      <p class="note" data-lang="en"><b>“Maestro” pipeline.</b> Gain G(ISO) per mode: smooth interpolation (smoothstep in log₂ ISO, from 64 to 1600) between the value measured at ISO 64 (−1.88 dB in M; −0.89 dB in S) and the plateau measured at 1600–6400 (mean: +3.10 dB in M; +3.28 dB in S). <b>Honest warning:</b> this is a phenomenological calibration over three ISOs, not reverse engineering of the processor; away from those points the curve is merely a plausible interpolation.</p>
+
+      <div class="tbls">
+        <div>
+          <h3 data-lang="es">SNR a resolución nativa (dB)</h3>
+          <h3 data-lang="en">SNR at native resolution (dB)</h3>
+          <table class="res"><thead><tr><th><span data-lang="es">Modo</span><span data-lang="en">Mode</span></th><th>ISO 64</th><th>ISO 1600</th><th>ISO 6400</th></tr></thead><tbody id="tbSNR"></tbody></table>
+        </div>
+        <div>
+          <h3 data-lang="es">Ganancia frente a L (dB)</h3>
+          <h3 data-lang="en">Gain over L (dB)</h3>
+          <table class="res"><thead><tr><th><span data-lang="es">Modo</span><span data-lang="en">Mode</span></th><th>ISO 64</th><th>ISO 1600</th><th>ISO 6400</th><th><span data-lang="es">teoría</span><span data-lang="en">theory</span></th></tr></thead><tbody id="tbGain"></tbody></table>
+        </div>
+        <div>
+          <h3 data-lang="es">Todo a 18 Mpx, Lanczos (dB)</h3>
+          <h3 data-lang="en">Everything at 18 MP, Lanczos (dB)</h3>
+          <table class="res"><thead><tr><th><span data-lang="es">Vía</span><span data-lang="en">Path</span></th><th>ISO 64</th><th>ISO 1600</th><th>ISO 6400</th></tr></thead><tbody id="tbTo18"></tbody></table>
+        </div>
+        <div>
+          <h3 data-lang="es">DR ingenieril (dB)</h3>
+          <h3 data-lang="en">Engineering DR (dB)</h3>
+          <table class="res"><thead><tr><th><span data-lang="es">Modo</span><span data-lang="en">Mode</span></th><th>ISO 64</th><th>ISO 1600</th><th>ISO 6400</th></tr></thead><tbody id="tbDR"></tbody></table>
+        </div>
+      </div>
+      <p class="note" data-lang="es">Ratios lineales medidos: L→M 1,28×, L→S 1,81×. Método: imagen-diferencia de dos tomas idénticas, demosaico AHD lineal, canal G, parche subexpuesto μ ≈ 0,08, tres disparos por modo.</p>
+      <p class="note" data-lang="en">Measured linear ratios: L→M 1.28×, L→S 1.81×. Method: difference image of two identical exposures, linear AHD demosaicing, G channel, underexposed patch μ ≈ 0.08, three frames per mode.</p>
+
+      <h3 data-lang="es">Verificación numérica del modelo</h3>
+      <h3 data-lang="en">Numerical verification of the model</h3>
+      <table class="res"><thead><tr>
+        <th><span data-lang="es">Comprobación</span><span data-lang="en">Check</span></th>
+        <th><span data-lang="es">modelo</span><span data-lang="en">model</span></th>
+        <th><span data-lang="es">referencia</span><span data-lang="en">reference</span></th>
+        <th>Δ (dB)</th>
+        <th><span data-lang="es">estado</span><span data-lang="en">status</span></th>
+      </tr></thead><tbody id="verif"></tbody></table>
+      <p class="note" id="chkAll"></p>
+      <p class="note" data-lang="es">Tolerancias: binning ideal ±0,05 dB frente al valor redondeado del artículo; SNR de L ±0,30 dB; ganancias Maestro ±0,35 dB. Los dos puntos de ISO 64 son anclas de la calibración (Δ = 0 por construcción). La verificación usa siempre los valores de calibración por defecto y μ = 0,08, aunque muevas los deslizadores.</p>
+      <p class="note" data-lang="en">Tolerances: ideal binning ±0.05 dB against the article’s rounded value; L SNR ±0.30 dB; Maestro gains ±0.35 dB. The two ISO 64 points are anchors of the calibration (Δ = 0 by construction). The verification always uses the default calibration values and μ = 0.08, however you move the sliders.</p>
+      <p class="note"><a href="https://rafaelvida.com/2026/04/25/binning-en-leica/" data-lang="es">Artículo con las medidas ↗</a><a href="https://rafaelvida.com/2026/04/25/binning-en-leica/" data-lang="en">Article with the measurements ↗</a></p>
+    </div>
+  </section>
+</main>
+
+
+
+
+</div>
+</section>
+<section class="tab" id="tab-difraccion" role="tabpanel" hidden>
+<div class="part-sens"><section id="difraccion">
+  <h2 data-lang="es">Difracción y paso de píxel</h2>
+<h2 data-lang="en">Diffraction and pixel pitch</h2>
+  <p data-lang="es">El disco de Airy tiene un diámetro hasta el primer cero de 2,44·λ·N y una resolución de Rayleigh de 1,22·λ·N. Cuando la resolución de Rayleigh supera el paso de píxel, el sensor ya no aprovecha toda su resolución; cuando la dobla, la difracción domina claramente.</p>
+<p data-lang="en">The Airy disc has a diameter to the first zero of 2.44·λ·N and a Rayleigh resolution of 1.22·λ·N. When the Rayleigh resolution exceeds the pixel pitch, the sensor no longer uses all its resolution; when it doubles it, diffraction clearly dominates.</p>
+  <div class="panel">
+    <div class="grid">
+      <div class="field"><label for="fnum"><span data-lang="es">Apertura:</span><span data-lang="en">Aperture:</span> f/<span id="fnumV">8</span></label><input id="fnum" type="range" min="0" max="10" value="5" step="1"></div>
+      <div class="field"><label for="lambda"><span data-lang="es">Longitud de onda</span><span data-lang="en">Wavelength</span></label><select id="lambda"><option value="0.45" data-es="450 nm (azul)" data-en="450 nm (blue)">450 nm (azul)</option><option value="0.55" selected data-es="550 nm (verde)" data-en="550 nm (green)">550 nm (verde)</option><option value="0.65" data-es="650 nm (rojo)" data-en="650 nm (red)">650 nm (rojo)</option></select></div>
+    </div>
+    <div class="out">
+      <div class="tscroll"><table>
+        <thead><tr data-lang="es"><th>Cámara</th><th class="num">Paso (µm)</th><th class="num">Airy 2,44λN (µm)</th><th class="num">Rayleigh / paso</th><th>Estado</th></tr>
+        <tr data-lang="en"><th>Camera</th><th class="num">Pitch (µm)</th><th class="num">Airy 2.44λN (µm)</th><th class="num">Rayleigh / pitch</th><th>Status</th></tr></thead>
+        <tbody id="difBody"></tbody>
+      </table></div>
+    </div>
+  </div>
+  <p data-lang="es">Consecuencia práctica: los sensores de 60 Mpx rinden todo su detalle hasta f/5,6 y lo pierden progresivamente a partir de f/8, lo que en paisaje empuja a trabajar más abierto y apilar enfoques. El píxel de 5,94 µm de la SL3-S tolera f/8 sin pérdida y f/11 con pérdida leve.</p>
+<p data-lang="en">Practical consequence: the 60 Mpx sensors deliver all their detail up to f/5.6 and lose it progressively from f/8, which in landscape pushes towards working more open and focus stacking. The 5.94 µm pixel of the SL3-S tolerates f/8 without loss and f/11 with slight loss.</p>
+</section></div>
+<div class="part-nd6"><section id="nd6-difraccion">
+  <div class="wrap">
+    <h2 data-lang="es">Difracción y elección del diafragma</h2>
+<h2 data-lang="en">Diffraction and choice of aperture</h2>
+    <p data-lang="es">La larga exposición invita a cerrar el diafragma para ganar tiempo. Es un mal negocio. El diámetro del disco de Airy es <i>d</i> = 2.44 λ <i>N</i>, que a 550 nm son 1.34 <i>N</i> micras, y no depende de la focal. Cuando ese disco alcanza dos veces el paso de píxel, la difracción pasa a ser el factor limitante:</p>
+<p data-lang="en">Long exposure invites stopping down to gain time. It is a bad bargain. The diameter of the Airy disc is <i>d</i> = 2.44 λ <i>N</i>, which at 550 nm is 1.34 <i>N</i> microns, and does not depend on focal length. When that disc reaches twice the pixel pitch, diffraction becomes the limiting factor:</p>
+    <p class="eq"><i>N</i><sub>crítico</sub> ≈ 1.49 · <i>p</i> &nbsp;&nbsp;&nbsp;&nbsp; <i>N</i><sub>óptimo</sub> ≈ 0.61 · <i>f</i> / √<i>s</i></p>
+    <p data-lang="es">La segunda expresión minimiza en cuadratura el desenfoque geométrico frente a la difracción para una escena cuyo sujeto más cercano está a <i>s</i> metros, con <i>f</i> en milímetros y el foco colocado en el punto óptimo, no en el primer plano. Pasado ese diafragma solo se pierde. La difracción, además, es proporcional a λ: la contaminación infrarroja a 850 nm difracta un 55 por ciento más que el verde y llega, por aberración cromática longitudinal, enfocada en otro plano. Un ND que fuga no solo tiñe, también vela.</p>
+<p data-lang="en">The second expression minimises in quadrature the geometric defocus against diffraction for a scene whose nearest subject is at <i>s</i> metres, with <i>f</i> in millimetres and the focus placed at the optimum point, not on the foreground. Beyond that aperture there is only loss. Diffraction, moreover, is proportional to λ: infrared contamination at 850 nm diffracts 55 percent more than green and arrives, through longitudinal chromatic aberration, focused on another plane. A leaking ND does not only tint; it also veils.</p>
+
+    <div class="panel">
+      <h4 data-lang="es">Diafragma crítico y diafragma óptimo</h4>
+<h4 data-lang="en">Critical aperture and optimum aperture</h4>
+      <div class="controls">
+        <label><span data-lang="es">Paso de píxel</span><span data-lang="en">Pixel pitch</span>
+          <select id="c6-pitch">
+            <option value="3.76" selected data-es="3.76 µm (60 MP, formato completo)" data-en="3.76 µm (60 MP, full frame)">3.76 µm (60 MP, formato completo)</option>
+            <option value="4.6" data-es="4.6 µm (40 MP)" data-en="4.6 µm (40 MP)">4.6 µm (40 MP)</option>
+            <option value="5.97" data-es="5.97 µm (24 MP)" data-en="5.97 µm (24 MP)">5.97 µm (24 MP)</option>
+            <option value="3.3" data-es="3.3 µm (APS-C 26 MP)" data-en="3.3 µm (APS-C 26 MP)">3.3 µm (APS-C 26 MP)</option>
+          </select>
+        </label>
+        <label><span data-lang="es">Focal (mm)</span><span data-lang="en">Focal length (mm)</span>
+          <input type="number" id="c6-f" value="28" min="8" max="400" step="1">
+        </label>
+        <label><span data-lang="es">Sujeto más cercano (m)</span><span data-lang="en">Nearest subject (m)</span>
+          <input type="number" id="c6-s" value="2" min="0.2" max="1000" step="any">
+        </label>
+      </div>
+      <div class="readout">
+        <div><b id="c6-ncrit">f/5.6</b><span data-lang="es">diafragma crítico para ese píxel</span><span data-lang="en">critical aperture for that pixel</span></div>
+        <div><b id="c6-nopt">f/12.1</b><span data-lang="es">diafragma óptimo para esa profundidad</span><span data-lang="en">optimum aperture for that depth</span></div>
+        <div><b id="c6-airy">16.2 µm</b><span data-lang="es">disco de Airy en el óptimo</span><span data-lang="en">Airy disc at the optimum</span></div>
+        <div><b id="c6-mtf">61 lp/mm</b><span data-lang="es">MTF50 por difracción en el óptimo</span><span data-lang="en">diffraction MTF50 at the optimum</span></div>
+        <div><b id="c6-nyq">133 lp/mm</b><span data-lang="es">límite de Nyquist del sensor</span><span data-lang="en">sensor Nyquist limit</span></div>
+      </div>
+    </div>
+  </div>
+</section></div>
+</section>
+
+<div class="shell-foot">
+  <span data-lang="es">Antes eran tres páginas (datos del sensor, multishot, binning) y una calculadora de difracción repetida en cada una; los enlaces antiguos redirigen aquí. Relacionadas: <a href="filtro-sensor.html">el filtro del sensor y el ND</a>, <a href="sensor-al-papel.html">del sensor al papel</a> y el <a href="manual-siril-apilado.html">manual de Siril</a>.</span>
+  <span data-lang="en">These used to be three pages (sensor data, multishot, binning) with a diffraction calculator repeated in each; the old links redirect here. Related: <a href="filtro-sensor.html">the sensor filter and the ND</a>, <a href="sensor-al-papel.html">from sensor to paper</a> and the <a href="manual-siril-apilado.html">Siril manual</a>.</span>
+</div>
+<script>
+(function(){
+
+const RAW = {"rn":{"Leica M11_14":{"meta":{"fwc":"47875","unityEv":"5.97","loEv":"4.33","hiEv":"14.00"},"pts":[{"ev":4.33,"y":1.99,"m":""},{"ev":4.67,"y":1.92,"m":""},{"ev":5.0,"y":1.84,"m":""},{"ev":5.33,"y":1.74,"m":""},{"ev":5.67,"y":1.61,"m":""},{"ev":6.0,"y":0.6,"m":""},{"ev":6.33,"y":0.51,"m":""},{"ev":6.67,"y":0.46,"m":""},{"ev":7.0,"y":0.44,"m":""},{"ev":7.33,"y":0.34,"m":""},{"ev":7.67,"y":0.3,"m":""},{"ev":8.0,"y":0.3,"m":""},{"ev":8.33,"y":0.19,"m":""},{"ev":8.67,"y":0.12,"m":""},{"ev":9.0,"y":0.08,"m":""},{"ev":9.33,"y":0.05,"m":""},{"ev":9.67,"y":-0.02,"m":""},{"ev":10.0,"y":-0.01,"m":""},{"ev":10.33,"y":-0.06,"m":""},{"ev":10.67,"y":-0.13,"m":""},{"ev":11.0,"y":-0.13,"m":""},{"ev":11.33,"y":-0.16,"m":""},{"ev":11.67,"y":-0.22,"m":""},{"ev":12.0,"y":-0.2,"m":""},{"ev":12.33,"y":-0.25,"m":""},{"ev":12.67,"y":-0.27,"m":""},{"ev":13.0,"y":-0.19,"m":""},{"ev":13.33,"y":-0.27,"m":""},{"ev":13.67,"y":-0.29,"m":""},{"ev":14.0,"y":-0.24,"m":""}]},"Leica Q3_13":{"meta":{"fwc":"31135","unityEv":"6.02","loEv":"4.00","hiEv":"14.00"},"pts":[{"ev":4.0,"y":2.66,"m":""},{"ev":5.0,"y":2.1,"m":""},{"ev":6.0,"y":1.74,"m":""},{"ev":7.0,"y":0.61,"m":""},{"ev":8.0,"y":0.41,"m":""},{"ev":9.0,"y":0.33,"m":""},{"ev":10.0,"y":0.22,"m":""},{"ev":11.0,"y":0.2,"m":""},{"ev":12.0,"y":0.03,"m":""},{"ev":13.0,"y":-0.29,"m":"nr"},{"ev":14.0,"y":-0.38,"m":"nr"},{"ev":14.33,"y":-0.41,"m":"both"},{"ev":14.67,"y":-0.47,"m":"both"},{"ev":15.0,"y":-0.51,"m":"both"}]},"Leica SL3-S_14":{"meta":{"fwc":"95292","unityEv":"7.59","loEv":"5.00","hiEv":"16.00"},"pts":[{"ev":4.0,"y":3.03,"m":"ext"},{"ev":4.33,"y":3.14,"m":"ext"},{"ev":4.67,"y":3.26,"m":"ext"},{"ev":5.0,"y":3.29,"m":""},{"ev":5.33,"y":3.09,"m":""},{"ev":5.67,"y":2.9,"m":""},{"ev":6.0,"y":2.71,"m":""},{"ev":6.33,"y":2.57,"m":""},{"ev":6.67,"y":2.48,"m":""},{"ev":7.0,"y":2.38,"m":""},{"ev":7.33,"y":2.28,"m":""},{"ev":7.67,"y":0.92,"m":""},{"ev":8.0,"y":0.75,"m":""},{"ev":8.33,"y":0.63,"m":""},{"ev":8.67,"y":0.53,"m":""},{"ev":9.0,"y":0.43,"m":""},{"ev":9.33,"y":0.39,"m":""},{"ev":9.67,"y":0.33,"m":""},{"ev":10.0,"y":0.28,"m":""},{"ev":10.33,"y":0.21,"m":""},{"ev":10.67,"y":0.19,"m":""},{"ev":11.0,"y":-0.01,"m":"nr"},{"ev":11.33,"y":-0.09,"m":"nr"},{"ev":11.67,"y":-0.12,"m":"nr"},{"ev":12.0,"y":-0.17,"m":"nr"},{"ev":12.33,"y":-0.25,"m":"nr"},{"ev":12.67,"y":-0.29,"m":"nr"},{"ev":13.0,"y":-0.34,"m":"nr"},{"ev":13.33,"y":-0.39,"m":"nr"},{"ev":13.67,"y":-0.44,"m":"nr"},{"ev":14.0,"y":-0.51,"m":"nr"},{"ev":14.33,"y":-0.58,"m":"nr"},{"ev":14.67,"y":-0.61,"m":"nr"},{"ev":15.0,"y":-0.64,"m":"nr"},{"ev":15.33,"y":-0.69,"m":"nr"},{"ev":15.67,"y":-0.71,"m":"nr"},{"ev":16.0,"y":-0.74,"m":"nr"}]}},"pdr":{"Leica M11":{"meta":{"lowLightEv":"10.6239"},"pts":[{"ev":4.33,"y":11.82,"m":""},{"ev":4.67,"y":11.47,"m":""},{"ev":5.0,"y":11.19,"m":""},{"ev":5.33,"y":10.9,"m":""},{"ev":5.67,"y":10.61,"m":""},{"ev":6.0,"y":10.79,"m":""},{"ev":6.33,"y":10.56,"m":""},{"ev":6.67,"y":10.2,"m":""},{"ev":7.0,"y":9.84,"m":""},{"ev":7.33,"y":9.62,"m":""},{"ev":7.67,"y":9.23,"m":""},{"ev":8.0,"y":8.92,"m":""},{"ev":8.33,"y":8.59,"m":""},{"ev":8.67,"y":8.34,"m":""},{"ev":9.0,"y":8.0,"m":""},{"ev":9.33,"y":7.66,"m":""},{"ev":9.67,"y":7.4,"m":""},{"ev":10.0,"y":7.04,"m":""},{"ev":10.33,"y":6.76,"m":""},{"ev":10.67,"y":6.46,"m":""},{"ev":11.0,"y":6.11,"m":""},{"ev":11.33,"y":5.8,"m":""},{"ev":11.67,"y":5.53,"m":""},{"ev":12.0,"y":5.13,"m":""},{"ev":12.33,"y":4.87,"m":""},{"ev":12.67,"y":4.52,"m":""},{"ev":13.0,"y":4.13,"m":""},{"ev":13.33,"y":3.74,"m":""},{"ev":13.67,"y":3.41,"m":""},{"ev":14.0,"y":3.02,"m":""}]},"Leica Q3":{"meta":{"lowLightEv":"10.3116"},"pts":[{"ev":4.0,"y":10.62,"m":""},{"ev":5.0,"y":11.07,"m":""},{"ev":6.0,"y":10.31,"m":""},{"ev":7.0,"y":9.78,"m":""},{"ev":8.0,"y":8.8,"m":""},{"ev":9.0,"y":7.82,"m":""},{"ev":10.0,"y":6.81,"m":""},{"ev":11.0,"y":5.82,"m":""},{"ev":12.0,"y":4.86,"m":""},{"ev":13.0,"y":4.04,"m":"nr"},{"ev":14.0,"y":3.11,"m":"nr"},{"ev":14.33,"y":2.85,"m":"both"},{"ev":14.67,"y":2.49,"m":"both"},{"ev":15.0,"y":2.23,"m":"both"}]},"Leica SL3-S":{"meta":{"lowLightEv":"10.6447"},"pts":[{"ev":4.0,"y":10.07,"m":"ext"},{"ev":4.33,"y":10.89,"m":"ext"},{"ev":4.67,"y":10.72,"m":"ext"},{"ev":5.0,"y":10.45,"m":""},{"ev":5.33,"y":10.21,"m":""},{"ev":5.67,"y":9.92,"m":""},{"ev":6.0,"y":9.66,"m":""},{"ev":6.33,"y":9.78,"m":""},{"ev":6.67,"y":9.49,"m":""},{"ev":7.0,"y":8.95,"m":""},{"ev":7.33,"y":8.88,"m":""},{"ev":7.67,"y":9.39,"m":""},{"ev":8.0,"y":8.96,"m":""},{"ev":8.33,"y":8.73,"m":""},{"ev":8.67,"y":8.4,"m":""},{"ev":9.0,"y":8.07,"m":""},{"ev":9.33,"y":7.74,"m":""},{"ev":9.67,"y":7.42,"m":""},{"ev":10.0,"y":7.12,"m":""},{"ev":10.33,"y":6.75,"m":""},{"ev":10.67,"y":6.48,"m":""},{"ev":11.0,"y":6.41,"m":"nr"},{"ev":11.33,"y":6.01,"m":"nr"},{"ev":11.67,"y":5.78,"m":"nr"},{"ev":12.0,"y":5.46,"m":"nr"},{"ev":12.33,"y":5.19,"m":"nr"},{"ev":12.67,"y":4.92,"m":"nr"},{"ev":13.0,"y":4.6,"m":"nr"},{"ev":13.33,"y":4.28,"m":"nr"},{"ev":13.67,"y":3.98,"m":"nr"},{"ev":14.0,"y":3.65,"m":"nr"},{"ev":14.33,"y":3.4,"m":"nr"},{"ev":14.67,"y":3.13,"m":"nr"},{"ev":15.0,"y":2.81,"m":"nr"},{"ev":15.33,"y":2.5,"m":"nr"},{"ev":15.67,"y":2.2,"m":"nr"},{"ev":16.0,"y":1.86,"m":"nr"}]}}};
+
+const CAMS = [
+  {id:"m11", name:"M11", rn:"Leica M11_14", pdr:"Leica M11", color:"#4C9A3B", pitch:3.76, mpx:60.3, isoBase:64, fwc:47875, dual:200, nrFrom:null, ip:"sin certificar"},
+  {id:"q3",  name:"Q3",  rn:"Leica Q3_13",  pdr:"Leica Q3",  color:"#262626", pitch:3.76, mpx:60.3, isoBase:100, fwc:31135, dual:400, nrFrom:25600, ip:"IP52"},
+  {id:"sl3s",name:"SL3-S",rn:"Leica SL3-S_14",pdr:"Leica SL3-S",color:"#3C7BC7", pitch:5.94, mpx:24.6, isoBase:100, fwc:95292, dual:640, nrFrom:6400, ip:"IP54"}
+];
+const AREA_REF = CAMS[2].pitch**2;
+const evToIso = ev => 3.125*Math.pow(2,ev);
+const fmtIso = iso => { const std=[25,32,40,50,64,80,100,125,160,200,250,320,400,500,640,800,1000,1250,1600,2000,2500,3200,4000,5000,6400,8000,10000,12500,16000,20000,25000,32000,40000,50000,64000,80000,100000,125000,160000,200000]; let best=std[0]; for(const s of std){ if(Math.abs(Math.log2(s/iso))<Math.abs(Math.log2(best/iso))) best=s;} return best; };
+const LANG=()=>document.documentElement.lang==="en"?"en":"es";
+const LOC=()=>LANG()==="en"?"en-GB":"es-ES";
+const DICT={
+  es:{rows:["Resolución (Mpx)","Paso de píxel (µm)","Área del píxel (µm²)","Capacidad de pozo (e⁻ por píxel)","Capacidad de pozo por área (e⁻/µm²)","ISO base","Ruido de lectura a ISO base (e⁻)","Conmutación de ganancia dual (ISO)","Ruido de lectura tras la conmutación (e⁻)","Ruido mínimo sin filtrado (e⁻)","Filtrado del RAW desde ISO","PDR a ISO base (EV)","Low-Light EV (PhotonsToPhotos)","Sellado"],
+      none:"ninguno", nocert:"sin certificar", yRn:"Ruido de lectura (e⁻ rms)", yPdr:"PDR (EV)", nr:" (RAW filtrado)", ext:" (ISO extendido)", both:" (escalado y filtrado)",
+      read:"lectura", mixed:"mixto", photon:"fotones", sat:"saturado", well:"% del pozo", rawf:"RAW filtrado", readvar:"% varianza de lectura", snrArea:"SNR a igual área: ",
+      hint1:(b,w,ev)=>`Con estos parámetros la mejor SNR normalizada es la de la ${b}; la diferencia con la ${w} equivale a ${ev} EV de exposición.`,
+      hint2:" Las tres están limitadas por fotones: el tamaño de píxel no interviene y solo cuenta la eficiencia cuántica y la óptica.",
+      hint3:" Al menos una cámara aplica reducción de ruido al RAW a este ISO; el valor de ruido es engañoso para estrellas débiles.",
+      hint4:(N,r)=>` Las ${N} tomas apiladas multiplican la SNR por √${N} = ${r}.`,
+      dOk:"sin limitación", dWarn:"pérdida parcial de detalle", dBad:"limitado por difracción"},
+  en:{rows:["Resolution (Mpx)","Pixel pitch (µm)","Pixel area (µm²)","Well capacity (e⁻ per pixel)","Well capacity per area (e⁻/µm²)","Base ISO","Read noise at base ISO (e⁻)","Dual-gain switching (ISO)","Read noise after switching (e⁻)","Minimum noise without filtering (e⁻)","RAW filtering from ISO","PDR at base ISO (EV)","Low-Light EV (PhotonsToPhotos)","Sealing"],
+      none:"none", nocert:"uncertified", yRn:"Read noise (e⁻ rms)", yPdr:"PDR (EV)", nr:" (filtered RAW)", ext:" (extended ISO)", both:" (scaled and filtered)",
+      read:"read", mixed:"mixed", photon:"photon", sat:"saturated", well:"% of the well", rawf:"filtered RAW", readvar:"% read variance", snrArea:"SNR at equal area: ",
+      hint1:(b,w,ev)=>`With these parameters the best normalised SNR is the ${b}'s; the difference from the ${w} amounts to ${ev} EV of exposure.`,
+      hint2:" All three are photon-limited: pixel size plays no part and only quantum efficiency and optics count.",
+      hint3:" At least one camera applies noise reduction to the RAW at this ISO; the noise value is misleading for faint stars.",
+      hint4:(N,r)=>` The ${N} stacked frames multiply SNR by √${N} = ${r}.`,
+      dOk:"no limitation", dWarn:"partial loss of detail", dBad:"diffraction-limited"}
+};
+const L=k=>DICT[LANG()][k];
+const nf = (x,d=2)=> x.toLocaleString(LOC(),{minimumFractionDigits:d,maximumFractionDigits:d});
+
+/* Ficha */
+function buildSpec(){
+  const fns = [
+    c=>nf(c.mpx,1), c=>nf(c.pitch,2), c=>nf(c.pitch**2,1), c=>c.fwc.toLocaleString(LOC()), c=>nf(c.fwc/c.pitch**2,0),
+    c=>String(c.isoBase), c=>nf(rnAt(c,c.isoBase),2), c=>String(c.dual), c=>nf(rnAt(c,c.dual),2), c=>nf(minRnClean(c),2),
+    c=>c.nrFrom?String(c.nrFrom):L("none"), c=>nf(pdrAt(c,c.isoBase),2), c=>nf(parseFloat(RAW.pdr[c.pdr].meta.lowLightEv),2),
+    c=>c.ip==="sin certificar"?L("nocert"):c.ip
+  ];
+  const tb=document.getElementById("specBody"); tb.innerHTML="";
+  L("rows").forEach((label,i)=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<th>${label}</th>`+CAMS.map(c=>`<td class="num">${fns[i](c)}</td>`).join("");
+    tb.appendChild(tr);
+  });
+}
+buildSpec();
+
+function interp(pts, ev){
+  const p=pts; if(ev<=p[0].ev) return p[0].y; if(ev>=p[p.length-1].ev) return p[p.length-1].y;
+  for(let i=0;i<p.length-1;i++){ if(ev>=p[i].ev && ev<=p[i+1].ev){ const t=(ev-p[i].ev)/(p[i+1].ev-p[i].ev); return p[i].y+t*(p[i+1].y-p[i].y);} }
+  return p[p.length-1].y;
+}
+function rnAt(c, iso){ const ev=Math.log2(iso/3.125); return Math.pow(2, interp(RAW.rn[c.rn].pts, ev)); }
+function pdrAt(c, iso){ const ev=Math.log2(iso/3.125); return interp(RAW.pdr[c.pdr].pts, ev); }
+function minRnClean(c){ return Math.pow(2, Math.min(...RAW.rn[c.rn].pts.filter(p=>p.m==="").map(p=>p.y))); }
+function rnIsFiltered(c, iso){ const ev=Math.log2(iso/3.125); const p=RAW.rn[c.rn].pts; let near=p[0]; for(const q of p){ if(Math.abs(q.ev-ev)<Math.abs(near.ev-ev)) near=q; } return near.m==="nr"||near.m==="both"; }
+
+/* Charts */
+Chart.defaults.font.family = getComputedStyle(document.documentElement).getPropertyValue("--sans");
+Chart.defaults.color = "#1B1D1B";
+const isoTicks=[50,100,200,400,800,1600,3200,6400,12800,25600,51200,102400,204800];
+const xScale = {type:"logarithmic", min:40, max:220000, title:{display:true,text:"ISO"},
+  grid:{color:"#DDE1DC"},
+  ticks:{callback:v=> isoTicks.includes(v)?v.toLocaleString(LOC()):"", maxRotation:0, autoSkip:false}, 
+  afterBuildTicks: s=>{ s.ticks = isoTicks.map(v=>({value:v})); }};
+
+function pointStyleFor(m){ return m==="nr"?"triangle":(m==="both"?"rectRot":"circle"); }
+function buildRn(normalize, showNR){
+  return CAMS.map(c=>{
+    const k = normalize? Math.sqrt(c.mpx/CAMS[2].mpx) : 1;
+    const pts = RAW.rn[c.rn].pts.filter(p=> showNR || (p.m!=="nr" && p.m!=="both"));
+    return {
+      label:c.name, borderColor:c.color, backgroundColor:c.color, tension:0.15, borderWidth:2,
+      data: pts.map(p=>({x:evToIso(p.ev), y:Math.pow(2,p.y)*k, m:p.m})),
+      pointStyle: ctx=>pointStyleFor(ctx.raw?.m), pointRotation: ctx=> ctx.raw?.m==="nr"?180:0,
+      pointRadius: ctx=> (ctx.raw?.m)?6:3.5, pointBackgroundColor: ctx=> ctx.raw?.m==="ext"||ctx.raw?.m==="both" ? "#fff" : c.color,
+      pointBorderWidth:1.5
+    };
+  });
+}
+const rnChart = new Chart(document.getElementById("rnChart"),{
+  type:"line", data:{datasets:buildRn(false,true)},
+  options:{responsive:true,maintainAspectRatio:false, parsing:false,
+    scales:{x:xScale, y:{type:"logarithmic", min:0.5, max:16, title:{display:true,text:L("yRn")}, grid:{color:"#DDE1DC"},
+      ticks:{callback:v=>[0.5,1,2,4,8,16].includes(v)?nf(v,v<1?1:0):""}, afterBuildTicks:s=>{s.ticks=[0.5,1,2,4,8,16].map(v=>({value:v}));}}},
+    plugins:{legend:{display:false}, tooltip:{callbacks:{
+      title: items=>"ISO "+fmtIso(items[0].raw.x).toLocaleString(LOC()),
+      label: item=>{ const m=item.raw.m; const tag = m==="nr"?L("nr"):m==="ext"?L("ext"):m==="both"?L("both"):""; return `${item.dataset.label}: ${nf(item.raw.y,2)} e⁻${tag}`; }}}}}
+});
+let normalize=false, showNR=true;
+function refreshRn(){ rnChart.data.datasets=buildRn(normalize,showNR); rnChart.update(); }
+document.getElementById("btnPx").addEventListener("click",e=>{normalize=false; e.target.setAttribute("aria-pressed","true"); document.getElementById("btnArea").setAttribute("aria-pressed","false"); refreshRn();});
+document.getElementById("btnArea").addEventListener("click",e=>{normalize=true; e.target.setAttribute("aria-pressed","true"); document.getElementById("btnPx").setAttribute("aria-pressed","false"); refreshRn();});
+document.getElementById("chkNR").addEventListener("change",e=>{showNR=e.target.checked; refreshRn();});
+
+const pdrChart = new Chart(document.getElementById("pdrChart"),{
+  type:"line", data:{datasets:CAMS.map(c=>({label:c.name,borderColor:c.color,backgroundColor:c.color,tension:0.15,borderWidth:2,
+    data:RAW.pdr[c.pdr].pts.map(p=>({x:evToIso(p.ev),y:p.y,m:p.m})),
+    pointStyle:ctx=>pointStyleFor(ctx.raw?.m), pointRotation:ctx=>ctx.raw?.m==="nr"?180:0, pointRadius:ctx=>(ctx.raw?.m)?6:3.5,
+    pointBackgroundColor:ctx=>ctx.raw?.m==="ext"||ctx.raw?.m==="both"?"#fff":c.color, pointBorderWidth:1.5}))},
+  options:{responsive:true,maintainAspectRatio:false,parsing:false,
+    scales:{x:xScale, y:{min:1,max:12.5,title:{display:true,text:L("yPdr")},grid:{color:"#DDE1DC"}}},
+    plugins:{legend:{display:false},tooltip:{callbacks:{title:items=>"ISO "+fmtIso(items[0].raw.x).toLocaleString(LOC()),
+      label:item=>`${item.dataset.label}: ${nf(item.raw.y,2)} EV`}}}}
+});
+
+window.__sensCharts=[rnChart,pdrChart];
+/* SNR calculator */
+const isoSel=document.getElementById("iso");
+[64,100,125,160,200,250,320,400,500,640,800,1000,1250,1600,2000,2500,3200,4000,5000,6400,8000,10000,12800,16000,20000,25600].forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v.toLocaleString(LOC());if(v===1600)o.selected=true;isoSel.appendChild(o);});
+function relabelIso(){ [...isoSel.options].forEach(o=>{o.textContent=(+o.value).toLocaleString(LOC());}); document.querySelectorAll("option[data-es]").forEach(o=>{o.textContent=o.getAttribute("data-"+LANG())||o.textContent;}); }
+const $=id=>document.getElementById(id);
+function calc(){
+  const F=parseFloat($("flux").value)||0, t=parseFloat($("texp").value)||0, iso=parseFloat(isoSel.value), N=Math.max(1,parseInt($("nfr").value)||1);
+  const T=parseFloat($("temp").value); $("tempV").textContent=T;
+  const D0=parseFloat($("dark").value)||0; const D=D0*Math.pow(2,(T-20)/6);
+  const tb=$("snrBody"); tb.innerHTML=""; const bars=$("snrBars"); bars.innerHTML="";
+  const results=CAMS.map(c=>{
+    const A=c.pitch**2, S=F*A*t, dk=D*A*t, rn=rnAt(c,iso);
+    const varTot=S+dk+rn*rn; const snr=S>0?S/Math.sqrt(varTot):0;
+    const snrN=snr*Math.sqrt(AREA_REF/A)*Math.sqrt(N);
+    const fracRead=rn*rn/varTot;
+    const fwcIso=c.fwc*c.isoBase/Math.max(iso,c.isoBase); const sat=(S+dk)/fwcIso;
+    const reg= fracRead>0.5?L("read"):(fracRead>0.2?L("mixed"):L("photon")); const regKey=fracRead>0.5?"read":(fracRead>0.2?"mixed":"photon");
+    return {c,S,dk,rn,snr,snrN,fracRead,sat,reg,regKey,filtered:rnIsFiltered(c,iso),iso};
+  });
+  const maxN=Math.max(...results.map(r=>r.snrN),1e-9);
+  for(const r of results){
+    const satTag = r.sat>=1?`<span class="tag bad">${L("sat")} (${nf(r.sat*100,0)} %)</span>`:(r.sat>0.7?`<span class="tag warn">${nf(r.sat*100,0)} ${L("well")}</span>`:`<span class="tag ok">${nf(r.sat*100,r.sat<0.01?2:0)} ${L("well")}</span>`);
+    const nrTag = r.filtered?` <span class="tag warn">${L("rawf")}</span>`:"";
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td style="color:${r.c.color};font-weight:600">${r.c.name}</td><td class="num">${nf(r.S,r.S<10?2:0)}</td><td class="num">${nf(Math.sqrt(r.S),2)}</td><td class="num">${nf(r.rn,2)}</td><td class="num">${nf(Math.sqrt(r.dk),2)}</td><td class="num">${nf(r.snr,2)}</td><td class="num">${nf(r.snrN,2)}</td><td>${r.reg} (${nf(r.fracRead*100,0)} ${L("readvar")})${nrTag}</td><td>${satTag}</td>`;
+    tb.appendChild(tr);
+    const b=document.createElement("div"); b.style.marginTop="8px";
+    b.innerHTML=`<div style="font-size:13px;display:flex;justify-content:space-between"><span style="color:${r.c.color};font-weight:600">${r.c.name}</span><span>${L("snrArea")}${nf(r.snrN,1)}</span></div><div class="bar"><i style="width:${(r.snrN/maxN*100).toFixed(1)}%;background:${r.c.color}"></i></div>`;
+    bars.appendChild(b);
+  }
+  const best=results.reduce((a,b)=>b.snrN>a.snrN?b:a);
+  const worst=results.reduce((a,b)=>b.snrN<a.snrN?b:a);
+  const evDiff=Math.log2(best.snrN/Math.max(worst.snrN,1e-9))*2;
+  let hint=L("hint1")(best.c.name,worst.c.name,nf(evDiff,2));
+  if(results.every(r=>r.regKey==="photon")) hint+=L("hint2");
+  if(results.some(r=>r.filtered)) hint+=L("hint3");
+  if(N>1) hint+=L("hint4")(N,nf(Math.sqrt(N),2));
+  $("snrHint").textContent=hint;
+}
+["flux","texp","iso","nfr","dark","temp"].forEach(id=>$(id).addEventListener("input",calc));
+document.querySelectorAll(".presets button").forEach(b=>b.addEventListener("click",()=>{$("flux").value=b.dataset.flux;$("texp").value=b.dataset.t;calc();}));
+calc();
+
+/* Diffraction */
+const FN=[1.4,2,2.8,4,5.6,8,11,16,22,32,45];
+function dif(){
+  const N=FN[parseInt($("fnum").value)]; $("fnumV").textContent=N; const lam=parseFloat($("lambda").value);
+  const airy=2.44*lam*N, ray=1.22*lam*N; const tb=$("difBody"); tb.innerHTML="";
+  for(const c of CAMS){
+    const ratio=ray/c.pitch;
+    const st= ratio<=1?`<span class="tag ok">${L("dOk")}</span>`:(ratio<=2?`<span class="tag warn">${L("dWarn")}</span>`:`<span class="tag bad">${L("dBad")}</span>`);
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td style="color:${c.color};font-weight:600">${c.name}</td><td class="num">${nf(c.pitch,2)}</td><td class="num">${nf(airy,1)}</td><td class="num">${nf(ratio,2)}</td><td>${st}</td>`;
+    tb.appendChild(tr);
+  }
+}
+$("fnum").addEventListener("input",dif); $("lambda").addEventListener("change",dif); dif();
+relabelIso();
+window.onLangChange_sens=function(){
+  buildSpec(); relabelIso();
+  rnChart.options.scales.y.title.text=L("yRn"); rnChart.update();
+  pdrChart.options.scales.y.title.text=L("yPdr"); pdrChart.update();
+  calc(); dif();
+};
+
+})();
+
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const LANG=()=>document.documentElement.lang==="en"?"en":"es";
+const LOC=()=>LANG()==="en"?"en-GB":"es-ES";
+const D={
+ es:{steps:["Origen","+1 px en x","+1 px en x, +1 px en y","+1 px en y","+½ px en x e y","+1½ px en x, +½ px en y","+1½ px en x e y","+½ px en x, +1½ px en y"],
+     stepOf:(k)=>`Paso ${k+1} de 8: `, b48:" (bloque de 48 MP)", b96:" (bloque adicional para 96 MP)", edge:"borde entre fotodiodos (muestreo subpíxel)", scenePt:"punto de la escena",
+     xN:"N exposiciones promediadas", yGain:"ganancia de SNR (×)", xF:"focal (mm)", ySec:"segundos",
+     airy1:a=>`El disco de Airy (${a} µm) es menor que el paso de píxel: el sistema está limitado por el sensor y el modo de 96 MP puede aportar detalle real, si las aberraciones del objetivo lo permiten.`,
+     airy2:a=>`El disco de Airy (${a} µm) es comparable al paso de píxel: región de transición. El modo de 96 MP aportará algo de detalle, decreciente al cerrar el diafragma.`,
+     airy3:a=>`El disco de Airy (${a} µm) supera claramente el paso de píxel: difracción dominante. El modo de 96 MP añade color RGB completo pero apenas detalle; abrir el diafragma o quedarse en 48 MP.`,
+     m24:"24 MP nativo", m48h:"48 MP a pulso o trípode", m48hand:"48 MP a pulso", m48t:"48 MP trípode", m96t:"96 MP trípode",
+     wMuch:"Con movimiento evidente ningún multishot registra bien; el resultado tendría zonas enmascaradas o artefactos. Si hace falta más resolución, panorámica por barrido y unión en software.",
+     wIso:(iso,low)=>"ISO "+iso+" supera el límite del modo de 96 MP. "+(low?"El promediado de 4 tomas recupera un paso de SNR, útil con sombras importantes.":"Sin necesidad de limpiar sombras, el nativo es más rápido y seguro."),
+     wScreen:"El destino no aprovecha la resolución adicional y la luz no exige promediado. El multishot solo añadiría tiempo de fusión y tamaño de archivo.",
+     wHand:(some)=>"A pulso el registro subpíxel de 96 MP es menos fiable y la secuencia más larga. El modo de 48 MP da color RGB completo y un paso de SNR"+(some?", y con movimiento leve tolera mejor la escena.":"."),
+     wSome:"Con movimiento leve la secuencia de 4 tomas tiene menos probabilidad de artefactos que la de 8. Se conserva el color completo y la ganancia de SNR.",
+     wMtf:(N,m)=>"A f/"+N+" la MTF de difracción en el Nyquist de 96 MP es de "+m+" %: el detalle adicional queda anulado. Abre a f/4 a f/5,6 si quieres 96 MP; si no, 48 MP aprovecha lo que hay.",
+     w96:(N,m)=>"Escena estática, trípode, ISO ≤ 3200 y MTF de difracción del "+m+" % en 167 lp/mm a f/"+N+": condiciones para ganancia de detalle real. Guarda también la toma individual como respaldo."},
+ en:{steps:["Origin","+1 px in x","+1 px in x, +1 px in y","+1 px in y","+½ px in x and y","+1½ px in x, +½ px in y","+1½ px in x and y","+½ px in x, +1½ px in y"],
+     stepOf:(k)=>`Step ${k+1} of 8: `, b48:" (48 MP block)", b96:" (additional block for 96 MP)", edge:"boundary between photodiodes (sub-pixel sampling)", scenePt:"scene point",
+     xN:"N averaged exposures", yGain:"SNR gain (×)", xF:"focal length (mm)", ySec:"seconds",
+     airy1:a=>`The Airy disc (${a} µm) is smaller than the pixel pitch: the system is sensor-limited and the 96 MP mode can add real detail, if the lens aberrations allow it.`,
+     airy2:a=>`The Airy disc (${a} µm) is comparable to the pixel pitch: transition region. The 96 MP mode will add some detail, decreasing as the aperture closes.`,
+     airy3:a=>`The Airy disc (${a} µm) clearly exceeds the pixel pitch: diffraction dominates. The 96 MP mode adds full RGB colour but hardly any detail; open the aperture or stay at 48 MP.`,
+     m24:"24 MP native", m48h:"48 MP handheld or tripod", m48hand:"48 MP handheld", m48t:"48 MP tripod", m96t:"96 MP tripod",
+     wMuch:"With obvious movement no multishot registers well; the result would have masked zones or artefacts. If more resolution is needed, a swept panorama stitched in software.",
+     wIso:(iso,low)=>"ISO "+iso+" exceeds the limit of the 96 MP mode. "+(low?"Averaging 4 frames recovers one stop of SNR, useful with significant shadows.":"With no shadows to clean, native is faster and safer."),
+     wScreen:"The destination does not use the additional resolution and the light does not call for averaging. Multishot would only add merge time and file size.",
+     wHand:(some)=>"Handheld, the 96 MP sub-pixel registration is less reliable and the sequence longer. The 48 MP mode gives full RGB colour and one stop of SNR"+(some?", and with slight movement it tolerates the scene better.":"."),
+     wSome:"With slight movement the 4-frame sequence is less likely to show artefacts than the 8-frame one. Full colour and the SNR gain are kept.",
+     wMtf:(N,m)=>"At f/"+N+" the diffraction MTF at the 96 MP Nyquist is "+m+" %: the additional detail is cancelled. Open to f/4–f/5.6 if you want 96 MP; otherwise 48 MP makes the most of what there is.",
+     w96:(N,m)=>"Static scene, tripod, ISO ≤ 3200 and a diffraction MTF of "+m+" % at 167 lp/mm at f/"+N+": conditions for real detail gain. Save the single frame too as a fallback."}
+};
+const T=k=>D[LANG()][k];
+const fmt=(x,d)=>Number.isFinite(x)?x.toLocaleString(LOC(),{maximumFractionDigits:d,minimumFractionDigits:d}):"—";
+
+/* ---------- Bayer diagram ---------- */
+const steps=[{dx:0,dy:0},{dx:1,dy:0},{dx:1,dy:1},{dx:0,dy:1},{dx:.5,dy:.5},{dx:1.5,dy:.5},{dx:1.5,dy:1.5},{dx:.5,dy:1.5}];
+const stepLabel=k=>T("steps")[k];
+const cell=40, n=4, off=30;
+const svg=$("bayerSvg");
+const col=(i,j)=>((i+j)%2===1)?"G":((i%2===0)?"R":"B");
+const fill={R:"var(--r)",G:"var(--g)",B:"var(--b)"};
+let g='<g id="grid">';
+for(let j=0;j<n;j++)for(let i=0;i<n;i++){
+  const c=col(i,j);
+  g+=`<rect x="${off+i*cell}" y="${off+j*cell}" width="${cell-1}" height="${cell-1}" fill="${fill[c]}" opacity=".85" rx="2"/>`;
+  g+=`<text x="${off+i*cell+cell/2}" y="${off+j*cell+cell/2+4}" text-anchor="middle" font-size="12" fill="#fff" font-weight="600">${c}</text>`;
+}
+g+='</g>';
+const px=off+cell*1.5, py=off+cell*1.5;
+g+=`<g stroke="#1D2733" stroke-width="2"><line x1="${px-9}" y1="${py}" x2="${px+9}" y2="${py}"/><line x1="${px}" y1="${py-9}" x2="${px}" y2="${py+9}"/></g>`;
+g+=`<text x="${px+12}" y="${py-10}" font-size="10" fill="#1D2733" id="scenePt">${T("scenePt")}</text>`;
+svg.innerHTML=g;
+const grid=svg.querySelector("#grid");
+const tbody=$("sampled").querySelector("tbody");
+function sampleColor(dx,dy){
+  const i=Math.floor(1.5-dx), j=Math.floor(1.5-dy);
+  const fx=(1.5-dx)%1, fy=(1.5-dy)%1;
+  if(Math.abs(fx-.5)<1e-9||Math.abs(fy-.5)<1e-9) return T("edge");
+  return col(((i%2)+2)%2,((j%2)+2)%2);
+}
+let curShift=0;
+function drawShift(k){
+  curShift=k;
+  const s=steps[k];
+  grid.setAttribute("transform",`translate(${s.dx*cell} ${s.dy*cell})`);
+  $("shiftLabel").textContent=T("stepOf")(k)+stepLabel(k)+(k<4?T("b48"):T("b96"));
+  let rows="";
+  for(let t=0;t<=k;t++){rows+=`<tr><td>${t+1}</td><td>${stepLabel(t)}</td><td>${sampleColor(steps[t].dx,steps[t].dy)}</td></tr>`;}
+  tbody.innerHTML=rows;
+  const sp=$("scenePt"); if(sp) sp.textContent=T("scenePt");
+}
+$("shift").addEventListener("input",e=>drawShift(+e.target.value));
+drawShift(0);
+
+/* ---------- generic line chart ---------- */
+function chart(svgEl,series,opt){
+  const W=640,H=260,L=56,R=16,T=14,B=38;
+  const xs=series.flatMap(s=>s.x), ys=series.flatMap(s=>s.y).filter(Number.isFinite);
+  const xmin=opt.xmin??Math.min(...xs), xmax=opt.xmax??Math.max(...xs);
+  const logy=!!opt.logy;
+  const ty=v=>logy?Math.log10(v):v;
+  let ymin=opt.ymin??Math.min(...ys), ymax=opt.ymax??Math.max(...ys);
+  const X=v=>L+(v-xmin)/(xmax-xmin)*(W-L-R);
+  const Y=v=>H-B-(ty(v)-ty(ymin))/(ty(ymax)-ty(ymin))*(H-T-B);
+  let out="";
+  const yt=opt.yticks||[];
+  yt.forEach(v=>{out+=`<line class="grid" x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end">${v}</text>`;});
+  (opt.xticks||[]).forEach(v=>{out+=`<line class="grid" y1="${T}" y2="${H-B}" x1="${X(v)}" x2="${X(v)}"/><text x="${X(v)}" y="${H-B+14}" text-anchor="middle">${v}</text>`;});
+  out+=`<line class="axis" x1="${L}" x2="${L}" y1="${T}" y2="${H-B}"/><line class="axis" x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}"/>`;
+  out+=`<text x="${(L+W-R)/2}" y="${H-4}" text-anchor="middle">${opt.xlabel}</text>`;
+  out+=`<text transform="translate(12 ${(T+H-B)/2}) rotate(-90)" text-anchor="middle">${opt.ylabel}</text>`;
+  series.forEach(s=>{
+    const pts=s.x.map((x,i)=>[x,s.y[i]]).filter(p=>Number.isFinite(p[1])&&p[1]>=ymin&&p[1]<=ymax).map(p=>`${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join(" ");
+    out+=`<polyline class="${s.cls}" points="${pts}"/>`;
+  });
+  if(opt.marker&&Number.isFinite(opt.marker[1])){const [mx,my]=opt.marker;if(mx>=xmin&&mx<=xmax&&my>=ymin&&my<=ymax)out+=`<circle class="marker" cx="${X(mx)}" cy="${Y(my)}" r="5"/>`;}
+  svgEl.innerHTML=out;
+}
+
+/* ---------- SNR ---------- */
+function snr(){
+  const N=Math.max(1,+$("nExp").value||1), s1=+$("snr1").value||0;
+  const gain=Math.sqrt(N);
+  $("oGain").textContent=fmt(gain,2)+"×";
+  $("oDb").textContent=fmt(10*Math.log10(N),2);
+  $("oStops").textContent=fmt(Math.log2(gain),2);
+  $("oSnrN").textContent=fmt(s1*gain,1);
+  const xmax=Math.max(16,Math.ceil(N*1.25));
+  const xs=[],ys=[];for(let i=1;i<=xmax;i+=Math.max(1,Math.floor(xmax/200))){xs.push(i);ys.push(Math.sqrt(i));}
+  const ymax=Math.ceil(Math.sqrt(xmax));
+  const xt=[1,Math.round(xmax/4),Math.round(xmax/2),Math.round(3*xmax/4),xmax];
+  const ytk=[];for(let v=0;v<=ymax;v+=Math.max(1,Math.ceil(ymax/6)))ytk.push(v);
+  chart($("snrChart"),[{x:xs,y:ys,cls:"line"}],{xmin:1,xmax,ymin:0,ymax,xticks:xt,yticks:ytk,xlabel:T("xN"),ylabel:T("yGain"),marker:[N,gain]});
+}
+["nExp","snr1"].forEach(id=>$(id).addEventListener("input",snr));snr();
+
+/* ---------- Optics ---------- */
+function optics(){
+  const p=+$("pitch").value||6, f=+$("focal").value||24, N=+$("ms-fnum").value||2.8, lam=(+$("ms-lambda").value||550)/1000;
+  const nyq=1/(2*p/1000);
+  $("oNyq").textContent=fmt(nyq,1);
+  $("oNyq2").textContent=fmt(2*nyq,1);
+  $("oScale").textContent=fmt(206.265*p/f,2);
+  const airy=2.44*lam*N;
+  $("oAiry").textContent=fmt(airy,1)+" / "+fmt(p,1);
+  $("oFov").textContent=fmt(2*Math.atan(18/f)*180/Math.PI,1);
+  const cut=1/(lam/1000*N);
+  const mtf=v=>{const x=v/cut;return x>=1?0:(2/Math.PI)*(Math.acos(x)-x*Math.sqrt(1-x*x));};
+  $("oCut").textContent=fmt(cut,0);
+  $("oMtf1").textContent=fmt(mtf(nyq)*100,0)+" %";
+  $("oMtf2").textContent=fmt(mtf(2*nyq)*100,0)+" %";
+  const ratio=airy/p;
+  $("airyNote").textContent=(ratio<1?T("airy1"):ratio<2?T("airy2"):T("airy3"))(fmt(airy,1));
+}
+["pitch","focal","ms-fnum","ms-lambda"].forEach(id=>$(id).addEventListener("input",optics));optics();
+
+/* ---------- Drift ---------- */
+const SID=15.041;
+function drift(){
+  const f=+$("aFocal").value||24, p=+$("aPitch").value||6, N=+$("aFnum").value||2.8, dec=+$("dec").value||0, tol=+$("tol").value||1;
+  const cd=Math.cos(dec*Math.PI/180);
+  const rate=SID*cd;
+  const scale=206.265*p/f;
+  const t1=tol*scale/rate;
+  const npf=(35*N+30*p)/f;
+  $("oDrift").textContent=fmt(rate,2);
+  $("oT1").textContent=fmt(t1,1);
+  $("oNpf").textContent=fmt(npf,1);
+  $("o500").textContent=fmt(500/f,1);
+  const xs=[],y1=[],y2=[];
+  for(let ff=10;ff<=400;ff+=2){xs.push(ff);y1.push(tol*206.265*p/ff/rate);y2.push((35*N+30*p)/ff);}
+  chart($("driftChart"),[{x:xs,y:y1,cls:"line"},{x:xs,y:y2,cls:"line2"}],{xmin:10,xmax:400,ymin:0.1,ymax:100,logy:true,xticks:[10,50,100,200,300,400],yticks:[0.1,1,10,100],xlabel:T("xF"),ylabel:T("ySec"),marker:[f,t1]});
+}
+["aFocal","aPitch","aFnum","dec","tol"].forEach(id=>$(id).addEventListener("input",drift));drift();
+
+/* ---------- Decision helper ---------- */
+function decide(){
+  const sup=$("dSupport").value, mot=$("dMotion").value, N=+$("dF").value||5.6, iso=+$("dIso").value||100, out=$("dOut").value, light=$("dLight").value;
+  const p=+$("pitch").value||6, lam=(+$("ms-lambda").value||550)/1000;
+  const cut=1/(lam*N), nyq96=2/(2*p/1000);
+  const x=nyq96/cut, mtf96=x>=1?0:(2/Math.PI)*(Math.acos(x)-x*Math.sqrt(1-x*x));
+  let mode, why;
+  if(mot==="much"){ mode=T("m24"); why=T("wMuch"); }
+  else if(iso>3200){ mode=light==="low"?T("m48h"):T("m24"); why=T("wIso")(iso,light==="low"); }
+  else if(out==="screen"&&light==="good"){ mode=T("m24"); why=T("wScreen"); }
+  else if(sup==="hand"){ mode=T("m48hand"); why=T("wHand")(mot==="some"); }
+  else if(mot==="some"){ mode=T("m48t"); why=T("wSome"); }
+  else if(mtf96<0.1){ mode=T("m48t"); why=T("wMtf")(N,fmt(mtf96*100,0)); }
+  else { mode=T("m96t"); why=T("w96")(N,fmt(mtf96*100,0)); }
+  $("dMode").textContent=mode;
+  $("dWhy").textContent=why;
+}
+["dSupport","dMotion","dF","dIso","dOut","dLight","pitch","ms-lambda"].forEach(id=>$(id).addEventListener("input",decide));
+["dSupport","dMotion","dOut","dLight"].forEach(id=>$(id).addEventListener("change",decide));
+decide();
+
+/* ---------- Software filter ---------- */
+const btns=document.querySelectorAll("button.f"), rows=document.querySelectorAll(".swTable tbody tr");
+btns.forEach(b=>b.addEventListener("click",()=>{
+  btns.forEach(x=>x.setAttribute("aria-pressed","false"));
+  b.setAttribute("aria-pressed","true");
+  const f=b.dataset.f;
+  rows.forEach(r=>{r.style.display=(f==="all"||r.dataset.c.split(" ").includes(f))?"":"none";});
+}));
+function relabelOptions(){ document.querySelectorAll("option[data-es]").forEach(o=>{o.textContent=o.getAttribute("data-"+LANG())||o.textContent;}); }
+relabelOptions();
+window.onLangChange_ms=function(){ relabelOptions(); drawShift(curShift); snr(); optics(); drift(); decide(); };
+})();
+
+(function(){
+
+"use strict";
+// ---------- utilidades ----------
+const $ = id => document.getElementById(id);
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+/* ---------- diccionario de cadenas generadas por JS ----------
+   Como en stack-sensor.html, el diccionario se llama DICT y el traductor LBL():
+   ni t(), ni S(), ni T, que en este repositorio ya han eclipsado tres veces a la
+   función traductora dentro de funciones con variables locales homónimas. En este
+   archivo ningún identificador se llama t, S ni T (verificado con grep). */
+const DICT={
+ es:{
+  axISO:'ISO (escala logarítmica)',
+  axSNR:'SNR (dB)',
+  axGain:'ganancia frente a L (dB)',
+  axDR:'DR ingenieril (dB)',
+  ax18:'SNR a 18 Mpx comunes (dB)',
+  idealLbl:'ideal {m} +{v} dB',
+  winTag:'mejor',
+  nameLan:'L reescalado (Lanczos-3)',
+  nameMae:'pipeline «Maestro» (prefiltro + diezmado)',
+  nameBin:'binning ideal (media de bloques)',
+  capSim:'{name} · SNR {snr} dB ({d} dB frente a L nativo)',
+  simInfo:'Parche a «60 Mpx» ({b}×{b}): μ ≈ {mu} e⁻ por píxel, SNR nativa {snr} dB, medida por imagen-diferencia de dos realizaciones.',
+  vGainNow:'Ganancia modelada a ISO {iso}: {gm} dB en M-DNG y {gs} dB en S-DNG (binning ideal: +{bm} y +{bs} dB). ',
+  vBase:'Veredicto: a ISO base, dispara L-DNG siempre. El remuestreo no regala nada (medido: −1,88 dB en M frente a L) y, todo reducido a 18 Mpx, L→Lanczos gana al mejor rival por 3,3 dB.',
+  vMid:'Zona de transición: la ganancia sube hacia su meseta de ≈3 dB pero aún no es completa. Si puedes bajar el ISO, baja el ISO y dispara L-DNG; si no, M-DNG ya recupera casi toda la ganancia.',
+  vHigh:'Veredicto: a ISO alto, dispara M-DNG: la ganancia entera (≈3 dB, medio paso) con la mitad de archivo; a 18 Mpx comunes M→Lanczos también gana (25,57 dB frente a 23,92 a ISO 1600).',
+  vS:' S-DNG da la misma ganancia que M con la mitad de resolución: nunca es la mejor opción de calidad.',
+  rowL18:'L → 18 Mpx', rowM18:'M → 18 Mpx', rowS18:'S-DNG nativo',
+  ckBinM:'Binning ideal M: 10·log₁₀(60/36)',
+  ckBinS:'Binning ideal S: 10·log₁₀(60/18)',
+  ckL:'SNR del modelo L a ISO {iso}',
+  ckGM:'Ganancia Maestro M a ISO {iso}',
+  ckGS:'Ganancia Maestro S a ISO {iso}',
+  anchor:'✓ ancla',
+  okAll:'Todas las comprobaciones quedan dentro de tolerancia.',
+  badAll:'ATENCIÓN: hay comprobaciones fuera de tolerancia.'
+ },
+ en:{
+  axISO:'ISO (log scale)',
+  axSNR:'SNR (dB)',
+  axGain:'gain over L (dB)',
+  axDR:'engineering DR (dB)',
+  ax18:'SNR at a common 18 MP (dB)',
+  idealLbl:'ideal {m} +{v} dB',
+  winTag:'best',
+  nameLan:'L downsampled (Lanczos-3)',
+  nameMae:'“Maestro” pipeline (pre-filter + decimation)',
+  nameBin:'ideal binning (block average)',
+  capSim:'{name} · SNR {snr} dB ({d} dB vs native L)',
+  simInfo:'“60 MP” patch ({b}×{b}): μ ≈ {mu} e⁻ per pixel, native SNR {snr} dB, measured from the difference image of two realisations.',
+  vGainNow:'Modelled gain at ISO {iso}: {gm} dB in M-DNG and {gs} dB in S-DNG (ideal binning: +{bm} and +{bs} dB). ',
+  vBase:'Verdict: at base ISO, always shoot L-DNG. The resampling gives nothing back (measured: −1.88 dB in M against L) and, with everything reduced to 18 MP, L→Lanczos beats the best rival by 3.3 dB.',
+  vMid:'Transition zone: the gain climbs towards its ≈3 dB plateau but is not yet complete. If you can lower the ISO, lower it and shoot L-DNG; otherwise M-DNG already recovers almost all of the gain.',
+  vHigh:'Verdict: at high ISO, shoot M-DNG: the whole gain (≈3 dB, half a stop) at half the file size; at a common 18 MP, M→Lanczos wins too (25.57 dB against 23.92 at ISO 1600).',
+  vS:' S-DNG delivers the same gain as M at half the resolution: it is never the best quality option.',
+  rowL18:'L → 18 MP', rowM18:'M → 18 MP', rowS18:'native S-DNG',
+  ckBinM:'Ideal binning M: 10·log₁₀(60/36)',
+  ckBinS:'Ideal binning S: 10·log₁₀(60/18)',
+  ckL:'Model L SNR at ISO {iso}',
+  ckGM:'Maestro M gain at ISO {iso}',
+  ckGS:'Maestro S gain at ISO {iso}',
+  anchor:'✓ anchor',
+  okAll:'All checks fall within tolerance.',
+  badAll:'WARNING: some checks fall outside tolerance.'
+ }
+};
+const LANG = () => document.documentElement.lang==='en' ? 'en' : 'es';
+function LBL(k,vars){
+  const D=DICT[LANG()]||DICT.es;
+  let out = D[k]!==undefined ? D[k] : (DICT.es[k]!==undefined?DICT.es[k]:k);
+  if(vars) out=out.replace(/\{(\w+)\}/g,(mm,nn)=>vars[nn]!==undefined?vars[nn]:mm);
+  return out;
+}
+/* Separador decimal: coma en español, punto en inglés. */
+const nf = (x,d) => (typeof x==='number' ? x.toFixed(d) : String(x)).replace('.', LANG()==='es'?',':'.');
+const sgnf = (x,d) => (x>=0?'+':'')+nf(x,d);
+
+/* ---------- datos medidos del artículo (incrustados) ---------- */
+const MEAS={
+  iso:[64,1600,6400],
+  snr:{ L:[33.42,20.66,14.48], M:[31.54,23.86,23.92], S:[32.53,17.47,17.77] },
+  gain:{ M:[-1.88,3.20,2.99], S:[-0.89,3.26,3.29] },
+  gainTheoryArticle:{ M:2.2, S:5.2 },
+  to18:{ L:[35.81,23.05,16.86], M:[32.10,25.57,19.07], S:[32.53,23.92,17.77] },
+  dr:{ L:[39.43,37.21,32.57], M:[39.15,38.90,34.96], S:[39.57,38.92,35.31] },
+  ratios:{ LM:1.28, LS:1.81 }
+};
+/* corrección: la SNR nativa de M y S a 1600/6400 (M 23,86/17,47 — errata arriba) */
+MEAS.snr.M=[31.54,23.86,17.47];
+MEAS.snr.S=[32.53,23.92,17.77];
+
+/* ---------- calibración del pipeline «Maestro» ---------- */
+const CAL={ fwc:28500, rn:1.5, gam:0.93, mu:0.08 };            // modelo L por defecto
+const GAINS={ M:{base:-1.88, hi:(3.20+2.99)/2}, S:{base:-0.89, hi:(3.26+3.29)/2} };
+const KIDEAL={ M:10*Math.log10(60/36), S:10*Math.log10(60/18) }; // +10·log10(k) dB
+const LOG2A=6, LOG2B=Math.log2(1600);                            // tramo del smoothstep
+
+function uOf(iso){
+  let u=(Math.log2(iso)-LOG2A)/(LOG2B-LOG2A);
+  u=Math.min(1,Math.max(0,u));
+  return u*u*(3-2*u);
+}
+function snrLdB(iso,ev,fwc,rn,gam){
+  const sig=fwc*Math.pow(2,ev)*Math.pow(64/iso,gam);
+  return 20*Math.log10(sig/Math.sqrt(sig+rn*rn));
+}
+function gainDB(iso,mode){
+  const gg=GAINS[mode];
+  return gg.base+(gg.hi-gg.base)*uOf(iso);
+}
+function params(){
+  const isoRaw=Math.pow(2,+$('bn-iso').value);
+  const iso=isoRaw>=1000?Math.round(isoRaw/50)*50:isoRaw>=200?Math.round(isoRaw/10)*10:Math.round(isoRaw);
+  return { iso, ev:+$('ev').value, fwc:+$('fwc').value, rn:+$('rn').value,
+           gam:+$('gam').value, lift:+$('lift').value };
+}
+
+/* ---------- gráficas ---------- */
+const XDOM=[6,Math.log2(6400)], ISOTICKS=[64,125,250,500,1000,2000,4000,6400];
+function frameXY(g,W,Hh,ymin,ymax,ystep,ylab){
+  const mL=56,mR=16,mT=14,mB=40;
+  const X=v=>mL+(W-mL-mR)*(Math.log2(v)-XDOM[0])/(XDOM[1]-XDOM[0]);
+  const Y=v=>mT+(Hh-mT-mB)*(1-(v-ymin)/(ymax-ymin));
+  g.strokeStyle=css('--line'); g.fillStyle=css('--mute'); g.font='12px IBM Plex Sans, system-ui'; g.lineWidth=1;
+  for(let v=ymin;v<=ymax+1e-9;v+=ystep){ g.beginPath(); g.moveTo(mL,Y(v)); g.lineTo(W-mR,Y(v)); g.stroke(); g.textAlign='right'; g.fillText(nf(v,0),mL-8,Y(v)+4); }
+  ISOTICKS.forEach(v=>{ g.textAlign='center'; g.fillText(String(v),X(v),Hh-mB+18); });
+  g.textAlign='center'; g.fillText(LBL('axISO'),(mL+W-mR)/2,Hh-6);
+  g.save(); g.translate(14,(mT+Hh-mB)/2); g.rotate(-Math.PI/2); g.fillText(ylab,0,0); g.restore();
+  return {X,Y,mL,mR,mT,mB};
+}
+function curve(g,X,Y,fn,col,dash,w){
+  g.setLineDash(dash); g.strokeStyle=css(col); g.lineWidth=w; g.beginPath();
+  const NPT=72;
+  for(let i=0;i<=NPT;i++){ const lg=XDOM[0]+(XDOM[1]-XDOM[0])*i/NPT; const iso=Math.pow(2,lg);
+    const x=X(iso), y=Y(fn(iso)); i?g.lineTo(x,y):g.moveTo(x,y); }
+  g.stroke(); g.setLineDash([]);
+}
+function dot(g,x,y,col){
+  g.fillStyle=css(col); g.strokeStyle=css('--panel'); g.lineWidth=1.6;
+  g.beginPath(); g.arc(x,y,4.6,0,7); g.fill(); g.stroke();
+}
+
+function drawSNR(p){
+  const c=$('chartSNR'), g=c.getContext('2d'); const W=c.width,Hh=c.height; g.clearRect(0,0,W,Hh);
+  const fnL=iso=>snrLdB(iso,p.ev,p.fwc,p.rn,p.gam);
+  const fns={ L:fnL, M:iso=>fnL(iso)+gainDB(iso,'M'), S:iso=>fnL(iso)+gainDB(iso,'S'),
+              iM:iso=>fnL(iso)+KIDEAL.M, iS:iso=>fnL(iso)+KIDEAL.S };
+  let lo=1e9, hi=-1e9;
+  ['L','M','S','iM','iS'].forEach(kk=>{ [64,6400].forEach(iso=>{ const v=fns[kk](iso); lo=Math.min(lo,v); hi=Math.max(hi,v); }); });
+  ['L','M','S'].forEach(kk=>MEAS.snr[kk].forEach(v=>{ lo=Math.min(lo,v); hi=Math.max(hi,v); }));
+  const ymin=Math.floor((lo-1.2)/5)*5, ymax=Math.ceil((hi+1.2)/5)*5;
+  const {X,Y}=frameXY(g,W,Hh,ymin,ymax,5,LBL('axSNR'));
+  curve(g,X,Y,fns.iM,'--ref',[5,4],1.2);
+  curve(g,X,Y,fns.iS,'--ref',[5,4],1.2);
+  curve(g,X,Y,fns.L,'--sag',[],2.2);
+  curve(g,X,Y,fns.M,'--tan',[],2.2);
+  curve(g,X,Y,fns.S,'--sph',[],2.2);
+  g.font='bold 12px IBM Plex Sans, system-ui'; g.textAlign='left';
+  [['L','--sag'],['M','--tan'],['S','--sph']].forEach(([kk,col])=>{
+    g.fillStyle=css(col); g.fillText(kk,W-14,Y(fns[kk](6400))+4);
+  });
+  g.font='12px IBM Plex Sans, system-ui';
+  const cols={L:'--sag',M:'--tan',S:'--sph'};
+  ['L','M','S'].forEach(kk=>MEAS.iso.forEach((iso,i)=>dot(g,X(iso),Y(MEAS.snr[kk][i]),cols[kk])));
+}
+function drawGain(p){
+  const c=$('chartGain'), g=c.getContext('2d'); const W=c.width,Hh=c.height; g.clearRect(0,0,W,Hh);
+  const {X,Y}=frameXY(g,W,Hh,-3,6,1,LBL('axGain'));
+  g.strokeStyle=css('--mute'); g.lineWidth=1.4; g.beginPath(); g.moveTo(56,Y(0)); g.lineTo(W-16,Y(0)); g.stroke();
+  g.setLineDash([5,4]); g.lineWidth=1.2; g.strokeStyle=css('--ref');
+  [['M',KIDEAL.M],['S',KIDEAL.S]].forEach(([mm,v])=>{
+    g.beginPath(); g.moveTo(56,Y(v)); g.lineTo(W-16,Y(v)); g.stroke();
+    g.fillStyle=css('--ref'); g.textAlign='left'; g.fillText(LBL('idealLbl',{m:mm,v:nf(v,1)}),62,Y(v)-4);
+  });
+  g.setLineDash([]);
+  curve(g,X,Y,iso=>gainDB(iso,'M'),'--tan',[],2.2);
+  curve(g,X,Y,iso=>gainDB(iso,'S'),'--sph',[],2.2);
+  MEAS.iso.forEach((iso,i)=>{ dot(g,X(iso),Y(MEAS.gain.M[i]),'--tan'); dot(g,X(iso),Y(MEAS.gain.S[i]),'--sph'); });
+  g.font='bold 12px IBM Plex Sans, system-ui'; g.textAlign='left';
+  g.fillStyle=css('--tan'); g.fillText('M',W-14,Y(gainDB(6400,'M'))+4);
+  g.fillStyle=css('--sph'); g.fillText('S',W-14,Y(gainDB(6400,'S'))+12);
+  g.font='12px IBM Plex Sans, system-ui';
+}
+function drawBars(cid,data,ymin,ymax,ystep,ylab,winners){
+  const c=$(cid), g=c.getContext('2d'); const W=c.width,Hh=c.height; g.clearRect(0,0,W,Hh);
+  const mL=56,mR=16,mT=16,mB=40;
+  const Y=v=>mT+(Hh-mT-mB)*(1-(v-ymin)/(ymax-ymin));
+  g.strokeStyle=css('--line'); g.fillStyle=css('--mute'); g.font='12px IBM Plex Sans, system-ui'; g.lineWidth=1;
+  for(let v=ymin;v<=ymax+1e-9;v+=ystep){ g.beginPath(); g.moveTo(mL,Y(v)); g.lineTo(W-mR,Y(v)); g.stroke(); g.textAlign='right'; g.fillText(nf(v,0),mL-8,Y(v)+4); }
+  g.save(); g.translate(14,(mT+Hh-mB)/2); g.rotate(-Math.PI/2); g.textAlign='center'; g.fillText(ylab,0,0); g.restore();
+  const cols=['--sag','--tan','--sph'];
+  const gw=(W-mL-mR)/3, bw=gw*0.20;
+  data.forEach((grp,gi)=>{
+    const x0=mL+gw*gi;
+    grp.vals.forEach((v,bi)=>{
+      const x=x0+gw*0.14+bi*(bw+6);
+      const win=winners&&winners[gi]===bi;
+      g.globalAlpha=winners?(win?1:0.62):1;
+      g.fillStyle=css(cols[bi]); g.fillRect(x,Y(v),bw,Y(ymin)-Y(v));
+      g.globalAlpha=1;
+      g.fillStyle=css('--ink'); g.textAlign='center';
+      g.font=(win?'bold ':'')+'11px IBM Plex Sans, system-ui';
+      g.fillText(nf(v,1),x+bw/2,Y(v)-4);
+      g.font='11px IBM Plex Sans, system-ui'; g.fillStyle=css('--mute');
+      g.fillText(grp.tags[bi],x+bw/2,Hh-mB+14);
+      if(win){ g.fillStyle=css(cols[bi]); g.fillText(LBL('winTag'),x+bw/2,Y(v)-16); }
+    });
+    g.fillStyle=css('--mute'); g.textAlign='center'; g.fillText('ISO '+grp.iso,x0+gw/2,Hh-6);
+  });
+}
+function drawDR(){
+  drawBars('chartDR',MEAS.iso.map((iso,i)=>({iso,vals:[MEAS.dr.L[i],MEAS.dr.M[i],MEAS.dr.S[i]],tags:['L','M','S']})),30,41,2,LBL('axDR'),null);
+}
+function draw18(){
+  const winners=MEAS.iso.map((iso,i)=>{
+    const vals=[MEAS.to18.L[i],MEAS.to18.M[i],MEAS.to18.S[i]];
+    return vals.indexOf(Math.max.apply(null,vals));
+  });
+  drawBars('chart18',MEAS.iso.map((iso,i)=>({iso,vals:[MEAS.to18.L[i],MEAS.to18.M[i],MEAS.to18.S[i]],tags:['L→18','M→18','S']})),15,38,5,LBL('ax18'),winners);
+}
+
+/* ---------- veredicto operativo ---------- */
+function drawVerdict(p){
+  const gm=gainDB(p.iso,'M'), gs=gainDB(p.iso,'S');
+  let txt=LBL('vGainNow',{iso:p.iso, gm:sgnf(gm,2), gs:sgnf(gs,2), bm:nf(KIDEAL.M,1), bs:nf(KIDEAL.S,1)});
+  txt+=LBL(p.iso<200?'vBase':p.iso<800?'vMid':'vHigh');
+  txt+=LBL('vS');
+  $('verdict').textContent=txt;
+}
+
+/* ---------- simulación visual (RNG congruente sembrado, nunca Math.random) ---------- */
+const BASE=319, OUT=176;              // 319/176 = 1,8125 ≈ ratio lineal medido 1,81×
+let SEED=1, FIELD=null;
+function makeRng(seed){
+  let sd=(seed>>>0)||123456789;
+  return function(){ sd=(Math.imul(sd,1664525)+1013904223)>>>0; return (sd+0.5)/4294967296; };
+}
+function gaussOf(rnd){ return Math.sqrt(-2*Math.log(rnd()))*Math.cos(6.283185307179586*rnd()); }
+function poisOf(rnd,mean){
+  if(mean<=0) return 0;
+  if(mean>=30) return mean+Math.sqrt(mean)*gaussOf(rnd);
+  const lim=Math.exp(-mean); let kk=0, pp=1;
+  do{ kk++; pp*=rnd(); }while(pp>lim);
+  return kk-1;
+}
+function fieldOf(){
+  if(FIELD) return FIELD;
+  FIELD=new Float32Array(BASE*BASE);
+  for(let y=0;y<BASE;y++)for(let x=0;x<BASE;x++){
+    const gx=0.55+0.9*x/(BASE-1);
+    const tex=1+0.10*Math.sin(x*0.37)*Math.sin(y*0.29);
+    const bar=(y>BASE*0.42&&y<BASE*0.58)?1+0.16*Math.sin(x*1.848):1;
+    FIELD[y*BASE+x]=gx*tex*bar;
+  }
+  return FIELD;
+}
+function shotOf(p,eScale,seed){
+  const fld=fieldOf(), rnd=makeRng(seed), arr=new Float32Array(BASE*BASE);
+  for(let i=0;i<arr.length;i++) arr[i]=poisOf(rnd,eScale*fld[i])+p.rn*gaussOf(rnd);
+  return arr;
+}
+function lanczos3(x){
+  const ax=Math.abs(x);
+  if(ax<1e-8) return 1; if(ax>=3) return 0;
+  const px=Math.PI*x;
+  return (Math.sin(px)/px)*(Math.sin(px/3)/(px/3));
+}
+const WCACHE={};
+function wlistOf(mode){
+  if(WCACHE[mode]) return WCACHE[mode];
+  const ratio=BASE/OUT, list=[];
+  for(let o=0;o<OUT;o++){
+    const ctr=(o+0.5)*ratio-0.5;
+    let rad = mode==='lanczos' ? 3*ratio : mode==='box' ? ratio/2+0.5 : 1;
+    const i0=Math.max(0,Math.ceil(ctr-rad)), i1=Math.min(BASE-1,Math.floor(ctr+rad));
+    const ws=[]; let sum=0;
+    for(let i=i0;i<=i1;i++){
+      const dx=i-ctr; let w;
+      if(mode==='lanczos') w=lanczos3(dx/ratio);
+      else if(mode==='box') w=Math.max(0,Math.min(i+0.5,ctr+ratio/2)-Math.max(i-0.5,ctr-ratio/2));
+      else { const ax=Math.abs(dx); w=ax<1?1-ax:0; }
+      ws.push(w); sum+=w;
+    }
+    if(sum<=1e-12){ ws[0]=1; sum=1; }
+    for(let i=0;i<ws.length;i++) ws[i]/=sum;
+    list.push({i0,ws});
+  }
+  return WCACHE[mode]=list;
+}
+function resampleSep(src,mode){
+  const wl=wlistOf(mode);
+  const mid=new Float32Array(BASE*OUT);
+  for(let y=0;y<BASE;y++){
+    const ro=y*OUT, ri=y*BASE;
+    for(let o=0;o<OUT;o++){
+      const en=wl[o]; let acc=0;
+      for(let j=0;j<en.ws.length;j++) acc+=en.ws[j]*src[ri+en.i0+j];
+      mid[ro+o]=acc;
+    }
+  }
+  const out=new Float32Array(OUT*OUT);
+  for(let o=0;o<OUT;o++){
+    const en=wl[o];
+    for(let x=0;x<OUT;x++){
+      let acc=0;
+      for(let j=0;j<en.ws.length;j++) acc+=en.ws[j]*mid[(en.i0+j)*OUT+x];
+      out[o*OUT+x]=acc;
+    }
+  }
+  return out;
+}
+function blurSep(a,N,sgm){
+  if(sgm<0.12) return a;
+  const rad=Math.ceil(3*sgm), ker=[]; let ks=0;
+  for(let i=-rad;i<=rad;i++){ const v=Math.exp(-i*i/(2*sgm*sgm)); ker.push(v); ks+=v; }
+  for(let i=0;i<ker.length;i++) ker[i]/=ks;
+  const mid=new Float32Array(N*N), out=new Float32Array(N*N);
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){ let v=0; for(let i=-rad;i<=rad;i++){ const xx=Math.min(N-1,Math.max(0,x+i)); v+=ker[i+rad]*a[y*N+xx]; } mid[y*N+x]=v; }
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){ let v=0; for(let i=-rad;i<=rad;i++){ const yy=Math.min(N-1,Math.max(0,y+i)); v+=ker[i+rad]*mid[yy*N+x]; } out[y*N+x]=v; }
+  return out;
+}
+function snrStat(a1,a2,N,mg){
+  let sm=0,d1=0,d2=0,cnt=0;
+  for(let y=mg;y<N-mg;y++)for(let x=mg;x<N-mg;x++){
+    const i=y*N+x, df=(a1[i]-a2[i])*0.7071067811865476;
+    sm+=(a1[i]+a2[i])/2; d1+=df; d2+=df*df; cnt++;
+  }
+  const mean=sm/cnt, varr=Math.max(1e-12,d2/cnt-(d1/cnt)*(d1/cnt));
+  return 20*Math.log10(mean/Math.sqrt(varr));
+}
+function paint(cid,a,N,kD){
+  const c=$(cid), g=c.getContext('2d'), img=g.createImageData(N,N);
+  for(let i=0;i<N*N;i++){
+    const v=Math.round(255*(0.05+0.90*Math.min(1,Math.max(0,a[i]*kD))));
+    img.data[4*i]=v; img.data[4*i+1]=v; img.data[4*i+2]=v; img.data[4*i+3]=255;
+  }
+  g.putImageData(img,0,0);
+}
+function runSim(p){
+  const eScale=p.fwc*Math.pow(2,p.ev)*Math.pow(64/p.iso,p.gam);
+  const s1=shotOf(p,eScale,1013+SEED*7919), s2=shotOf(p,eScale,2027+SEED*7919);
+  const nat=snrStat(s1,s2,BASE,6);
+  const sgm=0.55*uOf(p.iso);
+  const mb1=blurSep(s1,BASE,sgm), mb2=blurSep(s2,BASE,sgm);
+  const outs=[
+    ['cvL','capL','nameLan', resampleSep(s1,'lanczos'), resampleSep(s2,'lanczos')],
+    ['cvM','capM','nameMae', resampleSep(mb1,'bilinear'), resampleSep(mb2,'bilinear')],
+    ['cvBin','capBin','nameBin', resampleSep(s1,'box'), resampleSep(s2,'box')]
+  ];
+  const kD=Math.pow(2,p.lift)/(eScale*2.2);
+  outs.forEach(([cid,cap,key,o1,o2])=>{
+    const q=snrStat(o1,o2,OUT,3);
+    paint(cid,o1,OUT,kD);
+    $(cap).textContent=LBL('capSim',{name:LBL(key),snr:nf(q,1),d:sgnf(q-nat,1)});
+  });
+  $('simInfo').textContent=LBL('simInfo',{b:BASE,mu:nf(eScale,eScale<100?1:0),snr:nf(nat,1)});
+}
+
+/* ---------- tablas de datos y verificación ---------- */
+function rowHTML(cells){ return '<tr>'+cells.map((v,i)=>i?'<td>'+v+'</td>':'<td class="k">'+v+'</td>').join('')+'</tr>'; }
+function buildTables(){
+  $('tbSNR').innerHTML=['L','M','S'].map(kk=>rowHTML([kk+'-DNG'].concat(MEAS.snr[kk].map(v=>nf(v,2))))).join('');
+  $('tbGain').innerHTML=['M','S'].map(kk=>rowHTML([kk+'-DNG'].concat(MEAS.gain[kk].map(v=>sgnf(v,2))).concat([sgnf(MEAS.gainTheoryArticle[kk],1)]))).join('');
+  $('tbTo18').innerHTML=[['rowL18','L'],['rowM18','M'],['rowS18','S']].map(([rk,kk])=>rowHTML([LBL(rk)].concat(MEAS.to18[kk].map(v=>nf(v,2))))).join('');
+  $('tbDR').innerHTML=['L','M','S'].map(kk=>rowHTML([kk+'-DNG'].concat(MEAS.dr[kk].map(v=>nf(v,2))))).join('');
+}
+function buildVerif(){
+  const ev0=Math.log2(CAL.mu);
+  const rows=[]; let allOk=true;
+  function push(label,model,ref,tol,isAnchor){
+    const dd=model-ref, ok=Math.abs(dd)<=tol; if(!ok) allOk=false;
+    const status=isAnchor?LBL('anchor'):(ok?'<span class="okc">✓</span>':'<span class="badc">✗</span>');
+    rows.push(rowHTML([label,nf(model,2),nf(ref,2),sgnf(dd,2),status]));
+  }
+  push(LBL('ckBinM'),KIDEAL.M,MEAS.gainTheoryArticle.M,0.05,false);
+  push(LBL('ckBinS'),KIDEAL.S,MEAS.gainTheoryArticle.S,0.05,false);
+  MEAS.iso.forEach((iso,i)=>push(LBL('ckL',{iso}),snrLdB(iso,ev0,CAL.fwc,CAL.rn,CAL.gam),MEAS.snr.L[i],0.30,false));
+  MEAS.iso.forEach((iso,i)=>push(LBL('ckGM',{iso}),gainDB(iso,'M'),MEAS.gain.M[i],0.35,i===0));
+  MEAS.iso.forEach((iso,i)=>push(LBL('ckGS',{iso}),gainDB(iso,'S'),MEAS.gain.S[i],0.35,i===0));
+  $('verif').innerHTML=rows.join('');
+  $('chkAll').textContent=LBL(allOk?'okAll':'badAll');
+}
+
+/* ---------- ciclo ---------- */
+let timer=null;
+function update(){
+  const p=params();
+  $('isoV').textContent=String(p.iso);
+  $('evV').textContent=nf(p.ev,2);
+  $('muV').textContent=nf(Math.pow(2,p.ev),3);
+  $('liftV').textContent=sgnf(p.lift,1);
+  drawSNR(p); drawGain(p); drawDR(); draw18(); drawVerdict(p);
+  clearTimeout(timer); timer=setTimeout(()=>runSim(p),60);
+}
+/* El conmutador llama a onLangChange también al arrancar, antes de que la
+   aplicación exista: de ahí la guarda READY. Al cambiar de idioma se repintan
+   lienzos, tablas y rótulos; la simulación es determinista y se regenera igual. */
+let READY=false;
+window.onLangChange_bn=function(){ if(!READY) return; buildTables(); buildVerif(); update(); };
+
+['bn-iso','ev','fwc','rn','gam','lift'].forEach(id=>$(id).addEventListener('input',update));
+$('btnPatch').addEventListener('click',()=>{ $('ev').value=Math.log2(CAL.mu).toFixed(2); update(); });
+$('btnSeed').addEventListener('click',()=>{ SEED++; update(); });
+
+buildTables(); buildVerif();
+READY=true;
+update();
+
+})();
+(function(){
+const $=(id)=>document.getElementById(id);
+const LAMBDA_REF=0.55;
+function airyDiameter(N){return 2.44*LAMBDA_REF*N;}
+function nCritical(pitchUm){return 2*pitchUm/(2.44*LAMBDA_REF);}
+function nOptimo(fmm,sMetros){return 0.61*fmm/Math.sqrt(sMetros);}
+function mtf50Diff(N){return 0.404/(LAMBDA_REF*1e-3*N);}
+function fmtF(N){return 'f/'+(N>=10?N.toFixed(0):N.toFixed(1));}
+function updateC6() {
+  const p = parseFloat($('c6-pitch').value);
+  const f = parseFloat($('c6-f').value) || 28;
+  const s = parseFloat($('c6-s').value) || 2;
+  const nc = nCritical(p), no = nOptimo(f, s);
+  $('c6-ncrit').textContent = fmtF(nc);
+  $('c6-nopt').textContent = fmtF(no);
+  $('c6-airy').textContent = airyDiameter(no).toFixed(1) + ' µm';
+  $('c6-mtf').textContent = Math.round(mtf50Diff(no)) + ' lp/mm';
+  $('c6-nyq').textContent = Math.round(1000 / (2 * p)) + ' lp/mm';
+}
+function bind(ids,fn){for(const id of ids){const el=$(id);el.addEventListener('input',fn);el.addEventListener('change',fn);}}
+function relabel(){const l=document.documentElement.lang==='en'?'en':'es';document.querySelectorAll('.part-nd6 option[data-es]').forEach(o=>{o.textContent=o.getAttribute('data-'+l)||o.textContent;});}
+document.addEventListener('DOMContentLoaded',()=>{bind(['c6-pitch','c6-f','c6-s'],updateC6);relabel();updateC6();});
+window.onLangChange_nd6=function(){relabel();updateC6();};
+})();
+</script>
+<script>
+/* ---------- pestañas ---------- */
+(function(){
+  var btns=[].slice.call(document.querySelectorAll('.tabs button[data-tab]'));
+  var ids=btns.map(function(b){return b.getAttribute('data-tab');});
+  var alias={"ruido": "datos"};
+  function show(id,push){
+    if(ids.indexOf(id)<0) id=ids[0];
+    btns.forEach(function(b){ b.setAttribute('aria-selected', b.getAttribute('data-tab')===id ? 'true':'false'); });
+    ids.forEach(function(x){ var s=document.getElementById('tab-'+x); if(s) s.hidden = (x!==id); });
+    if(push){ try{ history.replaceState(null,'','#'+id); }catch(e){} }
+    try{ (window.__sensCharts||[]).forEach(function(c){ c.resize(); }); }catch(e){}
+    setTimeout(function(){ window.dispatchEvent(new Event('resize')); },30);
+  }
+  btns.forEach(function(b){ b.addEventListener('click',function(){ show(b.getAttribute('data-tab'),true); window.scrollTo({top:0}); }); });
+  function fromHash(){ var h=(location.hash||'').replace('#',''); if(alias[h]) h=alias[h]; show(h||ids[0],false);
+    if(h && !ids.includes(h)) { var el=document.getElementById(h); if(el){ var sec=el.closest('.tab'); if(sec){ show(sec.id.replace('tab-',''),false); setTimeout(function(){ el.scrollIntoView(); },50); } } } }
+  window.addEventListener('hashchange',fromHash);
+  // enlaces internos entre pestañas
+  document.addEventListener('click',function(ev){ var a=ev.target.closest('a[href^="#"]'); if(!a) return; var h=a.getAttribute('href').slice(1); if(ids.indexOf(h)>=0){ ev.preventDefault(); show(h,true); window.scrollTo({top:0}); } else if(alias[h]){ ev.preventDefault(); show(alias[h],true); window.scrollTo({top:0}); } });
+  fromHash();
+})();
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{ title:"El sensor: ruido, desplazamiento de píxel, binning y difracción", desc:"Lo que hace el sensor con los fotones, en una sola página: ruido de lectura y rango dinámico de M11, Q3 y SL3-S según PhotonsToPhotos con calculadora SNR; el multishot del SL3-S (48 y 96 MP, √N, Nyquist, deriva sidérea, software de apilado); la Triple Resolution de la M11 (binning o remuestreo) y una calculadora común de difracción y diafragma óptimo." },
+    en:{ title:"The sensor: noise, pixel shift, binning and diffraction", desc:"What the sensor does with photons, on one page: read noise and dynamic range of the M11, Q3 and SL3-S per PhotonsToPhotos with an SNR calculator; the SL3-S multishot (48 and 96 MP, √N, Nyquist, sidereal drift, stacking software); the M11 Triple Resolution (binning or resampling) and a shared diffraction and optimum-aperture calculator." }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    [].forEach.call(document.querySelectorAll("[data-aria-"+l+"]"),function(e){ e.setAttribute("aria-label",e.getAttribute("data-aria-"+l)); });
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange_sens) window.onLangChange_sens(l); if(window.onLangChange_ms) window.onLangChange_ms(l); if(window.onLangChange_bn) window.onLangChange_bn(l); if(window.onLangChange_nd6) window.onLangChange_nd6(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
+</body>
+</html>
