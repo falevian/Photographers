@@ -285,6 +285,7 @@ html[lang="en"] [data-lang="es"]{display:none!important}
 .part-dif .readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 16px;margin:16px 0 4px}
 .part-dif .readout div{border-top:1px solid var(--rule);padding-top:6px;background:transparent}
 .part-dif .readout b{display:block;font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+.part-dif .readout b small{font-size:13px;font-weight:400;color:var(--muted)}
 .part-dif .readout span{font-size:13px;color:var(--muted)}
 .part-dif .tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:3px;border:1px solid currentColor;font-weight:600}
 .part-dif .tag.ok{color:var(--ok)}
@@ -292,6 +293,7 @@ html[lang="en"] [data-lang="es"]{display:none!important}
 .part-dif .tag.bad{color:var(--bad)}
 .part-dif .verdict{background:var(--panel);border:1px solid var(--rule);padding:16px 18px;margin:14px 0}
 .part-dif .verdict h3{margin:0 0 8px;font-family:var(--serif);font-size:19px}
+.part-dif .verdict h4{margin:14px 0 4px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .part-dif .verdict p{margin:0 0 8px;font-size:15px}
 .part-dif .verdict p:last-child{margin-bottom:0}
 .part-dif svg.chart{width:100%;height:auto;display:block;background:var(--panel);border:1px solid var(--rule);margin:12px 0 6px}
@@ -308,6 +310,10 @@ html[lang="en"] [data-lang="es"]{display:none!important}
 .part-dif dl{margin:0 0 14px}
 .part-dif dt{font-weight:600;margin-top:10px}
 .part-dif dd{margin:2px 0 0;max-width:68ch}
+.part-dif .rule{border-left:4px solid var(--acc);padding:10px 16px;background:var(--panel);margin:14px 0;max-width:72ch}
+.part-dif .rule p{margin:0 0 6px}
+.part-dif .rule p:last-child{margin:0}
+.part-dif .formula{font-family:"Iowan Old Style",Georgia,serif;font-style:italic;white-space:nowrap}
 @media (max-width:600px){.part-dif table{font-size:13px}
 .part-dif th,.part-dif td{padding:6px 6px}
 .part-dif .panel{padding:14px}}
@@ -1047,10 +1053,10 @@ html[lang="en"] [data-lang="es"]{display:none!important}
 <div class="part-dif">
 <main>
 <header>
-  <h1 data-lang="es">Difracción y diafragma: hasta dónde cerrar, y cuántos píxeles rinde cada uno</h1>
-  <h1 data-lang="en">Diffraction and aperture: how far to stop down, and how many pixels each one delivers</h1>
-  <p data-lang="es">Una sola calculadora para tres decisiones que en realidad son la misma: a partir de qué diafragma cerrar más solo pierde detalle en <em>este</em> sensor, si a ese diafragma merece la pena un modo de alta resolución (los 96 MP del SL3-S, el L-DNG de 60 de la M11) o basta con menos, y cómo casa todo eso con la profundidad de campo que la escena pide.</p>
-  <p data-lang="en">One calculator for three decisions that are really the same one: from which aperture stopping down further only loses detail on <em>this</em> sensor, whether at that aperture a high-resolution mode is worth it (the SL3-S's 96 MP, the M11's 60 MP L-DNG) or less will do, and how all that squares with the depth of field the scene demands.</p>
+  <h1 data-lang="es">Difracción y diafragma: el disco de Airy como techo</h1>
+  <h1 data-lang="en">Diffraction and aperture: the Airy disc as the ceiling</h1>
+  <p data-lang="es">Con un objetivo perfecto, lo único que limita el detalle es el disco de Airy, y su tamaño depende solo del diafragma y del color de la luz. Eso fija, para cada diafragma, un techo de megapíxeles que ningún sensor, ningún multishot y ningún apilado pueden superar. Esta calculadora pone ese techo al lado de cada cámara y de cada modo, y de ahí salen las tres respuestas: hasta dónde cerrar, cuándo aporta el multishot y qué puede y qué no puede el apilado.</p>
+  <p data-lang="en">With a perfect lens, the only thing limiting detail is the Airy disc, and its size depends only on the aperture and the colour of the light. That sets, for each aperture, a megapixel ceiling that no sensor, no multishot and no stacking can exceed. This calculator puts that ceiling beside each camera and each mode, and from there come the three answers: how far to stop down, when multishot pays, and what stacking can and cannot do.</p>
 </header>
 
 <div class="panel">
@@ -1070,16 +1076,19 @@ html[lang="en"] [data-lang="es"]{display:none!important}
     <div class="field"><label for="d-f"><span data-lang="es">Focal (mm)</span><span data-lang="en">Focal length (mm)</span></label><input id="d-f" type="number" min="8" max="600" step="1" value="35"></div>
     <div class="field"><label for="d-s"><span data-lang="es">Sujeto más cercano que debe salir nítido (m)</span><span data-lang="en">Nearest subject that must be sharp (m)</span></label><input id="d-s" type="number" min="0.2" max="1000" step="any" value="3"></div>
   </div>
-  <p class="note" data-lang="es">Los modos de una misma cámara (L/M/S-DNG de la M11, 24/48/96 MP del SL3-S) comparten sensor: cambia el paso de píxel efectivo con que se muestrea la imagen, y eso es lo único que la difracción ve.</p>
-  <p class="note" data-lang="en">Modes of the same camera (the M11's L/M/S-DNG, the SL3-S's 24/48/96 MP) share the sensor: what changes is the effective pixel pitch at which the image is sampled, and that is all diffraction sees.</p>
+  <p class="note" data-lang="es">Los modos de una misma cámara (L/M/S-DNG de la M11, 24/48/96 MP del SL3-S) comparten sensor: cambia el paso de píxel efectivo con que se muestrea la imagen, y eso es lo único que la difracción ve. Los techos dependen solo del área del sensor: son iguales para todos los cuerpos de un mismo formato.</p>
+  <p class="note" data-lang="en">Modes of the same camera (the M11's L/M/S-DNG, the SL3-S's 24/48/96 MP) share the sensor: what changes is the effective pixel pitch at which the image is sampled, and that is all diffraction sees. The ceilings depend only on sensor area: they are the same for every body of a given format.</p>
 
   <div class="readout">
     <div><b id="d-airy">—</b><span data-lang="es">disco de Airy (µm) · en píxeles</span><span data-lang="en">Airy disc (µm) · in pixels</span></div>
+    <div><b id="d-ceilp">—</b><span data-lang="es">techo práctico del formato (Mpx, MTF 50 %)</span><span data-lang="en">practical ceiling of the format (Mpx, MTF 50 %)</span></div>
+    <div><b id="d-ceilh">—</b><span data-lang="es">límite duro (Mpx, frecuencia de corte)</span><span data-lang="en">hard limit (Mpx, cut-off frequency)</span></div>
+    <div><b id="d-mpeff">—</b><span data-lang="es">megapíxeles efectivos de este sensor</span><span data-lang="en">effective megapixels of this sensor</span></div>
     <div><b id="d-mtf">—</b><span data-lang="es">MTF de difracción en el Nyquist del sensor</span><span data-lang="en">diffraction MTF at the sensor's Nyquist</span></div>
-    <div><b id="d-mpeff">—</b><span data-lang="es">megapíxeles efectivos a este diafragma</span><span data-lang="en">effective megapixels at this aperture</span></div>
     <div><b id="d-ncrit">—</b><span data-lang="es">diafragma crítico (Rayleigh = un píxel)</span><span data-lang="en">critical aperture (Rayleigh = one pixel)</span></div>
     <div><b id="d-nlim">—</b><span data-lang="es">claramente limitado (Rayleigh = dos píxeles)</span><span data-lang="en">clearly limited (Rayleigh = two pixels)</span></div>
     <div><b id="d-nopt">—</b><span data-lang="es">óptimo geométrico para esa profundidad</span><span data-lang="en">geometric optimum for that depth</span></div>
+    <div><b id="d-slices">—</b><span data-lang="es">tomas para cubrir esa profundidad al diafragma crítico</span><span data-lang="en">frames to cover that depth at the critical aperture</span></div>
   </div>
 </div>
 
@@ -1087,42 +1096,103 @@ html[lang="en"] [data-lang="es"]{display:none!important}
 
 <h2 data-lang="es">Megapíxeles efectivos frente al diafragma</h2>
 <h2 data-lang="en">Effective megapixels against aperture</h2>
-<p data-lang="es">La curva de cada sensor es plana hasta su diafragma crítico y cae después como el cuadrado del cociente: cerrar un paso más allá del crítico deja la mitad de los píxeles útiles. Las curvas finas son las referencias del sitio; la gruesa, la cámara elegida. La línea vertical es tu diafragma; la discontinua, el óptimo geométrico para la profundidad pedida.</p>
-<p data-lang="en">Each sensor's curve is flat up to its critical aperture and then falls as the square of the ratio: one stop beyond critical leaves half the useful pixels. The thin curves are the site's reference bodies; the thick one, the chosen camera. The vertical line is your aperture; the dashed one, the geometric optimum for the requested depth.</p>
-<svg class="chart" id="d-chart" viewBox="0 0 760 340" role="img" aria-label="Megapíxeles efectivos frente a diafragma" data-aria-es="Megapíxeles efectivos frente a diafragma" data-aria-en="Effective megapixels against aperture"></svg>
+<p data-lang="es">La línea gris es el techo práctico del formato: baja como 1/N², y la curva de cada sensor es plana hasta que la toca y después la sigue. Cerrar un paso más allá del cruce deja la mitad de los píxeles útiles. La línea gris discontinua es el límite duro, el máximo absoluto que ninguna técnica supera. Las curvas finas son las referencias del sitio; la gruesa, la cámara elegida. La vertical negra es tu diafragma; la ocre discontinua, el óptimo geométrico para la profundidad pedida.</p>
+<p data-lang="en">The grey line is the format's practical ceiling: it falls as 1/N², and each sensor's curve is flat until it touches it and then follows it. One stop beyond the crossing leaves half the useful pixels. The dashed grey line is the hard limit, the absolute maximum no technique exceeds. Thin curves are the site's reference bodies; the thick one, the chosen camera. The black vertical is your aperture; the dashed ochre one, the geometric optimum for the requested depth.</p>
+<svg class="chart" id="d-chart" viewBox="0 0 760 340" role="img" aria-label="Megapíxeles efectivos frente a diafragma"></svg>
 <div class="legend" id="d-leg"></div>
 
 <h2 data-lang="es">Este sensor, diafragma a diafragma</h2>
 <h2 data-lang="en">This sensor, stop by stop</h2>
+<p data-lang="es">La última columna dice qué modo o archivo tiene sentido a cada diafragma: el más pequeño que ya recoge todo el detalle que la difracción deja pasar.</p>
+<p data-lang="en">The last column says which mode or file makes sense at each aperture: the smallest one that already captures all the detail diffraction lets through.</p>
 <div class="tscroll"><table>
-  <thead><tr data-lang="es"><th>Diafragma</th><th class="num">Airy (µm)</th><th class="num">Airy / paso</th><th class="num">MTF en Nyquist</th><th class="num">Mpx efectivos</th><th>Estado</th></tr>
-         <tr data-lang="en"><th>Aperture</th><th class="num">Airy (µm)</th><th class="num">Airy / pitch</th><th class="num">MTF at Nyquist</th><th class="num">Effective Mpx</th><th>Status</th></tr></thead>
+  <thead id="d-rowshead"></thead>
   <tbody id="d-rows"></tbody>
 </table></div>
 
 <h2 data-lang="es">Todas las cámaras a este diafragma</h2>
 <h2 data-lang="en">All cameras at this aperture</h2>
 <div class="tscroll"><table>
-  <thead><tr data-lang="es"><th>Cámara o modo</th><th class="num">Paso (µm)</th><th class="num">Nominales</th><th class="num">Efectivos</th><th class="num">Crítico</th><th>Estado</th></tr>
-         <tr data-lang="en"><th>Camera or mode</th><th class="num">Pitch (µm)</th><th class="num">Nominal</th><th class="num">Effective</th><th class="num">Critical</th><th>Status</th></tr></thead>
+  <thead><tr data-lang="es"><th>Cámara o modo</th><th class="num">Paso (µm)</th><th class="num">Nominales</th><th class="num">Techo práctico</th><th class="num">Efectivos</th><th class="num">Crítico</th><th>Estado</th></tr>
+         <tr data-lang="en"><th>Camera or mode</th><th class="num">Pitch (µm)</th><th class="num">Nominal</th><th class="num">Practical ceiling</th><th class="num">Effective</th><th class="num">Critical</th><th>Status</th></tr></thead>
   <tbody id="d-cams"></tbody>
 </table></div>
 
-<h2 data-lang="es">Cómo se calcula, y qué no incluye</h2>
-<h2 data-lang="en">How it is computed, and what it leaves out</h2>
+<h2 data-lang="es">El disco de Airy como techo</h2>
+<h2 data-lang="en">The Airy disc as the ceiling</h2>
+<p data-lang="es">Un objetivo perfecto no forma puntos, forma discos de Airy: el 84 % de la luz de una estrella cae dentro de un círculo de diámetro 2,44·λ·N. A 550 nm y f/8 son 10,7 µm, sea cual sea la focal, el formato o la marca. Dos detalles se distinguen aún cuando están separados 1,22·λ·N (criterio de Rayleigh); más juntos, se funden. En el lenguaje de la MTF: la difracción deja pasar cada vez menos contraste conforme sube la frecuencia, y a la frecuencia de corte <span class="formula">ν<sub>c</sub> = 1/(λ·N)</span> no deja pasar nada. A f/8 y 550 nm, ν<sub>c</sub> = 227 pares de líneas por milímetro; a la mitad de esa frecuencia el contraste ya es solo del 39 %, y al 50 % de contraste (el MTF50, lo que el ojo percibe como "nítido") se llega en 0,404·ν<sub>c</sub> = 92 lp/mm.</p>
+<p data-lang="en">A perfect lens does not form points, it forms Airy discs: 84 % of a star's light falls within a circle of diameter 2.44·λ·N. At 550 nm and f/8 that is 10.7 µm, whatever the focal length, format or brand. Two details are still distinguishable when separated by 1.22·λ·N (Rayleigh criterion); closer, they merge. In MTF language: diffraction passes less and less contrast as frequency rises, and at the cut-off frequency <span class="formula">ν<sub>c</sub> = 1/(λ·N)</span> it passes nothing. At f/8 and 550 nm, ν<sub>c</sub> = 227 line pairs per millimetre; at half that frequency the contrast is already only 39 %, and 50 % contrast (the MTF50, what the eye perceives as "sharp") is reached at 0.404·ν<sub>c</sub> = 92 lp/mm.</p>
+<p data-lang="es">Como cada frecuencia ν se convierte en píxeles útiles a razón de 2ν por milímetro en cada eje, un sensor de área A tiene un techo de <span class="formula">A·(2ν)²</span> píxeles a esa frecuencia. Para el formato 24×36 y 550 nm salen dos números que conviene recordar:</p>
+<p data-lang="en">Since each frequency ν converts into useful pixels at 2ν per millimetre on each axis, a sensor of area A has a ceiling of <span class="formula">A·(2ν)²</span> pixels at that frequency. For the 24×36 format at 550 nm two numbers are worth remembering:</p>
+<div class="rule">
+  <p data-lang="es"><b>Techo práctico</b> (MTF 50 %): <span class="formula">≈ 1 865 / N²</span> megapíxeles. f/2.8 → 238; f/4 → 117; f/5.6 → 59; f/8 → 29; f/11 → 15; f/16 → 7; f/22 → 4.</p>
+  <p data-lang="en"><b>Practical ceiling</b> (MTF 50 %): <span class="formula">≈ 1,865 / N²</span> megapixels. f/2.8 → 238; f/4 → 117; f/5.6 → 59; f/8 → 29; f/11 → 15; f/16 → 7; f/22 → 4.</p>
+  <p data-lang="es"><b>Límite duro</b> (frecuencia de corte): <span class="formula">≈ 11 400 / N²</span> megapíxeles, seis veces más. f/8 → 179; f/11 → 94; f/16 → 45; f/22 → 24. Por encima no hay información alguna en la imagen; por debajo la hay, pero con un contraste que tiende a cero al acercarse al límite.</p>
+  <p data-lang="en"><b>Hard limit</b> (cut-off frequency): <span class="formula">≈ 11,400 / N²</span> megapixels, six times more. f/8 → 179; f/11 → 94; f/16 → 45; f/22 → 24. Above it there is no information whatsoever in the image; below it there is, but with a contrast that tends to zero as the limit is approached.</p>
+  <p data-lang="es">Para otros formatos, multiplica por el cociente de áreas: APS-C ×0,42; micro 4/3 ×0,26; formato medio 44×33 ×1,68.</p>
+  <p data-lang="en">For other formats, multiply by the area ratio: APS-C ×0.42; micro 4/3 ×0.26; 44×33 medium format ×1.68.</p>
+</div>
+<p data-lang="es">Todo lo que sigue se deduce de esos dos techos. Un sensor está bien aprovechado mientras sus megapíxeles nominales quedan por debajo del techo práctico; el diafragma en que lo cruza es su diafragma crítico, y coincide con el criterio de Rayleigh igualado al paso de píxel. Para la M11 (60 Mpx) es f/5.6; para el SL3-S en 24 Mpx, f/8.9; para sus 96 Mpx de multishot, f/4.4.</p>
+<p data-lang="en">Everything that follows derives from those two ceilings. A sensor is well used while its nominal megapixels stay below the practical ceiling; the aperture where it crosses is its critical aperture, and it coincides with the Rayleigh criterion set equal to the pixel pitch. For the M11 (60 Mpx) it is f/5.6; for the SL3-S at 24 Mpx, f/8.9; for its 96 Mpx multishot, f/4.4.</p>
+
+<h2 data-lang="es">Multishot: cuándo tiene sentido, según el disco</h2>
+<h2 data-lang="en">Multishot: when it makes sense, according to the disc</h2>
+<p data-lang="es">El SL3-S tiene dos multishots que responden a dos preguntas distintas, y el disco de Airy solo decide una de ellas.</p>
+<p data-lang="en">The SL3-S has two multishots that answer two different questions, and the Airy disc decides only one of them.</p>
 <dl data-lang="es">
-  <dt>Disco de Airy y criterio de Rayleigh</dt><dd>Diámetro hasta el primer cero 2,44·λ·N; resolución de Rayleigh 1,22·λ·N. El diafragma crítico es aquel en que Rayleigh iguala el paso de píxel (N = 0,82·p/λ, es decir 1,49·p a 550 nm); a partir de ahí el sensor deja de aprovechar toda su resolución, y cuando Rayleigh dobla el paso la pérdida es clara.</dd>
-  <dt>MTF de difracción</dt><dd>Para una pupila circular, MTF(ν) = (2/π)·[arccos(x) − x·√(1 − x²)] con x = ν·λ·N. Se evalúa en el Nyquist del sensor, 1/(2p): es el porcentaje de contraste que la óptica perfecta deja en el detalle más fino que el sensor puede registrar, antes de descontar las aberraciones reales del objetivo.</dd>
-  <dt>Megapíxeles efectivos</dt><dd>Nominales × mín(1, (N<sub>crítico</sub>/N)²). Equivale a tomar como límite de resolución el MTF50 de la difracción (0,404/(λN)) y compararlo con el Nyquist del sensor; coincide con el umbral de Rayleigh. Es una estimación de orden de magnitud, no una medida: un objetivo real rinde menos a plena abertura y puede compensar parte con nitidez de procesado.</dd>
-  <dt>Óptimo geométrico para la profundidad</dt><dd>N ≈ 0,61·f/√s, con f en mm y s la distancia en metros al sujeto más cercano que debe salir nítido, enfocando en el punto óptimo (no en el primer plano). Minimiza en cuadratura el desenfoque geométrico frente a la difracción. Cuando queda por encima del crítico, no hay diafragma que dé a la vez toda la profundidad y todo el detalle: se elige, o se apilan enfoques.</dd>
-  <dt>Modos de alta resolución</dt><dd>El multishot de 96 MP del SL3-S muestrea con paso efectivo p/2; los 48 MP conservan el paso y ganan color RGB completo y un paso de relación señal/ruido sin exigir nada a la óptica. Los M-DNG y S-DNG de la M11 equivalen a pasos efectivos de 4,85 y 6,86 µm. Ver las pestañas de multishot y de Triple Resolution para el detalle de cada mecanismo.</dd>
+  <dt>48 Mpx (cuatro tomas, desplazamientos de un píxel entero)</dt><dd>No cambia el muestreo: cada píxel sigue midiendo 5,94 µm, pero ahora tiene medidos los tres colores en lugar de interpolar dos de ellos. Gana resolución de color (el rojo y el azul pasan de muestrearse cada dos píxeles a cada uno), elimina el moiré de color y suma cuatro exposiciones, un paso entero de relación señal/ruido. Nada de eso depende del diafragma: <b>a f/16 aporta exactamente lo mismo que a f/4</b>. La difracción no es un argumento ni a favor ni en contra; los argumentos son la escena estática y el trípode.</dd>
+  <dt>96 Mpx (ocho tomas, desplazamientos de medio píxel)</dt><dd>Aquí sí cambia el muestreo: el paso efectivo baja a 2,97 µm y el Nyquist sube de 84 a 168 lp/mm. Solo sirve si la difracción deja contraste en esa banda nueva, entre 84 y 168 lp/mm. Comparado con el techo práctico del formato: a f/4 el techo es 117 Mpx, los 96 se aprovechan enteros; a f/5.6 el techo es 59, el modo rinde 59 frente a los 24 del nativo, sigue mereciendo la pena; a f/8 el techo es 29, la ganancia sobre 24 es marginal; <b>a f/11 el techo es 15, ni siquiera los 24 nativos se aprovechan</b> y las ocho tomas no compran nada. El diafragma frontera, donde el 96 rinde 1,5 veces el nativo, es f/7.1 a 550 nm.</dd>
+  <dt>Los 60 Mpx de la M11 son el mismo problema</dt><dd>El L-DNG es "el modo 96" de la M11: aporta sobre el M-DNG de 36 Mpx mientras el techo supere 36, es decir, hasta f/7.2, y sobre el S-DNG de 18 mientras el techo supere 18, hasta f/10. A f/11 y más cerrado, el archivo de 60 Mpx solo ocupa más disco.</dd>
+  <dt>Con luz roja o azul</dt><dd>Los techos escalan como 1/λ²: a 650 nm son un 28 % más bajos y a 450 nm un 49 % más altos. Una escena iluminada por sodio o un filtro rojo adelanta el límite casi medio paso; el cielo azul lo retrasa otro tanto.</dd>
 </dl>
 <dl data-lang="en">
-  <dt>Airy disc and Rayleigh criterion</dt><dd>Diameter to the first zero 2.44·λ·N; Rayleigh resolution 1.22·λ·N. The critical aperture is the one where Rayleigh equals the pixel pitch (N = 0.82·p/λ, i.e. 1.49·p at 550 nm); from there the sensor no longer uses all its resolution, and when Rayleigh doubles the pitch the loss is clear.</dd>
-  <dt>Diffraction MTF</dt><dd>For a circular pupil, MTF(ν) = (2/π)·[arccos(x) − x·√(1 − x²)] with x = ν·λ·N. It is evaluated at the sensor's Nyquist, 1/(2p): the percentage of contrast a perfect lens leaves in the finest detail the sensor can record, before discounting the real lens aberrations.</dd>
-  <dt>Effective megapixels</dt><dd>Nominal × min(1, (N<sub>critical</sub>/N)²). Equivalent to taking the diffraction MTF50 (0.404/(λN)) as the resolution limit and comparing it with the sensor's Nyquist; it coincides with the Rayleigh threshold. An order-of-magnitude estimate, not a measurement: a real lens delivers less wide open and can recover part of it with processing sharpening.</dd>
-  <dt>Geometric optimum for depth</dt><dd>N ≈ 0.61·f/√s, with f in mm and s the distance in metres to the nearest subject that must be sharp, focusing at the optimum point (not on the foreground). It minimises geometric defocus against diffraction in quadrature. When it lies above critical, no aperture gives full depth and full detail at once: you choose, or focus-stack.</dd>
-  <dt>High-resolution modes</dt><dd>The SL3-S's 96 MP multishot samples at an effective pitch of p/2; the 48 MP keep the pitch and gain full RGB colour and one stop of signal-to-noise without asking anything of the lens. The M11's M-DNG and S-DNG are equivalent to effective pitches of 4.85 and 6.86 µm. See the multishot and Triple Resolution tabs for the detail of each mechanism.</dd>
+  <dt>48 Mpx (four frames, whole-pixel shifts)</dt><dd>Sampling does not change: each pixel still measures 5.94 µm, but now it has all three colours measured instead of two of them interpolated. It gains colour resolution (red and blue go from being sampled every other pixel to every pixel), removes colour moiré and adds four exposures, a full stop of signal-to-noise. None of that depends on the aperture: <b>at f/16 it contributes exactly the same as at f/4</b>. Diffraction is an argument neither for nor against; the arguments are the static scene and the tripod.</dd>
+  <dt>96 Mpx (eight frames, half-pixel shifts)</dt><dd>Here sampling does change: the effective pitch drops to 2.97 µm and Nyquist rises from 84 to 168 lp/mm. It is only useful if diffraction leaves contrast in that new band, between 84 and 168 lp/mm. Compared with the format's practical ceiling: at f/4 the ceiling is 117 Mpx, the 96 are fully used; at f/5.6 the ceiling is 59, the mode delivers 59 against the native 24, still worthwhile; at f/8 the ceiling is 29, the gain over 24 is marginal; <b>at f/11 the ceiling is 15, not even the native 24 are used</b> and the eight frames buy nothing. The boundary aperture, where the 96 delivers 1.5 times the native, is f/7.1 at 550 nm.</dd>
+  <dt>The M11's 60 Mpx are the same problem</dt><dd>The L-DNG is the M11's "96 mode": it contributes over the 36 Mpx M-DNG while the ceiling exceeds 36, i.e. up to f/7.2, and over the 18 Mpx S-DNG while the ceiling exceeds 18, up to f/10. At f/11 and beyond, the 60 Mpx file only takes up more disk.</dd>
+  <dt>In red or blue light</dt><dd>The ceilings scale as 1/λ²: at 650 nm they are 28 % lower and at 450 nm 49 % higher. A scene lit by sodium or through a red filter brings the limit forward almost half a stop; blue sky pushes it back by as much.</dd>
+</dl>
+
+<h2 data-lang="es">Apilar: tres apilados distintos frente al mismo techo</h2>
+<h2 data-lang="en">Stacking: three different stacks against the same ceiling</h2>
+<dl data-lang="es">
+  <dt>Apilado de enfoque</dt><dd>Es la única salida cuando la profundidad de campo pide un diafragma más cerrado que el crítico. En lugar de cerrar a f/12 y quedarte con 12 Mpx, disparas a f/5.6 con los 60 y desplazas el enfoque. Cuántas tomas hacen falta lo da <span class="formula">k ≈ f² / (2·N·c·s)</span>, con f la focal, N el diafragma, c el círculo de confusión (aquí dos píxeles, un par de líneas) y s la distancia al sujeto más cercano, todo en milímetros, para cubrir desde s hasta el infinito. Con 35 mm, f/5.6 y 3 m salen cinco tomas; con 90 mm a 3 m, treinta y tres, y ahí el apilado deja de ser razonable en campo. La calculadora lo muestra arriba para tu focal y tu distancia.</dd>
+  <dt>Apilado por promedio (astro, larga exposición sintética)</dt><dd>Promediar n tomas mejora la relación señal/ruido en √n, y nada más: el disco de Airy es el mismo en cada toma y el muestreo también, así que <b>la resolución no cambia ni con mil tomas</b>. Lo que sí cambia es lo que se puede hacer después: con mucha señal, la deconvolución puede devolver contraste a las frecuencias que la difracción atenuó, y acercarse desde el techo práctico hacia el límite duro. Ese es el margen real, seis veces en píxeles, y es todo el margen que hay: por encima de la frecuencia de corte no hay señal que recuperar, solo ruido amplificado. En astropaisaje además el disco rara vez es el límite: a f/2 mide 2,7 µm, menos que el píxel de la M11, y las estrellas son puntos de un píxel limitados por el muestreo y el seguimiento, no por la óptica.</dd>
+  <dt>Apilado con desplazamiento (dither, drizzle, "superresolución")</dt><dd>Si entre toma y toma la imagen se mueve fracciones de píxel, el apilado puede reconstruir un muestreo más fino: es el multishot de 96 Mpx hecho a mano, con la ventaja de no necesitar un sensor que se mueva y la desventaja de necesitar registro subpíxel y muchas tomas. Le rige el mismo techo que al multishot: solo aporta mientras el techo práctico del formato a ese diafragma supere los megapíxeles nativos, y nunca, con ninguna cantidad de tomas, más allá del límite duro.</dd>
+</dl>
+<dl data-lang="en">
+  <dt>Focus stacking</dt><dd>It is the only way out when depth of field asks for an aperture smaller than the critical one. Instead of stopping down to f/12 and keeping 12 Mpx, you shoot at f/5.6 with all 60 and shift focus. How many frames are needed is given by <span class="formula">k ≈ f² / (2·N·c·s)</span>, with f the focal length, N the aperture, c the circle of confusion (here two pixels, one line pair) and s the distance to the nearest subject, all in millimetres, to cover from s to infinity. With 35 mm, f/5.6 and 3 m it comes to five frames; with 90 mm at 3 m, thirty-three, and there stacking stops being reasonable in the field. The calculator shows it above for your focal length and distance.</dd>
+  <dt>Averaging stacks (astro, synthetic long exposure)</dt><dd>Averaging n frames improves signal-to-noise by √n, and nothing else: the Airy disc is the same in every frame and so is the sampling, so <b>resolution does not change even with a thousand frames</b>. What does change is what can be done afterwards: with plenty of signal, deconvolution can give contrast back to the frequencies diffraction attenuated, and move from the practical ceiling towards the hard limit. That is the real margin, six times in pixels, and it is all the margin there is: above the cut-off frequency there is no signal to recover, only amplified noise. In astro-landscape, moreover, the disc is seldom the limit: at f/2 it measures 2.7 µm, less than the M11's pixel, and stars are one-pixel points limited by sampling and tracking, not by the optics.</dd>
+  <dt>Dithered stacks (dither, drizzle, "super-resolution")</dt><dd>If the image moves by fractions of a pixel between frames, the stack can reconstruct a finer sampling: it is the 96 Mpx multishot done by hand, with the advantage of not needing a moving sensor and the disadvantage of needing sub-pixel registration and many frames. The same ceiling as multishot rules it: it only contributes while the format's practical ceiling at that aperture exceeds the native megapixels, and never, with any number of frames, beyond the hard limit.</dd>
+</dl>
+
+<h2 data-lang="es">Límites y supuestos</h2>
+<h2 data-lang="en">Limits and assumptions</h2>
+<dl data-lang="es">
+  <dt>Objetivo perfecto</dt><dd>Todo lo anterior supone una óptica sin aberraciones, y por eso los techos a plena abertura (238 Mpx a f/2.8) no se alcanzan nunca: un objetivo real rinde menos abierto de lo que la difracción permitiría y mejora al cerrar, hasta que la difracción vuelve a dominar. Ese cruce es su "punto dulce", en formato completo entre f/4 y f/5.6 para los buenos objetivos actuales. La difracción da el límite superior; el objetivo, cuánto queda por debajo.</dd>
+  <dt>Estimación, no medida</dt><dd>El criterio MTF50 y el círculo de confusión de dos píxeles son convenciones razonables, no leyes: con un umbral del 30 % los techos prácticos se duplican; con el 10 %, se multiplican por cuatro. Las conclusiones cualitativas (qué modo aporta, dónde cruza cada sensor) apenas se mueven; los números concretos son de orden de magnitud.</dd>
+  <dt>Lo que no depende de nada más</dt><dd>El disco de Airy no depende de la focal, del tamaño del sensor ni de la distancia de enfoque (salvo en macro, donde N crece con el aumento: a 1:1 el diafragma efectivo es el doble del marcado y todos los límites se adelantan un paso). Depende solo de N y de λ. El formato entra únicamente porque un sensor mayor cabe más discos: el techo es por unidad de área.</dd>
+  <dt>Nyquist y aliasing</dt><dd>Un sensor sin filtro de paso bajo, como los tres Leica, registra aliasing cuando la óptica deja contraste por encima de su Nyquist: exactamente la zona "sin limitación" de la tabla. Cerrar hasta el diafragma crítico es también la manera de hacer que la difracción actúe de filtro antialiasing gratuito.</dd>
+</dl>
+<dl data-lang="en">
+  <dt>Perfect lens</dt><dd>All of the above assumes aberration-free optics, which is why the wide-open ceilings (238 Mpx at f/2.8) are never reached: a real lens delivers less wide open than diffraction would allow and improves on stopping down, until diffraction dominates again. That crossing is its "sweet spot", on full frame between f/4 and f/5.6 for today's good lenses. Diffraction gives the upper limit; the lens, how far below it you stay.</dd>
+  <dt>Estimate, not measurement</dt><dd>The MTF50 criterion and the two-pixel circle of confusion are reasonable conventions, not laws: with a 30 % threshold the practical ceilings double; with 10 %, they quadruple. The qualitative conclusions (which mode contributes, where each sensor crosses) barely move; the concrete numbers are order-of-magnitude.</dd>
+  <dt>What depends on nothing else</dt><dd>The Airy disc does not depend on focal length, sensor size or focus distance (except in macro, where N grows with magnification: at 1:1 the effective aperture is twice the marked one and all limits move one stop earlier). It depends only on N and λ. Format enters only because a larger sensor fits more discs: the ceiling is per unit area.</dd>
+  <dt>Nyquist and aliasing</dt><dd>A sensor without a low-pass filter, like all three Leicas, records aliasing when the optics leave contrast above its Nyquist: exactly the "no limitation" zone of the table. Stopping down to the critical aperture is also the way to make diffraction act as a free anti-aliasing filter.</dd>
+</dl>
+
+<h2 data-lang="es">Cómo se calcula</h2>
+<h2 data-lang="en">How it is computed</h2>
+<dl data-lang="es">
+  <dt>Disco de Airy y Rayleigh</dt><dd>Diámetro 2,44·λ·N; resolución de Rayleigh 1,22·λ·N. Diafragma crítico N = p/(1,22·λ) (1,49·p a 550 nm, con p en µm); claramente limitado al doble.</dd>
+  <dt>MTF de difracción</dt><dd>Pupila circular: MTF(ν) = (2/π)·[arccos(x) − x·√(1 − x²)], x = ν·λ·N. MTF50 en ν = 0,404/(λ·N); corte en ν<sub>c</sub> = 1/(λ·N). Se evalúa en el Nyquist del sensor, 1/(2p).</dd>
+  <dt>Techos</dt><dd>Área del sensor A = p²·Mpx (en mm² con p en µm). Techo práctico A·(2·0,404/(λN))²; límite duro A·(2/(λN))². Megapíxeles efectivos = mín(nominales, techo práctico), que equivale a nominales·mín(1, (N<sub>crítico</sub>/N)²).</dd>
+  <dt>Profundidad de campo</dt><dd>Óptimo geométrico N ≈ 0,61·f/√s (f en mm, s en m), que iguala en cuadratura desenfoque y difracción enfocando en el punto óptimo. Tomas del apilado k = f²/(2·N<sub>crítico</sub>·c·s) con c = 2p, redondeado hacia arriba.</dd>
+</dl>
+<dl data-lang="en">
+  <dt>Airy disc and Rayleigh</dt><dd>Diameter 2.44·λ·N; Rayleigh resolution 1.22·λ·N. Critical aperture N = p/(1.22·λ) (1.49·p at 550 nm, p in µm); clearly limited at twice that.</dd>
+  <dt>Diffraction MTF</dt><dd>Circular pupil: MTF(ν) = (2/π)·[arccos(x) − x·√(1 − x²)], x = ν·λ·N. MTF50 at ν = 0.404/(λ·N); cut-off at ν<sub>c</sub> = 1/(λ·N). Evaluated at the sensor's Nyquist, 1/(2p).</dd>
+  <dt>Ceilings</dt><dd>Sensor area A = p²·Mpx (in mm² with p in µm). Practical ceiling A·(2·0.404/(λN))²; hard limit A·(2/(λN))². Effective megapixels = min(nominal, practical ceiling), which equals nominal·min(1, (N<sub>critical</sub>/N)²).</dd>
+  <dt>Depth of field</dt><dd>Geometric optimum N ≈ 0.61·f/√s (f in mm, s in m), which balances defocus and diffraction in quadrature when focusing at the optimum point. Stack frames k = f²/(2·N<sub>critical</sub>·c·s) with c = 2p, rounded up.</dd>
 </dl>
 </main>
 
@@ -1929,96 +1999,133 @@ const nf=(x,d)=>Number.isFinite(x)?x.toLocaleString(LOC(),{minimumFractionDigits
 const fN=N=>"f/"+(N>=10?N.toFixed(0):(Math.abs(N-Math.round(N))<0.05?String(Math.round(N)):N.toFixed(1)));
 const D={
  es:{ok:"sin limitación",warn:"pérdida parcial",bad:"limitado por difracción",
+     h_close:"Hasta dónde cerrar",h_dof:"Profundidad de campo",h_mode:"Qué modo o archivo",h_stack:"Qué puede el apilado",
      v_title:(c,N)=>`${c} a ${N}`,
-     v_state:(a,ap,mtf,me,mp,st)=>`El disco de Airy mide ${a} µm, ${ap} píxeles. La difracción deja un ${mtf} % de contraste en el detalle más fino del sensor, que rinde unos <b>${me} Mpx efectivos de ${mp}</b>: ${st}.`,
+     v_state:(a,ap,cp,ch,me,mp,st)=>`El disco de Airy mide ${a} µm, ${ap} píxeles. A este diafragma el formato tiene un techo práctico de <b>${cp} Mpx</b> (límite duro ${ch}); este sensor rinde unos <b>${me} Mpx efectivos de ${mp}</b>: ${st}.`,
      v_close_ok:(nc,nl)=>`Puedes cerrar hasta <b>${nc}</b> sin perder detalle; a partir de ${nl} la pérdida es clara. Más cerrado solo se gana profundidad de campo a cambio de resolución.`,
      v_close_warn:(nc,nl)=>`Ya estás pasado del diafragma crítico (${nc}). Hasta ${nl} la pérdida es moderada; más allá, cada paso deja la mitad de los píxeles útiles.`,
      v_close_bad:(nc)=>`Cerrar más ya no aporta nada: este sensor rinde todo su detalle solo hasta ${nc}. Si necesitas la profundidad, asume la pérdida o apila enfoques.`,
-     v_dof_ok:(no,nc)=>`Para que salga nítido desde el sujeto más cercano, el óptimo geométrico es <b>${no}</b>, dentro de la zona sin pérdida: ese es el diafragma.`,
-     v_dof_conf:(no,nc,me)=>`El óptimo geométrico para esa profundidad es <b>${no}</b>, por encima del crítico (${nc}): no hay diafragma que dé a la vez toda la profundidad y todo el detalle. A ${no} rendirías ~${me} Mpx; si el detalle importa, dispara a ${nc} y apila enfoques.`,
-     v_hires_yes:(mode,mtf,me)=>`<b>${mode}</b>: la difracción deja ${mtf} % en su Nyquist y rendiría ~${me} Mpx efectivos. Merece la pena, si la óptica y la escena estática lo permiten.`,
-     v_hires_partial:(mode,mtf,me)=>`<b>${mode}</b>: solo ${mtf} % de contraste en su Nyquist, ~${me} Mpx efectivos. Aporta algo de detalle, decreciente; el color RGB completo y el paso de SNR del modo de 48 MP se conservan igual con la mitad de tomas.`,
-     v_hires_no:(mode,mtf)=>`<b>${mode}</b>: ${mtf} % de contraste en su Nyquist. A este diafragma no añade detalle; quédate en 48 MP (color completo, un paso de SNR) o en el nativo.`,
-     v_m11:(me)=>`Con ~${me} Mpx efectivos, el <b>M-DNG (36 Mpx)</b> ${me>=34?"perdería detalle real: mantén el L-DNG":"no pierde nada"}; el <b>S-DNG (18 Mpx)</b> ${me>=17?"sí recortaría":"tampoco pierde nada"}. A este diafragma ${me<34?"el archivo de 60 Mpx solo pesa más":"los 60 Mpx se aprovechan"}.`,
-     v_sl3s_48:"El modo de 48 MP no depende de la difracción: con escena estática siempre aporta color RGB completo y un paso de relación señal/ruido.",
-     leg_sel:"cámara elegida",leg_n:"tu diafragma",leg_opt:"óptimo geométrico",
+     v_dof_ok:(no)=>`Para que salga nítido desde el sujeto más cercano, el óptimo geométrico es <b>${no}</b>, dentro de la zona sin pérdida: ese es el diafragma, y una sola toma basta.`,
+     v_dof_conf:(no,nc,meo,k)=>`El óptimo geométrico para esa profundidad es <b>${no}</b>, por encima del crítico (${nc}): no hay diafragma que dé a la vez toda la profundidad y todo el detalle. A ${no} rendirías ~${meo} Mpx en una toma; a ${nc} con todo el detalle harían falta unas <b>${k} tomas</b> de apilado de enfoque.`,
+     v_ms96:(cp,e96,e24,g)=>`<b>Multishot de 96 Mpx</b>: con techo de ${cp} Mpx rendiría ~${e96} frente a ~${e24} del nativo (×${g}). `,
+     v_ms_yes:"Merece las ocho tomas, si la escena estática y la óptica lo permiten.",
+     v_ms_part:"Aporta algo, decreciente; valora si compensa frente a las cuatro tomas del modo de 48.",
+     v_ms_no:"No añade detalle a este diafragma: quédate en 48 Mpx o en el nativo.",
+     v_ms48:"El <b>modo de 48 Mpx</b> no depende de la difracción: con escena estática siempre aporta color RGB completo, sin moiré, y un paso de relación señal/ruido.",
+     v_ms_lim:(n15,n24)=>`Fronteras a esta longitud de onda: el 96 rinde 1,5× el nativo hasta <b>${n15}</b>; desde <b>${n24}</b> ni los 24 nativos se aprovechan.`,
+     v_m11:(cp,rec)=>`Con techo de ${cp} Mpx, el archivo que ya recoge todo el detalle es el <b>${rec}</b>.`,
+     v_m11_lim:(n36,n18)=>`El L-DNG de 60 Mpx aporta sobre el M-DNG hasta <b>${n36}</b> y sobre el S-DNG hasta <b>${n18}</b>; más cerrado, solo pesa más.`,
+     v_gen:(nc)=>`Este sensor se aprovecha entero hasta ${nc}; no hay modo de mayor resolución que considerar.`,
+     v_stack:(ch,r)=>`Promediar tomas no cambia la resolución: el disco es el mismo en todas. Con mucha señal, la deconvolución puede acercarse desde el techo práctico hacia el límite duro de ${ch} Mpx (${r}× más), y nunca más allá. Un apilado con desplazamiento subpíxel obedece las mismas fronteras que el multishot de arriba.`,
+     mode_sl3s:["24 nativo","48 (color)","96"],mode_m11:["S-DNG 18","M-DNG 36","L-DNG 60"],mode_none:"—",
+     th:["Diafragma","Airy (µm)","Airy / paso","MTF en Nyquist","Techo práctico","Mpx efectivos","Estado","Modo que basta"],
+     leg_sel:"cámara elegida",leg_n:"tu diafragma",leg_opt:"óptimo geométrico",leg_cp:"techo práctico del formato",leg_ch:"límite duro",
      x:"diafragma",y:"Mpx efectivos",
-     cams:{m11:"Leica M11 / Q3 / SL3 · L-DNG 60 Mpx",m11m:"Leica M11 · M-DNG 36 Mpx",m11s:"Leica M11 · S-DNG 18 Mpx",sl3s:"Leica SL3-S · 24 Mpx nativo",sl3s96:"Leica SL3-S · multishot 96 Mpx",ff45:"Formato completo 45 Mpx (4,35 µm)",apsc40:"APS-C 40 Mpx (3,04 µm)",apsc26:"APS-C 26 Mpx (3,76 µm)",m43:"Micro 4/3 20 Mpx (3,3 µm)",custom:"Personalizado…"}},
+     cams:{m11:"Leica M11 / Q3 / SL3 · L-DNG 60 Mpx",m11m:"Leica M11 · M-DNG 36 Mpx",m11s:"Leica M11 · S-DNG 18 Mpx",sl3s:"Leica SL3-S · 24 Mpx nativo",sl3s96:"Leica SL3-S · multishot 96 Mpx",ff45:"Formato completo 45 Mpx (4,35 µm)",apsc40:"APS-C 40 Mpx (3,04 µm)",apsc26:"APS-C 26 Mpx (3,76 µm)",m43:"Micro 4/3 20 Mpx (3,3 µm)",custom:"Personalizado"}},
  en:{ok:"no limitation",warn:"partial loss",bad:"diffraction-limited",
+     h_close:"How far to stop down",h_dof:"Depth of field",h_mode:"Which mode or file",h_stack:"What stacking can do",
      v_title:(c,N)=>`${c} at ${N}`,
-     v_state:(a,ap,mtf,me,mp,st)=>`The Airy disc measures ${a} µm, ${ap} pixels. Diffraction leaves ${mtf} % contrast in the sensor's finest detail, which delivers about <b>${me} effective Mpx out of ${mp}</b>: ${st}.`,
+     v_state:(a,ap,cp,ch,me,mp,st)=>`The Airy disc measures ${a} µm, ${ap} pixels. At this aperture the format has a practical ceiling of <b>${cp} Mpx</b> (hard limit ${ch}); this sensor delivers about <b>${me} effective Mpx out of ${mp}</b>: ${st}.`,
      v_close_ok:(nc,nl)=>`You can stop down to <b>${nc}</b> without losing detail; from ${nl} the loss is clear. Further than that you only buy depth of field with resolution.`,
      v_close_warn:(nc,nl)=>`You are already past the critical aperture (${nc}). Up to ${nl} the loss is moderate; beyond it, each stop leaves half the useful pixels.`,
      v_close_bad:(nc)=>`Stopping down further gains nothing: this sensor delivers all its detail only up to ${nc}. If you need the depth, accept the loss or focus-stack.`,
-     v_dof_ok:(no,nc)=>`For sharpness from the nearest subject, the geometric optimum is <b>${no}</b>, within the loss-free zone: that is the aperture.`,
-     v_dof_conf:(no,nc,me)=>`The geometric optimum for that depth is <b>${no}</b>, above critical (${nc}): no aperture gives full depth and full detail at once. At ${no} you would get ~${me} Mpx; if detail matters, shoot at ${nc} and focus-stack.`,
-     v_hires_yes:(mode,mtf,me)=>`<b>${mode}</b>: diffraction leaves ${mtf} % at its Nyquist and it would deliver ~${me} effective Mpx. Worth it, if the lens and a static scene allow.`,
-     v_hires_partial:(mode,mtf,me)=>`<b>${mode}</b>: only ${mtf} % contrast at its Nyquist, ~${me} effective Mpx. It adds some detail, decreasing; the full RGB colour and the SNR stop of the 48 MP mode are kept just the same with half the frames.`,
-     v_hires_no:(mode,mtf)=>`<b>${mode}</b>: ${mtf} % contrast at its Nyquist. At this aperture it adds no detail; stay at 48 MP (full colour, one stop of SNR) or native.`,
-     v_m11:(me)=>`With ~${me} effective Mpx, the <b>M-DNG (36 Mpx)</b> ${me>=34?"would lose real detail: keep the L-DNG":"loses nothing"}; the <b>S-DNG (18 Mpx)</b> ${me>=17?"would clip":"loses nothing either"}. At this aperture ${me<34?"the 60 Mpx file only weighs more":"the 60 Mpx are put to use"}.`,
-     v_sl3s_48:"The 48 MP mode does not depend on diffraction: with a static scene it always adds full RGB colour and one stop of signal-to-noise.",
-     leg_sel:"chosen camera",leg_n:"your aperture",leg_opt:"geometric optimum",
+     v_dof_ok:(no)=>`For sharpness from the nearest subject, the geometric optimum is <b>${no}</b>, within the loss-free zone: that is the aperture, and one frame is enough.`,
+     v_dof_conf:(no,nc,meo,k)=>`The geometric optimum for that depth is <b>${no}</b>, above critical (${nc}): no aperture gives full depth and full detail at once. At ${no} you would get ~${meo} Mpx in one frame; at ${nc} with full detail it would take about <b>${k} frames</b> of focus stacking.`,
+     v_ms96:(cp,e96,e24,g)=>`<b>96 Mpx multishot</b>: with a ceiling of ${cp} Mpx it would deliver ~${e96} against ~${e24} native (×${g}). `,
+     v_ms_yes:"Worth the eight frames, if the static scene and the lens allow.",
+     v_ms_part:"It adds something, decreasing; weigh it against the four frames of the 48 mode.",
+     v_ms_no:"It adds no detail at this aperture: stay at 48 Mpx or native.",
+     v_ms48:"The <b>48 Mpx mode</b> does not depend on diffraction: with a static scene it always adds full RGB colour, no moiré, and one stop of signal-to-noise.",
+     v_ms_lim:(n15,n24)=>`Boundaries at this wavelength: the 96 delivers 1.5× native up to <b>${n15}</b>; from <b>${n24}</b> not even the native 24 are used.`,
+     v_m11:(cp,rec)=>`With a ceiling of ${cp} Mpx, the file that already captures all the detail is the <b>${rec}</b>.`,
+     v_m11_lim:(n36,n18)=>`The 60 Mpx L-DNG contributes over the M-DNG up to <b>${n36}</b> and over the S-DNG up to <b>${n18}</b>; further stopped down, it only weighs more.`,
+     v_gen:(nc)=>`This sensor is fully used up to ${nc}; there is no higher-resolution mode to consider.`,
+     v_stack:(ch,r)=>`Averaging frames does not change resolution: the disc is the same in all of them. With plenty of signal, deconvolution can move from the practical ceiling towards the hard limit of ${ch} Mpx (${r}× more), and never beyond. A sub-pixel dithered stack obeys the same boundaries as the multishot above.`,
+     mode_sl3s:["24 native","48 (colour)","96"],mode_m11:["S-DNG 18","M-DNG 36","L-DNG 60"],mode_none:"—",
+     th:["Aperture","Airy (µm)","Airy / pitch","MTF at Nyquist","Practical ceiling","Effective Mpx","Status","Mode that suffices"],
+     leg_sel:"chosen camera",leg_n:"your aperture",leg_opt:"geometric optimum",leg_cp:"format's practical ceiling",leg_ch:"hard limit",
      x:"aperture",y:"effective Mpx",
-     cams:{m11:"Leica M11 / Q3 / SL3 · L-DNG 60 Mpx",m11m:"Leica M11 · M-DNG 36 Mpx",m11s:"Leica M11 · S-DNG 18 Mpx",sl3s:"Leica SL3-S · 24 Mpx native",sl3s96:"Leica SL3-S · 96 Mpx multishot",ff45:"Full frame 45 Mpx (4.35 µm)",apsc40:"APS-C 40 Mpx (3.04 µm)",apsc26:"APS-C 26 Mpx (3.76 µm)",m43:"Micro 4/3 20 Mpx (3.3 µm)",custom:"Custom…"}}
+     cams:{m11:"Leica M11 / Q3 / SL3 · L-DNG 60 Mpx",m11m:"Leica M11 · M-DNG 36 Mpx",m11s:"Leica M11 · S-DNG 18 Mpx",sl3s:"Leica SL3-S · 24 Mpx native",sl3s96:"Leica SL3-S · 96 Mpx multishot",ff45:"Full frame 45 Mpx (4.35 µm)",apsc40:"APS-C 40 Mpx (3.04 µm)",apsc26:"APS-C 26 Mpx (3.76 µm)",m43:"Micro 4/3 20 Mpx (3.3 µm)",custom:"Custom"}}
 };
 const T=k=>D[LANG()][k];
+const FF=36*24, APSC=23.5*15.6, M43=17.3*13;   // áreas de formato, mm²
 const CAMS=[
- {id:"m11",p:3.76,mp:60.3,fam:"m11",ref:true,color:"#4C9A3B"},
- {id:"m11m",p:4.85,mp:36.3,fam:"m11",color:"#8DBE84"},
- {id:"m11s",p:6.86,mp:18.4,fam:"m11",color:"#C3DDBE"},
- {id:"sl3s",p:5.94,mp:24.6,fam:"sl3s",ref:true,color:"#3C7BC7"},
- {id:"sl3s96",p:2.97,mp:96.0,fam:"sl3s",ref:true,color:"#8FB6E6"},
- {id:"ff45",p:4.35,mp:45.0,fam:null,color:"#999"},
- {id:"apsc40",p:3.04,mp:40.2,fam:null,color:"#999"},
- {id:"apsc26",p:3.76,mp:26.1,fam:null,color:"#999"},
- {id:"m43",p:3.3,mp:20.3,fam:null,color:"#999"},
- {id:"custom",p:3.76,mp:60.3,fam:null,color:"#B5432F"}
+ {id:"m11",p:3.76,mp:60.3,A:FF,fam:"m11",ref:true,color:"#4C9A3B"},
+ {id:"m11m",p:4.85,mp:36.3,A:FF,fam:"m11",color:"#8DBE84"},
+ {id:"m11s",p:6.86,mp:18.4,A:FF,fam:"m11",color:"#C3DDBE"},
+ {id:"sl3s",p:5.94,mp:24.6,A:FF,fam:"sl3s",ref:true,color:"#3C7BC7"},
+ {id:"sl3s96",p:2.97,mp:96.0,A:FF,fam:"sl3s",ref:true,color:"#8FB6E6"},
+ {id:"ff45",p:4.35,mp:45.0,A:FF,fam:null,color:"#999"},
+ {id:"apsc40",p:3.04,mp:40.2,A:APSC,fam:null,color:"#999"},
+ {id:"apsc26",p:3.76,mp:26.1,A:APSC,fam:null,color:"#999"},
+ {id:"m43",p:3.3,mp:20.3,A:M43,fam:null,color:"#999"},
+ {id:"custom",p:3.76,mp:60.3,A:null,fam:null,color:"#B5432F"}
 ];
 const FSTOPS=[1.4,1.6,1.8,2,2.2,2.5,2.8,3.2,3.5,4,4.5,5,5.6,6.3,7.1,8,9,10,11,13,14,16,18,20,22,25,29,32];
 const sel=$("d-cam");
 function fillCams(){const cur=sel.value; sel.innerHTML=""; CAMS.forEach(c=>{const o=document.createElement("option");o.value=c.id;o.textContent=T("cams")[c.id];sel.appendChild(o);}); sel.value=cur||"m11";}
 fillCams();
-function relabelOptions(){document.querySelectorAll(".part-dif option[data-es], #d-lambda option[data-es]").forEach(o=>{o.textContent=o.getAttribute("data-"+LANG())||o.textContent;});}
+function relabelOptions(){document.querySelectorAll("#d-lambda option[data-es]").forEach(o=>{o.textContent=o.getAttribute("data-"+LANG())||o.textContent;});}
 /* física */
 const airy=(lam,N)=>2.44*lam*N;                       // µm
 const nCrit=(p,lam)=>p/(1.22*lam);                    // Rayleigh = p
 const mtfDiff=(nu,lam,N)=>{const x=nu*lam*1e-3*N; return x>=1?0:(2/Math.PI)*(Math.acos(x)-x*Math.sqrt(1-x*x));}; // nu en lp/mm
 const nyq=p=>1000/(2*p);
+const area=c=>c.A||c.p*c.p*c.mp;                      // mm² (formato conocido, o p²·Mpx)
+const ceilP=(A,lam,N)=>A*Math.pow(2*0.404/(lam*1e-3*N),2)/1e6;   // techo práctico, Mpx
+const ceilH=(A,lam,N)=>A*Math.pow(2/(lam*1e-3*N),2)/1e6;         // límite duro, Mpx
+const nForCeil=(A,lam,mp)=>2*0.404/(lam*1e-3*Math.sqrt(mp*1e6/A)); // diafragma en que el techo práctico vale mp
 const mpEff=(mp,p,lam,N)=>mp*Math.min(1,Math.pow(nCrit(p,lam)/N,2));
 const nOpt=(f,s)=>0.61*f/Math.sqrt(s);
+const slices=(f,N,p,s)=>Math.max(1,Math.ceil(f*f/(2*N*(2*p*1e-3)*(s*1000))));
 const state=(p,lam,N)=>{const r=1.22*lam*N/p; return r<=1?"ok":(r<=2?"warn":"bad");};
 const tag=k=>`<span class="tag ${k}">${T(k)}</span>`;
 function cam(){const c=CAMS.find(x=>x.id===sel.value); if(c.id==="custom"){c.p=+$("d-pitch").value||3.76;c.mp=+$("d-mpx").value||60;} return c;}
-function nearestStop(N){let b=FSTOPS[0];for(const s of FSTOPS){if(Math.abs(Math.log(s/N))<Math.abs(Math.log(b/N)))b=s;}return b;}
+function modeFor(c,cp){ // el modo o archivo más pequeño que ya recoge todo el detalle
+  if(c.fam==="sl3s"){const m=T("mode_sl3s"); return cp<=24.6*1.25?m[1]:m[2];}
+  if(c.fam==="m11"){const m=T("mode_m11"); return cp<=18.4*1.15?m[0]:cp<=36.3*1.15?m[1]:m[2];}
+  return T("mode_none");
+}
 function update(){
   const c=cam(), N=FSTOPS[+$("d-n").value], lam=+$("d-lambda").value, f=+$("d-f").value||35, s=+$("d-s").value||3;
   const custom=c.id==="custom"; $("d-customwrap").classList.toggle("on",custom); $("d-customwrap2").classList.toggle("on",custom);
   $("d-nv").textContent=fN(N);
-  const a=airy(lam,N), nc=nCrit(c.p,lam), nl=2*nc, mtf=mtfDiff(nyq(c.p),lam,N), me=mpEff(c.mp,c.p,lam,N), no=nOpt(f,s), st=state(c.p,lam,N);
+  const A=area(c), a=airy(lam,N), nc=nCrit(c.p,lam), nl=2*nc, mtf=mtfDiff(nyq(c.p),lam,N), me=mpEff(c.mp,c.p,lam,N), no=nOpt(f,s), st=state(c.p,lam,N);
+  const cp=ceilP(A,lam,N), ch=ceilH(A,lam,N), k=slices(f,nc,c.p,s);
   $("d-airy").innerHTML=nf(a,1)+" <small>· "+nf(a/c.p,1)+" px</small>";
+  $("d-ceilp").textContent=nf(cp,cp<10?1:0);
+  $("d-ceilh").textContent=nf(ch,0);
   $("d-mtf").textContent=nf(mtf*100,0)+" %";
   $("d-mpeff").innerHTML=nf(me,1)+" <small>/ "+nf(c.mp,1)+"</small>";
   $("d-ncrit").textContent=fN(nc);
   $("d-nlim").textContent=fN(nl);
   $("d-nopt").textContent=fN(no);
+  $("d-slices").textContent=no<=nc?"1":String(k);
   /* veredicto */
   let h=`<h3>${T("v_title")(T("cams")[c.id],fN(N))}</h3>`;
-  h+=`<p>${T("v_state")(nf(a,1),nf(a/c.p,1),nf(mtf*100,0),nf(me,0),nf(c.mp,0),tag(st))}</p>`;
-  h+=`<p>${st==="ok"?T("v_close_ok")(fN(nc),fN(nl)):st==="warn"?T("v_close_warn")(fN(nc),fN(nl)):T("v_close_bad")(fN(nc))}</p>`;
-  h+=`<p>${no<=nc?T("v_dof_ok")(fN(no),fN(nc)):T("v_dof_conf")(fN(no),fN(nc),nf(mpEff(c.mp,c.p,lam,no),0))}</p>`;
+  h+=`<p>${T("v_state")(nf(a,1),nf(a/c.p,1),nf(cp,0),nf(ch,0),nf(me,0),nf(c.mp,0),tag(st))}</p>`;
+  h+=`<h4>${T("h_close")}</h4><p>${st==="ok"?T("v_close_ok")(fN(nc),fN(nl)):st==="warn"?T("v_close_warn")(fN(nc),fN(nl)):T("v_close_bad")(fN(nc))}</p>`;
+  h+=`<h4>${T("h_dof")}</h4><p>${no<=nc?T("v_dof_ok")(fN(no)):T("v_dof_conf")(fN(no),fN(nc),nf(mpEff(c.mp,c.p,lam,no),0),k)}</p>`;
+  h+=`<h4>${T("h_mode")}</h4>`;
   if(c.fam==="sl3s"){
-    const p96=2.97, mtf96=mtfDiff(nyq(p96),lam,N), me96=mpEff(96,p96,lam,N), mode=LANG()==="en"?"96 MP multishot":"Multishot de 96 MP";
-    h+=`<p>${mtf96>=0.3?T("v_hires_yes")(mode,nf(mtf96*100,0),nf(me96,0)):mtf96>=0.1?T("v_hires_partial")(mode,nf(mtf96*100,0),nf(me96,0)):T("v_hires_no")(mode,nf(mtf96*100,0))}</p><p>${T("v_sl3s_48")}</p>`;
+    const e96=Math.min(96,cp), e24=Math.min(24.6,cp), g=e96/e24;
+    h+=`<p>${T("v_ms96")(nf(cp,0),nf(e96,0),nf(e24,0),nf(g,1))}${g>=2.5?T("v_ms_yes"):g>=1.3?T("v_ms_part"):T("v_ms_no")}</p>`;
+    h+=`<p>${T("v_ms48")}</p><p>${T("v_ms_lim")(fN(nForCeil(A,lam,24.6*1.5)),fN(nForCeil(A,lam,24.6)))}</p>`;
+  } else if(c.fam==="m11"){
+    h+=`<p>${T("v_m11")(nf(cp,0),modeFor(c,cp))} ${T("v_m11_lim")(fN(nForCeil(A,lam,36.3)),fN(nForCeil(A,lam,18.4)))}</p>`;
+  } else {
+    h+=`<p>${T("v_gen")(fN(nc))}</p>`;
   }
-  if(c.fam==="m11"){ const me60=mpEff(60.3,3.76,lam,N); h+=`<p>${T("v_m11")(nf(me60,0))}</p>`; }
+  h+=`<h4>${T("h_stack")}</h4><p>${T("v_stack")(nf(ch,0),nf(ch/Math.max(cp,1e-9),1))}</p>`;
   $("d-verdict").innerHTML=h;
   /* tabla por diafragma */
-  $("d-rows").innerHTML=FSTOPS.filter((x,i)=>i%1===0).map(x=>{const k=state(c.p,lam,x);return `<tr class="${x===N?"sel":""}"><td>${fN(x)}</td><td class="num">${nf(airy(lam,x),1)}</td><td class="num">${nf(airy(lam,x)/c.p,2)}</td><td class="num">${nf(mtfDiff(nyq(c.p),lam,x)*100,0)} %</td><td class="num">${nf(mpEff(c.mp,c.p,lam,x),1)}</td><td>${tag(k)}</td></tr>`;}).join("");
+  const th=T("th"); $("d-rowshead").innerHTML="<tr>"+th.map((x,i)=>`<th class="${i>0&&i<6?"num":""}">${x}</th>`).join("")+"</tr>";
+  $("d-rows").innerHTML=FSTOPS.map(x=>{const k2=state(c.p,lam,x), cpx=ceilP(A,lam,x);return `<tr class="${x===N?"sel":""}"><td>${fN(x)}</td><td class="num">${nf(airy(lam,x),1)}</td><td class="num">${nf(airy(lam,x)/c.p,2)}</td><td class="num">${nf(mtfDiff(nyq(c.p),lam,x)*100,0)} %</td><td class="num">${nf(cpx,cpx<10?1:0)}</td><td class="num">${nf(mpEff(c.mp,c.p,lam,x),1)}</td><td>${tag(k2)}</td><td>${modeFor(c,cpx)}</td></tr>`;}).join("");
   /* tabla de cámaras */
-  $("d-cams").innerHTML=CAMS.filter(x=>x.id!=="custom"||custom).map(x=>{const k=state(x.p,lam,N);return `<tr class="${x.id===c.id?"sel":""}"><td>${T("cams")[x.id]}</td><td class="num">${nf(x.p,2)}</td><td class="num">${nf(x.mp,1)}</td><td class="num">${nf(mpEff(x.mp,x.p,lam,N),1)}</td><td class="num">${fN(nCrit(x.p,lam))}</td><td>${tag(k)}</td></tr>`;}).join("");
-  chart(c,lam,N,no);
+  $("d-cams").innerHTML=CAMS.filter(x=>x.id!=="custom"||custom).map(x=>{const k2=state(x.p,lam,N), cpx=ceilP(area(x),lam,N);return `<tr class="${x.id===c.id?"sel":""}"><td>${T("cams")[x.id]}</td><td class="num">${nf(x.p,2)}</td><td class="num">${nf(x.mp,1)}</td><td class="num">${nf(cpx,cpx<10?1:0)}</td><td class="num">${nf(mpEff(x.mp,x.p,lam,N),1)}</td><td class="num">${fN(nCrit(x.p,lam))}</td><td>${tag(k2)}</td></tr>`;}).join("");
+  chart(c,lam,N,no,A);
 }
-function chart(c,lam,N,no){
+function chart(c,lam,N,no,A){
   const W=760,H=340,L=54,R=16,Tp=16,B=44;
   const xs=v=>L+(Math.log(v)-Math.log(1.4))/(Math.log(32)-Math.log(1.4))*(W-L-R);
   const ymax=Math.max(100,Math.ceil(Math.max(c.mp,96)/10)*10);
@@ -2028,15 +2135,18 @@ function chart(c,lam,N,no){
   [1.4,2,2.8,4,5.6,8,11,16,22,32].forEach(v=>{s+=`<line x1="${xs(v).toFixed(1)}" x2="${xs(v).toFixed(1)}" y1="${Tp}" y2="${H-B}" stroke="#EEF1F3"/><text x="${xs(v).toFixed(1)}" y="${H-B+16}" text-anchor="middle">f/${v}</text>`;});
   s+=`<line x1="${L}" x2="${L}" y1="${Tp}" y2="${H-B}" stroke="#5F6662"/><line x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}" stroke="#5F6662"/>`;
   s+=`<text x="${(L+W-R)/2}" y="${H-6}" text-anchor="middle">${T("x")}</text><text transform="translate(12 ${(Tp+H-B)/2}) rotate(-90)" text-anchor="middle">${T("y")}</text>`;
+  const path=(fn)=>{let d="",pen=false;for(let i=0;i<=160;i++){const n=1.4*Math.pow(32/1.4,i/160);const v=fn(n);if(v>ymax){pen=false;continue;}d+=(pen?"L":"M")+xs(n).toFixed(1)+" "+ys(v).toFixed(1);pen=true;}return d;};
+  s+=`<path d="${path(n=>ceilH(A,lam,n))}" fill="none" stroke="#8A9096" stroke-width="1.2" stroke-dasharray="3 4"/>`;
+  s+=`<path d="${path(n=>ceilP(A,lam,n))}" fill="none" stroke="#8A9096" stroke-width="1.6"/>`;
   const refs=CAMS.filter(x=>x.ref&&x.id!==c.id);
-  const curve=(x)=>{let d="";for(let i=0;i<=120;i++){const n=1.4*Math.pow(32/1.4,i/120);const v=mpEff(x.mp,x.p,lam,n);d+=(i?"L":"M")+xs(n).toFixed(1)+" "+ys(Math.min(v,ymax)).toFixed(1);}return d;};
-  refs.forEach(x=>{s+=`<path d="${curve(x)}" fill="none" stroke="${x.color}" stroke-width="1.4" opacity=".8"/>`;});
-  s+=`<path d="${curve(c)}" fill="none" stroke="${c.color==="#999"?"#1B1D1B":c.color}" stroke-width="3"/>`;
+  refs.forEach(x=>{s+=`<path d="${path(n=>mpEff(x.mp,x.p,lam,n))}" fill="none" stroke="${x.color}" stroke-width="1.4" opacity=".8"/>`;});
+  const col=c.color==="#999"?"#1B1D1B":c.color;
+  s+=`<path d="${path(n=>mpEff(c.mp,c.p,lam,n))}" fill="none" stroke="${col}" stroke-width="3"/>`;
   s+=`<line x1="${xs(N).toFixed(1)}" x2="${xs(N).toFixed(1)}" y1="${Tp}" y2="${H-B}" stroke="#1B1D1B" stroke-width="1.2"/>`;
   if(no>=1.4&&no<=32) s+=`<line x1="${xs(no).toFixed(1)}" x2="${xs(no).toFixed(1)}" y1="${Tp}" y2="${H-B}" stroke="#B8861B" stroke-width="1.4" stroke-dasharray="5 4"/>`;
   const me=mpEff(c.mp,c.p,lam,N); s+=`<circle cx="${xs(N).toFixed(1)}" cy="${ys(Math.min(me,ymax)).toFixed(1)}" r="5" fill="#1B1D1B"/>`;
   $("d-chart").innerHTML=s;
-  $("d-leg").innerHTML=`<span><i style="border-color:${c.color==="#999"?"#1B1D1B":c.color};border-top-width:3px"></i>${T("cams")[c.id]} (${T("leg_sel")})</span>`+refs.map(x=>`<span><i style="border-color:${x.color}"></i>${T("cams")[x.id]}</span>`).join("")+`<span><i style="border-color:#1B1D1B"></i>${T("leg_n")}</span><span><i style="border-color:#B8861B;border-top-style:dashed"></i>${T("leg_opt")}</span>`;
+  $("d-leg").innerHTML=`<span><i style="border-color:${col}"></i>${T("cams")[c.id]} (${T("leg_sel")})</span>`+refs.map(x=>`<span><i style="border-color:${x.color}"></i>${T("cams")[x.id]}</span>`).join("")+`<span><i style="border-color:#8A9096"></i>${T("leg_cp")}</span><span><i style="border-color:#8A9096;border-top-style:dotted"></i>${T("leg_ch")}</span><span><i style="border-color:#1B1D1B"></i>${T("leg_n")}</span><span><i style="border-color:#B8861B;border-top-style:dashed"></i>${T("leg_opt")}</span>`;
 }
 ["d-cam","d-pitch","d-mpx","d-n","d-lambda","d-f","d-s"].forEach(id=>{$(id).addEventListener("input",update);$(id).addEventListener("change",update);});
 relabelOptions(); update();
