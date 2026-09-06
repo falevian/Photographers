@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>El sensor: ruido, desplazamiento de píxel, binning y difracción</title>
 <meta name="author" content="Rafael Vida">
-<meta name="description" content="Lo que hace el sensor con los fotones, en una sola página: ruido de lectura y rango dinámico de M11, Q3 y SL3-S según PhotonsToPhotos con calculadora SNR; el multishot del SL3-S (48 y 96 MP, √N, Nyquist, deriva sidérea, software de apilado); la Triple Resolution de la M11 (binning o remuestreo) y una calculadora común de difracción y diafragma óptimo.">
+<meta name="description" content="Lo que hace el sensor con los fotones, en una sola página: ruido de lectura y rango dinámico de M11, Q3 y SL3-S según PhotonsToPhotos con calculadora SNR; el multishot del SL3-S (48 y 96 MP, √N, Nyquist, deriva sidérea, software de apilado); la Triple Resolution de la M11 (binning o remuestreo) y una calculadora de difracción que dice, para cada sensor y modo, hasta qué diafragma cerrar, cuántos megapíxeles rinde de verdad y cuándo merece la pena el multishot.">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Crect%20width%3D%2764%27%20height%3D%2764%27%20rx%3D%2713%27%20fill%3D%27%23F4F5F2%27/%3E%3Crect%20x%3D%2710%27%20y%3D%2750%27%20width%3D%2744%27%20height%3D%271.5%27%20fill%3D%27%235F6662%27/%3E%3Cpath%20d%3D%27M10%2C20%20L20%2C21%20L24%2C34%20L54%2C40%27%20fill%3D%27none%27%20stroke%3D%27%234C9A3B%27%20stroke-width%3D%273%27%20stroke-linejoin%3D%27round%27/%3E%3Cpath%20d%3D%27M10%2C16%20L22%2C17%20L28%2C32%20L54%2C38%27%20fill%3D%27none%27%20stroke%3D%27%23262626%27%20stroke-width%3D%273%27%20stroke-linejoin%3D%27round%27/%3E%3Cpath%20d%3D%27M10%2C12%20L30%2C13%20L34%2C28%20L54%2C36%27%20fill%3D%27none%27%20stroke%3D%27%233C7BC7%27%20stroke-width%3D%273%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="icons/sensor-180.png">
 <meta name="theme-color" content="#F4F5F2">
@@ -16,7 +16,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Photographers">
 <meta property="og:title" content="El sensor: ruido, desplazamiento de píxel, binning y difracción">
-<meta property="og:description" content="Lo que hace el sensor con los fotones, en una sola página: ruido de lectura y rango dinámico de M11, Q3 y SL3-S según PhotonsToPhotos con calculadora SNR; el multishot del SL3-S (48 y 96 MP, √N, Nyquist, deriva sidérea, software de apilado); la Triple Resolution de la M11 (binning o remuestreo) y una calculadora común de difracción y diafragma óptimo.">
+<meta property="og:description" content="Lo que hace el sensor con los fotones, en una sola página: ruido de lectura y rango dinámico de M11, Q3 y SL3-S según PhotonsToPhotos con calculadora SNR; el multishot del SL3-S (48 y 96 MP, √N, Nyquist, deriva sidérea, software de apilado); la Triple Resolution de la M11 (binning o remuestreo) y una calculadora de difracción que dice, para cada sensor y modo, hasta qué diafragma cerrar, cuántos megapíxeles rinde de verdad y cuándo merece la pena el multishot.">
 <meta property="og:url" content="https://falevian.github.io/Photographers/sensor.html">
 <meta property="og:image" content="https://falevian.github.io/Photographers/og/sensor.png">
 <meta property="og:image:width" content="1200">
@@ -263,73 +263,54 @@ html[lang="en"] [data-lang="es"]{display:none!important}
 .part-bn .srclinks a{color:var(--sag);text-decoration:none;border-bottom:1px solid var(--line)}
 .part-bn .srclinks a:hover{color:var(--tan);border-bottom-color:var(--tan)}
 @media print{}
-.part-nd6{
-  --bg:#F3F5F7; --surface:#FFFFFF; --ink:#1B2530; --muted:#5A6978; --line:#D3DAE1;
-  --vis:#2A6F8F; --ir:#A8322E; --ir-soft:rgba(168,50,46,.06);
-  --r:#C0392B; --g:#2E8B57; --b:#2E6FB7; --hot:#7A5C9E; --qe:#6E7680;
-  --serif:"Charter","Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;
-  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-}
-.part-nd6 *{box-sizing:border-box}
-.part-nd6{background:var(--bg);color:var(--ink);font-family:var(--serif);font-size:18px;line-height:1.55;-webkit-text-size-adjust:100%;scroll-behavior:smooth}
-.part-nd6{margin:0}
-.part-nd6 a{color:var(--vis)}
-.part-nd6 a:focus-visible,.part-nd6 button:focus-visible,.part-nd6 input:focus-visible,.part-nd6 select:focus-visible,.part-nd6 summary:focus-visible{outline:3px solid var(--vis);outline-offset:2px}
-.part-nd6 .wrap{max-width:720px;margin:0 auto;padding:0 20px}
-.part-nd6 .wide{max-width:900px;margin:0 auto;padding:0 20px}
-.part-nd6 header.portada{padding:64px 0 28px}
-.part-nd6 h1{font-size:2.6rem;line-height:1.1;font-weight:400;margin:0 0 16px;letter-spacing:-.01em}
-.part-nd6 .sub{font-size:1.25rem;line-height:1.4;color:var(--muted);margin:0 0 20px;max-width:640px}
-.part-nd6 .lede{font-family:var(--sans);font-size:.92rem;line-height:1.5;color:var(--muted);border-left:3px solid var(--ir);padding-left:12px;max-width:600px;margin:0}
-.part-nd6 nav.indice{position:sticky;top:0;background:rgba(243,245,247,.94);backdrop-filter:blur(6px);border-top:1px solid var(--line);border-bottom:1px solid var(--line);z-index:5}
-.part-nd6 nav.indice ol{list-style:none;margin:0 auto;padding:10px 20px;max-width:900px;display:flex;flex-wrap:wrap;gap:6px 18px;font-family:var(--sans);font-size:.86rem}
-.part-nd6 nav.indice a{text-decoration:none;color:var(--ink)}
-.part-nd6 nav.indice a:hover{text-decoration:underline}
-.part-nd6 section{padding:56px 0 8px}
-.part-nd6 h2{font-size:1.75rem;font-weight:400;line-height:1.2;margin:0 0 18px}
-.part-nd6 h3{font-size:1.15rem;font-weight:600;margin:28px 0 10px}
-.part-nd6 p{margin:0 0 16px}
-.part-nd6 ul,.part-nd6 ol{padding-left:22px;margin:0 0 16px}
-.part-nd6 li{margin-bottom:6px}
-.part-nd6 .eq{font-size:1.15rem;text-align:center;margin:18px 0;padding:6px 0;line-height:1.7}
-.part-nd6 .eq i{font-style:italic}
-.part-nd6 .nota{font-family:var(--sans);font-size:.9rem;line-height:1.5;color:var(--muted)}
-.part-nd6 .panel{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:18px 20px 16px;margin:22px 0 28px;font-family:var(--sans)}
-.part-nd6 .panel h4{margin:0 0 14px;font-size:.95rem;font-weight:600;color:var(--ink)}
-.part-nd6 .controls{display:flex;flex-wrap:wrap;gap:14px 22px;margin-bottom:14px}
-.part-nd6 .controls label{display:flex;flex-direction:column;gap:5px;font-size:.84rem;color:var(--muted);min-width:150px}
-.part-nd6 .controls select,.part-nd6 .controls input[type=number]{font:inherit;font-size:.95rem;color:var(--ink);padding:6px 8px;border:1px solid var(--line);border-radius:3px;background:#fff;max-width:320px}
-.part-nd6 .controls input[type=range]{width:180px;accent-color:var(--vis)}
-.part-nd6 .controls .val{color:var(--ink);font-variant-numeric:tabular-nums}
-.part-nd6 .toggles{display:flex;flex-wrap:wrap;gap:10px 18px;font-size:.84rem;color:var(--muted);margin-bottom:10px}
-.part-nd6 .toggles label{display:flex;align-items:center;gap:6px}
-.part-nd6 .toggles input{accent-color:var(--vis)}
-.part-nd6 svg.chart{width:100%;height:auto;display:block}
-.part-nd6 .readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px 18px;margin-top:14px;font-size:.88rem}
-.part-nd6 .readout div{border-top:1px solid var(--line);padding-top:8px}
-.part-nd6 .readout b{display:block;font-size:1.25rem;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink)}
-.part-nd6 .readout span{color:var(--muted)}
-.part-nd6 .swatches{display:flex;gap:16px;margin:14px 0 6px;flex-wrap:wrap}
-.part-nd6 .swatch{flex:1 1 160px}
-.part-nd6 .swatch .color{height:64px;border-radius:3px;border:1px solid var(--line)}
-.part-nd6 .swatch p{font-size:.84rem;color:var(--muted);margin:6px 0 0}
-.part-nd6 table{border-collapse:collapse;font-family:var(--sans);font-size:.9rem;width:100%;margin:12px 0 20px}
-.part-nd6 th,.part-nd6 td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
-.part-nd6 th{font-weight:600;color:var(--muted)}
-.part-nd6 td.num,.part-nd6 th.num{text-align:right;font-variant-numeric:tabular-nums}
-.part-nd6 details{margin:10px 0;font-family:var(--sans);font-size:.92rem}
-.part-nd6 summary{cursor:pointer;font-weight:600}
-.part-nd6 details ul{margin-top:10px}
-.part-nd6 footer{padding:40px 0 60px;font-family:var(--sans);font-size:.86rem;color:var(--muted);border-top:1px solid var(--line);margin-top:40px}
-.part-nd6 .leyenda{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:.8rem;color:var(--muted);margin-top:8px}
-.part-nd6 .leyenda i{display:inline-block;width:18px;height:0;border-top:3px solid;vertical-align:middle;margin-right:6px}
-@media (max-width:600px){.part-nd6{font-size:17px}
-.part-nd6 h1{font-size:2.05rem}
-.part-nd6 .controls input[type=range]{width:140px}
-.part-nd6 header.portada{padding-top:44px}
-.part-nd6 nav.indice ol{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;gap:0 18px;padding:10px 20px;-webkit-overflow-scrolling:touch}}
-@media (prefers-reduced-motion:reduce){.part-nd6{scroll-behavior:auto}}
-@media print{}
+.part-dif{--bg:#F4F5F2;--panel:#FFFFFF;--ink:#1B1D1B;--muted:#5F6662;--rule:#D3D8D2;--acc:#3C7BC7;--ok:#2F7D5B;--warn:#B8861B;--bad:#B5432F;--soft:#EBEEEA;
+  --serif:"Fraunces","Iowan Old Style",Georgia,serif;--sans:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif}
+.part-dif *{box-sizing:border-box}
+.part-dif{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5}
+.part-dif main{max-width:920px;margin:0 auto;padding:0 20px 60px}
+.part-dif header{padding:28px 0 20px;border-bottom:2px solid var(--ink)}
+.part-dif h1{font-family:var(--serif);font-weight:600;font-size:clamp(26px,4.4vw,38px);line-height:1.1;margin:0 0 10px}
+.part-dif header p{max-width:68ch;margin:0;color:var(--muted)}
+.part-dif h2{font-family:var(--serif);font-weight:600;font-size:clamp(21px,3.2vw,27px);margin:36px 0 10px}
+.part-dif h3{font-size:16px;font-weight:600;margin:22px 0 8px}
+.part-dif p{max-width:68ch;margin:0 0 12px}
+.part-dif .panel{background:var(--soft);padding:18px 20px;margin:16px 0 20px;border-left:4px solid var(--ink)}
+.part-dif .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 18px}
+.part-dif .field label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+.part-dif .field input,.part-dif .field select{width:100%;font:inherit;padding:7px 9px;border:1px solid var(--rule);border-radius:4px;background:#fff;color:var(--ink)}
+.part-dif .field input[type=range]{padding:0;accent-color:var(--acc)}
+.part-dif .field .v{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.part-dif .custom{display:none}
+.part-dif .custom.on{display:contents}
+.part-dif .readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 16px;margin:16px 0 4px}
+.part-dif .readout div{border-top:1px solid var(--rule);padding-top:6px;background:transparent}
+.part-dif .readout b{display:block;font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+.part-dif .readout span{font-size:13px;color:var(--muted)}
+.part-dif .tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:3px;border:1px solid currentColor;font-weight:600}
+.part-dif .tag.ok{color:var(--ok)}
+.part-dif .tag.warn{color:var(--warn)}
+.part-dif .tag.bad{color:var(--bad)}
+.part-dif .verdict{background:var(--panel);border:1px solid var(--rule);padding:16px 18px;margin:14px 0}
+.part-dif .verdict h3{margin:0 0 8px;font-family:var(--serif);font-size:19px}
+.part-dif .verdict p{margin:0 0 8px;font-size:15px}
+.part-dif .verdict p:last-child{margin-bottom:0}
+.part-dif svg.chart{width:100%;height:auto;display:block;background:var(--panel);border:1px solid var(--rule);margin:12px 0 6px}
+.part-dif svg.chart text{font-family:var(--sans);font-size:11px;fill:var(--muted)}
+.part-dif .legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--muted);margin:6px 0 14px}
+.part-dif .legend i{display:inline-block;width:18px;height:0;border-top:3px solid;vertical-align:middle;margin-right:6px}
+.part-dif table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums;margin:8px 0 18px}
+.part-dif th,.part-dif td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--rule);vertical-align:top}
+.part-dif th{font-weight:600;background:var(--soft)}
+.part-dif td.num,.part-dif th.num{text-align:right}
+.part-dif tr.sel td{background:#EAF1FA}
+.part-dif .tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.part-dif .note{font-size:14px;color:var(--muted);max-width:68ch}
+.part-dif dl{margin:0 0 14px}
+.part-dif dt{font-weight:600;margin-top:10px}
+.part-dif dd{margin:2px 0 0;max-width:68ch}
+@media (max-width:600px){.part-dif table{font-size:13px}
+.part-dif th,.part-dif td{padding:6px 6px}
+.part-dif .panel{padding:14px}}
 </style>
 </head>
 <body>
@@ -341,8 +322,8 @@ html[lang="en"] [data-lang="es"]{display:none!important}
 <div class="shell-head">
   <h1 data-lang="es">El sensor</h1>
   <h1 data-lang="en">The sensor</h1>
-  <p data-lang="es">Cuatro pestañas sobre lo que el sensor hace con los fotones: los datos medidos de tres cuerpos Leica, el desplazamiento de píxel del SL3-S, la Triple Resolution de la M11 y la difracción, que a todos les afecta igual y aquí se calcula una sola vez.</p>
-  <p data-lang="en">Four tabs on what the sensor does with photons: the measured data of three Leica bodies, the SL3-S pixel shift, the M11 Triple Resolution, and diffraction, which affects them all alike and is computed here once.</p>
+  <p data-lang="es">Cuatro pestañas sobre lo que el sensor hace con los fotones: los datos medidos de tres cuerpos Leica, el desplazamiento de píxel del SL3-S, la Triple Resolution de la M11 y la difracción: para cada sensor y modo, hasta dónde cerrar, cuántos megapíxeles rinde de verdad y cuándo merece la pena el multishot.</p>
+  <p data-lang="en">Four tabs on what the sensor does with photons: the measured data of three Leica bodies, the SL3-S pixel shift, the M11 Triple Resolution, and diffraction: for each sensor and mode, how far to stop down, how many megapixels it really delivers and when multishot is worth it.</p>
 </div>
 <nav class="tabs" aria-label="Pestañas" data-aria-es="Pestañas" data-aria-en="Tabs"><div class="in" role="tablist"><button type="button" role="tab" data-tab="datos" aria-selected="false"><span data-lang="es">Datos del sensor · M11, Q3, SL3-S</span><span data-lang="en">Sensor data · M11, Q3, SL3-S</span></button><button type="button" role="tab" data-tab="pixelshift" aria-selected="false"><span data-lang="es">Multishot del SL3-S</span><span data-lang="en">SL3-S multishot</span></button><button type="button" role="tab" data-tab="binning" aria-selected="false"><span data-lang="es">Triple Resolution de la M11</span><span data-lang="en">M11 Triple Resolution</span></button><button type="button" role="tab" data-tab="difraccion" aria-selected="false"><span data-lang="es">Difracción y diafragma</span><span data-lang="en">Diffraction and aperture</span></button></div></nav>
 <section class="tab" id="tab-datos" role="tabpanel" hidden>
@@ -1063,71 +1044,94 @@ html[lang="en"] [data-lang="es"]{display:none!important}
 </div>
 </section>
 <section class="tab" id="tab-difraccion" role="tabpanel" hidden>
-<div class="part-sens"><section id="difraccion">
-  <h2 data-lang="es">Difracción y paso de píxel</h2>
-<h2 data-lang="en">Diffraction and pixel pitch</h2>
-  <p data-lang="es">El disco de Airy tiene un diámetro hasta el primer cero de 2,44·λ·N y una resolución de Rayleigh de 1,22·λ·N. Cuando la resolución de Rayleigh supera el paso de píxel, el sensor ya no aprovecha toda su resolución; cuando la dobla, la difracción domina claramente.</p>
-<p data-lang="en">The Airy disc has a diameter to the first zero of 2.44·λ·N and a Rayleigh resolution of 1.22·λ·N. When the Rayleigh resolution exceeds the pixel pitch, the sensor no longer uses all its resolution; when it doubles it, diffraction clearly dominates.</p>
-  <div class="panel">
-    <div class="grid">
-      <div class="field"><label for="fnum"><span data-lang="es">Apertura:</span><span data-lang="en">Aperture:</span> f/<span id="fnumV">8</span></label><input id="fnum" type="range" min="0" max="10" value="5" step="1"></div>
-      <div class="field"><label for="lambda"><span data-lang="es">Longitud de onda</span><span data-lang="en">Wavelength</span></label><select id="lambda"><option value="0.45" data-es="450 nm (azul)" data-en="450 nm (blue)">450 nm (azul)</option><option value="0.55" selected data-es="550 nm (verde)" data-en="550 nm (green)">550 nm (verde)</option><option value="0.65" data-es="650 nm (rojo)" data-en="650 nm (red)">650 nm (rojo)</option></select></div>
-    </div>
-    <div class="out">
-      <div class="tscroll"><table>
-        <thead><tr data-lang="es"><th>Cámara</th><th class="num">Paso (µm)</th><th class="num">Airy 2,44λN (µm)</th><th class="num">Rayleigh / paso</th><th>Estado</th></tr>
-        <tr data-lang="en"><th>Camera</th><th class="num">Pitch (µm)</th><th class="num">Airy 2.44λN (µm)</th><th class="num">Rayleigh / pitch</th><th>Status</th></tr></thead>
-        <tbody id="difBody"></tbody>
-      </table></div>
-    </div>
-  </div>
-  <p data-lang="es">Consecuencia práctica: los sensores de 60 Mpx rinden todo su detalle hasta f/5,6 y lo pierden progresivamente a partir de f/8, lo que en paisaje empuja a trabajar más abierto y apilar enfoques. El píxel de 5,94 µm de la SL3-S tolera f/8 sin pérdida y f/11 con pérdida leve.</p>
-<p data-lang="en">Practical consequence: the 60 Mpx sensors deliver all their detail up to f/5.6 and lose it progressively from f/8, which in landscape pushes towards working more open and focus stacking. The 5.94 µm pixel of the SL3-S tolerates f/8 without loss and f/11 with slight loss.</p>
-</section></div>
-<div class="part-nd6"><section id="nd6-difraccion">
-  <div class="wrap">
-    <h2 data-lang="es">Difracción y elección del diafragma</h2>
-<h2 data-lang="en">Diffraction and choice of aperture</h2>
-    <p data-lang="es">La larga exposición invita a cerrar el diafragma para ganar tiempo. Es un mal negocio. El diámetro del disco de Airy es <i>d</i> = 2.44 λ <i>N</i>, que a 550 nm son 1.34 <i>N</i> micras, y no depende de la focal. Cuando ese disco alcanza dos veces el paso de píxel, la difracción pasa a ser el factor limitante:</p>
-<p data-lang="en">Long exposure invites stopping down to gain time. It is a bad bargain. The diameter of the Airy disc is <i>d</i> = 2.44 λ <i>N</i>, which at 550 nm is 1.34 <i>N</i> microns, and does not depend on focal length. When that disc reaches twice the pixel pitch, diffraction becomes the limiting factor:</p>
-    <p class="eq"><i>N</i><sub>crítico</sub> ≈ 1.49 · <i>p</i> &nbsp;&nbsp;&nbsp;&nbsp; <i>N</i><sub>óptimo</sub> ≈ 0.61 · <i>f</i> / √<i>s</i></p>
-    <p data-lang="es">La segunda expresión minimiza en cuadratura el desenfoque geométrico frente a la difracción para una escena cuyo sujeto más cercano está a <i>s</i> metros, con <i>f</i> en milímetros y el foco colocado en el punto óptimo, no en el primer plano. Pasado ese diafragma solo se pierde. La difracción, además, es proporcional a λ: la contaminación infrarroja a 850 nm difracta un 55 por ciento más que el verde y llega, por aberración cromática longitudinal, enfocada en otro plano. Un ND que fuga no solo tiñe, también vela.</p>
-<p data-lang="en">The second expression minimises in quadrature the geometric defocus against diffraction for a scene whose nearest subject is at <i>s</i> metres, with <i>f</i> in millimetres and the focus placed at the optimum point, not on the foreground. Beyond that aperture there is only loss. Diffraction, moreover, is proportional to λ: infrared contamination at 850 nm diffracts 55 percent more than green and arrives, through longitudinal chromatic aberration, focused on another plane. A leaking ND does not only tint; it also veils.</p>
+<div class="part-dif">
+<main>
+<header>
+  <h1 data-lang="es">Difracción y diafragma: hasta dónde cerrar, y cuántos píxeles rinde cada uno</h1>
+  <h1 data-lang="en">Diffraction and aperture: how far to stop down, and how many pixels each one delivers</h1>
+  <p data-lang="es">Una sola calculadora para tres decisiones que en realidad son la misma: a partir de qué diafragma cerrar más solo pierde detalle en <em>este</em> sensor, si a ese diafragma merece la pena un modo de alta resolución (los 96 MP del SL3-S, el L-DNG de 60 de la M11) o basta con menos, y cómo casa todo eso con la profundidad de campo que la escena pide.</p>
+  <p data-lang="en">One calculator for three decisions that are really the same one: from which aperture stopping down further only loses detail on <em>this</em> sensor, whether at that aperture a high-resolution mode is worth it (the SL3-S's 96 MP, the M11's 60 MP L-DNG) or less will do, and how all that squares with the depth of field the scene demands.</p>
+</header>
 
-    <div class="panel">
-      <h4 data-lang="es">Diafragma crítico y diafragma óptimo</h4>
-<h4 data-lang="en">Critical aperture and optimum aperture</h4>
-      <div class="controls">
-        <label><span data-lang="es">Paso de píxel</span><span data-lang="en">Pixel pitch</span>
-          <select id="c6-pitch">
-            <option value="3.76" selected data-es="3.76 µm (60 MP, formato completo)" data-en="3.76 µm (60 MP, full frame)">3.76 µm (60 MP, formato completo)</option>
-            <option value="4.6" data-es="4.6 µm (40 MP)" data-en="4.6 µm (40 MP)">4.6 µm (40 MP)</option>
-            <option value="5.97" data-es="5.97 µm (24 MP)" data-en="5.97 µm (24 MP)">5.97 µm (24 MP)</option>
-            <option value="3.3" data-es="3.3 µm (APS-C 26 MP)" data-en="3.3 µm (APS-C 26 MP)">3.3 µm (APS-C 26 MP)</option>
-          </select>
-        </label>
-        <label><span data-lang="es">Focal (mm)</span><span data-lang="en">Focal length (mm)</span>
-          <input type="number" id="c6-f" value="28" min="8" max="400" step="1">
-        </label>
-        <label><span data-lang="es">Sujeto más cercano (m)</span><span data-lang="en">Nearest subject (m)</span>
-          <input type="number" id="c6-s" value="2" min="0.2" max="1000" step="any">
-        </label>
-      </div>
-      <div class="readout">
-        <div><b id="c6-ncrit">f/5.6</b><span data-lang="es">diafragma crítico para ese píxel</span><span data-lang="en">critical aperture for that pixel</span></div>
-        <div><b id="c6-nopt">f/12.1</b><span data-lang="es">diafragma óptimo para esa profundidad</span><span data-lang="en">optimum aperture for that depth</span></div>
-        <div><b id="c6-airy">16.2 µm</b><span data-lang="es">disco de Airy en el óptimo</span><span data-lang="en">Airy disc at the optimum</span></div>
-        <div><b id="c6-mtf">61 lp/mm</b><span data-lang="es">MTF50 por difracción en el óptimo</span><span data-lang="en">diffraction MTF50 at the optimum</span></div>
-        <div><b id="c6-nyq">133 lp/mm</b><span data-lang="es">límite de Nyquist del sensor</span><span data-lang="en">sensor Nyquist limit</span></div>
-      </div>
+<div class="panel">
+  <div class="grid">
+    <div class="field"><label for="d-cam"><span data-lang="es">Cámara o modo</span><span data-lang="en">Camera or mode</span></label>
+      <select id="d-cam"></select></div>
+    <div class="field custom" id="d-customwrap">
+      <label for="d-pitch"><span data-lang="es">Paso de píxel (µm)</span><span data-lang="en">Pixel pitch (µm)</span></label><input id="d-pitch" type="number" step="0.01" min="1" max="12" value="3.76">
     </div>
+    <div class="field custom" id="d-customwrap2">
+      <label for="d-mpx"><span data-lang="es">Megapíxeles nominales</span><span data-lang="en">Nominal megapixels</span></label><input id="d-mpx" type="number" step="0.1" min="1" max="400" value="60.3">
+    </div>
+    <div class="field"><label for="d-n"><span data-lang="es">Diafragma:</span><span data-lang="en">Aperture:</span> <span class="v" id="d-nv">f/8</span></label>
+      <input id="d-n" type="range" min="0" max="27" step="1" value="15"></div>
+    <div class="field"><label for="d-lambda"><span data-lang="es">Longitud de onda</span><span data-lang="en">Wavelength</span></label>
+      <select id="d-lambda"><option value="0.45" data-es="450 nm (azul)" data-en="450 nm (blue)">450 nm (azul)</option><option value="0.55" selected data-es="550 nm (verde)" data-en="550 nm (green)">550 nm (verde)</option><option value="0.65" data-es="650 nm (rojo)" data-en="650 nm (red)">650 nm (rojo)</option></select></div>
+    <div class="field"><label for="d-f"><span data-lang="es">Focal (mm)</span><span data-lang="en">Focal length (mm)</span></label><input id="d-f" type="number" min="8" max="600" step="1" value="35"></div>
+    <div class="field"><label for="d-s"><span data-lang="es">Sujeto más cercano que debe salir nítido (m)</span><span data-lang="en">Nearest subject that must be sharp (m)</span></label><input id="d-s" type="number" min="0.2" max="1000" step="any" value="3"></div>
   </div>
-</section></div>
+  <p class="note" data-lang="es">Los modos de una misma cámara (L/M/S-DNG de la M11, 24/48/96 MP del SL3-S) comparten sensor: cambia el paso de píxel efectivo con que se muestrea la imagen, y eso es lo único que la difracción ve.</p>
+  <p class="note" data-lang="en">Modes of the same camera (the M11's L/M/S-DNG, the SL3-S's 24/48/96 MP) share the sensor: what changes is the effective pixel pitch at which the image is sampled, and that is all diffraction sees.</p>
+
+  <div class="readout">
+    <div><b id="d-airy">—</b><span data-lang="es">disco de Airy (µm) · en píxeles</span><span data-lang="en">Airy disc (µm) · in pixels</span></div>
+    <div><b id="d-mtf">—</b><span data-lang="es">MTF de difracción en el Nyquist del sensor</span><span data-lang="en">diffraction MTF at the sensor's Nyquist</span></div>
+    <div><b id="d-mpeff">—</b><span data-lang="es">megapíxeles efectivos a este diafragma</span><span data-lang="en">effective megapixels at this aperture</span></div>
+    <div><b id="d-ncrit">—</b><span data-lang="es">diafragma crítico (Rayleigh = un píxel)</span><span data-lang="en">critical aperture (Rayleigh = one pixel)</span></div>
+    <div><b id="d-nlim">—</b><span data-lang="es">claramente limitado (Rayleigh = dos píxeles)</span><span data-lang="en">clearly limited (Rayleigh = two pixels)</span></div>
+    <div><b id="d-nopt">—</b><span data-lang="es">óptimo geométrico para esa profundidad</span><span data-lang="en">geometric optimum for that depth</span></div>
+  </div>
+</div>
+
+<div class="verdict" id="d-verdict"></div>
+
+<h2 data-lang="es">Megapíxeles efectivos frente al diafragma</h2>
+<h2 data-lang="en">Effective megapixels against aperture</h2>
+<p data-lang="es">La curva de cada sensor es plana hasta su diafragma crítico y cae después como el cuadrado del cociente: cerrar un paso más allá del crítico deja la mitad de los píxeles útiles. Las curvas finas son las referencias del sitio; la gruesa, la cámara elegida. La línea vertical es tu diafragma; la discontinua, el óptimo geométrico para la profundidad pedida.</p>
+<p data-lang="en">Each sensor's curve is flat up to its critical aperture and then falls as the square of the ratio: one stop beyond critical leaves half the useful pixels. The thin curves are the site's reference bodies; the thick one, the chosen camera. The vertical line is your aperture; the dashed one, the geometric optimum for the requested depth.</p>
+<svg class="chart" id="d-chart" viewBox="0 0 760 340" role="img" aria-label="Megapíxeles efectivos frente a diafragma" data-aria-es="Megapíxeles efectivos frente a diafragma" data-aria-en="Effective megapixels against aperture"></svg>
+<div class="legend" id="d-leg"></div>
+
+<h2 data-lang="es">Este sensor, diafragma a diafragma</h2>
+<h2 data-lang="en">This sensor, stop by stop</h2>
+<div class="tscroll"><table>
+  <thead><tr data-lang="es"><th>Diafragma</th><th class="num">Airy (µm)</th><th class="num">Airy / paso</th><th class="num">MTF en Nyquist</th><th class="num">Mpx efectivos</th><th>Estado</th></tr>
+         <tr data-lang="en"><th>Aperture</th><th class="num">Airy (µm)</th><th class="num">Airy / pitch</th><th class="num">MTF at Nyquist</th><th class="num">Effective Mpx</th><th>Status</th></tr></thead>
+  <tbody id="d-rows"></tbody>
+</table></div>
+
+<h2 data-lang="es">Todas las cámaras a este diafragma</h2>
+<h2 data-lang="en">All cameras at this aperture</h2>
+<div class="tscroll"><table>
+  <thead><tr data-lang="es"><th>Cámara o modo</th><th class="num">Paso (µm)</th><th class="num">Nominales</th><th class="num">Efectivos</th><th class="num">Crítico</th><th>Estado</th></tr>
+         <tr data-lang="en"><th>Camera or mode</th><th class="num">Pitch (µm)</th><th class="num">Nominal</th><th class="num">Effective</th><th class="num">Critical</th><th>Status</th></tr></thead>
+  <tbody id="d-cams"></tbody>
+</table></div>
+
+<h2 data-lang="es">Cómo se calcula, y qué no incluye</h2>
+<h2 data-lang="en">How it is computed, and what it leaves out</h2>
+<dl data-lang="es">
+  <dt>Disco de Airy y criterio de Rayleigh</dt><dd>Diámetro hasta el primer cero 2,44·λ·N; resolución de Rayleigh 1,22·λ·N. El diafragma crítico es aquel en que Rayleigh iguala el paso de píxel (N = 0,82·p/λ, es decir 1,49·p a 550 nm); a partir de ahí el sensor deja de aprovechar toda su resolución, y cuando Rayleigh dobla el paso la pérdida es clara.</dd>
+  <dt>MTF de difracción</dt><dd>Para una pupila circular, MTF(ν) = (2/π)·[arccos(x) − x·√(1 − x²)] con x = ν·λ·N. Se evalúa en el Nyquist del sensor, 1/(2p): es el porcentaje de contraste que la óptica perfecta deja en el detalle más fino que el sensor puede registrar, antes de descontar las aberraciones reales del objetivo.</dd>
+  <dt>Megapíxeles efectivos</dt><dd>Nominales × mín(1, (N<sub>crítico</sub>/N)²). Equivale a tomar como límite de resolución el MTF50 de la difracción (0,404/(λN)) y compararlo con el Nyquist del sensor; coincide con el umbral de Rayleigh. Es una estimación de orden de magnitud, no una medida: un objetivo real rinde menos a plena abertura y puede compensar parte con nitidez de procesado.</dd>
+  <dt>Óptimo geométrico para la profundidad</dt><dd>N ≈ 0,61·f/√s, con f en mm y s la distancia en metros al sujeto más cercano que debe salir nítido, enfocando en el punto óptimo (no en el primer plano). Minimiza en cuadratura el desenfoque geométrico frente a la difracción. Cuando queda por encima del crítico, no hay diafragma que dé a la vez toda la profundidad y todo el detalle: se elige, o se apilan enfoques.</dd>
+  <dt>Modos de alta resolución</dt><dd>El multishot de 96 MP del SL3-S muestrea con paso efectivo p/2; los 48 MP conservan el paso y ganan color RGB completo y un paso de relación señal/ruido sin exigir nada a la óptica. Los M-DNG y S-DNG de la M11 equivalen a pasos efectivos de 4,85 y 6,86 µm. Ver las pestañas de multishot y de Triple Resolution para el detalle de cada mecanismo.</dd>
+</dl>
+<dl data-lang="en">
+  <dt>Airy disc and Rayleigh criterion</dt><dd>Diameter to the first zero 2.44·λ·N; Rayleigh resolution 1.22·λ·N. The critical aperture is the one where Rayleigh equals the pixel pitch (N = 0.82·p/λ, i.e. 1.49·p at 550 nm); from there the sensor no longer uses all its resolution, and when Rayleigh doubles the pitch the loss is clear.</dd>
+  <dt>Diffraction MTF</dt><dd>For a circular pupil, MTF(ν) = (2/π)·[arccos(x) − x·√(1 − x²)] with x = ν·λ·N. It is evaluated at the sensor's Nyquist, 1/(2p): the percentage of contrast a perfect lens leaves in the finest detail the sensor can record, before discounting the real lens aberrations.</dd>
+  <dt>Effective megapixels</dt><dd>Nominal × min(1, (N<sub>critical</sub>/N)²). Equivalent to taking the diffraction MTF50 (0.404/(λN)) as the resolution limit and comparing it with the sensor's Nyquist; it coincides with the Rayleigh threshold. An order-of-magnitude estimate, not a measurement: a real lens delivers less wide open and can recover part of it with processing sharpening.</dd>
+  <dt>Geometric optimum for depth</dt><dd>N ≈ 0.61·f/√s, with f in mm and s the distance in metres to the nearest subject that must be sharp, focusing at the optimum point (not on the foreground). It minimises geometric defocus against diffraction in quadrature. When it lies above critical, no aperture gives full depth and full detail at once: you choose, or focus-stack.</dd>
+  <dt>High-resolution modes</dt><dd>The SL3-S's 96 MP multishot samples at an effective pitch of p/2; the 48 MP keep the pitch and gain full RGB colour and one stop of signal-to-noise without asking anything of the lens. The M11's M-DNG and S-DNG are equivalent to effective pitches of 4.85 and 6.86 µm. See the multishot and Triple Resolution tabs for the detail of each mechanism.</dd>
+</dl>
+</main>
+
+</div>
 </section>
 
 <div class="shell-foot">
-  <span data-lang="es">Antes eran tres páginas (datos del sensor, multishot, binning) y una calculadora de difracción repetida en cada una; los enlaces antiguos redirigen aquí. Relacionadas: <a href="filtro-sensor.html">el filtro del sensor y el ND</a>, <a href="sensor-al-papel.html">del sensor al papel</a> y el <a href="manual-siril-apilado.html">manual de Siril</a>.</span>
-  <span data-lang="en">These used to be three pages (sensor data, multishot, binning) with a diffraction calculator repeated in each; the old links redirect here. Related: <a href="filtro-sensor.html">the sensor filter and the ND</a>, <a href="sensor-al-papel.html">from sensor to paper</a> and the <a href="manual-siril-apilado.html">Siril manual</a>.</span>
+  <span data-lang="es">Antes eran tres páginas (datos del sensor, multishot, binning) y una calculadora de difracción repetida en cada una, hoy unificada y ampliada; los enlaces antiguos redirigen aquí. Relacionadas: <a href="filtro-sensor.html">el filtro del sensor y el ND</a>, <a href="sensor-al-papel.html">del sensor al papel</a> y el <a href="manual-siril-apilado.html">manual de Siril</a>.</span>
+  <span data-lang="en">These used to be three pages (sensor data, multishot, binning) with a diffraction calculator repeated in each, now unified and extended; the old links redirect here. Related: <a href="filtro-sensor.html">the sensor filter and the ND</a>, <a href="sensor-al-papel.html">from sensor to paper</a> and the <a href="manual-siril-apilado.html">Siril manual</a>.</span>
 </div>
 <script>
 (function(){
@@ -1298,13 +1302,13 @@ function dif(){
     tb.appendChild(tr);
   }
 }
-$("fnum").addEventListener("input",dif); $("lambda").addEventListener("change",dif); dif();
+/* la sección de difracción vive ahora en la pestaña propia */
 relabelIso();
 window.onLangChange_sens=function(){
   buildSpec(); relabelIso();
   rnChart.options.scales.y.title.text=L("yRn"); rnChart.update();
   pdrChart.options.scales.y.title.text=L("yPdr"); pdrChart.update();
-  calc(); dif();
+  calc();
 };
 
 })();
@@ -1915,30 +1919,130 @@ READY=true;
 update();
 
 })();
+
 (function(){
-const $=(id)=>document.getElementById(id);
-const LAMBDA_REF=0.55;
-function airyDiameter(N){return 2.44*LAMBDA_REF*N;}
-function nCritical(pitchUm){return 2*pitchUm/(2.44*LAMBDA_REF);}
-function nOptimo(fmm,sMetros){return 0.61*fmm/Math.sqrt(sMetros);}
-function mtf50Diff(N){return 0.404/(LAMBDA_REF*1e-3*N);}
-function fmtF(N){return 'f/'+(N>=10?N.toFixed(0):N.toFixed(1));}
-function updateC6() {
-  const p = parseFloat($('c6-pitch').value);
-  const f = parseFloat($('c6-f').value) || 28;
-  const s = parseFloat($('c6-s').value) || 2;
-  const nc = nCritical(p), no = nOptimo(f, s);
-  $('c6-ncrit').textContent = fmtF(nc);
-  $('c6-nopt').textContent = fmtF(no);
-  $('c6-airy').textContent = airyDiameter(no).toFixed(1) + ' µm';
-  $('c6-mtf').textContent = Math.round(mtf50Diff(no)) + ' lp/mm';
-  $('c6-nyq').textContent = Math.round(1000 / (2 * p)) + ' lp/mm';
+"use strict";
+const $=id=>document.getElementById(id);
+const LANG=()=>document.documentElement.lang==="en"?"en":"es";
+const LOC=()=>LANG()==="en"?"en-GB":"es-ES";
+const nf=(x,d)=>Number.isFinite(x)?x.toLocaleString(LOC(),{minimumFractionDigits:d,maximumFractionDigits:d}):"—";
+const fN=N=>"f/"+(N>=10?N.toFixed(0):(Math.abs(N-Math.round(N))<0.05?String(Math.round(N)):N.toFixed(1)));
+const D={
+ es:{ok:"sin limitación",warn:"pérdida parcial",bad:"limitado por difracción",
+     v_title:(c,N)=>`${c} a ${N}`,
+     v_state:(a,ap,mtf,me,mp,st)=>`El disco de Airy mide ${a} µm, ${ap} píxeles. La difracción deja un ${mtf} % de contraste en el detalle más fino del sensor, que rinde unos <b>${me} Mpx efectivos de ${mp}</b>: ${st}.`,
+     v_close_ok:(nc,nl)=>`Puedes cerrar hasta <b>${nc}</b> sin perder detalle; a partir de ${nl} la pérdida es clara. Más cerrado solo se gana profundidad de campo a cambio de resolución.`,
+     v_close_warn:(nc,nl)=>`Ya estás pasado del diafragma crítico (${nc}). Hasta ${nl} la pérdida es moderada; más allá, cada paso deja la mitad de los píxeles útiles.`,
+     v_close_bad:(nc)=>`Cerrar más ya no aporta nada: este sensor rinde todo su detalle solo hasta ${nc}. Si necesitas la profundidad, asume la pérdida o apila enfoques.`,
+     v_dof_ok:(no,nc)=>`Para que salga nítido desde el sujeto más cercano, el óptimo geométrico es <b>${no}</b>, dentro de la zona sin pérdida: ese es el diafragma.`,
+     v_dof_conf:(no,nc,me)=>`El óptimo geométrico para esa profundidad es <b>${no}</b>, por encima del crítico (${nc}): no hay diafragma que dé a la vez toda la profundidad y todo el detalle. A ${no} rendirías ~${me} Mpx; si el detalle importa, dispara a ${nc} y apila enfoques.`,
+     v_hires_yes:(mode,mtf,me)=>`<b>${mode}</b>: la difracción deja ${mtf} % en su Nyquist y rendiría ~${me} Mpx efectivos. Merece la pena, si la óptica y la escena estática lo permiten.`,
+     v_hires_partial:(mode,mtf,me)=>`<b>${mode}</b>: solo ${mtf} % de contraste en su Nyquist, ~${me} Mpx efectivos. Aporta algo de detalle, decreciente; el color RGB completo y el paso de SNR del modo de 48 MP se conservan igual con la mitad de tomas.`,
+     v_hires_no:(mode,mtf)=>`<b>${mode}</b>: ${mtf} % de contraste en su Nyquist. A este diafragma no añade detalle; quédate en 48 MP (color completo, un paso de SNR) o en el nativo.`,
+     v_m11:(me)=>`Con ~${me} Mpx efectivos, el <b>M-DNG (36 Mpx)</b> ${me>=34?"perdería detalle real: mantén el L-DNG":"no pierde nada"}; el <b>S-DNG (18 Mpx)</b> ${me>=17?"sí recortaría":"tampoco pierde nada"}. A este diafragma ${me<34?"el archivo de 60 Mpx solo pesa más":"los 60 Mpx se aprovechan"}.`,
+     v_sl3s_48:"El modo de 48 MP no depende de la difracción: con escena estática siempre aporta color RGB completo y un paso de relación señal/ruido.",
+     leg_sel:"cámara elegida",leg_n:"tu diafragma",leg_opt:"óptimo geométrico",
+     x:"diafragma",y:"Mpx efectivos",
+     cams:{m11:"Leica M11 / Q3 / SL3 · L-DNG 60 Mpx",m11m:"Leica M11 · M-DNG 36 Mpx",m11s:"Leica M11 · S-DNG 18 Mpx",sl3s:"Leica SL3-S · 24 Mpx nativo",sl3s96:"Leica SL3-S · multishot 96 Mpx",ff45:"Formato completo 45 Mpx (4,35 µm)",apsc40:"APS-C 40 Mpx (3,04 µm)",apsc26:"APS-C 26 Mpx (3,76 µm)",m43:"Micro 4/3 20 Mpx (3,3 µm)",custom:"Personalizado…"}},
+ en:{ok:"no limitation",warn:"partial loss",bad:"diffraction-limited",
+     v_title:(c,N)=>`${c} at ${N}`,
+     v_state:(a,ap,mtf,me,mp,st)=>`The Airy disc measures ${a} µm, ${ap} pixels. Diffraction leaves ${mtf} % contrast in the sensor's finest detail, which delivers about <b>${me} effective Mpx out of ${mp}</b>: ${st}.`,
+     v_close_ok:(nc,nl)=>`You can stop down to <b>${nc}</b> without losing detail; from ${nl} the loss is clear. Further than that you only buy depth of field with resolution.`,
+     v_close_warn:(nc,nl)=>`You are already past the critical aperture (${nc}). Up to ${nl} the loss is moderate; beyond it, each stop leaves half the useful pixels.`,
+     v_close_bad:(nc)=>`Stopping down further gains nothing: this sensor delivers all its detail only up to ${nc}. If you need the depth, accept the loss or focus-stack.`,
+     v_dof_ok:(no,nc)=>`For sharpness from the nearest subject, the geometric optimum is <b>${no}</b>, within the loss-free zone: that is the aperture.`,
+     v_dof_conf:(no,nc,me)=>`The geometric optimum for that depth is <b>${no}</b>, above critical (${nc}): no aperture gives full depth and full detail at once. At ${no} you would get ~${me} Mpx; if detail matters, shoot at ${nc} and focus-stack.`,
+     v_hires_yes:(mode,mtf,me)=>`<b>${mode}</b>: diffraction leaves ${mtf} % at its Nyquist and it would deliver ~${me} effective Mpx. Worth it, if the lens and a static scene allow.`,
+     v_hires_partial:(mode,mtf,me)=>`<b>${mode}</b>: only ${mtf} % contrast at its Nyquist, ~${me} effective Mpx. It adds some detail, decreasing; the full RGB colour and the SNR stop of the 48 MP mode are kept just the same with half the frames.`,
+     v_hires_no:(mode,mtf)=>`<b>${mode}</b>: ${mtf} % contrast at its Nyquist. At this aperture it adds no detail; stay at 48 MP (full colour, one stop of SNR) or native.`,
+     v_m11:(me)=>`With ~${me} effective Mpx, the <b>M-DNG (36 Mpx)</b> ${me>=34?"would lose real detail: keep the L-DNG":"loses nothing"}; the <b>S-DNG (18 Mpx)</b> ${me>=17?"would clip":"loses nothing either"}. At this aperture ${me<34?"the 60 Mpx file only weighs more":"the 60 Mpx are put to use"}.`,
+     v_sl3s_48:"The 48 MP mode does not depend on diffraction: with a static scene it always adds full RGB colour and one stop of signal-to-noise.",
+     leg_sel:"chosen camera",leg_n:"your aperture",leg_opt:"geometric optimum",
+     x:"aperture",y:"effective Mpx",
+     cams:{m11:"Leica M11 / Q3 / SL3 · L-DNG 60 Mpx",m11m:"Leica M11 · M-DNG 36 Mpx",m11s:"Leica M11 · S-DNG 18 Mpx",sl3s:"Leica SL3-S · 24 Mpx native",sl3s96:"Leica SL3-S · 96 Mpx multishot",ff45:"Full frame 45 Mpx (4.35 µm)",apsc40:"APS-C 40 Mpx (3.04 µm)",apsc26:"APS-C 26 Mpx (3.76 µm)",m43:"Micro 4/3 20 Mpx (3.3 µm)",custom:"Custom…"}}
+};
+const T=k=>D[LANG()][k];
+const CAMS=[
+ {id:"m11",p:3.76,mp:60.3,fam:"m11",ref:true,color:"#4C9A3B"},
+ {id:"m11m",p:4.85,mp:36.3,fam:"m11",color:"#8DBE84"},
+ {id:"m11s",p:6.86,mp:18.4,fam:"m11",color:"#C3DDBE"},
+ {id:"sl3s",p:5.94,mp:24.6,fam:"sl3s",ref:true,color:"#3C7BC7"},
+ {id:"sl3s96",p:2.97,mp:96.0,fam:"sl3s",ref:true,color:"#8FB6E6"},
+ {id:"ff45",p:4.35,mp:45.0,fam:null,color:"#999"},
+ {id:"apsc40",p:3.04,mp:40.2,fam:null,color:"#999"},
+ {id:"apsc26",p:3.76,mp:26.1,fam:null,color:"#999"},
+ {id:"m43",p:3.3,mp:20.3,fam:null,color:"#999"},
+ {id:"custom",p:3.76,mp:60.3,fam:null,color:"#B5432F"}
+];
+const FSTOPS=[1.4,1.6,1.8,2,2.2,2.5,2.8,3.2,3.5,4,4.5,5,5.6,6.3,7.1,8,9,10,11,13,14,16,18,20,22,25,29,32];
+const sel=$("d-cam");
+function fillCams(){const cur=sel.value; sel.innerHTML=""; CAMS.forEach(c=>{const o=document.createElement("option");o.value=c.id;o.textContent=T("cams")[c.id];sel.appendChild(o);}); sel.value=cur||"m11";}
+fillCams();
+function relabelOptions(){document.querySelectorAll(".part-dif option[data-es], #d-lambda option[data-es]").forEach(o=>{o.textContent=o.getAttribute("data-"+LANG())||o.textContent;});}
+/* física */
+const airy=(lam,N)=>2.44*lam*N;                       // µm
+const nCrit=(p,lam)=>p/(1.22*lam);                    // Rayleigh = p
+const mtfDiff=(nu,lam,N)=>{const x=nu*lam*1e-3*N; return x>=1?0:(2/Math.PI)*(Math.acos(x)-x*Math.sqrt(1-x*x));}; // nu en lp/mm
+const nyq=p=>1000/(2*p);
+const mpEff=(mp,p,lam,N)=>mp*Math.min(1,Math.pow(nCrit(p,lam)/N,2));
+const nOpt=(f,s)=>0.61*f/Math.sqrt(s);
+const state=(p,lam,N)=>{const r=1.22*lam*N/p; return r<=1?"ok":(r<=2?"warn":"bad");};
+const tag=k=>`<span class="tag ${k}">${T(k)}</span>`;
+function cam(){const c=CAMS.find(x=>x.id===sel.value); if(c.id==="custom"){c.p=+$("d-pitch").value||3.76;c.mp=+$("d-mpx").value||60;} return c;}
+function nearestStop(N){let b=FSTOPS[0];for(const s of FSTOPS){if(Math.abs(Math.log(s/N))<Math.abs(Math.log(b/N)))b=s;}return b;}
+function update(){
+  const c=cam(), N=FSTOPS[+$("d-n").value], lam=+$("d-lambda").value, f=+$("d-f").value||35, s=+$("d-s").value||3;
+  const custom=c.id==="custom"; $("d-customwrap").classList.toggle("on",custom); $("d-customwrap2").classList.toggle("on",custom);
+  $("d-nv").textContent=fN(N);
+  const a=airy(lam,N), nc=nCrit(c.p,lam), nl=2*nc, mtf=mtfDiff(nyq(c.p),lam,N), me=mpEff(c.mp,c.p,lam,N), no=nOpt(f,s), st=state(c.p,lam,N);
+  $("d-airy").innerHTML=nf(a,1)+" <small>· "+nf(a/c.p,1)+" px</small>";
+  $("d-mtf").textContent=nf(mtf*100,0)+" %";
+  $("d-mpeff").innerHTML=nf(me,1)+" <small>/ "+nf(c.mp,1)+"</small>";
+  $("d-ncrit").textContent=fN(nc);
+  $("d-nlim").textContent=fN(nl);
+  $("d-nopt").textContent=fN(no);
+  /* veredicto */
+  let h=`<h3>${T("v_title")(T("cams")[c.id],fN(N))}</h3>`;
+  h+=`<p>${T("v_state")(nf(a,1),nf(a/c.p,1),nf(mtf*100,0),nf(me,0),nf(c.mp,0),tag(st))}</p>`;
+  h+=`<p>${st==="ok"?T("v_close_ok")(fN(nc),fN(nl)):st==="warn"?T("v_close_warn")(fN(nc),fN(nl)):T("v_close_bad")(fN(nc))}</p>`;
+  h+=`<p>${no<=nc?T("v_dof_ok")(fN(no),fN(nc)):T("v_dof_conf")(fN(no),fN(nc),nf(mpEff(c.mp,c.p,lam,no),0))}</p>`;
+  if(c.fam==="sl3s"){
+    const p96=2.97, mtf96=mtfDiff(nyq(p96),lam,N), me96=mpEff(96,p96,lam,N), mode=LANG()==="en"?"96 MP multishot":"Multishot de 96 MP";
+    h+=`<p>${mtf96>=0.3?T("v_hires_yes")(mode,nf(mtf96*100,0),nf(me96,0)):mtf96>=0.1?T("v_hires_partial")(mode,nf(mtf96*100,0),nf(me96,0)):T("v_hires_no")(mode,nf(mtf96*100,0))}</p><p>${T("v_sl3s_48")}</p>`;
+  }
+  if(c.fam==="m11"){ const me60=mpEff(60.3,3.76,lam,N); h+=`<p>${T("v_m11")(nf(me60,0))}</p>`; }
+  $("d-verdict").innerHTML=h;
+  /* tabla por diafragma */
+  $("d-rows").innerHTML=FSTOPS.filter((x,i)=>i%1===0).map(x=>{const k=state(c.p,lam,x);return `<tr class="${x===N?"sel":""}"><td>${fN(x)}</td><td class="num">${nf(airy(lam,x),1)}</td><td class="num">${nf(airy(lam,x)/c.p,2)}</td><td class="num">${nf(mtfDiff(nyq(c.p),lam,x)*100,0)} %</td><td class="num">${nf(mpEff(c.mp,c.p,lam,x),1)}</td><td>${tag(k)}</td></tr>`;}).join("");
+  /* tabla de cámaras */
+  $("d-cams").innerHTML=CAMS.filter(x=>x.id!=="custom"||custom).map(x=>{const k=state(x.p,lam,N);return `<tr class="${x.id===c.id?"sel":""}"><td>${T("cams")[x.id]}</td><td class="num">${nf(x.p,2)}</td><td class="num">${nf(x.mp,1)}</td><td class="num">${nf(mpEff(x.mp,x.p,lam,N),1)}</td><td class="num">${fN(nCrit(x.p,lam))}</td><td>${tag(k)}</td></tr>`;}).join("");
+  chart(c,lam,N,no);
 }
-function bind(ids,fn){for(const id of ids){const el=$(id);el.addEventListener('input',fn);el.addEventListener('change',fn);}}
-function relabel(){const l=document.documentElement.lang==='en'?'en':'es';document.querySelectorAll('.part-nd6 option[data-es]').forEach(o=>{o.textContent=o.getAttribute('data-'+l)||o.textContent;});}
-document.addEventListener('DOMContentLoaded',()=>{bind(['c6-pitch','c6-f','c6-s'],updateC6);relabel();updateC6();});
-window.onLangChange_nd6=function(){relabel();updateC6();};
+function chart(c,lam,N,no){
+  const W=760,H=340,L=54,R=16,Tp=16,B=44;
+  const xs=v=>L+(Math.log(v)-Math.log(1.4))/(Math.log(32)-Math.log(1.4))*(W-L-R);
+  const ymax=Math.max(100,Math.ceil(Math.max(c.mp,96)/10)*10);
+  const ys=v=>H-B-(v/ymax)*(H-B-Tp);
+  let s="";
+  for(let v=0;v<=ymax;v+=20){s+=`<line x1="${L}" x2="${W-R}" y1="${ys(v).toFixed(1)}" y2="${ys(v).toFixed(1)}" stroke="#E3E8ED"/><text x="${L-6}" y="${(ys(v)+4).toFixed(1)}" text-anchor="end">${v}</text>`;}
+  [1.4,2,2.8,4,5.6,8,11,16,22,32].forEach(v=>{s+=`<line x1="${xs(v).toFixed(1)}" x2="${xs(v).toFixed(1)}" y1="${Tp}" y2="${H-B}" stroke="#EEF1F3"/><text x="${xs(v).toFixed(1)}" y="${H-B+16}" text-anchor="middle">f/${v}</text>`;});
+  s+=`<line x1="${L}" x2="${L}" y1="${Tp}" y2="${H-B}" stroke="#5F6662"/><line x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}" stroke="#5F6662"/>`;
+  s+=`<text x="${(L+W-R)/2}" y="${H-6}" text-anchor="middle">${T("x")}</text><text transform="translate(12 ${(Tp+H-B)/2}) rotate(-90)" text-anchor="middle">${T("y")}</text>`;
+  const refs=CAMS.filter(x=>x.ref&&x.id!==c.id);
+  const curve=(x)=>{let d="";for(let i=0;i<=120;i++){const n=1.4*Math.pow(32/1.4,i/120);const v=mpEff(x.mp,x.p,lam,n);d+=(i?"L":"M")+xs(n).toFixed(1)+" "+ys(Math.min(v,ymax)).toFixed(1);}return d;};
+  refs.forEach(x=>{s+=`<path d="${curve(x)}" fill="none" stroke="${x.color}" stroke-width="1.4" opacity=".8"/>`;});
+  s+=`<path d="${curve(c)}" fill="none" stroke="${c.color==="#999"?"#1B1D1B":c.color}" stroke-width="3"/>`;
+  s+=`<line x1="${xs(N).toFixed(1)}" x2="${xs(N).toFixed(1)}" y1="${Tp}" y2="${H-B}" stroke="#1B1D1B" stroke-width="1.2"/>`;
+  if(no>=1.4&&no<=32) s+=`<line x1="${xs(no).toFixed(1)}" x2="${xs(no).toFixed(1)}" y1="${Tp}" y2="${H-B}" stroke="#B8861B" stroke-width="1.4" stroke-dasharray="5 4"/>`;
+  const me=mpEff(c.mp,c.p,lam,N); s+=`<circle cx="${xs(N).toFixed(1)}" cy="${ys(Math.min(me,ymax)).toFixed(1)}" r="5" fill="#1B1D1B"/>`;
+  $("d-chart").innerHTML=s;
+  $("d-leg").innerHTML=`<span><i style="border-color:${c.color==="#999"?"#1B1D1B":c.color};border-top-width:3px"></i>${T("cams")[c.id]} (${T("leg_sel")})</span>`+refs.map(x=>`<span><i style="border-color:${x.color}"></i>${T("cams")[x.id]}</span>`).join("")+`<span><i style="border-color:#1B1D1B"></i>${T("leg_n")}</span><span><i style="border-color:#B8861B;border-top-style:dashed"></i>${T("leg_opt")}</span>`;
+}
+["d-cam","d-pitch","d-mpx","d-n","d-lambda","d-f","d-s"].forEach(id=>{$(id).addEventListener("input",update);$(id).addEventListener("change",update);});
+relabelOptions(); update();
+window.onLangChange_dif=function(){fillCams();relabelOptions();update();};
 })();
+
 </script>
 <script>
 /* ---------- pestañas ---------- */
@@ -1966,8 +2070,8 @@ window.onLangChange_nd6=function(){relabel();updateC6();};
 (function(){
   var KEY="pn-lang";
   var META={
-    es:{ title:"El sensor: ruido, desplazamiento de píxel, binning y difracción", desc:"Lo que hace el sensor con los fotones, en una sola página: ruido de lectura y rango dinámico de M11, Q3 y SL3-S según PhotonsToPhotos con calculadora SNR; el multishot del SL3-S (48 y 96 MP, √N, Nyquist, deriva sidérea, software de apilado); la Triple Resolution de la M11 (binning o remuestreo) y una calculadora común de difracción y diafragma óptimo." },
-    en:{ title:"The sensor: noise, pixel shift, binning and diffraction", desc:"What the sensor does with photons, on one page: read noise and dynamic range of the M11, Q3 and SL3-S per PhotonsToPhotos with an SNR calculator; the SL3-S multishot (48 and 96 MP, √N, Nyquist, sidereal drift, stacking software); the M11 Triple Resolution (binning or resampling) and a shared diffraction and optimum-aperture calculator." }
+    es:{ title:"El sensor: ruido, desplazamiento de píxel, binning y difracción", desc:"Lo que hace el sensor con los fotones, en una sola página: ruido de lectura y rango dinámico de M11, Q3 y SL3-S según PhotonsToPhotos con calculadora SNR; el multishot del SL3-S (48 y 96 MP, √N, Nyquist, deriva sidérea, software de apilado); la Triple Resolution de la M11 (binning o remuestreo) y una calculadora de difracción que dice, para cada sensor y modo, hasta qué diafragma cerrar, cuántos megapíxeles rinde de verdad y cuándo merece la pena el multishot." },
+    en:{ title:"The sensor: noise, pixel shift, binning and diffraction", desc:"What the sensor does with photons, on one page: read noise and dynamic range of the M11, Q3 and SL3-S per PhotonsToPhotos with an SNR calculator; the SL3-S multishot (48 and 96 MP, √N, Nyquist, sidereal drift, stacking software); the M11 Triple Resolution (binning or resampling) and a diffraction calculator that says, for each sensor and mode, how far to stop down, how many megapixels it really delivers and when multishot is worth it." }
   };
   function apply(l){
     document.documentElement.lang=l;
@@ -1980,7 +2084,7 @@ window.onLangChange_nd6=function(){relabel();updateC6();};
       b.classList.toggle("on",on);
       b.setAttribute("aria-pressed",on?"true":"false");
     });
-    if(window.onLangChange_sens) window.onLangChange_sens(l); if(window.onLangChange_ms) window.onLangChange_ms(l); if(window.onLangChange_bn) window.onLangChange_bn(l); if(window.onLangChange_nd6) window.onLangChange_nd6(l);
+    if(window.onLangChange_sens) window.onLangChange_sens(l); if(window.onLangChange_ms) window.onLangChange_ms(l); if(window.onLangChange_bn) window.onLangChange_bn(l); if(window.onLangChange_dif) window.onLangChange_dif(l);
   }
   [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
     b.addEventListener("click",function(){

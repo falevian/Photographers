@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27b%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%270%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%231b2029%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%2312171e%27%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%2764%27%20height%3D%2764%27%20rx%3D%2713%27%20fill%3D%27url%28%23b%29%27%2F%3E%3Crect%20x%3D%2716%27%20y%3D%2716%27%20width%3D%2714%27%20height%3D%2714%27%20rx%3D%272%27%20fill%3D%27%2359b6e8%27%20opacity%3D%27.95%27%2F%3E%3Crect%20x%3D%2734%27%20y%3D%2716%27%20width%3D%2714%27%20height%3D%2714%27%20rx%3D%272%27%20fill%3D%27%2359b6e8%27%20opacity%3D%27.7%27%2F%3E%3Crect%20x%3D%2716%27%20y%3D%2734%27%20width%3D%2714%27%20height%3D%2714%27%20rx%3D%272%27%20fill%3D%27%2359b6e8%27%20opacity%3D%27.5%27%2F%3E%3Crect%20x%3D%2734%27%20y%3D%2734%27%20width%3D%2714%27%20height%3D%2714%27%20rx%3D%272%27%20fill%3D%27%2359b6e8%27%20opacity%3D%27.3%27%2F%3E%3C%2Fsvg%3E">
+<link rel="apple-touch-icon" href="icons/binning-m11-180.png">
+<meta name="theme-color" content="#e9ecef">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Binning M11">
+<meta name="author" content="Rafael Vida">
+<title>Triple Resolution de la Leica M11: ¿binning o remuestreo? Modelo frente a medidas</title>
+<meta name="description" content="Simulador del Triple Resolution de la Leica M11 (L-DNG 60 Mpx, M-DNG 36, S-DNG 18): modelo de transferencia fotónica, ganancia real del remuestreo del Maestro III frente al binning ideal, y comparación con las medidas del artículo.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Photographers">
+<meta property="og:title" content="Triple Resolution de la Leica M11: ¿binning o remuestreo? Modelo frente a medidas">
+<meta property="og:description" content="Simulador del Triple Resolution de la Leica M11 (L-DNG 60 Mpx, M-DNG 36, S-DNG 18): modelo de transferencia fotónica, ganancia real del remuestreo del Maestro III frente al binning ideal, y comparación con las medidas del artículo.">
+<meta property="og:url" content="https://falevian.github.io/Photographers/binning-m11.html">
+<meta property="og:image" content="https://falevian.github.io/Photographers/og/binning.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="es_ES">
+<meta property="og:locale:alternate" content="en_GB">
+<meta name="twitter:card" content="summary_large_image">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
+<style>
+  :root{
+    --bg:#e9ecef; --panel:#f7f8f9; --ink:#1b2430; --mute:#5b6773; --line:#c9d0d6;
+    --sag:#0b6e99; --tan:#b3541e; --col:#7a3d9e; --sph:#2f7d4a; --ref:#8a949c; --eff:#a8871a;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#14181c; --panel:#1d2329; --ink:#e6eaee; --mute:#98a3ad; --line:#3a444d;
+      --sag:#4fb0dc; --tan:#e08a52; --col:#b58ad6; --sph:#6cc48a; --ref:#7d878f; --eff:#d6b24a; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14.5px/1.5 "IBM Plex Sans","Segoe UI",system-ui,sans-serif}
+  header{padding:24px 28px 6px;max-width:1300px;margin:0 auto}
+  h1{font-size:23px;line-height:1.2;margin:0 0 6px;font-weight:600}
+  header p{margin:0;color:var(--mute);max-width:960px}
+  main{max-width:1300px;margin:0 auto;padding:12px 28px 40px;display:grid;grid-template-columns:350px 1fr;gap:20px}
+  @media (max-width:960px){main{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px 18px}
+  .panel h2{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--mute);margin:0 0 10px;font-weight:600}
+  h3{font-size:13px;margin:16px 0 4px;font-weight:600}
+  label{display:block;font-size:12.5px;color:var(--mute);margin-top:9px}
+  label span.v{float:right;color:var(--ink);font-family:"IBM Plex Mono",ui-monospace,monospace}
+  input[type=range]{width:100%;margin:3px 0 0}
+  input[type=number]{width:100%;margin-top:3px;padding:4px 6px;border:1px solid var(--line);border-radius:4px;background:transparent;color:var(--ink);font:inherit;font-size:13px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  canvas{width:100%;height:auto;display:block;background:var(--panel)}
+  .grid2{display:grid;grid-template-columns:1fr;gap:20px}
+  table.res{width:100%;border-collapse:collapse;font-size:13px}
+  table.res th{font-weight:500;color:var(--mute);text-align:right;padding:5px 4px;border-bottom:1px solid var(--line)}
+  table.res th:first-child{text-align:left}
+  table.res td{padding:5px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.res td:not(:first-child){text-align:right;font-family:"IBM Plex Mono",ui-monospace,monospace;white-space:nowrap}
+  table.res td.k{color:var(--mute)}
+  .legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--mute);margin:8px 0 0}
+  .legend i{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:5px;border-radius:2px}
+  .legend i.dash{background:repeating-linear-gradient(90deg,var(--ref) 0 4px,transparent 4px 8px)!important}
+  .note{font-size:12.5px;color:var(--mute);margin-top:10px}
+  .note b{color:var(--ink);font-weight:600}
+  .verdict{margin-top:12px;padding:10px 12px;border-left:3px solid var(--tan);font-size:13.5px}
+  code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px}
+  .sim{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .sim figure{margin:0}.sim figcaption{font-size:12px;color:var(--mute);margin-top:4px;text-align:center}
+  .sim canvas{image-rendering:pixelated;border:1px solid var(--line)}
+  button{font:inherit;font-size:13px;padding:6px 10px;border:1px solid var(--line);border-radius:4px;background:transparent;color:var(--ink);cursor:pointer;margin-right:8px;margin-top:8px}
+  button:hover{background:var(--line)}
+  .tbls{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+  @media (max-width:720px){.tbls{grid-template-columns:1fr}}
+  a{color:var(--sag)}
+  .okc{color:var(--sph)} .badc{color:var(--tan)}
+
+  /* ---------- conmutador de idioma ---------- */
+  html[lang="es"] [data-lang="en"]{display:none!important}
+  html[lang="en"] [data-lang="es"]{display:none!important}
+  /* Como en stack-sensor.html: el conmutador va dentro del <header>, en flujo
+     normal, para no tapar ningún control ni en escritorio ni en móvil. */
+  .hbar{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap}
+  .hbar h1{flex:1 1 520px}
+  .langbar{display:flex;flex:0 0 auto;margin-top:2px;background:var(--panel);
+           border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .langbar button{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;
+                  letter-spacing:.09em;background:transparent;border:0;color:var(--mute);
+                  padding:7px 11px;margin:0;cursor:pointer;transition:background .15s,color .15s}
+  .langbar button+button{border-left:1px solid var(--line)}
+  .langbar button:hover{background:transparent;color:var(--ink)}
+  .langbar button.on{background:var(--line);color:var(--tan)}
+  .langbar button:focus-visible{outline:2px solid var(--tan);outline-offset:-2px}
+  header p.srclinks{margin:9px 0 0;font-size:12.5px;display:flex;gap:16px;flex-wrap:wrap}
+  .srclinks a{color:var(--sag);text-decoration:none;border-bottom:1px solid var(--line)}
+  .srclinks a:hover{color:var(--tan);border-bottom-color:var(--tan)}
+  @media print{.langbar{display:none!important}}
+
+  /* enlace a la portada, dentro del conmutador de idioma */
+  .langbar a.home{display:flex;align-items:center;padding:0 9px;color:currentColor;
+                  opacity:.62;border-right:1px solid rgba(125,132,140,.35);background:none}
+  .langbar a.home:hover{opacity:1}
+  .langbar a.home svg{width:12px;height:12px;display:block;background:none;border:0;border-radius:0}
+</style>
+</head>
+<body>
+<header>
+  <div class="hbar">
+    <h1 data-lang="es">Triple Resolution de la Leica M11: ¿binning o remuestreo? Modelo frente a medidas</h1>
+    <h1 data-lang="en">Leica M11 Triple Resolution: binning or resampling? Model against measurements</h1>
+    <div class="langbar" role="group" aria-label="Idioma / Language">
+  <a class="home" href="index.html" title="Portada / Home" aria-label="Portada / Home"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.5 8 2.5l5.5 5v6h-4v-4h-3v4h-4z"/></svg></a>
+      <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+      <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+  <p data-lang="es">La Leica M11 escribe tres tamaños de DNG desde el mismo sensor de 60 Mpx: L-DNG (60), M-DNG (36) y S-DNG (18). ¿Hace binning físico el Maestro III o remuestrea? Las medidas del artículo — imagen-diferencia de dos tomas idénticas, demosaico AHD lineal, canal G, parche subexpuesto (μ ≈ 0,08), tres disparos por modo — dicen que remuestrea aplicando un filtrado suave del ruido: la ganancia real ronda los 3 dB (medio paso) a ISO medio-alto, es la misma en M y en S pese al factor 2 de píxeles, y a ISO base es nula o negativa. Esta herramienta deja explorar un modelo de transferencia fotónica calibrado sobre esas medidas y contrastarlo con el binning ideal.</p>
+  <p data-lang="en">The Leica M11 writes three DNG sizes from the same 60 MP sensor: L-DNG (60), M-DNG (36) and S-DNG (18). Does the Maestro III perform physical binning, or does it resample? The article’s measurements — difference image of two identical exposures, linear AHD demosaicing, G channel, underexposed patch (μ ≈ 0.08), three frames per mode — say it resamples while applying gentle noise filtering: the real gain sits around 3 dB (half a stop) at medium-to-high ISO, it is identical in M and in S despite the factor of 2 in pixel count, and at base ISO it is nil or negative. This tool lets you explore a photon-transfer model calibrated on those measurements and set it against ideal binning.</p>
+  <p class="srclinks">
+    <a href="https://rafaelvida.com/2026/04/25/binning-en-leica/" data-lang="es">Artículo con las medidas ↗</a>
+    <a href="https://rafaelvida.com/2026/04/25/binning-en-leica/" data-lang="en">Article with the measurements ↗</a>
+    <a href="sensor-al-papel.html" data-lang="es">Del sensor al papel: ¿cuántos píxeles necesitas de verdad?</a>
+    <a href="sensor-al-papel.html" data-lang="en">From sensor to paper: how many pixels do you really need?</a>
+  </p>
+</header>
+<main>
+  <section class="panel" id="controls">
+    <h2 data-lang="es">Parámetros</h2>
+    <h2 data-lang="en">Parameters</h2>
+    <label>ISO <span class="v"><span id="isoV"></span></span>
+      <input type="range" id="iso" min="6" max="12.6439" step="0.01" value="10.6439"></label>
+    <label><span data-lang="es">Exposición del parche (EV bajo saturación)</span><span data-lang="en">Patch exposure (EV below saturation)</span> <span class="v"><span id="evV"></span> EV · μ = <span id="muV"></span></span>
+      <input type="range" id="ev" min="-8" max="-1" step="0.02" value="-3.64"></label>
+    <button id="btnPatch"><span data-lang="es">Volver al parche del artículo (μ ≈ 0,08)</span><span data-lang="en">Back to the article’s patch (μ ≈ 0.08)</span></button>
+
+    <h3 data-lang="es">Sensor efectivo (calibración)</h3>
+    <h3 data-lang="en">Effective sensor (calibration)</h3>
+    <div class="row3">
+      <label>FWC<sub>ef</sub> (e⁻)<input type="number" id="fwc" step="500" value="28500"></label>
+      <label>σ<sub>r</sub> (e⁻)<input type="number" id="rn" step="0.1" value="1.5"></label>
+      <label>γ<input type="number" id="gam" step="0.01" value="0.93"></label>
+    </div>
+    <p class="note" data-lang="es">FWC<sub>ef</sub> y σ<sub>r</sub> son valores <b>efectivos</b> del canal G tras el demosaico, ajustados a las tres medidas de L-DNG; γ &lt; 1 recoge que el sensor cae algo menos deprisa de lo fotónico puro (doble ganancia de conversión). No son datos de fábrica.</p>
+    <p class="note" data-lang="en">FWC<sub>ef</sub> and σ<sub>r</sub> are <b>effective</b> values of the G channel after demosaicing, fitted to the three L-DNG measurements; γ &lt; 1 captures the sensor falling somewhat less steeply than pure photon behaviour (dual conversion gain). They are not factory data.</p>
+
+    <h3 data-lang="es">Simulación visual</h3>
+    <h3 data-lang="en">Visual simulation</h3>
+    <label><span data-lang="es">Realce de visualización</span><span data-lang="en">Display lift</span> <span class="v"><span id="liftV"></span> EV</span>
+      <input type="range" id="lift" min="-2" max="3" step="0.1" value="0.5"></label>
+    <button id="btnSeed"><span data-lang="es">Nueva realización de ruido</span><span data-lang="en">New noise realisation</span></button>
+    <p class="note" data-lang="es">El ruido sale de un generador congruente sembrado (nunca <code>Math.random</code>): la misma configuración reproduce siempre la misma imagen, igual que en el resto del repositorio.</p>
+    <p class="note" data-lang="en">The noise comes from a seeded congruential generator (never <code>Math.random</code>): the same settings always reproduce the same image, as everywhere else in this repository.</p>
+  </section>
+
+  <section class="grid2">
+    <div class="panel">
+      <h2 data-lang="es">SNR frente a ISO, a resolución nativa</h2>
+      <h2 data-lang="en">SNR against ISO, at native resolution</h2>
+      <canvas id="chartSNR" width="900" height="400"></canvas>
+      <div class="legend">
+        <span><i style="background:var(--sag)"></i><span data-lang="es">L-DNG nativo (modelo)</span><span data-lang="en">native L-DNG (model)</span></span>
+        <span><i style="background:var(--tan)"></i><span data-lang="es">M-DNG, pipeline Maestro (modelo)</span><span data-lang="en">M-DNG, Maestro pipeline (model)</span></span>
+        <span><i style="background:var(--sph)"></i><span data-lang="es">S-DNG, pipeline Maestro (modelo)</span><span data-lang="en">S-DNG, Maestro pipeline (model)</span></span>
+        <span><i class="dash" style="background:var(--ref)"></i><span data-lang="es">binning ideal (+2,2 / +5,2 dB)</span><span data-lang="en">ideal binning (+2.2 / +5.2 dB)</span></span>
+        <span data-lang="es">Puntos: medidas del artículo (μ ≈ 0,08).</span>
+        <span data-lang="en">Dots: article measurements (μ ≈ 0.08).</span>
+      </div>
+      <p class="note" data-lang="es">Que M y S midan casi lo mismo — y que S quede lejos de su curva discontinua de binning ideal — es la firma de que no hay binning físico: el Maestro III remuestrea con un filtrado de ruido de fuerza fija, independiente del factor de reducción.</p>
+      <p class="note" data-lang="en">That M and S measure almost the same — and that S falls far below its dashed ideal-binning curve — is the signature that no physical binning takes place: the Maestro III resamples with noise filtering of fixed strength, independent of the reduction factor.</p>
+    </div>
+
+    <div class="panel">
+      <h2 data-lang="es">Ganancia de SNR frente a L-DNG</h2>
+      <h2 data-lang="en">SNR gain over L-DNG</h2>
+      <canvas id="chartGain" width="900" height="300"></canvas>
+      <p class="note" data-lang="es">El binning ideal de k píxeles daría +10·log₁₀(k) dB: +2,2 dB en M (k = 5/3) y +5,2 dB en S (k = 10/3). Lo medido: ≈ +3 dB en <b>ambos</b> a ISO ≥ 1600, y ganancia nula o negativa a ISO 64. Los ratios lineales medidos (L→M 1,28×, L→S 1,81×) no son enteros: descartan por sí solos un binning 2×2 limpio.</p>
+      <p class="note" data-lang="en">Ideal binning of k pixels would give +10·log₁₀(k) dB: +2.2 dB in M (k = 5/3) and +5.2 dB in S (k = 10/3). What was measured: ≈ +3 dB in <b>both</b> at ISO ≥ 1600, and nil or negative gain at ISO 64. The measured linear ratios (L→M 1.28×, L→S 1.81×) are non-integer: on their own they rule out clean 2×2 binning.</p>
+    </div>
+
+    <div class="panel">
+      <h2 data-lang="es">Rango dinámico ingenieril por ISO (medido)</h2>
+      <h2 data-lang="en">Engineering dynamic range by ISO (measured)</h2>
+      <canvas id="chartDR" width="900" height="260"></canvas>
+      <p class="note" data-lang="es">Solo datos medidos; el eje empieza en 30 dB. A ISO base los tres modos empatan; a ISO alto M y S ganan entre 1,7 y 2,7 dB de DR sobre L — coherente con un filtrado de ruido en las sombras, no con binning.</p>
+      <p class="note" data-lang="en">Measured data only; the axis starts at 30 dB. At base ISO the three modes tie; at high ISO M and S gain 1.7 to 2.7 dB of DR over L — consistent with noise filtering in the shadows, not binning.</p>
+    </div>
+
+    <div class="panel">
+      <h2 data-lang="es">Todo reducido a 18 Mpx: comparación a tamaño común (medido)</h2>
+      <h2 data-lang="en">Everything reduced to 18 MP: comparison at a common size (measured)</h2>
+      <canvas id="chart18" width="900" height="260"></canvas>
+      <p class="note" data-lang="es">L y M reducidos con Lanczos a 18 Mpx, S nativo. A ISO 64 gana L→18 (35,81 dB); a ISO 1600 y 6400 gana M→18. S-DNG no es el mejor en ningún caso.</p>
+      <p class="note" data-lang="en">L and M reduced with Lanczos to 18 MP, S native. At ISO 64, L→18 wins (35.81 dB); at ISO 1600 and 6400, M→18 wins. S-DNG comes first in no case.</p>
+      <div class="verdict" id="verdict"></div>
+      <p class="note" data-lang="es">La resolución que de verdad necesitas la fija el destino, no el sensor: si el destino es un A3 mirado a un metro, mira cuántos píxeles hacen falta en <a href="sensor-al-papel.html">Del sensor al papel</a>.</p>
+      <p class="note" data-lang="en">The resolution you actually need is set by the destination, not the sensor: if the destination is an A3 print viewed at one metre, check how many pixels it takes in <a href="sensor-al-papel.html">From sensor to paper</a>.</p>
+    </div>
+
+    <div class="panel">
+      <h2 data-lang="es">Simulación visual del parche de sombra, a tamaño común (18 Mpx)</h2>
+      <h2 data-lang="en">Visual simulation of the shadow patch, at a common size (18 MP)</h2>
+      <div class="sim">
+        <figure><canvas id="cvL" width="176" height="176"></canvas><figcaption id="capL"></figcaption></figure>
+        <figure><canvas id="cvM" width="176" height="176"></canvas><figcaption id="capM"></figcaption></figure>
+        <figure><canvas id="cvBin" width="176" height="176"></canvas><figcaption id="capBin"></figcaption></figure>
+      </div>
+      <p class="note" id="simInfo"></p>
+      <p class="note" data-lang="es">Parche sintético (gradiente, textura tenue y una banda central de barras finas) generado a «60 Mpx» con ruido de Poisson más ruido de lectura al ISO elegido, y reducido ×1,81 lineal por tres caminos: L reescalado con Lanczos-3, pipeline «Maestro» (prefiltro gaussiano suave + diezmado bilineal) y binning ideal (media de bloques). La SNR de cada recuadro se mide como en el artículo, por imagen-diferencia de dos realizaciones independientes. El prefiltro del camino «Maestro» se modula con la ganancia calibrada: a ISO base apenas filtra; fíjate entonces en cómo el binning ideal borra las barras finas mientras Lanczos las conserva.</p>
+      <p class="note" data-lang="en">A synthetic patch (gradient, faint texture and a central band of fine bars) generated at “60 MP” with Poisson noise plus read noise at the chosen ISO, then reduced ×1.81 linear along three paths: L downsampled with Lanczos-3, the “Maestro” pipeline (gentle Gaussian pre-filter + bilinear decimation) and ideal binning (block average). The SNR of each tile is measured as in the article, by the difference image of two independent realisations. The “Maestro” pre-filter is modulated by the calibrated gain: at base ISO it barely filters; notice then how ideal binning wipes out the fine bars while Lanczos keeps them.</p>
+    </div>
+
+    <div class="panel">
+      <h2 data-lang="es">Modelo, supuestos y datos medidos</h2>
+      <h2 data-lang="en">Model, assumptions and measured data</h2>
+      <p class="note" data-lang="es"><b>Transferencia fotónica.</b> SNR = S/√(S + σ<sub>r</sub>²), en dB 20·log₁₀, con S = FWC<sub>ef</sub> · 2<sup>EV</sup> · (64/ISO)<sup>γ</sup> electrones de señal y σ<sub>r</sub> de ruido de lectura. <b>Convención de decibelios:</b> la SNR es un cociente de amplitudes, así que SNR(dB) = 20·log₁₀(μ/σ). Promediar k píxeles independientes divide σ entre √k: la mejora es 20·log₁₀(√k) = <b>10·log₁₀(k) dB</b>. Con k = 60/36 = 5/3 salen +2,22 dB (M) y con k = 60/18 = 10/3, +5,23 dB (S): los «+2,2» y «+5,2» del artículo.</p>
+      <p class="note" data-lang="en"><b>Photon transfer.</b> SNR = S/√(S + σ<sub>r</sub>²), in dB 20·log₁₀, with S = FWC<sub>ef</sub> · 2<sup>EV</sup> · (64/ISO)<sup>γ</sup> signal electrons and σ<sub>r</sub> of read noise. <b>Decibel convention:</b> the SNR is a ratio of amplitudes, so SNR(dB) = 20·log₁₀(μ/σ). Averaging k independent pixels divides σ by √k: the improvement is 20·log₁₀(√k) = <b>10·log₁₀(k) dB</b>. With k = 60/36 = 5/3 that yields +2.22 dB (M) and with k = 60/18 = 10/3, +5.23 dB (S): the article’s “+2.2” and “+5.2”.</p>
+      <p class="note" data-lang="es"><b>Pipeline «Maestro».</b> Ganancia G(ISO) por modo: interpolación suave (smoothstep en log₂ ISO, de 64 a 1600) entre el valor medido a ISO 64 (−1,88 dB en M; −0,89 dB en S) y la meseta medida a 1600–6400 (media: +3,10 dB en M; +3,28 dB en S). <b>Advertencia honesta:</b> es una calibración fenomenológica sobre tres ISOs, no ingeniería inversa del procesador; fuera de esos puntos la curva es solo una interpolación plausible.</p>
+      <p class="note" data-lang="en"><b>“Maestro” pipeline.</b> Gain G(ISO) per mode: smooth interpolation (smoothstep in log₂ ISO, from 64 to 1600) between the value measured at ISO 64 (−1.88 dB in M; −0.89 dB in S) and the plateau measured at 1600–6400 (mean: +3.10 dB in M; +3.28 dB in S). <b>Honest warning:</b> this is a phenomenological calibration over three ISOs, not reverse engineering of the processor; away from those points the curve is merely a plausible interpolation.</p>
+
+      <div class="tbls">
+        <div>
+          <h3 data-lang="es">SNR a resolución nativa (dB)</h3>
+          <h3 data-lang="en">SNR at native resolution (dB)</h3>
+          <table class="res"><thead><tr><th><span data-lang="es">Modo</span><span data-lang="en">Mode</span></th><th>ISO 64</th><th>ISO 1600</th><th>ISO 6400</th></tr></thead><tbody id="tbSNR"></tbody></table>
+        </div>
+        <div>
+          <h3 data-lang="es">Ganancia frente a L (dB)</h3>
+          <h3 data-lang="en">Gain over L (dB)</h3>
+          <table class="res"><thead><tr><th><span data-lang="es">Modo</span><span data-lang="en">Mode</span></th><th>ISO 64</th><th>ISO 1600</th><th>ISO 6400</th><th><span data-lang="es">teoría</span><span data-lang="en">theory</span></th></tr></thead><tbody id="tbGain"></tbody></table>
+        </div>
+        <div>
+          <h3 data-lang="es">Todo a 18 Mpx, Lanczos (dB)</h3>
+          <h3 data-lang="en">Everything at 18 MP, Lanczos (dB)</h3>
+          <table class="res"><thead><tr><th><span data-lang="es">Vía</span><span data-lang="en">Path</span></th><th>ISO 64</th><th>ISO 1600</th><th>ISO 6400</th></tr></thead><tbody id="tbTo18"></tbody></table>
+        </div>
+        <div>
+          <h3 data-lang="es">DR ingenieril (dB)</h3>
+          <h3 data-lang="en">Engineering DR (dB)</h3>
+          <table class="res"><thead><tr><th><span data-lang="es">Modo</span><span data-lang="en">Mode</span></th><th>ISO 64</th><th>ISO 1600</th><th>ISO 6400</th></tr></thead><tbody id="tbDR"></tbody></table>
+        </div>
+      </div>
+      <p class="note" data-lang="es">Ratios lineales medidos: L→M 1,28×, L→S 1,81×. Método: imagen-diferencia de dos tomas idénticas, demosaico AHD lineal, canal G, parche subexpuesto μ ≈ 0,08, tres disparos por modo.</p>
+      <p class="note" data-lang="en">Measured linear ratios: L→M 1.28×, L→S 1.81×. Method: difference image of two identical exposures, linear AHD demosaicing, G channel, underexposed patch μ ≈ 0.08, three frames per mode.</p>
+
+      <h3 data-lang="es">Verificación numérica del modelo</h3>
+      <h3 data-lang="en">Numerical verification of the model</h3>
+      <table class="res"><thead><tr>
+        <th><span data-lang="es">Comprobación</span><span data-lang="en">Check</span></th>
+        <th><span data-lang="es">modelo</span><span data-lang="en">model</span></th>
+        <th><span data-lang="es">referencia</span><span data-lang="en">reference</span></th>
+        <th>Δ (dB)</th>
+        <th><span data-lang="es">estado</span><span data-lang="en">status</span></th>
+      </tr></thead><tbody id="verif"></tbody></table>
+      <p class="note" id="chkAll"></p>
+      <p class="note" data-lang="es">Tolerancias: binning ideal ±0,05 dB frente al valor redondeado del artículo; SNR de L ±0,30 dB; ganancias Maestro ±0,35 dB. Los dos puntos de ISO 64 son anclas de la calibración (Δ = 0 por construcción). La verificación usa siempre los valores de calibración por defecto y μ = 0,08, aunque muevas los deslizadores.</p>
+      <p class="note" data-lang="en">Tolerances: ideal binning ±0.05 dB against the article’s rounded value; L SNR ±0.30 dB; Maestro gains ±0.35 dB. The two ISO 64 points are anchors of the calibration (Δ = 0 by construction). The verification always uses the default calibration values and μ = 0.08, however you move the sliders.</p>
+      <p class="note"><a href="https://rafaelvida.com/2026/04/25/binning-en-leica/" data-lang="es">Artículo con las medidas ↗</a><a href="https://rafaelvida.com/2026/04/25/binning-en-leica/" data-lang="en">Article with the measurements ↗</a></p>
+    </div>
+  </section>
+</main>
+
+<script>
+"use strict";
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{
+      title:"Triple Resolution de la Leica M11: ¿binning o remuestreo? Modelo frente a medidas",
+      desc:"Simulador del Triple Resolution de la Leica M11 (L-DNG 60 Mpx, M-DNG 36, S-DNG 18): modelo de transferencia fotónica, ganancia real del remuestreo del Maestro III frente al binning ideal, y comparación con las medidas del artículo."
+    },
+    en:{
+      title:"Leica M11 Triple Resolution: binning or resampling? Model against measurements",
+      desc:"A simulator of the Leica M11 Triple Resolution (L-DNG 60 MP, M-DNG 36, S-DNG 18): photon-transfer model, the real gain of the Maestro III resampling against ideal binning, and a comparison with the article’s measurements."
+    }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    ["title","ph","alt","aria"].forEach(function(k){
+      [].forEach.call(document.querySelectorAll("[data-"+k+"-"+l+"]"),function(e){
+        var attr = k==="ph" ? "placeholder" : (k==="aria" ? "aria-label" : k);
+        e.setAttribute(attr, e.getAttribute("data-"+k+"-"+l));
+      });
+    });
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
+
+<script>
+"use strict";
+// ---------- utilidades ----------
+const $ = id => document.getElementById(id);
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+/* ---------- diccionario de cadenas generadas por JS ----------
+   Como en stack-sensor.html, el diccionario se llama DICT y el traductor LBL():
+   ni t(), ni S(), ni T, que en este repositorio ya han eclipsado tres veces a la
+   función traductora dentro de funciones con variables locales homónimas. En este
+   archivo ningún identificador se llama t, S ni T (verificado con grep). */
+const DICT={
+ es:{
+  axISO:'ISO (escala logarítmica)',
+  axSNR:'SNR (dB)',
+  axGain:'ganancia frente a L (dB)',
+  axDR:'DR ingenieril (dB)',
+  ax18:'SNR a 18 Mpx comunes (dB)',
+  idealLbl:'ideal {m} +{v} dB',
+  winTag:'mejor',
+  nameLan:'L reescalado (Lanczos-3)',
+  nameMae:'pipeline «Maestro» (prefiltro + diezmado)',
+  nameBin:'binning ideal (media de bloques)',
+  capSim:'{name} · SNR {snr} dB ({d} dB frente a L nativo)',
+  simInfo:'Parche a «60 Mpx» ({b}×{b}): μ ≈ {mu} e⁻ por píxel, SNR nativa {snr} dB, medida por imagen-diferencia de dos realizaciones.',
+  vGainNow:'Ganancia modelada a ISO {iso}: {gm} dB en M-DNG y {gs} dB en S-DNG (binning ideal: +{bm} y +{bs} dB). ',
+  vBase:'Veredicto: a ISO base, dispara L-DNG siempre. El remuestreo no regala nada (medido: −1,88 dB en M frente a L) y, todo reducido a 18 Mpx, L→Lanczos gana al mejor rival por 3,3 dB.',
+  vMid:'Zona de transición: la ganancia sube hacia su meseta de ≈3 dB pero aún no es completa. Si puedes bajar el ISO, baja el ISO y dispara L-DNG; si no, M-DNG ya recupera casi toda la ganancia.',
+  vHigh:'Veredicto: a ISO alto, dispara M-DNG: la ganancia entera (≈3 dB, medio paso) con la mitad de archivo; a 18 Mpx comunes M→Lanczos también gana (25,57 dB frente a 23,92 a ISO 1600).',
+  vS:' S-DNG da la misma ganancia que M con la mitad de resolución: nunca es la mejor opción de calidad.',
+  rowL18:'L → 18 Mpx', rowM18:'M → 18 Mpx', rowS18:'S-DNG nativo',
+  ckBinM:'Binning ideal M: 10·log₁₀(60/36)',
+  ckBinS:'Binning ideal S: 10·log₁₀(60/18)',
+  ckL:'SNR del modelo L a ISO {iso}',
+  ckGM:'Ganancia Maestro M a ISO {iso}',
+  ckGS:'Ganancia Maestro S a ISO {iso}',
+  anchor:'✓ ancla',
+  okAll:'Todas las comprobaciones quedan dentro de tolerancia.',
+  badAll:'ATENCIÓN: hay comprobaciones fuera de tolerancia.'
+ },
+ en:{
+  axISO:'ISO (log scale)',
+  axSNR:'SNR (dB)',
+  axGain:'gain over L (dB)',
+  axDR:'engineering DR (dB)',
+  ax18:'SNR at a common 18 MP (dB)',
+  idealLbl:'ideal {m} +{v} dB',
+  winTag:'best',
+  nameLan:'L downsampled (Lanczos-3)',
+  nameMae:'“Maestro” pipeline (pre-filter + decimation)',
+  nameBin:'ideal binning (block average)',
+  capSim:'{name} · SNR {snr} dB ({d} dB vs native L)',
+  simInfo:'“60 MP” patch ({b}×{b}): μ ≈ {mu} e⁻ per pixel, native SNR {snr} dB, measured from the difference image of two realisations.',
+  vGainNow:'Modelled gain at ISO {iso}: {gm} dB in M-DNG and {gs} dB in S-DNG (ideal binning: +{bm} and +{bs} dB). ',
+  vBase:'Verdict: at base ISO, always shoot L-DNG. The resampling gives nothing back (measured: −1.88 dB in M against L) and, with everything reduced to 18 MP, L→Lanczos beats the best rival by 3.3 dB.',
+  vMid:'Transition zone: the gain climbs towards its ≈3 dB plateau but is not yet complete. If you can lower the ISO, lower it and shoot L-DNG; otherwise M-DNG already recovers almost all of the gain.',
+  vHigh:'Verdict: at high ISO, shoot M-DNG: the whole gain (≈3 dB, half a stop) at half the file size; at a common 18 MP, M→Lanczos wins too (25.57 dB against 23.92 at ISO 1600).',
+  vS:' S-DNG delivers the same gain as M at half the resolution: it is never the best quality option.',
+  rowL18:'L → 18 MP', rowM18:'M → 18 MP', rowS18:'native S-DNG',
+  ckBinM:'Ideal binning M: 10·log₁₀(60/36)',
+  ckBinS:'Ideal binning S: 10·log₁₀(60/18)',
+  ckL:'Model L SNR at ISO {iso}',
+  ckGM:'Maestro M gain at ISO {iso}',
+  ckGS:'Maestro S gain at ISO {iso}',
+  anchor:'✓ anchor',
+  okAll:'All checks fall within tolerance.',
+  badAll:'WARNING: some checks fall outside tolerance.'
+ }
+};
+const LANG = () => document.documentElement.lang==='en' ? 'en' : 'es';
+function LBL(k,vars){
+  const D=DICT[LANG()]||DICT.es;
+  let out = D[k]!==undefined ? D[k] : (DICT.es[k]!==undefined?DICT.es[k]:k);
+  if(vars) out=out.replace(/\{(\w+)\}/g,(mm,nn)=>vars[nn]!==undefined?vars[nn]:mm);
+  return out;
+}
+/* Separador decimal: coma en español, punto en inglés. */
+const nf = (x,d) => (typeof x==='number' ? x.toFixed(d) : String(x)).replace('.', LANG()==='es'?',':'.');
+const sgnf = (x,d) => (x>=0?'+':'')+nf(x,d);
+
+/* ---------- datos medidos del artículo (incrustados) ---------- */
+const MEAS={
+  iso:[64,1600,6400],
+  snr:{ L:[33.42,20.66,14.48], M:[31.54,23.86,23.92], S:[32.53,17.47,17.77] },
+  gain:{ M:[-1.88,3.20,2.99], S:[-0.89,3.26,3.29] },
+  gainTheoryArticle:{ M:2.2, S:5.2 },
+  to18:{ L:[35.81,23.05,16.86], M:[32.10,25.57,19.07], S:[32.53,23.92,17.77] },
+  dr:{ L:[39.43,37.21,32.57], M:[39.15,38.90,34.96], S:[39.57,38.92,35.31] },
+  ratios:{ LM:1.28, LS:1.81 }
+};
+/* corrección: la SNR nativa de M y S a 1600/6400 (M 23,86/17,47 — errata arriba) */
+MEAS.snr.M=[31.54,23.86,17.47];
+MEAS.snr.S=[32.53,23.92,17.77];
+
+/* ---------- calibración del pipeline «Maestro» ---------- */
+const CAL={ fwc:28500, rn:1.5, gam:0.93, mu:0.08 };            // modelo L por defecto
+const GAINS={ M:{base:-1.88, hi:(3.20+2.99)/2}, S:{base:-0.89, hi:(3.26+3.29)/2} };
+const KIDEAL={ M:10*Math.log10(60/36), S:10*Math.log10(60/18) }; // +10·log10(k) dB
+const LOG2A=6, LOG2B=Math.log2(1600);                            // tramo del smoothstep
+
+function uOf(iso){
+  let u=(Math.log2(iso)-LOG2A)/(LOG2B-LOG2A);
+  u=Math.min(1,Math.max(0,u));
+  return u*u*(3-2*u);
+}
+function snrLdB(iso,ev,fwc,rn,gam){
+  const sig=fwc*Math.pow(2,ev)*Math.pow(64/iso,gam);
+  return 20*Math.log10(sig/Math.sqrt(sig+rn*rn));
+}
+function gainDB(iso,mode){
+  const gg=GAINS[mode];
+  return gg.base+(gg.hi-gg.base)*uOf(iso);
+}
+function params(){
+  const isoRaw=Math.pow(2,+$('iso').value);
+  const iso=isoRaw>=1000?Math.round(isoRaw/50)*50:isoRaw>=200?Math.round(isoRaw/10)*10:Math.round(isoRaw);
+  return { iso, ev:+$('ev').value, fwc:+$('fwc').value, rn:+$('rn').value,
+           gam:+$('gam').value, lift:+$('lift').value };
+}
+
+/* ---------- gráficas ---------- */
+const XDOM=[6,Math.log2(6400)], ISOTICKS=[64,125,250,500,1000,2000,4000,6400];
+function frameXY(g,W,Hh,ymin,ymax,ystep,ylab){
+  const mL=56,mR=16,mT=14,mB=40;
+  const X=v=>mL+(W-mL-mR)*(Math.log2(v)-XDOM[0])/(XDOM[1]-XDOM[0]);
+  const Y=v=>mT+(Hh-mT-mB)*(1-(v-ymin)/(ymax-ymin));
+  g.strokeStyle=css('--line'); g.fillStyle=css('--mute'); g.font='12px IBM Plex Sans, system-ui'; g.lineWidth=1;
+  for(let v=ymin;v<=ymax+1e-9;v+=ystep){ g.beginPath(); g.moveTo(mL,Y(v)); g.lineTo(W-mR,Y(v)); g.stroke(); g.textAlign='right'; g.fillText(nf(v,0),mL-8,Y(v)+4); }
+  ISOTICKS.forEach(v=>{ g.textAlign='center'; g.fillText(String(v),X(v),Hh-mB+18); });
+  g.textAlign='center'; g.fillText(LBL('axISO'),(mL+W-mR)/2,Hh-6);
+  g.save(); g.translate(14,(mT+Hh-mB)/2); g.rotate(-Math.PI/2); g.fillText(ylab,0,0); g.restore();
+  return {X,Y,mL,mR,mT,mB};
+}
+function curve(g,X,Y,fn,col,dash,w){
+  g.setLineDash(dash); g.strokeStyle=css(col); g.lineWidth=w; g.beginPath();
+  const NPT=72;
+  for(let i=0;i<=NPT;i++){ const lg=XDOM[0]+(XDOM[1]-XDOM[0])*i/NPT; const iso=Math.pow(2,lg);
+    const x=X(iso), y=Y(fn(iso)); i?g.lineTo(x,y):g.moveTo(x,y); }
+  g.stroke(); g.setLineDash([]);
+}
+function dot(g,x,y,col){
+  g.fillStyle=css(col); g.strokeStyle=css('--panel'); g.lineWidth=1.6;
+  g.beginPath(); g.arc(x,y,4.6,0,7); g.fill(); g.stroke();
+}
+
+function drawSNR(p){
+  const c=$('chartSNR'), g=c.getContext('2d'); const W=c.width,Hh=c.height; g.clearRect(0,0,W,Hh);
+  const fnL=iso=>snrLdB(iso,p.ev,p.fwc,p.rn,p.gam);
+  const fns={ L:fnL, M:iso=>fnL(iso)+gainDB(iso,'M'), S:iso=>fnL(iso)+gainDB(iso,'S'),
+              iM:iso=>fnL(iso)+KIDEAL.M, iS:iso=>fnL(iso)+KIDEAL.S };
+  let lo=1e9, hi=-1e9;
+  ['L','M','S','iM','iS'].forEach(kk=>{ [64,6400].forEach(iso=>{ const v=fns[kk](iso); lo=Math.min(lo,v); hi=Math.max(hi,v); }); });
+  ['L','M','S'].forEach(kk=>MEAS.snr[kk].forEach(v=>{ lo=Math.min(lo,v); hi=Math.max(hi,v); }));
+  const ymin=Math.floor((lo-1.2)/5)*5, ymax=Math.ceil((hi+1.2)/5)*5;
+  const {X,Y}=frameXY(g,W,Hh,ymin,ymax,5,LBL('axSNR'));
+  curve(g,X,Y,fns.iM,'--ref',[5,4],1.2);
+  curve(g,X,Y,fns.iS,'--ref',[5,4],1.2);
+  curve(g,X,Y,fns.L,'--sag',[],2.2);
+  curve(g,X,Y,fns.M,'--tan',[],2.2);
+  curve(g,X,Y,fns.S,'--sph',[],2.2);
+  g.font='bold 12px IBM Plex Sans, system-ui'; g.textAlign='left';
+  [['L','--sag'],['M','--tan'],['S','--sph']].forEach(([kk,col])=>{
+    g.fillStyle=css(col); g.fillText(kk,W-14,Y(fns[kk](6400))+4);
+  });
+  g.font='12px IBM Plex Sans, system-ui';
+  const cols={L:'--sag',M:'--tan',S:'--sph'};
+  ['L','M','S'].forEach(kk=>MEAS.iso.forEach((iso,i)=>dot(g,X(iso),Y(MEAS.snr[kk][i]),cols[kk])));
+}
+function drawGain(p){
+  const c=$('chartGain'), g=c.getContext('2d'); const W=c.width,Hh=c.height; g.clearRect(0,0,W,Hh);
+  const {X,Y}=frameXY(g,W,Hh,-3,6,1,LBL('axGain'));
+  g.strokeStyle=css('--mute'); g.lineWidth=1.4; g.beginPath(); g.moveTo(56,Y(0)); g.lineTo(W-16,Y(0)); g.stroke();
+  g.setLineDash([5,4]); g.lineWidth=1.2; g.strokeStyle=css('--ref');
+  [['M',KIDEAL.M],['S',KIDEAL.S]].forEach(([mm,v])=>{
+    g.beginPath(); g.moveTo(56,Y(v)); g.lineTo(W-16,Y(v)); g.stroke();
+    g.fillStyle=css('--ref'); g.textAlign='left'; g.fillText(LBL('idealLbl',{m:mm,v:nf(v,1)}),62,Y(v)-4);
+  });
+  g.setLineDash([]);
+  curve(g,X,Y,iso=>gainDB(iso,'M'),'--tan',[],2.2);
+  curve(g,X,Y,iso=>gainDB(iso,'S'),'--sph',[],2.2);
+  MEAS.iso.forEach((iso,i)=>{ dot(g,X(iso),Y(MEAS.gain.M[i]),'--tan'); dot(g,X(iso),Y(MEAS.gain.S[i]),'--sph'); });
+  g.font='bold 12px IBM Plex Sans, system-ui'; g.textAlign='left';
+  g.fillStyle=css('--tan'); g.fillText('M',W-14,Y(gainDB(6400,'M'))+4);
+  g.fillStyle=css('--sph'); g.fillText('S',W-14,Y(gainDB(6400,'S'))+12);
+  g.font='12px IBM Plex Sans, system-ui';
+}
+function drawBars(cid,data,ymin,ymax,ystep,ylab,winners){
+  const c=$(cid), g=c.getContext('2d'); const W=c.width,Hh=c.height; g.clearRect(0,0,W,Hh);
+  const mL=56,mR=16,mT=16,mB=40;
+  const Y=v=>mT+(Hh-mT-mB)*(1-(v-ymin)/(ymax-ymin));
+  g.strokeStyle=css('--line'); g.fillStyle=css('--mute'); g.font='12px IBM Plex Sans, system-ui'; g.lineWidth=1;
+  for(let v=ymin;v<=ymax+1e-9;v+=ystep){ g.beginPath(); g.moveTo(mL,Y(v)); g.lineTo(W-mR,Y(v)); g.stroke(); g.textAlign='right'; g.fillText(nf(v,0),mL-8,Y(v)+4); }
+  g.save(); g.translate(14,(mT+Hh-mB)/2); g.rotate(-Math.PI/2); g.textAlign='center'; g.fillText(ylab,0,0); g.restore();
+  const cols=['--sag','--tan','--sph'];
+  const gw=(W-mL-mR)/3, bw=gw*0.20;
+  data.forEach((grp,gi)=>{
+    const x0=mL+gw*gi;
+    grp.vals.forEach((v,bi)=>{
+      const x=x0+gw*0.14+bi*(bw+6);
+      const win=winners&&winners[gi]===bi;
+      g.globalAlpha=winners?(win?1:0.62):1;
+      g.fillStyle=css(cols[bi]); g.fillRect(x,Y(v),bw,Y(ymin)-Y(v));
+      g.globalAlpha=1;
+      g.fillStyle=css('--ink'); g.textAlign='center';
+      g.font=(win?'bold ':'')+'11px IBM Plex Sans, system-ui';
+      g.fillText(nf(v,1),x+bw/2,Y(v)-4);
+      g.font='11px IBM Plex Sans, system-ui'; g.fillStyle=css('--mute');
+      g.fillText(grp.tags[bi],x+bw/2,Hh-mB+14);
+      if(win){ g.fillStyle=css(cols[bi]); g.fillText(LBL('winTag'),x+bw/2,Y(v)-16); }
+    });
+    g.fillStyle=css('--mute'); g.textAlign='center'; g.fillText('ISO '+grp.iso,x0+gw/2,Hh-6);
+  });
+}
+function drawDR(){
+  drawBars('chartDR',MEAS.iso.map((iso,i)=>({iso,vals:[MEAS.dr.L[i],MEAS.dr.M[i],MEAS.dr.S[i]],tags:['L','M','S']})),30,41,2,LBL('axDR'),null);
+}
+function draw18(){
+  const winners=MEAS.iso.map((iso,i)=>{
+    const vals=[MEAS.to18.L[i],MEAS.to18.M[i],MEAS.to18.S[i]];
+    return vals.indexOf(Math.max.apply(null,vals));
+  });
+  drawBars('chart18',MEAS.iso.map((iso,i)=>({iso,vals:[MEAS.to18.L[i],MEAS.to18.M[i],MEAS.to18.S[i]],tags:['L→18','M→18','S']})),15,38,5,LBL('ax18'),winners);
+}
+
+/* ---------- veredicto operativo ---------- */
+function drawVerdict(p){
+  const gm=gainDB(p.iso,'M'), gs=gainDB(p.iso,'S');
+  let txt=LBL('vGainNow',{iso:p.iso, gm:sgnf(gm,2), gs:sgnf(gs,2), bm:nf(KIDEAL.M,1), bs:nf(KIDEAL.S,1)});
+  txt+=LBL(p.iso<200?'vBase':p.iso<800?'vMid':'vHigh');
+  txt+=LBL('vS');
+  $('verdict').textContent=txt;
+}
+
+/* ---------- simulación visual (RNG congruente sembrado, nunca Math.random) ---------- */
+const BASE=319, OUT=176;              // 319/176 = 1,8125 ≈ ratio lineal medido 1,81×
+let SEED=1, FIELD=null;
+function makeRng(seed){
+  let sd=(seed>>>0)||123456789;
+  return function(){ sd=(Math.imul(sd,1664525)+1013904223)>>>0; return (sd+0.5)/4294967296; };
+}
+function gaussOf(rnd){ return Math.sqrt(-2*Math.log(rnd()))*Math.cos(6.283185307179586*rnd()); }
+function poisOf(rnd,mean){
+  if(mean<=0) return 0;
+  if(mean>=30) return mean+Math.sqrt(mean)*gaussOf(rnd);
+  const lim=Math.exp(-mean); let kk=0, pp=1;
+  do{ kk++; pp*=rnd(); }while(pp>lim);
+  return kk-1;
+}
+function fieldOf(){
+  if(FIELD) return FIELD;
+  FIELD=new Float32Array(BASE*BASE);
+  for(let y=0;y<BASE;y++)for(let x=0;x<BASE;x++){
+    const gx=0.55+0.9*x/(BASE-1);
+    const tex=1+0.10*Math.sin(x*0.37)*Math.sin(y*0.29);
+    const bar=(y>BASE*0.42&&y<BASE*0.58)?1+0.16*Math.sin(x*1.848):1;
+    FIELD[y*BASE+x]=gx*tex*bar;
+  }
+  return FIELD;
+}
+function shotOf(p,eScale,seed){
+  const fld=fieldOf(), rnd=makeRng(seed), arr=new Float32Array(BASE*BASE);
+  for(let i=0;i<arr.length;i++) arr[i]=poisOf(rnd,eScale*fld[i])+p.rn*gaussOf(rnd);
+  return arr;
+}
+function lanczos3(x){
+  const ax=Math.abs(x);
+  if(ax<1e-8) return 1; if(ax>=3) return 0;
+  const px=Math.PI*x;
+  return (Math.sin(px)/px)*(Math.sin(px/3)/(px/3));
+}
+const WCACHE={};
+function wlistOf(mode){
+  if(WCACHE[mode]) return WCACHE[mode];
+  const ratio=BASE/OUT, list=[];
+  for(let o=0;o<OUT;o++){
+    const ctr=(o+0.5)*ratio-0.5;
+    let rad = mode==='lanczos' ? 3*ratio : mode==='box' ? ratio/2+0.5 : 1;
+    const i0=Math.max(0,Math.ceil(ctr-rad)), i1=Math.min(BASE-1,Math.floor(ctr+rad));
+    const ws=[]; let sum=0;
+    for(let i=i0;i<=i1;i++){
+      const dx=i-ctr; let w;
+      if(mode==='lanczos') w=lanczos3(dx/ratio);
+      else if(mode==='box') w=Math.max(0,Math.min(i+0.5,ctr+ratio/2)-Math.max(i-0.5,ctr-ratio/2));
+      else { const ax=Math.abs(dx); w=ax<1?1-ax:0; }
+      ws.push(w); sum+=w;
+    }
+    if(sum<=1e-12){ ws[0]=1; sum=1; }
+    for(let i=0;i<ws.length;i++) ws[i]/=sum;
+    list.push({i0,ws});
+  }
+  return WCACHE[mode]=list;
+}
+function resampleSep(src,mode){
+  const wl=wlistOf(mode);
+  const mid=new Float32Array(BASE*OUT);
+  for(let y=0;y<BASE;y++){
+    const ro=y*OUT, ri=y*BASE;
+    for(let o=0;o<OUT;o++){
+      const en=wl[o]; let acc=0;
+      for(let j=0;j<en.ws.length;j++) acc+=en.ws[j]*src[ri+en.i0+j];
+      mid[ro+o]=acc;
+    }
+  }
+  const out=new Float32Array(OUT*OUT);
+  for(let o=0;o<OUT;o++){
+    const en=wl[o];
+    for(let x=0;x<OUT;x++){
+      let acc=0;
+      for(let j=0;j<en.ws.length;j++) acc+=en.ws[j]*mid[(en.i0+j)*OUT+x];
+      out[o*OUT+x]=acc;
+    }
+  }
+  return out;
+}
+function blurSep(a,N,sgm){
+  if(sgm<0.12) return a;
+  const rad=Math.ceil(3*sgm), ker=[]; let ks=0;
+  for(let i=-rad;i<=rad;i++){ const v=Math.exp(-i*i/(2*sgm*sgm)); ker.push(v); ks+=v; }
+  for(let i=0;i<ker.length;i++) ker[i]/=ks;
+  const mid=new Float32Array(N*N), out=new Float32Array(N*N);
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){ let v=0; for(let i=-rad;i<=rad;i++){ const xx=Math.min(N-1,Math.max(0,x+i)); v+=ker[i+rad]*a[y*N+xx]; } mid[y*N+x]=v; }
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){ let v=0; for(let i=-rad;i<=rad;i++){ const yy=Math.min(N-1,Math.max(0,y+i)); v+=ker[i+rad]*mid[yy*N+x]; } out[y*N+x]=v; }
+  return out;
+}
+function snrStat(a1,a2,N,mg){
+  let sm=0,d1=0,d2=0,cnt=0;
+  for(let y=mg;y<N-mg;y++)for(let x=mg;x<N-mg;x++){
+    const i=y*N+x, df=(a1[i]-a2[i])*0.7071067811865476;
+    sm+=(a1[i]+a2[i])/2; d1+=df; d2+=df*df; cnt++;
+  }
+  const mean=sm/cnt, varr=Math.max(1e-12,d2/cnt-(d1/cnt)*(d1/cnt));
+  return 20*Math.log10(mean/Math.sqrt(varr));
+}
+function paint(cid,a,N,kD){
+  const c=$(cid), g=c.getContext('2d'), img=g.createImageData(N,N);
+  for(let i=0;i<N*N;i++){
+    const v=Math.round(255*(0.05+0.90*Math.min(1,Math.max(0,a[i]*kD))));
+    img.data[4*i]=v; img.data[4*i+1]=v; img.data[4*i+2]=v; img.data[4*i+3]=255;
+  }
+  g.putImageData(img,0,0);
+}
+function runSim(p){
+  const eScale=p.fwc*Math.pow(2,p.ev)*Math.pow(64/p.iso,p.gam);
+  const s1=shotOf(p,eScale,1013+SEED*7919), s2=shotOf(p,eScale,2027+SEED*7919);
+  const nat=snrStat(s1,s2,BASE,6);
+  const sgm=0.55*uOf(p.iso);
+  const mb1=blurSep(s1,BASE,sgm), mb2=blurSep(s2,BASE,sgm);
+  const outs=[
+    ['cvL','capL','nameLan', resampleSep(s1,'lanczos'), resampleSep(s2,'lanczos')],
+    ['cvM','capM','nameMae', resampleSep(mb1,'bilinear'), resampleSep(mb2,'bilinear')],
+    ['cvBin','capBin','nameBin', resampleSep(s1,'box'), resampleSep(s2,'box')]
+  ];
+  const kD=Math.pow(2,p.lift)/(eScale*2.2);
+  outs.forEach(([cid,cap,key,o1,o2])=>{
+    const q=snrStat(o1,o2,OUT,3);
+    paint(cid,o1,OUT,kD);
+    $(cap).textContent=LBL('capSim',{name:LBL(key),snr:nf(q,1),d:sgnf(q-nat,1)});
+  });
+  $('simInfo').textContent=LBL('simInfo',{b:BASE,mu:nf(eScale,eScale<100?1:0),snr:nf(nat,1)});
+}
+
+/* ---------- tablas de datos y verificación ---------- */
+function rowHTML(cells){ return '<tr>'+cells.map((v,i)=>i?'<td>'+v+'</td>':'<td class="k">'+v+'</td>').join('')+'</tr>'; }
+function buildTables(){
+  $('tbSNR').innerHTML=['L','M','S'].map(kk=>rowHTML([kk+'-DNG'].concat(MEAS.snr[kk].map(v=>nf(v,2))))).join('');
+  $('tbGain').innerHTML=['M','S'].map(kk=>rowHTML([kk+'-DNG'].concat(MEAS.gain[kk].map(v=>sgnf(v,2))).concat([sgnf(MEAS.gainTheoryArticle[kk],1)]))).join('');
+  $('tbTo18').innerHTML=[['rowL18','L'],['rowM18','M'],['rowS18','S']].map(([rk,kk])=>rowHTML([LBL(rk)].concat(MEAS.to18[kk].map(v=>nf(v,2))))).join('');
+  $('tbDR').innerHTML=['L','M','S'].map(kk=>rowHTML([kk+'-DNG'].concat(MEAS.dr[kk].map(v=>nf(v,2))))).join('');
+}
+function buildVerif(){
+  const ev0=Math.log2(CAL.mu);
+  const rows=[]; let allOk=true;
+  function push(label,model,ref,tol,isAnchor){
+    const dd=model-ref, ok=Math.abs(dd)<=tol; if(!ok) allOk=false;
+    const status=isAnchor?LBL('anchor'):(ok?'<span class="okc">✓</span>':'<span class="badc">✗</span>');
+    rows.push(rowHTML([label,nf(model,2),nf(ref,2),sgnf(dd,2),status]));
+  }
+  push(LBL('ckBinM'),KIDEAL.M,MEAS.gainTheoryArticle.M,0.05,false);
+  push(LBL('ckBinS'),KIDEAL.S,MEAS.gainTheoryArticle.S,0.05,false);
+  MEAS.iso.forEach((iso,i)=>push(LBL('ckL',{iso}),snrLdB(iso,ev0,CAL.fwc,CAL.rn,CAL.gam),MEAS.snr.L[i],0.30,false));
+  MEAS.iso.forEach((iso,i)=>push(LBL('ckGM',{iso}),gainDB(iso,'M'),MEAS.gain.M[i],0.35,i===0));
+  MEAS.iso.forEach((iso,i)=>push(LBL('ckGS',{iso}),gainDB(iso,'S'),MEAS.gain.S[i],0.35,i===0));
+  $('verif').innerHTML=rows.join('');
+  $('chkAll').textContent=LBL(allOk?'okAll':'badAll');
+}
+
+/* ---------- ciclo ---------- */
+let timer=null;
+function update(){
+  const p=params();
+  $('isoV').textContent=String(p.iso);
+  $('evV').textContent=nf(p.ev,2);
+  $('muV').textContent=nf(Math.pow(2,p.ev),3);
+  $('liftV').textContent=sgnf(p.lift,1);
+  drawSNR(p); drawGain(p); drawDR(); draw18(); drawVerdict(p);
+  clearTimeout(timer); timer=setTimeout(()=>runSim(p),60);
+}
+/* El conmutador llama a onLangChange también al arrancar, antes de que la
+   aplicación exista: de ahí la guarda READY. Al cambiar de idioma se repintan
+   lienzos, tablas y rótulos; la simulación es determinista y se regenera igual. */
+let READY=false;
+window.onLangChange=function(){ if(!READY) return; buildTables(); buildVerif(); update(); };
+
+['iso','ev','fwc','rn','gam','lift'].forEach(id=>$(id).addEventListener('input',update));
+$('btnPatch').addEventListener('click',()=>{ $('ev').value=Math.log2(CAL.mu).toFixed(2); update(); });
+$('btnSeed').addEventListener('click',()=>{ SEED++; update(); });
+
+buildTables(); buildVerif();
+READY=true;
+update();
+</script>
+</body>
+</html>
