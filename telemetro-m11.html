@@ -95,8 +95,28 @@
   .legend{display:flex; gap:18px; flex-wrap:wrap; font-size:.74rem; color:var(--dim); margin-top:8px; font-family:var(--mono)}
   .sw{display:inline-block; width:22px; height:9px; border-radius:2px; vertical-align:middle; margin-right:6px}
 
-  .verdict{margin-top:12px; font-family:var(--mono); font-size:.85rem; padding:10px 12px;
-           border:1px solid var(--line); border-radius:3px; background:var(--panel2); display:none}
+  .verdict{margin-top:12px; font-family:var(--mono); font-size:.82rem; line-height:1.55; padding:10px 12px;
+           border:1px solid var(--line); border-radius:3px; background:var(--panel2)}
+  .verdict p{margin:0} .verdict p+p{margin-top:7px; padding-top:7px; border-top:1px dotted #23262c}
+  .verdict .vk{color:var(--dim)}
+  /* tablas de decisión (tm-): fila/columna del ajuste actual */
+  table.stat tr.tm-cur td{background:rgba(226,169,79,.07)}
+  table.stat th.tm-cur{color:var(--amber)}
+  table.stat td.tm-txt{color:var(--txt)}
+  .tm-cap{font-family:var(--mono); font-size:.74rem; color:var(--dim); margin:4px 0 8px; line-height:1.5}
+  .tm-cap .tm-txt{color:var(--txt)}
+  .tm-sub{margin-top:16px; padding-top:12px; border-top:1px solid var(--line)}
+  .tm-inline{display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:8px;
+             font-family:var(--mono); font-size:.76rem; color:var(--dim)}
+  .tm-inline input, .tm-inline select{background:var(--panel2); border:1px solid var(--line); color:var(--txt);
+             border-radius:3px; padding:4px 6px; font-family:var(--mono); font-size:.76rem}
+  .tm-inline input{width:62px}
+  .how{margin-top:14px}
+  .how dl{font-size:.8rem; line-height:1.55}
+  .how dt{font-weight:600; margin-top:9px; color:var(--txt)}
+  .how dd{margin:2px 0 0; color:var(--dim); max-width:90ch}
+  .how a, .note a{color:var(--dim); border-bottom:1px solid var(--line); text-decoration:none}
+  .how a:hover, .note a:hover{color:var(--amber); border-bottom-color:var(--amber)}
   .statwrap{overflow-x:auto}
   table.stat{border-collapse:collapse; font-family:var(--mono); font-size:.8rem; width:100%}
   table.stat th{color:var(--dim); font-weight:600; text-align:right; padding:4px 8px; border-bottom:1px solid var(--line)}
@@ -141,8 +161,8 @@
 
 <header>
   <h1><span class="dot"></span><span data-lang="es">M11 · Simulador de telémetro</span><span data-lang="en">M11 · Rangefinder simulator</span></h1>
-  <span class="spec" data-lang="es">base mecánica 69,25 mm · aumento 0,73× · base efectiva 50,55 mm · paso de píxel 3,78 µm</span>
-  <span class="spec" data-lang="en">mechanical baseline 69.25 mm · 0.73× magnification · effective base length 50.55 mm · pixel pitch 3.78 µm</span>
+  <span class="spec" data-lang="es">base mecánica 69,25 mm · aumento 0,73× · base efectiva 50,55 mm · paso de píxel 3,76 µm</span>
+  <span class="spec" data-lang="en">mechanical baseline 69.25 mm · 0.73× magnification · effective base length 50.55 mm · pixel pitch 3.76 µm</span>
   <a class="guidelink" href="manual-telemetro-m11.html" data-lang="es">Manual ↗</a>
   <a class="guidelink" href="manual-telemetro-m11.html" data-lang="en">Manual ↗</a>
   <div class="langbar" role="group" aria-label="Idioma / Language">
@@ -188,8 +208,8 @@
 
   <div>
     <div class="card">
-      <h2 data-lang="es">Matriz de píxeles · 15 × 15 · 3,78 µm</h2>
-      <h2 data-lang="en">Pixel matrix · 15 × 15 · 3.78 µm</h2>
+      <h2 data-lang="es">Matriz de píxeles · 15 × 15 · 3,76 µm</h2>
+      <h2 data-lang="en">Pixel matrix · 15 × 15 · 3.76 µm</h2>
       <canvas id="matrix" width="420" height="420"></canvas>
       <div class="legend" data-lang="es">
         <span><span class="sw" style="border:1px dashed var(--frame); background:none"></span>disco geométrico c</span>
@@ -248,7 +268,7 @@
       <label><span data-lang="es">Sistema de enfoque</span><span data-lang="en">Focusing system</span></label>
       <div class="stops">
         <button class="stop" id="sysRF"><span data-lang="es">telémetro</span><span data-lang="en">rangefinder</span></button>
-        <button class="stop" id="sysVis"><span data-lang="es">Visoflex (EVF ampliado)</span><span data-lang="en">Visoflex (magnified EVF)</span></button>
+        <button class="stop" id="sysVis"><span data-lang="es">EVF ampliado (Visoflex 2 · SL3-S con adaptador M)</span><span data-lang="en">magnified EVF (Visoflex 2 · SL3-S with M adapter)</span></button>
       </div>
       <label style="margin-top:8px"><span data-lang="es">Umbral en el EVF</span><span data-lang="en">EVF threshold</span> <span class="val" id="cthVal"></span></label>
       <input type="range" id="cth" min="5" max="40" value="15">
@@ -256,12 +276,27 @@
     <div class="ctrl">
       <label><span data-lang="es">Tolerancia mecánica · desfase</span><span data-lang="en">Mechanical tolerance · offset</span> <span class="val" id="mechOffVal"></span></label>
       <input type="range" id="mechOff" min="-60" max="60" value="0">
+      <div class="tm-inline">
+        <span data-lang="es">he medido: enfoca</span><span data-lang="en">measured: it focuses</span>
+        <input type="number" id="tm-mfMm" value="10" min="0" max="500" step="1"> mm
+        <select id="tm-mfDir">
+          <option value="front" data-es="por delante" data-en="in front">por delante</option>
+          <option value="back" data-es="por detrás" data-en="behind">por detrás</option>
+        </select>
+        <span data-lang="es">a</span><span data-lang="en">at</span>
+        <input type="number" id="tm-mfD" value="1" min="0.3" max="60" step="0.1"> m
+        <button class="stop" id="tm-mfApply"><span data-lang="es">→ desfase</span><span data-lang="en">→ offset</span></button>
+        <span id="tm-mfMsg"></span>
+      </div>
+      <div class="note" style="margin-top:4px" data-lang="es">Δv = Δd·m², con m el aumento a esa distancia; se acota a ±60 µm. El rótulo de arriba convierte el desfase a mm a la distancia actual del sujeto.</div>
+      <div class="note" style="margin-top:4px" data-lang="en">Δv = Δd·m², with m the magnification at that distance; clamped to ±60 µm. The label above converts the offset to mm at the current subject distance.</div>
       <label style="margin-top:8px"><span data-lang="es">ruido de la leva σ</span><span data-lang="en">coupling-cam noise σ</span> <span class="val" id="mechNoiseVal"></span></label>
       <input type="range" id="mechNoise" min="0" max="30" value="0">
     </div>
     <div class="ctrl">
       <label><span data-lang="es">Reencuadre tras enfocar α</span><span data-lang="en">Recomposing after focusing α</span> <span class="val" id="alphaVal"></span></label>
       <input type="range" id="alpha" min="0" max="25" value="0">
+      <div class="note" id="tm-alphaNote" style="margin-top:6px"></div>
     </div>
     <div class="ctrl">
       <label><span data-lang="es">Desplazamiento de foco del objetivo</span><span data-lang="en">Focus shift of the lens</span> <span class="val" id="fsVal"></span></label>
@@ -290,6 +325,14 @@
       </div>
     </div>
   </div>
+  <div class="tm-sub">
+    <h2 data-lang="es">Desplazamiento de foco por diafragma · en mm al sujeto frente a la profundidad de campo</h2>
+    <h2 data-lang="en">Focus shift by aperture · in mm at the subject against the depth of field</h2>
+    <div class="tm-cap" id="tm-fsCap"></div>
+    <div class="statwrap" id="tm-fsTable"></div>
+    <div class="note" data-lang="es">Δv es el desplazamiento del mejor foco en el plano imagen (positivo: el plano nítido se va detrás del sujeto); Δd = Δv/m² es lo mismo medido en el sujeto, a la distancia actual. La tolerancia es el mayor desenfoque que admite el criterio de nitidez a ese diafragma (N·c₀·(1 + m), o el de la bisección MTF), también llevado al sujeto: «lo absorbe» si Δv ≤ ½ tolerancia, «muerde» hasta 1 tolerancia, «lo saca de foco» más allá. El botón «Leva ajustada a f/» de arriba cambia el diafragma en que el desplazamiento es nulo. Los fs del catálogo son estimaciones editables, no medidas.</div>
+    <div class="note" data-lang="en">Δv is the shift of best focus at the image plane (positive: the plane of focus moves behind the subject); Δd = Δv/m² is the same thing measured at the subject, at the current distance. The tolerance is the largest defocus the sharpness criterion admits at that aperture (N·c₀·(1 + m), or that of the MTF bisection), also carried to the subject: "absorbed" if Δv ≤ ½ tolerance, "bites" up to 1 tolerance, "out of focus" beyond. The "Coupling cam calibrated at f/" button above changes the aperture at which the shift is null. The catalogue fs values are editable estimates, not measurements.</div>
+  </div>
   <div class="btnrow">
     <button class="btn" id="btnHuman"><span data-lang="es">Enfocar como un humano (error aleatorio ≤ ε)</span><span data-lang="en">Focus like a human (random error ≤ ε)</span></button>
     <button class="btn" id="btnPerfect"><span data-lang="es">Alinear exacto</span><span data-lang="en">Align exactly</span></button>
@@ -300,26 +343,54 @@
     <span class="note" style="margin:0" data-lang="en">settings and added lenses are saved in this browser</span>
   </div>
   <div class="note" id="footNote" data-lang="es">
-    El parche se congela por debajo de 0,7 m porque la leva del telémetro llega a su tope mecánico.
-    El desplazamiento se dibuja a escala angular real, 1′ de arco son unos 0,33 px en el visor, de ahí la lupa: en ella la banda azul es ±ε, si las barras dobles caen dentro tu ojo las daría por alineadas.
-    Anillo: arrastrar para movimiento grueso, rueda para fino, rueda con mayúsculas para muy fino.
-    Reencuadre: se enfoca al sujeto sobre el eje y se gira α; la distancia axial del sujeto pasa a d·cos α, el plano de foco no se mueve.
-    Desplazamiento de foco: el telémetro se ajusta a plena abertura; al cerrar, la aberración esférica lleva el mejor foco hacia atrás según fs·[(N<sub>máx</sub>/N<sub>cal</sub>)² − (N<sub>máx</sub>/N)²], nulo en el diafragma de calibración de la leva y negativo por debajo de él. Los valores por objetivo son estimaciones editables.
-    En modo a ciegas la distancia real se sortea y se oculta; alinea con la lupa y dispara.
-    Curva psicométrica: probabilidad de detección Weibull con umbral ε al 50 % y pendiente 3,5; el enfoque humano se detiene donde el ojo no detecta.
-    Visoflex: la zona ciega pasa a ser |Δv| &lt; N·c<sub>th</sub>, proporcional al diafragma, y el desplazamiento de foco desaparece porque se enfoca a la abertura de trabajo sobre el sensor.
-    Tolerancia mecánica: el desfase se suma al plano imagen en todas las tomas; el ruido σ se sortea en cada toma (enfoque humano, a ciegas, Monte Carlo).
+    Anillo: arrastrar para movimiento grueso, rueda para fino, rueda con mayúsculas para muy fino. El parche se congela por debajo de 0,7 m porque la leva del telémetro llega a su tope mecánico. El desplazamiento del parche se dibuja a escala angular real (1′ de arco son unos 0,33 px en el visor), de ahí la lupa: en ella la banda azul es ±ε y, si las barras dobles caen dentro, tu ojo las daría por alineadas. En modo a ciegas la distancia real se sortea y se oculta: alinea con la lupa y dispara. La deducción completa del modelo y su verificación numérica están en el <a href="manual-telemetro-m11.html">manual</a>.
   </div>
   <div class="note" data-lang="en">
-    The rangefinder patch freezes below 0.7 m because the coupling cam has reached its mechanical stop.
-    The displacement is drawn at true angular scale — one arcminute is about 0.33 px in the viewfinder — hence the loupe: in it the blue band is ±ε, and if the doubled bars fall inside it your eye would take them for aligned.
-    Ring: drag for coarse movement, wheel for fine, wheel with shift for very fine.
-    Recomposing: the subject is focused on axis and the camera is then swung through α; the axial distance of the subject becomes d·cos α, while the plane of focus does not move. This is the cosine error.
-    Focus shift: the rangefinder is calibrated at full aperture; on stopping down, spherical aberration carries best focus rearwards by fs·[(N<sub>max</sub>/N<sub>cal</sub>)² − (N<sub>max</sub>/N)²], null at the aperture the coupling cam is calibrated for and negative below it. The per-lens values are editable estimates.
-    In blind mode the true distance is drawn at random and hidden; align with the loupe and shoot.
-    Psychometric curve: a Weibull detection probability with threshold ε at 50 % and slope 3.5; human focusing stops where the eye no longer detects the misalignment.
-    Visoflex: the blind zone becomes |Δv| &lt; N·c<sub>th</sub>, proportional to the aperture, and focus shift disappears because focusing takes place at the working aperture on the sensor itself.
-    Mechanical tolerance: the offset is added at the image plane in every exposure; the noise σ is drawn afresh for each exposure (human focusing, blind mode, Monte Carlo).
+    Ring: drag for coarse movement, wheel for fine, wheel with Shift for very fine. The patch freezes below 0.7 m because the coupling cam has reached its mechanical stop. The patch displacement is drawn at true angular scale (one arcminute is about 0.33 px in the viewfinder), hence the loupe: in it the blue band is ±ε and, if the doubled bars fall inside it, your eye would take them for aligned. In blind mode the true distance is drawn at random and hidden: align with the loupe and shoot. The full derivation of the model and its numerical verification are in the <a href="manual-telemetro-m11.html">manual</a>.
+  </div>
+  <div class="how" data-lang="es">
+    <h2>Cómo se calcula</h2>
+    <dl>
+      <dt>Zona ciega del telémetro</dt><dd>El parche se desplaza un ángulo B·M·K·(1/d′ − 1/d), con B = 69,25 mm la base mecánica, M = 0,73 el aumento del visor y K el magnificador (1, 1,25 o 1,4). El ojo no lo distingue mientras ese ángulo sea menor que su agudeza ε: la zona ciega es |1/d′ − 1/d| &lt; ε/(B·M·K), un intervalo fijo en dioptrías que no depende ni del objetivo ni del diafragma. A 1′ y sin magnificador vale 5,8·10⁻⁶ mm⁻¹: con el sujeto a 3 m, el anillo puede quedar entre 2,95 y 3,05 m sin que el ojo lo note.</dd>
+      <dt>Círculo que induce</dt><dd>En el borde de la zona ciega el plano imagen se desplaza Δv ≈ f²·ε/(B·M·K) y el disco geométrico mide c ≈ Δv/N = f²·ε/(B·M·K·N). A 1′ y a plena abertura: 35 f/2 → 3,5 µm; 50 f/1.4 → 10 µm; 75 f/1.4 → 23 µm; 90 f/2 → 23 µm; 135 f/3.4 → 31 µm. Invertida, y sin contar el disco de Airy, da el diafragma mínimo para un círculo c, N = f²·ε/(B·M·K·c): para 2 px (7,52 µm) salen f/1.9 con el 50, f/4.3 con el 75, f/6.2 con el 90 y f/14 con el 135. El veredicto y las tablas no usan esta aproximación sino el cálculo exacto en los dos bordes de la zona ciega, con Airy en cuadratura, el desplazamiento de foco y el desfase mecánico incluidos: por eso el 50 f/1.4 sale en ellas un paso más cerrado (7,8 µm a f/2) y, con su desplazamiento de foco activo, más aún.</dd>
+      <dt>Disco de Airy en cuadratura</dt><dd>c<sub>total</sub> = √(c² + (2,44·λ·N)²) con λ = 550 nm. El disco de Airy mide 1,34·N µm: a f/5.6 ya son 7,5 µm, los 2 px del sensor, de modo que el criterio «≤ 2 px» solo es alcanzable hasta f/4 sea cual sea el sistema de enfoque; a f/16 (21 µm) queda solo el criterio de 30 µm.</dd>
+      <dt>Profundidad de campo</dt><dd>Hiperfocal H = f²/(N·c₀) + f; límites cercano d·(H − f)/(H + d − 2f) y lejano d·(H − f)/(H − d) alrededor del plano nítido, con c₀ = 2 px, 30 µm o, en el criterio MTF, el mayor desenfoque que mantiene MTF66 ≥ umbral (por bisección). Son las fórmulas de <a href="programa-camara.html">programa-camara</a>; aquí sirven solo para compararlas con la zona ciega, el reencuadre y el desplazamiento de foco.</dd>
+      <dt>Error de coseno al reencuadrar</dt><dd>Se enfoca al sujeto en el eje y se gira α: su distancia axial pasa a d·cos α, es decir, se acerca d·(1 − cos α) sin que el plano de foco se mueva. Cabe en la PdC mientras d·cos α ≥ d<sub>cerca</sub>, de donde α<sub>máx</sub> = arccos(d<sub>cerca</sub>/d).</dd>
+      <dt>Desplazamiento de foco</dt><dd>Δv = fs·(1 + k·m)·[(N<sub>máx</sub>/N<sub>cal</sub>)² − (N<sub>máx</sub>/N)²]: nulo en el diafragma N<sub>cal</sub> al que está ajustada la leva, hacia atrás al cerrar y hacia delante al abrir; crece con el aumento m del sujeto. Con el EVF ampliado no interviene, porque se enfoca a la abertura de trabajo sobre el sensor.</dd>
+      <dt>Del plano imagen al sujeto</dt><dd>Un desplazamiento Δv del plano imagen equivale a Δd = Δv/m² en el sujeto, con m = f/(d − f). Es la conversión que usan el desfase mecánico y la tabla de desplazamiento: 10 µm con un 50 mm son 3,6 mm a 1 m y 35 mm a 3 m.</dd>
+      <dt>EVF ampliado (Visoflex 2 · SL3-S con adaptador M)</dt><dd>El desenfoque se detecta cuando el disco geométrico supera c<sub>th</sub> píxeles: la zona ciega es |Δv| &lt; N·c<sub>th</sub>·p·v/f, proporcional al diafragma, y el círculo en su borde vale c<sub>th</sub> píxeles más el disco de Airy. El mismo modelo vale para enfocar un objetivo M sobre el sensor del SL3-S con el adaptador.</dd>
+      <dt>Ojo psicométrico</dt><dd>Con la curva psicométrica la detección es una Weibull P = 1 − 2^(−(Δ/ε)^3,5), con ε en el 50 %; el enfoque humano y el Monte Carlo se detienen donde el ojo deja de detectar.</dd>
+      <dt>Cadena MTF</dt><dd>MTF total = OTF de desenfoque con difracción (integral de Hopkins, pupila circular) × residuo de aberraciones del objetivo (interpolado de la MTF publicada a 10/20/40 pl/mm) × apertura del fotosito |sinc(π·p·ν)| con p = 3,76 µm. «MTF66» es su valor a media Nyquist, 66,5 pl/mm.</dd>
+    </dl>
+    <h2 style="margin-top:14px">Límites y supuestos</h2>
+    <dl>
+      <dt>Peor caso, no promedio</dt><dd>El veredicto y las tablas colocan el anillo en el borde de la zona ciega: es lo peor que puede pasar con un ojo de agudeza ε y sin ruido de la leva. La tabla de Monte Carlo reparte los enfoques dentro de la zona y da la tasa real de acierto, siempre mejor que el peor caso.</dd>
+      <dt>Estimaciones</dt><dd>Los desplazamientos de foco de todos los objetivos son estimaciones editables, no medidas, y la MTF de tres de los ocho (Thypoch, Nokton, LLL) también; la de los Leica se redondea de sus hojas de datos. El umbral c<sub>th</sub> del EVF es un supuesto del usuario. Un índice ordinal de deriva de foco por objetivo, obtenido por otra vía, está en <a href="caracter-optico-leica-m.html">el carácter óptico de los M</a>.</dd>
+      <dt>Ojo y mecánica ideales</dt><dd>El ojo es un vernier ideal con umbral ε (0,6′ con buena luz, 1,8′ en penumbra); no se modelan el contraste del parche, la fatiga ni el temblor de la mano. El objetivo es una lente delgada sin curvatura de campo ni respiración de foco; la leva es lineal en 1/d salvo el desfase y el ruido σ que se fijen.</dd>
+      <dt>Lo que no está aquí</dt><dd>Los techos de difracción por diafragma y modo de archivo están en <a href="sensor.html#difraccion">la pestaña de difracción del sensor</a>; el cálculo general de PdC e hiperfocal, en <a href="programa-camara.html">programa-camara</a>. El paralaje de los marcos a corta distancia es un problema de encuadre, no de enfoque, y no se modela.</dd>
+    </dl>
+  </div>
+  <div class="how" data-lang="en">
+    <h2>How it is computed</h2>
+    <dl>
+      <dt>Rangefinder blind zone</dt><dd>The patch moves through an angle B·M·K·(1/d′ − 1/d), with B = 69.25 mm the mechanical base, M = 0.73 the finder magnification and K the magnifier (1, 1.25 or 1.4). The eye cannot tell while that angle stays below its acuity ε: the blind zone is |1/d′ − 1/d| &lt; ε/(B·M·K), a fixed interval in dioptres that depends neither on the lens nor on the aperture. At 1′ without magnifier it is 5.8·10⁻⁶ mm⁻¹: with the subject at 3 m, the ring can sit anywhere between 2.95 and 3.05 m without the eye noticing.</dd>
+      <dt>Circle it induces</dt><dd>At the edge of the blind zone the image plane shifts by Δv ≈ f²·ε/(B·M·K) and the geometrical disc measures c ≈ Δv/N = f²·ε/(B·M·K·N). At 1′ and full aperture: 35 f/2 → 3.5 µm; 50 f/1.4 → 10 µm; 75 f/1.4 → 23 µm; 90 f/2 → 23 µm; 135 f/3.4 → 31 µm. Inverted, and leaving the Airy disc aside, it gives the minimum aperture for a circle c, N = f²·ε/(B·M·K·c): for 2 px (7.52 µm) that is f/1.9 with the 50, f/4.3 with the 75, f/6.2 with the 90 and f/14 with the 135. The verdict and the tables do not use this approximation but the exact calculation at both edges of the blind zone, with Airy in quadrature, focus shift and mechanical offset included: that is why the 50 f/1.4 comes out one stop further down in them (7.8 µm at f/2) and, with its focus shift active, further still.</dd>
+      <dt>Airy disc in quadrature</dt><dd>c<sub>total</sub> = √(c² + (2.44·λ·N)²) with λ = 550 nm. The Airy disc measures 1.34·N µm: at f/5.6 it is already 7.5 µm, the sensor's 2 px, so the "≤ 2 px" criterion is only attainable up to f/4 whatever the focusing system; at f/16 (21 µm) only the 30 µm criterion remains.</dd>
+      <dt>Depth of field</dt><dd>Hyperfocal H = f²/(N·c₀) + f; near limit d·(H − f)/(H + d − 2f) and far limit d·(H − f)/(H − d) around the plane of focus, with c₀ = 2 px, 30 µm or, under the MTF criterion, the largest defocus that keeps MTF66 ≥ threshold (by bisection). These are the formulas of <a href="programa-camara.html">programa-camara</a>; here they serve only to be compared with the blind zone, the recomposing error and the focus shift.</dd>
+      <dt>Cosine error when recomposing</dt><dd>The subject is focused on axis and the camera swung through α: its axial distance becomes d·cos α, i.e. it comes closer by d·(1 − cos α) while the plane of focus does not move. It fits within the DoF while d·cos α ≥ d<sub>near</sub>, whence α<sub>max</sub> = arccos(d<sub>near</sub>/d).</dd>
+      <dt>Focus shift</dt><dd>Δv = fs·(1 + k·m)·[(N<sub>max</sub>/N<sub>cal</sub>)² − (N<sub>max</sub>/N)²]: null at the aperture N<sub>cal</sub> the coupling cam is calibrated for, rearwards on stopping down and forwards on opening up; it grows with the subject magnification m. With the magnified EVF it plays no part, because focusing takes place at the working aperture on the sensor.</dd>
+      <dt>From image plane to subject</dt><dd>A shift Δv of the image plane is equivalent to Δd = Δv/m² at the subject, with m = f/(d − f). This is the conversion used by the mechanical offset and by the focus-shift table: 10 µm with a 50 mm are 3.6 mm at 1 m and 35 mm at 3 m.</dd>
+      <dt>Magnified EVF (Visoflex 2 · SL3-S with M adapter)</dt><dd>Defocus is detected when the geometrical disc exceeds c<sub>th</sub> pixels: the blind zone is |Δv| &lt; N·c<sub>th</sub>·p·v/f, proportional to the aperture, and the circle at its edge is c<sub>th</sub> pixels plus the Airy disc. The same model applies to focusing an M lens on the SL3-S sensor through the adapter.</dd>
+      <dt>Psychometric eye</dt><dd>With the psychometric curve, detection is a Weibull P = 1 − 2^(−(Δ/ε)^3.5), with ε at 50 %; human focusing and the Monte Carlo stop where the eye no longer detects.</dd>
+      <dt>MTF chain</dt><dd>Total MTF = defocus OTF with diffraction (Hopkins integral, circular pupil) × lens aberration residual (interpolated from the published MTF at 10/20/40 lp/mm) × photosite aperture |sinc(π·p·ν)| with p = 3.76 µm. "MTF66" is its value at half Nyquist, 66.5 lp/mm.</dd>
+    </dl>
+    <h2 style="margin-top:14px">Limits and assumptions</h2>
+    <dl>
+      <dt>Worst case, not average</dt><dd>The verdict and the tables place the ring at the edge of the blind zone: it is the worst that can happen with an eye of acuity ε and no cam noise. The Monte Carlo table spreads the focusings within the zone and gives the real hit rate, always better than the worst case.</dd>
+      <dt>Estimates</dt><dd>The focus shifts of all lenses are editable estimates, not measurements, and so is the MTF of three of the eight (Thypoch, Nokton, LLL); that of the Leica lenses is rounded from their data sheets. The EVF threshold c<sub>th</sub> is a user assumption. An ordinal index of focus drift per lens, obtained by another route, is in <a href="caracter-optico-leica-m.html">the optical character of the M lenses</a>.</dd>
+      <dt>Ideal eye and mechanics</dt><dd>The eye is an ideal vernier with threshold ε (0.6′ in good light, 1.8′ in dim light); patch contrast, fatigue and hand tremor are not modelled. The lens is a thin lens without field curvature or focus breathing; the cam is linear in 1/d apart from whatever offset and noise σ are set.</dd>
+      <dt>What is not here</dt><dd>The diffraction ceilings by aperture and file mode are in <a href="sensor.html#difraccion">the sensor's diffraction tab</a>; the general DoF and hyperfocal calculator, in <a href="programa-camara.html">programa-camara</a>. Frame-line parallax at close range is a framing problem, not a focusing one, and is not modelled.</dd>
+    </dl>
   </div>
 </div>
 
@@ -347,6 +418,14 @@
   <canvas id="curves" width="860" height="300"></canvas>
   <div class="note" data-lang="es">Cada punto corresponde al anillo en el borde de la zona ciega del sistema de enfoque, más Airy, desplazamiento de foco y desfase mecánico. Sin ruido aleatorio. La curva gruesa es el objetivo seleccionado. En modo MTF, la línea de trazos es el techo de difracción por sensor a 66 pl/mm.</div>
   <div class="note" data-lang="en">Each point corresponds to the ring at the edge of the focusing system's blind zone, plus the Airy disc, focus shift and mechanical offset. Random noise excluded. The heavy curve is the selected lens. In MTF mode, the dashed line is the diffraction ceiling times the sensor at 66 lp/mm.</div>
+  <div class="tm-sub">
+    <h2 data-lang="es">Diafragma mínimo fiable por objetivo y sistema de enfoque</h2>
+    <h2 data-lang="en">Minimum reliable aperture by lens and focusing system</h2>
+    <div class="tm-cap" id="tm-lensCap"></div>
+    <div class="statwrap" id="tm-lensTable"></div>
+    <div class="note" data-lang="es">Cada celda es el primer diafragma cuyo peor caso (anillo en el borde de la zona ciega) cumple el criterio; «f/2.8–4» significa que solo lo cumple en ese tramo, porque más cerrado el disco de Airy ya lo desborda. Verde: cumple a plena abertura; ámbar: cumple cerrando; «—»: ningún diafragma hasta f/16. La última columna es el desplazamiento de foco a f/5.6 convertido a mm al sujeto y comparado con la PdC de ese objetivo (verde ≤ ½ PdC, ámbar ≤ PdC, rojo más allá). Los objetivos añadidos aparecen también.</div>
+    <div class="note" data-lang="en">Each cell is the first aperture whose worst case (ring at the edge of the blind zone) meets the criterion; "f/2.8–4" means it only holds within that range, because further stopped down the Airy disc alone exceeds it. Green: holds at full aperture; amber: holds on stopping down; "—": no aperture up to f/16. The last column is the focus shift at f/5.6 converted to mm at the subject and compared with that lens's DoF (green ≤ ½ DoF, amber ≤ DoF, red beyond). Added lenses appear too.</div>
+  </div>
 </div>
 
 <div class="card" style="margin-top:16px">
@@ -366,6 +445,14 @@
       <h2 data-lang="en">Hit rate by aperture</h2>
       <div id="statTable" class="statwrap"></div>
     </div>
+  </div>
+  <div class="tm-sub">
+    <h2 data-lang="es">Peor caso por diafragma · telémetro / ×1,25 / ×1,4 / EVF ampliado, lado a lado</h2>
+    <h2 data-lang="en">Worst case by aperture · rangefinder / ×1.25 / ×1.4 / magnified EVF, side by side</h2>
+    <div class="tm-cap" id="tm-sysCap"></div>
+    <div class="statwrap" id="tm-sysTable"></div>
+    <div class="note" data-lang="es">Círculo total con el anillo en el borde de la zona ciega de cada sistema, para el objetivo y la distancia actuales; verde ≤ 2 px, ámbar ≤ 30 µm, rojo más allá. La columna resaltada es el sistema en uso; si se ha pulsado «Simular 1000 enfoques», añade el porcentaje de acierto con el criterio de nitidez elegido. El umbral del EVF (c<sub>th</sub>, deslizador de arriba) es un supuesto, no una medida. El mismo modelo del EVF vale para el objetivo M montado en el SL3-S con adaptador.</div>
+    <div class="note" data-lang="en">Total circle with the ring at the edge of each system's blind zone, for the current lens and distance; green ≤ 2 px, amber ≤ 30 µm, red beyond. The highlighted column is the system in use; if "Simulate 1000 focusings" has been pressed, it adds the hit rate under the chosen sharpness criterion. The EVF threshold (c<sub>th</sub>, slider above) is an assumption, not a measurement. The same EVF model applies to the M lens mounted on the SL3-S with the adapter.</div>
   </div>
 </div>
 
@@ -403,7 +490,7 @@ es:{
   /* --- rótulos del visor y de la lupa --- */
   camStopFinder:"leva en tope · telémetro desacoplado",
   camStopLoupe:"leva en tope: la imagen del parche no responde",
-  visoActive:"Visoflex activo: el parche no interviene, se enfoca sobre el sensor ampliado",
+  visoActive:"EVF ampliado activo: el parche no interviene, se enfoca sobre el sensor ampliado",
   pDetect:"· P(detectar) = ",
   discernible:"(distinguible)",
   looksAligned:"(dentro de ±ε, parece alineado)",
@@ -436,7 +523,7 @@ es:{
   mtfAxis:"frecuencia espacial (pl/mm)",
   serDiff:"difracción f/",
   serLens:"objetivo enfocado (difr. × residuo)",
-  serSensor:"sensor (fotosito 3,78 µm)",
+  serSensor:"sensor (fotosito 3,76 µm)",
   serTotal:"total, con el desenfoque actual",
   mtf50At:" · MTF50 a ", lpmm:" pl/mm",
   lensResid:"residuo del objetivo: ",
@@ -468,13 +555,63 @@ es:{
   fsmEff:" · fs eficaz ",
   blindOn:"Modo a ciegas", blindOff:"Salir del modo a ciegas",
   resetTitle:"Borra ajustes y objetivos guardados en este navegador",
-  resetAsk:"¿Borrar ajustes y objetivos guardados en este navegador?"
+  resetAsk:"¿Borrar ajustes y objetivos guardados en este navegador?",
+  /* --- veredicto permanente: ¿me fío del telémetro aquí? --- */
+  vLead:"{lens} · ε = {eps}′ · {sys}: ",
+  vSysRF:"telémetro", vSysMag:"telémetro ×{k}", vSysEVF:"EVF ampliado (c<sub>th</sub> {cth} px)",
+  v2Wide:"≤ 2 px ya a plena abertura (f/{n0}: peor caso {c0} µm, {px0} px).",
+  v2From:"≤ 2 px desde f/{n2}; a f/{n0} el peor caso es {c0} µm ({px0} px)",
+  v2Never:"ningún diafragma hasta f/16 garantiza ≤ 2 px; a f/{n0} el peor caso es {c0} µm ({px0} px)",
+  v30Ok:", que sirve para 30 µm.", v30From:"; ≤ 30 µm desde f/{n30}.", v30Never:"; ni 30 µm hasta f/16.",
+  vBzHidden:"veredicto oculto hasta disparar: depende de la distancia real, que a ciegas está sorteada.",
+  mfOut:"→ {dv} µm, fuera del recorrido del deslizador (±60 µm): se ha fijado el tope.",
+  vBz:"Zona ciega a {d} m: −{bn}/+{bf} mm (Δv {dvb} µm) · PdC a f/{N} ({crit}): Δv ±{dvd} µm → ",
+  vLimRF:"el límite es el telémetro: su zona ciega es {r}× la tolerancia de la PdC.",
+  vLimDof:"el límite es la PdC: el telémetro resuelve {r}× más fino de lo que exige el criterio.",
+  vLimNoDof:"el criterio es inalcanzable a este diafragma (PdC vacía).",
+  vFixOk:"Para ≤ 2 px a f/{n0} basta {opt}.",
+  vFixBest:"Ninguna opción da ≤ 2 px a f/{n0}; la mejor es {opt}, desde f/{n}.",
+  vFixNone:"Ninguna opción da ≤ 2 px con este objetivo hasta f/16.",
+  vFixNeed:"A f/{n0} no hace falta magnificador ni EVF.",
+  vAlt:" Alternativas (≤ 2 px desde): ",
+  optRF:"el telémetro sin magnificador", optM125:"el magnificador ×1,25", optM14:"el magnificador ×1,4", optEVF:"el EVF ampliado",
+  altRF:"telémetro", altM125:"×1,25", altM14:"×1,4", altEVF:"EVF",
+  only:" solo",
+  /* --- reencuadre --- */
+  aMax:" · máx {a}°",
+  aNote0:"A {d} m y f/{N} puedes girar hasta {amax}° sin que el sujeto salga de la PdC: el error d·(1 − cos α) agota entonces la tolerancia hacia delante, {tol} mm.",
+  aNoteOk:"A {d} m y f/{N}, girar {a}° acerca el sujeto {e} mm: cabe en la tolerancia de {tol} mm (máx {amax}°).",
+  aNoteBad:"A {d} m y f/{N}, girar {a}° acerca el sujeto {e} mm, {r}× la tolerancia de la PdC ({tol} mm; máx {amax}°): enfoca en el borde del marco o cierra a f/{nok}.",
+  aNoteBadNone:"A {d} m y f/{N}, girar {a}° acerca el sujeto {e} mm, {r}× la tolerancia de la PdC ({tol} mm; máx {amax}°): ningún diafragma hasta f/16 lo absorbe; enfoca en el borde del marco.",
+  aNoteEmpty:"PdC vacía a f/{N} con este criterio: cualquier giro saca al sujeto de foco.",
+  aHidden:"oculto hasta disparar",
+  /* --- desfase mecánico al sujeto --- */
+  rMechSubj:"desfase al sujeto", mmFront:" mm por delante", mmBack:" mm por detrás", atD:" a ",
+  /* --- tabla de desplazamiento de foco --- */
+  fsCapOff:"desplazamiento de foco desactivado: la tabla no aplica.",
+  fsCapEVF:"con el EVF ampliado se enfoca a la abertura de trabajo: no hay desplazamiento que corregir.",
+  fsCap:"{lens} · fs = {fs} µm ({src}) · k = {k} · leva a f/{ncal} · sujeto a {d} m · PdC con {crit}. ",
+  fsSentOk:"Con la leva a f/{ncal}, la PdC absorbe el desplazamiento en todo el rango.",
+  fsSentBite:"Con la leva a f/{ncal}, el desplazamiento muerde en {list}; ",
+  fsAltOk:"calibrada a f/{n2} quedaría dentro de la PdC en todo el rango.",
+  fsAltBite:"calibrada a f/{n2} muerde en {list2}.",
+  fsAltNone:"no queda un diafragma de calibración más cerrado que probar.",
+  thDv:"Δv plano imagen", thDd:"Δd al sujeto", thTol:"tolerancia PdC", thVerdict:"veredicto",
+  fsAbs:"lo absorbe", fsBite:"muerde", fsOut:"lo saca de foco", fsNull:"nulo (leva)",
+  fsEstimate:"estimación editable", fsUserVal:"valor del usuario",
+  /* --- tabla de diafragma mínimo por objetivo --- */
+  lensCap:"ε = {eps}′ · sujeto a {d} m · EVF con c<sub>th</sub> = {cth} px · leva a f/{ncal} o a plena abertura · desfase {off} µm · fila resaltada: objetivo actual · columna resaltada: sistema en uso",
+  thLens:"objetivo", th2RF:"≤ 2 px · telémetro", th2M125:"≤ 2 px · ×1,25", th2M14:"≤ 2 px · ×1,4", th2EVF:"≤ 2 px · EVF ({cth} px)", th30RF:"≤ 30 µm · telémetro", thFs56:"fs a f/5.6 · Δd / tolerancia",
+  /* --- tabla lado a lado por sistema --- */
+  sysCap:"{lens} · sujeto a {d} m · ε = {eps}′ · c<sub>th</sub> = {cth} px · leva a f/{ncal} · desfase {off} µm{mc}",
+  sysMc:" · el % es la tasa de acierto Monte Carlo con el criterio {crit}",
+  thRF:"telémetro", thM125:"×1,25", thM14:"×1,4", thEVF:"EVF ({cth} px)", thDofW:"PdC ({crit})"
 },
 en:{
   addLens:"+ add", lensDefault:"Lens",
   camStopFinder:"cam against its stop · rangefinder uncoupled",
   camStopLoupe:"cam against its stop: the patch image no longer responds",
-  visoActive:"Visoflex active: the rangefinder patch plays no part, focusing is done on the magnified sensor image",
+  visoActive:"Magnified EVF active: the rangefinder patch plays no part, focusing is done on the magnified sensor image",
   pDetect:"· P(detect) = ",
   discernible:"(discernible)",
   looksAligned:"(within ±ε, appears aligned)",
@@ -501,7 +638,7 @@ en:{
   mtfAxis:"spatial frequency (lp/mm)",
   serDiff:"diffraction f/",
   serLens:"focused lens (diffr. × residual)",
-  serSensor:"sensor (photosite 3.78 µm)",
+  serSensor:"sensor (photosite 3.76 µm)",
   serTotal:"total, with the current defocus",
   mtf50At:" · MTF50 at ", lpmm:" lp/mm",
   lensResid:"lens residual: ",
@@ -530,12 +667,58 @@ en:{
   fsmEff:" · effective fs ",
   blindOn:"Blind mode", blindOff:"Leave blind mode",
   resetTitle:"Clears the settings and lenses saved in this browser",
-  resetAsk:"Clear the settings and lenses saved in this browser?"
+  resetAsk:"Clear the settings and lenses saved in this browser?",
+  vLead:"{lens} · ε = {eps}′ · {sys}: ",
+  vSysRF:"rangefinder", vSysMag:"rangefinder ×{k}", vSysEVF:"magnified EVF (c<sub>th</sub> {cth} px)",
+  v2Wide:"≤ 2 px already at full aperture (f/{n0}: worst case {c0} µm, {px0} px).",
+  v2From:"≤ 2 px from f/{n2}; at f/{n0} the worst case is {c0} µm ({px0} px)",
+  v2Never:"no aperture up to f/16 guarantees ≤ 2 px; at f/{n0} the worst case is {c0} µm ({px0} px)",
+  v30Ok:", which is good enough for 30 µm.", v30From:"; ≤ 30 µm from f/{n30}.", v30Never:"; not even 30 µm up to f/16.",
+  vBzHidden:"verdict hidden until the shot: it depends on the true distance, which in blind mode is drawn at random.",
+  mfOut:"→ {dv} µm, beyond the slider range (±60 µm): it has been pinned to the end stop.",
+  vBz:"Blind zone at {d} m: −{bn}/+{bf} mm (Δv {dvb} µm) · DoF at f/{N} ({crit}): Δv ±{dvd} µm → ",
+  vLimRF:"the limit is the rangefinder: its blind zone is {r}× the DoF tolerance.",
+  vLimDof:"the limit is the DoF: the rangefinder resolves {r}× finer than the criterion demands.",
+  vLimNoDof:"the criterion is unattainable at this aperture (empty DoF).",
+  vFixOk:"For ≤ 2 px at f/{n0}, {opt} is enough.",
+  vFixBest:"No option gives ≤ 2 px at f/{n0}; the best is {opt}, from f/{n}.",
+  vFixNone:"No option gives ≤ 2 px with this lens up to f/16.",
+  vFixNeed:"At f/{n0} neither a magnifier nor the EVF is needed.",
+  vAlt:" Alternatives (≤ 2 px from): ",
+  optRF:"the rangefinder without magnifier", optM125:"the ×1.25 magnifier", optM14:"the ×1.4 magnifier", optEVF:"the magnified EVF",
+  altRF:"rangefinder", altM125:"×1.25", altM14:"×1.4", altEVF:"EVF",
+  only:" only",
+  aMax:" · max {a}°",
+  aNote0:"At {d} m and f/{N} you can swing up to {amax}° before the subject leaves the DoF: the error d·(1 − cos α) then uses up the forward tolerance, {tol} mm.",
+  aNoteOk:"At {d} m and f/{N}, swinging {a}° brings the subject {e} mm closer: it fits within the {tol} mm tolerance (max {amax}°).",
+  aNoteBad:"At {d} m and f/{N}, swinging {a}° brings the subject {e} mm closer, {r}× the DoF tolerance ({tol} mm; max {amax}°): focus at the edge of the frame or stop down to f/{nok}.",
+  aNoteBadNone:"At {d} m and f/{N}, swinging {a}° brings the subject {e} mm closer, {r}× the DoF tolerance ({tol} mm; max {amax}°): no aperture up to f/16 absorbs it; focus at the edge of the frame.",
+  aNoteEmpty:"Empty DoF at f/{N} under this criterion: any swing takes the subject out of focus.",
+  aHidden:"hidden until the shot",
+  rMechSubj:"offset at the subject", mmFront:" mm in front", mmBack:" mm behind", atD:" at ",
+  fsCapOff:"focus shift disabled: the table does not apply.",
+  fsCapEVF:"with the magnified EVF focusing is done at the working aperture: there is no shift to correct.",
+  fsCap:"{lens} · fs = {fs} µm ({src}) · k = {k} · cam at f/{ncal} · subject at {d} m · DoF under {crit}. ",
+  fsSentOk:"With the cam at f/{ncal}, the DoF absorbs the shift over the whole range.",
+  fsSentBite:"With the cam at f/{ncal}, the shift bites at {list}; ",
+  fsAltOk:"calibrated at f/{n2} it would stay within the DoF over the whole range.",
+  fsAltBite:"calibrated at f/{n2} it bites at {list2}.",
+  fsAltNone:"there is no further stopped-down calibration aperture to try.",
+  thDv:"Δv image plane", thDd:"Δd at the subject", thTol:"DoF tolerance", thVerdict:"verdict",
+  fsAbs:"absorbed", fsBite:"bites", fsOut:"out of focus", fsNull:"null (cam)",
+  fsEstimate:"editable estimate", fsUserVal:"user value",
+  lensCap:"ε = {eps}′ · subject at {d} m · EVF with c<sub>th</sub> = {cth} px · cam at f/{ncal} or at full aperture · offset {off} µm · highlighted row: current lens · highlighted column: system in use",
+  thLens:"lens", th2RF:"≤ 2 px · rangefinder", th2M125:"≤ 2 px · ×1.25", th2M14:"≤ 2 px · ×1.4", th2EVF:"≤ 2 px · EVF ({cth} px)", th30RF:"≤ 30 µm · rangefinder", thFs56:"fs at f/5.6 · Δd / tolerance",
+  sysCap:"{lens} · subject at {d} m · ε = {eps}′ · c<sub>th</sub> = {cth} px · cam at f/{ncal} · offset {off} µm{mc}",
+  sysMc:" · the % is the Monte Carlo hit rate under the {crit} criterion",
+  thRF:"rangefinder", thM125:"×1.25", thM14:"×1.4", thEVF:"EVF ({cth} px)", thDofW:"DoF ({crit})"
 }
 };
 const LANG   = ()=> document.documentElement.lang==="en" ? "en" : "es";
 const LOCALE = ()=> LANG()==="en" ? "en-GB" : "es-ES";
 function t(k){ const D=T[LANG()]||T.es; return D[k]!==undefined ? D[k] : (T.es[k]!==undefined?T.es[k]:k); }
+/* plantilla con huecos {x}: tf("vBz",{d:"3,00", ...}) */
+function tf(k, o){ return t(k).replace(/\{(\w+)\}/g, (s,p)=> o[p]!==undefined ? o[p] : s); }
 /* separador decimal para las cadenas ya formateadas con punto (marcas del anillo, etc.) */
 const dec = s => LANG()==="en" ? String(s) : String(s).replace(".",",");
 /* La procedencia de la MTF se guarda como código estable en los datos del objetivo
@@ -546,7 +729,7 @@ function srcLabel(src){ if(!src) return t("srcDefault"); return SRC_KEY[src] ? t
 /* ================= Constantes de la M11 ================= */
 const BASE = 69.25;          // mm, base mecánica
 const MAG  = 0.73;           // aumento del visor
-const PITCH = 3.78;          // µm por píxel
+const PITCH = 3.76;          // µm por píxel (el mismo valor que sensor.html y leica-sensores.html)
 const LAMBDA = 0.55e-3;      // mm, 550 nm
 const COUPLE_MIN = 0.7;      // m, tope de la leva
 const DMAX = 60;             // m, posición de ∞ en la escala
@@ -572,8 +755,8 @@ const LENSES = [
   {name:"Summicron-M 90 f/2",           f:90,  nmax:2.0, mfd:1.00, fs:15, mtf:{wo:[0.95,0.88,0.72], f56:[0.97,0.93,0.82], src:"Leica"}},
   {name:"APO-Telyt-M 135 f/3.4",        f:135, nmax:3.4, mfd:1.50, fs:0,  mtf:{wo:[0.97,0.93,0.82], f56:[0.98,0.94,0.85], src:"Leica"}},
 ];
-const NYQ = 1000/(2*PITCH);          // 132,3 pl/mm
-const NU_CRIT = NYQ/2;               // 66,1 pl/mm, media Nyquist
+const NYQ = 1000/(2*PITCH);          // 133,0 pl/mm
+const NU_CRIT = NYQ/2;               // 66,5 pl/mm, media Nyquist
 const STOPS_ALL = [0.95,1.2,1.4,2,2.8,4,5.6,8,11,16];
 
 /* ================= Estado ================= */
@@ -605,6 +788,7 @@ const S = {
   shot: null,                // resultado del disparo en modo a ciegas
   mc: null,                  // último resultado Monte Carlo
   mcRows: null,              // filas por diafragma, conservadas para repintar al cambiar de idioma
+  mfDv: null,                // µm pedidos por el conversor cuando se salen del recorrido (aviso)
 };
 
 /* ================= Óptica ================= */
@@ -750,19 +934,53 @@ function monteCarlo(nRuns, N){
 /* ================= Curva c(N) por objetivo ================= */
 /* círculo inducido por el sistema de enfoque en el peor caso de la zona ciega (borde),
    más Airy, desplazamiento y desfase, para un objetivo dado; ruido excluido (determinista). */
-function cCurveFor(L){
+/* Patrón «what-if»: evalúa fn() con otro objetivo montado y restaura S siempre, también ante
+   excepción. El fs editado por el usuario sólo se conserva si L es el objetivo en uso. */
+function withLens(L, fn){
   const save = {lens:S.lens, fs:S.fs, nCal:S.nCal};
-  S.lens=L; S.fs=null; S.nCal=Math.max(save.nCal, L.nmax);
-  const out = STOPS_ALL.filter(n=>n>=L.nmax-1e-9 && n<=16).map(N=>{
+  S.lens=L; S.fs=(L===save.lens)? save.fs : null; S.nCal=Math.max(save.nCal, L.nmax);
+  try{ return fn(); } finally { S.lens=save.lens; S.fs=save.fs; S.nCal=save.nCal; }
+}
+/* Ídem con otro sistema de enfoque (magnificador K, telémetro o EVF ampliado). */
+function tmWithSys(magX, viso, fn){
+  const save = {magX:S.magX, visoflex:S.visoflex};
+  S.magX=magX; S.visoflex=viso;
+  try{ return fn(); } finally { S.magX=save.magX; S.visoflex=save.visoflex; }
+}
+function stopsFor(L){ return STOPS_ALL.filter(n=>n>=L.nmax-1e-9 && n<=16); }
+/* peor caso determinista por diafragma: anillo en los dos bordes de la zona ciega del sistema
+   vigente, sin ruido. Sin la OTF numérica: es lo que usan el veredicto y las tablas (barato). */
+function tmWorst(L){
+  return withLens(L, ()=> stopsFor(L).map(N=>{
     const [lo,hi] = blindZone(N);
     const r1 = cTotalFor(clampDm(lo), S.dTrue, N, 0);
     const r2 = cTotalFor(hi===Infinity? DMAX : clampDm(hi), S.dTrue, N, 0);
     const worst = r1.c>=r2.c? r1 : r2;
-    return {N, c:worst.c, m:mtfAtCrit(N, worst.dv, L)};
-  });
-  S.lens=save.lens; S.fs=save.fs; S.nCal=save.nCal;
-  return out;
+    return {N, c:worst.c, dv:worst.dv};
+  }));
 }
+function cCurveFor(L){
+  return withLens(L, ()=> tmWorst(L).map(p=>({N:p.N, c:p.c, m:mtfAtCrit(p.N, p.dv, L)})));
+}
+/* primer diafragma cuyo peor caso cumple c ≤ lim, y hasta dónde se mantiene seguido;
+   wide: ya a plena abertura; all: hasta el último diafragma evaluado (si no, «f/2–4») */
+function tmNmin(curve, lim){
+  const i = curve.findIndex(p=>p.c<=lim); if(i<0) return null;
+  let j=i; while(j+1<curve.length && curve[j+1].c<=lim) j++;
+  return {N:curve[i].N, to:curve[j].N, wide:i===0, all:j===curve.length-1};
+}
+function tmNminTxt(r){ return !r ? "—" : r.all ? "f/"+r.N : r.N===r.to ? "f/"+r.N+t("only") : "f/"+r.N+"–"+r.to; }
+function tmNminCell(r){ return `<td class="${!r?"v-bad":r.wide?"v-ok":"v-warn"}">${tmNminTxt(r)}</td>`; }
+/* tolerancia de desenfoque en el plano imagen (mm) que admite el criterio a N: N·c₀·v/f para
+   2 px / 30 µm (la misma geometría que cTotalFor), o la bisección MTF */
+function dvTol(N){
+  if(S.crit==="mtf") return dvMaxForMTF(N);
+  return N*S.c0*vImg(dAxial(S.dTrue),S.lens.f)/S.lens.f;
+}
+const SYS_LIST = [[1,false,"RF"],[1.25,false,"M125"],[1.4,false,"M14"],[1,true,"EVF"]];
+function tmCurSys(){ return S.visoflex? 3 : S.magX>=1.4? 2 : S.magX>=1.25? 1 : 0; }
+function fmtR(r){ return r===Infinity? "∞" : fmt(r, r<10?1:0); }
+function critLbl(){ return S.crit==="mtf"? "MTF66 ≥ "+fmt(S.mtfThr,2) : dec((S.c0*1000).toFixed(1))+" µm"; }
 
 /* ================= MTF ================= */
 /* OTF de desenfoque con difracción para pupila circular (Hopkins):
@@ -806,10 +1024,19 @@ function mtf50(N, dv){
   for(let i=0;i<24;i++){ const m=(lo+hi)/2; (mtfTotal(m,N,dv)>=0.5)?(lo=m):(hi=m); } return (lo+hi)/2;
 }
 /* mayor Δv (mm) que mantiene MTF66 ≥ umbral; 0 si ni con foco perfecto se alcanza */
+/* Memorizada: las tablas la piden por diafragma y por objetivo en cada pintado; sólo depende
+   de N, del umbral y del objetivo (residuo de aberraciones). */
+const DVM_MEMO = new Map();
 function dvMaxForMTF(N){
-  if(mtfAtCrit(N,0) < S.mtfThr) return 0;
-  let lo=0, hi=0.05; while(mtfAtCrit(N,hi)>=S.mtfThr && hi<5) hi*=2;
-  for(let i=0;i<30;i++){ const m=(lo+hi)/2; (mtfAtCrit(N,m)>=S.mtfThr)?(lo=m):(hi=m); } return lo;
+  const key = N+"|"+S.mtfThr+"|"+LENSES.indexOf(S.lens);
+  if(DVM_MEMO.has(key)) return DVM_MEMO.get(key);
+  let out = 0;
+  if(mtfAtCrit(N,0) >= S.mtfThr){
+    let lo=0, hi=0.05; while(mtfAtCrit(N,hi)>=S.mtfThr && hi<5) hi*=2;
+    for(let i=0;i<30;i++){ const m=(lo+hi)/2; (mtfAtCrit(N,m)>=S.mtfThr)?(lo=m):(hi=m); } out=lo;
+  }
+  if(DVM_MEMO.size>400) DVM_MEMO.clear();
+  DVM_MEMO.set(key, out); return out;
 }
 function hitOK(res, N){
   if(S.crit==="mtf") return mtfAtCrit(N, res.dv) >= S.mtfThr;
@@ -1066,6 +1293,15 @@ function drawBarrel(){
       ctx.beginPath(); ctx.moveTo(xa,yScale-20); ctx.lineTo(xa,yScale+12); ctx.stroke();
       ctx.setLineDash([]);
       ctx.fillStyle="#c98bd8"; ctx.fillText(t("afterRecompose"), xa, yScale+42);
+      /* α máx: el sujeto reencuadrado toca el límite cercano de la PdC alrededor del sujeto */
+      const ai = alphaInfo();
+      if(ai.tol>0){
+        const xm = xOfD(Math.max(S.dTrue-ai.tol, S.lens.mfd),M);
+        ctx.strokeStyle = "rgba(201,139,216,.8)"; ctx.setLineDash([1,3]);
+        ctx.beginPath(); ctx.moveTo(xm,yScale-46); ctx.lineTo(xm,yScale+12); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.font = "11px "+mono; ctx.fillText("α ≤ "+fmt(Math.min(ai.amax,90),ai.amax<10?1:0)+"°", xm, yScale-50); ctx.font = "13px "+mono;
+      }
     }
   }
 
@@ -1316,7 +1552,7 @@ function drawCurves(){
   ctx.textAlign="right";
   (mtfMode?[0,.2,.4,.6,.8,1]:[0,10,20,30,40]).forEach(c=>{ ctx.fillRect(L-4,yOf(c),4,1); ctx.fillText(mtfMode?dec(c.toFixed(1)):c,L-7,yOf(c)+4); });
   ctx.textAlign="left"; ctx.fillText(mtfMode?"MTF66":"µm",L-44,T-8);
-  ctx.fillText(t("subjectAt")+fmt(S.dTrue,1)+` m · ε=${fmt(S.eps,1)}′`+t("blindEdge")+(S.visoflex?" · Visoflex":"")+(S.alpha?` · α=${S.alpha}°`:"")+(S.mechOff?t("offsetTag")+S.mechOff+" µm":""), L+50, T-8);
+  ctx.fillText(t("subjectAt")+(S.blind&&!S.shot? t("hidden") : fmt(S.dTrue,1)+" m")+` · ε=${fmt(S.eps,1)}′`+t("blindEdge")+(S.visoflex?" · EVF":"")+(S.alpha?` · α=${S.alpha}°`:"")+(S.mechOff?t("offsetTag")+S.mechOff+" µm":""), L+50, T-8);
   // curvas
   let ly=T+6;
   LENSES.forEach((Lz,i)=>{
@@ -1352,7 +1588,7 @@ function drawMTF(){
   ctx.fillStyle="#8b9097"; ctx.font="11px "+mono; ctx.textAlign="right";
   [0,.2,.4,.6,.8,1].forEach(m=>{ ctx.fillRect(L-4,yOf(m),4,1); ctx.fillText(dec(m.toFixed(1)),L-7,yOf(m)+4); });
   ctx.textAlign="center";
-  [10,20,40,66,100,132].forEach(nu=>{ ctx.fillRect(xOf(nu),B,1,4); ctx.fillText(nu===132?"132 Nyq":nu===66?"66":nu, xOf(nu), B+16); });
+  [10,20,40,66,100,133].forEach(nu=>{ ctx.fillRect(xOf(nu),B,1,4); ctx.fillText(nu===133?"133 Nyq":nu===66?"66":nu, xOf(nu), B+16); });
   ctx.fillText(t("mtfAxis"), (L+R)/2, H-4);
   // umbral
   ctx.strokeStyle="rgba(127,176,105,.8)"; ctx.setLineDash([4,3]); ctx.beginPath(); ctx.moveTo(L,yOf(S.mtfThr)); ctx.lineTo(R,yOf(S.mtfThr)); ctx.stroke();
@@ -1379,7 +1615,9 @@ function drawMTF(){
 }
 
 /* ================= Persistencia local ================= */
-const LS_KEY="telemetro_m11_v6";
+/* v7: paso de píxel 3,76 µm (el criterio «2 px» pasa de 7,56 a 7,52 µm). Si no hay v7 se lee
+   la v6 anterior y se recalcula c0 cuando el criterio es «2 px», en vez de heredar el valor viejo. */
+const LS_KEY="telemetro_m11_v7", LS_OLD="telemetro_m11_v6";
 function saveState(){
   try{
     const custom = LENSES.filter(L=>L.custom);
@@ -1390,15 +1628,16 @@ function saveState(){
 }
 function loadState(){
   try{
-    const raw=localStorage.getItem(LS_KEY); if(!raw) return false;
+    const raw=localStorage.getItem(LS_KEY) || localStorage.getItem(LS_OLD); if(!raw) return false;
     const {st,custom}=JSON.parse(raw);
     (custom||[]).forEach(L=>{ if(!LENSES.some(x=>x.name===L.name)) LENSES.push(L); });
     Object.keys(st).forEach(k=>{ if(k!=="lensName" && k in S) S[k]=st[k]; });
     const L=LENSES.find(x=>x.name===st.lensName); if(L) S.lens=L;
+    if(S.crit==="px2") S.c0=2*PITCH/1000;   // «2 px» se recalcula con el paso vigente (migración v6 → v7)
     return true;
   }catch(e){ return false; }
 }
-function clearState(){ try{ localStorage.removeItem(LS_KEY); }catch(e){} location.reload(); }
+function clearState(){ try{ localStorage.removeItem(LS_KEY); localStorage.removeItem(LS_OLD); }catch(e){} location.reload(); }
 
 /* ================= Lectura ================= */
 function classFor(cUm){
@@ -1421,9 +1660,10 @@ function drawReadouts(){
   const dAx = dAxial(S.dTrue);
 
   const oc = t("hidden");
-  rows.push([t("rLens"), S.lens.name+(S.visoflex?" · <span class='v-ok'>Visoflex</span>":"")]);
+  rows.push([t("rLens"), S.lens.name+(S.visoflex?" · <span class='v-ok'>EVF</span>":"")]);
   rows.push([t("rRingAt"), atInf()?"∞":fmt(S.dSet,3)+" m"]);
   if(S.mechOff||S.noiseSample) rows.push([t("rMech"), t("rMechOff")+fmt(S.mechOff,0)+t("rMechNoise")+fmt(S.noiseSample,1)+" µm"]);
+  if(S.mechOff){ const dd=mechOffAtSubject(); rows.push([t("rMechSubj"), hide?oc:fmt(Math.abs(dd),Math.abs(dd)<10?1:0)+(dd>0?t("mmFront"):t("mmBack"))]); }
   if(shiftUm>1e-6) rows.push([t("rSharpPlane"), (dSharp===Infinity?"∞":fmt(dSharp,3)+" m")+" <span class='v-warn'>"+t("rShift")+fmt(shiftUm,0)+" µm</span>"]);
   rows.push([t("rSubjectAt"), hide?oc:fmt(S.dTrue,3)+" m"]);
   if(S.alpha>0) rows.push([t("rAxial")+fmt(S.alpha,0)+"°", hide?oc:fmt(dAx,3)+" m <span class='v-warn'>· −"+fmt((S.dTrue-dAx)*1000,0)+" mm</span>"]);
@@ -1440,14 +1680,167 @@ function drawReadouts(){
   rows.push([t("rPatch"), fmt(Math.abs(arc),2)+"′ "+(seen?'<span class="v-warn">'+t("rEyeSees")+'</span>':'<span class="v-ok">'+t("rUnderEps")+'</span>')]);
   rows.push([t("rEbl"), fmt(BASE*MAG*S.magX,1)+" mm"]);
   el.readTable.innerHTML = rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join("");
+  drawVerdict();
+}
 
-  const v = el.verdict;
+/* ================= Decisión: veredicto permanente y tablas (tm-) ================= */
+/* desfase mecánico llevado al sujeto, mm a la distancia actual: Δd = Δv/m²; positivo = enfoca por delante
+   (el sensor queda más lejos del ideal y el plano nítido se acerca) */
+function mechOffAtSubject(){ const m=magAt(dAxial(S.dTrue),S.lens.f); return S.mechOff/1000/(m*m); }
+
+/* ¿Me fío del telémetro aquí? Tres frases: diafragma mínimo fiable, zona ciega frente a PdC,
+   y qué lo arregla (magnificador o EVF). Conserva el resultado del disparo a ciegas si existe. */
+function drawVerdict(){
+  const v=el.verdict; if(!v) return;
+  const hide=S.blind&&!S.shot, ps=[];
   if(S.shot){
-    /* el veredicto se reclasifica en cada pintado: así sigue al idioma en curso */
-    const [scls,stxt] = classFor(S.shot.ct);
-    v.style.display="block";
-    v.innerHTML = t("result")+`<b>${fmt(S.shot.ct,1)} µm</b> (${fmt(S.shot.ct/PITCH,1)} px)`+t("errorIs")+`${fmt(S.shot.err*1000,0)} mm · <span class="${scls}">${stxt}</span>`;
-  } else v.style.display="none";
+    /* el resultado se reclasifica en cada pintado: así sigue al idioma en curso */
+    const [scls,stxt]=classFor(S.shot.ct);
+    ps.push(t("result")+`<b>${fmt(S.shot.ct,1)} µm</b> (${fmt(S.shot.ct/PITCH,1)} px)`+t("errorIs")+`${fmt(S.shot.err*1000,0)} mm · <span class="${scls}">${stxt}</span>`);
+  }
+  const L=S.lens, lim2=2*PITCH, cur=tmWorst(L);
+  /* a ciegas el veredicto callaría la distancia real por la puerta de atrás (el diafragma mínimo
+     depende de ella): se calla entero hasta el disparo, como las tablas */
+  if(hide) ps.push(`<span class="vk">${t("vBzHidden")}</span>`);
+  if(hide||!cur.length){ v.innerHTML=ps.map(p=>`<p>${p}</p>`).join(""); return; }
+  /* 1: diafragma mínimo fiable con el sistema, ε y magnificador actuales */
+  const n0=cur[0].N, c0=cur[0].c, r2=tmNmin(cur,lim2), r30=tmNmin(cur,30);
+  const sys = S.visoflex? tf("vSysEVF",{cth:fmt(S.cthVis,1)}) : S.magX>1? tf("vSysMag",{k:dec(String(S.magX))}) : t("vSysRF");
+  const o={n0, c0:fmt(c0,0), px0:fmt(c0/PITCH,1), n2:r2?r2.N:"", n30:r30?r30.N:""};
+  let s1=tf("vLead",{lens:L.name, eps:fmt(S.eps,1), sys});
+  const tail = c0<=30? t("v30Ok") : r30? tf("v30From",o) : t("v30Never");
+  if(r2&&r2.wide) s1+=`<span class="v-ok">${tf("v2Wide",o)}</span>`;
+  else if(r2) s1+=`<span class="${c0<=30?"v-warn":"v-bad"}">${tf("v2From",o)}</span>`+tail;
+  else s1+=`<span class="${c0<=30?"v-warn":"v-bad"}">${tf("v2Never",o)}</span>`+tail;
+  ps.push(s1);
+  /* 2: zona ciega frente a tolerancia de la PdC, comparadas en el plano imagen (exacto) y en mm al sujeto */
+  {
+    const f=L.f, d=S.dTrue, [lo,hi]=blindZone(S.N), v0=vImg(d,f);
+    const dvb=Math.max(vImg(lo,f)-v0, v0-(hi===Infinity? f : vImg(hi,f)));
+    const dvd=dvTol(S.N), r=dvd>0? dvb/dvd : Infinity;
+    const lim = dvd<=0? t("vLimNoDof") : r>1? tf("vLimRF",{r:fmtR(r)}) : tf("vLimDof",{r:fmtR(1/r)});
+    const cls = dvd<=0||r>1? "v-warn" : "v-ok";
+    ps.push(`<span class="vk">${tf("vBz",{d:fmt(d,2), bn:fmt((d-lo)*1000,0), bf:hi===Infinity?"∞":fmt((hi-d)*1000,0), dvb:fmt(dvb*1000,1), N:S.N, crit:critLbl(), dvd:fmt(dvd*1000,1)})}</span><span class="${cls}">${lim}</span>`);
+  }
+  /* 3: qué lo arregla: N mínimo con ×1,25, ×1,4 y EVF (y telémetro llano si se está en EVF) */
+  const ci=tmCurSys();
+  const alts=SYS_LIST.map(([k,vis,id],i)=>({id,i, r:i===ci? r2 : tmNmin(tmWithSys(k,vis,()=>tmWorst(L)),lim2)})).filter(a=>a.i!==ci);
+  let s3;
+  if(r2&&r2.wide) s3=`<span class="v-ok">${tf("vFixNeed",{n0})}</span>`;
+  else {
+    const ok=alts.find(a=>a.r&&a.r.wide);
+    if(ok) s3=`<span class="v-ok">${tf("vFixOk",{n0, opt:t("opt"+ok.id)})}</span>`;
+    else {
+      const best=alts.filter(a=>a.r).sort((a,b)=>a.r.N-b.r.N)[0];
+      s3=`<span class="v-warn">${best? tf("vFixBest",{n0, opt:t("opt"+best.id), n:best.r.N}) : t("vFixNone")}</span>`;
+    }
+  }
+  s3+=`<span class="vk">${t("vAlt")}${alts.map(a=>t("alt"+a.id)+" "+tmNminTxt(a.r)).join(" · ")}</span>`;
+  ps.push(s3);
+  v.innerHTML=ps.map(p=>`<p>${p}</p>`).join("");
+}
+
+/* Reencuadre: error d·(1 − cos α) frente a la tolerancia hacia delante de la PdC alrededor del sujeto */
+function alphaInfo(){
+  const d=S.dTrue, dn=dofLimits(d)[0];
+  const tol=Math.max(0,d-dn);
+  const amax = dn>=d? 0 : Math.acos(Math.max(-1,Math.min(1,dn/d)))*180/Math.PI;
+  const err = d*(1-Math.cos(S.alpha*Math.PI/180));
+  return {d, tol, amax, err, ratio: tol>0? err/tol : Infinity};
+}
+/* primer diafragma cuya PdC absorbe el α actual */
+function alphaFirstN(){
+  const d=S.dTrue, dax=dAxial(d);
+  return stopsFor(S.lens).find(N=>{ const save=S.N; S.N=N; try{ return dofLimits(d)[0]<=dax; } finally { S.N=save; } });
+}
+function drawAlphaNote(ai){
+  const box=el["tm-alphaNote"]; if(!box) return;
+  if(!ai){ box.textContent=t("aHidden"); return; }
+  const o={d:fmt(ai.d,2), N:S.N, a:fmt(S.alpha,0), amax:fmt(Math.min(ai.amax,90),ai.amax<10?1:0), tol:fmt(ai.tol*1000,ai.tol<0.01?1:0), e:fmt(ai.err*1000,ai.err<0.01?1:0), r:fmtR(ai.ratio)};
+  let k, cls;
+  if(ai.tol<=0){ k="aNoteEmpty"; cls="v-bad"; }
+  else if(S.alpha<=0){ k="aNote0"; cls=""; }
+  else if(ai.ratio<=1){ k="aNoteOk"; cls="v-ok"; }
+  else { const nok=alphaFirstN(); if(nok!==undefined){ k="aNoteBad"; o.nok=nok; } else k="aNoteBadNone"; cls="v-bad"; }
+  box.innerHTML=`<span class="${cls}">${tf(k,o)}</span>`;
+}
+
+/* Desplazamiento de foco por diafragma, en mm al sujeto frente a la tolerancia de la PdC */
+function fsRowsFor(nCalVal){
+  const save=S.nCal; S.nCal=nCalVal;
+  try{
+    const m=magAt(dAxial(S.dTrue),S.lens.f);
+    return stopsFor(S.lens).map(N=>{
+      const dv=focusShift(N), tol=dvTol(N);
+      return {N, dv, dd:dv/(m*m), tol:tol/(m*m), ratio: Math.abs(dv)<1e-9? 0 : tol<=0? Infinity : Math.abs(dv)/tol};
+    });
+  } finally { S.nCal=save; }
+}
+function drawFsTable(){
+  const wrap=el["tm-fsTable"], cap=el["tm-fsCap"]; if(!wrap||!cap) return;
+  const hide=S.blind&&!S.shot;
+  if(hide||S.visoflex||!S.fsOn){ cap.textContent=t(hide?"hiddenUntilShot":S.visoflex?"fsCapEVF":"fsCapOff"); wrap.innerHTML=""; return; }
+  const rows=fsRowsFor(S.nCal);
+  const bites=rs=>rs.filter(x=>x.ratio>0.5).map(x=>"f/"+x.N);
+  const b1=bites(rows); let sent;
+  if(!b1.length) sent=tf("fsSentOk",{ncal:nCal()});
+  else {
+    const nxt=STOPS_ALL.find(n=>n>nCal()+1e-9 && n<=5.6);
+    sent=tf("fsSentBite",{ncal:nCal(), list:b1.join(", ")});
+    if(nxt===undefined) sent+=t("fsAltNone");
+    else { const b2=bites(fsRowsFor(nxt)); sent+= b2.length? tf("fsAltBite",{n2:nxt, list2:b2.join(", ")}) : tf("fsAltOk",{n2:nxt}); }
+  }
+  cap.innerHTML=tf("fsCap",{lens:S.lens.name, fs:fmt(fsCur(),0), src:S.fs===null?t("fsEstimate"):t("fsUserVal"), k:fmt(S.fsm,0), ncal:nCal(), d:fmt(S.dTrue,2), crit:critLbl()})+`<span class="tm-txt">${sent}</span>`;
+  const sg=x=>(x>0?"+":"")+fmt(x,1);
+  const head=`<tr><th>f/</th><th>${t("thDv")}</th><th>${t("thDd")}</th><th>${t("thTol")}</th><th>${t("thVerdict")}</th></tr>`;
+  const body=rows.map(r=>{
+    const cls=r.ratio===0?"":r.ratio<=0.5?"v-ok":r.ratio<=1?"v-warn":"v-bad";
+    const lbl=t(r.ratio===0?"fsNull":r.ratio<=0.5?"fsAbs":r.ratio<=1?"fsBite":"fsOut");
+    return `<tr${Math.abs(r.N-S.N)<1e-9?' class="tm-cur"':''}><td>${r.N}</td><td>${sg(r.dv*1000)} µm</td><td>${sg(r.dd)} mm</td><td>±${fmt(r.tol,1)} mm</td><td class="${cls}">${lbl}${r.ratio?" · "+fmtR(r.ratio)+"×":""}</td></tr>`;
+  }).join("");
+  wrap.innerHTML=`<table class="stat">${head}${body}</table>`;
+}
+
+/* Diafragma mínimo fiable por objetivo y sistema de enfoque (todos los objetivos, incluidos los añadidos) */
+function drawLensTable(){
+  const wrap=el["tm-lensTable"], cap=el["tm-lensCap"]; if(!wrap||!cap) return;
+  const hide=S.blind&&!S.shot;
+  if(hide){ cap.textContent=t("hiddenUntilShot"); wrap.innerHTML=""; return; }
+  const lim2=2*PITCH, ci=tmCurSys(), cth=fmt(S.cthVis,1), off=(S.mechOff>0?"+":"")+fmt(S.mechOff,0);
+  cap.innerHTML=tf("lensCap",{eps:fmt(S.eps,1), d:fmt(S.dTrue,2), cth, ncal:S.nCal, off});
+  const heads=[t("thLens"), t("th2RF"), t("th2M125"), t("th2M14"), tf("th2EVF",{cth}), t("th30RF"), t("thFs56")];
+  const head="<tr>"+heads.map((h,i)=>`<th${i-1===ci?' class="tm-cur"':''}>${h}</th>`).join("")+"</tr>";
+  const body=LENSES.map(L=>{
+    const curves=SYS_LIST.map(([k,vis])=>tmWithSys(k,vis,()=>tmWorst(L)));
+    const cells=curves.map(cv=>tmNminCell(tmNmin(cv,lim2))).join("")+tmNminCell(tmNmin(curves[0],30));
+    let fsCell="<td>—</td>";
+    if(S.fsOn && 5.6>=L.nmax-1e-9){
+      const r=tmWithSys(S.magX,false,()=>withLens(L,()=>{ const dv=focusShift(5.6), tol=dvTol(5.6), m=magAt(dAxial(S.dTrue),L.f); return {dd:dv/(m*m), ratio: Math.abs(dv)<1e-9?0 : tol>0? Math.abs(dv)/tol : Infinity}; }));
+      fsCell=`<td class="${r.ratio<=0.5?"v-ok":r.ratio<=1?"v-warn":"v-bad"}">${(r.dd>0?"+":"")+fmt(r.dd,1)} mm · ${fmtR(r.ratio)}×</td>`;
+    }
+    return `<tr${L===S.lens?' class="tm-cur"':''}><td>${L.name}</td>${cells}${fsCell}</tr>`;
+  }).join("");
+  wrap.innerHTML=`<table class="stat">${head}${body}</table>`;
+}
+
+/* Peor caso por diafragma, lado a lado: telémetro / ×1,25 / ×1,4 / EVF, más la PdC y el % Monte Carlo si existe */
+function drawSysTable(){
+  const wrap=el["tm-sysTable"], cap=el["tm-sysCap"]; if(!wrap||!cap) return;
+  const hide=S.blind&&!S.shot;
+  if(hide){ cap.textContent=t("hiddenUntilShot"); wrap.innerHTML=""; return; }
+  const ci=tmCurSys(), cth=fmt(S.cthVis,1), cl=critLbl();
+  const curves=SYS_LIST.map(([k,vis])=>tmWithSys(k,vis,()=>tmWorst(S.lens)));
+  cap.innerHTML=tf("sysCap",{lens:S.lens.name, d:fmt(S.dTrue,2), eps:fmt(S.eps,1), cth, ncal:nCal(), off:(S.mechOff>0?"+":"")+fmt(S.mechOff,0), mc:S.mcRows? tf("sysMc",{crit:cl}) : ""});
+  const head=`<tr><th>f/</th><th>${tf("thDofW",{crit:cl})}</th>`+SYS_LIST.map(([k,vis,id],i)=>`<th${i===ci?' class="tm-cur"':''}>${id==="EVF"? tf("thEVF",{cth}) : t("th"+id)}</th>`).join("")+"</tr>";
+  const body=curves[0].map((p,ri)=>{
+    const N=p.N, [dn,df]=dofAt(N);
+    const dofTxt = df===Infinity? "∞" : dn>=df? `<span class="v-bad">${t("dofEmpty")}</span>` : fmt((df-dn)*1000,0)+" mm";
+    const mc=S.mcRows? S.mcRows.find(r=>Math.abs(r.N-N)<1e-9) : null;
+    const hit=mc? (S.crit==="mtf"? mc.hitM : S.crit==="um30"? mc.hit30 : mc.hit2) : null;
+    const cells=curves.map((cv,i)=>{ const c=cv[ri].c; return `<td class="${classFor(c)[0]}">${fmt(c,1)} µm · ${fmt(c/PITCH,1)} px${(i===ci&&hit!==null)?" · "+(hit*100).toFixed(0)+" %":""}</td>`; }).join("");
+    return `<tr${Math.abs(N-S.N)<1e-9?' class="tm-cur"':''}><td>${N}</td><td>${dofTxt}</td>${cells}</tr>`;
+  }).join("");
+  wrap.innerHTML=`<table class="stat">${head}${body}</table>`;
 }
 
 /* ================= UI ================= */
@@ -1512,9 +1905,12 @@ function sliderToD(v){ return 0.5*Math.pow(60, v/1000); }
 function dToSlider(d){ return 1000*Math.log(d/0.5)/Math.log(60); }
 
 function render(){
-  el.dTrueVal.textContent = S.blind&&!S.shot ? t("hiddenF") : fmt(S.dTrue,2)+" m";
+  const hideNow = S.blind&&!S.shot;
+  el.dTrueVal.textContent = hideNow ? t("hiddenF") : fmt(S.dTrue,2)+" m";
   el.epsVal.textContent = fmt(S.eps,1)+"′";
-  el.alphaVal.textContent = fmt(S.alpha,0)+"°";
+  const ai = hideNow ? null : alphaInfo();
+  el.alphaVal.textContent = fmt(S.alpha,0)+"°"+(ai? tf("aMax",{a:fmt(Math.min(ai.amax,90),ai.amax<10?1:0)}) : "");
+  drawAlphaNote(ai);
   el.fsVal.textContent = fmt(fsCur(),0)+" µm"+(S.fs===null?t("fsFromLens"):"")+(S.fsOn?t("fsCamAt")+nCal():t("fsOff"));
   el.fs.value = fsCur();
   el.fsOn.classList.toggle("on", S.fsOn); el.fsOff.classList.toggle("on", !S.fsOn);
@@ -1522,7 +1918,10 @@ function render(){
   document.querySelectorAll("[data-eps]").forEach(b=>b.classList.toggle("on", Math.abs(+b.dataset.eps-S.eps)<1e-6));
   el.sysRF.classList.toggle("on", !S.visoflex); el.sysVis.classList.toggle("on", S.visoflex);
   el.cthVal.textContent = fmt(S.cthVis,1)+" px · "+fmt(S.cthVis*PITCH,1)+" µm"; el.cth.value=Math.round(S.cthVis*10);
-  el.mechOffVal.textContent = (S.mechOff>0?"+":"")+fmt(S.mechOff,0)+" µm"; el.mechOff.value=S.mechOff;
+  { const dd=mechOffAtSubject();
+    el.mechOffVal.textContent = (S.mechOff>0?"+":"")+fmt(S.mechOff,0)+" µm"+(S.mechOff&&!hideNow? " = "+fmt(Math.abs(dd),Math.abs(dd)<10?1:0)+(dd>0?t("mmFront"):t("mmBack"))+t("atD")+fmt(S.dTrue,2)+" m" : "");
+    el.mechOff.value=S.mechOff;
+    el["tm-mfMsg"].innerHTML = S.mfDv==null ? "" : `<span class="v-warn">${tf("mfOut",{dv:(S.mfDv>0?"+":"−")+fmt(Math.abs(S.mfDv),0)})}</span>`; }
   el.mechNoiseVal.textContent = fmt(S.mechNoise,0)+" µm"; el.mechNoise.value=S.mechNoise;
   el.fsmVal.textContent = "k = "+fmt(S.fsm,0)+t("fsmEff")+fmt(fsCur()*(1+S.fsm*magAt(dAxial(S.dTrue),S.lens.f)),0)+" µm"; el.fsm.value=S.fsm;
   document.querySelectorAll("[data-phase]").forEach(b=>b.classList.toggle("on", b.dataset.phase===S.phase));
@@ -1533,6 +1932,7 @@ function render(){
   el.mtfThrVal.textContent = fmt(S.mtfThr,2); el.mtfThr.value=Math.round(S.mtfThr*100);
   el.cmC.classList.toggle("on", S.curveMode!=="mtf"); el.cmM.classList.toggle("on", S.curveMode==="mtf");
   drawFinder(); drawLoupe(); drawBarrel(); drawMatrix(); drawReadouts(); drawStats(); drawCurves(); drawMTF();
+  drawFsTable(); drawLensTable(); drawSysTable();
   saveState();
 }
 /* cualquier cambio de parámetros invalida la estadística previa */
@@ -1546,6 +1946,8 @@ function aplicarEtiquetas(){
   /* valores y atributos que el marcado dual no puede cubrir */
   const nl=$("nlName");
   if(nl && (nl.value===""||nl.value===T.es.lensDefault||nl.value===T.en.lensDefault)) nl.value=t("lensDefault");
+  /* las <option> no admiten el marcado dual: se reetiquetan desde data-es / data-en */
+  document.querySelectorAll("option[data-es][data-en]").forEach(o=>{ o.textContent=o.getAttribute("data-"+LANG()); });
 }
 function aplicarIdioma(){
   aplicarEtiquetas();
@@ -1561,7 +1963,8 @@ window.addEventListener("DOMContentLoaded", ()=>{
    "btnPerfect","btnBlind","btnShoot","footNote",
    "alpha","alphaVal","fs","fsVal","fsOn","fsOff","fsReset","cals","hist","statTable","btnMC",
    "curves","eyeHard","eyePsy","sysRF","sysVis","cth","cthVal","mechOff","mechOffVal","mechNoise","mechNoiseVal",
-   "fsm","fsmVal","scaleLog","scaleHel","btnReset","mtf","mtfThr","mtfThrVal","cmC","cmM"].forEach(id=>el[id]=$(id));
+   "fsm","fsmVal","scaleLog","scaleHel","btnReset","mtf","mtfThr","mtfThrVal","cmC","cmM",
+   "tm-mfMm","tm-mfDir","tm-mfD","tm-mfApply","tm-mfMsg","tm-alphaNote","tm-fsCap","tm-fsTable","tm-lensCap","tm-lensTable","tm-sysCap","tm-sysTable"].forEach(id=>el[id]=$(id));
 
   loadState();
   buildAll();
@@ -1585,7 +1988,20 @@ window.addEventListener("DOMContentLoaded", ()=>{
   el.sysRF.onclick  = ()=>{ S.visoflex=false; invalidateMC(); render(); };
   el.sysVis.onclick = ()=>{ S.visoflex=true;  invalidateMC(); render(); };
   el.cth.addEventListener("input", e=>{ S.cthVis=+e.target.value/10; invalidateMC(); render(); });
-  el.mechOff.addEventListener("input", e=>{ S.mechOff=+e.target.value; invalidateMC(); render(); });
+  el.mechOff.addEventListener("input", e=>{ S.mechOff=+e.target.value; S.mfDv=null; invalidateMC(); render(); });
+  /* conversor inverso: «enfoca X mm por delante/detrás a D m» → desfase en el plano imagen, Δv = Δd·m²
+     (por delante = sensor más lejos del ideal = desfase positivo); se acota al recorrido del deslizador */
+  el["tm-mfApply"].onclick = ()=>{
+    const ddMm = Math.abs(+el["tm-mfMm"].value)||0;
+    const D = Math.max(S.lens.f/1000*2, +el["tm-mfD"].value||1);
+    const m = magAt(D, S.lens.f), sign = el["tm-mfDir"].value==="back"? -1 : 1;
+    const dv = sign*ddMm*m*m*1000;                       // µm en el plano imagen
+    S.mechOff = Math.max(-60, Math.min(60, Math.round(dv)));
+    /* un error de milímetros a corta distancia se sale del recorrido del deslizador: hay que decirlo,
+       no fijar el tope en silencio. Se guarda el número, no el texto, para que siga al idioma. */
+    S.mfDv = Math.abs(dv)>60.5 ? dv : null;
+    invalidateMC(); render();
+  };
   el.mechNoise.addEventListener("input", e=>{ S.mechNoise=+e.target.value; invalidateMC(); render(); });
   el.fsm.addEventListener("input", e=>{ S.fsm=+e.target.value; invalidateMC(); render(); });
   document.querySelectorAll("[data-phase]").forEach(b=>b.onclick=()=>{ S.phase=b.dataset.phase; render(); });
