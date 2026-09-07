@@ -486,6 +486,11 @@ function pick(i){
   if(sel.length===0) sel=[i]; else if(sel.length===1) sel=(sel[0]===i)?[]:[sel[0],i]; else sel=[i];
   if(layout==="radial") applyLayout();
   renderPanel(); render();
+  /* enlace profundo compartido con la cronología y la red */
+  try{
+    const n=sel.length?DATA.nodes[sel[sel.length-1]]:null;
+    history.replaceState(null,"",n?("#a="+encodeURIComponent(n.name)):location.pathname+location.search);
+  }catch(e){}
 }
 
 /* ---------- lector de fidelidad del plano ---------- */
@@ -1074,6 +1079,22 @@ svg.call(zoom).on("dblclick.zoom",null);
 
 window.addEventListener("resize",resize);
 renderLegend(); renderPanel(); resize(); updateFidelity(true);
+
+/* Enlace profundo: #a=Nombre del autor, el mismo formato que usan
+   cronologia-red.html y red-influencia.html. */
+(function(){
+  const m=/^#a=(.+)$/.exec(location.hash||"");
+  if(!m) return;
+  let id; try{ id=decodeURIComponent(m[1]); }catch(e){ id=m[1]; }
+  let n=DATA.nodes.find(d=>d.name===id);
+  if(!n){ const q=norm(id); n=DATA.nodes.find(d=>norm(d.name)===q); }
+  if(!n) return;
+  sel=[n.i];
+  const box=document.getElementById("search"); if(box) box.value=n.name;
+  if(layout==="radial") applyLayout();
+  renderPanel(); render();
+  if(layout!=="radial") zoomTo(n);
+})();
 
 /* Repinta lo que el JS genera cuando cambia el idioma. */
 window.onLangChange=function(){

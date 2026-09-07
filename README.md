@@ -74,7 +74,7 @@ la página es su manual; el código está en [`scripts/`](scripts/).
 
 | Documento | Qué hace | Peso |
 |---|---|---:|
-| [`red-influencia.html`](red-influencia.html) | 293 autores y 467 relaciones de influencia declaradas. Traza linajes hacia arriba o hacia abajo, busca la ruta entre dos autores y dimensiona los nodos por nivel trófico. Se adapta a pantalla pequeña y a interacción táctil. | 246 KB |
+| [`red-influencia.html`](red-influencia.html) | 293 autores y 467 relaciones de influencia declaradas. Traza linajes hacia arriba o hacia abajo, busca la ruta entre dos autores y dimensiona los nodos por nivel trófico. Se adapta a pantalla pequeña y a interacción táctil. | 247 KB |
 | [`explorador_distancias.html`](explorador_distancias.html) | 309 autores colocados por parecido entre sus imágenes, con las fotos incrustadas. Da la distancia de contenido de cada pareja y, a la vez, su distancia en la red de influencia. | 6,4 MB |
 | [`cronologia-red.html`](cronologia-red.html) | La tercera vista del mismo dato: los 293 autores sobre dos siglos, los movimientos como carriles y las influencias como arcos que cruzan décadas, con el salto medio en años de las 467 relaciones calculado del propio corpus. | 6,5 MB |
 | [`ficha-fases-juicio-estetico.html`](ficha-fases-juicio-estetico.html) | Cómo se juzga una imagen a lo largo del tiempo de procesamiento visual, tratado como actualización bayesiana; dónde cae cada herramienta de la ficha del marco en las tres fases, y un protocolo en tres tiempos para juzgar lo propio sin engañarse. La ficha hermana dice qué hacer; esta, cómo se juzga lo hecho. | 82 KB |

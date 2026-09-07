@@ -525,7 +525,7 @@
         close:"Cerrar", controls:"Controles", images:"Imágenes",
         school:"escuela", noSchool:"sin escuela", noMov:"sin movimiento",
         pctl:"percentil", lblReachD:"alcance \u2193", lblReachU:"alcance \u2191",
-        seeLineage:"Ver linaje",
+        seeLineage:"Ver linaje", linkChrono:"En el tiempo", linkSim:"Parecido",
         linSub:"tres niveles de maestros a la izquierda, tres de influidos a la derecha \u00b7 cada columna se queda con los de mayor grado total",
         theAuthor:"el autor", mastersShort:"maestros", heirsShort:"influidos",
         moreN:function(k){return "+"+k+" m\u00e1s";},
@@ -564,7 +564,7 @@
         close:"Close", controls:"Controls", images:"Images",
         school:"school", noSchool:"no school", noMov:"no movement",
         pctl:"percentile", lblReachD:"reach \u2193", lblReachU:"reach \u2191",
-        seeLineage:"See lineage",
+        seeLineage:"See lineage", linkChrono:"In time", linkSim:"Resemblance",
         linSub:"three levels of masters on the left, three of heirs on the right \u00b7 each column keeps the highest total degree",
         theAuthor:"the author", mastersShort:"masters", heirsShort:"heirs",
         moreN:function(k){return "+"+k+" more";},
@@ -756,6 +756,8 @@
     showInfo(d); applyLabels();
     if(LIN.open)renderLineage(d.id);
     markTableRow();
+    /* enlace profundo compartido con la cronología y el explorador */
+    try{ history.replaceState(null,"","#a="+encodeURIComponent(d.id)); }catch(e){}
   }
   function reach(from,x,adj,inclSelf){ if(x===from)return inclSelf; return bfs(from,adj).has(x); }
 
@@ -930,7 +932,9 @@
         numCell(fmtN(ru),t('lblReachU'),pctile(S_RU,ru))+
       "</div>"+
       "<div class='verd "+v.k+"'>"+v.h+(rd>=P90RD?"<span class='cav'>"+t('vCaveat')+"</span>":"")+"</div>"+
-      "<div class='acts'><button class='btn actlin'>"+t('seeLineage')+"</button></div>"+
+      "<div class='acts'><button class='btn actlin'>"+t('seeLineage')+"</button>"+
+        "<a class='btn' href='cronologia-red.html#a="+encodeURIComponent(d.id)+"'>"+t('linkChrono')+"</a>"+
+        "<a class='btn' href='explorador_distancias.html#a="+encodeURIComponent(d.id)+"'>"+t('linkSim')+"</a></div>"+
       "<div class='lst up'><h4>"+t('hUpstream')+"</h4>"+chips(up)+"</div>"+
       "<div class='lst down'><h4>"+t('hDownstream')+"</h4>"+chips(down)+"</div>"+
       (d.wikipedia_url||d.google_images_url?"<div class='ext'>"+(d.wikipedia_url?"<a href='"+d.wikipedia_url+"' target='_blank' rel='noopener'>Wikipedia</a>":"")+(d.google_images_url?"<a href='"+d.google_images_url+"' target='_blank' rel='noopener'>"+t('images')+"</a>":"")+"</div>":"")
@@ -1251,6 +1255,17 @@
     if(st.sel){ showInfo(st.sel); markTableRow(); }
     if(LIN.open) renderLineage(LIN.id);
   };
+  /* enlace profundo: #a=Nombre del autor, el mismo formato que usan la
+     cronología y el explorador de distancias. */
+  (function(){
+    var m=/^#a=(.+)$/.exec(location.hash||"");
+    if(!m) return;
+    var id; try{ id=decodeURIComponent(m[1]); }catch(e){ id=m[1]; }
+    var n=byId[id];
+    if(!n){ var q=norm(id); for(var i=0;i<nodes.length;i++){ if(norm(nodes[i].name)===q){ n=nodes[i]; break; } } }
+    if(n){ zoomToNode(n); selectNode(n); }
+  })();
+
   window.onLangChange();
 })();
 </script>
