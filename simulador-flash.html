@@ -112,6 +112,31 @@
   .bflags{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
   .bflag{font-size:11px;padding:4px 9px;border-radius:7px;font-family:var(--sans);border:1px solid}
 
+  /* ---------- veredicto, tabla comparativa, filas de chips y subpaneles ---------- */
+  [hidden]{display:none!important}
+  .chiprow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .chiprow .chips{margin:10px 0 4px}
+  .chiplab{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);margin-top:6px}
+  .verdict{background:var(--panel);border:1px solid var(--line2);border-radius:10px;padding:14px 16px;margin-top:16px}
+  .verdict h3{font-family:var(--disp);font-weight:500;font-size:15px;color:var(--head);margin:0 0 8px}
+  .verdict h4{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);margin:12px 0 4px}
+  .verdict p{margin:0 0 8px;font-size:13.5px;line-height:1.6}
+  .verdict p:last-child{margin-bottom:0}
+  .verdict b{font-weight:500;color:var(--head)}
+  .verdict code{font-family:var(--mono);font-size:12.5px;color:var(--head)}
+  .tblwrap{overflow-x:auto;margin-top:16px}
+  table.cmp{width:100%;border-collapse:collapse;font-size:12px}
+  table.cmp th,table.cmp td{border-bottom:1px solid var(--line);padding:6px 7px;text-align:right;white-space:nowrap}
+  table.cmp th:first-child,table.cmp td:first-child{text-align:left}
+  table.cmp thead th{color:var(--faint);font-weight:500;font-size:10px;letter-spacing:.04em;text-transform:uppercase;border-bottom-color:var(--line2)}
+  table.cmp tbody td{font-family:var(--mono)}
+  table.cmp tbody td:first-child{font-family:var(--sans)}
+  table.cmp tr.sel td{background:rgba(244,177,60,.10);color:var(--head)}
+  table.cmp tr.sel td:first-child{color:var(--amber)}
+  .tblnote{font-size:10.5px;color:var(--faint);margin-top:6px;line-height:1.5}
+  .sub{border-top:1px solid var(--line);margin-top:12px;padding-top:10px}
+  .sub .st{font-size:11px;color:var(--faint);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+
   /* ---------- conmutador de idioma ---------- */
   html[lang="es"] [data-lang="en"]{display:none!important}
   html[lang="en"] [data-lang="es"]{display:none!important}
@@ -158,7 +183,14 @@
     <a class="guidelink" href="guia-simulador.html" data-lang="en">User guide ↗</a>
   </div>
 
-  <div class="chips" id="chips"></div>
+  <div class="chiprow">
+    <span class="chiplab" data-lang="es">Modificador</span><span class="chiplab" data-lang="en">Modifier</span>
+    <div class="chips" id="chips" role="group" aria-label="Modificador"></div>
+  </div>
+  <div class="chiprow">
+    <span class="chiplab" data-lang="es">Cuerpo</span><span class="chiplab" data-lang="en">Body</span>
+    <div class="chips" id="cams" role="group" aria-label="Cuerpo"></div>
+  </div>
   <div class="tabs">
     <button class="tab on" data-tab="shadow"><span data-lang="es">Sombras</span><span data-lang="en">Shadows</span></button>
     <button class="tab" data-tab="falloff"><span data-lang="es">Caída de luz (GN)</span><span data-lang="en">Light falloff (GN)</span></button>
@@ -186,6 +218,20 @@
         <div class="stat"><div class="l" data-lang="es">Penumbra</div><div class="l" data-lang="en">Penumbra</div><div class="n te"><span id="st-pen">0</span><span class="u">cm</span></div><div class="h" id="st-pen-h"></div></div>
         <div class="stat"><div class="l" data-lang="es">Umbra (radio)</div><div class="l" data-lang="en">Umbra (radius)</div><div class="n"><span id="st-umbra">0</span><span class="u">cm</span></div><div class="h" id="st-umbra-h"></div></div>
         <div class="stat"><div class="l" data-lang="es">Desplaza. sombra</div><div class="l" data-lang="en">Shadow shift</div><div class="n vi"><span id="st-shift">0</span><span class="u">cm</span></div><div class="h" data-lang="es">por el ángulo de la luz</div><div class="h" data-lang="en">due to the light angle</div></div>
+        <div class="stat"><div class="l" id="st-need-d-l">Ø</div><div class="n am"><span id="st-need-d">0</span><span class="u">cm</span></div><div class="h" id="st-need-d-h"></div></div>
+        <div class="stat"><div class="l" id="st-need-l-l">L</div><div class="n te"><span id="st-need-l">0</span><span class="u">cm</span></div><div class="h" id="st-need-l-h"></div></div>
+      </div>
+      <div class="seg" id="seg-theta" style="margin-top:14px">
+        <span class="chiplab" data-lang="es">θ objetivo</span><span class="chiplab" data-lang="en">Target θ</span>
+        <button class="segbtn" data-th="5">5°</button>
+        <button class="segbtn on" data-th="10">10°</button>
+        <button class="segbtn" data-th="20">20°</button>
+        <button class="segbtn" data-th="30">30°</button>
+      </div>
+      <div class="verdict" id="v-shadow"></div>
+      <div class="tblwrap">
+        <table class="cmp" id="modtable"><thead id="modthead"></thead><tbody id="modtbody"></tbody></table>
+        <p class="tblnote" id="modnote"></p>
       </div>
       <p class="explain" data-lang="es">La suavidad la fija <b class="am">θ = 2·arctan(d/2L)</b>: el tamaño angular de la fuente vista desde el sujeto. La penumbra en el fondo vale <b class="te">w = d·s/L</b>. El ángulo de la luz no cambia la dureza, solo desplaza la sombra: ahí están los patrones de retrato.</p>
       <p class="explain" data-lang="en">Softness is set by <b class="am">θ = 2·arctan(d/2L)</b>: the angular size of the source as seen from the subject. The penumbra on the background measures <b class="te">w = d·s/L</b>. The angle of the light does not change its hardness, it only displaces the shadow: that is where the portrait patterns live.</p>
@@ -193,13 +239,28 @@
     <div class="controls">
       <div class="ct" data-lang="es">Geometría</div>
       <div class="ct" data-lang="en">Geometry</div>
-      <div class="ctl"><div class="row"><span data-lang="es">Diámetro de fuente d</span><span data-lang="en">Source diameter d</span><span class="val"><span id="v-d">7</span><em>cm</em></span></div><input id="r-d" type="range" min="1" max="150" step="1" value="7"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Diámetro de fuente d</span><span data-lang="en">Source diameter d</span><span class="val"><span id="v-d">7</span><em>cm</em></span></div><input id="r-d" type="range" min="1" max="250" step="1" value="7"></div>
       <div class="ctl"><div class="row"><span data-lang="es">Distancia luz → sujeto L</span><span data-lang="en">Light → subject distance L</span><span class="val"><span id="v-L">150</span><em>cm</em></span></div><input id="r-L" type="range" min="30" max="400" step="5" value="150"></div>
       <div class="ctl"><div class="row"><span data-lang="es">Distancia sujeto → fondo s</span><span data-lang="en">Subject → background distance s</span><span class="val"><span id="v-s">60</span><em>cm</em></span></div><input id="r-s" type="range" min="2" max="300" step="2" value="60"></div>
       <div class="ctl"><div class="row"><span data-lang="es">Tamaño del rasgo</span><span data-lang="en">Feature size</span><span class="val"><span id="v-occ">8</span><em>cm</em></span></div><input id="r-occ" type="range" min="2" max="40" step="1" value="8"></div>
       <div class="sep"></div>
       <div class="ctl"><div class="row"><span data-lang="es">Ángulo lateral de la luz</span><span data-lang="en">Lateral angle of the light</span><span class="val"><span id="v-az">20</span><em>°</em></span></div><input id="r-az" type="range" min="-60" max="60" step="1" value="20"></div>
-      <div class="ctl"><div class="row"><span data-lang="es">Altura de la luz</span><span data-lang="en">Height of the light</span><span class="val"><span id="v-el">15</span><em>°</em></span></div><input id="r-el" type="range" min="-20" max="50" step="1" value="15"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Altura de la luz</span><span data-lang="en">Height of the light</span><span class="val"><span id="v-el">15</span><em>°</em></span></div><input id="r-el" type="range" min="-20" max="75" step="1" value="15"></div>
+      <div class="sub" id="bounce-box" hidden>
+        <div class="st" data-lang="es">Rebote en el techo</div>
+        <div class="st" data-lang="en">Ceiling bounce</div>
+        <div class="ctl"><div class="row"><span data-lang="es">Altura del techo</span><span data-lang="en">Ceiling height</span><span class="val"><span id="v-bch">260</span><em>cm</em></span></div><input id="r-bch" type="range" min="210" max="400" step="5" value="260"></div>
+        <div class="ctl"><div class="row"><span data-lang="es">Altura del flash</span><span data-lang="en">Flash height</span><span class="val"><span id="v-bcf">150</span><em>cm</em></span></div><input id="r-bcf" type="range" min="100" max="200" step="5" value="150"></div>
+        <div class="ctl"><div class="row"><span data-lang="es">Distancia horizontal al sujeto</span><span data-lang="en">Horizontal distance to subject</span><span class="val"><span id="v-bcd">200</span><em>cm</em></span></div><input id="r-bcd" type="range" min="80" max="400" step="5" value="200"></div>
+        <div class="ctl"><div class="row"><span data-lang="es">Ángulo del cabezal</span><span data-lang="en">Head tilt</span><span class="val"><span id="v-bca">60</span><em>°</em></span></div><input id="r-bca" type="range" min="30" max="90" step="5" value="60"></div>
+        <div class="ctl"><div class="row"><span data-lang="es">Albedo del techo</span><span data-lang="en">Ceiling albedo</span><span class="val"><span id="v-bcalb">0.7</span></span></div><input id="r-bcalb" type="range" min="0.4" max="0.9" step="0.05" value="0.7"></div>
+        <div class="stats" style="grid-template-columns:repeat(2,1fr);margin-top:0">
+          <div class="stat"><div class="l" data-lang="es">Mancha en el techo</div><div class="l" data-lang="en">Patch on the ceiling</div><div class="n am"><span id="st-bcd">0</span><span class="u">cm</span></div><div class="h" id="st-bcd-h"></div></div>
+          <div class="stat"><div class="l" data-lang="es">Pérdida del rebote</div><div class="l" data-lang="en">Bounce loss</div><div class="n rd">−<span id="st-bcl">0</span><span class="u">EV</span></div><div class="h" id="st-bcl-h"></div></div>
+        </div>
+        <div class="hint" data-lang="es">El rebote escribe el diámetro, la distancia, la altura y la pérdida de arriba. Cobertura del cabezal fija en 60°.</div>
+        <div class="hint" data-lang="en">The bounce writes the diameter, the distance, the height and the loss above. Head coverage fixed at 60°.</div>
+      </div>
       <div class="hint" data-lang="es">El rasgo que arroja sombra: ~3 cm una nariz, ~20 cm una cabeza.</div>
       <div class="hint" data-lang="en">The feature casting the shadow: ~3 cm for a nose, ~20 cm for a head.</div>
     </div>
@@ -218,9 +279,12 @@
       <div class="stats">
         <div class="stat"><div class="l" data-lang="es">GN efectivo</div><div class="l" data-lang="en">Effective GN</div><div class="n am" id="st-gneff">18</div><div class="h" id="st-gneff-h"></div></div>
         <div class="stat"><div class="l" id="st-fref-l">Diafragma</div><div class="n te" id="st-fref">f/9</div><div class="h" id="st-fref-h"></div></div>
-        <div class="stat"><div class="l" data-lang="es">Ley del cuadrado</div><div class="l" data-lang="en">Inverse-square law</div><div class="n rd">−2<span class="u">EV</span></div><div class="h" data-lang="es">al duplicar la distancia</div><div class="h" data-lang="en">on doubling the distance</div></div>
+        <div class="stat"><div class="l" id="st-reach-l">Alcance</div><div class="n rd"><span id="st-reach">0</span><span class="u">m</span></div><div class="h" id="st-reach-h"></div></div>
         <div class="stat"><div class="l" data-lang="es">Caída en el fondo</div><div class="l" data-lang="en">Falloff at the background</div><div class="n vi" id="st-bg">−2.0<span class="u">EV</span></div><div class="h" id="st-bg-h"></div></div>
+        <div class="stat"><div class="l" data-lang="es">1.ª a última fila</div><div class="l" data-lang="en">Front to back row</div><div class="n am"><span id="st-grp">0</span><span class="u">EV</span></div><div class="h" id="st-grp-h"></div></div>
+        <div class="stat"><div class="l" data-lang="es">Distancia mínima</div><div class="l" data-lang="en">Minimum distance</div><div class="n te"><span id="st-grpd">0</span><span class="u">m</span></div><div class="h" id="st-grpd-h"></div></div>
       </div>
+      <div class="verdict" id="v-falloff"></div>
       <p class="explain" data-lang="es">Exposición a potencia plena: <b class="te">f = GN/D</b>, con <b class="am">GN_ef = GN·√(ISO/100)·2^(−pérdida/2)</b>. Cada parada de pérdida divide el GN por √2. La iluminancia cae como 1/D², por eso acercar la luz oscurece el fondo y separa al sujeto.</p>
       <p class="explain" data-lang="en">Exposure at full power: <b class="te">f = GN/D</b>, with <b class="am">GN_ef = GN·√(ISO/100)·2^(−loss/2)</b>. Every stop of loss divides the guide number by √2. Illuminance falls as 1/D², which is why bringing the light closer darkens the background and separates the subject.</p>
     </div>
@@ -231,7 +295,10 @@
       <div class="ctl"><div class="row"><span data-lang="es">ISO</span><span data-lang="en">ISO</span><span class="val"><span id="v-iso">100</span></span></div><input id="r-iso" type="range" min="100" max="6400" step="100" value="100"></div>
       <div class="ctl"><div class="row"><span data-lang="es">Distancia de trabajo</span><span data-lang="en">Working distance</span><span class="val"><span id="v-ref">2</span><em>m</em></span></div><input id="r-ref" type="range" min="0.5" max="8" step="0.25" value="2"></div>
       <div class="ctl"><div class="row"><span data-lang="es">Fondo por detrás</span><span data-lang="en">Background behind</span><span class="val"><span id="v-bg">2</span><em>m</em></span></div><input id="r-bg" type="range" min="0.5" max="6" step="0.25" value="2"></div>
-      <div class="ctl"><div class="row"><span data-lang="es">Pérdida del modificador</span><span data-lang="en">Modifier loss</span><span class="val"><span id="v-loss">1</span><em>EV</em></span></div><input id="r-loss" type="range" min="0" max="3" step="0.5" value="1"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Diafragma de trabajo</span><span data-lang="en">Working aperture</span><span class="val"><span id="v-fap">f/8</span></span></div><input id="r-fap" type="range" min="0" max="7" step="1" value="4"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Profundidad del grupo Δ</span><span data-lang="en">Group depth Δ</span><span class="val"><span id="v-grp">0.8</span><em>m</em></span></div><input id="r-grp" type="range" min="0" max="1.5" step="0.1" value="0.8"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Margen tolerado en el grupo</span><span data-lang="en">Tolerated spread in the group</span><span class="val"><span id="v-grpm">0.5</span><em>EV</em></span></div><input id="r-grpm" type="range" min="0.2" max="2" step="0.1" value="0.5"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Pérdida del modificador</span><span data-lang="en">Modifier loss</span><span class="val"><span id="v-loss">1</span><em>EV</em></span></div><input id="r-loss" type="range" min="0" max="5" step="0.5" value="1"></div>
       <div class="hint" data-lang="es">Godox iT32: GN18 (m, ISO100). El "32" del nombre no es el número guía.</div>
       <div class="hint" data-lang="en">Godox iT32: GN18 (m, ISO100). The "32" in the name is not the guide number.</div>
     </div>
@@ -244,27 +311,31 @@
         <canvas id="sunCanvas" width="580" height="300"></canvas>
       </div>
       <div class="stats">
-        <div class="stat"><div class="l" data-lang="es">Ambiente con central</div><div class="l" data-lang="en">Ambient with leaf shutter</div><div class="n te" id="st-ambleaf">0</div><div class="h" id="st-ambleaf-h"></div></div>
-        <div class="stat"><div class="l" data-lang="es">Ambiente plano focal 1/200</div><div class="l" data-lang="en">Ambient, focal-plane 1/200</div><div class="n rd" id="st-ambfp">0</div><div class="h" id="st-ambfp-h"></div></div>
-        <div class="stat"><div class="l" data-lang="es">Ventaja del central</div><div class="l" data-lang="en">Leaf-shutter advantage</div><div class="n vi" id="st-adv">0</div><div class="h" data-lang="es">paradas de oscurecimiento</div><div class="h" data-lang="en">stops of darkening</div></div>
+        <div class="stat"><div class="l" id="st-ambleaf-l">Ambiente</div><div class="n te" id="st-ambleaf">0</div><div class="h" id="st-ambleaf-h"></div></div>
+        <div class="stat"><div class="l" id="st-ambfp-l">X-sync</div><div class="n rd" id="st-ambfp">0</div><div class="h" id="st-ambfp-h"></div></div>
+        <div class="stat"><div class="l" data-lang="es">Ventaja del central</div><div class="l" data-lang="en">Leaf-shutter advantage</div><div class="n vi" id="st-adv">0</div><div class="h" id="st-adv-h"></div></div>
         <div class="stat"><div class="l" data-lang="es">Margen del flash</div><div class="l" data-lang="en">Flash headroom</div><div class="n am" id="st-head">0</div><div class="h" id="st-head-h"></div></div>
+        <div class="stat"><div class="l" id="st-gnuse-l">GN</div><div class="n am" id="st-gnuse">0</div><div class="h" id="st-gnuse-h"></div></div>
+        <div class="stat"><div class="l" data-lang="es">Tope con potencia</div><div class="l" data-lang="en">Ceiling with power</div><div class="n te" id="st-vmax">—</div><div class="h" id="st-vmax-h"></div></div>
       </div>
-      <p class="explain" data-lang="es">El obturador central sincroniza a <b class="te">todas</b> sus velocidades. Eliges un tiempo rápido para subexponer el ambiente <b class="vi">log₂(t_neutro/t_sinc)</b> paradas mientras el flash sigue exponiendo el sujeto. El plano focal corta en su X-sync (aquí 1/200) y por encima necesita HSS, que recorta potencia. El flash basta cuando <b class="am">GN_ef ≥ f·D</b>, margen <b class="am">2·log₂(GN_ef / (f·D))</b>.</p>
-      <p class="explain" data-lang="en">A leaf shutter synchronises at <b class="te">every</b> one of its speeds. You pick a fast time to underexpose the ambient by <b class="vi">log₂(t_neutro/t_sinc)</b> stops while the flash carries on exposing the subject. A focal-plane shutter stops at its X-sync (1/200 here) and above it needs HSS, which costs power. The flash suffices when <b class="am">GN_ef ≥ f·D</b>, with headroom <b class="am">2·log₂(GN_ef / (f·D))</b>.</p>
+      <div class="verdict" id="v-sun"></div>
+      <p class="explain" data-lang="es">El obturador central de la Q3 43 sincroniza a <b class="te">todas</b> sus velocidades hasta 1/2000. Un tiempo rápido subexpone el ambiente <b class="vi">log₂(t_neutro/t_sinc)</b> paradas, pero no es gratis: a partir de cierta velocidad la ventana es más corta que el pulso y el destello se recorta, <b class="rd">captado = (1−e^(−T/τ))/P</b> con <b class="rd">τ = t.5/ln2</b>, el mismo modelo del <a href="manual-flash-ttl-q3.html#s7">manual, §07</a>. La curva ámbar es lo que ganas y la verde azulada lo que te queda de flash: <b class="am">2·log₂(GN_ef·√captado / (N·D))</b>. Donde la verde cruza el cero está tu velocidad máxima útil. La M11 y la SL3-S cortan en su X-sync y por encima solo tienen <a href="manual-flash-ttl-q3.html#s9">HSS</a>, que cuesta de 2 a 3 EV más.</p>
+      <p class="explain" data-lang="en">The Q3 43's leaf shutter synchronises at <b class="te">every</b> one of its speeds up to 1/2000. A fast time underexposes the ambient by <b class="vi">log₂(t_neutro/t_sinc)</b> stops, but it is not free: past a certain speed the window is shorter than the pulse and the burst is clipped, <b class="rd">captured = (1−e^(−T/τ))/P</b> with <b class="rd">τ = t.5/ln2</b>, the same model as the <a href="manual-flash-ttl-q3.html#s7">manual, §07</a>. The amber curve is what you gain and the teal one what flash you have left: <b class="am">2·log₂(GN_ef·√captured / (N·D))</b>. Where the teal curve crosses zero lies your fastest useful speed. The M11 and the SL3-S stop at their X-sync and above it have only <a href="manual-flash-ttl-q3.html#s9">HSS</a>, which costs a further 2 to 3 EV.</p>
     </div>
     <div class="controls">
       <div class="ct" data-lang="es">Luz y obturador</div>
       <div class="ct" data-lang="en">Light and shutter</div>
       <div class="ctl"><div class="row"><span data-lang="es">Luz ambiente (EV, ISO100)</span><span data-lang="en">Ambient light (EV, ISO100)</span><span class="val"><span id="v-amb">15</span></span></div><input id="r-amb" type="range" min="12" max="16" step="0.5" value="15"></div>
-      <div class="ctl"><div class="row"><span data-lang="es">ISO</span><span data-lang="en">ISO</span><span class="val"><span id="v-siso">100</span></span></div><input id="r-siso" type="range" min="100" max="1600" step="100" value="100"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">ISO</span><span data-lang="en">ISO</span><span class="val"><span id="v-siso">100</span></span></div><input id="r-siso" type="range" min="0" max="5" step="1" value="1"></div>
       <div class="ctl"><div class="row"><span data-lang="es">Diafragma</span><span data-lang="en">Aperture</span><span class="val"><span id="v-ap">f/8</span></span></div><input id="r-ap" type="range" min="0" max="7" step="1" value="4"></div>
-      <div class="ctl"><div class="row"><span data-lang="es">Sincronización (central)</span><span data-lang="en">Sync speed (leaf shutter)</span></div><select id="r-sync"><option value="500">1/500</option><option value="800">1/800</option><option value="1000" selected>1/1000</option><option value="1600">1/1600</option><option value="2000">1/2000</option><option value="4000">1/4000</option></select></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Filtro ND</span><span data-lang="en">ND filter</span><span class="val"><span id="v-nd">0</span><em>EV</em></span></div><input id="r-nd" type="range" min="0" max="3" step="0.5" value="0"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Velocidad de disparo</span><span data-lang="en">Shooting speed</span></div><select id="r-sync"></select></div>
       <div class="sep"></div>
       <div class="ctl"><div class="row"><span data-lang="es">Distancia flash</span><span data-lang="en">Flash distance</span><span class="val"><span id="v-sd">2</span><em>m</em></span></div><input id="r-sd" type="range" min="1" max="6" step="0.5" value="2"></div>
       <div class="ctl"><div class="row"><span data-lang="es">Número guía GN</span><span data-lang="en">Guide number GN</span><span class="val"><span id="v-sgn">18</span></span></div><input id="r-sgn" type="range" min="5" max="80" step="1" value="18"></div>
-      <div class="ctl"><div class="row"><span data-lang="es">Pérdida del modificador</span><span data-lang="en">Modifier loss</span><span class="val"><span id="v-sloss">1</span><em>EV</em></span></div><input id="r-sloss" type="range" min="0" max="3" step="0.5" value="1"></div>
-      <div class="hint" data-lang="es">Pleno sol ≈ EV15 (regla del 16). Plano focal de referencia: X-sync 1/200.</div>
-      <div class="hint" data-lang="en">Full sun ≈ EV15 (sunny 16 rule). Reference focal-plane shutter: X-sync 1/200.</div>
+      <div class="ctl"><div class="row"><span data-lang="es">Pérdida del modificador</span><span data-lang="en">Modifier loss</span><span class="val"><span id="v-sloss">1</span><em>EV</em></span></div><input id="r-sloss" type="range" min="0" max="5" step="0.5" value="1"></div>
+      <div class="hint" data-lang="es">Pleno sol ≈ EV15 (regla del 16). Las velocidades del desplegable son las que permite el cuerpo elegido arriba. El ND resta al ambiente y al flash por igual; la t.5 del destello se fija en la pestaña de balance.</div>
+      <div class="hint" data-lang="en">Full sun ≈ EV15 (sunny 16 rule). The speeds in the dropdown are the ones the body chosen above allows. The ND subtracts from ambient and flash alike; the burst's t.5 is set in the balance tab.</div>
     </div>
   </div>
 
@@ -297,9 +368,12 @@
         <div class="stat"><div class="l" data-lang="es">Fondo</div><div class="l" data-lang="en">Background</div><div class="n vi"><span id="b-st-bg">0</span><span class="u">EV</span></div><div class="h" id="b-st-bg-h"></div></div>
         <div class="stat"><div class="l" data-lang="es">Relación flash/amb.</div><div class="l" data-lang="en">Flash/ambient ratio</div><div class="n am"><span id="b-st-ratio">0</span><span class="u">EV</span></div><div class="h" id="b-st-ratio-h"></div></div>
         <div class="stat"><div class="l" data-lang="es">Potencia flash</div><div class="l" data-lang="en">Flash power</div><div class="n" id="b-st-pow">1/4</div><div class="h" id="b-st-pow-h"></div></div>
+        <div class="stat"><div class="l" data-lang="es">Pulso efectivo</div><div class="l" data-lang="en">Effective pulse</div><div class="n am"><span id="b-st-pulse">0</span><span class="u">ms</span></div><div class="h" id="b-st-pulse-h"></div></div>
+        <div class="stat"><div class="l" data-lang="es">Arrastre del ambiente</div><div class="l" data-lang="en">Ambient smear</div><div class="n vi"><span id="b-st-blur">0</span><span class="u">px</span></div><div class="h" id="b-st-blur-h"></div></div>
       </div>
-      <p class="explain" data-lang="es">Cada mando toca solo lo suyo: la <b class="am">obturación</b> es ambiente puro (no entra en el flash mientras sincronices), la <b class="te">potencia</b> y la <b class="te">distancia</b> son flash puro. En el cociente <b class="vi">flash/ambiente</b> se cancelan el ISO y el diafragma, así que el balance lo mueven el tiempo y la potencia, no la apertura, que solo te cuesta profundidad de campo. En TTL la cámara fija la potencia para clavar al sujeto, y por eso subir el ISO sube solo el fondo. El obturador central libera el tiempo hasta 1/2000 sin HSS, con un único límite: a plena potencia el destello dura ~1/1000 s, así que a las velocidades más altas la ventana de obturación recorta parte del pulso y el aviso lo cuantifica en pasos.</p>
-      <p class="explain" data-lang="en">Each control touches only its own share: the <b class="am">shutter speed</b> is pure ambient (it does not reach the flash as long as you stay in sync), while <b class="te">power</b> and <b class="te">distance</b> are pure flash. ISO and aperture cancel out in the <b class="vi">flash/ambient</b> quotient, so the balance is moved by time and power, not by the aperture, which merely costs you depth of field. In TTL the camera sets the power to nail the subject, which is why raising the ISO lifts the background alone. A leaf shutter frees the shutter speed up to 1/2000 without HSS, with a single limit: at full power the burst lasts ~1/1000 s, so at the highest speeds the shutter window clips part of the pulse, and the warning quantifies that in stops.</p>
+      <div class="verdict" id="v-balance"></div>
+      <p class="explain" data-lang="es">Cada mando toca solo lo suyo: la <b class="am">obturación</b> es ambiente puro (no entra en el flash mientras sincronices), la <b class="te">potencia</b> y la <b class="te">distancia</b> son flash puro. En el cociente <b class="vi">flash/ambiente</b> se cancelan el ISO y el diafragma, así que el balance lo mueven el tiempo y la potencia, no la apertura, que solo te cuesta profundidad de campo. En TTL la cámara fija la potencia para clavar al sujeto, y por eso subir el ISO sube solo el fondo. El obturador central libera el tiempo hasta 1/2000 sin HSS, con un único límite: la descarga decae como <b class="rd">e^(−t/τ)</b> con <b class="rd">τ = t.5/ln2</b> (1,44 ms con la t.5 de 1/1000 s del iT32) y se corta en <b class="rd">t_c = −τ·ln(1−P)</b>, así que a plena potencia la ventana de 1/2000 s solo recoge el 29 % de la energía, −1,8 EV, mientras que a 1/4 el pulso cabe entero y no se pierde nada. Es el modelo del <a href="manual-flash-ttl-q3.html#s7">manual, §07</a>. Ese mismo pulso es el que congela: compara el arrastre del ambiente, v·t, con el del destello, v·t_c.</p>
+      <p class="explain" data-lang="en">Each control touches only its own share: the <b class="am">shutter speed</b> is pure ambient (it does not reach the flash as long as you stay in sync), while <b class="te">power</b> and <b class="te">distance</b> are pure flash. ISO and aperture cancel out in the <b class="vi">flash/ambient</b> quotient, so the balance is moved by time and power, not by the aperture, which merely costs you depth of field. In TTL the camera sets the power to nail the subject, which is why raising the ISO lifts the background alone. A leaf shutter frees the shutter speed up to 1/2000 without HSS, with a single limit: the discharge decays as <b class="rd">e^(−t/τ)</b> with <b class="rd">τ = t.5/ln2</b> (1.44 ms with the iT32's t.5 of 1/1000 s) and is cut off at <b class="rd">t_c = −τ·ln(1−P)</b>, so at full power the 1/2000 s window collects only 29 % of the energy, −1.8 EV, whereas at 1/4 the pulse fits whole and nothing is lost. It is the model of the <a href="manual-flash-ttl-q3.html#s7">manual, §07</a>. That same pulse is what freezes: compare the ambient smear, v·t, with the burst's, v·t_c.</p>
     </div>
     <div class="controls">
       <div class="ct" data-lang="es">Exposición</div>
@@ -313,13 +387,19 @@
       <div class="ctl"><div class="row"><span data-lang="es">Distancia flash</span><span data-lang="en">Flash distance</span><span class="val"><span id="v-bd">2</span><em>m</em></span></div><input id="r-bd" type="range" min="1" max="6" step="0.5" value="2"></div>
       <div class="ctl"><div class="row"><span data-lang="es">Duración flash (plena pot.)</span><span data-lang="en">Flash duration (full power)</span></div><select id="r-bdur"><option value="500">1/500</option><option value="700">1/700</option><option value="1000" selected>1/1000</option><option value="1500">1/1500</option><option value="2000">1/2000</option></select></div>
       <div class="ctl"><div class="row"><span data-lang="es">Número guía GN</span><span data-lang="en">Guide number GN</span><span class="val"><span id="v-bgn">18</span></span></div><input id="r-bgn" type="range" min="5" max="80" step="1" value="18"></div>
-      <div class="ctl"><div class="row"><span data-lang="es">Pérdida del modificador</span><span data-lang="en">Modifier loss</span><span class="val"><span id="v-bloss">1</span><em>EV</em></span></div><input id="r-bloss" type="range" min="0" max="3" step="0.5" value="1"></div>
+      <div class="ctl"><div class="row"><span data-lang="es">Pérdida del modificador</span><span data-lang="en">Modifier loss</span><span class="val"><span id="v-bloss">1</span><em>EV</em></span></div><input id="r-bloss" type="range" min="0" max="5" step="0.5" value="1"></div>
+      <div class="sub">
+        <div class="st" data-lang="es">Movimiento</div>
+        <div class="st" data-lang="en">Movement</div>
+        <div class="ctl"><div class="row"><span data-lang="es">Velocidad del sujeto</span><span data-lang="en">Subject speed</span><span class="val"><span id="v-bvel">1</span><em>m/s</em></span></div><input id="r-bvel" type="range" min="0.3" max="3" step="0.1" value="1"></div>
+        <div class="ctl"><div class="row"><span data-lang="es">Focal</span><span data-lang="en">Focal length</span><span class="val"><span id="v-bfoc">50</span><em>mm</em></span></div><input id="r-bfoc" type="range" min="0" max="7" step="1" value="4"></div>
+      </div>
       <div class="hint" data-lang="es">En TTL la potencia la fija la cámara y el deslizador queda en gris. EV ambiente: interior ≈ 10–11, nublado ≈ 13, pleno sol = 15.</div>
       <div class="hint" data-lang="en">In TTL the camera sets the power and the slider greys out. Ambient EV: indoors ≈ 10–11, overcast ≈ 13, full sun = 15.</div>
     </div>
   </div>
 
-  <footer>w = d·s/L · θ = 2·arctan(d/2L) · f = GN/D · E ∝ 1/D² · t_neutro = f²·100/(ISO·2^EV) · © Rafael Vida</footer>
+  <footer>w = d·s/L · θ = 2·arctan(d/2L) · f = GN/D · E ∝ 1/D² · t_neutro = N²·100/(ISO·2^(EV−ND)) · τ = t.5/ln2 · t_c = −τ·ln(1−P) · captado = (1−e^(−mín(T,t_c)/τ))/P · © Rafael Vida</footer>
 </div>
 
 <script>
@@ -368,6 +448,8 @@
     es:{
       mBare:"Flash desnudo", mDome:"Domo magnético", mCard:"Tarjeta rebote", mCeil:"Rebote techo",
       mUmb:"Paraguas 80", mSb40:"Softbox 40", mSb60:"Softbox 60", mOcta:"Octa 95",
+      cM11:"Leica M11", cQ3:"Leica Q3 43", cSL:"Leica SL3-S", cGen:"Genérica",
+      shLeaf:"central", shFP:"plano focal",
       hard:"luz dura", mid:"intermedia", soft:"luz suave",
       transition:" mm de transición", fullShadow:"sombra plena", noUmbra:"sin umbra",
       dSource:"fuente", dSubject:"sujeto", dBackground:"fondo",
@@ -381,15 +463,76 @@
       bgSunk:"fondo hundido", bgBright:"fondo claro", bgNeutral:"fondo neutro",
       ambientOnly:"solo ambiente", flashLeads:"manda el flash", ambientLeads:"manda el ambiente",
       minPow:"mín", setByTtl:"la fija el TTL", setManual:"fijada (manual)",
-      fAboveSync:"por encima de X-sync 1/200 · necesita HSS",
-      fClipA:"recorte del flash −", fClipB:" EV · pulso ", fClipC:" ms vs ventana ", fClipD:" ms",
       fSubjBlown:"sujeto quemado", fBgBlown:"fondo quemado",
       fNoPower:"falta potencia · acerca el flash o sube ISO",
-      fSubjDark:"sujeto oscuro · sube potencia"
+      fSubjDark:"sujeto oscuro · sube potencia",
+      /* leyenda de la gráfica del sol */
+      lgAmb:"ambiente", lgHead:"margen de flash",
+      /* patrones de retrato */
+      pFlat:"frontal plana", pButterfly:"mariposa", pLoop:"lazo", pRembrandt:"Rembrandt",
+      pSplit:"lateral", pUnder:"desde abajo",
+      /* lecturas nuevas */
+      needDl:"Ø para θ objetivo", needLl:"L para θ objetivo",
+      needDh:"a la L de ahora", needLh:"con la fuente de ahora",
+      outOfReach:"fuera del rango", tooClose:"casi encima del sujeto",
+      reachL:"Alcance a f/", grpSpread:"entre filas", grpMin:"para ", grpOk:"ya cumples",
+      patch:"mancha", bounceOf:"albedo ", pulseCap:"captado ", frozen:"congela", ghost:"fantasma",
+      ambAt:"Ambiente a 1/", ambXsync:"Ambiente en X-sync 1/", gnAt:"GN efectivo a 1/",
+      advOver:"frente a ", capped:"tope del cuerpo", noPower:"no llegas",
+      /* avisos */
+      fAboveSync:function(x){return "por encima de X-sync 1/"+x+" · necesita HSS";},
+      fClip:function(ev,pulse,win){return "recorte del flash −"+ev+" EV · pulso "+pulse+" ms vs ventana "+win+" ms";},
+      fGhost:function(px){return "fantasma del ambiente · "+px+" px de arrastre";},
+      /* tabla de modificadores */
+      thMod:"Modificador", thD:"Ø", thTheta:"θ", thPen:"Penumbra", thLoss:"Pérdida", thGn:"GN ef.", thF:"f a ",
+      tblNote:function(L,s,D){return "θ y penumbra a L = "+L+" cm y s = "+s+" cm; GN efectivo y diafragma a "+D+" m con el ISO de la pestaña de caída. Diámetros y pérdidas son valores típicos, no medidas de tu equipo: ajústalos con el deslizador si tienes datos propios.";},
+      /* veredicto de sombras */
+      vsTitle:function(p,th,verd){return "Patrón "+p+" · θ = "+th+"° · "+verd;},
+      vsGeom:function(d,L,th,verd){return "La fuente de "+d+" cm vista desde el sujeto a "+L+" cm mide "+th+"°, y eso es lo único que fija la dureza: "+verd+". Los umbrales son 5° (por debajo, borde de navaja) y 15° (por encima, el borde se disuelve). Mover la luz de ángulo cambia dónde cae la sombra, no cómo de blanda es.";},
+      vsInv:function(obj,Lneed,dneed,warn){return "Para "+obj+"° con esta misma fuente hay que trabajar a "+Lneed+" cm"+warn+"; si prefieres no moverte, el difusor tendría que medir "+dneed+" cm.";},
+      vsInvFar:" (fuera del recorrido del deslizador)",
+      vsInvNear:" (tan cerca que entra en el encuadre)",
+      vsPen:function(w,w2,s,umbra){return "En el fondo, "+s+" cm por detrás, la transición mide "+w+" cm de ancho en la dirección transversal y "+w2+" cm en la de la luz, que es la que se ve alargada en las tomas laterales. Queda "+umbra+".";},
+      vsUmbraYes:function(r){return "un núcleo de sombra plena de "+r+" cm de radio";},
+      vsUmbraNo:"sin núcleo: la fuente es tan grande que se come la sombra entera",
+      vsFrameIn:function(x){return "La sombra cae a "+x+" cm del sujeto: con un encuadre de busto, unos 60 cm de fondo visible, cae dentro y hay que contar con ella.";},
+      vsFrameOut:function(x){return "La sombra cae a "+x+" cm del sujeto: con un encuadre de busto, unos 60 cm de fondo visible, se sale del cuadro y el fondo queda limpio.";},
+      vsBounce:function(dsp,L2,el,loss){return "En rebote, la mancha del techo mide "+dsp+" cm y queda a "+L2+" cm del sujeto, con la fuente elevada "+el+"° y "+loss+" EV de pérdida frente al directo.";},
+      vsBounceEye:" Por encima de 55° de elevación las cuencas se hunden: baja el cabezal o aleja el punto de impacto.",
+      /* veredicto de caída */
+      vfTitle:function(f,D,reach,N){return "f/"+f+" a "+D+" m · alcance "+reach+" m a f/"+N;},
+      vfMain:function(gn,iso,loss,gnEff,D,f,N,reach){return "Con GN "+gn+" a ISO "+iso+" y una pérdida de modificador de "+loss+" EV, el número guía efectivo es "+gnEff+": a "+D+" m la exposición correcta cae en f/"+f+", y con el f/"+N+" que has elegido el alcance a plena potencia es "+reach+" m. Es un límite duro, no una preferencia: cada duplicación de la distancia cuesta 2 EV.";},
+      vfBg:function(bg,ev){return "El fondo situado "+bg+" m por detrás recibe "+ev+" EV menos que el sujeto. Si lo quieres más negro, acerca la luz antes que bajar la potencia: la caída es lo que separa al sujeto.";},
+      vfGrp:function(g,ev,marg,dmin,D){return "Un grupo de "+g+" m de fondo reparte "+ev+" EV entre la primera y la última fila. Para no pasar de "+marg+" EV hay que retirar la luz a "+dmin+" m, y ahora está a "+D+" m.";},
+      vfGrpOk:" Ya cumples: no toques nada.",
+      vfGrpNo:" Retírala o resígnate a revelar la última fila por separado.",
+      vfGrpZero:"Sin profundidad de grupo declarada, la caída solo se mide contra el fondo.",
+      /* veredicto del sol */
+      vuTitle:function(cam,N,den,verd){return cam+" · f/"+N+" a 1/"+den+" · "+verd;},
+      vuOk:"potencia de sobra", vuTight:"justo", vuNo:"no llegas",
+      vuAmb:function(den,ev,cam,x){return "A 1/"+den+" el ambiente queda en "+ev+" EV respecto al neutro. "+cam+" sincroniza hasta 1/"+x+"; de ahí para arriba solo hay HSS, que cuesta de 2 a 3 EV y deja el problema peor que estaba.";},
+      vuFlash:function(gnEff,frac,gnUse,head){return "El flash sale con GN efectivo "+gnEff+", pero a esa velocidad la ventana solo recoge el "+frac+" % del pulso y rinde como GN "+gnUse+". El margen resultante es "+head+" EV.";},
+      vuMax:function(den){return "Con esta potencia el tope útil está en 1/"+den+": más rápido, el recorte te quita más de lo que te da el oscurecimiento del ambiente.";},
+      vuMaxNo:"Ni a la velocidad más lenta hay potencia para este diafragma: acerca el flash, abre un paso o sube el ISO.",
+      vuRoutes:function(N,iso,nd){return "Tres vías para el mismo resultado: cerrar a f/"+N+", que cuesta profundidad de campo y difracción; bajar a ISO "+iso+", que no cuesta nada mientras el cuerpo lo permita; o poner un ND de "+nd+" EV, que resta al ambiente y también al flash, así que el margen del flash baja con él.";},
+      vuDiff:" El detalle de lo que cuesta cerrar está en la ficha de difracción.",
+      vuDiffLink:"difracción y diafragma",
+      /* veredicto del balance */
+      vbTitle:function(sub,bg){return "Sujeto "+sub+" EV · fondo "+bg+" EV";},
+      vbSub:function(ev,pow){return "El sujeto queda a "+ev+" EV del correcto con la potencia en "+pow+".";},
+      vbBgLow:function(ev){return "El fondo va a "+ev+" EV: si lo quieres más presente, abre la obturación, no el diafragma; el diafragma sube los dos a la vez y el tiempo solo toca al ambiente.";},
+      vbBgHigh:function(ev){return "El fondo va a "+ev+" EV y se te va a quemar: baja la obturación antes que cerrar el diafragma, que arrastraría también al flash.";},
+      vbBgOk:function(ev){return "El fondo queda a "+ev+" EV, en su sitio: el reparto está resuelto.";},
+      vbClip:function(ev,tc,win){return "La ventana de "+win+" ms es más corta que el pulso de "+tc+" ms y te está costando "+ev+" EV: baja la potencia (a 1/4 el pulso cabe entero) o baja la velocidad.";},
+      vbMove:function(amb,fl,px){return "Con el sujeto a esa velocidad, el ambiente lo arrastra "+amb+" mm y el destello "+fl+" mm; sobre el sensor son "+px+" px de estela.";},
+      vbGhost:" Es un fantasma visible: o bajas el ambiente o lo asumes como efecto.",
+      vbClean:" No se ve: la toma sale congelada."
     },
     en:{
       mBare:"Bare bulb", mDome:"Magnetic dome", mCard:"Bounce card", mCeil:"Ceiling bounce",
       mUmb:"Umbrella 80", mSb40:"Softbox 40", mSb60:"Softbox 60", mOcta:"Octa 95",
+      cM11:"Leica M11", cQ3:"Leica Q3 43", cSL:"Leica SL3-S", cGen:"Generic",
+      shLeaf:"leaf", shFP:"focal plane",
       hard:"hard light", mid:"intermediate", soft:"soft light",
       transition:" mm of transition", fullShadow:"full shadow", noUmbra:"no umbra",
       dSource:"source", dSubject:"subject", dBackground:"backgr.",
@@ -403,14 +546,69 @@
       bgSunk:"background sunk", bgBright:"bright background", bgNeutral:"neutral background",
       ambientOnly:"ambient only", flashLeads:"flash dominates", ambientLeads:"ambient dominates",
       minPow:"min", setByTtl:"set by TTL", setManual:"set manually",
-      fAboveSync:"above X-sync 1/200 · HSS required",
-      fClipA:"flash clipping −", fClipB:" EV · pulse ", fClipC:" ms vs window ", fClipD:" ms",
       fSubjBlown:"subject blown", fBgBlown:"background blown",
       fNoPower:"not enough power · move the flash closer or raise the ISO",
-      fSubjDark:"subject dark · raise the power"
+      fSubjDark:"subject dark · raise the power",
+      lgAmb:"ambient", lgHead:"flash headroom",
+      pFlat:"flat frontal", pButterfly:"butterfly", pLoop:"loop", pRembrandt:"Rembrandt",
+      pSplit:"split", pUnder:"from below",
+      needDl:"Ø for target θ", needLl:"L for target θ",
+      needDh:"at the current L", needLh:"with the current source",
+      outOfReach:"beyond the range", tooClose:"almost on the subject",
+      reachL:"Reach at f/", grpSpread:"between rows", grpMin:"for ", grpOk:"already there",
+      patch:"patch", bounceOf:"albedo ", pulseCap:"captured ", frozen:"freezes", ghost:"ghost",
+      ambAt:"Ambient at 1/", ambXsync:"Ambient at X-sync 1/", gnAt:"Effective GN at 1/",
+      advOver:"against ", capped:"body ceiling", noPower:"out of reach",
+      fAboveSync:function(x){return "above X-sync 1/"+x+" · HSS required";},
+      fClip:function(ev,pulse,win){return "flash clipping −"+ev+" EV · pulse "+pulse+" ms vs window "+win+" ms";},
+      fGhost:function(px){return "ambient ghost · "+px+" px of smear";},
+      thMod:"Modifier", thD:"Ø", thTheta:"θ", thPen:"Penumbra", thLoss:"Loss", thGn:"Eff. GN", thF:"f at ",
+      tblNote:function(L,s,D){return "θ and penumbra at L = "+L+" cm and s = "+s+" cm; effective GN and aperture at "+D+" m with the ISO of the falloff tab. Diameters and losses are typical values, not measurements of your own kit: adjust them with the slider if you have your own figures.";},
+      vsTitle:function(p,th,verd){return p+" pattern · θ = "+th+"° · "+verd;},
+      vsGeom:function(d,L,th,verd){return "The "+d+" cm source seen from the subject at "+L+" cm measures "+th+"°, and that alone sets the hardness: "+verd+". The thresholds are 5° (below it, a knife edge) and 15° (above it, the edge dissolves). Moving the light in angle changes where the shadow falls, not how soft it is.";},
+      vsInv:function(obj,Lneed,dneed,warn){return "For "+obj+"° with this same source you have to work at "+Lneed+" cm"+warn+"; if you would rather not move, the diffuser would have to measure "+dneed+" cm.";},
+      vsInvFar:" (beyond the slider's travel)",
+      vsInvNear:" (so close that it enters the frame)",
+      vsPen:function(w,w2,s,umbra){return "On the background, "+s+" cm behind, the transition measures "+w+" cm across and "+w2+" cm along the direction of the light, which is the one that looks stretched in side-lit shots. What is left is "+umbra+".";},
+      vsUmbraYes:function(r){return "a core of full shadow "+r+" cm in radius";},
+      vsUmbraNo:"no core: the source is so large that it eats the shadow whole",
+      vsFrameIn:function(x){return "The shadow falls "+x+" cm from the subject: with a head-and-shoulders frame, some 60 cm of visible background, it lands inside and you have to reckon with it.";},
+      vsFrameOut:function(x){return "The shadow falls "+x+" cm from the subject: with a head-and-shoulders frame, some 60 cm of visible background, it leaves the picture and the background stays clean.";},
+      vsBounce:function(dsp,L2,el,loss){return "In bounce, the patch on the ceiling measures "+dsp+" cm and sits "+L2+" cm from the subject, with the source raised "+el+"° and "+loss+" EV of loss against direct flash.";},
+      vsBounceEye:" Past 55° of elevation the eye sockets sink: lower the head or move the point of impact away.",
+      vfTitle:function(f,D,reach,N){return "f/"+f+" at "+D+" m · reach "+reach+" m at f/"+N;},
+      vfMain:function(gn,iso,loss,gnEff,D,f,N,reach){return "With GN "+gn+" at ISO "+iso+" and a modifier loss of "+loss+" EV, the effective guide number is "+gnEff+": at "+D+" m correct exposure lands on f/"+f+", and with the f/"+N+" you chose the full-power reach is "+reach+" m. It is a hard limit, not a preference: every doubling of the distance costs 2 EV.";},
+      vfBg:function(bg,ev){return "The background "+bg+" m behind receives "+ev+" EV less than the subject. If you want it blacker, bring the light closer rather than lowering the power: the falloff is what separates the subject.";},
+      vfGrp:function(g,ev,marg,dmin,D){return "A group "+g+" m deep spreads "+ev+" EV between the front and the back row. To stay within "+marg+" EV the light has to go back to "+dmin+" m, and it is now at "+D+" m.";},
+      vfGrpOk:" You are already there: leave it alone.",
+      vfGrpNo:" Move it back, or resign yourself to developing the back row separately.",
+      vfGrpZero:"With no group depth declared, the falloff is measured only against the background.",
+      vuTitle:function(cam,N,den,verd){return cam+" · f/"+N+" at 1/"+den+" · "+verd;},
+      vuOk:"power to spare", vuTight:"tight", vuNo:"out of reach",
+      vuAmb:function(den,ev,cam,x){return "At 1/"+den+" the ambient sits at "+ev+" EV against neutral. "+cam+" syncs up to 1/"+x+"; beyond that there is only HSS, which costs 2 to 3 EV and leaves the problem worse than it was.";},
+      vuFlash:function(gnEff,frac,gnUse,head){return "The flash starts with an effective GN of "+gnEff+", but at that speed the window collects only "+frac+" % of the pulse and it performs like GN "+gnUse+". The resulting headroom is "+head+" EV.";},
+      vuMax:function(den){return "With this power the useful ceiling is 1/"+den+": any faster and the clipping takes more than the ambient darkening gives.";},
+      vuMaxNo:"Not even at the slowest speed is there power for this aperture: move the flash closer, open a stop or raise the ISO.",
+      vuRoutes:function(N,iso,nd){return "Three routes to the same result: stopping down to f/"+N+", which costs depth of field and diffraction; dropping to ISO "+iso+", which costs nothing as long as the body allows it; or fitting an ND of "+nd+" EV, which subtracts from the ambient and from the flash alike, so the flash headroom falls with it.";},
+      vuDiff:" The detail of what stopping down costs is in the diffraction page.",
+      vuDiffLink:"diffraction and aperture",
+      vbTitle:function(sub,bg){return "Subject "+sub+" EV · background "+bg+" EV";},
+      vbSub:function(ev,pow){return "The subject lands "+ev+" EV from correct with the power at "+pow+".";},
+      vbBgLow:function(ev){return "The background is at "+ev+" EV: if you want more of it, open up the shutter, not the aperture; the aperture lifts both at once and the time touches the ambient alone.";},
+      vbBgHigh:function(ev){return "The background is at "+ev+" EV and will blow out: lower the shutter speed rather than stopping down, which would drag the flash with it.";},
+      vbBgOk:function(ev){return "The background sits at "+ev+" EV, right where it should: the split is settled.";},
+      vbClip:function(ev,tc,win){return "The "+win+" ms window is shorter than the "+tc+" ms pulse and it is costing you "+ev+" EV: lower the power (at 1/4 the pulse fits whole) or lower the speed.";},
+      vbMove:function(amb,fl,px){return "With the subject at that speed, the ambient smears it "+amb+" mm and the burst "+fl+" mm; on the sensor that is "+px+" px of trail.";},
+      vbGhost:" That is a visible ghost: either bring the ambient down or take it as an effect.",
+      vbClean:" It does not show: the frame comes out frozen."
     }
   };
-  function t(k){ return (T[document.documentElement.lang]||T.es)[k]; }
+  function lang(){ return document.documentElement.lang==="en"?"en":"es"; }
+  function t(k){ return (T[lang()]||T.es)[k]; }
+  function nf(x,dec){
+    if(!isFinite(x)) return "—";
+    return x.toLocaleString(lang()==="en"?"en-GB":"es-ES",{minimumFractionDigits:dec,maximumFractionDigits:dec}).replace(/^-/,"\u2212");
+  }
 
   var MODS=[
     {k:"bare",tk:"mBare",d:4,loss:0},
@@ -422,18 +620,93 @@
     {k:"sb60",tk:"mSb60",d:60,loss:1.5},
     {k:"octa",tk:"mOcta",d:95,loss:2}
   ];
+  /* Cuerpos del equipo. sync = X-sync mecánico; leaf = obturador central.
+     M11 1/180 y Q3 43 1/2000 están en los manuales Leica; la SL3-S se toma
+     en 1/200, el valor de la serie SL3, y es el que conviene comprobar. */
+  var LEAFMAX=2000;
+  var CAMS=[
+    {k:"q343",tk:"cQ3", sync:2000,leaf:true, pitch:3.76,isoMin:50},
+    {k:"m11", tk:"cM11",sync:180, leaf:false,pitch:3.76,isoMin:64},
+    {k:"sl3s",tk:"cSL", sync:200, leaf:false,pitch:5.94,isoMin:50},
+    {k:"gen", tk:"cGen",sync:250, leaf:false,pitch:4.30,isoMin:100}
+  ];
   var FSTOPS=[1,1.4,2,2.8,4,5.6,8,11,16,22,32,45];
   var APS=[2,2.8,4,5.6,8,11,16,22];
+  var SISO=[50,100,200,400,800,1600];
+  var FOCS=[21,28,35,43,50,75,90,135];
+  var SYNCS=[60,125,180,200,250,500,800,1000,1600,2000];
+  var HEADCOV=60;      /* cobertura del reflector del iT32, grados */
+  var FACEH=155;       /* altura de la cara del sujeto, cm */
+  var FRAMEHALF=30;    /* medio encuadre de busto sobre el fondo, cm */
   function nearestF(f){return FSTOPS.reduce(function(a,b){return Math.abs(b-f)<Math.abs(a-f)?b:a;});}
   function $(id){return document.getElementById(id);}
   function num(id){return parseFloat($(id).value);}
   function evStr(x){return (x>=0?"+":"−")+Math.abs(x).toFixed(1);}
+  var L2=Math.log2;
+  function nearIdx(arr,v){var b=0,i;for(i=1;i<arr.length;i++){if(Math.abs(arr[i]-v)<Math.abs(arr[b]-v))b=i;}return b;}
+  function snap(id,v){
+    var el=$(id),mn=parseFloat(el.min),mx=parseFloat(el.max),st=parseFloat(el.step)||1;
+    var x=Math.min(mx,Math.max(mn,v));
+    el.value=mn+Math.round((x-mn)/st)*st;
+    return parseFloat(el.value);
+  }
 
-  var activeMod="dome",chips=$("chips"),chipBtns=[];
+  /* ---------- modelo exponencial del pulso (IGBT), el mismo del manual §07 ----------
+     I(t) ∝ e^(−t/τ) con τ = t.5/ln2; a potencia P el corte cae en t_c = −τ·ln(1−P)
+     y la energía emitida hasta t_c vale P. Fracción captada en una ventana T:
+     (1 − e^(−mín(T,t_c)/τ)) / P.                                                    */
+  function pulse(t5,P,win){
+    var tau=t5/Math.LN2,Pc=Math.min(Math.max(P,1e-4),0.999999);
+    var tc=-tau*Math.log(1-Pc);
+    var cap=1-Math.exp(-Math.min(win,tc)/tau);
+    /* a plena potencia el IGBT no corta: la duración con sentido es la t.1,
+       el instante en que se ha emitido el 90 % de la energía. */
+    var t10=tau*Math.LN10;
+    return {tau:tau,tc:tc,tEff:Math.min(tc,t10),frac:Math.min(1,cap/Pc)};
+  }
+  function t5cur(){return 1/parseFloat($("r-bdur").value);}
+
+  /* ---------- estado compartido entre pestañas ---------- */
+  var activeMod="dome",activeCam="q343";
+  function camObj(){
+    var i;for(i=0;i<CAMS.length;i++){if(CAMS[i].k===activeCam)return CAMS[i];}
+    return CAMS[0];
+  }
+  function camName(c){return t(c.tk);}
+  function refFP(){var c=camObj();return c.leaf?CAMS[1]:c;}   /* el cuerpo de plano focal de referencia */
+
+  function setGN(v){snap("r-gn",v);snap("r-sgn",v);snap("r-bgn",v);}
+  function setLoss(v){snap("r-loss",v);snap("r-sloss",v);snap("r-bloss",v);}
+  function setDist(v){snap("r-ref",v);snap("r-sd",v);snap("r-bd",v);}
+  function setISO(v){
+    snap("r-iso",Math.max(100,v));
+    $("r-siso").value=nearIdx(SISO,v);
+    $("r-bis").value=nearIdx(BIS,v);
+  }
+  function labels(){
+    ["r-d","r-L","r-s","r-occ","r-az","r-el","r-gn","r-iso","r-ref","r-bg","r-loss",
+     "r-grp","r-grpm","r-amb","r-sd","r-sgn","r-sloss","r-nd","r-bamb","r-bd","r-bgn",
+     "r-bloss","r-bvel","r-bch","r-bcf","r-bcd","r-bca","r-bcalb"].forEach(function(id){
+      var out=$("v-"+id.slice(2));
+      if(out) out.textContent=$(id).value;
+    });
+    $("v-fap").textContent="f/"+APS[num("r-fap")];
+    $("v-ap").textContent="f/"+APS[num("r-ap")];
+    $("v-siso").textContent=SISO[num("r-siso")];
+    $("v-bfoc").textContent=FOCS[num("r-bfoc")];
+    $("v-bap").textContent="f/"+BAP[num("r-bap")];
+    $("v-bis").textContent=BIS[num("r-bis")];
+    $("v-bsh").textContent=BSH[num("r-bsh")].l;
+  }
+  function renderAll(){renderShadow();renderFalloff();renderSun();renderBalance();}
+  function renderShared(){labels();shadowReadouts();renderFalloff();renderSun();renderBalance();}
+
+  /* ---------- chips de modificador ---------- */
+  var chips=$("chips"),chipBtns=[];
   function chipHTML(m){return t(m.tk)+'<span class="v">'+m.d+'cm·−'+m.loss+'EV</span>';}
-  function relabelChips(){chipBtns.forEach(function(o){o.b.innerHTML=chipHTML(o.m);});}
   MODS.forEach(function(m){
     var b=document.createElement("button");
+    b.type="button";
     b.className="chip"+(m.k===activeMod?" on":"");
     b.innerHTML=chipHTML(m);
     chipBtns.push({b:b,m:m});
@@ -441,15 +714,54 @@
       activeMod=m.k;
       Array.prototype.forEach.call(chips.children,function(c){c.classList.remove("on");});
       b.classList.add("on");
-      $("r-d").value=m.d; $("v-d").textContent=m.d;
-      $("r-loss").value=m.loss; $("v-loss").textContent=m.loss;
-      $("r-sloss").value=m.loss; $("v-sloss").textContent=m.loss;
-      $("r-bloss").value=m.loss; $("v-bloss").textContent=m.loss;
-      renderShadow(); renderFalloff(); renderSun(); renderBalance();
+      snap("r-d",m.d); setLoss(m.loss);
+      $("bounce-box").hidden=(m.k!=="ceil");
+      if(m.k==="ceil") bounceApply();
+      labels(); renderAll();
     };
     chips.appendChild(b);
   });
 
+  /* ---------- chips de cuerpo ---------- */
+  var camsBox=$("cams"),camBtns=[];
+  function camHTML(c){
+    return t(c.tk)+'<span class="v">1/'+c.sync+'·'+(c.leaf?t("shLeaf"):t("shFP"))+'</span>';
+  }
+  CAMS.forEach(function(c){
+    var b=document.createElement("button");
+    b.type="button";
+    b.className="chip"+(c.k===activeCam?" on":"");
+    b.innerHTML=camHTML(c);
+    camBtns.push({b:b,c:c});
+    b.onclick=function(){
+      activeCam=c.k;
+      Array.prototype.forEach.call(camsBox.children,function(x){x.classList.remove("on");});
+      b.classList.add("on");
+      buildSync();
+      var want=c.leaf?"leaf":"fp";
+      document.querySelectorAll("#panel-balance .seg[data-g='shut'] .segbtn").forEach(function(x){
+        x.classList.toggle("on",x.dataset.v===want);
+      });
+      labels(); renderAll();
+    };
+    camsBox.appendChild(b);
+  });
+  function relabelChips(){
+    chipBtns.forEach(function(o){o.b.innerHTML=chipHTML(o.m);});
+    camBtns.forEach(function(o){o.b.innerHTML=camHTML(o.c);});
+  }
+
+  /* velocidades que permite el cuerpo elegido */
+  function buildSync(){
+    var c=camObj(),max=c.leaf?LEAFMAX:c.sync,sel=$("r-sync"),cur=parseFloat(sel.value)||max,h="",i;
+    for(i=0;i<SYNCS.length;i++){ if(SYNCS[i]<=max) h+='<option value="'+SYNCS[i]+'">1/'+SYNCS[i]+'</option>'; }
+    if(SYNCS.indexOf(max)<0) h+='<option value="'+max+'">1/'+max+'</option>';
+    sel.innerHTML=h;
+    var opts=[].map.call(sel.options,function(o){return parseFloat(o.value);});
+    sel.value=opts[nearIdx(opts,Math.min(cur,max))];
+  }
+
+  /* ---------- pestañas ---------- */
   Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(tb){
     tb.onclick=function(){
       document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("on");});
@@ -463,41 +775,94 @@
     };
   });
 
-  [["r-d","v-d"],["r-L","v-L"],["r-s","v-s"],["r-occ","v-occ"],["r-az","v-az"],["r-el","v-el"]]
-    .forEach(function(p){$(p[0]).addEventListener("input",function(){$(p[1]).textContent=$(p[0]).value;renderShadow();});});
-  [["r-gn","v-gn"],["r-iso","v-iso"],["r-ref","v-ref"],["r-bg","v-bg"],["r-loss","v-loss"]]
-    .forEach(function(p){$(p[0]).addEventListener("input",function(){$(p[1]).textContent=$(p[0]).value;renderFalloff();});});
-  [["r-amb","v-amb"],["r-siso","v-siso"],["r-sd","v-sd"],["r-sgn","v-sgn"],["r-sloss","v-sloss"]]
-    .forEach(function(p){$(p[0]).addEventListener("input",function(){$(p[1]).textContent=$(p[0]).value;renderSun();});});
-  $("r-ap").addEventListener("input",function(){$("v-ap").textContent="f/"+APS[num("r-ap")];renderSun();});
-  $("r-sync").addEventListener("change",renderSun);
-  document.querySelectorAll("#panel-falloff .segbtn").forEach(function(b){
-    b.onclick=function(){document.querySelectorAll("#panel-falloff .segbtn").forEach(function(x){x.classList.remove("on");});b.classList.add("on");renderFalloff();};
-  });
-  function metric(){var on=document.querySelector("#panel-falloff .segbtn.on");return on?on.dataset.metric:"f";}
+  /* ---------- rebote de techo: geometría que alimenta el motor de sombras ---------- */
+  function bounceCalc(){
+    var hc=num("r-bch"),hf=num("r-bcf"),Dh=num("r-bcd"),beta=num("r-bca")*Math.PI/180,alb=num("r-bcalb");
+    var rise=Math.max(hc-hf,10);
+    var L1=rise/Math.sin(beta);
+    var xi=rise/Math.tan(beta);
+    var dx=Math.max(Dh-xi,15),dy=Math.max(hc-FACEH,20);
+    var L2d=Math.sqrt(dx*dx+dy*dy);
+    var tanHalf=Math.tan(HEADCOV/2*Math.PI/180);
+    var dSpot=2*L1*tanHalf/Math.sqrt(Math.sin(beta));
+    /* E_rebote / E_directo = albedo · tan²(cob/2) · (Dh/L2)² · cos(salida) */
+    var ratio=alb*tanHalf*tanHalf*(Dh*Dh)/(L2d*L2d)*(dy/L2d);
+    var loss=-L2(ratio);
+    var elev=Math.atan2(dy,dx)*180/Math.PI;
+    return {L1:L1,L2:L2d,d:dSpot,loss:loss,elev:elev,xi:xi};
+  }
+  function bounceApply(){
+    var b=bounceCalc();
+    snap("r-d",b.d); snap("r-L",b.L2); snap("r-el",b.elev); setLoss(b.loss);
+    $("st-bcd").textContent=b.d.toFixed(0);
+    $("st-bcd-h").textContent=t("patch")+" · "+b.L1.toFixed(0)+" cm";
+    $("st-bcl").textContent=b.loss.toFixed(1);
+    $("st-bcl-h").textContent=t("bounceOf")+num("r-bcalb").toFixed(2);
+  }
 
-  /* ---- sombras ---- */
-  function renderShadow(){
+  /* ---------- sombras ---------- */
+  function thetaTag(th){return th<5?t("hard"):th<15?t("mid"):t("soft");}
+  function patternName(az,el){
+    var a=Math.abs(az);
+    if(a<10&&el<25) return t("pFlat");
+    if(el<0) return t("pUnder");
+    if(a<12) return t("pButterfly");
+    if(a>=70) return t("pSplit");
+    if(a>=40&&el>=30) return t("pRembrandt");
+    return t("pLoop");
+  }
+  function targetTheta(){
+    var on=document.querySelector("#seg-theta .segbtn.on");
+    return on?parseFloat(on.dataset.th):10;
+  }
+  function geom(){
     var d=num("r-d"),L=num("r-L"),s=num("r-s"),occD=num("r-occ"),azim=num("r-az"),elev=num("r-el");
-    var cv=$("shadowCanvas"),ctx=cv.getContext("2d"),W=cv.width,H=cv.height;
-    var img=ctx.createImageData(W,H),data=img.data;
-    var R=d/2,occR=occD/2,Zs=L+s,u=s/Zs;
     var az=azim*Math.PI/180,el=elev*Math.PI/180;
     var srcX=L*Math.tan(az),srcY=-L*Math.tan(el);
+    var slant=Math.sqrt(srcX*srcX+srcY*srcY+L*L);
+    return {d:d,L:L,s:s,occD:occD,az:az,el:el,azim:azim,elev:elev,
+            srcX:srcX,srcY:srcY,slant:slant,
+            theta:2*Math.atan((d/2)/slant)*180/Math.PI,
+            pen:d*s/L, penLong:d*s*slant/(L*L),
+            umbraR:(occD/2)*(L+s)/L-(d*s/L)/2,
+            shift:s*Math.hypot(Math.tan(az),Math.tan(el))};
+  }
+  function renderShadow(){
+    var G=geom(),d=G.d,L=G.L,s=G.s,occD=G.occD;
+    var cv=$("shadowCanvas"),ctx=cv.getContext("2d"),W=cv.width,H=cv.height;
+    var img=ctx.createImageData(W,H),data=img.data;
+    var R=d/2,occR=occD/2,Zs=L+s;
+    var srcX=G.srcX,srcY=G.srcY;
     var shiftX=-srcX*(s/L),shiftY=-srcY*(s/L);
     var geomEdge=occR*Zs/L,penHalf=R*s/L,outerR=geomEdge+penHalf;
-    var shiftMag=Math.hypot(shiftX,shiftY);
-    var frameHalf=Math.max((shiftMag+outerR)*1.12,1);
+    var frameHalf=Math.max((Math.hypot(shiftX,shiftY)+outerR)*1.12,1);
     var scale=(Math.min(W,H)/2)/frameHalf;
+    /* la fuente se orienta hacia el sujeto: el disco vive en el plano normal a
+       la línea fuente→sujeto, no en el plano del fondo. */
+    var nx=-srcX/G.slant,ny=-srcY/G.slant,nz=L/G.slant;
+    var ux=1,uy=0,uz=0;
+    if(Math.abs(nx)>0.9){ux=0;uy=1;uz=0;}
+    var e1x=uy*nz-uz*ny,e1y=uz*nx-ux*nz,e1z=ux*ny-uy*nx;
+    var e1n=Math.sqrt(e1x*e1x+e1y*e1y+e1z*e1z)||1;
+    e1x/=e1n;e1y/=e1n;e1z/=e1n;
+    var e2x=ny*e1z-nz*e1y,e2y=nz*e1x-nx*e1z,e2z=nx*e1y-ny*e1x;
     var N=72,g=Math.PI*(3-Math.sqrt(5)),i;
-    var scx=new Float32Array(N),scy=new Float32Array(N);
-    for(i=0;i<N;i++){var r=R*Math.sqrt((i+0.5)/N),a=i*g;scx[i]=srcX+Math.cos(a)*r;scy[i]=srcY+Math.sin(a)*r;}
+    var scx=new Float32Array(N),scy=new Float32Array(N),scu=new Float32Array(N);
+    for(i=0;i<N;i++){
+      var r=R*Math.sqrt((i+0.5)/N),a=i*g,ca=Math.cos(a)*r,sa=Math.sin(a)*r;
+      var px3=srcX+ca*e1x+sa*e2x, py3=srcY+ca*e1y+sa*e2y, pz3=ca*e1z+sa*e2z;
+      scx[i]=px3;scy[i]=py3;
+      scu[i]=s/Math.max(Zs-pz3,1);
+    }
     var occR2=occR*occR,py,px,k;
     for(py=0;py<H;py++){
       var Ys=(py-H/2)/scale+shiftY;
       for(px=0;px<W;px++){
         var Xs=(px-W/2)/scale+shiftX,cnt=0;
-        for(k=0;k<N;k++){var Mx=Xs+u*(scx[k]-Xs),My=Ys+u*(scy[k]-Ys);if(Mx*Mx+My*My>=occR2)cnt++;}
+        for(k=0;k<N;k++){
+          var u=scu[k],Mx=Xs+u*(scx[k]-Xs),My=Ys+u*(scy[k]-Ys);
+          if(Mx*Mx+My*My>=occR2)cnt++;
+        }
         var b=0.07+0.93*(cnt/N),idx=(py*W+px)*4;
         data[idx]=238*b;data[idx+1]=230*b;data[idx+2]=210*b;data[idx+3]=255;
       }
@@ -506,17 +871,8 @@
     var oxp=(0-shiftX)*scale+W/2,oyp=(0-shiftY)*scale+H/2;
     ctx.save();ctx.setLineDash([3,3]);ctx.strokeStyle="rgba(159,140,255,0.85)";ctx.lineWidth=1.2;
     ctx.beginPath();ctx.arc(oxp,oyp,occR*scale,0,Math.PI*2);ctx.stroke();ctx.restore();
-    var slant=L/Math.max(Math.cos(az)*Math.cos(el),0.2);
-    var theta=2*Math.atan(R/slant)*180/Math.PI;
-    var pen=d*s/L,umbraR=geomEdge-pen/2,shift=s*Math.hypot(Math.tan(az),Math.tan(el));
-    $("st-theta").textContent=theta.toFixed(1);
-    $("st-theta-h").textContent=theta<5?t("hard"):theta<15?t("mid"):t("soft");
-    $("st-pen").textContent=pen.toFixed(1);
-    $("st-pen-h").textContent=(pen*10).toFixed(0)+t("transition");
-    $("st-umbra").textContent=umbraR>0?umbraR.toFixed(1):"0";
-    $("st-umbra-h").textContent=umbraR>0?t("fullShadow"):t("noUmbra");
-    $("st-shift").textContent=shift.toFixed(0);
     renderDiag(d,L,s,occD);
+    shadowReadouts();
   }
   function renderDiag(d,L,s,occD){
     var w=240,h=150,padL=16,padR=16,Zs=L+s,x0=padL,xScr=w-padR;
@@ -543,21 +899,82 @@
     g+='<text x="'+(xScr-28)+'" y="'+(h-4)+'" font-size="9" fill="#5b636f" font-family="monospace">'+t("dBackground")+'</text>';
     $("diag").innerHTML=g;
   }
+  function shadowReadouts(){
+    var G=geom(),th=G.theta,thObj=targetTheta();
+    var tanHalf=Math.tan(thObj/2*Math.PI/180);
+    /* el inverso se resuelve sobre la distancia real (oblicua), que es la que
+       fija θ, y se devuelve en la distancia axial que pide el deslizador. */
+    var dNeed=2*G.slant*tanHalf, LNeed=(G.d/(2*tanHalf))*(G.L/G.slant);
+    $("st-theta").textContent=th.toFixed(1);
+    $("st-theta-h").textContent=thetaTag(th);
+    $("st-pen").textContent=G.pen.toFixed(1);
+    $("st-pen-h").textContent=(G.pen*10).toFixed(0)+t("transition");
+    $("st-umbra").textContent=G.umbraR>0?G.umbraR.toFixed(1):"0";
+    $("st-umbra-h").textContent=G.umbraR>0?t("fullShadow"):t("noUmbra");
+    $("st-shift").textContent=G.shift.toFixed(0);
+    $("st-need-d-l").textContent=t("needDl");
+    $("st-need-d").textContent=dNeed.toFixed(0);
+    $("st-need-d-h").textContent=t("needDh");
+    $("st-need-l-l").textContent=t("needLl");
+    $("st-need-l").textContent=LNeed.toFixed(0);
+    $("st-need-l-h").textContent=LNeed>parseFloat($("r-L").max)?t("outOfReach"):(LNeed<60?t("tooClose"):t("needLh"));
+    modTable(G);
+    /* ---- veredicto ---- */
+    var warn=LNeed>parseFloat($("r-L").max)?t("vsInvFar"):(LNeed<60?t("vsInvNear"):"");
+    var umbra=G.umbraR>0?t("vsUmbraYes")(nf(G.umbraR,1)):t("vsUmbraNo");
+    var h="<h3>"+t("vsTitle")(patternName(G.azim,G.elev),nf(th,1),thetaTag(th))+"</h3>";
+    h+="<p>"+t("vsGeom")(nf(G.d,0),nf(G.L,0),nf(th,1),thetaTag(th))+" "+t("vsInv")(thObj,nf(LNeed,0),nf(dNeed,0),warn)+"</p>";
+    h+="<p>"+t("vsPen")(nf(G.pen,1),nf(G.penLong,1),nf(G.s,0),umbra)+" "+
+       (G.shift<=FRAMEHALF?t("vsFrameIn")(nf(G.shift,0)):t("vsFrameOut")(nf(G.shift,0)))+"</p>";
+    if(activeMod==="ceil"){
+      var b=bounceCalc();
+      h+="<p>"+t("vsBounce")(nf(b.d,0),nf(b.L2,0),nf(b.elev,0),nf(b.loss,1))+
+         (b.elev>55?t("vsBounceEye"):"")+"</p>";
+    }
+    $("v-shadow").innerHTML=h;
+  }
+  /* tabla comparativa de los ocho modificadores en las condiciones de ahora */
+  function modTable(G){
+    var iso=num("r-iso"),gn=num("r-gn"),D=num("r-ref");
+    var th="<tr><th>"+t("thMod")+"</th><th>"+t("thD")+" (cm)</th><th>"+t("thTheta")+"</th><th>"+
+           t("thPen")+" (cm)</th><th>"+t("thLoss")+"</th><th>"+t("thGn")+"</th><th>"+t("thF")+nf(D,2)+" m</th></tr>";
+    var rows="";
+    MODS.forEach(function(m){
+      var slant=Math.sqrt(G.srcX*G.srcX+G.srcY*G.srcY+G.L*G.L);
+      var thd=2*Math.atan((m.d/2)/slant)*180/Math.PI;
+      var pen=m.d*G.s/G.L;
+      var gnEff=gn*Math.sqrt(iso/100)*Math.pow(2,-m.loss/2);
+      rows+='<tr'+(m.k===activeMod?' class="sel"':'')+'><td>'+t(m.tk)+"</td><td>"+m.d+"</td><td>"+
+            nf(thd,1)+"° <small>"+thetaTag(thd)+"</small></td><td>"+nf(pen,1)+"</td><td>−"+nf(m.loss,1)+
+            " EV</td><td>"+nf(gnEff,1)+"</td><td>f/"+nf(gnEff/D,1)+"</td></tr>";
+    });
+    $("modthead").innerHTML=th;
+    $("modtbody").innerHTML=rows;
+    $("modnote").textContent=t("tblNote")(nf(G.L,0),nf(G.s,0),nf(D,2));
+  }
 
-  /* ---- caída ---- */
+  /* ---------- caída ---------- */
+  function metric(){var on=document.querySelector("#panel-falloff .segbtn.on");return on?on.dataset.metric:"f";}
   function renderFalloff(){
     var gn=num("r-gn"),iso=num("r-iso"),refD=num("r-ref"),bgExtra=num("r-bg"),loss=num("r-loss"),met=metric();
+    var Nw=APS[num("r-fap")],grp=num("r-grp"),marg=num("r-grpm");
     var gnEff=gn*Math.sqrt(iso/100)*Math.pow(2,-loss/2);
+    var reach=gnEff/Nw;
     var cv=$("falloffCanvas"),ctx=cv.getContext("2d"),W=cv.width,H=cv.height;
     ctx.clearRect(0,0,W,H);
     var padL=46,padR=14,padT=12,padB=34,x0=padL,x1=W-padR,y0=H-padB,y1=padT;
     var Dmin=0.5,Dmax=8,pts=[],D,v;
-    for(D=Dmin;D<=Dmax+1e-6;D+=0.1){v=met==="f"?gnEff/D:2*Math.log2(refD/D);pts.push([D,v]);}
+    for(D=Dmin;D<=Dmax+1e-6;D+=0.1){v=met==="f"?gnEff/D:2*L2(refD/D);pts.push([D,v]);}
     var vals=pts.map(function(p){return p[1];}),ymin,ymax;
     if(met==="f"){ymin=0;ymax=Math.max.apply(null,vals)*1.05;}
     else{ymin=Math.min.apply(null,vals);ymax=Math.max.apply(null,vals);var pdd=(ymax-ymin)*0.08||1;ymin-=pdd;ymax+=pdd;}
     function X(d){return x0+(d-Dmin)/(Dmax-Dmin)*(x1-x0);}
     function Yv(val){return y0+(val-ymin)/(ymax-ymin)*(y1-y0);}
+    /* banda que ocupa el grupo */
+    if(grp>0.05){
+      ctx.fillStyle="rgba(244,177,60,0.10)";
+      ctx.fillRect(X(refD),y1,Math.max(X(Math.min(refD+grp,Dmax))-X(refD),1),y0-y1);
+    }
     ctx.font="11px 'IBM Plex Mono', monospace";ctx.textAlign="center";
     for(var gx=1;gx<=8;gx++){var px=X(gx);ctx.strokeStyle="#222a35";ctx.beginPath();ctx.moveTo(px,y1);ctx.lineTo(px,y0);ctx.stroke();ctx.fillStyle="#878f9d";ctx.fillText(gx,px,y0+18);}
     ctx.fillStyle="#5b636f";ctx.fillText(t("axDist"),(x0+x1)/2,H-6);
@@ -567,113 +984,173 @@
     if(met==="ev"){ctx.strokeStyle="#2c3644";ctx.beginPath();ctx.moveTo(x0,Yv(0));ctx.lineTo(x1,Yv(0));ctx.stroke();}
     ctx.strokeStyle=met==="f"?"#3fcab0":"#ef6f53";ctx.lineWidth=2.2;ctx.beginPath();
     pts.forEach(function(p,i){var X1=X(p[0]),Y1=Yv(p[1]);if(i===0)ctx.moveTo(X1,Y1);else ctx.lineTo(X1,Y1);});ctx.stroke();
-    if(met==="f"){ctx.fillStyle="#f4b13c";ctx.beginPath();ctx.arc(X(refD),Yv(gnEff/refD),4,0,Math.PI*2);ctx.fill();}
-    var fRef=gnEff/refD,bgFall=2*Math.log2((refD+bgExtra)/refD);
+    if(met==="f"){
+      ctx.fillStyle="#f4b13c";ctx.beginPath();ctx.arc(X(refD),Yv(gnEff/refD),4,0,Math.PI*2);ctx.fill();
+      if(reach>=Dmin&&reach<=Dmax){
+        ctx.save();ctx.setLineDash([2,3]);ctx.strokeStyle="#9b8cff";
+        ctx.beginPath();ctx.moveTo(x0,Yv(Nw));ctx.lineTo(X(reach),Yv(Nw));ctx.lineTo(X(reach),y0);ctx.stroke();ctx.restore();
+      }
+    }
+    var fRef=gnEff/refD,bgFall=2*L2((refD+bgExtra)/refD);
+    var grpEV=grp>0?2*L2((refD+grp)/refD):0;
+    var dMin=grp>0?grp/(Math.pow(2,marg/2)-1):0;
     $("st-gneff").textContent=gnEff.toFixed(1);
     $("st-gneff-h").textContent=t("base")+gn+" · −"+loss.toFixed(1)+" EV · ISO"+iso;
     $("st-fref-l").textContent=t("apertureAt")+refD+t("metres");
     $("st-fref").textContent="f/"+fRef.toFixed(1);
     $("st-fref-h").textContent=t("standard")+nearestF(fRef);
+    $("st-reach-l").textContent=t("reachL")+Nw;
+    $("st-reach").textContent=reach.toFixed(1);
+    $("st-reach-h").textContent=t("base")+"GN "+gnEff.toFixed(1);
     $("st-bg").innerHTML="−"+bgFall.toFixed(1)+'<span class="u">EV</span>';
     $("st-bg-h").textContent=t("bgAt")+bgExtra+t("metres");
+    $("st-grp").textContent=grp>0?"−"+grpEV.toFixed(2):"0";
+    $("st-grp-h").textContent=t("grpSpread")+" · Δ "+grp+" m";
+    $("st-grpd").textContent=grp>0?dMin.toFixed(1):"—";
+    $("st-grpd-h").textContent=grp>0?(t("grpMin")+marg.toFixed(1)+" EV"):t("grpOk");
+    var h="<h3>"+t("vfTitle")(nf(fRef,1),nf(refD,2),nf(reach,1),Nw)+"</h3>";
+    h+="<p>"+t("vfMain")(gn,iso,nf(loss,1),nf(gnEff,1),nf(refD,2),nf(fRef,1),Nw,nf(reach,1))+"</p>";
+    h+="<p>"+t("vfBg")(nf(bgExtra,2),nf(bgFall,1))+"</p>";
+    h+="<p>"+(grp>0?(t("vfGrp")(nf(grp,1),nf(grpEV,2),nf(marg,1),nf(dMin,1),nf(refD,2))+
+        (refD>=dMin?t("vfGrpOk"):t("vfGrpNo"))):t("vfGrpZero"))+"</p>";
+    $("v-falloff").innerHTML=h;
   }
 
-  /* ---- vencer al sol ---- */
+  /* ---------- vencer al sol ---------- */
   function renderSun(){
-    var ev=num("r-amb"),iso=num("r-siso"),N=APS[num("r-ap")],leaf=parseFloat($("r-sync").value),
+    var ev=num("r-amb"),iso=SISO[num("r-siso")],Nw=APS[num("r-ap")],nd=num("r-nd"),
         D=num("r-sd"),gn=num("r-sgn"),loss=num("r-sloss");
-    var tn=N*N/(Math.pow(2,ev)*iso/100); // tiempo de ambiente neutro (s)
-    var FP=200;
-    function amb(den){return -Math.log2(den*tn);} // EV del ambiente respecto a neutro
-    var ambLeaf=amb(leaf),ambFP=amb(FP),adv=Math.log2(leaf/FP);
-    var gnAvail=gn*Math.sqrt(iso/100)*Math.pow(2,-loss/2);
-    var head=2*Math.log2(gnAvail/(N*D));
+    var c=camObj(),bodyMax=c.leaf?LEAFMAX:c.sync;
+    var den=Math.min(parseFloat($("r-sync").value)||bodyMax,bodyMax);
+    var ref=refFP();
+    var tn=Nw*Nw/(Math.pow(2,ev-nd)*iso/100);
+    var t5=t5cur();
+    function amb(dn){return -L2(dn*tn);}
+    var gnEff=gn*Math.sqrt(iso/100)*Math.pow(2,-loss/2)*Math.pow(2,-nd/2);
+    function fracAt(dn){return pulse(t5,1,1/dn).frac;}
+    function head(dn){return 2*L2(gnEff*Math.sqrt(fracAt(dn))/(Nw*D));}
+    var frac=fracAt(den),gnUse=gnEff*Math.sqrt(frac),hd=head(den);
+    var adv=L2(LEAFMAX/ref.sync);
+    /* velocidad más rápida, dentro de lo que el cuerpo permite, con margen ≥ 0 */
+    var vmax=0,i;
+    for(i=0;i<SYNCS.length;i++){ if(SYNCS[i]<=bodyMax&&head(SYNCS[i])>=0) vmax=SYNCS[i]; }
 
     var cv=$("sunCanvas"),ctx=cv.getContext("2d"),W=cv.width,H=cv.height;
     ctx.clearRect(0,0,W,H);
     var padL=44,padR=14,padT=14,padB=34,x0=padL,x1=W-padR,y0=H-padB,y1=padT;
     var DENS=[60,125,250,500,1000,2000,4000,8000];
-    var lx0=Math.log2(50),lx1=Math.log2(9000);
-    function X(den){return x0+(Math.log2(den)-lx0)/(lx1-lx0)*(x1-x0);}
-    var yv=DENS.map(amb).concat([ambLeaf,ambFP,0]);
+    var lx0=L2(50),lx1=L2(9000);
+    function X(dn){return x0+(L2(dn)-lx0)/(lx1-lx0)*(x1-x0);}
+    var yv=DENS.map(amb).concat(DENS.map(function(dn){return Math.max(-8,Math.min(8,head(dn)));}))
+             .concat([amb(den),amb(ref.sync),hd,0]);
     var ymin=Math.min.apply(null,yv),ymax=Math.max.apply(null,yv),pd=(ymax-ymin)*0.12||1;ymin-=pd;ymax+=pd;
     function Y(v){return y0+(v-ymin)/(ymax-ymin)*(y1-y0);}
     ctx.font="10px 'IBM Plex Mono', monospace";ctx.textAlign="center";
-    DENS.forEach(function(den){var px=X(den);ctx.strokeStyle="#222a35";ctx.beginPath();ctx.moveTo(px,y1);ctx.lineTo(px,y0);ctx.stroke();ctx.fillStyle="#878f9d";ctx.fillText("1/"+den,px,y0+15);});
+    DENS.forEach(function(dn){var px=X(dn);ctx.strokeStyle="#222a35";ctx.beginPath();ctx.moveTo(px,y1);ctx.lineTo(px,y0);ctx.stroke();ctx.fillStyle="#878f9d";ctx.fillText("1/"+dn,px,y0+15);});
     ctx.fillStyle="#5b636f";ctx.fillText(t("axShutter"),(x0+x1)/2,H-4);
     ctx.textAlign="right";
     for(var gy=0;gy<=4;gy++){var v2=ymin+(ymax-ymin)*gy/4,py=Y(v2);ctx.strokeStyle="#1a212b";ctx.beginPath();ctx.moveTo(x0,py);ctx.lineTo(x1,py);ctx.stroke();ctx.fillStyle="#878f9d";ctx.fillText(v2.toFixed(1),x0-6,py+4);}
-    // región extra del central
-    if(leaf>FP){ctx.fillStyle="rgba(63,202,176,0.10)";ctx.fillRect(X(FP),y1,X(leaf)-X(FP),y0-y1);}
-    // ambiente neutro
+    /* terreno que solo alcanza el obturador central */
+    if(LEAFMAX>ref.sync){ctx.fillStyle="rgba(63,202,176,0.10)";ctx.fillRect(X(ref.sync),y1,X(LEAFMAX)-X(ref.sync),y0-y1);}
     ctx.save();ctx.setLineDash([2,3]);ctx.strokeStyle="#3a4452";ctx.beginPath();ctx.moveTo(x0,Y(0));ctx.lineTo(x1,Y(0));ctx.stroke();ctx.restore();
     ctx.fillStyle="#5b636f";ctx.textAlign="left";ctx.fillText(t("neutralAmb"),x0+4,Y(0)-4);
-    // refs FP y central
     ctx.save();ctx.setLineDash([4,3]);
-    ctx.strokeStyle="#ef6f53";ctx.beginPath();ctx.moveTo(X(FP),y1);ctx.lineTo(X(FP),y0);ctx.stroke();
-    ctx.strokeStyle="#3fcab0";ctx.beginPath();ctx.moveTo(X(leaf),y1);ctx.lineTo(X(leaf),y0);ctx.stroke();
+    ctx.strokeStyle="#ef6f53";ctx.beginPath();ctx.moveTo(X(ref.sync),y1);ctx.lineTo(X(ref.sync),y0);ctx.stroke();
+    ctx.strokeStyle="#3fcab0";ctx.beginPath();ctx.moveTo(X(den),y1);ctx.lineTo(X(den),y0);ctx.stroke();
     ctx.restore();
-    // curva
-    ctx.strokeStyle="#f4b13c";ctx.lineWidth=2.2;ctx.beginPath();var first=true;
-    for(var den=55;den<=9000;den*=1.04){var px=X(den),py=Y(amb(den));if(first){ctx.moveTo(px,py);first=false;}else ctx.lineTo(px,py);}
+    var dn2;
+    ctx.strokeStyle="#f4b13c";ctx.lineWidth=2.2;ctx.beginPath();
+    for(dn2=55;dn2<=9000;dn2*=1.04){var pxa=X(dn2),pya=Y(amb(dn2));if(dn2===55)ctx.moveTo(pxa,pya);else ctx.lineTo(pxa,pya);}
     ctx.stroke();
-    ctx.fillStyle="#ef6f53";ctx.beginPath();ctx.arc(X(FP),Y(ambFP),4,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle="#3fcab0";ctx.beginPath();ctx.arc(X(leaf),Y(ambLeaf),4,0,Math.PI*2);ctx.fill();
+    /* margen de flash con el recorte del pulso */
+    ctx.strokeStyle="#3fcab0";ctx.lineWidth=2.2;ctx.beginPath();
+    for(dn2=55;dn2<=9000;dn2*=1.04){var pxb=X(dn2),pyb=Y(Math.max(ymin,Math.min(ymax,head(dn2))));if(dn2===55)ctx.moveTo(pxb,pyb);else ctx.lineTo(pxb,pyb);}
+    ctx.stroke();
+    ctx.fillStyle="#ef6f53";ctx.beginPath();ctx.arc(X(ref.sync),Y(amb(ref.sync)),4,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle="#3fcab0";ctx.beginPath();ctx.arc(X(den),Y(amb(den)),4,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle="#f4b13c";ctx.beginPath();ctx.arc(X(den),Y(Math.max(ymin,Math.min(ymax,hd))),4,0,Math.PI*2);ctx.fill();
+    ctx.textAlign="left";ctx.fillStyle="#f4b13c";ctx.fillText(t("lgAmb"),x0+4,y1+10);
+    ctx.fillStyle="#3fcab0";ctx.fillText(t("lgHead"),x0+4,y1+22);
 
-    $("st-ambleaf").innerHTML=evStr(ambLeaf)+'<span class="u">EV</span>';
-    $("st-ambleaf-h").textContent=ambLeaf<0?t("skyUnder"):t("brightAmb");
-    $("st-ambfp").innerHTML=evStr(ambFP)+'<span class="u">EV</span>';
-    $("st-ambfp-h").textContent=ambFP<0?t("xsyncLimited"):t("noDarkening");
+    $("st-ambleaf-l").textContent=t("ambAt")+den;
+    $("st-ambleaf").innerHTML=evStr(amb(den))+'<span class="u">EV</span>';
+    $("st-ambleaf-h").textContent=amb(den)<0?t("skyUnder"):t("brightAmb");
+    $("st-ambfp-l").textContent=t("ambXsync")+ref.sync;
+    $("st-ambfp").innerHTML=evStr(amb(ref.sync))+'<span class="u">EV</span>';
+    $("st-ambfp-h").textContent=amb(ref.sync)<0?t("xsyncLimited"):t("noDarkening");
     $("st-adv").innerHTML="+"+adv.toFixed(1)+'<span class="u">EV</span>';
-    $("st-head").innerHTML=evStr(head)+'<span class="u">EV</span>';
-    $("st-head-h").textContent=head>=0?t("enoughPower"):t("shortBy")+Math.abs(head).toFixed(1)+t("evUnit");
+    $("st-adv-h").textContent="1/"+LEAFMAX+" "+t("advOver")+"1/"+ref.sync;
+    $("st-head").innerHTML=evStr(hd)+'<span class="u">EV</span>';
+    $("st-head-h").textContent=hd>=0?t("enoughPower"):t("shortBy")+Math.abs(hd).toFixed(1)+t("evUnit");
+    $("st-gnuse-l").textContent=t("gnAt")+den;
+    $("st-gnuse").textContent=gnUse.toFixed(1);
+    $("st-gnuse-h").textContent=t("pulseCap")+(frac*100).toFixed(0)+" %";
+    $("st-vmax").textContent=vmax?("1/"+vmax):"—";
+    $("st-vmax-h").textContent=vmax?(vmax>=bodyMax?t("capped"):t("enoughPower")):t("noPower");
+
+    var verd=hd>=1?t("vuOk"):(hd>=0?t("vuTight"):t("vuNo"));
+    var h="<h3>"+t("vuTitle")(camName(c),Nw,den,verd)+"</h3>";
+    h+="<p>"+t("vuAmb")(den,nf(amb(den),1),camName(c),bodyMax)+"</p>";
+    h+="<p>"+t("vuFlash")(nf(gnEff,1),nf(frac*100,0),nf(gnUse,1),nf(hd,1))+" "+
+       (vmax?t("vuMax")(vmax):t("vuMaxNo"))+"</p>";
+    h+="<p>"+t("vuRoutes")(Nw,c.isoMin,nf(nd,1))+
+       (Nw>8?" "+t("vuDiff")+' <a href="sensor.html#difraccion">'+t("vuDiffLink")+"</a>.":"")+"</p>";
+    $("v-sun").innerHTML=h;
   }
 
-  /* ---- balance ambiente / flash ---- */
+  /* ---------- balance ambiente / flash ---------- */
   var BSH=[{t:1/2000,l:"1/2000"},{t:1/1000,l:"1/1000"},{t:1/500,l:"1/500"},{t:1/250,l:"1/250"},{t:1/200,l:"1/200"},{t:1/125,l:"1/125"},{t:1/60,l:"1/60"},{t:1/30,l:"1/30"},{t:1/15,l:"1/15"},{t:1/8,l:"1/8"}];
   var BAP=[2,2.8,4,5.6,8,11,16,22];
   var BIS=[100,200,400,800,1600,3200,6400];
   var BPW=[{p:1,l:"1/1"},{p:0.5,l:"1/2"},{p:0.25,l:"1/4"},{p:0.125,l:"1/8"},{p:0.0625,l:"1/16"},{p:0.03125,l:"1/32"},{p:0.015625,l:"1/64"},{p:0.0078125,l:"1/128"}];
-  var L2=Math.log2;
   function bSeg(g){var on=document.querySelector("#panel-balance .seg[data-g='"+g+"'] .segbtn.on");return on?on.dataset.v:"";}
   function bColor(ev){if(ev>1)return"#ef6f53";if(ev<-1)return"#9b8cff";if(Math.abs(ev)<=0.5)return"#3fcab0";return"#f4b13c";}
   function bBar(id,ev){var e=Math.max(-4,Math.min(4,ev)),left=50+Math.min(e,0)/4*50,w=Math.abs(e)/4*50,f=$(id);f.style.left=left+"%";f.style.width=w+"%";f.style.background=bColor(ev);}
-  function bFlag(t,c){return '<span class="bflag" style="color:'+c+';border-color:'+c+';background:'+c+'22">'+t+'</span>';}
+  function bFlag(txt,c){return '<span class="bflag" style="color:'+c+';border-color:'+c+';background:'+c+'22">'+txt+'</span>';}
 
   function renderBalance(){
-    var E=num("r-bamb"),shO=BSH[num("r-bsh")],N=BAP[num("r-bap")],S=BIS[num("r-bis")],
+    var E=num("r-bamb"),shO=BSH[num("r-bsh")],Nw=BAP[num("r-bap")],S=BIS[num("r-bis")],
         fpO=BPW[num("r-bfp")],D=num("r-bd"),gn=num("r-bgn"),loss=num("r-bloss");
-    var mode=bSeg("mode"),shut=bSeg("shut");
-    $("v-bamb").textContent=E;$("v-bsh").textContent=shO.l;$("v-bap").textContent="f/"+N;
+    var mode=bSeg("mode"),shut=bSeg("shut"),cam=camObj(),xs=cam.sync;
+    var vel=num("r-bvel"),foc=FOCS[num("r-bfoc")];
+    $("v-bamb").textContent=E;$("v-bsh").textContent=shO.l;$("v-bap").textContent="f/"+Nw;
     $("v-bis").textContent=S;$("v-bd").textContent=D;$("v-bgn").textContent=gn;$("v-bloss").textContent=loss;
+    $("v-bvel").textContent=vel;$("v-bfoc").textContent=foc;
 
-    var ambEV=L2(S/100)+L2(shO.t)-2*L2(N)+E;
+    var ambEV=L2(S/100)+L2(shO.t)-2*L2(Nw)+E;
     var gnBase=gn*Math.sqrt(S/100)*Math.pow(2,-loss/2);
     var powFrac,flashEV;
     if(mode==="manual"){
       $("r-bfp").disabled=false;$("b-powrow").style.opacity="1";
       powFrac=fpO.p;$("v-bfp").textContent=fpO.l;
-      flashEV=2*L2(gnBase*Math.sqrt(powFrac)/(N*D));
+      flashEV=2*L2(gnBase*Math.sqrt(powFrac)/(Nw*D));
     } else {
       $("r-bfp").disabled=true;$("b-powrow").style.opacity="0.45";
       var rem=1-Math.pow(2,ambEV);
       if(rem<=0.0009){powFrac=1/128;flashEV=-99;}
       else{
-        var sq=(N*D/gnBase)*Math.pow(2,L2(rem)/2);
+        var sq=(Nw*D/gnBase)*Math.pow(2,L2(rem)/2);
         powFrac=Math.max(1/128,Math.min(1,sq*sq));
-        flashEV=2*L2(gnBase*Math.sqrt(powFrac)/(N*D));
+        flashEV=2*L2(gnBase*Math.sqrt(powFrac)/(Nw*D));
       }
       $("v-bfp").textContent="1/"+Math.round(1/powFrac);
     }
 
-    var durFull=1/parseFloat($("r-bdur").value);
-    var applyClip=(shut==="leaf")||(shut==="fp"&&shO.t>=1/200);
-    var tPulse=durFull*Math.pow(Math.max(powFrac,1e-4),0.70);
-    var capt=applyClip?Math.min(1,shO.t/tPulse):1;
+    var t5=t5cur();
+    var inSync=(shut==="leaf")||(shut==="fp"&&shO.t>=1/xs);
+    var pu=pulse(t5,powFrac,shO.t);
+    var capt=inSync?pu.frac:1;
     var clipLoss=-L2(capt);
     var flashEVc=(flashEV<=-90)?flashEV:(flashEV+L2(capt));
     var subjLin=Math.pow(2,ambEV)+(flashEVc<=-90?0:Math.pow(2,flashEVc));
     var subjEV=L2(subjLin),bgEV=ambEV;
+
+    /* congelación: arrastre del ambiente frente al del destello */
+    var tBurn=Math.min(pu.tEff,shO.t);
+    var mag=foc/(D*1000);
+    var ambMM=vel*shO.t*1000,flMM=vel*tBurn*1000;
+    var ambPx=ambMM*mag/(cam.pitch/1000),flPx=flMM*mag/(cam.pitch/1000);
+    var ghost=(ambPx>3)&&(ambEV>subjEV-2.5);
 
     $("b-subv").textContent=evStr(subjEV)+" EV";$("b-bgv").textContent=evStr(bgEV)+" EV";
     bBar("b-subfill",subjEV);bBar("b-bgfill",bgEV);
@@ -687,21 +1164,67 @@
     $("b-st-ratio-h").textContent=(rel<=-90)?t("ambientOnly"):(rel>=0?t("flashLeads"):t("ambientLeads"));
     $("b-st-pow").textContent=(flashEV<=-90)?t("minPow"):$("v-bfp").textContent;
     $("b-st-pow-h").textContent=mode==="ttl"?t("setByTtl"):t("setManual");
+    $("b-st-pulse").textContent=(pu.tEff*1000).toFixed(2);
+    $("b-st-pulse-h").textContent=t("pulseCap")+(capt*100).toFixed(0)+" %";
+    $("b-st-blur").textContent=ambPx.toFixed(0);
+    $("b-st-blur-h").textContent=ghost?t("ghost"):t("frozen");
 
     var fl=[];
-    if(shut==="fp"&&shO.t<1/200) fl.push(bFlag(t("fAboveSync"),"#ef6f53"));
-    if(clipLoss>0.1) fl.push(bFlag(t("fClipA")+clipLoss.toFixed(1)+t("fClipB")+(tPulse*1000).toFixed(2)+t("fClipC")+(shO.t*1000).toFixed(2)+t("fClipD"),clipLoss>1?"#ef6f53":"#f4b13c"));
+    if(shut==="fp"&&shO.t<1/xs) fl.push(bFlag(t("fAboveSync")(xs),"#ef6f53"));
+    if(clipLoss>0.1) fl.push(bFlag(t("fClip")(clipLoss.toFixed(1),(pu.tEff*1000).toFixed(2),(shO.t*1000).toFixed(2)),clipLoss>1?"#ef6f53":"#f4b13c"));
     if(subjEV>1.2) fl.push(bFlag(t("fSubjBlown"),"#ef6f53"));
     if(bgEV>1.2) fl.push(bFlag(t("fBgBlown"),"#ef6f53"));
     if(mode==="ttl"&&powFrac>=1&&subjEV<-0.4) fl.push(bFlag(t("fNoPower"),"#f4b13c"));
     if(mode==="manual"&&subjEV<-1.2) fl.push(bFlag(t("fSubjDark"),"#9b8cff"));
+    if(ghost) fl.push(bFlag(t("fGhost")(ambPx.toFixed(0)),"#9b8cff"));
     $("b-flags").innerHTML=fl.join("");
+
+    var h="<h3>"+t("vbTitle")(nf(subjEV,1),nf(bgEV,1))+"</h3>";
+    h+="<p>"+t("vbSub")(nf(subjEV,1),$("v-bfp").textContent)+" "+
+       (bgEV<-0.5?t("vbBgLow")(nf(bgEV,1)):bgEV>0.5?t("vbBgHigh")(nf(bgEV,1)):t("vbBgOk")(nf(bgEV,1)))+"</p>";
+    if(clipLoss>0.1) h+="<p>"+t("vbClip")(nf(clipLoss,1),nf(pu.tEff*1000,2),nf(shO.t*1000,2))+"</p>";
+    h+="<p>"+t("vbMove")(nf(ambMM,1),nf(flMM,2),nf(ambPx,0))+(ghost?t("vbGhost"):t("vbClean"))+"</p>";
+    $("v-balance").innerHTML=h;
   }
 
-  [["r-bamb","v-bamb"],["r-bd","v-bd"],["r-bgn","v-bgn"],["r-bloss","v-bloss"]]
-    .forEach(function(p){$(p[0]).addEventListener("input",function(){$(p[1]).textContent=$(p[0]).value;renderBalance();});});
-  ["r-bsh","r-bap","r-bis","r-bfp"].forEach(function(i){$(i).addEventListener("input",renderBalance);});
-  $("r-bdur").addEventListener("change",renderBalance);
+  /* ---------- cableado ---------- */
+  ["r-d","r-L","r-s","r-occ","r-az","r-el"].forEach(function(id){
+    $(id).addEventListener("input",function(){labels();renderShadow();});
+  });
+  ["r-bch","r-bcf","r-bcd","r-bca","r-bcalb"].forEach(function(id){
+    $(id).addEventListener("input",function(){bounceApply();labels();renderAll();});
+  });
+  ["r-fap","r-grp","r-grpm","r-bg"].forEach(function(id){
+    $(id).addEventListener("input",function(){labels();renderFalloff();});
+  });
+  ["r-amb","r-ap","r-nd"].forEach(function(id){
+    $(id).addEventListener("input",function(){labels();renderSun();});
+  });
+  ["r-bamb","r-bsh","r-bap","r-bfp","r-bvel","r-bfoc"].forEach(function(id){
+    $(id).addEventListener("input",function(){labels();renderBalance();});
+  });
+  $("r-sync").addEventListener("change",renderSun);
+  $("r-bdur").addEventListener("change",function(){renderSun();renderBalance();});
+  /* mandos compartidos: escriben en las tres pestañas */
+  ["r-gn","r-sgn","r-bgn"].forEach(function(id){
+    $(id).addEventListener("input",function(){setGN(num(id));renderShared();});
+  });
+  ["r-loss","r-sloss","r-bloss"].forEach(function(id){
+    $(id).addEventListener("input",function(){setLoss(num(id));renderShared();});
+  });
+  ["r-ref","r-sd","r-bd"].forEach(function(id){
+    $(id).addEventListener("input",function(){setDist(num(id));renderShared();});
+  });
+  $("r-iso").addEventListener("input",function(){setISO(num("r-iso"));renderShared();});
+  $("r-siso").addEventListener("input",function(){setISO(SISO[num("r-siso")]);renderShared();});
+  $("r-bis").addEventListener("input",function(){setISO(BIS[num("r-bis")]);renderShared();});
+
+  document.querySelectorAll("#panel-falloff .segbtn").forEach(function(b){
+    b.onclick=function(){document.querySelectorAll("#panel-falloff .segbtn").forEach(function(x){x.classList.remove("on");});b.classList.add("on");renderFalloff();};
+  });
+  document.querySelectorAll("#seg-theta .segbtn").forEach(function(b){
+    b.onclick=function(){document.querySelectorAll("#seg-theta .segbtn").forEach(function(x){x.classList.remove("on");});b.classList.add("on");shadowReadouts();};
+  });
   document.querySelectorAll("#panel-balance .seg").forEach(function(seg){
     seg.querySelectorAll(".segbtn").forEach(function(b){
       b.onclick=function(){seg.querySelectorAll(".segbtn").forEach(function(x){x.classList.remove("on");});b.classList.add("on");renderBalance();};
@@ -709,17 +1232,17 @@
   });
 
   function accent(id,c){var el=$(id);if(el)el.style.accentColor=c;}
-  ["r-d"].forEach(function(i){accent(i,"#f4b13c");});
-  ["r-L","r-s","r-iso","r-ref","r-gn","r-siso","r-sgn"].forEach(function(i){accent(i,"#3fcab0");});
-  ["r-az","r-el","r-bg","r-sd"].forEach(function(i){accent(i,"#9b8cff");});
-  ["r-loss","r-sloss"].forEach(function(i){accent(i,"#ef6f53");});
-  ["r-occ","r-amb","r-ap"].forEach(function(i){accent(i,"#878f9d");});
-  ["r-bsh"].forEach(function(i){accent(i,"#f4b13c");});
-  ["r-bis","r-bgn","r-bfp","r-bd"].forEach(function(i){accent(i,"#3fcab0");});
-  ["r-bamb","r-bap"].forEach(function(i){accent(i,"#9b8cff");});
-  ["r-bloss"].forEach(function(i){accent(i,"#ef6f53");});
+  ["r-d","r-bsh","r-bvel"].forEach(function(i){accent(i,"#f4b13c");});
+  ["r-L","r-s","r-iso","r-ref","r-gn","r-siso","r-sgn","r-grp","r-bis","r-bgn","r-bfp","r-bd",
+   "r-bch","r-bcf","r-bcd"].forEach(function(i){accent(i,"#3fcab0");});
+  ["r-az","r-el","r-bg","r-sd","r-bamb","r-bap","r-bca"].forEach(function(i){accent(i,"#9b8cff");});
+  ["r-loss","r-sloss","r-bloss","r-nd","r-bcalb"].forEach(function(i){accent(i,"#ef6f53");});
+  ["r-occ","r-amb","r-ap","r-fap","r-grpm","r-bfoc"].forEach(function(i){accent(i,"#878f9d");});
 
-  renderShadow();renderFalloff();renderSun();renderBalance();
+  buildSync();
+  $("bounce-box").hidden=(activeMod!=="ceil");
+  labels();
+  renderAll();
 
   /* Repinta lo que depende de t() al cambiar de idioma. Es seguro llamarlo antes
      de que la aplicación esté lista: el guardián corta la ejecución. */
@@ -727,7 +1250,7 @@
   window.onLangChange=function(){
     if(!ready) return;
     relabelChips();
-    renderShadow();renderFalloff();renderSun();renderBalance();
+    renderAll();
   };
 })();
 </script>

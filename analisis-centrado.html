@@ -138,6 +138,18 @@
   code{background:#dfe7eb; padding:1.5px 5px; font-size:12px}
   .note{font-family:var(--sans); font-size:12px; color:var(--ink2); max-width:70ch; margin:10px 0 0}
   .warn{color:var(--g1)}
+  /* bloque de veredicto, del mismo tipo que el de la ficha de difracción */
+  .verdict{background:var(--panel); border:1px solid var(--rule); border-left:3px solid var(--g1);
+           padding:15px 18px; margin:2px 0 0}
+  .verdict p{font-family:var(--sans); font-size:14px; color:var(--ink); max-width:78ch; margin:0 0 9px}
+  .verdict p:last-child{margin-bottom:0}
+  .verdict p.note{font-size:12px; color:var(--ink2)}
+  .verdict b{color:var(--ink)}
+  /* método y supuestos */
+  dl.method{font-family:var(--sans); font-size:13px; color:var(--ink2); max-width:78ch; margin:6px 0 0}
+  dl.method dt{font-weight:600; color:var(--ink); margin-top:12px; font-size:12.5px}
+  dl.method dd{margin:3px 0 0}
+  .miniram{display:block; max-width:300px; max-height:200px; margin-top:6px; border:1px solid var(--rule2)}
   @media (max-width:900px){
     #wrap{grid-template-columns:1fr}
     #side{position:static; max-height:none; border-right:0; border-bottom:1px solid var(--rule2)}
@@ -211,6 +223,11 @@
      Load CSV. Required columns: <code>group</code>, <code>x_norm</code>,
      <code>y_norm</code>, <code>r_norm</code>.</p>
   <p style="margin:0 auto"><code>python subject_center.py ./M5 ./M4 --group-by top --csv medidas.csv</code></p>
+  <p style="margin:16px auto 0"><button id="demo" class="ghost"><span data-lang="es">Ver un ejemplo</span><span data-lang="en">See an example</span></button></p>
+  <p class="note" style="margin:8px auto 0;max-width:56ch" data-lang="es">El ejemplo es un conjunto sintético de 600 fotogramas generado en el navegador,
+     con tres grupos y una deriva plantada. Sirve para recorrer la herramienta sin haber procesado nada; los números no son de nadie.</p>
+  <p class="note" style="margin:8px auto 0;max-width:56ch" data-lang="en">The example is a synthetic set of 600 frames generated in the browser,
+     with three groups and a planted drift. It is there to walk through the tool without having processed anything; the numbers belong to nobody.</p>
 </div>
 
 <div id="wrap" hidden>
@@ -218,6 +235,16 @@
     <fieldset class="fset">
       <legend data-lang="es">Grupos</legend>
       <legend data-lang="en">Groups</legend>
+      <div class="row"><span class="muted" data-lang="es">agrupar por</span><span class="muted" data-lang="en">group by</span>
+        <select id="groupBy" class="sel" style="max-width:130px">
+          <option value="group" data-es="columna group" data-en="group column">columna group</option>
+          <option value="model" data-es="cuerpo (model)" data-en="body (model)">cuerpo (model)</option>
+          <option value="lens" data-es="objetivo (lens)" data-en="lens">objetivo (lens)</option>
+          <option value="orientation" data-es="orientación" data-en="orientation">orientación</option>
+          <option value="year" data-es="año" data-en="year">año</option>
+          <option value="focalband" data-es="banda de focal" data-en="focal-length band">banda de focal</option>
+          <option value="apband" data-es="banda de diafragma" data-en="aperture band">banda de diafragma</option>
+        </select></div>
       <div class="row" style="gap:6px">
         <button id="gAll" class="ghost" style="padding:4px 8px;font-size:10px"><span data-lang="es">Todos</span><span data-lang="en">All</span></button>
         <button id="gNone" class="ghost" style="padding:4px 8px;font-size:10px"><span data-lang="es">Ninguno</span><span data-lang="en">None</span></button>
@@ -271,12 +298,48 @@
       <label class="chk"><input type="checkbox" id="tThirds" checked><span data-lang="es">tercios</span><span data-lang="en">rule of thirds</span></label>
       <label class="chk"><input type="checkbox" id="tArcs" checked><span data-lang="es">campo de medida M5 (8 mm)</span><span data-lang="en">M5 metering field (8 mm)</span></label>
       <label class="chk"><input type="checkbox" id="tPatch" checked><span data-lang="es">parche del telémetro</span><span data-lang="en">rangefinder patch</span></label>
-      <div class="row"><span class="muted" data-lang="es">ancho del parche</span><span class="muted" data-lang="en">patch width</span>
+      <div class="row"><span class="muted" data-lang="es">marco</span><span class="muted" data-lang="en">frame</span>
+        <select id="patchFrame" class="sel" style="max-width:110px">
+          <option value="28">28 mm</option><option value="35">35 mm</option>
+          <option value="50" selected>50 mm</option><option value="75">75 mm</option>
+          <option value="90">90 mm</option><option value="135">135 mm</option>
+          <option value="custom" data-es="a medida" data-en="custom">a medida</option>
+        </select></div>
+      <div class="row"><span class="muted" data-lang="es">magnificador</span><span class="muted" data-lang="en">magnifier</span>
+        <select id="patchMag" class="sel" style="max-width:80px">
+          <option value="1">1×</option><option value="1.25">1,25×</option><option value="1.4">1,4×</option>
+        </select></div>
+      <div class="row"><span class="muted" data-lang="es">semiancho del parche</span><span class="muted" data-lang="en">patch half-width</span>
         <output id="patchOut" class="num">0.20</output></div>
-      <input id="patch" type="range" min="0.05" max="0.5" step="0.01" value="0.2">
+      <input id="patch" type="range" min="0.05" max="0.5" step="0.01" value="0.2" disabled
+        data-title-es="Sólo con el marco «a medida»" data-title-en="Only with the “custom” frame">
       <label class="chk"><input type="checkbox" id="tDens"><span data-lang="es">densidad por celdas</span><span data-lang="en">cell density</span></label>
       <label class="chk"><input type="checkbox" id="tEll" checked><span data-lang="es">elipse del 50 %</span><span data-lang="en">50 % ellipse</span></label>
       <label class="chk"><input type="checkbox" id="tPts" checked><span data-lang="es">fotogramas</span><span data-lang="en">frames</span></label>
+      <div class="row" style="margin-top:8px"><span class="muted" data-lang="es">recorte</span><span class="muted" data-lang="en">crop</span>
+        <select id="cropAspect" class="sel" style="max-width:120px">
+          <option value="0" data-es="3:2 nativo" data-en="3:2 native">3:2 nativo</option>
+          <option value="1.3333">4:3</option><option value="1.25">5:4</option>
+          <option value="1">1:1</option><option value="1.7778">16:9</option>
+          <option value="2.7083">65:24</option>
+        </select></div>
+      <div class="row"><span class="muted" data-lang="es">anclaje</span><span class="muted" data-lang="en">anchor</span>
+        <select id="cropAnchor" class="sel" style="max-width:120px">
+          <option value="c" data-es="centro del fotograma" data-en="centre of the frame">centro del fotograma</option>
+          <option value="m" data-es="mediana del grupo" data-en="median of the group">mediana del grupo</option>
+        </select></div>
+    </fieldset>
+
+    <fieldset class="fset">
+      <legend data-lang="es">Miniaturas</legend>
+      <legend data-lang="en">Thumbnails</legend>
+      <label class="btn ghost" for="thumbs" style="display:inline-block"><span data-lang="es">Indexar imágenes</span><span data-lang="en">Index images</span></label>
+      <input id="thumbs" type="file" accept="image/*" multiple hidden>
+      <div id="thumbsInfo" class="muted" style="font-size:11px;margin-top:6px"></div>
+      <p class="note" style="margin-top:6px" data-lang="es">Las miniaturas o las superposiciones de <code>--overlay</code> se emparejan por
+        nombre de fichero y aparecen en el globo del vidrio. No se suben a ninguna parte: se leen del disco y se sueltan al salir.</p>
+      <p class="note" style="margin-top:6px" data-lang="en">Thumbnails or the <code>--overlay</code> renderings are matched by file name
+        and appear in the ground-glass tooltip. Nothing is uploaded: they are read from disk and released on leaving.</p>
     </fieldset>
 
     <fieldset class="fset">
@@ -284,8 +347,14 @@
       <legend data-lang="en">Criterion</legend>
       <div class="row"><span class="muted" data-lang="es">centrada si r &lt;</span><span class="muted" data-lang="en">centred if r &lt;</span>
         <input id="thr" type="number" step="0.01" value="0.15" style="width:70px"></div>
+      <div class="row"><span class="muted" data-lang="es">margen justo si m &lt;</span><span class="muted" data-lang="en">tight margin if m &lt;</span>
+        <input id="mThr" type="number" step="0.01" value="0.10" style="width:70px"></div>
       <div class="row"><span class="muted" data-lang="es">remuestreos</span><span class="muted" data-lang="en">resamples</span>
         <input id="iters" type="number" step="1000" value="10000" style="width:90px"></div>
+      <p class="note" style="margin-top:8px" data-lang="es">r &lt; 0,15 no es una ley: sobre un fotograma de 36×24 son 3,2 mm
+        desde el centro, algo más ceñido que el campo de medida de 8 mm del M5, que cae en r = 0,185. Cámbialo y el veredicto se recalcula.</p>
+      <p class="note" style="margin-top:8px" data-lang="en">r &lt; 0.15 is not a law: on a 36×24 frame it is 3.2 mm from the
+        centre, slightly tighter than the M5's 8 mm metering field, which falls at r = 0.185. Change it and the verdict is recomputed.</p>
     </fieldset>
   </aside>
 
@@ -306,6 +375,12 @@
     </nav>
 
     <div id="tab-encuadre" role="tabpanel">
+
+    <section class="panel">
+      <div class="head"><h2 data-lang="es">Veredicto de encuadre</h2><h2 data-lang="en">Framing verdict</h2>
+        <div id="vAxisEnc" class="muted" style="font-size:11px"></div></div>
+      <div class="verdict" id="vEncuadre"></div>
+    </section>
 
     <section class="panel">
       <div class="head">
@@ -346,6 +421,34 @@
     </section>
 
     <section class="panel">
+      <div class="grid2">
+        <div>
+          <div class="head"><h2 data-lang="es">Rosa de colocación</h2><h2 data-lang="en">Placement rose</h2>
+            <div id="rayleigh" class="muted" style="font-size:11px"></div></div>
+          <svg id="svPlaceRose" viewBox="0 0 420 340" role="img"
+            data-aria-es="Histograma circular de la dirección de colocación"
+            data-aria-en="Circular histogram of the placement direction"></svg>
+        </div>
+        <div>
+          <div class="head"><h2 data-lang="es">Margen al borde más próximo</h2><h2 data-lang="en">Margin to the nearest edge</h2></div>
+          <svg id="svMargin" viewBox="0 0 420 340" role="img"
+            data-aria-es="Distribución acumulada del margen al borde"
+            data-aria-en="Cumulative distribution of the margin to the edge"></svg>
+        </div>
+      </div>
+      <p class="note" data-lang="es">r dice cuánto te alejas del centro, no hacia dónde ni con cuánta holgura. La rosa reparte
+        las direcciones φ = atan2(y, x·aspecto) en doce sectores y pondera cada fotograma por su r, de modo que uno casi centrado
+        apenas empuja. La prueba de Rayleigh contrasta la hipótesis de direcciones repartidas al azar; con p &lt; 0,05 hay manía
+        direccional. A la derecha, m = mín(1−|x|, 1−|y|) es la distancia al borde más próximo en semiejes: 1 es el centro exacto y
+        0 el borde. La línea vertical marca el umbral de margen justo del panel Criterio.</p>
+      <p class="note" data-lang="en">r says how far you go from the centre, not in which direction nor with how much room. The rose
+        spreads the directions φ = atan2(y, x·aspect) over twelve sectors and weights each frame by its r, so a nearly centred one
+        barely pushes. The Rayleigh test contrasts the hypothesis of directions scattered at random; with p &lt; 0.05 there is a
+        directional habit. On the right, m = min(1−|x|, 1−|y|) is the distance to the nearest edge in semi-axes: 1 is the exact
+        centre and 0 the edge. The vertical line marks the tight-margin threshold from the Criterion panel.</p>
+    </section>
+
+    <section class="panel">
       <div class="head"><h2 data-lang="es">Estadística por grupo</h2><h2 data-lang="en">Statistics by group</h2></div>
       <table id="tGroups"><thead></thead><tbody></tbody></table>
       <p class="note" data-lang="es">IC95 de la mediana por bootstrap percentil. r se mide en
@@ -376,6 +479,161 @@
         stratify by focal length: if with one body you mostly used a 35 and with the
         other a 90, what you are measuring is the angle of view, not the framing habit.
         Compare the medians within each focal-length band.</p>
+    </section>
+    <section class="panel">
+      <div class="head"><h2 data-lang="es">Ángulo de reencuadre frente al que tolera el foco</h2>
+        <h2 data-lang="en">Recomposing angle against what focus tolerates</h2>
+        <div class="toggles muted">
+          <label class="chk"><span data-lang="es">marco</span><span data-lang="en">frame</span>
+            <select id="alFoc" class="sel" style="max-width:120px">
+              <option value="auto" data-es="mediana" data-en="median">mediana</option>
+              <option value="28">28 mm</option><option value="35">35 mm</option>
+              <option value="50" selected>50 mm</option><option value="75">75 mm</option>
+              <option value="90">90 mm</option><option value="135">135 mm</option>
+            </select></label>
+          <label class="chk"><span data-lang="es">círculo c</span><span data-lang="en">circle c</span>
+            <select id="alC" class="sel" style="max-width:130px">
+              <option value="0.00752" data-es="2 px (7,52 µm)" data-en="2 px (7.52 µm)">2 px (7,52 µm)</option>
+              <option value="0.03">30 µm</option>
+            </select></label>
+          <label class="chk"><span data-lang="es">distancia</span><span data-lang="en">distance</span>
+            <output id="alDOut" class="num">2,0 m</output></label>
+        </div>
+      </div>
+      <input id="alD" type="range" min="0.7" max="20" step="0.1" value="2" style="max-width:340px">
+      <div class="verdict" id="alVerdict" style="margin:12px 0"></div>
+      <svg id="svAlpha" viewBox="0 0 860 320" role="img"
+        data-aria-es="Distribución acumulada del ángulo de reencuadre"
+        data-aria-en="Cumulative distribution of the recomposing angle"></svg>
+      <p class="note" data-lang="es">Para cada fotograma con focal, α = atan(hipot(x·tan θh, y·tan θv)) con θh = atan(18/f) y
+        θv = atan(12/f): el ángulo que hubo que girar la cámara si el foco se tomó en el eje y luego se recompuso. La línea
+        vertical es α<sub>máx</sub> = arccos(d<sub>cerca</sub>/d), el giro que la profundidad de campo todavía perdona, con
+        d<sub>cerca</sub> = d(H−f)/(H+d−2f) y H = f²/(N·c)+f, tomando N de la mediana de diafragma de la selección. Supone
+        fotograma 3:2 sin recortar, foco tomado en el eje y giro sobre el nodo de entrada. El modelo de error de coseno, la zona
+        ciega del telémetro y las tasas de acierto por diafragma están en <a href="telemetro-m11.html">telemetro-m11.html</a>;
+        la profundidad de campo y la hiperfocal, en <a href="programa-camara.html">programa-camara.html</a>. Aquí sólo está lo
+        que ninguna de las dos puede tener: la distribución de α que de verdad usas.</p>
+      <p class="note" data-lang="en">For every frame with a focal length, α = atan(hypot(x·tan θh, y·tan θv)) with θh = atan(18/f)
+        and θv = atan(12/f): the angle the camera had to be turned through if focus was taken on axis and the shot then recomposed.
+        The vertical line is α<sub>max</sub> = arccos(d<sub>near</sub>/d), the turn depth of field still forgives, with
+        d<sub>near</sub> = d(H−f)/(H+d−2f) and H = f²/(N·c)+f, taking N from the median aperture of the selection. It assumes an
+        uncropped 3:2 frame, focus taken on axis and rotation about the entrance node. The cosine-error model, the rangefinder
+        blind zone and the hit rates by aperture live in <a href="telemetro-m11.html">telemetro-m11.html</a>; depth of field and
+        the hyperfocal distance, in <a href="programa-camara.html">programa-camara.html</a>. What is here is the one thing neither
+        of them can hold: the distribution of α you actually use.</p>
+    </section>
+
+    <section class="panel">
+      <div class="head"><h2 data-lang="es">Recorte: qué sobrevive y cuántos megapíxeles quedan</h2>
+        <h2 data-lang="en">Cropping: what survives and how many megapixels are left</h2></div>
+      <div class="verdict" id="cropVerdict"></div>
+      <table id="tCrop" style="margin-top:16px"><thead></thead><tbody></tbody></table>
+      <div class="head" style="margin:22px 0 8px"><h2 data-lang="es">Marcos de la Q3 43</h2><h2 data-lang="en">Q3 43 frames</h2></div>
+      <table id="tCropQ"><thead></thead><tbody></tbody></table>
+      <p class="note" data-lang="es">El recorte se dibuja sobre el vidrio. Con anclaje en el centro del fotograma es el recorte que
+        haría la cámara; con anclaje en la mediana del grupo es el recorte que harías tú si persiguieras tu propio hábito, desplazado
+        hasta donde cabe sin salirse. «Dentro» es la fracción de centroides que sigue en el rectángulo; «margen ≥ umbral» exige además
+        que el sujeto conserve, medido sobre el recorte, al menos el margen del panel Criterio. Los marcos de 60, 75 y 90 mm de la
+        Q3 43 son recortes centrados de factor 43/60, 43/75 y 43/90 sobre el fotograma. Los megapíxeles salen de width·height del
+        CSV, o del lado largo del cuerpo cuando el CSV no los trae. La cadena se para aquí: el tamaño de copia y la distancia de
+        observación están en <a href="sensor-al-papel.html">sensor-al-papel.html</a>, y los datos de sensor en
+        <a href="leica-sensores.html">leica-sensores.html</a>.</p>
+      <p class="note" data-lang="en">The crop is drawn on the ground glass. Anchored at the centre of the frame it is the crop the
+        camera would make; anchored at the median of the group it is the crop you would make if you followed your own habit, shifted
+        as far as it fits without leaving the frame. “Inside” is the fraction of centroids still in the rectangle; “margin ≥ threshold”
+        also demands that the subject keep, measured on the crop, at least the margin from the Criterion panel. The Q3 43's 60, 75 and
+        90 mm frames are centred crops of factor 43/60, 43/75 and 43/90 over the frame. Megapixels come from width·height in the CSV,
+        or from the body's long side when the CSV does not carry them. The chain stops here: print size and viewing distance are in
+        <a href="sensor-al-papel.html">sensor-al-papel.html</a>, and sensor data in
+        <a href="leica-sensores.html">leica-sensores.html</a>.</p>
+    </section>
+
+    <section class="panel">
+      <div class="head"><h2 data-lang="es">Método y supuestos</h2><h2 data-lang="en">Method and assumptions</h2></div>
+      <dl class="method" data-lang="es">
+        <dt>Qué es «el sujeto»</dt>
+        <dd>El máximo del mapa de saliencia, que mezcla 0,65 de nitidez local y 0,35 de contraste local sobre una rejilla de 48
+          celdas por lado. Se toma la componente conexa por encima del nivel 0,5 y, si esa componente ocupa más del 35 % del
+          fotograma, se sube el nivel hasta que baje de ahí. El centroide de esa componente, ponderado por saliencia, es lo que
+          la página llama sujeto. No es reconocimiento de objetos: no sabe si hay una cara.</dd>
+        <dt>Qué es la confianza</dt>
+        <dd>1 − (radio de giro del blob / radio de giro de una distribución uniforme). Vale 0 cuando el mapa está plano —el
+          estimador no ha encontrado nada— y tiende a 1 cuando el sujeto es puntual. El filtro por defecto en 0,30 descarta los
+          fotogramas en los que «el sujeto» es en realidad toda la escena. Con paisajes o texturas uniformes lo normal es que casi
+          todo caiga por debajo, y eso es información, no un fallo.</dd>
+        <dt>Por qué r va en semidiagonales</dt>
+        <dd>r = hipot(x·a, y)/hipot(a, 1) con a = ancho/alto. Así r = 0 es el centro exacto y r = 1 la esquina, en cualquier
+          relación de aspecto. Sin la corrección por a, un mismo desplazamiento hacia el lado corto pesaría más que hacia el largo.
+          r no es una distancia en milímetros: para pasarla al fotograma de 36×24 hay que multiplicar por la semidiagonal, 21,63 mm.</dd>
+        <dt>Qué normaliza x e y, y por qué mezclar orientaciones deforma la lectura</dt>
+        <dd>x = (cx − W/2)/(W/2) e y = (H/2 − cy)/(H/2): cada eje se normaliza a su propio semieje. En un vertical, x = 0,5
+          son 6 mm sobre el eje corto; en un horizontal, 9 mm sobre el largo. El vidrio dibuja un único rectángulo con la relación
+          de aspecto mediana de la selección, así que si mezclas orientaciones estás superponiendo dos sistemas de coordenadas.
+          Filtra por orientación, o agrupa por orientación en el panel de grupos, antes de sacar conclusiones finas.</dd>
+        <dt>Qué se hereda del EXIF y qué se infiere del nombre</dt>
+        <dd>Del EXIF salen fabricante, modelo, objetivo, focal, focal equivalente, diafragma y fecha de toma. Cuando falta la
+          fecha, el analizador puede inferirla del nombre del fichero con <code>--infer-date</code>, y entonces la deriva temporal
+          descansa en cómo nombras tus carpetas. La columna <code>group</code> la fija el analizador, no la cámara: agrupar por
+          cuerpo, objetivo, orientación, año o banda de focal se hace ya aquí, en el navegador.</dd>
+        <dt>Escaneos de película</dt>
+        <dd>Un escaneo destruye la dominante de color del original: base naranja, corrección del escáner y perfil de salida se
+          mezclan sin remedio. En un conjunto de escaneos, tono y textura siguen siendo comparables entre sí; temperatura de color,
+          Duv, rosa de tonos y tono partido no significan nada. La pestaña de color avisa de cuántos fotogramas traen CCT.</dd>
+        <dt>Lo que no está aquí</dt>
+        <dd><a href="telemetro-m11.html">telemetro-m11.html</a>, si el telémetro acierta: zona ciega, error de coseno,
+          desplazamiento de foco y tasas de acierto por diafragma; también el paralaje de los marcos, que allí se declara problema
+          de encuadre y aquí se mide como ángulo de reencuadre.
+          <a href="programa-camara.html">programa-camara.html</a>, qué diafragma y qué velocidad elegir: profundidad de campo,
+          hiperfocal y trepidación.
+          <a href="sensor.html#difraccion">sensor.html#difraccion</a>, hasta dónde puedes cerrar antes de que el disco de Airy
+          se coma la resolución. Esta ficha no toca difracción.
+          <a href="sensor-al-papel.html">sensor-al-papel.html</a>, de los megapíxeles al ancho de copia y a la distancia de
+          observación. <a href="leica-sensores.html">leica-sensores.html</a>, los datos de cada sensor.
+          <a href="equipo-real.html">equipo-real.html</a>, el hábito de equipo: qué diafragma, qué ISO, qué velocidad y a qué
+          hora disparas de verdad. <a href="manual-medidas.html">manual-medidas.html</a>, la referencia completa de cada medida.</dd>
+      </dl>
+      <dl class="method" data-lang="en">
+        <dt>What “the subject” is</dt>
+        <dd>The maximum of the saliency map, which mixes 0.65 of local sharpness and 0.35 of local contrast over a grid of 48
+          cells per side. The connected component above level 0.5 is taken and, if that component covers more than 35 % of the
+          frame, the level is raised until it drops below that. The saliency-weighted centroid of that component is what the page
+          calls the subject. It is not object recognition: it does not know whether there is a face.</dd>
+        <dt>What confidence is</dt>
+        <dd>1 − (radius of gyration of the blob / radius of gyration of a uniform distribution). It is 0 when the map is flat —the
+          estimator has found nothing— and tends to 1 when the subject is point-like. The default filter at 0.30 discards frames in
+          which “the subject” is really the whole scene. With landscapes or uniform textures it is normal for almost everything to
+          fall below it, and that is information, not a failure.</dd>
+        <dt>Why r is measured in semi-diagonals</dt>
+        <dd>r = hypot(x·a, y)/hypot(a, 1) with a = width/height. So r = 0 is the exact centre and r = 1 the corner, at any aspect
+          ratio. Without the correction for a, the same displacement towards the short side would weigh more than towards the long
+          one. r is not a distance in millimetres: to bring it to a 36×24 frame you multiply by the semi-diagonal, 21.63 mm.</dd>
+        <dt>What x and y are normalised to, and why mixing orientations distorts the reading</dt>
+        <dd>x = (cx − W/2)/(W/2) and y = (H/2 − cy)/(H/2): each axis is normalised to its own semi-axis. In a portrait frame,
+          x = 0.5 is 6 mm along the short axis; in a landscape one, 9 mm along the long axis. The ground glass draws a single
+          rectangle with the median aspect ratio of the selection, so mixing orientations superimposes two coordinate systems.
+          Filter by orientation, or group by orientation in the groups panel, before drawing fine conclusions.</dd>
+        <dt>What comes from EXIF and what is inferred from the file name</dt>
+        <dd>EXIF gives make, model, lens, focal length, equivalent focal length, aperture and capture date. When the date is
+          missing, the analyser can infer it from the file name with <code>--infer-date</code>, and then the temporal drift rests on
+          how you name your folders. The <code>group</code> column is set by the analyser, not by the camera: grouping by body,
+          lens, orientation, year or focal-length band is done here, in the browser.</dd>
+        <dt>Film scans</dt>
+        <dd>A scan destroys the colour cast of the original: orange base, scanner correction and output profile mix beyond repair.
+          In a set of scans, tone and texture remain comparable with one another; colour temperature, Duv, the hue rose and split
+          toning mean nothing. The colour tab reports how many frames carry a CCT.</dd>
+        <dt>What is not here</dt>
+        <dd><a href="telemetro-m11.html">telemetro-m11.html</a>, whether the rangefinder gets it right: blind zone, cosine error,
+          focus shift and hit rates by aperture; also frameline parallax, declared there a framing problem and measured here as a
+          recomposing angle.
+          <a href="programa-camara.html">programa-camara.html</a>, which aperture and which speed to choose: depth of field,
+          hyperfocal distance and camera shake.
+          <a href="sensor.html#difraccion">sensor.html#difraccion</a>, how far you can stop down before the Airy disc eats the
+          resolution. This page does not touch diffraction.
+          <a href="sensor-al-papel.html">sensor-al-papel.html</a>, from megapixels to print width and viewing distance.
+          <a href="leica-sensores.html">leica-sensores.html</a>, the data of each sensor.
+          <a href="equipo-real.html">equipo-real.html</a>, the equipment habit: which aperture, which ISO, which speed and at what
+          hour you actually shoot. <a href="manual-medidas.html">manual-medidas.html</a>, the full reference of every measurement.</dd>
+      </dl>
     </section>
     </div><!-- /encuadre -->
 
@@ -795,6 +1053,63 @@ const T={
     exportName:"seleccion_centrado.csv",
     // unidades
     uStops:"diafragmas", uLevels:"niveles",
+    // ---- veredicto de encuadre ----
+    veNeed:"Hacen falta al menos 20 fotogramas en la selección para leer nada.",
+    vHCent:"Centrado.", vC1:"La mediana de r es ", vC2:" (IC95 ",
+    vC3:") en semidiagonales: ", vC4:". El ",
+    vC5:" de los fotogramas queda por debajo de ",
+    vCent0:"el sujeto va prácticamente en el centro",
+    vCent1:"descentras de forma moderada",
+    vCent2:"el sujeto vive en la periferia del cuadro",
+    vHBias:"Sesgo direccional.", vB1:"Tiendes a colocar ", vBAnd:" y ", vB2:": ",
+    vBNone:"Ningún sesgo apreciable: los intervalos del 95 % de x y de y cruzan el cero. ",
+    dirRight:"a la derecha", dirLeft:"a la izquierda",
+    dirUp:"arriba", dirDown:"abajo",
+    vHDisc:"Disciplina.", vD1:"La MAD de r es ", vD2:" frente a ",
+    vD3:" de una colocación al azar sobre el mismo rectángulo: ",
+    vDisc0:"la nube está claramente más apretada que el azar, así que hay hábito",
+    vDisc1:"la nube está algo más apretada que el azar; el hábito es débil",
+    vDisc2:"la nube no se distingue de una colocación al azar",
+    vHMarg:"Márgenes.", vM1:"El percentil 5 del margen al borde más próximo es ",
+    vM2:": en el 5 % de los fotogramas el sujeto queda a menos del ",
+    vM3:" del semieje. ",
+    vMarg0:"El sujeto roza el borde con frecuencia.",
+    vMarg1:"Queda aire suficiente en casi todos los fotogramas.",
+    vMarg2:"Trabajas con mucho margen: el sujeto casi nunca se acerca al borde.",
+    vHPatch:"Telémetro.", vP1:"Con el marco de ", vP2:" mm",
+    vP3:" y magnificador ×", vP3b:" sin magnificador", vP4:", el ",
+    vP5:" de los sujetos cae dentro del parche; el ",
+    vP6:" restante exigió enfocar y recomponer.",
+    vNote:"No hay una colocación correcta: el veredicto describe el hábito medido, no lo corrige.",
+    vMixOr:"La selección mezcla orientaciones: x e y están normalizados al semieje de cada fotograma, así que un vertical y un horizontal comparten coordenadas con significados distintos.",
+    // ---- rosa de colocación y margen ----
+    rsDirYes:"dirección dominante hacia ", rsDirNo:"sin dirección dominante",
+    rsR:"R̄", rsP:"p", rsNoDir:"ningún fotograma descentrado",
+    mLab:"margen al borde m", mAxisF:"F(m)",
+    dirE:"derecha", dirN:"arriba", dirW:"izquierda", dirS:"abajo",
+    // ---- ángulo de reencuadre ----
+    alAxis:"ángulo de reencuadre α (°)", alMax:"α máx",
+    alNoFocal:"el CSV no trae focal: α no se puede calcular",
+    avA:"A ", avB:" mm f/", avC:" y ", avD:" m, el foco aguanta hasta ",
+    avE:"° de reencuadre, equivalente a r = ", avF:" en la diagonal. El ",
+    avG:" de tus fotogramas pasa de ahí.",
+    avMed:"mediana de la selección",
+    // ---- recorte ----
+    thInCrop:"dentro", thKeepM:"margen ≥ umbral", thMpxLeft:"Mpx restantes",
+    thLongSide:"lado largo (px)", thCropName:"recorte",
+    cvA:"Si recortas a ", cvB:", el ",
+    cvC:" de los fotogramas conserva el sujeto dentro y te quedan ",
+    cvD:" Mpx de mediana.", cvNone:"sin fotogramas en la selección",
+    cvAnchorC:"centro del fotograma", cvAnchorM:"mediana del grupo",
+    cvNative:"Con el fotograma nativo no se recorta nada: elige una proporción para ver qué sobrevive. La tabla de la Q3 43 sí está calculada siempre.",
+    // ---- agrupación ----
+    gbYear:"año", gbFocal:"banda de focal", gbAp:"banda de diafragma",
+    gbNo:"sin dato",
+    // ---- conjunto de ejemplo ----
+    demoWarn:"datos de ejemplo, no son tuyos",
+    demoRep:"AVISO: conjunto de ejemplo sintético; estos números no son los de tu archivo.",
+    // ---- miniaturas ----
+    thumbsN:" imágenes indexadas", thumbsNone:"ninguna imagen indexada",
   },
   en:{
     noGroup:"no group", noData:"no data", group:"group", n:"n",
@@ -898,6 +1213,63 @@ const T={
     approxFrame:"≈ frame ",
     exportName:"subject_placement_selection.csv",
     uStops:"stops", uLevels:"levels",
+    // ---- framing verdict ----
+    veNeed:"At least 20 frames are needed in the selection before anything can be read.",
+    vHCent:"Centring.", vC1:"The median of r is ", vC2:" (95 % CI ",
+    vC3:") in semi-diagonals: ", vC4:". ",
+    vC5:" of the frames fall below ",
+    vCent0:"the subject sits essentially at the centre",
+    vCent1:"you go moderately off-centre",
+    vCent2:"the subject lives at the periphery of the frame",
+    vHBias:"Directional bias.", vB1:"You tend to place the subject ", vBAnd:" and ", vB2:": ",
+    vBNone:"No appreciable bias: the 95 % intervals of x and of y both straddle zero. ",
+    dirRight:"to the right", dirLeft:"to the left",
+    dirUp:"high", dirDown:"low",
+    vHDisc:"Discipline.", vD1:"The MAD of r is ", vD2:" against ",
+    vD3:" for a random placement over the same rectangle: ",
+    vDisc0:"the cloud is clearly tighter than chance, so there is a habit",
+    vDisc1:"the cloud is slightly tighter than chance; the habit is weak",
+    vDisc2:"the cloud is indistinguishable from random placement",
+    vHMarg:"Margins.", vM1:"The 5th percentile of the margin to the nearest edge is ",
+    vM2:": in 5 % of the frames the subject sits closer than ",
+    vM3:" of the semi-axis. ",
+    vMarg0:"The subject grazes the edge often.",
+    vMarg1:"There is enough air in almost every frame.",
+    vMarg2:"You work with plenty of margin: the subject hardly ever approaches the edge.",
+    vHPatch:"Rangefinder.", vP1:"With the ", vP2:" mm frame",
+    vP3:" and the ×", vP3b:" and no magnifier", vP4:", ",
+    vP5:" of the subjects fall inside the patch; the remaining ",
+    vP6:" required focusing and recomposing.",
+    vNote:"There is no correct placement: the verdict describes the measured habit, it does not correct it.",
+    vMixOr:"The selection mixes orientations: x and y are normalised to the semi-axis of each frame, so a portrait and a landscape share coordinates with different meanings.",
+    // ---- placement rose and margin ----
+    rsDirYes:"dominant direction towards ", rsDirNo:"no dominant direction",
+    rsR:"R̄", rsP:"p", rsNoDir:"no off-centre frame",
+    mLab:"margin to the edge m", mAxisF:"F(m)",
+    dirE:"right", dirN:"up", dirW:"left", dirS:"down",
+    // ---- recomposing angle ----
+    alAxis:"recomposing angle α (°)", alMax:"α max",
+    alNoFocal:"the CSV carries no focal length: α cannot be computed",
+    avA:"At ", avB:" mm f/", avC:" and ", avD:" m, focus tolerates up to ",
+    avE:"° of recomposing, equivalent to r = ", avF:" along the diagonal. ",
+    avG:" of your frames go beyond that.",
+    avMed:"median of the selection",
+    // ---- cropping ----
+    thInCrop:"inside", thKeepM:"margin ≥ threshold", thMpxLeft:"Mpx left",
+    thLongSide:"long side (px)", thCropName:"crop",
+    cvA:"If you crop to ", cvB:", ",
+    cvC:" of the frames keep the subject inside and you are left with ",
+    cvD:" Mpx on median.", cvNone:"no frames in the selection",
+    cvAnchorC:"centre of the frame", cvAnchorM:"median of the group",
+    cvNative:"With the native frame nothing is cropped: pick a ratio to see what survives. The Q3 43 table is always computed.",
+    // ---- grouping ----
+    gbYear:"year", gbFocal:"focal-length band", gbAp:"aperture band",
+    gbNo:"no value",
+    // ---- sample set ----
+    demoWarn:"sample data, not yours",
+    demoRep:"NOTICE: synthetic sample set; these numbers are not those of your archive.",
+    // ---- thumbnails ----
+    thumbsN:" images indexed", thumbsNone:"no image indexed",
   }
 };
 function t(k){ const d=T[LANG()]||T.es; return d[k]!==undefined?d[k]:(T.es[k]!==undefined?T.es[k]:k); }
@@ -1149,7 +1521,7 @@ function robustPCA(rows,keys){
 
 /* ---------- sesiones, ruptura y rectitud ---------- */
 function sessionKeyOf(r,ax){
-  return (r.group||"sin grupo")+"|"+(ax==="t"?isoDay(r.t):Math.floor(((r.seq||1)-1)/36));
+  return (groupKeyOf(r))+"|"+(ax==="t"?isoDay(r.t):Math.floor(((r.seq||1)-1)/36));
 }
 function sessionsOf(rows,ax,keys){
   // Los fotogramas de una misma sesion comparten escena, luz y pelicula:
@@ -1167,7 +1539,7 @@ function sessionsOf(rows,ax,keys){
     m.get(k).push(r);
   }
   const out=[...m.values()].map(fr=>{
-    const s2={group:fr[0].group||"sin grupo",frames:fr.length};
+    const s2={group:groupKeyOf(fr[0]),frames:fr.length};
     s2[ax]=medianOf(fr.map(r=>r[ax]));
     for(const key of keys){
       const v=fr.map(r=>r[key]).filter(Number.isFinite);
@@ -1289,6 +1661,8 @@ const SENTIDO={
               en:["subject with more micro-detail","subject with less micro-detail"]},
   r_norm:{es:["sujeto más descentrado","sujeto más centrado"],
           en:["subject placed further off-centre","subject placed more centrally"]},
+  m_edge:{es:["sujeto más lejos del borde","sujeto más pegado al borde"],
+          en:["subject further from the edge","subject closer to the edge"]},
   area_frac:{es:["sujeto más grande en el cuadro","sujeto más pequeño en el cuadro"],
              en:["larger subject in the frame","smaller subject in the frame"]},
   spread_norm:{es:["sujeto peor definido","sujeto más compacto"],
@@ -1302,7 +1676,7 @@ const frase=(k,i)=>{const e=SENTIDO[k]; return (e[LANG()]||e.es)[i];};
 const UNITS={key_stops:"@stops",dr_stops:"@stops",lstar_median:"L*",
   contrast_sd:"L*",tone_entropy:"bits",lab_a:"a*",lab_b:"b*",chroma_mean:"C*",
   chroma_p95:"C*",cct_k:"K",grain_levels:"@levels",focal35_mm:"mm",
-  hue_conc:"",split_dab:"Δa*b*"};
+  hue_conc:"",split_dab:"Δa*b*",alpha_deg:"°",place_dir_deg:"°"};
 /* Las unidades con arroba se traducen; el resto son símbolos y no cambian. */
 const unitOf=k=>{const u=UNITS[k];
   if(u===undefined) return undefined;
@@ -1471,10 +1845,11 @@ function drawVeredicto(rows,F){
 function buildReport(rows,F){
   const L=[];
   const qSmall=LANG()==="en"?"<0.0001":"<0,0001";
+  if(S.demo) L.push(t("demoRep"));
   L.push(t("repTitle")+new Date().toISOString().slice(0,10));
   const ts=rows.map(r=>r.t).filter(Number.isFinite);
   L.push(t("repCorpusA")+F.nFrames+t("repCorpusB")+F.sess.length+t("repCorpusC")
-    +new Set(rows.map(r=>r.group||"sin grupo")).size+t("repCorpusD")
+    +new Set(rows.map(r=>groupKeyOf(r))).size+t("repCorpusD")
     +(ts.length?t("repFromTo")+isoDay(Math.min(...ts))+t("repTo")+isoDay(Math.max(...ts))+"."
       :t("repNoDates")));
   L.push(t("repCritA")+F.list.length+t("repCritB"));
@@ -1754,7 +2129,7 @@ function evoData(rows,key){
   const out=[];
   for(const gr of S.groups){
     if(!S.on.has(gr)) continue;
-    const p=rows.filter(r=>(r.group||"sin grupo")===gr
+    const p=rows.filter(r=>(groupKeyOf(r))===gr
       &&Number.isFinite(r[key])&&Number.isFinite(r[ax]));
     if(p.length) out.push([gr,p.map(r=>r[ax]),p.map(r=>r[key])]);
   }
@@ -1891,6 +2266,9 @@ const COLS={
   r_norm:{es:"r (descentramiento)",en:"r (off-centre distance)"},
   x_norm:{es:"x del sujeto",en:"subject x"},
   y_norm:{es:"y del sujeto",en:"subject y"},
+  m_edge:{es:"margen al borde",en:"margin to the edge"},
+  place_dir_deg:{es:"dirección de colocación (°)",en:"placement direction (°)"},
+  alpha_deg:{es:"ángulo de reencuadre α (°)",en:"recomposing angle α (°)"},
   spread_norm:{es:"dispersión del sujeto",en:"subject dispersion"},
   area_frac:{es:"área del sujeto",en:"subject area"},
   confidence:{es:"confianza",en:"confidence"},
@@ -1992,7 +2370,7 @@ function scatterXY(id,rows,kx,ky,opts={}){
     g+=`<path d="M${x0} ${Y(opts.hline)}H${x1}" stroke="var(--rule2)" stroke-dasharray="3 3"/>`;
   for(const gr of S.groups){
     if(!S.on.has(gr)) continue;
-    const pts=rows.filter(r=>(r.group||"sin grupo")===gr
+    const pts=rows.filter(r=>(groupKeyOf(r))===gr
       &&Number.isFinite(r[kx])&&Number.isFinite(r[ky]));
     if(!pts.length) continue;
     let d="";
@@ -2029,7 +2407,7 @@ function ecdfOf(id,rows,key){
     [0,.25,.5,.75,1].map(v=>({p:Y(v),l:v.toFixed(2)})),label(key),"F");
   for(const gr of S.groups){
     if(!S.on.has(gr)) continue;
-    const v=rows.filter(r=>(r.group||"sin grupo")===gr).map(r=>r[key])
+    const v=rows.filter(r=>(groupKeyOf(r))===gr).map(r=>r[key])
       .filter(Number.isFinite).sort((a,b)=>a-b);
     if(!v.length) continue;
     let d=`M${Xc(v[0]).toFixed(1)} ${Y(0)}`;
@@ -2163,7 +2541,7 @@ function drawAB(rows){
   g+=tag(cx+R*0.66,cy-8,"C* "+Math.round(lim*2/3),"middle");
   for(const gr of S.groups){
     if(!S.on.has(gr)) continue;
-    const pts=rows.filter(r=>(r.group||"sin grupo")===gr
+    const pts=rows.filter(r=>(groupKeyOf(r))===gr
       &&Number.isFinite(r.lab_a)&&Number.isFinite(r.lab_b));
     if(!pts.length) continue;
     let d="";
@@ -2205,7 +2583,7 @@ function drawRose(rows){
   for(const gr of S.groups){
     if(!S.on.has(gr)) continue;
     const arr=new Array(nb).fill(0);
-    rows.filter(r=>(r.group||"sin grupo")===gr).forEach(r=>{
+    rows.filter(r=>(groupKeyOf(r))===gr).forEach(r=>{
       if(!Number.isFinite(r.hue_mean_deg)) return;
       const w=Number.isFinite(r.hue_conc)?r.hue_conc:1;
       arr[Math.min(nb-1,Math.floor(((r.hue_mean_deg%360)+360)%360/(360/nb)))]+=w;
@@ -2367,17 +2745,25 @@ function fillSelectors(){
 }
 
 /* ---------- estado ---------- */
-const S={rows:[],groups:[],on:new Set(),orients:[],onOr:new Set(),sel:[],aspect:1.5};
+const S={rows:[],groups:[],on:new Set(),orients:[],onOr:new Set(),sel:[],aspect:1.5,
+         groupBy:"group",demo:false};
 
 function ingest(text){
   const {head,data}=parseCSV(text);
   const need=["group","x_norm","y_norm","r_norm"];
   const miss=need.filter(c=>!head.includes(c));
   if(miss.length){ alert(t("csvMissing")+miss.join(", ")+t("csvMake")); return; }
+  S.demo=false;
+  adopt(data);
+}
+/* Toda la ingestión posterior al análisis del CSV, compartida con el conjunto
+   de ejemplo, que llega ya como objetos y no como texto. */
+function adopt(data){
   S.rows=data.filter(r=>!r.error&&Number.isFinite(r.x_norm)&&Number.isFinite(r.y_norm));
   S.rows.forEach(r=>{
     r.t=parseStamp(r.datetime);
     r.mpx=(Number.isFinite(r.width)&&Number.isFinite(r.height))?r.width*r.height/1e6:NaN;
+    derive(r);
   });
   // secuencia: orden cronologico dentro del grupo, y si no hay fecha, orden de ruta
   const byG={};
@@ -2396,14 +2782,7 @@ function ingest(text){
   if(ts.length){$("#d0").min=$("#d1").min=isoDay(S.tmin);
                 $("#d0").max=$("#d1").max=isoDay(S.tmax);}
   const evo=$("#evoAxis"); evo.value=ts.length?"t":"seq";
-  const cnt=new Map();
-  S.rows.forEach(r=>{const k=r.group||"sin grupo";cnt.set(k,(cnt.get(k)||0)+1);});
-  S.groups=[...cnt.keys()].sort();
-  S.count=cnt;
-  S.bySize=[...cnt.entries()].sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
-  // con muchos grupos, dibujarlos todos es ilegible y la paleta se repite:
-  // se activan los seis mayores y el resto queda a un clic
-  S.on=new Set(S.groups.length>8?S.bySize.slice(0,6):S.groups);
+  regroup();
   S.orients=[...new Set(S.rows.map(r=>r.orientation).filter(Boolean))].sort();
   S.onOr=new Set(S.orients);
   buildGroupUI(); buildOrientUI(); fillSelectors();
@@ -2452,7 +2831,7 @@ function filterRows(){
     if((t0!==null||t1!==null)&&!Number.isFinite(r.t)) return false;
     if(t0!==null&&!(r.t>=t0)) return false;
     if(t1!==null&&!(r.t<=t1)) return false;
-    if(!S.on.has(r.group||"sin grupo")) return false;
+    if(!S.on.has(groupKeyOf(r))) return false;
     if(S.orients.length&&r.orientation&&!S.onOr.has(r.orientation)) return false;
     if(Number.isFinite(r.confidence)&&r.confidence<cmin) return false;
     if(Number.isFinite(r.area_frac)&&r.area_frac>amax) return false;
@@ -2466,6 +2845,104 @@ function filterRows(){
   });
 }
 const focalOf=r=>Number.isFinite(r.focal35_mm)&&r.focal35_mm>0?r.focal35_mm:r.focal_mm;
+
+/* ---------- columnas derivadas, calculadas en el navegador ----------
+   Nada de esto vuelve al Python: el CSV es el contrato y no se toca. */
+const DEGS=180/Math.PI;
+function derive(r){
+  const ax=Number.isFinite(r.aspect)&&r.aspect>0?r.aspect:1.5;
+  const x=r.x_norm, y=r.y_norm;
+  // margen al borde mas proximo, en semiejes: 1 el centro exacto, 0 el borde
+  r.m_edge=Math.min(1-Math.abs(x),1-Math.abs(y));
+  // direccion de colocacion, con la correccion de aspecto que ya lleva r_norm
+  r.place_dir_deg=(Math.atan2(y,x*ax)*DEGS+360)%360;
+  // angulo de reencuadre: cuanto hubo que girar la camara si el foco fue al eje
+  const fo=focalOf(r);
+  r.alpha_deg=Number.isFinite(fo)&&fo>0
+    ? Math.atan(Math.hypot(x*18/fo,y*12/fo))*DEGS : NaN;
+}
+
+/* ---------- agrupación elegida en el navegador ---------- */
+const GB_NONE="sin grupo";
+function bandLabel(b,unit,dec){
+  if(b[0]===0) return "< "+b[1]+unit;
+  if(b[1]>=1e3) return "≥ "+b[0]+unit;
+  return b[0]+"–"+(dec?b[1]:b[1]-1)+unit;
+}
+function groupKeyOf(r){
+  const mode=S.groupBy||"group";
+  if(mode==="group") return r.group||GB_NONE;
+  if(mode==="year")
+    return Number.isFinite(r.t)?String(new Date(r.t).getUTCFullYear()):GB_NONE;
+  if(mode==="focalband"){
+    const fo=focalOf(r); if(!Number.isFinite(fo)) return GB_NONE;
+    const b=FOCAL_BANDS.find(bb=>fo>=bb[0]&&fo<bb[1]);
+    return b?bandLabel(b," mm",false):GB_NONE;
+  }
+  if(mode==="apband"){
+    const ap=r.f_number; if(!Number.isFinite(ap)) return GB_NONE;
+    const b=AP_BANDS.find(bb=>ap>=bb[0]&&ap<bb[1]);
+    return b?"f/"+bandLabel(b,"",true):GB_NONE;
+  }
+  const v=r[mode];
+  return (v===undefined||v===null||v==="")?GB_NONE:String(v);
+}
+function regroup(){
+  const cnt=new Map();
+  S.rows.forEach(r=>{const k=groupKeyOf(r);cnt.set(k,(cnt.get(k)||0)+1);});
+  S.groups=[...cnt.keys()].sort();
+  S.count=cnt;
+  S.bySize=[...cnt.entries()].sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
+  // con muchos grupos, dibujarlos todos es ilegible y la paleta se repite:
+  // se activan los seis mayores y el resto queda a un clic
+  S.on=new Set(S.groups.length>8?S.bySize.slice(0,6):S.groups);
+}
+
+/* ---------- telémetro: mismas constantes que telemetro-m11.html ----------
+   base 69,25 mm, aumento 0,73, parche 3,4° × 1,9° aparentes, marcos con
+   semiángulos atan(18/f) y atan(12/f) sobre cobertura del 100 % de 36×24. */
+const RF_MAG=0.73, RF_PW_DEG=3.4, RF_PH_DEG=1.9;
+const frameHalfDeg=f=>[Math.atan(18/f)*RF_MAG*DEGS, Math.atan(12/f)*RF_MAG*DEGS];
+function patchHalf(){
+  const md=$("#patchFrame").value;
+  if(md==="custom"){const pw=+$("#patch").value; return {pw,ph:pw*0.72,f:null,k:1};}
+  const fo=+md, k=+$("#patchMag").value, hd=frameHalfDeg(fo);
+  return {pw:(RF_PW_DEG/2)*k/hd[0], ph:(RF_PH_DEG/2)*k/hd[1], f:fo, k};
+}
+
+/* ---------- recorte ----------
+   Semiejes del recorte en unidades de x_norm e y_norm, y su centro. */
+function cropBox(rows){
+  const ac=+$("#cropAspect").value;
+  const asp=S.aspect;
+  let hw=1,hh=1;
+  if(ac>0){
+    if(ac>=asp){ hw=1; hh=asp/ac; } else { hh=1; hw=ac/asp; }
+  }
+  let cx=0,cy=0;
+  if($("#cropAnchor").value==="m"&&rows&&rows.length){
+    cx=medianOf(rows.map(r=>r.x_norm).filter(Number.isFinite))||0;
+    cy=medianOf(rows.map(r=>r.y_norm).filter(Number.isFinite))||0;
+    cx=Math.max(-(1-hw),Math.min(1-hw,cx));
+    cy=Math.max(-(1-hh),Math.min(1-hh,cy));
+  }
+  return {hw,hh,cx,cy,area:hw*hh,native:!(ac>0)};
+}
+/* Lado largo del cuerpo cuando el CSV no trae width/height. */
+const BODY_PX=[[/q3|m11/i,9528],[/multishot|96\s*mp/i,12000],[/sl3-?s|sl3s/i,6000]];
+function longSideOf(r){
+  if(Number.isFinite(r.width)&&Number.isFinite(r.height)) return Math.max(r.width,r.height);
+  const key=String(r.model||"")+" "+String(r.path||"");
+  for(const bp of BODY_PX) if(bp[0].test(key)) return bp[1];
+  return NaN;
+}
+function mpxOf(r){
+  if(Number.isFinite(r.mpx)) return r.mpx;
+  const ls=longSideOf(r);
+  if(!Number.isFinite(ls)) return NaN;
+  const ax=Number.isFinite(r.aspect)&&r.aspect>0?r.aspect:1.5;
+  return ls*(ls/ax)/1e6;
+}
 
 /* ---------- dibujo ---------- */
 const V=(id)=>{const s=$(id);const b=s.getAttribute("viewBox").split(" ").map(Number);return{s,W:b[2],H:b[3]};};
@@ -2538,19 +3015,31 @@ function drawGlass(rows){
     }
     g+=`<text x="${cx+R+6}" y="${cy-R-4}" font-size="9" fill="var(--ink2)" font-family="var(--mono)">8 mm</text>`;
   }
-  // parche del telémetro
-  const pw=+$("#patch").value;
+  // parche del telémetro, con la geometría real del marco elegido
+  const ph=patchHalf();
   if($("#tPatch").checked){
-    const w=pw*fw, h=w*0.72;
+    const w=ph.pw*fw, h=ph.ph*fh;
     g+=`<rect x="${cx-w/2}" y="${cy-h/2}" width="${w}" height="${h}" fill="none"
       stroke="var(--ink)" stroke-width="1" stroke-dasharray="5 3" opacity=".7"/>`;
+    g+=`<text x="${cx+w/2+5}" y="${cy-h/2-4}" font-size="9" fill="var(--ink2)"
+      font-family="var(--mono)">${esc(ph.f?ph.f+" mm"+(ph.k>1?" ×"+ph.k:""):"—")}</text>`;
+  }
+  // rectángulo del recorte
+  const cb=cropBox(rows);
+  if(!cb.native){
+    const rw=cb.hw*fw, rh=cb.hh*fh, rx=X(cb.cx)-rw/2, ry=Y(cb.cy)-rh/2;
+    g+=`<rect x="${rx.toFixed(1)}" y="${ry.toFixed(1)}" width="${rw.toFixed(1)}"
+      height="${rh.toFixed(1)}" fill="none" stroke="var(--g1)" stroke-width="1.6"
+      stroke-dasharray="8 4" opacity=".85"/>`;
+    g+=`<text x="${(rx+4).toFixed(1)}" y="${(ry+13).toFixed(1)}" font-size="9.5"
+      letter-spacing=".14em" fill="var(--g1)" font-family="var(--mono)">${esc(cropName())}</text>`;
   }
 
   // puntos
   if($("#tPts").checked){
     for(const gr of S.groups){
       if(!S.on.has(gr)) continue;
-      const pts=rows.filter(r=>(r.group||"sin grupo")===gr);
+      const pts=rows.filter(r=>(groupKeyOf(r))===gr);
       if(!pts.length) continue;
       let d="";
       for(const r of pts){
@@ -2563,7 +3052,7 @@ function drawGlass(rows){
   // elipse del 50 % y mediana
   for(const gr of S.groups){
     if(!S.on.has(gr)) continue;
-    const pts=rows.filter(r=>(r.group||"sin grupo")===gr);
+    const pts=rows.filter(r=>(groupKeyOf(r))===gr);
     if(pts.length<4) continue;
     const xs=pts.map(r=>r.x_norm), ys=pts.map(r=>r.y_norm);
     if($("#tEll").checked){
@@ -2596,7 +3085,7 @@ function drawEcdf(rows){
   g+=`<path d="M${X(thr)} ${y0}V${y1}" stroke="var(--g3)" stroke-dasharray="4 3"/>`;
   for(const gr of S.groups){
     if(!S.on.has(gr)) continue;
-    const v=rows.filter(r=>(r.group||"sin grupo")===gr).map(r=>r.r_norm)
+    const v=rows.filter(r=>(groupKeyOf(r))===gr).map(r=>r.r_norm)
       .filter(Number.isFinite).sort((a,b)=>a-b);
     if(!v.length) continue;
     let d=`M${X(0)} ${Y(0)}`;
@@ -2618,7 +3107,7 @@ function drawMarg(rows){
     for(const gr of S.groups){
       if(!S.on.has(gr)) continue;
       const h=new Array(nb).fill(0);
-      const v=rows.filter(r=>(r.group||"sin grupo")===gr);
+      const v=rows.filter(r=>(groupKeyOf(r))===gr);
       v.forEach(r=>{const b=Math.min(nb-1,Math.max(0,Math.floor((r[key]+1)/2*nb)));h[b]++;});
       const n=v.length||1; const hn=h.map(c=>c/n); max=Math.max(max,...hn);
       hs.push([gr,hn]);
@@ -2649,7 +3138,7 @@ function scatterVs(id,rows,key,xlab,ticks){
     [0,.25,.5,.75,1].map(v=>({p:Y(v),l:v.toFixed(2)})),xlab,"r");
   for(const gr of S.groups){
     if(!S.on.has(gr)) continue;
-    const pts=rows.filter(r=>(r.group||"sin grupo")===gr&&Number.isFinite(key(r)));
+    const pts=rows.filter(r=>(groupKeyOf(r))===gr&&Number.isFinite(key(r)));
     let d="";
     pts.forEach(r=>{const px=X(key(r)),py=Y(r.r_norm);
       d+=`M${(px-2.5).toFixed(1)} ${py.toFixed(1)}h5M${px.toFixed(1)} ${(py-2.5).toFixed(1)}v5`;});
@@ -2661,11 +3150,11 @@ function scatterVs(id,rows,key,xlab,ticks){
 /* ---------- tablas y contraste ---------- */
 function groupsOf(rows){
   const m=new Map();
-  rows.forEach(r=>{const k=r.group||"sin grupo"; if(!m.has(k))m.set(k,[]); m.get(k).push(r);});
+  rows.forEach(r=>{const k=groupKeyOf(r); if(!m.has(k))m.set(k,[]); m.get(k).push(r);});
   return [...m.entries()].sort((a,b)=>b[1].length-a[1].length);
 }
 function tableGroups(rows){
-  const thr=parseFloat($("#thr").value)||0.15, pw=+$("#patch").value, ph=pw*0.72;
+  const thr=parseFloat($("#thr").value)||0.15, hp=patchHalf(), pw=hp.pw, ph=hp.ph;
   const head=[t("group"),t("n"),t("thRmed"),t("thCI"),t("thMAD"),t("thAbsX"),t("thAbsY"),
               `r<${thr.toFixed(2)}`,t("thInPatch")];
   $("#tGroups").querySelector("thead").innerHTML="<tr>"+head.map(h=>`<th>${esc(h)}</th>`).join("")+"</tr>";
@@ -2727,13 +3216,326 @@ function tableBins(rows){
     gs.map(g=>`<th>${esc(gname(g))}${t("thBinN")}</th><th>${esc(gname(g))}${t("thBinR")}</th>`).join("")+"</tr>";
   tb.querySelector("tbody").innerHTML=bins.map(([lo,hi])=>{
     const cells=gs.map(g=>{
-      const v=withF.filter(r=>(r.group||"sin grupo")===g&&focalOf(r)>=lo&&focalOf(r)<hi)
+      const v=withF.filter(r=>(groupKeyOf(r))===g&&focalOf(r)>=lo&&focalOf(r)<hi)
         .map(r=>r.r_norm).filter(Number.isFinite);
       return `<td>${v.length||"—"}</td><td>${v.length?fmt(medianOf(v)):"—"}</td>`;
     }).join("");
     const any=gs.some((g,i)=>cells.split("<td>")[1+2*i]!=="—</td>");
     return any?`<tr><td>${lo}${hi>1e3?" +":"–"+(hi-1)}</td>${cells}</tr>`:"";
   }).join("");
+}
+
+/* ---------- veredicto de encuadre ---------- */
+/* IC95 de la media por bootstrap percentil: el sesgo direccional es una media
+   de coordenadas con signo, donde la mediana no dice lo que se quiere saber. */
+function bootstrapMeanCI(v,iters,seed){
+  const n=v.length; if(n<6) return [NaN,NaN];
+  const rnd=mulberry32(seed), out=new Float64Array(iters);
+  for(let b=0;b<iters;b++){
+    let acc=0;
+    for(let i=0;i<n;i++) acc+=v[(rnd()*n)|0];
+    out[b]=acc/n;
+  }
+  const so=Array.from(out).sort((p,q)=>p-q);
+  return [quantile(so,0.025),quantile(so,0.975)];
+}
+/* Mediana y MAD de r si el sujeto cayera al azar sobre el rectángulo: la
+   referencia contra la que se juzga si la nube es hábito o azar. Depende sólo
+   de la relación de aspecto, así que se calcula una vez por aspecto. */
+const UNIF_CACHE=new Map();
+function uniformStats(asp){
+  const key=asp.toFixed(3);
+  if(UNIF_CACHE.has(key)) return UNIF_CACHE.get(key);
+  const n=161, di=Math.hypot(asp,1), vals=[];
+  for(let i=0;i<n;i++){
+    const xu=-1+2*i/(n-1);
+    for(let j=0;j<n;j++){
+      const yu=-1+2*j/(n-1);
+      vals.push(Math.hypot(xu*asp,yu)/di);
+    }
+  }
+  const med=medianOf(vals);
+  const out={med,mad:medianOf(vals.map(q=>Math.abs(q-med)))};
+  UNIF_CACHE.set(key,out);
+  return out;
+}
+/* «compass» usa los rótulos cardinales de la rosa (derecha, arriba…);
+   sin él, los que caben en la frase del sesgo (a la derecha, arriba…). */
+function dirWords(deg,compass){
+  const rad=deg*Math.PI/180, dx=Math.cos(rad), dy=Math.sin(rad), out=[];
+  if(Math.abs(dx)>0.38) out.push(dx>0?t(compass?"dirE":"dirRight"):t(compass?"dirW":"dirLeft"));
+  if(Math.abs(dy)>0.38) out.push(dy>0?t(compass?"dirN":"dirUp"):t(compass?"dirS":"dirDown"));
+  return out.join(t("vBAnd"));
+}
+function drawVerdictEnc(rows){
+  const box=$("#vEncuadre"), head=$("#vAxisEnc");
+  const thr=parseFloat($("#thr").value)||0.15;
+  const mth=parseFloat($("#mThr").value)||0.10;
+  if(head) head.textContent=`${rows.length} ${t("frames")} · ASP ${S.aspect.toFixed(2)}`;
+  if(rows.length<20){ box.innerHTML=`<p class="note">${esc(t("veNeed"))}</p>`; return; }
+  let html="";
+  // 1 · centrado
+  const rv=rows.map(v=>v.r_norm).filter(Number.isFinite);
+  const rmed=medianOf(rv), rci=bootstrapCI(rv,2000,11);
+  const hiBand=Math.max(thr+0.05,0.35);
+  const cbn=rmed<thr?0:rmed<=hiBand?1:2;
+  html+=`<p><b>${esc(t("vHCent"))}</b> ${esc(t("vC1"))}${fmt(rmed)}${esc(t("vC2"))}`
+    +`${fmt(rci[0])}–${fmt(rci[1])}${esc(t("vC3"))}${esc(t("vCent"+cbn))}`
+    +`${esc(t("vC4"))}${pct(rv.filter(v=>v<thr).length/rv.length)}${esc(t("vC5"))}`
+    +`r &lt; ${thr.toFixed(2)}.</p>`;
+  // 2 · sesgo direccional
+  const xv=rows.map(v=>v.x_norm).filter(Number.isFinite);
+  const yv=rows.map(v=>v.y_norm).filter(Number.isFinite);
+  const mx=mean(xv), my=mean(yv);
+  const cix=bootstrapMeanCI(xv,2000,12), ciy=bootstrapMeanCI(yv,2000,13);
+  const sigX=Number.isFinite(cix[0])&&cix[0]*cix[1]>0;
+  const sigY=Number.isFinite(ciy[0])&&ciy[0]*ciy[1]>0;
+  const words=[];
+  if(sigX) words.push(mx>0?t("dirRight"):t("dirLeft"));
+  if(sigY) words.push(my>0?t("dirUp"):t("dirDown"));
+  const sgn=v=>(v>0?"+":"")+fmt(v);
+  html+=`<p><b>${esc(t("vHBias"))}</b> `
+    +(words.length?esc(t("vB1"))+esc(words.join(t("vBAnd")))+esc(t("vB2")):esc(t("vBNone")))
+    +`x = ${sgn(mx)} [${sgn(cix[0])}, ${sgn(cix[1])}], `
+    +`y = ${sgn(my)} [${sgn(ciy[0])}, ${sgn(ciy[1])}].</p>`;
+  // 3 · disciplina
+  const madR=madOf(rv), uni=uniformStats(S.aspect), ratio=madR/(uni.mad||1);
+  const dbn=ratio<0.75?0:ratio<0.95?1:2;
+  html+=`<p><b>${esc(t("vHDisc"))}</b> ${esc(t("vD1"))}${fmt(madR)}${esc(t("vD2"))}`
+    +`${fmt(uni.mad)}${esc(t("vD3"))}${esc(t("vDisc"+dbn))}.</p>`;
+  // 4 · margen al borde
+  const mv=rows.map(v=>v.m_edge).filter(Number.isFinite).sort((a,b)=>a-b);
+  if(mv.length){
+    const p5=quantile(mv,0.05);
+    const mbn=p5<mth?0:p5<=0.25?1:2;
+    html+=`<p><b>${esc(t("vHMarg"))}</b> ${esc(t("vM1"))}${fmt(p5)}${esc(t("vM2"))}`
+      +`${pct(p5)}${esc(t("vM3"))}${esc(t("vMarg"+mbn))}</p>`;
+  }
+  // 5 · telémetro
+  const hp=patchHalf();
+  if(hp.f){
+    const inP=rows.filter(v=>Math.abs(v.x_norm)<=hp.pw&&Math.abs(v.y_norm)<=hp.ph).length/rows.length;
+    html+=`<p><b>${esc(t("vHPatch"))}</b> ${esc(t("vP1"))}${hp.f}${esc(t("vP2"))}`
+      +(hp.k>1?esc(t("vP3"))+String(hp.k).replace(".",LANG()==="en"?".":","):esc(t("vP3b")))
+      +`${esc(t("vP4"))}${pct(inP)}${esc(t("vP5"))}${pct(1-inP)}${esc(t("vP6"))}</p>`;
+  }
+  const nOr=new Set(rows.map(v=>v.orientation).filter(Boolean)).size;
+  if(nOr>1) html+=`<p class="note"><span class="warn">${esc(t("vMixOr"))}</span></p>`;
+  html+=`<p class="note">${esc(t("vNote"))}</p>`;
+  box.innerHTML=html;
+}
+
+/* ---------- rosa de colocación y margen al borde ---------- */
+function drawPlaceRose(rows){
+  const {s,W,H}=V("#svPlaceRose");
+  const cx=W/2, cy=H/2+6, R=Math.min(W,H)/2-40;
+  const nb=12, bins=new Map();
+  let max=0;
+  for(const gr of S.groups){
+    if(!S.on.has(gr)) continue;
+    const arr=new Array(nb).fill(0);
+    rows.filter(r=>groupKeyOf(r)===gr).forEach(r=>{
+      if(!Number.isFinite(r.place_dir_deg)) return;
+      const wt=Number.isFinite(r.r_norm)?r.r_norm:0;
+      arr[Math.min(nb-1,Math.floor(r.place_dir_deg/(360/nb)))]+=wt;
+    });
+    const tot=arr.reduce((a,b)=>a+b,0);
+    if(tot>0){const nrm=arr.map(v=>v/tot); max=Math.max(max,...nrm); bins.set(gr,nrm);}
+  }
+  const info=$("#rayleigh");
+  if(!bins.size){ emptyMsg(s,W,H,t("rsNoDir")); if(info) info.textContent=""; return; }
+  // prueba de Rayleigh sobre las direcciones sin ponderar, de toda la selección
+  const ang=rows.map(r=>r.place_dir_deg).filter(Number.isFinite);
+  let sc=0, ss=0;
+  ang.forEach(a=>{const rad=a*Math.PI/180; sc+=Math.cos(rad); ss+=Math.sin(rad);});
+  const nA=ang.length, Rlen=Math.hypot(sc,ss), Rbar=nA?Rlen/nA:0;
+  const pRay=nA?Math.exp(Math.sqrt(1+4*nA+4*(nA*nA-Rlen*Rlen))-(1+2*nA)):1;
+  const mDeg=(Math.atan2(ss,sc)*DEGS+360)%360;
+  if(info) info.textContent=`${t("rsR")}=${fmt(Rbar,3)} · ${t("rsP")}=${pRay<1e-4?"<0.0001":fmt(pRay,4)}`
+    +` · ${pRay<0.05?t("rsDirYes")+dirWords(mDeg,true):t("rsDirNo")}`;
+  let g=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="var(--panel)" stroke="var(--rule)"/>`;
+  for(const fr of [1/3,2/3]) g+=`<circle cx="${cx}" cy="${cy}" r="${R*fr}" fill="none" stroke="var(--rule)" stroke-dasharray="2 4"/>`;
+  // «lb», no «t»: dentro del bucle t() sigue siendo la traductora
+  [[0,t("dirE")],[90,t("dirN")],[180,t("dirW")],[270,t("dirS")]].forEach(pr=>{
+    const a=-pr[0]*Math.PI/180, lb=pr[1];
+    g+=`<path d="M${cx} ${cy}L${cx+R*Math.cos(a)} ${cy+R*Math.sin(a)}" stroke="var(--rule)"/>`;
+    g+=`<text x="${cx+(R+16)*Math.cos(a)}" y="${cy+(R+16)*Math.sin(a)+3}" text-anchor="middle"
+      font-size="9" fill="var(--ink2)" font-family="var(--mono)">${esc(lb)}</text>`;
+  });
+  const k=bins.size; let gi=0;
+  bins.forEach((arr,gr)=>{
+    arr.forEach((v,i)=>{
+      if(v<=0) return;
+      const wd=(360/nb)/k*0.85;
+      const a0=-(i*(360/nb)+gi*wd)*Math.PI/180, a1=-(i*(360/nb)+(gi+1)*wd)*Math.PI/180;
+      const rr=Math.sqrt(v/max)*R;
+      g+=`<path d="M${cx} ${cy}L${cx+rr*Math.cos(a0)} ${cy+rr*Math.sin(a0)}
+        A${rr} ${rr} 0 0 0 ${cx+rr*Math.cos(a1)} ${cy+rr*Math.sin(a1)}Z"
+        fill="${colorOf(gr)}" opacity=".62" stroke="${colorOf(gr)}" stroke-width=".8"/>`;
+    });
+    gi++;
+  });
+  // vector resultante medio, en unidades de la rosa
+  if(nA){
+    const a=-mDeg*Math.PI/180, rr=Math.min(1,Rbar*2)*R;
+    g+=`<path d="M${cx} ${cy}L${cx+rr*Math.cos(a)} ${cy+rr*Math.sin(a)}"
+      stroke="var(--ink)" stroke-width="2"/>`;
+    g+=`<circle cx="${cx+rr*Math.cos(a)}" cy="${cy+rr*Math.sin(a)}" r="3" fill="var(--ink)"/>`;
+  }
+  s.innerHTML=g;
+}
+function drawMarginEcdf(rows){
+  const {s,W,H,x0,y0,x1,y1}=frameOf("#svMargin");
+  const mth=parseFloat($("#mThr").value)||0.10;
+  const any=rows.some(r=>Number.isFinite(r.m_edge));
+  if(!any){ emptyMsg(s,W,H,t("noDataFor")+label("m_edge")); return; }
+  const X=v=>x0+v*(x1-x0), Y=p=>y0-p*(y0-y1);
+  let g=axes(x0,y0,x1,y1,
+    [0,.25,.5,.75,1].map(v=>({p:X(v),l:v.toFixed(2)})),
+    [0,.25,.5,.75,1].map(v=>({p:Y(v),l:v.toFixed(2)})),
+    t("mLab"),t("mAxisF"));
+  g+=`<path d="M${X(Math.max(0,Math.min(1,mth)))} ${y0}V${y1}" stroke="var(--g1)" stroke-dasharray="4 3"/>`;
+  for(const gr of S.groups){
+    if(!S.on.has(gr)) continue;
+    const v=rows.filter(r=>groupKeyOf(r)===gr).map(r=>r.m_edge)
+      .filter(Number.isFinite).sort((a,b)=>a-b);
+    if(!v.length) continue;
+    let d=`M${X(Math.max(0,v[0])).toFixed(1)} ${Y(0)}`;
+    v.forEach((rv,i)=>{const px=X(Math.max(0,Math.min(1,rv))).toFixed(1);
+      d+=`L${px} ${Y(i/v.length).toFixed(1)}L${px} ${Y((i+1)/v.length).toFixed(1)}`;});
+    g+=`<path d="${d}" fill="none" stroke="${colorOf(gr)}" stroke-width="1.6"/>`;
+  }
+  s.innerHTML=g;
+}
+
+/* ---------- ángulo de reencuadre ----------
+   La física está en telemetro-m11.html y en programa-camara.html; aquí sólo el
+   reparto empírico de α y la línea de lo que el foco perdona. */
+/* Los rótulos nuevos que llevan unidad se escriben con la coma o el punto
+   decimal del idioma activo; las tablas heredadas siguen con fmt(). */
+const nloc=(v,d)=>Number.isFinite(v)
+  ? v.toLocaleString(LANG()==="en"?"en-GB":"es-ES",
+      {minimumFractionDigits:d,maximumFractionDigits:d})
+  : "—";
+function alphaMaxDeg(f,N,c,dmm){
+  if(!(f>0&&N>0&&c>0&&dmm>0)) return NaN;
+  const Hd=f*f/(N*c)+f;
+  const dn=dmm*(Hd-f)/(Hd+dmm-2*f);
+  const q=Math.max(-1,Math.min(1,dn/dmm));
+  return Math.acos(q)*DEGS;
+}
+function drawAlpha(rows){
+  const {s,W,H,x0,y0,x1,y1}=frameOf("#svAlpha",52,36,14,16);
+  const box=$("#alVerdict");
+  const av=rows.map(r=>r.alpha_deg).filter(Number.isFinite);
+  if(!av.length){
+    emptyMsg(s,W,H,t("alNoFocal"));
+    box.innerHTML=`<p class="note">${esc(t("alNoFocal"))}</p>`;
+    return;
+  }
+  const sel=$("#alFoc").value;
+  const medF=medianOf(rows.map(focalOf).filter(v=>Number.isFinite(v)&&v>0));
+  const foc=sel==="auto"?(Number.isFinite(medF)?medF:50):+sel;
+  const coc=+$("#alC").value;
+  const dm=(+$("#alD").value)*1000;
+  const nMed=medianOf(rows.map(r=>r.f_number).filter(v=>Number.isFinite(v)&&v>0));
+  const Nu=Number.isFinite(nMed)&&nMed>0?nMed:2.8;
+  const amax=alphaMaxDeg(foc,Nu,coc,dm);
+  const sorted=[...av].sort((a,b)=>a-b);
+  const hi=Math.max(quantile(sorted,0.995),Number.isFinite(amax)?amax*1.12:0,1);
+  const X=v=>x0+Math.max(0,Math.min(1,v/hi))*(x1-x0), Y=p=>y0-p*(y0-y1);
+  let g=axes(x0,y0,x1,y1,
+    ticksFor(0,hi).filter(k=>k.v>=0&&k.v<=hi).map(k=>({p:X(k.v),l:k.l})),
+    [0,.25,.5,.75,1].map(v=>({p:Y(v),l:v.toFixed(2)})),
+    t("alAxis"),"F(α)");
+  if(Number.isFinite(amax)&&amax<=hi){
+    g+=`<path d="M${X(amax)} ${y0}V${y1}" stroke="var(--g1)" stroke-width="1.4" stroke-dasharray="5 3"/>`;
+    g+=`<text x="${X(amax)+5}" y="${y1+12}" font-size="9.5" fill="var(--g1)"
+      font-family="var(--mono)">${esc(t("alMax")+" "+fmt(amax,1)+"°")}</text>`;
+  }
+  for(const gr of S.groups){
+    if(!S.on.has(gr)) continue;
+    const v=rows.filter(r=>groupKeyOf(r)===gr).map(r=>r.alpha_deg)
+      .filter(Number.isFinite).sort((a,b)=>a-b);
+    if(!v.length) continue;
+    let d=`M${X(v[0]).toFixed(1)} ${Y(0)}`;
+    v.forEach((rv,i)=>{const px=X(rv).toFixed(1);
+      d+=`L${px} ${Y(i/v.length).toFixed(1)}L${px} ${Y((i+1)/v.length).toFixed(1)}`;});
+    g+=`<path d="${d}" fill="none" stroke="${colorOf(gr)}" stroke-width="1.6"/>`;
+  }
+  s.innerHTML=g;
+  const over=av.filter(v=>v>amax).length/av.length;
+  const rEq=Math.tan(amax*Math.PI/180)/Math.hypot(18/foc,12/foc);
+  box.innerHTML=`<p>${esc(t("avA"))}${nloc(foc,0)}${esc(t("avB"))}${nloc(Nu,1)}`
+    +`${esc(t("avC"))}${nloc(dm/1000,1)}${esc(t("avD"))}${nloc(amax,1)}`
+    +`${esc(t("avE"))}${fmt(rEq)}${esc(t("avF"))}${pct(over)}${esc(t("avG"))}</p>`;
+}
+
+/* ---------- recorte ---------- */
+function cropName(){
+  const el=$("#cropAspect"), op=el.options[el.selectedIndex];
+  return op?op.textContent:"";
+}
+function dimsOf(r){
+  if(Number.isFinite(r.width)&&Number.isFinite(r.height)&&r.width>0&&r.height>0)
+    return [r.width,r.height];
+  const ls=longSideOf(r); if(!Number.isFinite(ls)) return null;
+  const ax=Number.isFinite(r.aspect)&&r.aspect>0?r.aspect:1.5;
+  return ax>=1?[ls,ls/ax]:[ls*ax,ls];
+}
+/* Estadísticas de un recorte de semiejes hw, hh centrado en (cx, cy). */
+function cropStats(rs,hw,hh,cx,cy,mth){
+  let inside=0, keep=0;
+  const mp=[], lo=[];
+  rs.forEach(r=>{
+    const dx=Math.abs(r.x_norm-cx)/hw, dy=Math.abs(r.y_norm-cy)/hh;
+    if(dx<=1&&dy<=1){
+      inside++;
+      if(Math.min(1-dx,1-dy)>=mth) keep++;
+    }
+    const dm=dimsOf(r);
+    if(dm){ mp.push(dm[0]*hw*dm[1]*hh/1e6); lo.push(Math.max(dm[0]*hw,dm[1]*hh)); }
+  });
+  return {n:rs.length, inside:rs.length?inside/rs.length:NaN,
+          keep:rs.length?keep/rs.length:NaN,
+          mpx:mp.length?medianOf(mp):NaN, long:lo.length?medianOf(lo):NaN};
+}
+function cropRow(name,swatch,st){
+  return `<tr><td>${swatch}${esc(name)}</td><td>${st.n}</td>`
+    +`<td>${pct(st.inside)}</td><td>${pct(st.keep)}</td>`
+    +`<td>${Number.isFinite(st.mpx)?fmt(st.mpx,1):"—"}</td>`
+    +`<td>${nloc(Math.round(st.long),0)}</td></tr>`;
+}
+function drawCrop(rows){
+  const mth=parseFloat($("#mThr").value)||0.10;
+  const head=[t("group"),t("n"),t("thInCrop"),t("thKeepM"),t("thMpxLeft"),t("thLongSide")];
+  const headQ=[t("thCropName"),t("n"),t("thInCrop"),t("thKeepM"),t("thMpxLeft"),t("thLongSide")];
+  const th=arr=>"<tr>"+arr.map(h=>`<th>${esc(h)}</th>`).join("")+"</tr>";
+  $("#tCrop").querySelector("thead").innerHTML=th(head);
+  $("#tCropQ").querySelector("thead").innerHTML=th(headQ);
+  if(!rows.length){
+    $("#tCrop").querySelector("tbody").innerHTML="";
+    $("#tCropQ").querySelector("tbody").innerHTML="";
+    $("#cropVerdict").innerHTML=`<p class="note">${esc(t("cvNone"))}</p>`;
+    return;
+  }
+  const gs=groupsOf(rows);
+  $("#tCrop").querySelector("tbody").innerHTML=gs.map(pr=>{
+    const cb=cropBox(pr[1]);
+    const sw=`<span class="swatch" style="display:inline-block;background:${colorOf(pr[0])}"></span> `;
+    return cropRow(gname(pr[0]),sw,cropStats(pr[1],cb.hw,cb.hh,cb.cx,cb.cy,mth));
+  }).join("");
+  // marcos de la Q3 43: recortes centrados de factor 43/f sobre el fotograma
+  $("#tCropQ").querySelector("tbody").innerHTML=[60,75,90].map(fq=>{
+    const sc=43/fq;
+    return cropRow(fq+" mm  ·  ×"+fmt(sc,3),"",cropStats(rows,sc,sc,0,0,mth));
+  }).join("");
+  const cbAll=cropBox(rows);
+  const st=cropStats(rows,cbAll.hw,cbAll.hh,cbAll.cx,cbAll.cy,mth);
+  $("#cropVerdict").innerHTML=cbAll.native
+    ? `<p class="note">${esc(t("cvNative"))}</p>`
+    : `<p>${esc(t("cvA"))}${esc(cropName())}${esc(t("cvB"))}${pct(st.inside)}`
+      +`${esc(t("cvC"))}${Number.isFinite(st.mpx)?fmt(st.mpx,1):"—"}${esc(t("cvD"))}</p>`;
 }
 
 /* ---------- refresco ---------- */
@@ -2753,11 +3555,14 @@ function refresh(){
     [t("kpiBiasX"),fmt(mean(rows.map(v=>v.x_norm)),3)],
     [t("kpiBiasY"),fmt(mean(rows.map(v=>v.y_norm)),3)],
   ].map(([k,v])=>`<div><span>${k}</span><b>${v}</b></div>`).join("");
-  $("#warn").innerHTML=rows.length<20
-    ? `<span class="warn">${t("smallSample")}</span>`:"";
+  $("#warn").innerHTML=(S.demo?`<span class="warn"><b>${esc(t("demoWarn"))}</b></span> `:"")
+    +(rows.length<20?`<span class="warn">${t("smallSample")}</span>`:"");
   $("#legend").innerHTML=groupsOf(rows).map(([g,rs])=>
     `<span><span class="swatch" style="display:inline-block;background:${colorOf(g)}"></span> ${esc(gname(g))} (${rs.length})</span>`).join("");
+  drawVerdictEnc(rows);
   drawGlass(rows); drawEcdf(rows); drawMarg(rows);
+  drawPlaceRose(rows); drawMarginEcdf(rows);
+  drawAlpha(rows); drawCrop(rows);
   scatterVs("#svFocal",rows,focalOf,t("focal35"),[21,28,35,50,90,135]);
   scatterVs("#svAp",rows,r=>r.f_number,t("fnum"),[1.4,2,2.8,4,5.6,8,11,16]);
   tableGroups(rows); contrast(rows); tableBins(rows);
@@ -2765,14 +3570,27 @@ function refresh(){
 }
 
 /* ---------- interacción ---------- */
-["#conf","#area","#patch"].forEach(id=>$(id).addEventListener("input",()=>{
+function paintOuts(){
   $("#confOut").textContent=(+$("#conf").value).toFixed(2);
   $("#areaOut").textContent=(+$("#area").value).toFixed(2);
-  $("#patchOut").textContent=(+$("#patch").value).toFixed(2);
-  refresh();
+  $("#patchOut").textContent=patchHalf().pw.toFixed(3);
+  $("#alDOut").textContent=nloc(+$("#alD").value,1)+" m";
+}
+["#conf","#area","#patch","#alD"].forEach(id=>$(id).addEventListener("input",()=>{
+  paintOuts(); refresh();
 }));
-["#f0","#f1","#a0","#a1","#thr","#iters","#q"].forEach(id=>{
-  let t; $(id).addEventListener("input",()=>{clearTimeout(t);t=setTimeout(refresh,260);});
+["#f0","#f1","#a0","#a1","#thr","#mThr","#iters","#q"].forEach(id=>{
+  let tm; $(id).addEventListener("input",()=>{clearTimeout(tm);tm=setTimeout(refresh,260);});
+});
+["#patchFrame","#patchMag","#cropAspect","#cropAnchor","#alFoc","#alC"].forEach(id=>
+  $(id).addEventListener("change",()=>{
+    $("#patch").disabled=$("#patchFrame").value!=="custom";
+    paintOuts(); refresh();
+  }));
+$("#groupBy").addEventListener("change",()=>{
+  S.groupBy=$("#groupBy").value;
+  if(!S.rows.length) return;
+  regroup(); buildGroupUI(); refresh();
 });
 ["#tThirds","#tArcs","#tPatch","#tDens","#tEll","#tPts","#tSplit","#tCEll",
  "#exLine"].forEach(id=>$(id).addEventListener("change",refresh));
@@ -2812,6 +3630,140 @@ $("#file").addEventListener("change",e=>{
   const f=e.target.files[0]; if(!f) return;
   const rd=new FileReader(); rd.onload=()=>ingest(rd.result); rd.readAsText(f);
 });
+
+/* ---------- conjunto de ejemplo ----------
+   600 fotogramas sintéticos generados con mulberry32: reproducibles, unos pocos
+   parámetros en lugar de datos crudos y ni una medida real. Están para poder
+   recorrer la herramienta sin haber ejecutado el analizador; el aviso de la
+   caja de Selección no se puede cerrar. */
+function demoRows(){
+  const rnd=mulberry32(20240917);
+  const gau=()=>{const u=Math.max(1e-9,rnd()),v=rnd();
+    return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
+  const PRO=[
+    {g:"A",model:"M-A",lens:"35 mm",f:35,N:2.8,sd:0.30,bx: 0.10,by: 0.06,pv:0.18,key:-0.15,cre:0.30},
+    {g:"B",model:"M-B",lens:"50 mm",f:50,N:2.0,sd:0.18,bx: 0.02,by: 0.01,pv:0.16,key: 0.10,cre:0.45},
+    {g:"C",model:"M-C",lens:"90 mm",f:90,N:4.0,sd:0.36,bx:-0.06,by: 0.09,pv:0.34,key:-0.05,cre:0.62},
+  ];
+  const out=[], t0=Date.UTC(2021,0,12);
+  const p2=v=>String(v).padStart(2,"0");
+  PRO.forEach((pr,gi)=>{
+    for(let ses=0;ses<40;ses++){
+      const ms=t0+(ses*27+gi*9)*86400000;
+      const dd=new Date(ms);
+      // 0 al principio del archivo, 1 al final: sobre esto va la deriva plantada
+      const age=Math.min(1,(ms-t0)/(3*365.25*86400000));
+      for(let k=0;k<5;k++){
+        const vert=rnd()<pr.pv;
+        const W=vert?4000:6000, He=vert?6000:4000, asp=W/He;
+        let x=pr.bx+gau()*pr.sd, y=pr.by+gau()*pr.sd*0.85;
+        x=Math.max(-0.97,Math.min(0.97,x)); y=Math.max(-0.97,Math.min(0.97,y));
+        const hh=9+Math.floor(rnd()*10), mi=Math.floor(rnd()*60);
+        const zs={}; let ztot=0;
+        const cen=4.4+1.5*(pr.key+0.35*age)+gau()*0.6;
+        for(let z=0;z<11;z++){const w=Math.exp(-((z-cen)*(z-cen))/(2*2.1*2.1));zs["z"+p2(z)]=w;ztot+=w;}
+        for(let z=0;z<11;z++) zs["z"+p2(z)]/=ztot;
+        const ent=-Object.keys(zs).reduce((a,kk)=>a+(zs[kk]>0?zs[kk]*Math.log2(zs[kk]):0),0);
+        const hue=(vert?200:35)+gau()*30;
+        out.push(Object.assign({
+          path:"ejemplo/"+pr.g+"/"+dd.getUTCFullYear()+"/"+pr.g+p2(ses+1)+"_"+p2(k+1)+".dng",
+          group:pr.g, width:W, height:He,
+          orientation:vert?"vertical":"horizontal", aspect:asp,
+          make:"—", model:pr.model, lens:pr.lens,
+          focal_mm:pr.f, focal35_mm:pr.f,
+          f_number:+(pr.N*Math.pow(2,Math.floor(rnd()*4)/2)).toFixed(1),
+          datetime:dd.getUTCFullYear()+"-"+p2(dd.getUTCMonth()+1)+"-"+p2(dd.getUTCDate())
+                   +" "+p2(hh)+":"+p2(mi)+":00",
+          method:"saliency",
+          x_norm:x, y_norm:y,
+          r_norm:Math.hypot(x*asp,y)/Math.hypot(asp,1),
+          spread_norm:0.18+Math.abs(gau())*0.09,
+          area_frac:0.06+Math.abs(gau())*0.07,
+          confidence:Math.max(0,Math.min(0.95,0.62+gau()*0.14)),
+          peak_x_norm:x+gau()*0.06, peak_y_norm:y+gau()*0.06,
+          key_stops:pr.key+0.35*age+gau()*0.45,
+          lum_mean:0.18*Math.pow(2,pr.key+0.35*age)+gau()*0.02,
+          lstar_median:50+12*(pr.key+0.35*age)+gau()*7,
+          contrast_sd:22-3.5*age+gau()*3.5,
+          dr_stops:7.2+0.5*age+gau()*1.1,
+          clip_lo:Math.max(0,0.012+gau()*0.008),
+          clip_hi:Math.max(0,0.006+gau()*0.005),
+          tone_entropy:ent,
+          lab_a:1.2+gau()*2.4, lab_b:2.0+3.2*age+gau()*3.0,
+          chroma_mean:11+gau()*3, chroma_p95:28+gau()*7,
+          colorfulness:24+gau()*7,
+          cct_k:5200+900*gau()+400*age, duv:gau()*0.004,
+          hue_mean_deg:(hue+360)%360,
+          hue_conc:Math.max(0.02,Math.min(0.95,0.42+gau()*0.13)),
+          hue_sd_deg:28+Math.abs(gau())*10,
+          sh_a:gau()*1.5, sh_b:-1.8+gau()*2.0,
+          hi_a:gau()*1.5, hi_b:2.4+gau()*2.0,
+          split_dab:Math.abs(4.2+gau()*1.8),
+          split_dir_deg:(70+gau()*40+360)%360,
+          acutance:0.42+gau()*0.09,
+          grain_levels:3.1+gau()*0.9,
+          focus_frac:Math.max(0.02,Math.min(0.98,0.34-0.10*age+gau()*0.12)),
+          edge_vert:Math.max(0.05,Math.min(0.95,(vert?0.58:0.44)+gau()*0.08)),
+          alpha_spectral:2.05+gau()*0.22,
+          blur_all:1.9+gau()*0.4,
+          blur_subject:1.1+gau()*0.3,
+          blur_bg:2.6+0.7*age+gau()*0.5,
+          blur_sep:Math.max(0,1.5+0.7*age+gau()*0.45),
+          bg_micro:0.29-0.05*age+gau()*0.06,
+          subj_micro:0.46+gau()*0.07,
+          bg_rel_micro:0.63-0.08*age+gau()*0.09,
+          creaminess:Math.max(0,pr.cre+0.28*age+gau()*0.10),
+        },zs));
+      }
+    }
+  });
+  return out;
+}
+$("#demo").addEventListener("click",()=>{
+  S.demo=true;
+  adopt(demoRows());
+});
+
+/* ---------- miniaturas locales ----------
+   Nada sale del equipo: URL.createObjectURL sobre ficheros del disco, con un
+   tope de veinticuatro vivas y revocación de la más antigua. */
+const THUMBS=new Map(), THUMB_URL=new Map();
+const stemOf=p=>String(p||"").split(/[\\/]/).pop().toLowerCase().replace(/\.[^.]+$/,"");
+function indexThumbs(files){
+  THUMB_URL.forEach(u=>URL.revokeObjectURL(u));
+  THUMB_URL.clear(); THUMBS.clear();
+  [].forEach.call(files,f=>{
+    const st=stemOf(f.name);
+    if(!THUMBS.has(st)) THUMBS.set(st,f);
+    // subject_center.py --overlay escribe «r0.312__nombre.jpg»
+    const cut=st.indexOf("__");
+    if(cut>=0&&!THUMBS.has(st.slice(cut+2))) THUMBS.set(st.slice(cut+2),f);
+  });
+  S.nThumbs=files.length;
+  paintThumbInfo();
+}
+function paintThumbInfo(){
+  const el=$("#thumbsInfo"); if(!el) return;
+  el.textContent=S.nThumbs?(S.nThumbs+t("thumbsN")):t("thumbsNone");
+}
+function thumbKeyFor(r){
+  const st=stemOf(r.path);
+  if(THUMBS.has(st)) return st;
+  const cut=st.slice(0,60);
+  return THUMBS.has(cut)?cut:null;
+}
+function thumbURL(key){
+  if(THUMB_URL.has(key)) return THUMB_URL.get(key);
+  const f=THUMBS.get(key); if(!f) return null;
+  const u=URL.createObjectURL(f);
+  THUMB_URL.set(key,u);
+  if(THUMB_URL.size>24){
+    const old=THUMB_URL.keys().next().value;
+    URL.revokeObjectURL(THUMB_URL.get(old)); THUMB_URL.delete(old);
+  }
+  return u;
+}
+$("#thumbs").addEventListener("change",e=>{indexThumbs(e.target.files);});
 const drop=$("#drop");
 ["dragover","dragenter"].forEach(ev=>document.addEventListener(ev,e=>{
   e.preventDefault(); drop.classList.add("hot");}));
@@ -2845,11 +3797,15 @@ $("#svGlass").addEventListener("mousemove",e=>{
     if(d<bd){bd=d;best=r;}
   }
   if(best&&bd<200){
+    const tk=THUMBS.size?thumbKeyFor(best):null;
+    const tu=tk?thumbURL(tk):null;
     tip.innerHTML=`${esc((best.path||"").split(/[\\/]/).pop())}<br>
-      <span style="opacity:.7">${esc(best.group?gname(best.group):"")} · r=${fmt(best.r_norm)} ·
-      x=${fmt(best.x_norm)} y=${fmt(best.y_norm)}
+      <span style="opacity:.7">${esc(gname(groupKeyOf(best)))} · r=${fmt(best.r_norm)} ·
+      x=${fmt(best.x_norm)} y=${fmt(best.y_norm)} · m=${fmt(best.m_edge)}
       ${Number.isFinite(focalOf(best))?" · "+focalOf(best)+" mm":""}
-      ${Number.isFinite(best.f_number)?" · f/"+best.f_number:""}</span>`;
+      ${Number.isFinite(best.f_number)?" · f/"+best.f_number:""}
+      ${Number.isFinite(best.alpha_deg)?" · α="+fmt(best.alpha_deg,1)+"°":""}</span>`
+      +(tu?`<img class="miniram" src="${tu}" alt="">`:"");
     tip.style.left=Math.min(innerWidth-350,e.clientX+14)+"px";
     tip.style.top=(e.clientY+14)+"px"; tip.style.opacity=1;
   }else tip.style.opacity=0;
@@ -2863,7 +3819,12 @@ window.onLangChange=function(){
   // <option> no se oculta con display:none de forma fiable: se reescribe el texto
   const ax=$("#evoAxis");
   if(ax) [].forEach.call(ax.options,o=>{o.textContent=o.value==="t"?t("date"):t("axSeq");});
-  paintDateInfo();
+  // el resto de <option> estáticas llevan su propio par data-es/data-en
+  [].forEach.call(document.querySelectorAll("option[data-es]"),o=>{
+    const lb=o.getAttribute(LANG()==="en"?"data-en":"data-es");
+    if(lb) o.textContent=lb;
+  });
+  paintDateInfo(); paintThumbInfo(); paintOuts();
   if(!S.rows||!S.rows.length) return;
   // los selectores se reconstruyen con los rótulos del nuevo idioma; hay que
   // conservar la variable elegida, que es la clave y no el rótulo

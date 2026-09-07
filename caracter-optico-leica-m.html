@@ -298,6 +298,7 @@ body.locked .langbar{opacity:0;pointer-events:none}
       <a href="#metodo" data-nav>Method</a>
     </div>
     <div class="navsel">
+      <select class="navq" id="cuerpo" style="width:auto;max-width:250px" aria-label="Cuerpo y modo"></select>
       <input class="navq" type="search" id="q" placeholder="buscar objetivo…" aria-label="Buscar objetivo">
       <span class="slotdots" id="dots" title="Selección para comparar"></span>
       <button class="chip" id="gocmp" type="button">Comparar</button>
@@ -330,8 +331,16 @@ body.locked .langbar{opacity:0;pointer-events:none}
       <div class="eyebrow" data-lang="en">Comparative plate · background defocus at full aperture</div>
       <div class="kv" data-lang="es">pulse cualquiera para abrir su ficha</div>
       <div class="kv" data-lang="en">click any of them to open its lens sheet</div>
+      <div class="cgrp">
+        <span class="lbl" data-lang="es">Escala</span><span class="lbl" data-lang="en">Scale</span>
+        <div class="toggle" style="min-width:170px">
+          <button type="button" data-esc="estructura" aria-pressed="true"><span data-lang="es">Estructura</span><span data-lang="en">Structure</span></button>
+          <button type="button" data-esc="cantidad" aria-pressed="false"><span data-lang="es">Cantidad</span><span data-lang="en">Amount</span></button>
+        </div>
+      </div>
     </div>
     <div class="bench-row" id="bench"></div>
+    <div class="kv" data-escnota style="padding:7px 12px;border-top:1px solid var(--line);line-height:1.45"></div>
   </div>
 </header>
 
@@ -341,6 +350,27 @@ body.locked .langbar{opacity:0;pointer-events:none}
     <h2 data-lang="es">Catálogo</h2><h2 data-lang="en">Catalogue</h2>
     <span class="kv"><span id="n-shown">0</span>
       <span data-lang="es">visibles · pulse el nombre para la ficha, la casilla para comparar</span><span data-lang="en">visible · click the name for the sheet, the box to compare</span></span></div>
+  <div class="panel" style="margin-bottom:14px">
+    <div class="panel-hd">
+      <h3 style="margin:0" data-lang="es">Entrar por lo que quiere la foto</h3>
+      <h3 style="margin:0" data-lang="en">Enter by what the picture needs</h3>
+      <span class="kv" data-lang="es">el criterio se imprime con el resultado</span>
+      <span class="kv" data-lang="en">the criterion is printed with the result</span>
+    </div>
+    <div class="panel-bd">
+      <div class="crow" style="margin-bottom:12px">
+        <div class="cgrp"><span class="lbl" data-lang="es">Quiero</span><span class="lbl" data-lang="en">I want</span>
+          <select id="iq-quiero" aria-label="Intención"></select></div>
+        <div class="cgrp"><span class="lbl" data-lang="es">Focal</span><span class="lbl" data-lang="en">Focal length</span>
+          <select id="iq-focal" aria-label="Focal"></select></div>
+        <div class="cgrp"><span class="lbl" data-lang="es">Apertura</span><span class="lbl" data-lang="en">Aperture</span>
+          <select id="iq-apert" aria-label="Apertura máxima"></select></div>
+        <div class="cgrp"><span class="lbl" data-lang="es">Masa</span><span class="lbl" data-lang="en">Mass</span>
+          <select id="iq-masa" aria-label="Masa máxima"></select></div>
+      </div>
+      <div id="iq-out"></div>
+    </div>
+  </div>
   <div class="crow" style="margin-bottom:10px">
     <div class="cgrp" id="f-brand"><span class="lbl" data-lang="es">Marca</span><span class="lbl" data-lang="en">Brand</span></div>
     <div class="cgrp" id="f-focal"><span class="lbl" data-lang="es">Focal</span><span class="lbl" data-lang="en">Focal length</span></div>
@@ -351,6 +381,7 @@ body.locked .langbar{opacity:0;pointer-events:none}
   </div>
   <div class="crow" style="margin-bottom:12px">
     <div class="cgrp"><span class="lbl" data-lang="es">Ordenar</span><span class="lbl" data-lang="en">Sort by</span><select id="sort" aria-label="Criterio de orden"></select></div>
+    <button class="chip" id="monta" type="button" aria-pressed="false"><span data-lang="es">Solo lo que monta</span><span data-lang="en">Mounts only</span></button>
     <button class="chip" id="reset" type="button"><span data-lang="es">Restablecer filtros</span><span data-lang="en">Reset filters</span></button>
     <span class="kv" data-lang="es">Barras: cremosidad · microcontraste · borde · pureza cromática · contraste base</span>
     <span class="kv" data-lang="en">Bars: creaminess · microcontrast · edge · chromatic purity · base contrast</span>
@@ -535,6 +566,33 @@ body.locked .langbar{opacity:0;pointer-events:none}
   </details>
 
   <details class="met" style="margin-top:12px">
+    <summary data-lang="es">El cuerpo, el veredicto y la escena</summary>
+    <summary data-lang="en">The body, the verdict and the scene</summary>
+    <div class="metbd">
+      <div class="grid2">
+        <div>
+          <p class="meth" data-lang="es"><b>Catalogado.</b> Paso de píxel y megapíxeles nominales de cada cuerpo y modo, de las fichas de Leica: M11 en L-DNG 60,3 Mpx y 3,76 µm, M-DNG 36,5 y 4,85, S-DNG 18,4 y 6,86; Q3 43 con el mismo sensor que la M11; SL3-S 24,6 Mpx y 5,94 µm, y 96 Mpx con 2,97 µm en multishot. Son los mismos valores que usa <a href="sensor.html#datos">datos del sensor</a>.</p>
+          <p class="meth" data-lang="en"><b>Catalogued.</b> Pixel pitch and nominal megapixels of every body and mode, from Leica's data sheets: M11 in L-DNG 60.3 Mpx and 3.76 µm, M-DNG 36.5 and 4.85, S-DNG 18.4 and 6.86; Q3 43 with the same sensor as the M11; SL3-S 24.6 Mpx and 5.94 µm, and 96 Mpx at 2.97 µm in multishot. They are the same values used by <a href="sensor.html#datos">sensor data</a>.</p>
+          <p class="meth" data-lang="es"><b>Derivado.</b> Nyquist ν<sub>N</sub> = 1/(2p), MTF del píxel cuadrado |sinc(ν·p)|, MTF del sistema como producto de las tres piezas, y el techo del formato 864 mm²·(2ν<sub>50</sub>)², que para un objetivo perfecto es exactamente los 1 865/N² Mpx de la pestaña de <a href="sensor.html#difraccion">difracción y diafragma</a>. Aquí solo se añade el término que allí falta: el del objetivo.</p>
+          <p class="meth" data-lang="en"><b>Derived.</b> Nyquist ν<sub>N</sub> = 1/(2p), square-pixel MTF |sinc(ν·p)|, system MTF as the product of the three terms, and the format ceiling 864 mm²·(2ν<sub>50</sub>)², which for a perfect lens is exactly the 1,865/N² Mpx of the <a href="sensor.html#difraccion">diffraction and aperture</a> tab. All that is added here is the term missing there: the lens.</p>
+          <p class="meth" data-lang="es"><b>Derivado por regla.</b> El barrido de diafragma va de 0 a 5 pasos en tercios; ν<sub>50</sub> se resuelve por bisección sobre la MTF del sistema. El veredicto da el máximo, el intervalo con menos del 10 % de pérdida y el diafragma desde el que la difracción pesa más que las aberraciones sobre esa misma ν<sub>50</sub>. El marco del visor sale de la focal por proximidad logarítmica entre 28, 35, 50, 75, 90 y 135; el suelo del telémetro, de la distancia mínima (33 de las 129 filas de montura M enfocan por debajo de 0,70 m). El estado de montaje no es derivable y solo recoge lo que ya estaba escrito en la nota de dos filas.</p>
+          <p class="meth" data-lang="en"><b>Derived by rule.</b> The aperture sweep runs from 0 to 5 stops in thirds; ν<sub>50</sub> is solved by bisection on the system MTF. The verdict gives the peak, the interval where less than 10 % is lost, and the aperture from which diffraction weighs more than the aberrations at that same ν<sub>50</sub>. The finder frame follows from the focal length by logarithmic proximity among 28, 35, 50, 75, 90 and 135; the rangefinder floor, from the minimum focusing distance (33 of the 129 M-mount rows focus below 0.70 m). Mount status is not derivable and only records what was already written in the note of two rows.</p>
+        </div>
+        <div>
+          <p class="meth" data-lang="es"><b>Escena.</b> El diámetro del disco sobre el sensor es c = (f²/N)·|D<sub>f</sub>−D<sub>s</sub>| / (D<sub>f</sub>·(D<sub>s</sub>−f)), con todo en milímetros y el sujeto acotado por debajo a la distancia mínima de enfoque. El lienzo del simulador abarca 1,00 mm del sensor: en modo <i>cantidad</i> el disco se dibuja a esa escala y, si se sale, se recorta y se avisa, en vez de reescalar en silencio. En modo <i>estructura</i> el radio es constante, que es lo que hacía la página entera: sirve para leer la forma y no para comparar cuánto desenfoque hay.</p>
+          <p class="meth" data-lang="en"><b>Scene.</b> The disc diameter on the sensor is c = (f²/N)·|D<sub>b</sub>−D<sub>s</sub>| / (D<sub>b</sub>·(D<sub>s</sub>−f)), everything in millimetres and the subject clamped below at the minimum focusing distance. The simulator canvas spans 1.00 mm of sensor: in <i>amount</i> mode the disc is drawn to that scale and, if it runs off, it is clipped and flagged rather than silently rescaled. In <i>structure</i> mode the radius is constant, which is what the whole page used to do: good for reading the shape, useless for comparing how much defocus there is.</p>
+          <p class="meth" data-lang="es"><b>Lo que este bloque no es.</b> Los megapíxeles efectivos salen de la MTF modelada, cuyo módulo es conservador, y de un factor de mejora al diafragmar que el propio contraste con MTF de fábrica declara corto: son una cota inferior comparable entre objetivos, no una medida. Y no hay eje económico: ni precio, ni producción actual, ni mercado de segunda mano. La pregunta «¿compro este o aquel?» no se puede cerrar aquí y conviene decirlo en voz alta en vez de dejarlo implícito.</p>
+          <p class="meth" data-lang="en"><b>What this block is not.</b> The effective megapixels come from the modelled MTF, whose scale is conservative, and from a stopping-down improvement factor that the check against factory MTF itself declares too small: they are a lower bound that is comparable between lenses, not a measurement. And there is no economic axis: no price, no current production, no second-hand market. The question "do I buy this one or that one?" cannot be closed here, and it is better said aloud than left implicit.</p>
+          <p class="meth" data-lang="es"><b>La fila de referencia.</b> El APO-Summicron-ASPH 43 f/2 del Q3 43 se cataloga como una fila más del bloque valorado, marcada «referencia, no montable»: entra en la métrica, en el PCA y en la normalización por σ como cualquier otra, pero queda fuera de la lista de candidatos a vecino y del filtro de montaje. No es un patrón objetivo: sus índices son tan interpretativos como los demás, y su masa es una estimación porque Leica no publica la del bloque óptico por separado. El catálogo de montura M sigue teniendo 129 filas.</p>
+          <p class="meth" data-lang="en"><b>The reference row.</b> The APO-Summicron-ASPH 43 f/2 of the Q3 43 is catalogued as one more row of the rated block, marked "reference, not mountable": it enters the metric, the PCA and the σ normalisation like any other, but stays out of the neighbour candidate list and of the mount filter. It is not an objective standard: its indices are as interpretative as the rest, and its mass is an estimate because Leica does not publish that of the optical block on its own. The M-mount catalogue still has 129 rows.</p>
+          <p class="meth" data-lang="es">Los cuatro descriptores de intención de la cabecera del catálogo son combinaciones lineales declaradas de índices que ya existen. La fórmula se imprime junto al resultado, no aquí: un criterio que hay que ir a buscar al método no es un criterio, es una excusa. Cómo se leen las gráficas, una por una, está en el <a href="manual-caracter-optico.html">manual</a>.</p>
+          <p class="meth" data-lang="en">The intent descriptors at the head of the catalogue are declared linear combinations of indices that already exist. The formula is printed next to the result, not here: a criterion you have to go and look up in the method is not a criterion, it is an excuse. How each chart is read, one by one, is in the <a href="manual-caracter-optico.html">manual</a>.</p>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <details class="met" style="margin-top:12px">
     <summary data-lang="es">Contraste del modelo con MTF publicada</summary>
     <summary data-lang="en">The model checked against published MTF</summary>
     <div class="metbd">
@@ -559,8 +617,10 @@ body.locked .langbar{opacity:0;pointer-events:none}
       </div>
       <button class="xbtn" id="xdrawer" type="button" aria-label="Cerrar ficha">×</button>
     </div>
-    <div class="badges" id="f-badges" style="margin-top:8px"></div>
+    <div class="badges" id="f-monta" style="margin-top:8px"></div>
+    <div class="badges" id="f-badges" style="margin-top:7px"></div>
     <div class="kv" id="f-masparecido" style="margin-top:7px;line-height:1.45"></div>
+    <div class="kv" id="f-q43" style="margin-top:4px;line-height:1.45"></div>
     <div class="dnav">
       <button class="chip" id="f-add" type="button">Añadir a la comparación</button>
       <button class="chip" id="f-prev" type="button" aria-label="Anterior">&#8249;</button>
@@ -568,6 +628,7 @@ body.locked .langbar{opacity:0;pointer-events:none}
     </div>
   </div>
   <div class="drawer-bd">
+    <div class="dsec" id="f-veredicto" style="background:linear-gradient(180deg,var(--ink-700),var(--ink-800))"></div>
     <div class="dsec"><p class="note" id="f-note" style="margin:0;border-left:2px solid var(--d);padding-left:12px;font-size:14.5px"></p>
       <p class="kv" id="f-arqdesc" style="margin:9px 0 0;line-height:1.5"></p>
       <div class="badges" id="f-uso" style="margin-top:11px;align-items:center"></div></div>
@@ -586,7 +647,16 @@ body.locked .langbar{opacity:0;pointer-events:none}
           <div class="ctl"><label><span data-lang="es">Lado del foco</span><span data-lang="en">Side of focus</span></label>
             <div class="toggle" id="t-side"><button type="button" data-v="bg" aria-pressed="true"><span data-lang="es">Fondo</span><span data-lang="en">Background</span></button><button type="button" data-v="fg" aria-pressed="false"><span data-lang="es">Primer plano</span><span data-lang="en">Foreground</span></button></div></div>
           <div class="ctl"><label><span data-lang="es">Campo</span><span data-lang="en">Field</span> <b id="v-field">0 %</b></label><input type="range" id="s-field" min="0" max="100" value="0"></div>
-          <div class="ctl"><label><span data-lang="es">Desenfoque</span><span data-lang="en">Defocus</span> <b id="v-blur">1,0×</b></label><input type="range" id="s-blur" min="40" max="170" value="100"></div>
+          <div class="ctl"><label><span data-lang="es">Sujeto · fondo (m)</span><span data-lang="en">Subject · background (m)</span></label>
+            <div style="display:flex;gap:6px">
+              <input class="navq" style="width:100%;min-width:0" type="number" id="s-ds" min="0.2" max="60" step="0.1" value="2" aria-label="Distancia al sujeto en metros">
+              <input class="navq" style="width:100%;min-width:0" type="number" id="s-db" min="0.3" max="400" step="0.5" value="6" aria-label="Distancia al fondo en metros">
+            </div></div>
+          <div class="ctl"><label><span data-lang="es">Escala del disco</span><span data-lang="en">Disc scale</span></label>
+            <div class="toggle">
+              <button type="button" data-esc="estructura" aria-pressed="true"><span data-lang="es">Estructura</span><span data-lang="en">Structure</span></button>
+              <button type="button" data-esc="cantidad" aria-pressed="false"><span data-lang="es">Cantidad</span><span data-lang="en">Amount</span></button>
+            </div></div>
           <div class="ctl"><label><span data-lang="es">Exposición</span><span data-lang="en">Exposure</span> <b id="v-exp">0,0 EV</b></label><input type="range" id="s-exp" min="-30" max="30" value="0"></div>
         </div>
       </div>
@@ -596,14 +666,18 @@ body.locked .langbar{opacity:0;pointer-events:none}
     <div class="dsec" id="f-metrica"></div>
     <div class="dsec"><h3 style="margin-bottom:9px" data-lang="es">MTF modelada</h3>
       <h3 style="margin-bottom:9px" data-lang="en">Modelled MTF</h3><div id="mtf"></div>
-      <div class="legend"><span><s style="background:var(--d)"></s><span data-lang="es">plena apertura</span><span data-lang="en">full aperture</span></span><span><s style="background:var(--F)"></s><span id="mtf-ap">f/5,6</span></span><span><s style="background:var(--line2)"></s><span data-lang="es">difracción</span><span data-lang="en">diffraction</span></span><span data-lang="es">continua centro · discontinua borde</span><span data-lang="en">solid centre · dashed edge</span></div></div>
+      <div class="legend"><span><s style="background:var(--d)"></s><span data-lang="es">plena apertura</span><span data-lang="en">full aperture</span></span><span><s style="background:var(--F)"></s><span id="mtf-ap">f/5,6</span></span><span><s style="background:var(--ok)"></s><span data-lang="es">sistema, con el píxel</span><span data-lang="en">system, pixel included</span></span><span><s style="background:var(--g)"></s><span data-lang="es">Nyquist del cuerpo</span><span data-lang="en">body Nyquist</span></span><span><s style="background:var(--line2)"></s><span data-lang="es">difracción</span><span data-lang="en">diffraction</span></span><span data-lang="es">continua centro · discontinua borde</span><span data-lang="en">solid centre · dashed edge</span></div>
+      <p class="meth" style="margin:8px 0 0;font-size:12px" data-lang="es">El eje llega a 170 lp/mm para que quepan los tres Nyquist del parque: 133 en la M11 y en el Q3 43, 84 en el SL3-S nativo y 168 en su multishot de 96 Mpx. Que casi todo el catálogo se agote mucho antes de esa línea no es un error de dibujo: es el hallazgo. La curva verde añade el píxel cuadrado como integrador, |sinc(ν·p)|, y el segundo diafragma es el óptimo del veredicto, no un valor fijo. La difracción sola está desarrollada en <a href="sensor.html#difraccion">difracción y diafragma</a>.</p>
+      <p class="meth" style="margin:8px 0 0;font-size:12px" data-lang="en">The axis runs to 170 lp/mm so that the three Nyquist frequencies fit: 133 on the M11 and the Q3 43, 84 on the native SL3-S and 168 on its 96 Mpx multishot. That almost the whole catalogue is spent long before that line is not a drawing error: it is the finding. The green curve adds the square pixel as an integrator, |sinc(ν·p)|, and the second aperture is the optimum from the verdict, not a fixed value. Diffraction on its own is worked out in <a href="sensor.html#difraccion">diffraction and aperture</a>.</p></div>
     <div class="dsec" id="f-contraste" style="display:none"></div>
     <div class="dsec"><h3 style="margin-bottom:9px" data-lang="es">Caída de iluminación</h3>
       <h3 style="margin-bottom:9px" data-lang="en">Illumination falloff</h3><div id="vig"></div>
       <div class="legend"><span><s style="background:var(--d)"></s><span data-lang="es">total a plena apertura</span><span data-lang="en">total at full aperture</span></span><span><s style="background:var(--line2)"></s><span data-lang="es">cos⁴ natural</span><span data-lang="en">natural cos⁴</span></span></div></div>
     <div class="dsec"><h3 style="margin-bottom:9px" data-lang="es">Superficie focal y deriva</h3>
       <h3 style="margin-bottom:9px" data-lang="en">Focal surface and shift</h3><div id="curv"></div>
-      <div class="legend"><span><s style="background:var(--g)"></s><span data-lang="es">curvatura de campo</span><span data-lang="en">field curvature</span></span><span><s style="background:var(--C)"></s><span data-lang="es">deriva al diafragmar</span><span data-lang="en">shift on stopping down</span></span></div></div>
+      <div class="legend"><span><s style="background:var(--g)"></s><span data-lang="es">curvatura de campo</span><span data-lang="en">field curvature</span></span><span><s style="background:var(--C)"></s><span data-lang="es">deriva al diafragmar</span><span data-lang="en">shift on stopping down</span></span></div>
+      <p class="meth" style="margin:8px 0 0;font-size:12px" data-lang="es">Aquí la deriva es solo el índice del catálogo llevado a micras. Quién puede fiarse del telémetro y a qué diafragma, con ruido de leva, Monte Carlo y umbral psicométrico, está en <a href="telemetro-m11.html">telémetro y M11</a>, que lo hace bien para ocho objetivos.</p>
+      <p class="meth" style="margin:8px 0 0;font-size:12px" data-lang="en">Here the shift is only the catalogue index carried into microns. Who can trust the rangefinder, and at which aperture, with cam noise, Monte Carlo and a psychometric threshold, is in <a href="telemetro-m11.html">rangefinder and M11</a>, which does it properly for eight lenses.</p></div>
     <div class="dsec"><table id="tab-a"></table></div>
     <div class="dsec"><table id="tab-b"></table></div>
   </div>
@@ -800,7 +874,70 @@ es:{
   ariaDots:"Selección para comparar", ariaOrden:"Criterio de orden",
   ariaRef:"Objetivo de referencia", ariaEjeX:"Eje X", ariaEjeY:"Eje Y",
   ariaFicha:"Ficha del objetivo", ariaCerrar:"Cerrar ficha",
-  ariaAnterior:"Anterior", ariaSiguiente:"Siguiente", ariaDisco:"Simulación del disco de desenfoque"
+  ariaAnterior:"Anterior", ariaSiguiente:"Siguiente", ariaDisco:"Simulación del disco de desenfoque",
+  /* --- cuerpo y modo --- */
+  cuNinguno:"sin cuerpo",
+  cu_m11l:"M11 · L-DNG 60,3 Mpx · 3,76 µm", cu_m11m:"M11 · M-DNG 36,5 Mpx · 4,85 µm",
+  cu_m11s:"M11 · S-DNG 18,4 Mpx · 6,86 µm", cu_q3:"Q3 43 · 60,3 Mpx · 3,76 µm",
+  cu_sl3s:"SL3-S · 24,6 Mpx · 5,94 µm", cu_sl3sm:"SL3-S multishot · 96 Mpx · 2,97 µm",
+  cu_none:"Sin sensor (solo el objetivo)",
+  cus_m11l:"M11 en L-DNG", cus_m11m:"M11 en M-DNG", cus_m11s:"M11 en S-DNG", cus_q3:"Q3 43",
+  cus_sl3s:"SL3-S", cus_sl3sm:"SL3-S multishot", cus_none:"sin cuerpo",
+  /* --- veredicto por objetivo y cuerpo --- */
+  vdTit:"Veredicto · {body}",
+  vd_max:"Máximo a {ap}: {mp} Mpx efectivos en el centro, cota inferior del modelo, frente a los {perf} que daría ahí un objetivo perfecto y los {nom} Mpx del archivo.",
+  vd_maxSin:"Máximo a {ap}: la MTF del objetivo por la difracción cae al 50 % en {n50} lp/mm.",
+  vd_rango:"Se pierde menos del 10 % entre {a} y {b}.",
+  vd_rangoUno:"Fuera de {a} ya se pierde más del 10 %.",
+  vd_difr:"Desde {ap} manda la difracción: cerrar más no compra detalle, lo gasta.",
+  vd_difrNo:"La difracción no llega a mandar dentro de los cinco pasos simulados.",
+  vd_nyqA:"Manda el objetivo: a plena apertura el sistema baja del 50 % en {n50} lp/mm, el {pc} % del Nyquist de {nq} lp/mm que ofrece el cuerpo.",
+  vd_nyqB:"Manda el sensor: a plena apertura el sistema aún pasa del 50 % en el Nyquist de {nq} lp/mm.",
+  vd_esq:"Esquina a plena apertura: {mp} Mpx efectivos, el {pc} % del centro, con {ev} EV de caída y {um} µm de flecha de campo.",
+  vd_aviso:"El factor de mejora al diafragmar de este modelo (1,42 sobre la frecuencia característica, tope en 2,2 pasos) es menos de la mitad del que exigen las curvas de fábrica del único objetivo contrastado. El óptimo sale sesgado hacia aperturas abiertas: léalo como rango, no como número.",
+  vd_sinCuerpo:"Sin cuerpo seleccionado no hay Nyquist ni techo de muestreo. Elija uno en la barra superior para que este bloque dé megapíxeles.",
+  vd_ref:"Fila de referencia: el objetivo fijo del Q3 43, que no se monta en una M. Está aquí para comparar, no para comprar.",
+  vd_escala:"Los megapíxeles efectivos salen de la MTF modelada, cuyo módulo es conservador frente a las curvas de fábrica: son una cota inferior comparable entre objetivos, no una medida de resolución.",
+  /* --- escala de los discos --- */
+  escTit:"Escala", escEstr:"Estructura", escCant:"Cantidad",
+  escNotaEstr:"Todos los discos al mismo tamaño: se compara la estructura, no la cantidad de desenfoque.",
+  escNotaCant:"Radio proporcional a f/N a encuadre constante: se compara la cantidad de desenfoque, y la estructura del de pupila pequeña deja de leerse.",
+  /* --- geometría de escena --- */
+  simSujeto:"Sujeto (m)", simFondo:"Fondo (m)",
+  sc_diag:"A {ds} m con el fondo a {db} m y {ap}: disco de {c} mm sobre el sensor.",
+  sc_px:" Son {px} px en la {body} y el {pc} % del lado corto.",
+  sc_fg:"Primer plano de igual disco: {dn} m.",
+  sc_clip:"El disco se sale del lienzo, que abarca 1,00 mm del sensor: lo que ve está recortado por arriba.",
+  sc_mfd:"Sujeto por debajo de la distancia mínima ({mfd} m): ajustado a ella.",
+  sc_span:"Lienzo = 1,00 mm del sensor.",
+  /* --- monta, mide y encuadra --- */
+  mo_ok:"monta en digital", mo_meter:"tapa el fotómetro", mo_nodig:"no montar en digital",
+  mo_ref:"referencia · no montable",
+  mo_marco:"levanta el marco de {m}", mo_visor:"sin marco propio · visor externo",
+  mo_rf:"telémetro hasta 0,70 m", mo_rfok:"telémetro en todo su recorrido",
+  mo_filtro:"Solo lo que monta",
+  /* --- consulta por intención --- */
+  iqTit:"Quiero", iqFocal:"Focal", iqApert:"Apertura mínima", iqMasa:"Masa máxima",
+  iqGo:"Buscar", iqNada:"Ningún objetivo del catálogo pasa esos filtros.",
+  iq_crema:"fondo cremoso", iq_esquina:"máximo detalle en la esquina", iq_shift:"sin deriva de foco",
+  iq_calle:"ligero para calle", iq_contraluz:"limpio en contraluz",
+  iqw_crema:"0,60·cremosidad + 0,25·(100−nerviosismo) + 0,15·pupila normalizada",
+  iqw_esquina:"0,55·resolución de borde + 0,25·(100−viñeteo normalizado) + 0,20·(100−curvatura normalizada)",
+  iqw_shift:"0,70·(100−deriva de foco) + 0,30·microcontraste",
+  iqw_calle:"0,55·ligereza (100 en 150 g, 0 en 450 g) + 0,25·microcontraste + 0,20·contraste base",
+  iqw_contraluz:"0,55·contraste base + 0,25·microcontraste + 0,20·índice de tratamiento",
+  iqScore:"Puntuación", iqCriterio:"Criterio:", iqNotaPesos:"Los pesos son una convención declarada, del mismo rango que los de la métrica de carácter: no son una medida y no están validados contra juicios de observadores. El catálogo no tiene eje económico ni de disponibilidad, así que esto ordena por carácter y por peso, nunca por precio.",
+  iqRazon:"Gana por {a} ({va}) y paga {vb} más de {b} que el segundo.",
+  iqRazonLimpia:"Gana por {a} ({va}) y no paga nada frente al segundo en viñeteo, masa, deriva ni velo.",
+  iqApAny:"cualquiera", iqAp28:"f/2,8 o más luminoso", iqAp2:"f/2 o más luminoso", iqAp14:"f/1,4 o más luminoso",
+  iqMaAny:"cualquiera", iqMa250:"hasta 250 g", iqMa350:"hasta 350 g", iqMa500:"hasta 500 g",
+  /* --- vecinos y referencia --- */
+  thMpx:"Mpx ef",
+  q43:"Distancia al 43 del Q3: {d} (percentil {p} %). Lo que más los separa:",
+  q43self:"Esta es la referencia contra la que se mide el resto.",
+  b_ref:"referencia",
+  /* --- MTF del sistema --- */
+  mtfSist:"sistema (objetivo × difracción × píxel)", mtfNyq:"Nyquist del cuerpo"
 },
 en:{
   /* --- general interface --- */
@@ -951,12 +1088,78 @@ en:{
   ariaDots:"Selection for comparison", ariaOrden:"Sort criterion",
   ariaRef:"Reference lens", ariaEjeX:"X axis", ariaEjeY:"Y axis",
   ariaFicha:"Lens sheet", ariaCerrar:"Close lens sheet",
-  ariaAnterior:"Previous", ariaSiguiente:"Next", ariaDisco:"Simulation of the defocus disc"
+  ariaAnterior:"Previous", ariaSiguiente:"Next", ariaDisco:"Simulation of the defocus disc",
+  /* --- body and mode --- */
+  cuNinguno:"no body",
+  cu_m11l:"M11 · L-DNG 60.3 Mpx · 3.76 µm", cu_m11m:"M11 · M-DNG 36.5 Mpx · 4.85 µm",
+  cu_m11s:"M11 · S-DNG 18.4 Mpx · 6.86 µm", cu_q3:"Q3 43 · 60.3 Mpx · 3.76 µm",
+  cu_sl3s:"SL3-S · 24.6 Mpx · 5.94 µm", cu_sl3sm:"SL3-S multishot · 96 Mpx · 2.97 µm",
+  cu_none:"No sensor (the lens alone)",
+  cus_m11l:"M11 in L-DNG", cus_m11m:"M11 in M-DNG", cus_m11s:"M11 in S-DNG", cus_q3:"Q3 43",
+  cus_sl3s:"SL3-S", cus_sl3sm:"SL3-S multishot", cus_none:"no body",
+  /* --- verdict per lens and body --- */
+  vdTit:"Verdict · {body}",
+  vd_max:"Peak at {ap}: {mp} effective Mpx at the centre, a lower bound of the model, against the {perf} a perfect lens would give there and the {nom} Mpx of the file.",
+  vd_maxSin:"Peak at {ap}: lens MTF times diffraction falls to 50 % at {n50} lp/mm.",
+  vd_rango:"Less than 10 % is lost between {a} and {b}.",
+  vd_rangoUno:"Away from {a} more than 10 % is already lost.",
+  vd_difr:"From {ap} on, diffraction takes over: stopping down further spends detail rather than buying it.",
+  vd_difrNo:"Diffraction never takes over within the five stops simulated.",
+  vd_nyqA:"The lens is what limits: at full aperture the system drops below 50 % at {n50} lp/mm, {pc} % of the {nq} lp/mm Nyquist the body offers.",
+  vd_nyqB:"The sensor is what limits: at full aperture the system still passes 50 % at the {nq} lp/mm Nyquist.",
+  vd_esq:"Corner at full aperture: {mp} effective Mpx, {pc} % of the centre, with {ev} EV of falloff and {um} µm of field sag.",
+  vd_aviso:"The stopping-down improvement factor in this model (1.42 on the characteristic frequency, capped at 2.2 stops) is less than half of what the factory curves of the one lens checked would demand. The optimum comes out biased towards open apertures: read it as a range, not as a number.",
+  vd_sinCuerpo:"With no body selected there is no Nyquist and no sampling ceiling. Pick one in the top bar for this block to give megapixels.",
+  vd_ref:"Reference row: the fixed lens of the Q3 43, which does not mount on an M. It is here to compare against, not to buy.",
+  vd_escala:"The effective megapixels come from the modelled MTF, whose scale is conservative against factory curves: they are a lower bound that is comparable between lenses, not a resolution measurement.",
+  /* --- disc scale --- */
+  escTit:"Scale", escEstr:"Structure", escCant:"Amount",
+  escNotaEstr:"Every disc at the same size: what is compared is the structure, not the amount of defocus.",
+  escNotaCant:"Radius proportional to f/N at constant framing: what is compared is the amount of defocus, and the structure of the small-pupil lenses stops being readable.",
+  /* --- scene geometry --- */
+  simSujeto:"Subject (m)", simFondo:"Background (m)",
+  sc_diag:"At {ds} m with the background at {db} m and {ap}: a {c} mm disc on the sensor.",
+  sc_px:" That is {px} px on the {body} and {pc} % of the short side.",
+  sc_fg:"Foreground of equal disc: {dn} m.",
+  sc_clip:"The disc runs off the canvas, which spans 1.00 mm of sensor: what you see is clipped.",
+  sc_mfd:"Subject closer than the minimum focusing distance ({mfd} m): set to it.",
+  sc_span:"Canvas = 1.00 mm of sensor.",
+  /* --- mounts, meters and frames --- */
+  mo_ok:"mounts on digital", mo_meter:"blocks the meter", mo_nodig:"do not mount on digital",
+  mo_ref:"reference · not mountable",
+  mo_marco:"brings up the {m} frame", mo_visor:"no frame line · external finder",
+  mo_rf:"rangefinder down to 0.70 m", mo_rfok:"rangefinder over its whole range",
+  mo_filtro:"Mounts only",
+  /* --- query by intent --- */
+  iqTit:"I want", iqFocal:"Focal length", iqApert:"Minimum aperture", iqMasa:"Maximum mass",
+  iqGo:"Search", iqNada:"No lens in the catalogue passes those filters.",
+  iq_crema:"a creamy background", iq_esquina:"maximum corner detail", iq_shift:"no focus shift",
+  iq_calle:"light for the street", iq_contraluz:"clean against the light",
+  iqw_crema:"0.60·creaminess + 0.25·(100−nervousness) + 0.15·normalised pupil",
+  iqw_esquina:"0.55·edge resolution + 0.25·(100−normalised vignetting) + 0.20·(100−normalised curvature)",
+  iqw_shift:"0.70·(100−focus shift) + 0.30·microcontrast",
+  iqw_calle:"0.55·lightness (100 at 150 g, 0 at 450 g) + 0.25·microcontrast + 0.20·base contrast",
+  iqw_contraluz:"0.55·base contrast + 0.25·microcontrast + 0.20·coating index",
+  iqScore:"Score", iqCriterio:"Criterion:", iqNotaPesos:"The weights are a stated convention, of the same standing as those of the character metric: they are not a measurement and they have not been validated against observer judgements. The catalogue carries no axis of price or availability, so this ranks by character and by mass, never by cost.",
+  iqRazon:"Wins on {a} ({va}) and pays {vb} more {b} than the runner-up.",
+  iqRazonLimpia:"Wins on {a} ({va}) and pays nothing against the runner-up in vignetting, mass, shift or veiling glare.",
+  iqApAny:"any", iqAp28:"f/2.8 or faster", iqAp2:"f/2 or faster", iqAp14:"f/1.4 or faster",
+  iqMaAny:"any", iqMa250:"up to 250 g", iqMa350:"up to 350 g", iqMa500:"up to 500 g",
+  /* --- neighbours and reference --- */
+  thMpx:"Eff. Mpx",
+  q43:"Distance to the 43 of the Q3: {d} (percentile {p} %). What separates them most:",
+  q43self:"This is the reference the rest is measured against.",
+  b_ref:"reference",
+  /* --- system MTF --- */
+  mtfSist:"system (lens × diffraction × pixel)", mtfNyq:"body Nyquist"
 }
 };
 const LANG = ()=> document.documentElement.lang==="en" ? "en" : "es";
 const LOCALE = ()=> LANG()==="en" ? "en-GB" : "es-ES";
 function t(k){ const D=T[LANG()]||T.es; return D[k]!==undefined ? D[k] : (T.es[k]!==undefined?T.es[k]:k); }
+/* Plantilla del diccionario: t("clave") con huecos {x} rellenados desde un
+   objeto. Mantiene la frase entera en cada idioma en vez de trocearla.     */
+function tf(k,o){ return t(k).replace(/\{(\w+)\}/g, (m,c)=> o[c]!==undefined ? o[c] : m); }
 
 /* =======================================================================
    Catálogo. Campos:
@@ -1098,6 +1301,7 @@ TTArtisan 90 f/1.25|TTArtisan|90|1.25|2020|Doble Gauss|8|6|0|14|0.9|67|920|multi
 Thypoch Simera 35 f/1.4|Thypoch|35|1.4|2023|Gauss asférico|9|7|2|14|0.5|46|350|multi+|76|-14|18|24|88|92|82|20|16|20|0.06|-0.6|2.3|42|18|8|38|Fabricante reciente con acabado mecánico notable. Catorce palas con muescas de apertura que mantienen el disco casi circular.
 Thypoch Simera 28 f/1.4|Thypoch|28|1.4|2023|Retrofoco asférico|11|8|2|14|0.5|46|380|multi+|74|-16|20|26|86|90|78|22|18|24|0.06|-1.2|2.8|46|18|10|38|Mismo planteamiento en gran angular luminoso. Corrección alta con transición al desenfoque más amable que la media asférica.
 Funleader Caps 18 f/8|Funleader|18|8|2020|Triplete|3|3|0|0|0.6|0|30|multi|48|-30|34|48|56|64|44|30|32|26|0.14|-2.0|2.6|20|0|10|30|Tapa objetivo de tres elementos y diafragma fijo. Curiosidad óptica de rendimiento modesto y masa despreciable.
+APO-Summicron-ASPH 43 f/2 (Q3 43)|Leica|43|2|2023|Apocromático asférico|8|6|1|9|0.27|49|290|multi+|66|-5|8|18|94|96|90|9|10|14|0.03|-0.5|1.8|30|18|5|46|Fila de referencia, no de catálogo M: es el objetivo fijo del Q3 43 y no se puede montar en una M. Los índices se han valorado con el mismo criterio que el resto, no medido; la masa es una estimación, porque Leica no publica la del bloque óptico por separado. Está aquí para que cualquier objetivo del catálogo se pueda comparar con el que ya se lleva encima.
 `;
 /* ===================== 1. PARSEO ===================== */
 const COLS = ["name","brand","focal","fmax","year","family","el","gr","asph","blades","mfd","filter","weight","coat",
@@ -1105,6 +1309,27 @@ const COLS = ["name","brand","focal","fmax","year","family","el","gr","asph","bl
 const NUMC = new Set(["focal","fmax","year","el","gr","asph","blades","mfd","filter","weight",
   "crema","sa","glow","velo","micro","resC","resB","loca","laca","coma","curv","dist","vig","mech","onion","shift","nerv"]);
 
+/* Fila marcada como referencia: entra en la métrica como una más, pero no es
+   un objetivo de montura M y queda fuera de los filtros de montaje y de la
+   lista de candidatos a vecino.                                            */
+const REFNAMES = new Set(["APO-Summicron-ASPH 43 f/2 (Q3 43)"]);
+const Q43NAME = "APO-Summicron-ASPH 43 f/2 (Q3 43)";
+/* Único dato de montaje que no es derivable: estaba en prosa dentro de la
+   columna «nota» de estas dos filas y aquí se hace consultable.            */
+const MOUNT = {
+  "Super-Angulon-M 21 f/3.4":"meter",
+  "Elmarit 28 f/2.8 (1ª serie)":"nodig"
+};
+/* Marcos del visor de la M: 28, 35, 50, 75, 90 y 135. Un objetivo levanta el
+   marco más próximo en escala logarítmica; fuera de 26 a 140 mm hace falta
+   visor externo. Regla, no dato de catálogo.                               */
+const MARCOS = [28,35,50,75,90,135];
+function marcoDe(f){
+  if(f<26 || f>140) return 0;
+  let b=MARCOS[0];
+  MARCOS.forEach(m=>{ if(Math.abs(Math.log(f/m))<Math.abs(Math.log(f/b))) b=m; });
+  return b;
+}
 const LENSES = RAW.trim().split("\n").filter(s=>s.trim()).map((line,i)=>{
   const p = line.split("|"), o = {i};
   COLS.forEach((c,j)=>{ o[c] = NUMC.has(c) ? parseFloat(p[j]) : p[j]; });
@@ -1117,6 +1342,13 @@ const LENSES = RAW.trim().split("\n").filter(s=>s.trim()).map((line,i)=>{
   o.aov = 2*Math.atan(21.63/o.focal)*180/Math.PI;
   o.pupila = o.focal/o.fmax;
   o.arq = arquetipo(o);
+  /* Derivado por regla, sin dato nuevo: fila de referencia, marco de visor y
+     suelo de acoplamiento del telémetro. El estado de montaje sale de MOUNT,
+     que solo recoge lo que ya estaba escrito en la nota de catálogo.        */
+  o.ref   = REFNAMES.has(o.name);
+  o.mount = o.ref ? "ref" : (MOUNT[o.name] || "ok");
+  o.marco = marcoDe(o.focal);
+  o.rfBajo = o.mfd < 0.70;
   return o;
 });
 
@@ -1183,7 +1415,10 @@ const SLOTCOL = ["#E8B33C","#35B7E6","#8A6BE0","#4FBF95"];
 const fmt = (v,d=0)=>v.toLocaleString(LOCALE(),{minimumFractionDigits:d,maximumFractionDigits:d,useGrouping:false});
 const fap = v=>"f/"+v.toLocaleString(LOCALE(),{maximumFractionDigits:2,useGrouping:false});
 const APS = [0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5];
-const apLabel = (l,st)=>{const N=l.fmax*Math.pow(2,st/2); return fap(Math.round(N*10)/10);};
+/* Por debajo de f/2 hace falta la centésima: redondear a la décima convierte
+   un f/0,95 en «f/1».                                                      */
+const fapN = N=>fap(N<2 ? Math.round(N*100)/100 : Math.round(N*10)/10);
+const apLabel = (l,st)=>fapN(l.fmax*Math.pow(2,st/2));
 
 /* ===================== 3. MODELO DEL DISCO ===================== */
 function insidePoly(x,y,nb,p){
@@ -1222,7 +1457,12 @@ function renderDisc(cv, L, o){
   const ctx=cv.getContext("2d");
   const st = Math.max(0, 2*Math.log2(o.N/L.fmax));           // pasos de diafragma
   const poly = Math.min(1, st/1.1);                          // aparición del polígono
-  const R0 = 0.415*Math.min(W,H)*o.blur*(L.fmax/o.N);        // radio paraxial
+  const bl = o.blur===undefined ? 1 : o.blur;
+  /* o.rel es el radio en fracción del radio máximo dibujable. Sin él se usa
+     fmax/N, que da el MISMO radio a todos a plena apertura: eso compara
+     estructura, no cantidad de desenfoque.                                 */
+  const rel = o.rel!==undefined ? o.rel : (L.fmax/o.N);
+  const R0 = 0.415*Math.min(W,H)*bl*rel;                     // radio paraxial
   const sgn = o.side==="fg" ? -1 : 1;
   const a  = sgn*R0;
   const b  = -(L.sa/100)*0.95*R0;                            // fijo por objetivo, no cambia de signo
@@ -1298,6 +1538,67 @@ const YMAX = 21.63, LAM = 0.00055;
 function mtfDiff(nu,N){ const nc=1/(LAM*N); if(nu>=nc) return 0; const p=nu/nc, ph=Math.acos(p); return (2/Math.PI)*(ph-p*Math.sqrt(1-p*p)); }
 function mtfAb(nu,res,st){ const n0=(-3.7+0.685*res)*(1+0.42*Math.min(1,st/2.2)); return Math.exp(-Math.pow(nu/Math.max(6,n0),1.6)); }
 function mtfTot(nu,res,N,st){ return mtfAb(nu,res,st)*mtfDiff(nu,N); }
+
+/* ---- el cuerpo: paso de píxel, Nyquist y techo de muestreo ----
+   El píxel cuadrado actúa como integrador: su MTF es |sinc(ν·p)| con ν en
+   lp/mm y p en mm, la misma convención que usa la pestaña de difracción de
+   sensor.html. El techo de megapíxeles del formato completo es
+   864 mm² · (2ν50)², idéntico a los 1865/N² de esa pestaña cuando el objetivo
+   es perfecto. Datos de catálogo del fabricante; el reparto por modo de la
+   M11 es exacto sobre el mismo sensor.                                     */
+const BODIES = [
+  {k:"m11l",  p:3.76, mpx:60.3},
+  {k:"m11m",  p:4.85, mpx:36.5},
+  {k:"m11s",  p:6.86, mpx:18.4},
+  {k:"q3",    p:3.76, mpx:60.3},
+  {k:"sl3s",  p:5.94, mpx:24.6},
+  {k:"sl3sm", p:2.97, mpx:96},
+  {k:"none",  p:0,    mpx:0}
+];
+let cuerpo = 0;
+const BODY   = ()=>BODIES[cuerpo];
+const nyq    = b=>b.p>0 ? 500/b.p : 0;                  /* lp/mm */
+const bodyLab= b=>t("cu_"+b.k);
+const bodyShort=b=>t("cus_"+b.k);
+function pixMTF(nu,p){ if(!p) return 1; const x=nu*p/1000; if(x<1e-9) return 1;
+  return Math.abs(Math.sin(Math.PI*x)/(Math.PI*x)); }
+function mtfSist(nu,res,N,st,p){ return mtfAb(nu,res,st)*mtfDiff(nu,N)*pixMTF(nu,p); }
+/* ν50 del sistema por barrido grueso y bisección: el término del píxel no es
+   monótono más allá de su primer cero, así que se acota el intervalo antes.  */
+function nu50(res,N,st,p){
+  const top = p>0 ? 1000/p : 400;                        /* primer cero del sinc */
+  let a=0, fa=1;
+  for(let nu=1; nu<=top; nu+=1){ const f=mtfSist(nu,res,N,st,p);
+    if(f<0.5){ let lo=a, hi=nu;
+      for(let k=0;k<40;k++){ const m=(lo+hi)/2; if(mtfSist(m,res,N,st,p)>=0.5) lo=m; else hi=m; }
+      return (lo+hi)/2; }
+    a=nu; fa=f; }
+  return top;
+}
+const AREA = 864;                                        /* mm² del 24×36 */
+function mpxEf(n50, nominal){
+  const techo = AREA*Math.pow(2*n50,2)/1e6;
+  return nominal>0 ? Math.min(nominal,techo) : techo;
+}
+/* Barrido de diafragma de 0 a 5 pasos en tercios. Devuelve el óptimo, el
+   intervalo con menos del 10 % de pérdida y el diafragma desde el que la
+   difracción pesa más que las aberraciones sobre la propia ν50.            */
+function barrido(L,p,nominal){
+  const pts=[];
+  for(let k=0;k<=15;k++){
+    const st=k/3, N=L.fmax*Math.pow(2,st/2);
+    const nc=nu50(L.resC,N,st,p), nb=nu50(L.resB,N,st,p);
+    pts.push({st,N,nc,nb,mc:mpxEf(nc,nominal),mb:mpxEf(nb,nominal),
+              ab:mtfAb(nc,L.resC,st), df:mtfDiff(nc,N)});
+  }
+  let best=0; pts.forEach((o,i)=>{ if(o.mc>pts[best].mc+1e-9) best=i; });
+  const lim=pts[best].mc*0.9;
+  let lo=best, hi=best;
+  while(lo>0 && pts[lo-1].mc>=lim) lo--;
+  while(hi<pts.length-1 && pts[hi+1].mc>=lim) hi++;
+  let dif=-1; for(let i=0;i<pts.length;i++){ if(pts[i].df<pts[i].ab){ dif=i; break; } }
+  return {pts,best,lo,hi,dif};
+}
 function vigModel(L){
   const th=Math.atan(YMAX/L.focal), nat4=Math.pow(Math.cos(th),4);
   const tgt=Math.pow(2,-L.vig);
@@ -1392,27 +1693,41 @@ function drawRadar(host, list, cols){
 }
 
 /* ---- MTF ---- */
-function drawMTF(host,L){
+function drawMTF(host,L,N2opt){
   host.innerHTML="";
-  const W=330,H=200,mL=32,mR=8,mT=10,mB=24;
+  const W=330,H=200,mL=32,mR=8,mT=10,mB=24, NUX=170;
   const s=svg(W,H); host.appendChild(s);
-  const X=nu=>mL+(nu/80)*(W-mL-mR), Y=m=>mT+(1-m)*(H-mT-mB);
+  const B=BODY(), p=B.p, nq=nyq(B);
+  const X=nu=>mL+(nu/NUX)*(W-mL-mR), Y=m=>mT+(1-m)*(H-mT-mB);
   for(let m=0;m<=1.001;m+=.25){ path(s,"M"+mL+" "+Y(m)+"H"+(W-mR),{stroke:"rgba(40,50,63,.9)","stroke-width":.6}); txt(s,mL-5,Y(m)+3.5,fmt(m*100)+"%","axl","end"); }
-  [0,20,40,60,80].forEach(nu=>{ path(s,"M"+X(nu)+" "+mT+"V"+Y(0),{stroke:"rgba(40,50,63,.6)","stroke-width":.6}); txt(s,X(nu),H-8,nu,"axl","middle"); });
+  [0,40,80,120].forEach(nu=>{ path(s,"M"+X(nu)+" "+mT+"V"+Y(0),{stroke:"rgba(40,50,63,.6)","stroke-width":.6}); txt(s,X(nu),H-8,nu,"axl","middle"); });
+  path(s,"M"+X(160)+" "+mT+"V"+Y(0),{stroke:"rgba(40,50,63,.6)","stroke-width":.6});
   txt(s,W-mR,H-8,"lp/mm","axl","end");
-  const curve=(res,N,st,col,dash)=>{ let d="";
-    for(let nu=0;nu<=80;nu+=1.6){ const m=mtfTot(nu,res,N,st); d+=(nu?"L":"M")+X(nu)+" "+Y(m); }
-    path(s,d,Object.assign({stroke:col,"stroke-width":1.6},dash?{"stroke-dasharray":"3 3"}:{})); };
-  let d=""; for(let nu=0;nu<=80;nu+=1.6){ d+=(nu?"L":"M")+X(nu)+" "+Y(mtfDiff(nu,L.fmax)); }
-  path(s,d,{stroke:"#384556","stroke-width":1,"stroke-dasharray":"1 3"});
-  curve(L.resC,L.fmax,0,"#E8B33C",false); curve(L.resB,L.fmax,0,"#E8B33C",true);
+  const curve=(fn,col,dash,wd)=>{ let d="";
+    for(let nu=0;nu<=NUX;nu+=1.7){ d+=(nu?"L":"M")+X(nu)+" "+Y(fn(nu)); }
+    path(s,d,Object.assign({stroke:col,"stroke-width":wd||1.6},dash?{"stroke-dasharray":dash}:{})); };
+  /* suelo de difracción a plena apertura */
+  curve(nu=>mtfDiff(nu,L.fmax),"#384556",false,1);
   const ref=MTFREF[L.name];
-  const N2=ref?ref.N2:Math.max(L.fmax,5.6), st2=2*Math.log2(N2/L.fmax);
-  curve(L.resC,N2,st2,"#35B7E6",false); curve(L.resB,N2,st2,"#35B7E6",true);
+  const N2=ref?ref.N2:(N2opt||Math.max(L.fmax,5.6)), st2=2*Math.log2(N2/L.fmax);
+  /* objetivo × difracción, plena apertura y segundo diafragma */
+  curve(nu=>mtfTot(nu,L.resC,L.fmax,0),"#E8B33C",false);
+  curve(nu=>mtfTot(nu,L.resB,L.fmax,0),"#E8B33C","3 3");
+  curve(nu=>mtfTot(nu,L.resC,N2,st2),"#35B7E6",false);
+  curve(nu=>mtfTot(nu,L.resB,N2,st2),"#35B7E6","3 3");
+  /* MTF del sistema: se le añade el píxel como integrador */
+  if(p>0){
+    curve(nu=>mtfSist(nu,L.resC,L.fmax,0,p),"#4FBF95",false,1.4);
+    curve(nu=>mtfSist(nu,L.resC,N2,st2,p),"#4FBF95","2 3",1.4);
+    if(nq<=NUX){
+      path(s,"M"+X(nq)+" "+mT+"V"+Y(0),{stroke:"#8A6BE0","stroke-width":1.1,"stroke-dasharray":"5 3"});
+      txt(s,X(nq)-3,mT+9,fmt(nq)+" lp/mm","axl","end").setAttribute("fill","#8A6BE0");
+    }
+  }
   const ap=$("mtf-ap"); if(ap) ap.textContent="f/"+fmt(N2,N2<10&&N2%1?1:0);
   if(ref){
     const marca=(pts,col,hueco)=>pts.forEach(pt=>{
-      if(pt[0]>80) return;
+      if(pt[0]>NUX) return;
       el(s,"circle",{cx:X(pt[0]),cy:Y(pt[1]),r:3.1,fill:hueco?"var(--ink-800)":col,stroke:col,"stroke-width":1.4});
     });
     marca(ref.c1,"#E8B33C",false); marca(ref.b1,"#E8B33C",true);
@@ -1631,9 +1946,17 @@ function separador(i,j,ix){
    CAPA DE INTERFAZ
    ============================================================ */
 const $=id=>document.getElementById(id);
-let cur=null, sel=[], sim={N:0,side:"bg",field:0,blur:1,exp:0};
+let cur=null, sel=[], sim={N:0,side:"bg",field:0,exp:0,ds:2,db:6};
 let sub=0, tab="vec", par=null;
-let fil={brand:"Todas",focal:null,era:null,tag:null,q:"",sort:"year"};
+let fil={brand:"Todas",focal:null,era:null,tag:null,q:"",sort:"year",monta:false};
+/* Escala de los discos. "estructura" mantiene el radio constante (se compara
+   la forma); "cantidad" lo hace proporcional a f/N a encuadre constante.
+   Estado único para la placa de portada, el par y la rejilla de perfiles.  */
+let escala="estructura";
+/* El lienzo del simulador abarca este ancho de sensor, en mm. Declararlo es
+   lo que permite leer el disco en milímetros y en píxeles.                 */
+const SPANMM=1.00;
+let iq={quiero:"iq_crema",focal:null,apert:0,masa:0};
 let rec={ref:0,focal:"any",marca:"any",epoca:"any"};
 let mapX="crema", mapY="micro", mapLab=false, mapAcc="sel", mapOnly=false;
 let vista=[];   /* orden filtrado actual, para navegar con ‹ › */
@@ -1687,6 +2010,7 @@ function filtrar(){
     if(fil.focal && (L.focal<fil.focal[0]||L.focal>fil.focal[1])) return false;
     if(fil.era && (L.year<fil.era[0]||L.year>fil.era[1])) return false;
     if(fil.tag && L.tags.indexOf(fil.tag)<0) return false;
+    if(fil.monta && (L.ref || L.mount==="nodig")) return false;
     if(q && (L.name+" "+L.brand+" "+L.family+" "+arqNombre(L)+" "+L.nota+" "
       +L.tags.map(t).join(" ")+" "+L.usos.map(t).join(" ")).toLowerCase().indexOf(q)<0) return false;
     return true;
@@ -1759,6 +2083,185 @@ function barra(m,L){
     return "<tr><td>"+m.n+"</td><td class='v'>"+(v>0?"+":"")+fmt(v)+"</td><td style='width:92px;padding-left:6px'><div class='ibar sg'><i style='left:"+x+"%;width:"+w+"%'></i></div></td></tr>"; }
   return "<tr><td>"+m.n+"</td><td class='v'>"+fmt(v)+"</td><td style='width:92px;padding-left:6px'><div class='ibar'><i style='left:0;width:"+v+"%'></i></div></td></tr>";
 }
+/* ===================== VEREDICTO, MONTAJE Y ESCENA ===================== */
+/* Todo lo que sigue es DERIVADO POR REGLA sobre el modelo que la ficha ya
+   tenía: no entra ningún dato nuevo de catálogo salvo el paso de píxel de
+   cada cuerpo, que es de fábrica.                                          */
+
+/* Megapíxeles efectivos en el óptimo de cada objetivo, con memoria por
+   cuerpo para no rehacer el barrido en cada repintado.                     */
+const MPXCACHE=new Map();
+function mpxOpt(L){
+  const key=L.i+"|"+cuerpo;
+  if(MPXCACHE.has(key)) return MPXCACHE.get(key);
+  const B=BODY(), sw=barrido(L,B.p,B.mpx), o=sw.pts[sw.best];
+  const r={mpx:o.mc, N:o.N, n50:o.nc};
+  MPXCACHE.set(key,r); return r;
+}
+function pintarVeredicto(L){
+  const B=BODY(), pp=B.p, host=$("f-veredicto");
+  const sw=barrido(L,pp,B.mpx), o=sw.pts[sw.best];
+  const apOpt=fapN(o.N);
+  const fr=[];
+  /* Primero la pregunta que decide: ¿manda el objetivo o manda el sensor?
+     La respuesta no depende del módulo absoluto de la MTF modelada, solo de
+     dónde cae ν50 frente al Nyquist.                                      */
+  if(pp>0){
+    const nq=nyq(B), m=mtfSist(nq,L.resC,L.fmax,0,pp);
+    fr.push(m>=0.5 ? tf("vd_nyqB",{nq:fmt(nq)})
+                   : tf("vd_nyqA",{n50:fmt(sw.pts[0].nc), nq:fmt(nq),
+                                   pc:fmt(100*sw.pts[0].nc/nq)}));
+  } else fr.push(t("vd_sinCuerpo"));
+  if(pp>0) fr.push(tf("vd_max",{ap:apOpt, mp:fmt(o.mc,1),
+      perf:fmt(1865/(o.N*o.N),1), nom:fmt(B.mpx,1)}));
+  else     fr.push(tf("vd_maxSin",{ap:apOpt, n50:fmt(o.nc)}));
+  fr.push(sw.lo===sw.hi ? tf("vd_rangoUno",{a:apOpt})
+        : tf("vd_rango",{a:fapN(sw.pts[sw.lo].N), b:fapN(sw.pts[sw.hi].N)}));
+  fr.push(sw.dif<0 ? t("vd_difrNo")
+        : tf("vd_difr",{ap:fapN(sw.pts[sw.dif].N)}));
+  const p0=sw.pts[0];
+  fr.push(tf("vd_esq",{mp:fmt(p0.mb,1), pc:fmt(100*p0.mb/Math.max(1e-6,p0.mc)),
+                       ev:fmt(L.vig,1), um:fmt(L.curv*1000)}));
+  let h="<div class='eyebrow' style='margin-bottom:6px'>"+tf("vdTit",{body:bodyShort(B)})+"</div>";
+  if(L.ref) h+="<p class='meth' style='margin:0 0 7px;color:var(--d)'>"+t("vd_ref")+"</p>";
+  h+="<p style='margin:0;font-size:14.5px;line-height:1.55;color:var(--txt)'>"+fr.join(" ")+"</p>";
+  h+="<p class='meth' style='margin:8px 0 0;font-size:12px'>"+t("vd_escala")+" "+t("vd_aviso")
+    +" <a href='sensor.html#difraccion' data-lang='es'>Difracción y techo del formato →</a>"
+    +"<a href='sensor.html#difraccion' data-lang='en'>Diffraction and the format ceiling →</a></p>";
+  host.innerHTML=h;
+  return o.N;
+}
+
+/* ---------- monta, mide y encuadra ---------- */
+function pintarMonta(L){
+  const col={ok:"var(--ok)",meter:"var(--d)",nodig:"var(--C)",ref:"var(--g)"}[L.mount];
+  let h="<span class='badge' style='border-color:"+col+";color:"+col+"'>"+t("mo_"+L.mount)+"</span>";
+  /* Marco de visor y acoplamiento del telémetro solo tienen sentido en un
+     objetivo que se monte en la M: la fila de referencia no lleva ninguno. */
+  if(!L.ref){
+    h+="<span class='badge'>"+(L.marco?tf("mo_marco",{m:L.marco}):t("mo_visor"))+"</span>";
+    h+="<a class='badge' href='telemetro-m11.html' style='text-decoration:none'>"
+      +(L.rfBajo?t("mo_rf"):t("mo_rfok"))+"</a>";
+  }
+  $("f-monta").innerHTML=h;
+}
+
+/* ---------- distancia al 43 del Q3 ---------- */
+function pintarQ43(L){
+  const host=$("f-q43"), R=LENSES.find(o=>o.name===Q43NAME);
+  if(!R){ host.innerHTML=""; return; }
+  if(R.i===L.i){ host.innerHTML="<span class='kv'>"+t("q43self")+"</span>"; return; }
+  const ix=SUB[0][1], d=dSub(L.i,R.i,ix), pc=pctil(d,distr(0));
+  host.innerHTML=tf("q43",{d:fmt(d,2), p:fmt(pc)})+" "+conDef(separador(L.i,R.i,ix));
+}
+
+/* ---------- geometría de escena ---------- */
+/* c = (f²/N)·|Db−Ds| / (Db·(Ds−f)), con f, Ds y Db en mm. Es el diámetro del
+   disco sobre el sensor, exacto para una lente delgada enfocada en Ds.     */
+function discoMM(L,N,ds,db){
+  const f=L.focal, Ds=Math.max(ds,L.mfd)*1000, Db=db*1000;
+  if(Ds<=f+1) return NaN;
+  return (f*f/N)*Math.abs(Db-Ds)/(Db*(Ds-f));
+}
+/* Plano cercano que produce el mismo diámetro de disco. */
+function planoIgual(L,N,ds,c){
+  const f=L.focal, Ds=Math.max(ds,L.mfd)*1000, k=f*f/N;
+  if(!(c>0)) return NaN;
+  return (k*Ds/(c*(Ds-f)+k))/1000;
+}
+
+/* ---------- escala de los discos ---------- */
+function relCant(L,N,pupMax){ return pupMax>0 ? Math.min(1,(L.focal/N)/pupMax) : 1; }
+function setEscala(v){
+  escala=v;
+  document.querySelectorAll("[data-esc]").forEach(b=>
+    b.setAttribute("aria-pressed", String(b.dataset.esc===escala)));
+  document.querySelectorAll("[data-escnota]").forEach(e=>
+    e.textContent = t(escala==="cantidad"?"escNotaCant":"escNotaEstr"));
+  pintarBanco();
+  if(tab==="perf") pintarPerfiles();
+  if(tab==="dist") pintarPar2();
+  if(cur) actualizarSim();
+}
+
+/* ---------- consulta por intención ---------- */
+/* Los pesos son convención declarada y se imprimen junto al resultado. */
+const INTENT=[
+  {k:"iq_crema", w:"iqw_crema", terms:L=>[["met_crema",L.crema,0.60],
+     ["met_nerv",100-L.nerv,0.25],["met_pupila",Math.min(100,100*L.pupila/72),0.15]]},
+  {k:"iq_esquina", w:"iqw_esquina", terms:L=>[["met_resB",L.resB,0.55],
+     ["met_vig",Math.max(0,100-100*L.vig/3.6),0.25],
+     ["met_curv",Math.max(0,100-100*Math.abs(L.curv)/0.36),0.20]]},
+  {k:"iq_shift", w:"iqw_shift", terms:L=>[["met_shift",100-L.shift,0.70],["met_micro",L.micro,0.30]]},
+  {k:"iq_calle", w:"iqw_calle", terms:L=>[["met_weight",Math.max(0,Math.min(100,100*(450-L.weight)/300)),0.55],
+     ["met_micro",L.micro,0.25],["gen_velo",100-L.velo,0.20]]},
+  {k:"iq_contraluz", w:"iqw_contraluz", terms:L=>[["gen_velo",100-L.velo,0.55],["met_micro",L.micro,0.25],
+     ["f_coat",{"multi+":100,"multi":70,"mono":35,"sin":0}[L.coat],0.20]]}
+];
+const COSTES=[
+  {k:"met_vig",   g:L=>L.vig,    u:" EV", d:1, n:3.6},
+  {k:"met_weight",g:L=>L.weight, u:" g",  d:0, n:400},
+  {k:"met_shift", g:L=>L.shift,  u:"",    d:0, n:60},
+  {k:"gen_velo",  g:L=>L.velo,   u:"",    d:0, n:70}
+];
+const IQFOCAL=()=>[[t("todas"),null],[t("ff1"),[0,21]],[t("ff2"),[22,29]],[t("ff3"),[30,39]],
+  [t("ff4"),[40,59]],[t("ff5"),[60,99]],[t("ff6"),[100,999]]];
+const IQAP=()=>[[t("iqApAny"),0],[t("iqAp28"),2.8],[t("iqAp2"),2],[t("iqAp14"),1.4]];
+const IQMA=()=>[[t("iqMaAny"),0],[t("iqMa250"),250],[t("iqMa350"),350],[t("iqMa500"),500]];
+function iqSelects(){
+  const put=(id,items,val)=>{ $(id).innerHTML=items.map((o,j)=>
+    "<option value='"+j+"'>"+o[0]+"</option>").join(""); $(id).value=String(val); };
+  put("iq-quiero",INTENT.map(o=>[t(o.k)]),Math.max(0,INTENT.findIndex(o=>o.k===iq.quiero)));
+  put("iq-focal",IQFOCAL(),iq.focal===null?0:iq.focal);
+  put("iq-apert",IQAP(),iq.apert);
+  put("iq-masa",IQMA(),iq.masa);
+}
+function pintarIntencion(){
+  const def=INTENT[Math.max(0,INTENT.findIndex(o=>o.k===iq.quiero))];
+  const banda=IQFOCAL()[iq.focal===null?0:iq.focal][1];
+  const apMin=IQAP()[iq.apert][1], maMax=IQMA()[iq.masa][1];
+  const cand=LENSES.filter(L=>{
+    if(L.ref) return false;
+    if(L.mount==="nodig") return false;
+    if(banda && (L.focal<banda[0]||L.focal>banda[1])) return false;
+    if(apMin && L.fmax>apMin+1e-9) return false;
+    if(maMax && L.weight>maMax) return false;
+    return true;
+  }).map(L=>({L,s:def.terms(L).reduce((a,c)=>a+c[2]*c[1],0)})).sort((a,b)=>b.s-a.s).slice(0,3);
+  let h="<div class='kv' style='margin-bottom:7px'><b style='color:var(--txt)'>"+t("iqCriterio")
+    +"</b> "+t(def.w)+"</div>";
+  if(!cand.length){ $("iq-out").innerHTML=h+"<div class='kv'>"+t("iqNada")+"</div>"; return; }
+  h+="<table style='margin-bottom:8px'><tr><th style='width:22px'></th><th>"+t("thObjetivo")
+    +"</th><th style='text-align:right'>"+t("iqScore")+"</th><th style='text-align:right'>"+t("met_weight")
+    +"</th><th style='text-align:right'>"+t("met_fmax")+"</th></tr>";
+  cand.forEach(o=>{
+    h+="<tr><td><button class='pick' type='button' data-ip='"+o.L.i+"' aria-pressed='"
+      +(colorDe(o.L.i)?"true":"false")+"' style='--c:"+(colorDe(o.L.i)||"var(--d)")
+      +"' aria-label='"+t("comparar")+"'></button></td>"
+      +"<td><span class='nm' data-io='"+o.L.i+"' style='font-family:var(--cond);font-size:12.5px;color:var(--hi);cursor:pointer'>"
+      +o.L.name+"</span><div class='kv'>"+o.L.brand+" · "+o.L.year+" · "+arqNombre(o.L)+"</div></td>"
+      +"<td class='v' style='color:var(--d)'>"+fmt(o.s,1)+"</td>"
+      +"<td class='v'>"+fmt(o.L.weight)+" g</td><td class='v'>"+fap(o.L.fmax)+"</td></tr>";
+  });
+  h+="</table>";
+  if(cand.length>1){
+    const A=cand[0].L, B=cand[1].L, ta=def.terms(A), tb=def.terms(B);
+    let gi=0; ta.forEach((c,j)=>{ if(c[2]*(c[1]-tb[j][1])>ta[gi][2]*(ta[gi][1]-tb[gi][1])) gi=j; });
+    let ci=-1, worst=0;
+    COSTES.forEach((c,j)=>{ const dd=(c.g(A)-c.g(B))/c.n; if(dd>worst){ worst=dd; ci=j; } });
+    h+="<p class='meth' style='margin:0 0 6px;font-size:13px'>";
+    if(ci>=0) h+=tf("iqRazon",{a:t(ta[gi][0]).toLowerCase(), va:fmt(ta[gi][1]),
+        vb:fmt(COSTES[ci].g(A)-COSTES[ci].g(B),COSTES[ci].d)+COSTES[ci].u,
+        b:t(COSTES[ci].k).toLowerCase()});
+    else h+=tf("iqRazonLimpia",{a:t(ta[gi][0]).toLowerCase(), va:fmt(ta[gi][1])});
+    h+="</p>";
+  }
+  h+="<p class='meth' style='margin:0;font-size:12px'>"+t("iqNotaPesos")+"</p>";
+  $("iq-out").innerHTML=h;
+  $("iq-out").querySelectorAll("[data-ip]").forEach(b=>b.onclick=()=>toggleSel(+b.dataset.ip));
+  $("iq-out").querySelectorAll("[data-io]").forEach(b=>b.onclick=()=>abrirFicha(LENSES[+b.dataset.io]));
+}
+
 function pintarFicha(L){
   $("f-brandline").textContent=L.brand+" · "+L.family+" · "+L.year;
   $("f-name").textContent=L.name;
@@ -1795,23 +2298,55 @@ function pintarFicha(L){
       hb += m.raw ? "<tr><td>"+m.n+"</td><td class='v'>"+(m.signed&&L[m.k]>0?"+":"")+fmt(L[m.k],Math.abs(L[m.k])<10?2:1)+(m.u||"")+"</td><td></td></tr>" : barra(m,L); }});
   $("tab-b").innerHTML=hb;
   drawRadar($("radar"),[L],["#E8B33C"]);
-  drawMTF($("mtf"),L); pintarContraste(L); drawVig($("vig"),L); drawCurv($("curv"),L);
+  pintarMonta(L); pintarQ43(L);
+  const Nopt=pintarVeredicto(L);
+  drawMTF($("mtf"),L,Nopt); pintarContraste(L); drawVig($("vig"),L); drawCurv($("curv"),L);
   pintarMetricaFicha(L); pintarParecidos(L); sincroAdd();
-  $("s-N").value=0; actualizarSim();
+  $("s-N").value=0;
+  $("s-ds").value=fmt(sim.ds,1); $("s-db").value=fmt(sim.db,1);
+  actualizarSim();
+}
+/* Lee los dos campos de escena, acota el sujeto a la distancia mínima de
+   enfoque y obliga al fondo a quedar por detrás. Devuelve metros.          */
+function leerEscena(L){
+  let ds=parseFloat(($("s-ds").value+"").replace(",",".")), db=parseFloat(($("s-db").value+"").replace(",","."));
+  if(!isFinite(ds)||ds<=0) ds=2; if(!isFinite(db)||db<=0) db=6;
+  const corto = ds<L.mfd;
+  ds=Math.max(ds,L.mfd);
+  if(db<=ds*1.02) db=ds*1.02;
+  return {ds,db,corto};
 }
 function actualizarSim(){
   const L=cur; if(!L) return;
   const st=+$("s-N").value/100*5;
   sim.N=L.fmax*Math.pow(2,st/2);
-  sim.field=+$("s-field").value/100; sim.blur=+$("s-blur").value/100; sim.exp=+$("s-exp").value/10;
-  $("v-N").textContent=fap(Math.round(sim.N*10)/10);
+  sim.field=+$("s-field").value/100; sim.exp=+$("s-exp").value/10;
+  const es=leerEscena(L); sim.ds=es.ds; sim.db=es.db;
+  $("v-N").textContent=fapN(sim.N);
   $("v-field").textContent=fmt(sim.field*100)+" %";
-  $("v-blur").textContent=fmt(sim.blur,1)+"×";
   $("v-exp").textContent=(sim.exp>0?"+":"")+fmt(sim.exp,1)+" EV";
-  const r=renderDisc($("bokeh"),L,sim);
+  const c=discoMM(L,sim.N,es.ds,es.db);
+  /* En "cantidad" el radio sale del disco medido; en "estructura" se
+     mantiene constante para poder leer la forma.                          */
+  const relEsc = isFinite(c) ? c/(2*SPANMM*0.415) : 0;
+  const o=Object.assign({},sim,escala==="cantidad"?{rel:Math.min(relEsc,1.35)}:{});
+  const r=renderDisc($("bokeh"),L,o);
   const sgn=L.sa<0?t("esfSub"):(L.sa>0?t("esfSobre"):t("esfNeutra"));
   const ef=(L.sa<0)===(sim.side==="bg")?t("discoNucleo"):t("discoCaustica");
-  $("sim-diag").textContent=t("simEsf")+" "+sgn+" · "+ef+" · "+t("simPupila")+" "+fmt(r.T*100)+" % ("+fmt(-Math.log2(Math.max(1e-3,r.T)),2)+" EV)";
+  const B=BODY();
+  let d1=tf("sc_diag",{ds:fmt(es.ds,1),db:fmt(es.db,1),ap:fapN(sim.N),c:fmt(c,3)});
+  if(B.p>0) d1+=tf("sc_px",{px:fmt(c*1000/B.p),body:bodyShort(B),pc:fmt(100*c/24,1)});
+  const extra=[];
+  if(es.corto) extra.push(tf("sc_mfd",{mfd:fmt(L.mfd,2)}));
+  if(sim.side==="fg") extra.push(tf("sc_fg",{dn:fmt(planoIgual(L,sim.N,es.ds,c),2)}));
+  /* El disco real se hincha sobre el radio paraxial por el término bρ³, así
+     que el aviso de recorte tiene que contar con esa cola.                */
+  if(escala==="cantidad" && 0.415*relEsc*(1+0.0095*Math.abs(L.sa))>0.5) extra.push(t("sc_clip"));
+  if(escala!=="cantidad") extra.push(t("escNotaEstr"));
+  $("sim-diag").innerHTML="<b style=\'color:var(--txt)\'>"+d1+"</b><br>"
+    +t("simEsf")+" "+sgn+" · "+ef+" · "+t("simPupila")+" "+fmt(r.T*100)+" % ("
+    +fmt(-Math.log2(Math.max(1e-3,r.T)),2)+" EV)"
+    +(extra.length?"<br>"+extra.join(" "):"");
 }
 function pintarMetricaFicha(L){
   let h="<div style='display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start'>";
@@ -1866,13 +2401,18 @@ function pintarPerfiles(){
   $("v-cN").textContent=st<0.05?t("plena"):("+"+fmt(st,1)+" "+t("pasos"));
   $("v-cfield").textContent=fmt(fd*100)+" %";
   const dh=$("c-discs"); dh.innerHTML="";
+  const pupMax=ls.length?Math.max.apply(null,ls.map(L=>L.focal/(L.fmax*Math.pow(2,st/2)))):1;
   ls.forEach((L,k)=>{
     const w=document.createElement("div"), cv=document.createElement("canvas");
     cv.width=180; cv.height=180; w.appendChild(cv);
+    const N=L.fmax*Math.pow(2,st/2);
     const cap=document.createElement("div"); cap.className="cap";
-    cap.innerHTML="<span style='color:"+SLOTCOL[k]+"'>■</span> "+L.name+"<br>"+apLabel(L,st)+" · "+t("esfCorta")+" "+(L.sa>0?"+":"")+L.sa;
+    cap.innerHTML="<span style='color:"+SLOTCOL[k]+"'>■</span> "+L.name+"<br>"+apLabel(L,st)+" · "+t("esfCorta")+" "+(L.sa>0?"+":"")+L.sa
+      +(escala==="cantidad"?"<br>"+t("met_pupila").toLowerCase()+" "+fmt(L.focal/N,1)+" mm":"");
     w.appendChild(cap); dh.appendChild(w);
-    renderDisc(cv,L,{N:L.fmax*Math.pow(2,st/2),side:"bg",field:fd,blur:1,exp:0});
+    const o={N,side:"bg",field:fd,exp:0,fast:true};
+    if(escala==="cantidad") o.rel=relCant(L,N,pupMax);
+    renderDisc(cv,L,o);
   });
   const rows=[[t("f_year"),"year",0],[t("met_fmax"),"fmax",1],[t("moduloK"),"K",2],[t("met_crema"),"crema",0],
     [t("met_sa"),"sa",0],[t("met_micro"),"micro",0],[t("sort_resB"),"resB",0],
@@ -1930,16 +2470,21 @@ function pintarPar2(){
   host.innerHTML=h;
   drawRadar($("c-parradar"),[A,B],["#E8B33C","#35B7E6"]);
   const dh=$("c-pardiscs"); dh.innerHTML="";
+  const pupMax=Math.max(A.pupila,B.pupila);
   [[A,"#E8B33C"],[B,"#35B7E6"]].forEach(([L,c])=>{
     const w=document.createElement("div"), cv=document.createElement("canvas");
     cv.width=180; cv.height=180; w.appendChild(cv);
     const cap=document.createElement("div"); cap.className="cap";
-    cap.innerHTML="<span style='color:"+c+"'>■</span> "+L.name+" · "+fap(L.fmax);
+    cap.innerHTML="<span style='color:"+c+"'>■</span> "+L.name+" · "+fap(L.fmax)
+      +(escala==="cantidad"?" · "+fmt(L.pupila,1)+" mm":"");
     w.appendChild(cap); dh.appendChild(w);
-    renderDisc(cv,L,{N:L.fmax,side:"bg",field:0.75,blur:1,exp:0});
+    const o={N:L.fmax,side:"bg",field:0.75,exp:0,fast:true};
+    if(escala==="cantidad") o.rel=relCant(L,L.fmax,pupMax);
+    renderDisc(cv,L,o);
   });
 }
 function pasaFiltro(A,B){
+  if(B.ref) return false;                       /* la referencia no es candidata */
   if(rec.focal==="same" && Math.abs(Math.log2(B.focal/A.focal))>0.2) return false;
   if(rec.marca==="otra" && B.brand===A.brand) return false;
   if(rec.epoca==="antes" && B.year>=A.year) return false;
@@ -1951,9 +2496,12 @@ function pintarVecinos(){
   $("rec-ref").value=String(rec.ref);
   const lista=LENSES.filter(B=>B.i!==A.i&&pasaFiltro(A,B)).map(B=>({B,d:dSub(A.i,B.i,ix)}))
     .sort((a,b)=>a.d-b.d).slice(0,10);
+  const mA=mpxOpt(A);
   let h="<tr><th style='width:22px'></th><th>"+t("thObjetivo")+"</th><th style='text-align:right'>d</th><th style='text-align:right'>pct</th>"
-    +"<th>"+t("thSepara")+"</th><th style='text-align:right'>ΔK</th><th style='text-align:right'>"+t("thAnio")+"</th></tr>";
-  if(!lista.length) h+="<tr><td colspan='7' class='kv'>"+t("sinVecinos")+"</td></tr>";
+    +"<th>"+t("thSepara")+"</th><th style='text-align:right'>ΔK</th>"
+    +"<th style='text-align:right' title='"+bodyLab(BODY())+"'>"+t("thMpx")+" · "+bodyShort(BODY())+"</th>"
+    +"<th style='text-align:right'>"+t("thAnio")+"</th></tr>";
+  if(!lista.length) h+="<tr><td colspan='8' class='kv'>"+t("sinVecinos")+"</td></tr>";
   lista.forEach(o=>{ const p=pctil(o.d,arr), c=colorDe(o.B.i);
     h+="<tr><td><button class='pick' type='button' data-p='"+o.B.i+"' aria-pressed='"+(c?"true":"false")
       +"' style='--c:"+(c||"var(--d)")+"' aria-label='"+t("comparar")+"'></button></td>"
@@ -1964,6 +2512,8 @@ function pintarVecinos(){
       +"<td class='v' style='color:"+(p<5?"var(--ok)":p<25?"var(--txt)":"var(--mut)")+"'>"+fmt(p)+" %</td>"
       +"<td style='color:var(--mut)'>"+conDef(separador(A.i,o.B.i,ix))+"</td>"
       +"<td class='v'>"+((o.B.K-A.K)>0?"+":"")+fmt(o.B.K-A.K,2)+"</td>"
+      +"<td class='v' style='color:"+(mpxOpt(o.B).mpx>=mA.mpx?"var(--ok)":"var(--mut)")+"'>"
+      +fmt(mpxOpt(o.B).mpx,1)+"</td>"
       +"<td class='v' style='color:var(--mut)'>"+((o.B.year-A.year)>0?"+":"")+fmt(o.B.year-A.year)+"</td></tr>"; });
   $("rec-tabla").innerHTML=h;
   $("rec-tabla").querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>toggleSel(+b.dataset.p));
@@ -2010,14 +2560,20 @@ function pintarBanco(){
   const pick=["Summar 50 f/2","Summilux 50 f/1.4 pre-ASPH E43","C-Sonnar T* 50 f/1.5 ZM",
     "Summicron-M 35 f/2 (4ª serie)","Summicron-M 35 f/2 ASPH","APO-Summicron-M 50 f/2 ASPH"];
   const host=$("bench"); host.innerHTML="";
-  pick.map(n=>LENSES.find(l=>l.name===n)).filter(Boolean).forEach(L=>{
+  const ls=pick.map(n=>LENSES.find(l=>l.name===n)).filter(Boolean);
+  const pupMax=Math.max.apply(null,ls.map(L=>L.focal/L.fmax));
+  ls.forEach(L=>{
     const c=document.createElement("div"); c.className="cellb";
     const cv=document.createElement("canvas"); cv.width=168; cv.height=168; c.appendChild(cv);
     const cap=document.createElement("div"); cap.className="cap"; cap.textContent=L.name;
-    const sb=document.createElement("div"); sb.className="sub"; sb.textContent=L.year+" · "+t("esfCorta")+" "+(L.sa>0?"+":"")+L.sa;
+    const sb=document.createElement("div"); sb.className="sub";
+    sb.textContent=L.year+" · "+t("esfCorta")+" "+(L.sa>0?"+":"")+L.sa
+      +(escala==="cantidad"?" · "+t("met_pupila").toLowerCase()+" "+fmt(L.pupila,1)+" mm":"");
     c.appendChild(cap); c.appendChild(sb); host.appendChild(c);
     c.onclick=()=>abrirFicha(L);
-    requestAnimationFrame(()=>renderDisc(cv,L,{N:L.fmax,side:"bg",field:0,blur:1,exp:0}));
+    const o={N:L.fmax,side:"bg",field:0,exp:0,fast:true};
+    if(escala==="cantidad") o.rel=relCant(L,L.fmax,pupMax);
+    renderDisc(cv,L,o);
   });
 }
 
@@ -2108,6 +2664,13 @@ function aplicarEtiquetas(){
   $("f-prev").setAttribute("aria-label",t("ariaAnterior"));
   $("f-next").setAttribute("aria-label",t("ariaSiguiente"));
   $("bokeh").setAttribute("aria-label",t("ariaDisco"));
+  $("cuerpo").setAttribute("aria-label",t("vdTit").replace("{body}","").trim());
+  $("iq-quiero").setAttribute("aria-label",t("iqTit"));
+  $("iq-focal").setAttribute("aria-label",t("iqFocal"));
+  $("iq-apert").setAttribute("aria-label",t("iqApert"));
+  $("iq-masa").setAttribute("aria-label",t("iqMasa"));
+  $("s-ds").setAttribute("aria-label",t("simSujeto"));
+  $("s-db").setAttribute("aria-label",t("simFondo"));
   $("lab").textContent=mapLab?t("ocultar"):t("mostrar");
   if(!cur){
     $("f-brandline").textContent=t("sinSelBreve");
@@ -2121,28 +2684,53 @@ function aplicarIdioma(){
   const so=$("sort").value;
   $("sort").innerHTML=SORTS().map(s=>"<option value='"+s[0]+"'>"+s[1]+"</option>").join("");
   $("sort").value=so||"year";
+  const cv=$("cuerpo").value;
+  $("cuerpo").innerHTML=BODIES.map((b,j)=>"<option value='"+j+"'>"+bodyLab(b)+"</option>").join("");
+  $("cuerpo").value=cv||String(cuerpo);
+  iqSelects();
   pintarEjes(); pintarLeyendaMapa(); pintarGrupos();
+  document.querySelectorAll("[data-escnota]").forEach(e=>
+    e.textContent=t(escala==="cantidad"?"escNotaCant":"escNotaEstr"));
   /* todo lo que se dibuja desde el diccionario */
-  pintarLista(); pintarBanco(); pintarSeccionMetrica(); refrescarSel();
+  pintarLista(); pintarBanco(); pintarSeccionMetrica(); pintarIntencion(); refrescarSel();
   if(cur) pintarFicha(cur);
 }
 window.onLangChange=function(){ if(LISTO) aplicarIdioma(); };
 
 function init(){
   construirMetrica();
-  $("stat-count").textContent=LENSES.length;
+  /* La cifra de portada cuenta objetivos de montura M; la fila de referencia
+     entra en la métrica pero no es un objetivo del catálogo M.            */
+  $("stat-count").textContent=LENSES.filter(l=>!l.ref).length;
   $("stat-brands").textContent=new Set(LENSES.map(l=>l.brand)).size;
   pintarGrupos();
 
   $("sort").innerHTML=SORTS().map(s=>"<option value='"+s[0]+"'>"+s[1]+"</option>").join("");
   $("sort").onchange=e=>{fil.sort=e.target.value;pintarLista();};
   $("q").oninput=e=>{fil.q=e.target.value;pintarLista();drawMap();};
-  $("reset").onclick=()=>{ fil={brand:"Todas",focal:null,era:null,tag:null,q:"",sort:"year"};
+  $("reset").onclick=()=>{ fil={brand:"Todas",focal:null,era:null,tag:null,q:"",sort:"year",monta:false};
     $("q").value=""; $("sort").value="year";
     act.brand=act.focal=act.era=act.tag=0;
+    $("monta").setAttribute("aria-pressed","false");
     ["f-brand","f-focal","f-era","f-tag"].forEach(h=>
       $(h).querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",String(c.dataset.k==="0"))));
     pintarLista(); drawMap(); };
+  $("monta").onclick=()=>{ fil.monta=!fil.monta;
+    $("monta").setAttribute("aria-pressed",String(fil.monta)); pintarLista(); drawMap(); };
+
+  /* cuerpo y modo: en memoria de sesión, sin tocar localStorage */
+  $("cuerpo").onchange=e=>{ cuerpo=+e.target.value; MPXCACHE.clear();
+    if(cur) pintarFicha(cur);
+    if(tab==="vec") pintarVecinos(); };
+
+  /* consulta por intención */
+  ["iq-quiero","iq-focal","iq-apert","iq-masa"].forEach(id=>$(id).onchange=()=>{
+    iq.quiero=INTENT[+$("iq-quiero").value].k;
+    iq.focal=+$("iq-focal").value; iq.apert=+$("iq-apert").value; iq.masa=+$("iq-masa").value;
+    pintarIntencion(); });
+
+  /* escala de los discos, un solo estado para los tres sitios */
+  document.querySelectorAll("[data-esc]").forEach(b=>b.onclick=()=>setEscala(b.dataset.esc));
 
   /* cajón */
   $("xdrawer").onclick=cerrarFicha; $("scrim").onclick=cerrarFicha;
@@ -2156,7 +2744,8 @@ function init(){
   let fino=0;
   const simRapido=()=>{ sim.fast=true; actualizarSim();
     clearTimeout(fino); fino=setTimeout(()=>{ sim.fast=false; actualizarSim(); },160); };
-  ["s-N","s-field","s-blur","s-exp"].forEach(id=>$(id).oninput=thr(simRapido));
+  ["s-N","s-field","s-exp"].forEach(id=>$(id).oninput=thr(simRapido));
+  ["s-ds","s-db"].forEach(id=>{ $(id).oninput=thr(simRapido); $(id).onchange=()=>actualizarSim(); });
   $("t-side").querySelectorAll("button").forEach(b=>b.onclick=()=>{
     $("t-side").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed","false"));
     b.setAttribute("aria-pressed","true"); sim.side=b.dataset.v; actualizarSim(); });
@@ -2190,6 +2779,10 @@ function init(){
     {rootMargin:"-56px 0px -70% 0px"});
   secs.forEach(id=>io.observe($(id)));
 
+  $("cuerpo").innerHTML=BODIES.map((b,j)=>"<option value='"+j+"'>"+bodyLab(b)+"</option>").join("");
+  $("cuerpo").value=String(cuerpo);
+  iqSelects(); pintarIntencion();
+  document.querySelectorAll("[data-escnota]").forEach(e=>e.textContent=t("escNotaEstr"));
   pintarLista(); pintarBanco();
   /* restaurar estado del enlace, o selección de ejemplo */
   const hash=decodeURIComponent(location.hash||"");

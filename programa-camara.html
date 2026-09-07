@@ -42,6 +42,7 @@
     --bg:#0a0c10; --panel:#13171e; --panel2:#0f131a; --line:#222a35; --line2:#2c3644;
     --text:#d8dde5; --head:#f3f5f8; --muted:#8a929f; --faint:#5b636f;
     --amber:#f4b13c; --teal:#3fcab0; --red:#ef6f53; --violet:#9b8cff;
+    --blue:#4f7fd6; --sand:#c9ab5f; --ice:#a8e9ff;
     --sans:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
     --disp:'Space Grotesk',var(--sans);
     --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -111,6 +112,28 @@
   footer{font-size:11px;color:var(--faint);margin-top:30px;line-height:1.5;font-family:var(--mono);border-top:1px solid var(--line);padding-top:16px}
   .am{color:var(--amber)} .te{color:var(--teal)} .vi{color:var(--violet)} .rd{color:var(--red)}
 
+  .bars{display:flex;flex-direction:column;gap:9px;margin:6px 0 4px}
+  .bar{display:grid;grid-template-columns:minmax(0,1fr) 46% 52px;align-items:center;gap:10px;font-size:12.5px;color:var(--muted)}
+  .bar i{display:block;height:9px;background:#151b23;border:1px solid var(--line);border-radius:5px;overflow:hidden}
+  .bar i b{display:block;height:100%;border-radius:4px}
+  .bar .bv{font-family:var(--mono);font-size:12.5px;color:var(--head);text-align:right}
+  @media(max-width:560px){.bar{grid-template-columns:minmax(0,1fr) 34% 46px}}
+  .youtwo{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
+  @media(max-width:560px){.youtwo{grid-template-columns:1fr}}
+  .youtwo>div{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+  .youtwo .ch{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:7px}
+  .youtwo .ln{font-size:12.5px;line-height:1.6;font-family:var(--mono);color:var(--text)}
+  .youtwo .ln.ok{color:var(--teal)} .youtwo .ln.bad{color:var(--red)}
+  .youtwo .ln.muted{font-family:var(--sans);color:var(--muted);margin-top:7px}
+  .segbtn.off{opacity:.35;cursor:not-allowed}
+  .segbtn.off:hover{color:var(--muted)}
+  .chk{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin-bottom:11px;cursor:pointer}
+  .chk input{accent-color:var(--teal)}
+  #diag{touch-action:pan-y;cursor:crosshair}
+  .bl2{color:#78a6f0}
+  table.sw td.act{color:var(--head);background:rgba(244,177,60,.05)}
+  .concl{font-size:13px;color:var(--text);line-height:1.6;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line2)}
+
   /* ---------- conmutador de idioma ---------- */
   html[lang="es"] [data-lang="en"]{display:none!important}
   html[lang="en"] [data-lang="es"]{display:none!important}
@@ -147,7 +170,7 @@
     <div>
       <h1 data-lang="es">El programa de la cámara</h1>
       <h1 data-lang="en">The camera’s program</h1>
-      <div class="byline">Rafael Vida · Vilém Flusser · Leica M11 (3,76 µm)</div>
+      <div class="byline">Rafael Vida · Vilém Flusser · <span id="pc-body">M11 · 3,76 µm</span></div>
     </div>
     <div class="srclinks">
       <a href="https://rafaelvida.com/2026/05/06/marco-para-pensar-la-fotografia/" data-lang="es">El ensayo del que nace ↗</a>
@@ -156,6 +179,8 @@
       <a href="ficha-marco-pensar.html" data-lang="en">Framework field sheet ↗</a>
       <a href="telemetro-m11.html" data-lang="es">Criterios de nitidez: telémetro M11 ↗</a>
       <a href="telemetro-m11.html" data-lang="en">Sharpness criteria: M11 rangefinder ↗</a>
+      <a href="sensor.html#difraccion" data-lang="es">El techo de difracción ↗</a>
+      <a href="sensor.html#difraccion" data-lang="en">The diffraction ceiling ↗</a>
     </div>
   </div>
 
@@ -166,40 +191,81 @@
     <div>
       <figure class="diagbox">
         <canvas id="diag" width="1000" height="620"></canvas>
-        <figcaption data-lang="es">Diagrama de programa: t horizontal (logarítmico, 30 s → 1/8000), N vertical (en pasos, f/1.4 → f/16), diagonales de EV constante a ISO 100. Línea ámbar: la línea de programa de la filosofía activa; punto grande: su elección a la EV actual.</figcaption>
-        <figcaption data-lang="en">Program diagram: t horizontal (logarithmic, 30 s → 1/8000), N vertical (in stops, f/1.4 → f/16), diagonals of constant EV at ISO 100. Amber line: the program line of the active philosophy; large dot: its choice at the current EV.</figcaption>
+        <figcaption data-lang="es">Diagrama de programa: t horizontal (logarítmico, 30 s → 1/8000), N vertical (en pasos, f/1.4 → f/16), diagonales de EV constante a ISO 100. Línea ámbar: la filosofía activa; líneas grises de puntos: las otras dos, para comparar; punto ámbar: la elección del programa a la EV medida. Pulsa o arrastra sobre el diagrama para poner <b>tu</b> punto.</figcaption>
+        <figcaption data-lang="en">Program diagram: t horizontal (logarithmic, 30 s → 1/8000), N vertical (in stops, f/1.4 → f/16), diagonals of constant EV at ISO 100. Amber line: the active philosophy; grey dotted lines: the other two, for comparison; amber dot: the program’s choice at the metered EV. Click or drag on the diagram to place <b>your</b> point.</figcaption>
       </figure>
       <div class="legend">
         <span><i style="background:var(--amber)"></i><span data-lang="es">línea de programa</span><span data-lang="en">program line</span></span>
         <span><i class="zone" style="background:var(--red)"></i><span data-lang="es">borrón de movimiento (t &gt; t<sub>máx</sub>)</span><span data-lang="en">motion blur (t &gt; t<sub>max</sub>)</span></span>
         <span><i class="zone" style="background:var(--violet)"></i><span data-lang="es">PdC insuficiente (N &lt; N<sub>mín</sub>)</span><span data-lang="en">insufficient depth of field (N &lt; N<sub>min</sub>)</span></span>
         <span><i class="zone" style="background:var(--teal)"></i><span data-lang="es">el programa sube ISO</span><span data-lang="en">the program raises ISO</span></span>
-        <span><i style="background:var(--faint);height:1px;border-top:2px dashed var(--faint);background:none"></i><span data-lang="es">umbral de trepidación</span><span data-lang="en">camera shake threshold</span></span>
+        <span><i class="zone" style="background:var(--blue)"></i><span data-lang="es">trepidación (t &gt; t<sub>trep</sub>)</span><span data-lang="en">camera shake (t &gt; t<sub>shake</sub>)</span></span>
+        <span><i class="zone" style="background:var(--sand)"></i><span data-lang="es">difracción: N &gt; crítico del sensor</span><span data-lang="en">diffraction: N &gt; sensor critical</span></span>
+        <span><i style="background:var(--ice)"></i><span data-lang="es">tu punto (pulsa o arrastra)</span><span data-lang="en">your point (click or drag)</span></span>
+        <span><i style="background:none;border-top:2px dashed rgba(138,146,159,.75);height:1px"></i><span data-lang="es">las otras dos filosofías</span><span data-lang="en">the other two philosophies</span></span>
       </div>
 
       <div class="verdict" id="verdict"></div>
 
       <div class="panel">
-        <h2 data-lang="es">Barrido: qué elige el programa de EV 3 a EV 15</h2>
-        <h2 data-lang="en">Sweep: what the program picks from EV 3 to EV 15</h2>
+        <h2 data-lang="es">Qué moneda pagas</h2>
+        <h2 data-lang="en">Which currency you pay</h2>
+        <div class="bars" id="pc-bars"></div>
+        <p class="note" id="pc-costnote"></p>
+        <p class="note" data-lang="es">El coste del ISO se cuenta en pasos de altas luces desde la referencia ISO 100 del diagrama. El ruido de lectura y el rango dinámico medidos de cada cuerpo no se replican aquí: están en <a href="sensor.html#datos">la ficha del sensor</a>. De ella salen también el ISO base y el punto de ganancia dual que se usan arriba.</p>
+        <p class="note" data-lang="en">The ISO cost is counted in stops of highlight range from the diagram’s ISO 100 reference. The measured read noise and dynamic range of each body are not replicated here: they live in <a href="sensor.html#datos">the sensor sheet</a>. Base ISO and the dual-gain point used above come from it too.</p>
+      </div>
+
+      <div class="panel">
+        <h2 data-lang="es">Tu punto frente al del programa</h2>
+        <h2 data-lang="en">Your point against the program’s</h2>
+        <div class="seg">
+          <button type="button" class="segbtn" id="pc-solve"><span data-lang="es">resuelve mi intención</span><span data-lang="en">solve my intention</span></button>
+          <button type="button" class="segbtn" id="pc-clear"><span data-lang="es">borrar mi punto</span><span data-lang="en">clear my point</span></button>
+        </div>
+        <div class="youtwo"><div id="pc-col-prog"></div><div id="pc-col-you"></div></div>
+        <p class="note" data-lang="es">Tu punto es libre en las dos direcciones: el ISO no es un ajuste más, es lo que la exposición exige una vez has fijado t y N, ISO = 100·2<sup>2log₂N + log₂(1/t) − EV</sup>. Por debajo de ISO 100 no se baja: ahí la pareja sobreexpone.</p>
+        <p class="note" data-lang="en">Your point is free in both directions: ISO is not one more setting, it is what the exposure demands once you have fixed t and N, ISO = 100·2<sup>2log₂N + log₂(1/t) − EV</sup>. Nothing goes below ISO 100: there the pair overexposes.</p>
+      </div>
+
+      <div class="panel">
+        <h2 data-lang="es">Barrido: qué elige cada filosofía alrededor de tu EV</h2>
+        <h2 data-lang="en">Sweep: what each philosophy picks around your EV</h2>
         <div class="tblwrap">
         <table class="sw">
-          <thead><tr>
-            <th>EV<sub>100</sub></th>
-            <th>t</th>
-            <th>N</th>
-            <th>ISO</th>
-            <th><span data-lang="es">veredicto</span><span data-lang="en">verdict</span></th>
-          </tr></thead>
+          <thead>
+            <tr>
+              <th rowspan="2">EV<sub>100</sub></th>
+              <th colspan="2"><span data-lang="es">P clásico</span><span data-lang="en">Classic P</span></th>
+              <th colspan="2"><span data-lang="es">P estab.</span><span data-lang="en">P + IS</span></th>
+              <th colspan="2">A + Auto-ISO</th>
+            </tr>
+            <tr>
+              <th>t · N · ISO</th><th><span data-lang="es">veredicto</span><span data-lang="en">verdict</span></th>
+              <th>t · N · ISO</th><th><span data-lang="es">veredicto</span><span data-lang="en">verdict</span></th>
+              <th>t · N · ISO</th><th><span data-lang="es">veredicto</span><span data-lang="en">verdict</span></th>
+            </tr>
+          </thead>
           <tbody id="sweep"></tbody>
         </table>
         </div>
-        <p class="note" data-lang="es">El coste del ISO alto se paga en ruido: la relación señal/ruido cae aproximadamente como √(señal), y cada duplicación de ISO recorta un paso el rango dinámico. La cuantificación para la M11 está en <a href="sensor.html#binning">binning-m11.html</a>.</p>
-        <p class="note" data-lang="en">The cost of high ISO is paid in noise: the signal-to-noise ratio falls roughly as √(signal), and every doubling of ISO trims one stop off the dynamic range. The quantitative treatment for the M11 lives in <a href="sensor.html#binning">binning-m11.html</a>.</p>
+        <p class="concl" id="pc-concl"></p>
+        <p class="note" data-lang="es">El coste del ISO alto se paga en ruido: la relación señal/ruido cae aproximadamente como √(señal), y cada duplicación de ISO recorta un paso el rango dinámico. La cuantificación por cuerpo está en <a href="sensor.html#datos">la ficha del sensor</a>.</p>
+        <p class="note" data-lang="en">The cost of high ISO is paid in noise: the signal-to-noise ratio falls roughly as √(signal), and every doubling of ISO trims one stop off the dynamic range. The quantitative treatment per body lives in <a href="sensor.html#datos">the sensor sheet</a>.</p>
       </div>
     </div>
 
     <div class="controls">
+      <div class="ct" data-lang="es">0 · El cuerpo</div>
+      <div class="ct" data-lang="en">0 · The body</div>
+      <div class="ctl">
+        <div class="row"><span data-lang="es">Cámara</span><span data-lang="en">Camera</span></div>
+        <select id="sel-body"></select>
+      </div>
+      <div class="hint" data-lang="es">El cuerpo fija el paso de píxel (y con él el criterio de 2 px y el diafragma crítico), el ISO base, el punto de ganancia dual, el techo de obturación, la estabilización disponible, las focales y —lo importante— qué automatismos existen. Datos de <a href="sensor.html#datos">la ficha del sensor</a>.</div>
+      <div class="hint" data-lang="en">The body sets the pixel pitch (and with it the 2 px criterion and the critical aperture), the base ISO, the dual-gain point, the shutter ceiling, the stabilisation available, the focal lengths and — the important one — which automatic modes exist at all. Data from <a href="sensor.html#datos">the sensor sheet</a>.</div>
+
+      <div class="sep"></div>
       <div class="ct" data-lang="es">1 · La escena</div>
       <div class="ct" data-lang="en">1 · The scene</div>
       <div class="ctl">
@@ -213,6 +279,21 @@
           <button type="button" class="chip" data-ev="4"><span data-lang="es">noche urbana 4</span><span data-lang="en">urban night 4</span></button>
         </div>
       </div>
+      <div class="ctl">
+        <div class="row"><span data-lang="es">Reflectancia dominante (lo que ve el fotómetro)</span><span data-lang="en">Dominant reflectance (what the meter sees)</span></div>
+        <select id="sel-bias"></select>
+      </div>
+      <div class="ctl">
+        <div class="row"><span data-lang="es">Escenas completas</span><span data-lang="en">Whole scenes</span></div>
+        <div class="chips">
+          <button type="button" class="chip" data-pre="kids"><span data-lang="es">niños en interior</span><span data-lang="en">children indoors</span></button>
+          <button type="button" class="chip" data-pre="night"><span data-lang="es">calle de noche a pulso</span><span data-lang="en">night street, handheld</span></button>
+          <button type="button" class="chip" data-pre="land"><span data-lang="es">paisaje al atardecer</span><span data-lang="en">landscape at dusk</span></button>
+          <button type="button" class="chip" data-pre="car"><span data-lang="es">coche que pasa</span><span data-lang="en">a car going past</span></button>
+        </div>
+        <div class="hint" data-lang="es">Cada escena mueve los seis controles a la vez hasta un conflicto concreto: los niños enfrentan borrón contra profundidad; la calle de noche, trepidación contra ruido; el paisaje, profundidad contra difracción; el coche, la velocidad del sujeto contra la luz que hay.</div>
+        <div class="hint" data-lang="en">Each scene moves all six controls at once into a specific conflict: the children pit blur against depth; the night street, camera shake against noise; the landscape, depth against diffraction; the car, subject speed against the light there is.</div>
+      </div>
 
       <div class="sep"></div>
       <div class="ct" data-lang="es">2 · El programa</div>
@@ -222,29 +303,25 @@
         <button type="button" class="segbtn" data-philo="ps"><span data-lang="es">P estab.</span><span data-lang="en">P + IS</span></button>
         <button type="button" class="segbtn" data-philo="a">A + Auto-ISO</button>
       </div>
+      <div class="hint" id="pc-nom11"><span data-lang="es">Este cuerpo no tiene P: la M11 solo ofrece A y Auto-ISO. Su programa es más delgado y, por eso mismo, más honesto: no finge repartir la luz por ti. Las dos columnas de P siguen dibujadas en fantasma, como lo que haría un Q3 o un SL3-S con los mismos datos.</span><span data-lang="en">This body has no P: the M11 offers only A and Auto-ISO. Its program is thinner and, for that very reason, more honest: it does not pretend to share out the light for you. The two P columns stay drawn as ghosts, as what a Q3 or an SL3-S would do with the same data.</span></div>
       <div class="ctl">
         <div class="row"><span data-lang="es">Focal (mm)</span><span data-lang="en">Focal length (mm)</span></div>
-        <select id="sel-focal">
-          <option value="21">21</option><option value="28">28</option><option value="35">35</option>
-          <option value="50" selected>50</option><option value="75">75</option><option value="90">90</option>
-        </select>
+        <select id="sel-focal"></select>
       </div>
       <div class="ctl">
         <div class="row"><span data-lang="es">Abertura máxima del objetivo</span><span data-lang="en">Maximum aperture of the lens</span></div>
-        <select id="sel-nopen">
-          <option value="1.4" selected>f/1.4</option><option value="2">f/2</option>
-          <option value="2.8">f/2.8</option><option value="4">f/4</option>
-        </select>
+        <select id="sel-nopen"></select>
       </div>
       <div id="a-opts">
         <div class="ctl">
           <div class="row"><span data-lang="es">N fijada por ti (modo A)</span><span data-lang="en">N you set (A mode)</span></div>
-          <select id="sel-nfix">
-            <option value="1.4">f/1.4</option><option value="2">f/2</option><option value="2.8">f/2.8</option>
-            <option value="4">f/4</option><option value="5.6" selected>f/5.6</option><option value="8">f/8</option>
-            <option value="11">f/11</option><option value="16">f/16</option>
-          </select>
+          <select id="sel-nfix"></select>
         </div>
+      </div>
+      <div id="pc-autowrap">
+        <label class="chk"><input type="checkbox" id="pc-autoiso"><span data-lang="es">Auto-ISO activo también en P</span><span data-lang="en">Auto-ISO active in P too</span></label>
+      </div>
+      <div id="pc-isoopts">
         <div class="ctl">
           <div class="row"><span data-lang="es">Mínimo de Auto-ISO</span><span data-lang="en">Auto-ISO floor</span></div>
           <select id="sel-floor"></select>
@@ -256,8 +333,8 @@
           </select>
         </div>
       </div>
-      <div class="hint" data-lang="es">P clásico: abre a tope y alarga t hasta 1/f; después reparte mitad y mitad hasta f/16. Con estabilizador, el umbral baja dos pasos, a 1/(f/4). En este modelo los P trabajan a ISO 100.</div>
-      <div class="hint" data-lang="en">Classic P: opens wide and lengthens t down to 1/f; beyond that it splits the light half and half up to f/16. With stabilisation the threshold drops two stops, to 1/(f/4). In this model the P modes work at ISO 100.</div>
+      <div class="hint" data-lang="es">P clásico: abre a tope y alarga t hasta 1/f; después reparte mitad y mitad hasta f/16. Con estabilizador, el umbral baja dos pasos, a 1/(f/4). Con «Auto-ISO activo también en P» el ISO paga antes de que t se alargue por debajo del mínimo, que es como se usan de verdad un Q3 o un SL3-S; sin marcar, los P trabajan a ISO 100, como en 1985.</div>
+      <div class="hint" data-lang="en">Classic P: opens wide and lengthens t down to 1/f; beyond that it splits the light half and half up to f/16. With stabilisation the threshold drops two stops, to 1/(f/4). With “Auto-ISO active in P too”, ISO pays before t stretches past the floor, which is how a Q3 or an SL3-S is actually used; unticked, the P modes work at ISO 100, as in 1985.</div>
 
       <div class="sep"></div>
       <div class="ct" data-lang="es">3 · Tu intención</div>
@@ -267,14 +344,18 @@
         <select id="sel-vel"></select>
       </div>
       <div class="ctl">
+        <div class="row"><span data-lang="es">Apoyo y estabilización</span><span data-lang="en">Support and stabilisation</span></div>
+        <select id="sel-sup"></select>
+      </div>
+      <div class="ctl">
         <div class="row"><span data-lang="es">Distancia al sujeto</span><span data-lang="en">Distance to the subject</span><span class="val" id="v-dist">3,0 m</span></div>
         <input id="r-dist" type="range" min="1" max="30" step="0.5" value="3">
       </div>
       <div class="ctl">
         <div class="row"><span data-lang="es">Criterio de nitidez (como el telémetro)</span><span data-lang="en">Sharpness criterion (as in the rangefinder)</span></div>
         <div class="seg" id="critSeg">
-          <button type="button" class="segbtn" data-crit="px2"><span data-lang="es">2 px M11 · 7,56 µm</span><span data-lang="en">2 px M11 · 7.56 µm</span></button>
-          <button type="button" class="segbtn on" data-crit="um30"><span data-lang="es">clásico 30 µm</span><span data-lang="en">classic 30 µm</span></button>
+          <button type="button" class="segbtn" data-crit="px2"><span id="pc-crit-px">2 px · 7,52 µm</span></button>
+          <button type="button" class="segbtn" data-crit="um30"><span data-lang="es">clásico 30 µm</span><span data-lang="en">classic 30 µm</span></button>
         </div>
       </div>
       <div class="ctl">
@@ -295,10 +376,22 @@
     <p class="explain" data-lang="en"><b>Classic P.</b> In dim light, N = N<sub>wide</sub> and long t; once t reaches the camera shake threshold 1/f, each extra stop of light is split half to t and half to N (the typical diagonal of the program line, the built-in program shift) up to N = 16; beyond that, t alone, down to 1/8000. <b>P with stabiliser:</b> identical with a 1/(f/4) threshold, two stops of margin. Values are continuous, with no rounding to third stops.</p>
     <p class="explain" data-lang="es"><b>A + Auto-ISO.</b> N la fijas tú. La cámara alarga t hasta el mínimo de Auto-ISO elegido (1/f, 1/(2f), 1/(4f) o un tiempo fijo); después mantiene t y sube ISO = 100·2<sup>Δ</sup> hasta el techo; solo al agotarlo vuelve a alargar t. La banda de color del diagrama marca las EV en las que está subiendo ISO.</p>
     <p class="explain" data-lang="en"><b>A + Auto-ISO.</b> You set N. The camera lengthens t down to the chosen Auto-ISO floor (1/f, 1/(2f), 1/(4f) or a fixed time); then it holds t and raises ISO = 100·2<sup>Δ</sup> up to the ceiling; only when that is exhausted does it lengthen t again. The coloured band on the diagram marks the EVs at which it is raising ISO.</p>
-    <p class="explain" data-lang="es"><b>Movimiento.</b> Con magnificación m = f/(d−f), como en el telémetro, el borrón en el sensor es b = v·t·f/(d−f); tu intención exige b ≤ b<sub>máx</sub> (2 píxeles de la M11 = 7,56 µm, o el clásico 30 µm), de donde t<sub>máx</sub> = b<sub>máx</sub>·(d−f)/(v·f). La región t &gt; t<sub>máx</sub> se sombrea como borrón.</p>
-    <p class="explain" data-lang="en"><b>Motion.</b> With magnification m = f/(d−f), as in the rangefinder, the blur on the sensor is b = v·t·f/(d−f); your intention demands b ≤ b<sub>max</sub> (2 pixels of the M11 = 7.56 µm, or the classic 30 µm), whence t<sub>max</sub> = b<sub>max</sub>·(d−f)/(v·f). The region t &gt; t<sub>max</sub> is shaded as motion blur.</p>
+    <p class="explain" data-lang="es"><b>Movimiento.</b> Con magnificación m = f/(d−f), como en el telémetro, el borrón en el sensor es b = v·t·f/(d−f); tu intención exige b ≤ b<sub>máx</sub> (2 píxeles del cuerpo elegido —7,52 µm en M11 y Q3, 11,88 en el SL3-S, 5,94 en su multishot— o el clásico 30 µm), de donde t<sub>máx</sub> = b<sub>máx</sub>·(d−f)/(v·f). La región t &gt; t<sub>máx</sub> se sombrea como borrón.</p>
+    <p class="explain" data-lang="en"><b>Motion.</b> With magnification m = f/(d−f), as in the rangefinder, the blur on the sensor is b = v·t·f/(d−f); your intention demands b ≤ b<sub>max</sub> (2 pixels of the chosen body — 7.52 µm on M11 and Q3, 11.88 on the SL3-S, 5.94 on its multishot — or the classic 30 µm), whence t<sub>max</sub> = b<sub>max</sub>·(d−f)/(v·f). The region t &gt; t<sub>max</sub> is shaded as motion blur.</p>
     <p class="explain" data-lang="es"><b>Profundidad de campo.</b> Las mismas fórmulas del repositorio: hiperfocal H = f²/(N·c₀) + f; límites d<sub>n</sub> = d(H−f)/(H+d−2f) y d<sub>f</sub> = d(H−f)/(H−d), con c₀ = 30 µm por defecto. N<sub>mín</sub> es la menor N cuya PdC cubre el intervalo pedido, resuelta por bisección sobre esas fórmulas; para paisaje (d<sub>f</sub> = ∞) hay forma cerrada, N<sub>mín</sub> = f²/(c₀·(d−f)). La región N &lt; N<sub>mín</sub> se sombrea como PdC insuficiente.</p>
     <p class="explain" data-lang="en"><b>Depth of field.</b> The repository’s own formulae: hyperfocal H = f²/(N·c₀) + f; limits d<sub>n</sub> = d(H−f)/(H+d−2f) and d<sub>f</sub> = d(H−f)/(H−d), with c₀ = 30 µm by default. N<sub>min</sub> is the smallest N whose depth of field covers the requested interval, solved by bisection over those formulae; for landscape (d<sub>f</sub> = ∞) there is a closed form, N<sub>min</sub> = f²/(c₀·(d−f)). The region N &lt; N<sub>min</sub> is shaded as insufficient depth of field.</p>
+  </div>
+
+    <p class="explain" data-lang="es"><b>Trepidación.</b> La regla del 1/f es una convención, no una medida; aquí se calibra y se declara. Si a 50 mm, 1/50 s y 30 µm de borrón la regla se da por buena, la velocidad angular implícita del pulso es ω₀ = b/(f·t) = 0,03/(50·0,02) = <b>0,03 rad/s</b>. Cada paso de apoyo o de estabilización la divide por dos: ω = ω₀/2<sup>apoyo</sup>, y el tiempo que aguantas es t<sub>trep</sub> = b<sub>máx</sub>/(f·ω), con f en mm y b<sub>máx</sub> en mm. A nivel de píxel el resultado es duro: con b<sub>máx</sub> = 2 px la regla 1/f se queda <b>dos pasos corta</b> —a 50 mm y a pulso, t<sub>trep</sub> = 1/199, es decir 1/(4f)—, que es justo la opción que la M11 ofrece en el menú de Auto-ISO. Es un umbral, no una promesa: la dispersión entre fotógrafos es enorme.</p>
+    <p class="explain" data-lang="en"><b>Camera shake.</b> The 1/f rule is a convention, not a measurement; here it is calibrated and declared. If at 50 mm, 1/50 s and 30 µm of blur the rule is taken as good, the implied angular speed of the pulse is ω₀ = b/(f·t) = 0.03/(50·0.02) = <b>0.03 rad/s</b>. Each stop of support or stabilisation halves it: ω = ω₀/2<sup>support</sup>, and the time you can hold is t<sub>shake</sub> = b<sub>max</sub>/(f·ω), with f in mm and b<sub>max</sub> in mm. At pixel level the result is harsh: with b<sub>max</sub> = 2 px the 1/f rule falls <b>two stops short</b> — at 50 mm handheld, t<sub>shake</sub> = 1/199, that is 1/(4f) — which is exactly the option the M11 offers in its Auto-ISO menu. It is a threshold, not a promise: the spread between photographers is enormous.</p>
+    <p class="explain" data-lang="es"><b>El diafragma crítico del sensor.</b> Cerrar tiene un techo que no es de exposición sino de resolución: cuando el disco de Airy iguala el paso de píxel, N<sub>crít</sub> = p/(1,22·λ) con λ = 0,55 µm, cerrar más ya no compra nitidez. Da <b>f/5,6</b> con 3,76 µm (M11 y Q3), f/8,9 con 5,94 µm (SL3-S) y f/4,4 con 2,97 µm (multishot de 96 Mpx). La zona por encima de esa línea se sombrea en el diagrama: cuando el veredicto te manda cerrar a f/11 o f/16 por profundidad de campo, te está mandando pagar en difracción. La cuantificación —megapíxeles efectivos, MTF, disco de Airy— no se repite aquí: está en <a href="sensor.html#difraccion">la ficha de difracción</a>.</p>
+    <p class="explain" data-lang="en"><b>The sensor’s critical aperture.</b> Stopping down has a ceiling that is not about exposure but about resolution: when the Airy disc matches the pixel pitch, N<sub>crit</sub> = p/(1.22·λ) with λ = 0.55 µm, stopping down further no longer buys sharpness. That gives <b>f/5.6</b> at 3.76 µm (M11 and Q3), f/8.9 at 5.94 µm (SL3-S) and f/4.4 at 2.97 µm (the 96 Mpx multishot). The zone above that line is shaded on the diagram: when the verdict tells you to stop down to f/11 or f/16 for depth of field, it is telling you to pay in diffraction. The quantitative treatment — effective megapixels, MTF, Airy disc — is not repeated here: it lives in <a href="sensor.html#difraccion">the diffraction sheet</a>.</p>
+    <p class="explain" data-lang="es"><b>El ISO que hace falta, y en qué pasos.</b> Fijados t y N, la exposición no deja elección: ISO<sub>req</sub> = 100·2<sup>2log₂N + log₂(1/t) − EV</sup>. Si tu intención pide t ≤ min(t<sub>máx</sub>, t<sub>trep</sub>) y N ≥ N<sub>mín</sub>, ese es el ISO que la ejecuta; si supera tu techo, faltan k = log₂(ISO<sub>req</sub>/techo) pasos, y hay que pagarlos con otra moneda: abrir el objetivo, aceptar 2<sup>k</sup> veces más borrón o rebajar la profundidad. Las tres barras cuentan exactamente eso, en pasos. El coste del ISO se mide en pasos de altas luces desde ISO 100; por encima del punto de ganancia dual del cuerpo (M11 200, Q3 400, SL3-S 640) el ruido de lectura cae y los últimos pasos son más baratos de lo que la barra sugiere.</p>
+    <p class="explain" data-lang="en"><b>The ISO you need, and in stops.</b> With t and N fixed, exposure leaves no choice: ISO<sub>req</sub> = 100·2<sup>2log₂N + log₂(1/t) − EV</sup>. If your intention asks for t ≤ min(t<sub>max</sub>, t<sub>shake</sub>) and N ≥ N<sub>min</sub>, that is the ISO that executes it; if it exceeds your ceiling, you are k = log₂(ISO<sub>req</sub>/ceiling) stops short, and those must be paid in another currency: open the lens, accept 2<sup>k</sup> times the blur, or ask for less depth. The three bars count exactly that, in stops. The ISO cost is measured in stops of highlight range from ISO 100; above the body’s dual-gain point (M11 200, Q3 400, SL3-S 640) read noise drops and the last stops are cheaper than the bar suggests.</p>
+    <p class="explain" data-lang="es"><b>La primera decisión del programa: qué es «exposición correcta».</b> Antes de repartir la luz entre t, N e ISO, el aparato ya ha decidido cuánta luz hay, y lo hace suponiendo que el mundo refleja un 18 %. No lo hace. La reflectancia dominante desplaza la medida: EV<sub>medida</sub> = EV<sub>real</sub> + desvío, con +2 en nieve o playa, −1,5 en un contraluz medido al sujeto y −1 en un interior oscuro con ventana. Todo el programa se calcula sobre la EV medida, que es la que la cámara cree; el diagrama dibuja además la diagonal de la escena real en blanco discontinuo, y el veredicto dice cuántos pasos de sub o sobreexposición hay entre una y otra. Esto es lo flusseriano del asunto: la automática no solo elige la pareja t/N, elige antes qué cuenta como correcto.</p>
+    <p class="explain" data-lang="en"><b>The program’s first decision: what counts as “correct exposure”.</b> Before sharing the light out between t, N and ISO, the apparatus has already decided how much light there is, and it does so assuming the world reflects 18%. It does not. The dominant reflectance shifts the reading: EV<sub>metered</sub> = EV<sub>real</sub> + bias, with +2 on snow or beach, −1.5 on a backlit subject metered on the subject, and −1 in a dark interior with a window. The whole program is computed on the metered EV, which is what the camera believes; the diagram also draws the real scene’s diagonal as a white dashed line, and the verdict says how many stops of under- or overexposure lie between them. This is the Flusserian part: the automation does not only pick the t/N pair, it first picks what counts as correct.</p>
+    <p class="explain" data-lang="es"><b>Los cuerpos.</b> El paso de píxel fija a la vez el criterio de 2 px (7,52 µm en M11 y Q3, 11,88 en el SL3-S, 5,94 en su multishot) y el diafragma crítico. El techo de obturación es del cuerpo, no del diagrama: 1/4000 mecánico en la M11 (1/16000 electrónico), 1/2000 en el obturador central de la Q3, 1/8000 en el SL3-S; el eje sigue llegando a 1/8000 y lo que el cuerpo no alcanza se dibuja como franja muerta. El ISO base (64 en la M11, 100 en las demás) no altera las diagonales, que son EV<sub>100</sub> por definición: es margen de altas luces adicional, no exposición distinta.</p>
+    <p class="explain" data-lang="en"><b>The bodies.</b> The pixel pitch sets both the 2 px criterion (7.52 µm on the M11 and Q3, 11.88 on the SL3-S, 5.94 on its multishot) and the critical aperture. The shutter ceiling belongs to the body, not to the diagram: 1/4000 mechanical on the M11 (1/16000 electronic), 1/2000 on the Q3’s leaf shutter, 1/8000 on the SL3-S; the axis still reaches 1/8000 and whatever the body cannot reach is drawn as a dead band. Base ISO (64 on the M11, 100 on the others) does not move the diagonals, which are EV<sub>100</sub> by definition: it is extra highlight headroom, not a different exposure.</p>
   </div>
 
   <div class="panel">
@@ -321,7 +414,7 @@
         </tr>
         <tr>
           <td><span data-lang="es">Borrón: 1,5 m/s · 3 m · 50 mm · 1/60</span><span data-lang="en">Motion blur: 1.5 m/s · 3 m · 50 mm · 1/60</span></td>
-          <td><span data-lang="es">b = 1500·(1/60)·50/2950 = 0,4237 mm = 423,7 µm = 112,1 px</span><span data-lang="en">b = 1500·(1/60)·50/2950 = 0.4237 mm = 423.7 µm = 112.1 px</span></td>
+          <td><span data-lang="es">b = 1500·(1/60)·50/2950 = 0,4237 mm = 423,7 µm = 112,7 px (3,76 µm)</span><span data-lang="en">b = 1500·(1/60)·50/2950 = 0.4237 mm = 423.7 µm = 112.7 px (3.76 µm)</span></td>
           <td id="vf-2"></td>
           <td id="vf-2s"></td>
         </tr>
@@ -337,6 +430,24 @@
           <td id="vf-4"></td>
           <td id="vf-4s"></td>
         </tr>
+        <tr>
+          <td><span data-lang="es">Trepidación: 50 mm, a pulso, b<sub>máx</sub> = 2 px = 7,52 µm</span><span data-lang="en">Camera shake: 50 mm, handheld, b<sub>max</sub> = 2 px = 7.52 µm</span></td>
+          <td><span data-lang="es">t = 0,00752/(50·0,03) = 0,005013 s ≈ 1/199, o sea 1/(4f)</span><span data-lang="en">t = 0.00752/(50·0.03) = 0.005013 s ≈ 1/199, that is 1/(4f)</span></td>
+          <td id="vf-5"></td>
+          <td id="vf-5s"></td>
+        </tr>
+        <tr>
+          <td><span data-lang="es">Diafragma crítico con 3,76 µm</span><span data-lang="en">Critical aperture at 3.76 µm</span></td>
+          <td><span data-lang="es">N = 3,76/(1,22·0,55) = 5,604 → f/5,6</span><span data-lang="en">N = 3.76/(1.22·0.55) = 5.604 → f/5.6</span></td>
+          <td id="vf-6"></td>
+          <td id="vf-6s"></td>
+        </tr>
+        <tr>
+          <td><span data-lang="es">ISO necesario: f/5,6 · 1/500 a EV 10</span><span data-lang="en">ISO required: f/5.6 · 1/500 at EV 10</span></td>
+          <td><span data-lang="es">100·2<sup>4,971+8,966−10</sup> = 100·5,6²·500/2¹⁰ = 1531,25</span><span data-lang="en">100·2<sup>4.971+8.966−10</sup> = 100·5.6²·500/2¹⁰ = 1531.25</span></td>
+          <td id="vf-7"></td>
+          <td id="vf-7s"></td>
+        </tr>
       </tbody>
     </table>
     </div>
@@ -347,7 +458,7 @@
   <p class="note" data-lang="es">La noción de programa y la de «jugar contra el aparato» son de Vilém Flusser, <i>Una filosofía de la fotografía</i> (1983). Aquí no hay metáfora: el programa es esta línea ámbar, y tu intención, estas regiones. El marco completo, en <a href="https://rafaelvida.com/2026/05/06/marco-para-pensar-la-fotografia/">el ensayo</a>.</p>
   <p class="note" data-lang="en">The notion of the program, and of “playing against the apparatus”, comes from Vilém Flusser, <i>Towards a Philosophy of Photography</i> (1983). No metaphor here: the program is this amber line, and your intention, these regions. The full framework is in <a href="https://rafaelvida.com/2026/05/06/marco-para-pensar-la-fotografia/">the essay</a>.</p>
 
-  <footer>EV = log₂(N²/t) − log₂(ISO/100) · b = v·t·f/(d−f) · t_máx = b_máx·(d−f)/(v·f) · H = f²/(N·c₀)+f · d_n = d(H−f)/(H+d−2f) · d_f = d(H−f)/(H−d) · © Rafael Vida</footer>
+  <footer>EV = log₂(N²/t) − log₂(ISO/100) · EV_medida = EV_real + desvío · b = v·t·f/(d−f) · t_máx = b_máx·(d−f)/(v·f) · ω = ω₀/2^apoyo, ω₀ = 0,03 rad/s · t_trep = b_máx/(f·ω) · N_crít = p/(1,22·λ), λ = 0,55 µm · ISO_req = 100·2^(2log₂N + log₂(1/t) − EV) · H = f²/(N·c₀)+f · d_n = d(H−f)/(H+d−2f) · d_f = d(H−f)/(H−d) · © Rafael Vida</footer>
 </div>
 
 <script>
@@ -406,69 +517,159 @@ const DICT={
   optStill:'parado (0 m/s)', optWalk:'andando (1,5 m/s)', optRun:'corriendo (4 m/s)', optCar:'vehículo (10 m/s)',
   optFace:'rostro (±15 cm)', optBody:'cuerpo (±50 cm)', optGroup:'grupo (±1,5 m)', optLand:'paisaje (hasta ∞)',
   optFl1:'1/f', optFl2:'1/(2f)', optFl4:'1/(4f)', optF60:'fijo 1/60', optF250:'fijo 1/250',
+  supHand:'a pulso (0 pasos)', supBrace:'apoyado, codos (1 paso)', supOis:'OIS del Q3 43 (2 pasos)',
+  supIbis:'IBIS del SL3-S (4 pasos)', supTri:'trípode (sin trepidación)',
+  refGrey:'gris 18 % (referencia)', refSnow:'nieve o playa (+2)',
+  refBack:'contraluz, medido al sujeto (−1,5)', refDark:'interior oscuro con ventana (−1)',
   /* rótulos del lienzo */
   axT:'tiempo de obturación t (30 s → 1/8000)', axN:'diafragma N',
-  evTag:'EV {v}', zShake:'trepidación {tt}',
+  evTag:'EV {v}', evRealTag:'EV real {v}',
+  zKnee:'rodilla del programa {tt}', zShake:'trepidación: t > {tt}',
   zBlur:'borrón: t > {tt}', zDof:'PdC insuficiente: N < f/{nn}', zDofAll:'PdC inalcanzable con este objetivo',
   zIso:'el programa sube ISO (hasta {cap})',
-  ptTag:'{tt} · f/{nn} · ISO {iso}',
+  zDiff:'crítico del sensor f/{nn}', zCap:'el obturador no llega ({tt})',
+  ptTag:'{tt} · f/{nn} · ISO {iso}', ptYou:'tú · {tt} · f/{nn}',
+  ghost:'{ph}', ghostOther:'{ph} (otro cuerpo)',
   /* nombres de filosofía */
   phP:'el P clásico', phPs:'el P con estabilizador', phA:'A + Auto-ISO',
+  phPs2:'P clásico', phPss:'P estab.', phAs:'A + Auto-ISO',
   /* veredicto */
+  vMeter:'El fotómetro no mide tu escena: mide un gris del 18 %. Con esta reflectancia lee <b>EV {evm}</b> donde la escena está a EV {evr}, y el programa reparte esa luz, no la tuya: {x} pasos de {dir}. ',
+  vUnderX:'subexposición', vOverX:'sobreexposición',
   vChoice:'A EV {ev}, {ph} te planta en <b>{tt} · f/{nn} · ISO {iso}</b>.',
+  vQuant:' Los mandos de este cuerpo van a tercios: en el dial leerás <b>{tt} · f/{nn}</b>.',
+  vCont:' En A este cuerpo es realmente continuo: ese valor es el que aplica, sin redondeo.',
   vUnder:' Y ni así llega: contra su tope de 30 s faltan {x} EV (subexposición).',
-  vOver:' Sobra luz: ni 1/8000 basta con esa abertura (sobreexposición).',
+  vOver:' Sobra luz: ni {cap} basta con esa abertura (sobreexposición).',
   vBlurFail:' El sujeto a {v} m/s y {d} m deja <b class="rd">{b} µm ({px} px)</b> de borrón; tu intención exigía <b>{tmax}</b> o más corto, que este programa no va a elegir a esta luz.',
   vBlurOk:' Movimiento: {b} µm ({px} px), dentro del criterio de {c} µm.',
+  vShakeFail:' Y el pulso también cuenta: {ap}, el umbral de este cuerpo cae en <b>{ts}</b> y con {tt} el temblor añade <b class="rd">{b} µm ({px} px)</b>.',
+  vShakeOk:' Trepidación: {b} µm ({px} px) {ap}, por debajo del criterio.',
   vDofFail:' A f/{nn} la profundidad de campo va de {dn} a {df}; tu intención pedía al menos <b class="vi">f/{nmin}</b>, que el programa no cerrará por sí solo.',
   vDofNever:' La profundidad pedida no se alcanza ni a f/16 con este objetivo a esta distancia: no hay pareja t/N que la ejecute.',
   vDofOk:' Profundidad de campo: de {dn} a {df}; cubre lo pedido.',
+  vDiff:' Y esa profundidad ya se paga en resolución: f/{nmin} está {x} pasos por encima del crítico de este sensor, f/{nc} (<a href="sensor.html#difraccion">la ficha de difracción</a> lo cuantifica).',
+  vDiffNow:' Aviso: f/{nn} ya está {x} pasos por encima del crítico de este sensor, f/{nc}; esa nitidez se paga en <a href="sensor.html#difraccion">difracción</a>.',
   vIso:' Lo paga en ISO {iso}: ruido, no magia.',
   vAllOk:' El punto del programa cae dentro de tu intención: a esta luz no hay conflicto que negociar.',
   vLever:' <b>Palanca:</b> {l}',
   lvToA:'pasa a A + Auto-ISO con mínimo 1/(4f), o fija tú {tmax} en manual y deja que el ISO pague la diferencia.',
   lvFloor:'sube el mínimo de Auto-ISO al menos hasta {tmax}.',
+  lvSupport:'apoya la cámara (o usa el estabilizador del cuerpo) y sube el mínimo de Auto-ISO hasta {tt}.',
   lvNup:'fija N ≥ f/{nmin} en modo A y deja que Auto-ISO pague la diferencia.',
   lvNupA:'cierra tu N a f/{nmin}; el techo de ISO decidirá el resto.',
   vFluss:'Esto es el programa; esto era tu intención. ¿La imagen que saldría ejecuta un programa o lucha contra uno?',
+  /* contabilidad en pasos */
+  cTime:'pasos de tiempo que faltan', cAp:'pasos de diafragma que faltan', cIso:'pasos de altas luces que ya cuesta el ISO',
+  cNone:'El programa ya ejecuta tu intención a esta luz: no hay moneda que pagar.',
+  cNoneIso:'El programa ya ejecuta tu intención a esta luz: lo único que pagas es el ISO, {x} pasos de altas luces.',
+  cNeed:'El punto del programa se queda a <b>{need} pasos</b> de tu intención. La pareja que sí la ejecuta es <b>{tt} · f/{nn}</b>, y con esta luz eso pide <b>ISO {iso}</b>. ',
+  cFits:'La moneda barata aquí es el <b>ISO</b>: {st} pasos de altas luces, dentro de tu techo de {cap}.',
+  cOverShoot:'Y no es ISO lo que falta: con el techo de obturación de este cuerpo ({cap}) esa pareja <b>sobreexpone {x} pasos</b>. La moneda que se paga aquí es luz de menos, es decir un <a href="filtro-sensor.html#nd">filtro ND</a>.',
+  cShort:'Se sale de tu techo de {cap} por <b>{k} pasos</b>. Las otras monedas: abrir hasta f/{no}, aceptar {k} pasos más de borrón ({b} µm = {px} px) o rebajar la profundidad pedida.',
+  cDual:' Por encima de ISO {d} este cuerpo conmuta a ganancia dual y el ruido de lectura cae: los últimos pasos salen más baratos de lo que sugiere la barra.',
+  cBase:'ISO base de este cuerpo: {b}. ',
+  /* tu punto */
+  yNone:'Pulsa o arrastra sobre el diagrama para poner tu punto, o deja que la ficha lo resuelva por ti.',
+  yProg:'el programa', yYou:'tú',
+  yPair:'<b>{tt} · f/{nn} · ISO {iso}</b>',
+  yBlur:'borrón {b} µm ({px} px)', yShake:'trepidación {b} µm ({px} px)',
+  yDof:'PdC {dn} → {df}', yIsoCost:'ISO: {x} pasos de altas luces',
+  yOver:'Esa pareja sobreexpone {x} pasos: por debajo de ISO 100 no se puede bajar.',
+  yCap:'Tu techo es {cap}: faltan {k} pasos.',
+  ySolved:'Resuelto sobre tu intención: {tt} viene de {src} y f/{nn} de la profundidad pedida.',
+  ySrcBlur:'el borrón admisible', ySrcShake:'el umbral de trepidación', ySrcLight:'la propia luz',
   /* tabla */
-  tbBlur:'borrón', tbDof:'PdC', tbIso:'ISO alto', tbUnder:'subexp.', tbOver:'sobreexp.',
+  tbBlur:'borrón', tbShake:'trepidación', tbDof:'PdC', tbIso:'ISO alto', tbUnder:'subexp.', tbOver:'sobreexp.',
+  cnNone:'En todo el barrido ninguna de las tres filosofías ejecuta tu intención: hay algo que ceder sí o sí.',
+  cnAll:'Las tres filosofías cumplen tu intención en todo el barrido: a esta escena el programa no te estorba.',
+  cnOnly:'Entre EV {a} y EV {b}, solo <b>{ph}</b> cumple tu intención.',
+  cnBest:'De las {m} EV del barrido, {p1} cumple en {k1}, {p2} en {k2} y {p3} en {k3}.',
+  cnGhost:'En este cuerpo las dos columnas de P son hipotéticas: es lo que haría un Q3 o un SL3-S con los mismos datos.',
   /* verificación */
   vfIs:'N²/t = {p} (EV {ev} exacto)', vfBlur:'{b} µm = {px} px', vfT:'{tt} s', vfH:'{h} m',
-  vfOk:'OK', vfBad:'≠'
+  vfShake:'{tt} ({ms} ms)', vfNc:'f/{nn}', vfIsoReq:'ISO {iso}',
+  vfOk:'OK', vfBad:'≠',
+  /* varios */
+  bodyTag:'{n} · {p} µm · ISO base {b}', critPx:'2 px · {um} µm',
+  preHint:'{x}'
  },
  en:{
   optStill:'standing still (0 m/s)', optWalk:'walking (1.5 m/s)', optRun:'running (4 m/s)', optCar:'a vehicle (10 m/s)',
   optFace:'a face (±15 cm)', optBody:'a body (±50 cm)', optGroup:'a group (±1.5 m)', optLand:'landscape (to ∞)',
   optFl1:'1/f', optFl2:'1/(2f)', optFl4:'1/(4f)', optF60:'fixed 1/60', optF250:'fixed 1/250',
+  supHand:'handheld (0 stops)', supBrace:'braced, elbows in (1 stop)', supOis:'Q3 43 OIS (2 stops)',
+  supIbis:'SL3-S IBIS (4 stops)', supTri:'tripod (no shake)',
+  refGrey:'18% grey (reference)', refSnow:'snow or beach (+2)',
+  refBack:'backlight, metered on the subject (−1.5)', refDark:'dark interior with a window (−1)',
   axT:'shutter time t (30 s → 1/8000)', axN:'aperture N',
-  evTag:'EV {v}', zShake:'camera shake {tt}',
+  evTag:'EV {v}', evRealTag:'real EV {v}',
+  zKnee:'program knee {tt}', zShake:'camera shake: t > {tt}',
   zBlur:'motion blur: t > {tt}', zDof:'insufficient DoF: N < f/{nn}', zDofAll:'DoF unreachable with this lens',
   zIso:'the program raises ISO (up to {cap})',
-  ptTag:'{tt} · f/{nn} · ISO {iso}',
+  zDiff:'sensor critical f/{nn}', zCap:'beyond this shutter ({tt})',
+  ptTag:'{tt} · f/{nn} · ISO {iso}', ptYou:'you · {tt} · f/{nn}',
+  ghost:'{ph}', ghostOther:'{ph} (another body)',
   phP:'classic P', phPs:'P with stabiliser', phA:'A + Auto-ISO',
+  phPs2:'Classic P', phPss:'P + IS', phAs:'A + Auto-ISO',
+  vMeter:'The meter does not measure your scene: it measures an 18% grey. With this reflectance it reads <b>EV {evm}</b> where the scene sits at EV {evr}, and the program shares out that light, not yours: {x} stops of {dir}. ',
+  vUnderX:'underexposure', vOverX:'overexposure',
   vChoice:'At EV {ev}, {ph} plants you at <b>{tt} · f/{nn} · ISO {iso}</b>.',
+  vQuant:' This body’s controls move in thirds: the dial will read <b>{tt} · f/{nn}</b>.',
+  vCont:' In A this body really is stepless: that value is the one it applies, with no rounding.',
   vUnder:' And even so it falls short: against its 30 s stop it is {x} EV under (underexposure).',
-  vOver:' Too much light: not even 1/8000 suffices at that aperture (overexposure).',
+  vOver:' Too much light: not even {cap} suffices at that aperture (overexposure).',
   vBlurFail:' The subject at {v} m/s and {d} m leaves <b class="rd">{b} µm ({px} px)</b> of motion blur; your intention demanded <b>{tmax}</b> or shorter, which this program will never choose at this light.',
   vBlurOk:' Motion: {b} µm ({px} px), within the {c} µm criterion.',
+  vShakeFail:' And your own pulse counts too: {ap}, this body’s threshold falls at <b>{ts}</b>, and at {tt} the tremor adds <b class="rd">{b} µm ({px} px)</b>.',
+  vShakeOk:' Camera shake: {b} µm ({px} px) {ap}, below the criterion.',
   vDofFail:' At f/{nn} the depth of field runs from {dn} to {df}; your intention asked for at least <b class="vi">f/{nmin}</b>, which the program will not stop down to on its own.',
   vDofNever:' The requested depth cannot be reached even at f/16 with this lens at this distance: no t/N pair executes it.',
   vDofOk:' Depth of field: from {dn} to {df}; it covers what was asked.',
+  vDiff:' And that depth is already paid for in resolution: f/{nmin} sits {x} stops beyond this sensor’s critical aperture, f/{nc} (<a href="sensor.html#difraccion">the diffraction sheet</a> quantifies it).',
+  vDiffNow:' Note: f/{nn} already sits {x} stops beyond this sensor’s critical aperture, f/{nc}; that sharpness is paid for in <a href="sensor.html#difraccion">diffraction</a>.',
   vIso:' It pays for it with ISO {iso}: noise, not magic.',
   vAllOk:' The program’s point falls inside your intention: at this light there is no conflict to negotiate.',
   vLever:' <b>The lever:</b> {l}',
   lvToA:'switch to A + Auto-ISO with a 1/(4f) floor, or set {tmax} yourself in manual and let ISO pay the difference.',
   lvFloor:'raise the Auto-ISO floor at least to {tmax}.',
+  lvSupport:'brace the camera (or use the body’s stabiliser) and raise the Auto-ISO floor to {tt}.',
   lvNup:'set N ≥ f/{nmin} in A mode and let Auto-ISO pay the difference.',
   lvNupA:'stop your N down to f/{nmin}; the ISO ceiling will decide the rest.',
   vFluss:'This is the program; this was your intention. Would the resulting image execute a program, or play against one?',
-  tbBlur:'blur', tbDof:'DoF', tbIso:'high ISO', tbUnder:'underexp.', tbOver:'overexp.',
+  cTime:'stops of shutter time missing', cAp:'stops of aperture missing', cIso:'stops of highlight range the ISO already costs',
+  cNone:'The program already executes your intention at this light: there is no currency to pay.',
+  cNoneIso:'The program already executes your intention at this light: the only thing you pay is ISO, {x} stops of highlight range.',
+  cNeed:'The program’s point falls <b>{need} stops</b> short of your intention. The pair that does execute it is <b>{tt} · f/{nn}</b>, and at this light that asks for <b>ISO {iso}</b>. ',
+  cFits:'The cheap currency here is <b>ISO</b>: {st} stops of highlight range, within your {cap} ceiling.',
+  cOverShoot:'And ISO is not what is missing: with this body’s shutter ceiling ({cap}) that pair <b>overexposes by {x} stops</b>. The currency paid here is less light, that is an <a href="filtro-sensor.html#nd">ND filter</a>.',
+  cShort:'It overshoots your {cap} ceiling by <b>{k} stops</b>. The other currencies: open up to f/{no}, accept {k} more stops of blur ({b} µm = {px} px), or ask for less depth.',
+  cDual:' Above ISO {d} this body switches to dual gain and read noise drops: the last stops come cheaper than the bar suggests.',
+  cBase:'Base ISO of this body: {b}. ',
+  yNone:'Click or drag on the diagram to place your own point, or let the sheet solve it for you.',
+  yProg:'the program', yYou:'you',
+  yPair:'<b>{tt} · f/{nn} · ISO {iso}</b>',
+  yBlur:'blur {b} µm ({px} px)', yShake:'shake {b} µm ({px} px)',
+  yDof:'DoF {dn} → {df}', yIsoCost:'ISO: {x} stops of highlight range',
+  yOver:'That pair overexposes by {x} stops: nothing goes below ISO 100.',
+  yCap:'Your ceiling is {cap}: {k} stops short.',
+  ySolved:'Solved on your intention: {tt} comes from {src} and f/{nn} from the depth you asked for.',
+  ySrcBlur:'the admissible blur', ySrcShake:'the camera-shake threshold', ySrcLight:'the light itself',
+  tbBlur:'blur', tbShake:'shake', tbDof:'DoF', tbIso:'high ISO', tbUnder:'underexp.', tbOver:'overexp.',
+  cnNone:'Across the whole sweep none of the three philosophies executes your intention: something has to give.',
+  cnAll:'All three philosophies meet your intention across the whole sweep: in this scene the program is not in your way.',
+  cnOnly:'Between EV {a} and EV {b}, only <b>{ph}</b> meets your intention.',
+  cnBest:'Of the {m} EVs in the sweep, {p1} succeeds at {k1}, {p2} at {k2} and {p3} at {k3}.',
+  cnGhost:'On this body the two P columns are hypothetical: it is what a Q3 or an SL3-S would do with the same data.',
   vfIs:'N²/t = {p} (EV {ev} exact)', vfBlur:'{b} µm = {px} px', vfT:'{tt} s', vfH:'{h} m',
-  vfOk:'OK', vfBad:'≠'
+  vfShake:'{tt} ({ms} ms)', vfNc:'f/{nn}', vfIsoReq:'ISO {iso}',
+  vfOk:'OK', vfBad:'≠',
+  bodyTag:'{n} · {p} µm · base ISO {b}', critPx:'2 px · {um} µm',
+  preHint:'{x}'
  }
 };
 const LANG = function(){ return document.documentElement.lang==='en' ? 'en' : 'es'; };
+const LOCALE = function(){ return LANG()==='en' ? 'en-GB' : 'es-ES'; };
 function LBL(key,vars){
   const D=DICT[LANG()]||DICT.es;
   let str = D[key]!==undefined ? D[key] : (DICT.es[key]!==undefined?DICT.es[key]:key);
@@ -478,32 +679,75 @@ function LBL(key,vars){
 /* coma decimal en español, punto en inglés */
 const nf = function(x,dd){ return x.toFixed(dd).replace('.', LANG()==='es'?',':'.'); };
 
+/* ---------- los cuerpos (datos de scripts/sitio/fuentes/leica-sensores.html) ---------- */
+const BODIES=[
+ {id:'m11',   label:'M11',           pitch:3.76, mpx:60.3, isoBase:64,  dual:200, cap:4000, elec:'1/16000',
+  stab:null,   focals:[21,28,35,50,75,90], opens:[1.4,2,2.8,4], modes:['a']},
+ {id:'q3',    label:'Q3 43',         pitch:3.76, mpx:60.3, isoBase:100, dual:400, cap:2000, elec:'1/16000',
+  stab:'ois',  focals:[43], opens:[2], modes:['p','ps','a']},
+ {id:'sl3s',  label:'SL3-S',         pitch:5.94, mpx:24.6, isoBase:100, dual:640, cap:8000, elec:'1/16000',
+  stab:'ibis', focals:[24,35,50,75,90], opens:[1.4,2,2.8,4], modes:['p','ps','a']},
+ {id:'sl3s96',label:'SL3-S 96 Mpx',  pitch:2.97, mpx:96,   isoBase:100, dual:640, cap:8000, elec:'1/16000',
+  stab:'ibis', focals:[24,35,50,75,90], opens:[1.4,2,2.8,4], modes:['p','ps','a']}
+];
+const SUPSTEPS={hand:0, brace:1, ois:2, ibis:4, tripod:Infinity};
+const SUPLBL={hand:'supHand', brace:'supBrace', ois:'supOis', ibis:'supIbis', tripod:'supTri'};
+const BIASV={grey:0, snow:2, back:-1.5, dark:-1};
+const BIASLBL={grey:'refGrey', snow:'refSnow', back:'refBack', dark:'refDark'};
+
 /* ---------- constantes y estado ---------- */
-const PITCH=3.76;                       // µm por píxel de la M11
 const TVMIN=Math.log2(1/30), TVMAX=Math.log2(8000);
 const AVLO=2*Math.log2(1.4), AVHI=8;    // f/1.4 … f/16 en Av = 2·log2(N)
+const LAMBDA=0.55;                      // µm, verde de referencia para el disco de Airy
+const OMEGA0=0.03;                      // rad/s: 50 mm, 1/50 s y 30 µm ⇒ ω₀ = 0,03
+const LSKEY='programa_camara_v1';
+const CW=1000, CH=620, ML=76, MR=88, MT=44, MB=60;
+const PW=CW-ML-MR, PH=CH-MT-MB;
+const DPR=Math.max(1, Math.min(2, window.devicePixelRatio||1));
+const X=function(tv){ return ML+PW*(tv-TVMIN)/(TVMAX-TVMIN); };
+const Y=function(av){ return MT+PH*(1-(av-AVLO)/(AVHI-AVLO)); };
+const invX=function(xx){ return TVMIN+(xx-ML)*(TVMAX-TVMIN)/PW; };
+const invY=function(yy){ return AVLO+(1-(yy-MT)/PH)*(AVHI-AVLO); };
+
 const ST={
-  ev:7, philo:'p', focal:50, nOpen:1.4,
-  nFix:5.6, floor:'fl1', isoCap:12500,
-  vel:1.5, dist:3, critUm:30, dof:'body'
+  body:'m11', ev:7, bias:'grey', philo:'a', focal:50, nOpen:1.4,
+  nFix:5.6, floor:'fl1', isoCap:12500, autoIsoP:false,
+  vel:1.5, dist:3, crit:'um30', dof:'body', support:'hand',
+  me:null
 };
 const DOFDELTA={face:150, body:500, group:1500, land:Infinity};  // ±mm
 
+function BODY(){ for(let i=0;i<BODIES.length;i++){ if(BODIES[i].id===ST.body) return BODIES[i]; } return BODIES[0]; }
+function CRIT(){ return ST.crit==='px2' ? 2*BODY().pitch : 30; }
+function TVCAP(){ return Math.log2(BODY().cap); }
+function evMed(){ return ST.ev + BIASV[ST.bias]; }
+function supSteps(){ const ss=SUPSTEPS[ST.support]; return ss===undefined?0:ss; }
+
 /* ---------- el programa (puro: sin estado de UI escondido) ---------- */
-function progP(evv, stab, focal, nOpen){
+function progP(evv, stab, focal, nOpen, autoIso, isoCap, floorMode, tvCap){
+  const cap = (tvCap===undefined)? TVMAX : tvCap;
   const avMin=2*Math.log2(nOpen);
   const tvShake=Math.log2(stab? focal/4 : focal);   // t = 1/f o 1/(f/4)
+  let iso=100, evEff=evv;
+  if(autoIso){                                      /* P con Auto-ISO: el ISO paga antes de alargar t */
+    const tvFloor=floorTv(floorMode||'fl1', focal);
+    const tvWide=evv-avMin;
+    if(tvWide<tvFloor){
+      const need=Math.min(tvFloor-tvWide, Math.log2(isoCap/100));
+      iso=100*Math.pow(2,need); evEff=evv+need;
+    }
+  }
   const knee=avMin+tvShake;
   let av, tv, clip=null;
-  if(evv<=knee){ av=avMin; tv=evv-avMin; }
+  if(evEff<=knee){ av=avMin; tv=evEff-avMin; }
   else{
-    const extra=evv-knee;
+    const extra=evEff-knee;
     av=avMin+extra/2; tv=tvShake+extra/2;
     if(av>AVHI){ tv+=av-AVHI; av=AVHI; }
   }
   if(tv<TVMIN){ clip='under'; tv=TVMIN; }
-  if(tv>TVMAX){ clip='over';  tv=TVMAX; }
-  return {tv:tv, av:av, iso:100, clip:clip};
+  if(tv>cap){ clip='over';  tv=cap; }
+  return {tv:tv, av:av, iso:iso, clip:clip};
 }
 function floorTv(mode, focal){
   if(mode==='fl2') return Math.log2(2*focal);
@@ -512,7 +756,8 @@ function floorTv(mode, focal){
   if(mode==='f250') return Math.log2(250);
   return Math.log2(focal);
 }
-function progA(evv, nFix, mode, focal, isoCap){
+function progA(evv, nFix, mode, focal, isoCap, tvCap){
+  const cap = (tvCap===undefined)? TVMAX : tvCap;
   const av=2*Math.log2(nFix);
   const tvFloor=floorTv(mode,focal);
   const capStops=Math.log2(isoCap/100);
@@ -521,13 +766,14 @@ function progA(evv, nFix, mode, focal, isoCap){
     const need=tvFloor-tv;
     if(need<=capStops){ iso=100*Math.pow(2,need); tv=tvFloor; }
     else{ iso=isoCap; tv=tv+capStops; if(tv<TVMIN){ clip='under'; tv=TVMIN; } }
-  } else if(tv>TVMAX){ clip='over'; tv=TVMAX; }
+  } else if(tv>cap){ clip='over'; tv=cap; }
   return {tv:tv, av:av, iso:iso, clip:clip};
 }
-function progAt(evv){
-  if(ST.philo==='a') return progA(evv, ST.nFix, ST.floor, ST.focal, ST.isoCap);
-  return progP(evv, ST.philo==='ps', ST.focal, ST.nOpen);
+function progFor(philo, evv){
+  if(philo==='a') return progA(evv, ST.nFix, ST.floor, ST.focal, ST.isoCap, TVCAP());
+  return progP(evv, philo==='ps', ST.focal, ST.nOpen, ST.autoIsoP, ST.isoCap, ST.floor, TVCAP());
 }
+function progAt(evv){ return progFor(ST.philo, evv); }
 
 /* ---------- la intención ---------- */
 function blurUmP(vms, dm, fmm, sec){          // borrón en µm
@@ -537,6 +783,14 @@ function tMaxP(vms, dm, fmm, bMaxUm){         // t máximo en s
   if(vms<=0) return Infinity;
   return (bMaxUm/1000)*(dm*1000-fmm)/(vms*1000*fmm);
 }
+function omegaP(steps){ return steps===Infinity ? 0 : OMEGA0/Math.pow(2,steps); }
+function shakeUmP(fmm, sec, steps){ return fmm*sec*omegaP(steps)*1000; }      // µm
+function tShakeP(fmm, bMaxUm, steps){                                          // s
+  const ww=omegaP(steps);
+  return ww<=0 ? Infinity : (bMaxUm/1000)/(fmm*ww);
+}
+function nCritP(pitchUm){ return pitchUm/(1.22*LAMBDA); }
+function isoReqP(nn, sec, evv){ return 100*Math.pow(2, 2*Math.log2(nn)+Math.log2(1/sec)-evv); }
 function hyperfP(fmm, nn, c0um){ return fmm*fmm/(nn*(c0um/1000))+fmm; }   // mm
 function dofNearFar(fmm, nn, c0um, dmm){
   const hh=hyperfP(fmm,nn,c0um);
@@ -560,68 +814,126 @@ function nMinDofP(fmm, c0um, dmm, delta){
   return hi;
 }
 function intention(){
-  const tMax=tMaxP(ST.vel, ST.dist, ST.focal, ST.critUm);
-  const nMin=nMinDofP(ST.focal, ST.critUm, ST.dist*1000, DOFDELTA[ST.dof]);
-  return {tMax:tMax, nMin:nMin};
+  const cu=CRIT();
+  return {
+    tMax: tMaxP(ST.vel, ST.dist, ST.focal, cu),
+    nMin: nMinDofP(ST.focal, cu, ST.dist*1000, DOFDELTA[ST.dof]),
+    tShake: tShakeP(ST.focal, cu, supSteps()),
+    nCrit: nCritP(BODY().pitch),
+    crit: cu
+  };
+}
+/* t y N que ejecutan la intención, y el ISO que eso pide */
+function solveIntention(){
+  const goal=intention();
+  const nTarget=Math.min(16, Math.max(ST.nOpen, goal.nMin===Infinity?16:goal.nMin));
+  const av=Math.min(AVHI, Math.max(AVLO, 2*Math.log2(nTarget)));
+  const tLim=Math.min(goal.tMax, goal.tShake);
+  let src='ySrcLight';
+  if(tLim!==Infinity) src = (goal.tMax<=goal.tShake) ? 'ySrcBlur' : 'ySrcShake';
+  const tvNeed = (tLim===Infinity) ? -Infinity : Math.log2(1/tLim);
+  let tv=Math.max(tvNeed, evMed()-av);
+  tv=Math.min(TVCAP(), Math.max(TVMIN, tv));
+  return {tv:tv, av:av, iso:isoReqP(Math.pow(2,av/2), Math.pow(2,-tv), evMed()), src:src};
 }
 
 /* ---------- formato ---------- */
 function fmtT(sec){
-  if(sec>=1) return nf(sec, sec>=10?0:1)+' s';
+  if(sec===Infinity) return '∞';
+  if(sec>=10) return nf(sec,0)+' s';
+  if(sec>=0.35) return nf(sec,1)+' s';
   return '1/'+Math.round(1/sec);
 }
 function fmtN(nn){ return nf(nn, nn<10?1:0); }
-function fmtIso(iso){ return String(Math.round(iso)); }
+function fmtIso(iso){ return Math.round(iso).toLocaleString(LOCALE()); }
 function fmtEv(evv){ return nf(evv, Math.abs(evv%1)>1e-9?1:0); }
 function fmtDist(dmm){ return dmm===Infinity?'∞':nf(dmm/1000, dmm<10000?2:1)+' m'; }
+/* escaleras reales de la cámara, a tercios de paso */
+const TLADDER=[30,25,20,15,13,10,8,6,5,4,3,2.5,2,1.6,1.3,1,0.8,0.6,0.5,0.4,1/3,1/4,1/5,1/6,1/8,1/10,1/13,1/15,1/20,1/25,1/30,1/40,1/50,1/60,1/80,1/100,1/125,1/160,1/200,1/250,1/320,1/400,1/500,1/640,1/800,1/1000,1/1250,1/1600,1/2000,1/2500,1/3200,1/4000,1/5000,1/6400,1/8000,1/10000,1/12500,1/16000];
+const NLADDER=[1.4,1.6,1.8,2,2.2,2.5,2.8,3.2,3.5,4,4.5,5,5.6,6.3,7.1,8,9,10,11,13,14,16,18,20,22];
+function snapTo(list, val){
+  let best=list[0];
+  for(let i=1;i<list.length;i++){ if(Math.abs(Math.log2(list[i]/val))<Math.abs(Math.log2(best/val))) best=list[i]; }
+  return best;
+}
+function quantized(){ return ST.philo!=='a'; }   /* los P van a tercios; en A estos cuerpos son continuos */
 
 /* ---------- diagnóstico en un punto del programa ---------- */
-function judge(evv){
-  const pt=progAt(evv), goal=intention();
+function judge(evReal, philo){
+  const evm=evReal+BIASV[ST.bias];
+  const pt=progFor(philo||ST.philo, evm), goal=intention();
   const sec=Math.pow(2,-pt.tv), nn=Math.pow(2,pt.av/2);
   const blur=ST.vel>0? blurUmP(ST.vel, ST.dist, ST.focal, sec) : 0;
+  const shake=shakeUmP(ST.focal, sec, supSteps());
   return {
-    pt:pt, sec:sec, nn:nn, goal:goal, blur:blur,
-    blurBad: ST.vel>0 && blur>ST.critUm+1e-9,
+    pt:pt, sec:sec, nn:nn, goal:goal, blur:blur, shake:shake, evMed:evm,
+    blurBad: ST.vel>0 && blur>goal.crit+1e-9,
+    shakeBad: shake>goal.crit+1e-9,
     dofBad: goal.nMin===Infinity ? true : nn<goal.nMin-1e-9,
     dofNever: goal.nMin===Infinity || goal.nMin>16+1e-9,
     isoHigh: pt.iso>=3200
   };
 }
+function clean(jj){ return !jj.blurBad && !jj.shakeBad && !jj.dofBad && !jj.dofNever && !jj.pt.clip; }
 
 /* ---------- lienzo ---------- */
+function setupCanvas(){
+  const cv=$('diag');
+  cv.width=Math.round(CW*DPR); cv.height=Math.round(CH*DPR);
+}
 function draw(){
   const cv=$('diag'), g=cv.getContext('2d');
-  const W=cv.width, HH=cv.height;
-  const ML=76, MR=88, MT=44, MB=60;
-  const X=function(tv){ return ML+(W-ML-MR)*(tv-TVMIN)/(TVMAX-TVMIN); };
-  const Y=function(av){ return MT+(HH-MT-MB)*(1-(av-AVLO)/(AVHI-AVLO)); };
-  const PW=W-ML-MR, PH=HH-MT-MB;
-  g.clearRect(0,0,W,HH);
-  g.fillStyle='#0f131a'; g.fillRect(0,0,W,HH);
-  const goal=intention();
+  g.setTransform(DPR,0,0,DPR,0,0);
+  g.clearRect(0,0,CW,CH);
+  g.fillStyle='#0f131a'; g.fillRect(0,0,CW,CH);
+  const goal=intention(), evm=evMed(), tvCap=TVCAP();
 
   /* rejilla: tiempos y diafragmas estándar */
   g.font='11px IBM Plex Mono, monospace'; g.lineWidth=1;
-  const ticksT=[[30,'30 s'],[8,'8 s'],[2,'2 s'],[0.5,'1/2'],[1/8,'1/8'],[1/30,'1/30'],[1/125,'1/125'],[1/500,'1/500'],[1/2000,'1/2000'],[1/8000,'1/8000']];
+  const ticksT=[[30,'30 s'],[8,'8 s'],[2,'2 s'],[0.5,'0,5 s'],[1/8,'1/8'],[1/30,'1/30'],[1/125,'1/125'],[1/500,'1/500'],[1/2000,'1/2000'],[1/8000,'1/8000']];
   for(let i=0;i<ticksT.length;i++){
     const xx=X(Math.log2(1/ticksT[i][0]));
-    g.strokeStyle='#1a212b'; g.beginPath(); g.moveTo(xx,MT); g.lineTo(xx,HH-MB); g.stroke();
-    g.fillStyle='#5b636f'; g.textAlign='center'; g.fillText(ticksT[i][1],xx,HH-MB+18);
+    g.strokeStyle='#1a212b'; g.beginPath(); g.moveTo(xx,MT); g.lineTo(xx,CH-MB); g.stroke();
+    g.fillStyle='#5b636f'; g.textAlign='center';
+    g.fillText(LANG()==='en'?ticksT[i][1].replace(',','.'):ticksT[i][1], xx, CH-MB+18);
   }
   const ticksN=[1.4,2,2.8,4,5.6,8,11,16];
   for(let i=0;i<ticksN.length;i++){
     const yy=Y(2*Math.log2(ticksN[i]));
-    g.strokeStyle='#1a212b'; g.beginPath(); g.moveTo(ML,yy); g.lineTo(W-MR,yy); g.stroke();
+    g.strokeStyle='#1a212b'; g.beginPath(); g.moveTo(ML,yy); g.lineTo(CW-MR,yy); g.stroke();
     g.fillStyle='#5b636f'; g.textAlign='right'; g.fillText('f/'+ticksN[i],ML-8,yy+4);
   }
 
-  /* regiones de la intención y banda de ISO, recortadas al área de trazado */
+  /* regiones, recortadas al área de trazado */
   g.save(); g.beginPath(); g.rect(ML,MT,PW,PH); g.clip();
 
-  /* banda de ISO (solo A + Auto-ISO): entre las diagonales EV donde sube ISO */
-  if(ST.philo==='a'){
-    const evStart=2*Math.log2(ST.nFix)+floorTv(ST.floor,ST.focal);
+  /* techo de obturación del cuerpo: franja inutilizable */
+  if(tvCap<TVMAX-1e-9){
+    const xc=X(tvCap);
+    g.fillStyle='rgba(10,12,16,.62)'; g.fillRect(xc,MT,(CW-MR)-xc,PH);
+    g.strokeStyle='rgba(138,146,159,.5)'; g.beginPath(); g.moveTo(xc,MT); g.lineTo(xc,CH-MB); g.stroke();
+    g.save(); g.translate(xc+13,MT+10); g.rotate(Math.PI/2);
+    g.fillStyle='rgba(138,146,159,.9)'; g.textAlign='left';
+    g.fillText(LBL('zCap',{tt:fmtT(1/BODY().cap)}),0,0); g.restore();
+  }
+
+  /* techo de difracción del sensor: por encima de av = 2·log2(N_crít) */
+  {
+    const avc=2*Math.log2(goal.nCrit);
+    if(avc<AVHI){
+      const yc=Y(Math.max(AVLO,avc));
+      g.fillStyle='rgba(201,171,95,.09)'; g.fillRect(ML,MT,PW,yc-MT);
+      g.strokeStyle='rgba(201,171,95,.45)'; g.setLineDash([2,3]);
+      g.beginPath(); g.moveTo(ML,yc); g.lineTo(CW-MR,yc); g.stroke(); g.setLineDash([]);
+      g.fillStyle='rgba(201,171,95,.85)'; g.textAlign='right';
+      g.fillText(LBL('zDiff',{nn:fmtN(goal.nCrit)}), CW-MR-8, Math.max(MT+12,yc-6));
+    }
+  }
+
+  /* banda de ISO (A + Auto-ISO, y P con Auto-ISO) */
+  if(ST.philo==='a' || ST.autoIsoP){
+    const avRef = ST.philo==='a' ? 2*Math.log2(ST.nFix) : 2*Math.log2(ST.nOpen);
+    const evStart=avRef+floorTv(ST.floor,ST.focal);
     const evEnd=evStart-Math.log2(ST.isoCap/100);
     const pA=function(evv,tv){ return [X(tv), Y(evv-tv)]; };
     g.fillStyle='rgba(63,202,176,.08)';
@@ -641,7 +953,7 @@ function draw(){
     g.fillStyle='rgba(63,202,176,.8)'; g.textAlign='left';
     const evMid=(evStart+evEnd)/2;
     let tvLab=evMid-AVHI+0.4; if(tvLab<TVMIN) tvLab=TVMIN+0.3;
-    g.fillText(LBL('zIso',{cap:ST.isoCap}), X(tvLab)+4, Y(evMid-tvLab)+14);
+    g.fillText(LBL('zIso',{cap:fmtIso(ST.isoCap)}), X(tvLab)+4, Y(evMid-tvLab)+14);
   }
 
   /* borrón: t > t_máx  ⇔  tv < log2(1/t_máx) */
@@ -651,10 +963,24 @@ function draw(){
       const xr=X(Math.min(tvReq,TVMAX));
       g.fillStyle='rgba(239,111,83,.10)'; g.fillRect(ML,MT,xr-ML,PH);
       g.strokeStyle='rgba(239,111,83,.55)'; g.setLineDash([5,4]);
-      g.beginPath(); g.moveTo(xr,MT); g.lineTo(xr,HH-MB); g.stroke(); g.setLineDash([]);
+      g.beginPath(); g.moveTo(xr,MT); g.lineTo(xr,CH-MB); g.stroke(); g.setLineDash([]);
       g.save(); g.translate(Math.max(ML+14,xr-10),MT+12); g.rotate(Math.PI/2);
       g.fillStyle='rgba(239,111,83,.85)'; g.textAlign='left';
       g.fillText(LBL('zBlur',{tt:fmtT(goal.tMax)}),0,0); g.restore();
+    }
+  }
+
+  /* trepidación: t > t_trep, con el apoyo elegido */
+  if(goal.tShake!==Infinity){
+    const tvReq=Math.log2(1/goal.tShake);
+    if(tvReq>TVMIN){
+      const xr=X(Math.min(tvReq,TVMAX));
+      g.fillStyle='rgba(79,127,214,.10)'; g.fillRect(ML,MT,xr-ML,PH);
+      g.strokeStyle='rgba(79,127,214,.6)'; g.setLineDash([7,3]);
+      g.beginPath(); g.moveTo(xr,MT); g.lineTo(xr,CH-MB); g.stroke(); g.setLineDash([]);
+      g.save(); g.translate(Math.max(ML+14,xr-10),CH-MB-14); g.rotate(-Math.PI/2);
+      g.fillStyle='rgba(120,166,240,.9)'; g.textAlign='left';
+      g.fillText(LBL('zShake',{tt:fmtT(goal.tShake)}),0,0); g.restore();
     }
   }
 
@@ -662,21 +988,21 @@ function draw(){
   if(goal.nMin>1.4+1e-9){
     const avReq=goal.nMin===Infinity? AVHI+1 : 2*Math.log2(goal.nMin);
     const yr=Y(Math.min(avReq,AVHI));
-    g.fillStyle='rgba(155,140,255,.10)'; g.fillRect(ML,yr,PW,HH-MB-yr);
+    g.fillStyle='rgba(155,140,255,.10)'; g.fillRect(ML,yr,PW,CH-MB-yr);
     if(avReq<=AVHI){
       g.strokeStyle='rgba(155,140,255,.55)'; g.setLineDash([5,4]);
-      g.beginPath(); g.moveTo(ML,yr); g.lineTo(W-MR,yr); g.stroke(); g.setLineDash([]);
+      g.beginPath(); g.moveTo(ML,yr); g.lineTo(CW-MR,yr); g.stroke(); g.setLineDash([]);
     }
     g.fillStyle='rgba(155,140,255,.85)'; g.textAlign='right';
     const dofLbl = (goal.nMin===Infinity||goal.nMin>16) ? LBL('zDofAll') : LBL('zDof',{nn:fmtN(goal.nMin)});
-    g.fillText(dofLbl, W-MR-8, Math.min(yr+16,HH-MB-8));
+    g.fillText(dofLbl, CW-MR-8, Math.min(yr+16,CH-MB-8));
   }
 
   /* diagonales de EV constante (ISO 100) */
   for(let evv=-4;evv<=20;evv++){
     const tvA=Math.max(TVMIN,evv-AVHI), tvB=Math.min(TVMAX,evv-AVLO);
     if(tvA>=tvB) continue;
-    const isCur=Math.abs(evv-ST.ev)<1e-9;
+    const isCur=Math.abs(evv-evm)<1e-9;
     g.strokeStyle=isCur?'rgba(244,177,60,.5)':(evv%2===0?'rgba(60,74,92,.6)':'rgba(46,57,71,.45)');
     g.lineWidth=isCur?1.6:1;
     if(isCur) g.setLineDash([6,4]);
@@ -685,18 +1011,48 @@ function draw(){
   }
   g.lineWidth=1;
 
-  /* umbral de trepidación (P y P estabilizado) */
+  /* la EV medida no es la real: dibuja también la diagonal de la escena */
+  if(Math.abs(BIASV[ST.bias])>1e-9){
+    const tvA=Math.max(TVMIN,ST.ev-AVHI), tvB=Math.min(TVMAX,ST.ev-AVLO);
+    if(tvA<tvB){
+      g.strokeStyle='rgba(216,221,229,.5)'; g.lineWidth=1.4; g.setLineDash([2,5]);
+      g.beginPath(); g.moveTo(X(tvA),Y(ST.ev-tvA)); g.lineTo(X(tvB),Y(ST.ev-tvB)); g.stroke();
+      g.setLineDash([]); g.lineWidth=1;
+      g.fillStyle='rgba(216,221,229,.75)'; g.textAlign='left';
+      g.fillText(LBL('evRealTag',{v:fmtEv(ST.ev)}), X(tvA)+6, Y(ST.ev-tvA)-6);
+    }
+  }
+
+  /* rodilla del programa: el umbral 1/f que la automática se cree (solo P) */
   if(ST.philo!=='a'){
     const tvShake=Math.log2(ST.philo==='ps'? ST.focal/4 : ST.focal);
     if(tvShake>TVMIN&&tvShake<TVMAX){
       g.strokeStyle='rgba(138,146,159,.6)'; g.setLineDash([2,4]);
-      g.beginPath(); g.moveTo(X(tvShake),MT); g.lineTo(X(tvShake),HH-MB); g.stroke(); g.setLineDash([]);
+      g.beginPath(); g.moveTo(X(tvShake),MT); g.lineTo(X(tvShake),CH-MB); g.stroke(); g.setLineDash([]);
       g.fillStyle='#8a929f'; g.textAlign='left';
-      g.fillText(LBL('zShake',{tt:fmtT(Math.pow(2,-tvShake))}), X(tvShake)+5, MT+14);
+      g.fillText(LBL('zKnee',{tt:fmtT(Math.pow(2,-tvShake))}), X(tvShake)+5, MT+14);
     }
   }
 
-  /* línea de programa */
+  /* las otras dos filosofías, en fantasma */
+  const others=['p','ps','a'].filter(function(ph){ return ph!==ST.philo; });
+  const hasP=BODY().modes.indexOf('p')>=0;
+  others.forEach(function(ph){
+    g.strokeStyle='rgba(138,146,159,.30)'; g.lineWidth=1.5; g.setLineDash([3,3]);
+    g.beginPath(); let st=false;
+    for(let evv=-2;evv<=17.0001;evv+=0.1){
+      const pp=progFor(ph,evv), xx=X(pp.tv), yy=Y(pp.av);
+      if(!st){ g.moveTo(xx,yy); st=true; } else g.lineTo(xx,yy);
+    }
+    g.stroke(); g.setLineDash([]); g.lineWidth=1;
+    const pl=progFor(ph,evm);
+    const nm=LBL(ph==='a'?'phAs':(ph==='ps'?'phPss':'phPs2'));
+    g.fillStyle='rgba(138,146,159,.75)'; g.textAlign='left'; g.font='10px IBM Plex Mono, monospace';
+    g.fillText(LBL((ph!=='a'&&!hasP)?'ghostOther':'ghost',{ph:nm}), X(pl.tv)+8, Y(pl.av)+4);
+    g.font='11px IBM Plex Mono, monospace';
+  });
+
+  /* línea de programa activa */
   g.strokeStyle='#f4b13c'; g.lineWidth=3; g.beginPath();
   let started=false;
   for(let evv=-2;evv<=17.0001;evv+=0.05){
@@ -709,10 +1065,22 @@ function draw(){
   /* punto de retención de ISO (A + Auto-ISO) */
   if(ST.philo==='a'){
     const xx=X(floorTv(ST.floor,ST.focal)), yy=Y(2*Math.log2(ST.nFix));
-    if(xx>ML&&xx<W-MR){
+    if(xx>ML&&xx<CW-MR){
       g.strokeStyle='#3fcab0'; g.lineWidth=2;
       g.beginPath(); g.arc(xx,yy,9,0,2*Math.PI); g.stroke(); g.lineWidth=1;
     }
+  }
+
+  /* tu punto */
+  if(ST.me){
+    const mx=X(ST.me.tv), my=Y(ST.me.av);
+    g.beginPath(); g.arc(mx,my,10,0,2*Math.PI); g.fillStyle='rgba(168,233,255,.22)'; g.fill();
+    g.beginPath(); g.arc(mx,my,6,0,2*Math.PI); g.fillStyle='#a8e9ff'; g.fill();
+    g.strokeStyle='#0a0c10'; g.lineWidth=1.5; g.stroke(); g.lineWidth=1;
+    g.font='12px IBM Plex Mono, monospace';
+    g.fillStyle='#a8e9ff'; g.textAlign=mx>CW/2?'right':'left';
+    g.fillText(LBL('ptYou',{tt:fmtT(Math.pow(2,-ST.me.tv)),nn:fmtN(Math.pow(2,ST.me.av/2))}), mx>CW/2?mx-14:mx+14, my+20);
+    g.font='11px IBM Plex Mono, monospace';
   }
   g.restore();
 
@@ -721,12 +1089,12 @@ function draw(){
   for(let evv=-4;evv<=20;evv+=2){
     const tvTop=evv-AVHI;
     if(tvTop>=TVMIN&&tvTop<=TVMAX){
-      g.fillStyle=Math.abs(evv-ST.ev)<1e-9?'#f4b13c':'#5b636f';
+      g.fillStyle=Math.abs(evv-evm)<1e-9?'#f4b13c':'#5b636f';
       g.textAlign='center'; g.fillText(LBL('evTag',{v:evv}), X(tvTop), MT-8);
     } else {
       const avLeft=evv-TVMIN;
       if(avLeft>=AVLO&&avLeft<=AVHI){
-        g.fillStyle=Math.abs(evv-ST.ev)<1e-9?'#f4b13c':'#5b636f';
+        g.fillStyle=Math.abs(evv-evm)<1e-9?'#f4b13c':'#5b636f';
         g.textAlign='left'; g.fillText(LBL('evTag',{v:evv}), ML+5, Y(avLeft)-4);
       }
     }
@@ -739,70 +1107,200 @@ function draw(){
   g.beginPath(); g.arc(px,py,10,0,2*Math.PI); g.fillStyle='rgba(244,177,60,.25)'; g.fill();
   g.beginPath(); g.arc(px,py,6,0,2*Math.PI); g.fillStyle='#f4b13c'; g.fill();
   g.strokeStyle='#0a0c10'; g.lineWidth=1.5; g.stroke(); g.lineWidth=1;
-  g.fillStyle='#f3f5f8'; g.textAlign=px>W/2?'right':'left';
-  const tagX=px>W/2? px-14 : px+14;
+  g.fillStyle='#f3f5f8'; g.textAlign=px>CW/2?'right':'left';
+  const tagX=px>CW/2? px-14 : px+14;
   g.fillText(LBL('ptTag',{tt:fmtT(cur.sec),nn:fmtN(cur.nn),iso:fmtIso(cur.pt.iso)}), tagX, py-10);
 
   /* títulos de ejes */
   g.font='12px IBM Plex Mono, monospace'; g.fillStyle='#8a929f';
-  g.textAlign='center'; g.fillText(LBL('axT'),(ML+W-MR)/2,HH-14);
-  g.save(); g.translate(20,(MT+HH-MB)/2); g.rotate(-Math.PI/2);
+  g.textAlign='center'; g.fillText(LBL('axT'),(ML+CW-MR)/2,CH-14);
+  g.save(); g.translate(20,(MT+CH-MB)/2); g.rotate(-Math.PI/2);
   g.textAlign='center'; g.fillText(LBL('axN'),0,0); g.restore();
 }
 
 /* ---------- veredicto ---------- */
 function phName(){ return LBL(ST.philo==='a'?'phA':(ST.philo==='ps'?'phPs':'phP')); }
+function supName(){ return LBL(SUPLBL[ST.support]||'supHand'); }
 function renderVerdict(){
-  const jj=judge(ST.ev), goal=jj.goal;
-  let html=LBL('vChoice',{ev:fmtEv(ST.ev), ph:phName(), tt:fmtT(jj.sec), nn:fmtN(jj.nn), iso:fmtIso(jj.pt.iso)});
-  if(jj.pt.clip==='under'){
-    const lack=(ST.philo==='a'? 2*Math.log2(ST.nFix)+Math.log2(ST.isoCap/100) : 2*Math.log2(ST.nOpen))+TVMIN-ST.ev;
-    html+=LBL('vUnder',{x:nf(Math.max(0,-(ST.ev-( (ST.philo==='a'?2*Math.log2(ST.nFix)-Math.log2(ST.isoCap/100):2*Math.log2(ST.nOpen)) +TVMIN))),1)});
-    void lack;
+  const jj=judge(ST.ev), goal=jj.goal, bd=BODY();
+  let html='';
+  const bv=BIASV[ST.bias];
+  if(Math.abs(bv)>1e-9){
+    html+=LBL('vMeter',{evm:fmtEv(jj.evMed), evr:fmtEv(ST.ev), x:nf(Math.abs(bv),1),
+                        dir:LBL(bv>0?'vUnderX':'vOverX')});
   }
-  if(jj.pt.clip==='over') html+=LBL('vOver');
+  html+=LBL('vChoice',{ev:fmtEv(ST.ev), ph:phName(), tt:fmtT(jj.sec), nn:fmtN(jj.nn), iso:fmtIso(jj.pt.iso)});
+  if(quantized()) html+=LBL('vQuant',{tt:fmtT(snapTo(TLADDER,jj.sec)), nn:fmtN(snapTo(NLADDER,jj.nn))});
+  else html+=LBL('vCont');
+  if(jj.pt.clip==='under'){
+    const avRef = ST.philo==='a' ? 2*Math.log2(ST.nFix) : 2*Math.log2(ST.nOpen);
+    const isoStops = (ST.philo==='a'||ST.autoIsoP) ? Math.log2(ST.isoCap/100) : 0;
+    const lack = TVMIN + avRef - isoStops - jj.evMed;
+    html+=LBL('vUnder',{x:nf(Math.max(0,lack),1)});
+  }
+  if(jj.pt.clip==='over') html+=LBL('vOver',{cap:fmtT(1/bd.cap)});
   const levers=[];
   if(ST.vel>0){
     if(jj.blurBad){
-      html+=LBL('vBlurFail',{v:nf(ST.vel,1), d:nf(ST.dist,1), b:nf(jj.blur,1), px:nf(jj.blur/PITCH,1), tmax:fmtT(goal.tMax)});
+      html+=LBL('vBlurFail',{v:nf(ST.vel,1), d:nf(ST.dist,1), b:nf(jj.blur,1), px:nf(jj.blur/bd.pitch,1), tmax:fmtT(goal.tMax)});
       levers.push(LBL(ST.philo==='a'?'lvFloor':'lvToA',{tmax:fmtT(goal.tMax)}));
     } else {
-      html+=LBL('vBlurOk',{b:nf(jj.blur,1), px:nf(jj.blur/PITCH,1), c:nf(ST.critUm,ST.critUm%1?2:0)});
+      html+=LBL('vBlurOk',{b:nf(jj.blur,1), px:nf(jj.blur/bd.pitch,1), c:nf(goal.crit,goal.crit%1?2:0)});
     }
+  }
+  if(jj.shakeBad){
+    html+=LBL('vShakeFail',{ap:supName(), ts:fmtT(goal.tShake), tt:fmtT(jj.sec), b:nf(jj.shake,1), px:nf(jj.shake/bd.pitch,1)});
+    levers.push(LBL('lvSupport',{tt:fmtT(goal.tShake)}));
+  } else if(goal.tShake!==Infinity){
+    html+=LBL('vShakeOk',{b:nf(jj.shake,1), px:nf(jj.shake/bd.pitch,1), ap:supName()});
   }
   if(jj.dofNever){
     html+=LBL('vDofNever');
   } else if(jj.dofBad){
-    const lim=dofNearFar(ST.focal,jj.nn,ST.critUm,ST.dist*1000);
+    const lim=dofNearFar(ST.focal,jj.nn,goal.crit,ST.dist*1000);
     html+=LBL('vDofFail',{nn:fmtN(jj.nn), dn:fmtDist(lim[0]), df:fmtDist(lim[1]), nmin:fmtN(goal.nMin)});
     levers.push(LBL(ST.philo==='a'?'lvNupA':'lvNup',{nmin:fmtN(goal.nMin)}));
+    if(goal.nMin<Infinity && goal.nMin>goal.nCrit*1.055){
+      html+=LBL('vDiff',{nmin:fmtN(goal.nMin), nc:fmtN(goal.nCrit), x:nf(2*Math.log2(goal.nMin/goal.nCrit),1)});
+    }
   } else {
-    const lim=dofNearFar(ST.focal,jj.nn,ST.critUm,ST.dist*1000);
+    const lim=dofNearFar(ST.focal,jj.nn,goal.crit,ST.dist*1000);
     html+=LBL('vDofOk',{dn:fmtDist(lim[0]), df:fmtDist(lim[1])});
+    if(jj.nn>goal.nCrit*1.055){
+      html+=LBL('vDiffNow',{nn:fmtN(jj.nn), nc:fmtN(goal.nCrit), x:nf(2*Math.log2(jj.nn/goal.nCrit),1)});
+    }
   }
   if(jj.isoHigh) html+=LBL('vIso',{iso:fmtIso(jj.pt.iso)});
-  if(!jj.blurBad&&!jj.dofBad&&!jj.dofNever&&!jj.pt.clip) html+=LBL('vAllOk');
+  if(clean(jj)) html+=LBL('vAllOk');
   if(levers.length) html+=LBL('vLever',{l:levers.join(' ')});
   html+='<div class="fluss">'+LBL('vFluss')+'</div>';
   $('verdict').innerHTML=html;
 }
 
-/* ---------- barrido EV 3–15 ---------- */
-function renderSweep(){
-  const rows=[];
-  for(let evv=3;evv<=15;evv++){
-    const jj=judge(evv);
-    const flags=[];
-    if(jj.pt.clip==='under') flags.push('<span class="bad">'+LBL('tbUnder')+'</span>');
-    if(jj.pt.clip==='over') flags.push('<span class="bad">'+LBL('tbOver')+'</span>');
-    if(jj.blurBad) flags.push('<span class="rd">'+LBL('tbBlur')+'</span>');
-    if(jj.dofBad||jj.dofNever) flags.push('<span class="vi">'+LBL('tbDof')+'</span>');
-    if(jj.isoHigh) flags.push('<span class="mid">'+LBL('tbIso')+'</span>');
-    const cell=flags.length? flags.join(' · ') : '<span class="ok">✓</span>';
-    const isCur=Math.abs(evv-ST.ev)<1e-9;
-    rows.push('<tr'+(isCur?' class="cur"':'')+'><td>'+evv+'</td><td>'+fmtT(jj.sec)+'</td><td>f/'+fmtN(jj.nn)+'</td><td>'+fmtIso(jj.pt.iso)+'</td><td>'+cell+'</td></tr>');
+/* ---------- contabilidad en pasos: qué moneda pagas ---------- */
+function renderCost(){
+  const jj=judge(ST.ev), goal=jj.goal, bd=BODY();
+  const tLim=Math.min(goal.tMax, goal.tShake);
+  const dTime = (tLim===Infinity) ? 0 : Math.max(0, Math.log2(jj.sec/tLim));
+  const nMinEff = Math.min(16, goal.nMin===Infinity?16:goal.nMin);
+  const dAp = Math.max(0, 2*Math.log2(nMinEff/jj.nn));
+  const dIso = Math.max(0, Math.log2(jj.pt.iso/100));
+  const scale = Math.max(4, Math.ceil(Math.max(dTime,dAp,dIso)));
+  const bar=function(key,val,color){
+    const w=Math.max(0, Math.min(100, 100*val/scale));
+    return '<div class="bar"><span class="bl">'+LBL(key)+'</span>'+
+           '<i><b style="width:'+w.toFixed(1)+'%;background:'+color+'"></b></i>'+
+           '<span class="bv">'+nf(val,1)+'</span></div>';
+  };
+  $('pc-bars').innerHTML =
+    bar('cTime',dTime,'var(--red)')+bar('cAp',dAp,'var(--violet)')+bar('cIso',dIso,'var(--teal)');
+
+  const need=dTime+dAp;
+  let note=LBL('cBase',{b:fmtIso(bd.isoBase)});
+  if(need<0.05){ note+= dIso>0.1 ? LBL('cNoneIso',{x:nf(dIso,1)}) : LBL('cNone'); }
+  else{
+    const sol=solveIntention();
+    const solIso=Math.max(100, sol.iso);
+    note+=LBL('cNeed',{need:nf(need,1), iso:fmtIso(solIso), tt:fmtT(Math.pow(2,-sol.tv)), nn:fmtN(Math.pow(2,sol.av/2))});
+    if(sol.iso<100-1e-9){
+      note+=LBL('cOverShoot',{x:nf(Math.log2(100/sol.iso),1), cap:fmtT(1/bd.cap)});
+    } else if(solIso<=ST.isoCap+1e-6){
+      note+=LBL('cFits',{cap:fmtIso(ST.isoCap), st:nf(Math.log2(solIso/100),1)});
+    } else {
+      const kk=Math.log2(solIso/ST.isoCap);
+      const bb=Math.max(jj.blur, shakeUmP(ST.focal,jj.sec,supSteps()), goal.crit);
+      note+=LBL('cShort',{cap:fmtIso(ST.isoCap), k:nf(kk,1), no:fmtN(ST.nOpen),
+                          b:nf(bb*Math.pow(2,kk),1), px:nf(bb*Math.pow(2,kk)/bd.pitch,1)});
+    }
+    if(solIso>=bd.dual) note+=LBL('cDual',{d:fmtIso(bd.dual)});
   }
+  $('pc-costnote').innerHTML=note;
+}
+
+/* ---------- tu punto frente al del programa ---------- */
+function colHtml(tv, av, iso, over, capShort){
+  const bd=BODY(), goal=intention();
+  const sec=Math.pow(2,-tv), nn=Math.pow(2,av/2);
+  const bl=ST.vel>0? blurUmP(ST.vel,ST.dist,ST.focal,sec):0;
+  const sh=shakeUmP(ST.focal,sec,supSteps());
+  const lim=dofNearFar(ST.focal,nn,goal.crit,ST.dist*1000);
+  const cls=function(bad){ return bad?'bad':'ok'; };
+  let out='<div class="ln">'+LBL('yPair',{tt:fmtT(sec),nn:fmtN(nn),iso:fmtIso(iso)})+'</div>';
+  if(ST.vel>0) out+='<div class="ln '+cls(bl>goal.crit+1e-9)+'">'+LBL('yBlur',{b:nf(bl,1),px:nf(bl/bd.pitch,1)})+'</div>';
+  if(goal.tShake!==Infinity) out+='<div class="ln '+cls(sh>goal.crit+1e-9)+'">'+LBL('yShake',{b:nf(sh,1),px:nf(sh/bd.pitch,1)})+'</div>';
+  const dofBad = goal.nMin===Infinity ? true : nn<goal.nMin-1e-9;
+  out+='<div class="ln '+cls(dofBad)+'">'+LBL('yDof',{dn:fmtDist(lim[0]),df:fmtDist(lim[1])})+'</div>';
+  out+='<div class="ln '+cls(iso>ST.isoCap+1e-6)+'">'+LBL('yIsoCost',{x:nf(Math.max(0,Math.log2(iso/100)),1)})+'</div>';
+  if(over>0.01) out+='<div class="ln bad">'+LBL('yOver',{x:nf(over,1)})+'</div>';
+  if(capShort>0.01) out+='<div class="ln bad">'+LBL('yCap',{cap:fmtIso(ST.isoCap),k:nf(capShort,1)})+'</div>';
+  return out;
+}
+function renderYou(){
+  const jj=judge(ST.ev);
+  $('pc-col-prog').innerHTML='<div class="ch">'+LBL('yProg')+'</div>'+colHtml(jj.pt.tv, jj.pt.av, jj.pt.iso, 0, 0);
+  if(!ST.me){ $('pc-col-you').innerHTML='<div class="ch">'+LBL('yYou')+'</div><div class="ln">'+LBL('yNone')+'</div>'; return; }
+  const rawIso=isoReqP(Math.pow(2,ST.me.av/2), Math.pow(2,-ST.me.tv), evMed());
+  const over = rawIso<100 ? Math.log2(100/rawIso) : 0;
+  const iso = Math.max(100, rawIso);
+  const capShort = iso>ST.isoCap ? Math.log2(iso/ST.isoCap) : 0;
+  let html='<div class="ch">'+LBL('yYou')+'</div>'+colHtml(ST.me.tv, ST.me.av, iso, over, capShort);
+  if(ST.me.src) html+='<div class="ln muted">'+LBL('ySolved',{tt:fmtT(Math.pow(2,-ST.me.tv)), nn:fmtN(Math.pow(2,ST.me.av/2)), src:LBL(ST.me.src)})+'</div>';
+  $('pc-col-you').innerHTML=html;
+}
+
+/* ---------- barrido: las tres filosofías, centrado en tu EV ---------- */
+const PHILOS=['p','ps','a'];
+function renderSweep(){
+  const ev0=Math.round(ST.ev);
+  const evs=[];
+  for(let k=-6;k<=6;k++){ const ee=ev0+k; if(ee>=-2&&ee<=17) evs.push(ee); }
+  const rows=[], cleanBy={p:[],ps:[],a:[]};
+  evs.forEach(function(evv){
+    let tds='<td>'+evv+'</td>';
+    PHILOS.forEach(function(ph){
+      const jj=judge(evv,ph);
+      const flags=[];
+      if(jj.pt.clip==='under') flags.push('<span class="bad">'+LBL('tbUnder')+'</span>');
+      if(jj.pt.clip==='over') flags.push('<span class="bad">'+LBL('tbOver')+'</span>');
+      if(jj.blurBad) flags.push('<span class="rd">'+LBL('tbBlur')+'</span>');
+      if(jj.shakeBad) flags.push('<span class="bl2">'+LBL('tbShake')+'</span>');
+      if(jj.dofBad||jj.dofNever) flags.push('<span class="vi">'+LBL('tbDof')+'</span>');
+      if(jj.isoHigh) flags.push('<span class="mid">'+LBL('tbIso')+'</span>');
+      const okAll=clean(jj);
+      if(okAll) cleanBy[ph].push(evv);
+      const qz = (ph!=='a');
+      const tt = qz? fmtT(snapTo(TLADDER,jj.sec)) : fmtT(jj.sec);
+      const nn = qz? fmtN(snapTo(NLADDER,jj.nn)) : fmtN(jj.nn);
+      const cls = ph===ST.philo? ' class="act"' : '';
+      tds+='<td'+cls+'>'+tt+' · f/'+nn+' · '+fmtIso(jj.pt.iso)+'</td>'+
+           '<td'+cls+'>'+(flags.length? flags.join(' · ') : '<span class="ok">✓</span>')+'</td>';
+    });
+    rows.push('<tr'+(evv===ev0?' class="cur"':'')+'>'+tds+'</tr>');
+  });
   $('sweep').innerHTML=rows.join('');
+
+  /* conclusión calculada */
+  const nm={p:LBL('phPs2'), ps:LBL('phPss'), a:LBL('phAs')};
+  const total=evs.length;
+  let concl;
+  if(cleanBy.p.length===total&&cleanBy.ps.length===total&&cleanBy.a.length===total) concl=LBL('cnAll');
+  else if(!cleanBy.p.length&&!cleanBy.ps.length&&!cleanBy.a.length) concl=LBL('cnNone');
+  else{
+    /* ¿hay un tramo en el que solo una filosofía cumple? */
+    let run=null, best=null;
+    evs.forEach(function(evv){
+      const win=PHILOS.filter(function(ph){ return cleanBy[ph].indexOf(evv)>=0; });
+      if(win.length===1){
+        if(run&&run.ph===win[0]&&run.b===evv-1) run.b=evv;
+        else run={ph:win[0], a:evv, b:evv};
+        if(!best||(run.b-run.a)>(best.b-best.a)) best={ph:run.ph,a:run.a,b:run.b};
+      } else run=null;
+    });
+    if(best&&best.b>best.a) concl=LBL('cnOnly',{a:best.a, b:best.b, ph:nm[best.ph]});
+    else concl=LBL('cnBest',{m:total, p1:nm.p, k1:cleanBy.p.length, p2:nm.ps, k2:cleanBy.ps.length, p3:nm.a, k3:cleanBy.a.length});
+  }
+  if(BODY().modes.indexOf('p')<0) concl+=' '+LBL('cnGhost');
+  $('pc-concl').innerHTML=concl;
 }
 
 /* ---------- verificación declarada ---------- */
@@ -814,7 +1312,7 @@ function renderVerify(){
   const ok1=Math.abs(Math.log2(prod)-15)<1e-6;
   /* 2: borrón 1,5 m/s · 3 m · 50 mm · 1/60 */
   const bb=blurUmP(1.5,3,50,1/60);
-  $('vf-2').innerHTML=LBL('vfBlur',{b:nf(bb,1), px:nf(bb/PITCH,1)});
+  $('vf-2').innerHTML=LBL('vfBlur',{b:nf(bb,1), px:nf(bb/3.76,1)});
   const ok2=Math.abs(bb-423.7288)/423.7288<0.005;
   /* 3: t_máx con criterio 30 µm */
   const tm=tMaxP(1.5,3,50,30);
@@ -824,7 +1322,19 @@ function renderVerify(){
   const hh=hyperfP(50,8,30);
   $('vf-4').innerHTML=LBL('vfH',{h:nf(hh/1000,2)});
   const ok4=Math.abs(hh-10466.67)/10466.67<0.005;
-  [[ok1,'vf-1s'],[ok2,'vf-2s'],[ok3,'vf-3s'],[ok4,'vf-4s']].forEach(function(pair){
+  /* 5: trepidación a pulso, 50 mm, b_máx = 7,56 µm */
+  const tsk=tShakeP(50,7.52,0);
+  $('vf-5').innerHTML=LBL('vfShake',{tt:fmtT(tsk), ms:nf(tsk*1000,2)});
+  const ok5=Math.abs(tsk-0.0050133)/0.0050133<0.005;
+  /* 6: diafragma crítico del sensor con 3,76 µm */
+  const nc=nCritP(3.76);
+  $('vf-6').innerHTML=LBL('vfNc',{nn:nf(nc,3)});
+  const ok6=Math.abs(nc-5.6036)/5.6036<0.005;
+  /* 7: ISO necesario para f/5.6 · 1/500 a EV 10 */
+  const ir=isoReqP(5.6,1/500,10);
+  $('vf-7').innerHTML=LBL('vfIsoReq',{iso:nf(ir,2)});
+  const ok7=Math.abs(ir-1531.25)/1531.25<0.005;
+  [[ok1,'vf-1s'],[ok2,'vf-2s'],[ok3,'vf-3s'],[ok4,'vf-4s'],[ok5,'vf-5s'],[ok6,'vf-6s'],[ok7,'vf-7s']].forEach(function(pair){
     $(pair[1]).innerHTML=pair[0]?'<span class="ok">'+LBL('vfOk')+'</span>':'<span class="bad">'+LBL('vfBad')+'</span>';
   });
 }
@@ -833,44 +1343,132 @@ function renderVerify(){
 const OPT_VEL=[['0','optStill'],['1.5','optWalk'],['4','optRun'],['10','optCar']];
 const OPT_DOF=[['face','optFace'],['body','optBody'],['group','optGroup'],['land','optLand']];
 const OPT_FLOOR=[['fl1','optFl1'],['fl2','optFl2'],['fl4','optFl4'],['f60','optF60'],['f250','optF250']];
-function setOptions(id,pairs){
-  const sel=$(id), prev=sel.value;
+const OPT_BIAS=[['grey','refGrey'],['snow','refSnow'],['back','refBack'],['dark','refDark']];
+function setOptions(id,pairs,val){
+  const sel=$(id), prev=(val!==undefined?val:sel.value);
   sel.innerHTML=pairs.map(function(pr){ return '<option value="'+pr[0]+'">'+LBL(pr[1])+'</option>'; }).join('');
-  if(prev) sel.value=prev;
+  if(prev!==undefined&&prev!==null&&prev!=='') sel.value=prev;
+}
+function setNums(id, vals, pre, val){
+  const sel=$(id), prev=(val!==undefined?val:sel.value);
+  sel.innerHTML=vals.map(function(vv){ return '<option value="'+vv+'">'+pre+(String(vv).replace('.', LANG()==='es'?',':'.'))+'</option>'; }).join('');
+  if(prev!==undefined&&prev!==null&&prev!=='') sel.value=prev;
+}
+function supOptions(){
+  const bd=BODY(), out=[['hand','supHand'],['brace','supBrace']];
+  if(bd.stab) out.push([bd.stab, SUPLBL[bd.stab]]);
+  out.push(['tripod','supTri']);
+  return out;
 }
 function refreshOptions(){
-  setOptions('sel-vel',OPT_VEL);
-  setOptions('sel-dof',OPT_DOF);
-  setOptions('sel-floor',OPT_FLOOR);
+  const bd=BODY();
+  setOptions('sel-vel',OPT_VEL,String(ST.vel));
+  setOptions('sel-dof',OPT_DOF,ST.dof);
+  setOptions('sel-floor',OPT_FLOOR,ST.floor);
+  setOptions('sel-bias',OPT_BIAS,ST.bias);
+  setOptions('sel-sup',supOptions(),ST.support);
+  setNums('sel-focal', bd.focals, '', String(ST.focal));
+  setNums('sel-nopen', bd.opens, 'f/', String(ST.nOpen));
+  setNums('sel-nfix', [1.4,2,2.8,4,5.6,8,11,16].filter(function(x){ return x>=bd.opens[0]-1e-9; }), 'f/', String(ST.nFix));
+  setNums('sel-body', BODIES.map(function(b){ return b.id; }), '', ST.body);
+  const so=$('sel-body');
+  [].forEach.call(so.options,function(op){ const b=BODIES.filter(function(x){return x.id===op.value;})[0]; if(b) op.textContent=b.label; });
+  so.value=ST.body;
+  $('pc-crit-px').textContent=LBL('critPx',{um:nf(2*bd.pitch,2)});
+  $('pc-body').textContent=LBL('bodyTag',{n:bd.label, p:nf(bd.pitch,2), b:fmtIso(bd.isoBase)});
+}
+
+/* ---------- coherencia del estado con el cuerpo elegido ---------- */
+function normalize(){
+  const bd=BODY();
+  if(bd.modes.indexOf(ST.philo)<0) ST.philo='a';
+  if(bd.focals.indexOf(ST.focal)<0) ST.focal=bd.focals[Math.min(bd.focals.length-1, Math.floor(bd.focals.length/2))];
+  if(bd.opens.indexOf(ST.nOpen)<0) ST.nOpen=bd.opens[0];
+  if(ST.nFix<bd.opens[0]) ST.nFix=bd.opens[0];
+  if(!SUPSTEPS.hasOwnProperty(ST.support)) ST.support='hand';
+  if(ST.support!=='hand'&&ST.support!=='brace'&&ST.support!=='tripod'&&ST.support!==bd.stab) ST.support='hand';
+  if(!BIASV.hasOwnProperty(ST.bias)) ST.bias='grey';
+  if(!DOFDELTA.hasOwnProperty(ST.dof)) ST.dof='body';
+  if(ST.crit!=='px2'&&ST.crit!=='um30') ST.crit='um30';
+  if(ST.me){
+    ST.me.tv=Math.max(TVMIN,Math.min(TVCAP(),ST.me.tv));
+    ST.me.av=Math.max(2*Math.log2(ST.nOpen),Math.min(AVHI,ST.me.av));
+  }
 }
 
 /* ---------- valores mostrados y repintado ---------- */
+function syncControls(){
+  const bd=BODY();
+  $('r-ev').value=ST.ev; $('r-dist').value=ST.dist;
+  $('sel-cap').value=String(ST.isoCap);
+  $('pc-autoiso').checked=!!ST.autoIsoP;
+  [].forEach.call(document.querySelectorAll('#philoSeg .segbtn'),function(bt){
+    const ph=bt.getAttribute('data-philo');
+    const okp=bd.modes.indexOf(ph)>=0;
+    bt.disabled=!okp; bt.classList.toggle('off',!okp);
+    bt.classList.toggle('on', okp&&ph===ST.philo);
+  });
+  [].forEach.call(document.querySelectorAll('#critSeg .segbtn'),function(bt){
+    bt.classList.toggle('on', bt.getAttribute('data-crit')===ST.crit);
+  });
+  $('a-opts').style.display = ST.philo==='a' ? '' : 'none';
+  $('pc-autowrap').style.display = ST.philo==='a' ? 'none' : '';
+  $('pc-isoopts').style.display = (ST.philo==='a'||ST.autoIsoP) ? '' : 'none';
+  $('pc-nom11').style.display = bd.modes.indexOf('p')<0 ? '' : 'none';
+}
 function renderVals(){
   $('v-ev').textContent=fmtEv(ST.ev);
   $('v-dist').textContent=nf(ST.dist,1)+' m';
 }
-function repaint(){ renderVals(); draw(); renderVerdict(); renderSweep(); renderVerify(); }
+function save(){ try{
+  localStorage.setItem(LSKEY, JSON.stringify({body:ST.body,ev:ST.ev,bias:ST.bias,philo:ST.philo,focal:ST.focal,
+    nOpen:ST.nOpen,nFix:ST.nFix,floor:ST.floor,isoCap:ST.isoCap,autoIsoP:ST.autoIsoP,vel:ST.vel,dist:ST.dist,
+    crit:ST.crit,dof:ST.dof,support:ST.support}));
+}catch(e){} }
+function load(){ try{
+  const raw=localStorage.getItem(LSKEY); if(!raw) return;
+  const ss=JSON.parse(raw); if(!ss||typeof ss!=='object') return;
+  Object.keys(ss).forEach(function(k){ if(ST.hasOwnProperty(k)&&k!=='me') ST[k]=ss[k]; });
+}catch(e){} }
+function repaint(){ normalize(); renderVals(); draw(); renderVerdict(); renderCost(); renderYou(); renderSweep(); renderVerify(); save(); }
+function reload(){ normalize(); refreshOptions(); syncControls(); repaint(); }
+
+/* ---------- preajustes: escenas de verdad ---------- */
+const PRESETS={
+  kids:  {body:'m11', ev:7,  bias:'grey', philo:'a', focal:50, nOpen:1.4, nFix:2,   floor:'fl4', vel:1.5, dist:3,  dof:'face',  support:'hand',   crit:'px2'},
+  night: {body:'m11', ev:4,  bias:'dark', philo:'a', focal:35, nOpen:1.4, nFix:1.4, floor:'fl1', vel:1.5, dist:5,  dof:'body',  support:'hand',   crit:'um30'},
+  land:  {body:'m11', ev:9,  bias:'grey', philo:'a', focal:21, nOpen:1.4, nFix:8,   floor:'fl1', vel:0,   dist:8,  dof:'land',  support:'tripod', crit:'px2'},
+  car:   {body:'sl3s',ev:12, bias:'grey', philo:'p', focal:90, nOpen:2,   nFix:5.6, floor:'fl1', vel:10,  dist:10, dof:'body',  support:'ibis',   crit:'um30'}
+};
+function applyPreset(key){
+  const pr=PRESETS[key]; if(!pr) return;
+  Object.keys(pr).forEach(function(k){ ST[k]=pr[k]; });
+  ST.me=null;
+  reload();
+}
 
 /* ---------- eventos ---------- */
 $('r-ev').addEventListener('input',function(){ ST.ev=+this.value; repaint(); });
 [].forEach.call(document.querySelectorAll('.chip[data-ev]'),function(bt){
   bt.addEventListener('click',function(){ ST.ev=+bt.getAttribute('data-ev'); $('r-ev').value=ST.ev; repaint(); });
 });
+[].forEach.call(document.querySelectorAll('.chip[data-pre]'),function(bt){
+  bt.addEventListener('click',function(){ applyPreset(bt.getAttribute('data-pre')); });
+});
 [].forEach.call(document.querySelectorAll('#philoSeg .segbtn'),function(bt){
   bt.addEventListener('click',function(){
+    if(bt.disabled) return;
     ST.philo=bt.getAttribute('data-philo');
-    [].forEach.call(document.querySelectorAll('#philoSeg .segbtn'),function(ot){ ot.classList.toggle('on',ot===bt); });
-    $('a-opts').style.display = ST.philo==='a' ? '' : 'none';
-    repaint();
+    syncControls(); repaint();
   });
 });
 [].forEach.call(document.querySelectorAll('#critSeg .segbtn'),function(bt){
   bt.addEventListener('click',function(){
-    ST.critUm = bt.getAttribute('data-crit')==='px2' ? 2*PITCH : 30;
-    [].forEach.call(document.querySelectorAll('#critSeg .segbtn'),function(ot){ ot.classList.toggle('on',ot===bt); });
-    repaint();
+    ST.crit=bt.getAttribute('data-crit');
+    syncControls(); refreshOptions(); repaint();
   });
 });
+$('sel-body').addEventListener('change',function(){ ST.body=this.value; ST.me=null; reload(); });
 $('sel-focal').addEventListener('change',function(){ ST.focal=+this.value; repaint(); });
 $('sel-nopen').addEventListener('change',function(){ ST.nOpen=+this.value; repaint(); });
 $('sel-nfix').addEventListener('change',function(){ ST.nFix=+this.value; repaint(); });
@@ -878,12 +1476,38 @@ $('sel-floor').addEventListener('change',function(){ ST.floor=this.value; repain
 $('sel-cap').addEventListener('change',function(){ ST.isoCap=+this.value; repaint(); });
 $('sel-vel').addEventListener('change',function(){ ST.vel=+this.value; repaint(); });
 $('sel-dof').addEventListener('change',function(){ ST.dof=this.value; repaint(); });
+$('sel-sup').addEventListener('change',function(){ ST.support=this.value; repaint(); });
+$('sel-bias').addEventListener('change',function(){ ST.bias=this.value; repaint(); });
+$('pc-autoiso').addEventListener('change',function(){ ST.autoIsoP=this.checked; syncControls(); repaint(); });
 $('r-dist').addEventListener('input',function(){ ST.dist=+this.value; repaint(); });
+$('pc-solve').addEventListener('click',function(){ const sol=solveIntention(); ST.me={tv:sol.tv, av:sol.av, src:sol.src}; repaint(); });
+$('pc-clear').addEventListener('click',function(){ ST.me=null; repaint(); });
+
+/* tu punto sobre el lienzo: pointer, para ratón y tableta */
+(function(){
+  const cv=$('diag'); let dragging=false;
+  function place(ee){
+    const rr=cv.getBoundingClientRect();
+    if(!rr.width) return;
+    const xx=(ee.clientX-rr.left)*CW/rr.width, yy=(ee.clientY-rr.top)*CH/rr.height;
+    ST.me={tv:Math.max(TVMIN,Math.min(TVCAP(),invX(xx))), av:Math.max(2*Math.log2(ST.nOpen),Math.min(AVHI,invY(yy)))};
+    repaint();
+  }
+  cv.addEventListener('pointerdown',function(ee){
+    dragging=true; try{ cv.setPointerCapture(ee.pointerId); }catch(err){}
+    place(ee); ee.preventDefault();
+  });
+  cv.addEventListener('pointermove',function(ee){ if(dragging) place(ee); });
+  cv.addEventListener('pointerup',function(){ dragging=false; });
+  cv.addEventListener('pointercancel',function(){ dragging=false; });
+})();
 
 /* ---------- arranque ---------- */
+load();
+setupCanvas();
+normalize();
 refreshOptions();
-$('sel-vel').value='1.5'; $('sel-dof').value='body'; $('sel-floor').value='fl1';
-$('a-opts').style.display='none';
+syncControls();
 repaint();
 
 /* Repintado al cambiar de idioma: onLangChange se dispara también en el arranque,
@@ -892,6 +1516,7 @@ var ready=true;
 window.onLangChange=function(){
   if(!ready) return;
   refreshOptions();
+  syncControls();
   repaint();
 };
 })();
