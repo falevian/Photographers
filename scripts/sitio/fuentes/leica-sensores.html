@@ -485,7 +485,8 @@ const isoMarker={id:"isoMarker", afterDraw(chart){
     g.setLineDash([]); g.fillStyle=ISOV.cam.color; g.font="12px "+Chart.defaults.font.family; g.textAlign="left"; g.fillText((i?"ISO ":L("dualMark")+" ")+v.toLocaleString(LOC()), px+4, ca.top+12+(i?0:14)); });
   g.restore(); }};
 if(HAS_CHART){
-Chart.defaults.font.family = getComputedStyle(document.documentElement).getPropertyValue("--sans");
+/* en la página fusionada las variables de esta parte viven en .part-sens, no en :root */
+Chart.defaults.font.family = getComputedStyle(document.querySelector(".part-sens")||document.documentElement).getPropertyValue("--sans") || '"IBM Plex Sans","Helvetica Neue",Arial,sans-serif';
 Chart.defaults.color = "#1B1D1B";
 }
 const isoTicks=[50,100,200,400,800,1600,3200,6400,12800,25600,51200,102400,204800];

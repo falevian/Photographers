@@ -83,6 +83,41 @@
   .chk{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--mute);margin-top:8px}
   .chk label{margin:0;display:inline}
   .sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px;background:var(--ink)}.swB{opacity:.35}
+  .hide{display:none!important}
+
+  /* ---------- tablas de decisión (diafragma a diafragma, mapa objetivo × residual) ---------- */
+  .tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table.heat{width:100%;border-collapse:collapse;font-size:12px;font-family:"IBM Plex Mono",ui-monospace,monospace}
+  table.heat th,table.heat td{padding:4px 5px;text-align:center;border:1px solid var(--panel);white-space:nowrap}
+  table.heat th{color:var(--mute);font-weight:500;font-family:"IBM Plex Sans","Segoe UI",system-ui,sans-serif}
+  table.heat th:first-child,table.heat td:first-child{text-align:left}
+  table.heat td.hc{color:#1b2430}
+  table.heat td.now{outline:2px solid var(--ink);outline-offset:-2px}
+  table.heat td.colA{outline:2px solid var(--sag);outline-offset:-2px}
+  table.heat td.colB{outline:2px dashed var(--tan);outline-offset:-2px}
+  table.heat tr.rowsel td:first-child{font-weight:600;color:var(--ink)}
+  .heatleg{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--mute);margin:8px 0 0}
+  .heatleg i{display:inline-block;width:96px;height:10px;border-radius:2px;
+             background:linear-gradient(90deg,hsl(130 45% 80%),hsl(60 55% 82%),hsl(0 55% 82%))}
+
+  /* ---------- controles de modelo, plegados ---------- */
+  details.mdl{margin-top:18px;border-top:1px solid var(--line);padding-top:8px}
+  details.mdl>summary{cursor:pointer;font-size:12px;text-transform:uppercase;letter-spacing:.12em;
+                      color:var(--mute);font-weight:600;list-style:none;padding:2px 0}
+  details.mdl>summary::-webkit-details-marker{display:none}
+  details.mdl>summary::before{content:"\25B8\00a0"}
+  details.mdl[open]>summary::before{content:"\25BE\00a0"}
+  details.mdl>summary:hover{color:var(--ink)}
+  details.mdl>summary:focus-visible{outline:2px solid var(--tan);outline-offset:2px}
+
+  /* ---------- prosa autocontenida ---------- */
+  .prose p{margin:6px 0 10px;max-width:78ch}
+  .prose h3{margin:18px 0 2px}
+  .prose a{color:var(--sag);text-decoration:none;border-bottom:1px solid var(--line)}
+  .prose a:hover{color:var(--tan);border-bottom-color:var(--tan)}
+  .prose ul{margin:6px 0 10px;padding-left:20px;max-width:78ch}
+  .prose li{margin:3px 0}
+  .fml{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12.5px}
 
   /* ---------- conmutador de idioma ---------- */
   html[lang="es"] [data-lang="en"]{display:none!important}
@@ -124,8 +159,8 @@
       <button type="button" data-setlang="en" aria-pressed="false">EN</button>
     </div>
   </div>
-  <p data-lang="es">Modelo: el objetivo se representa por su pupila de salida (circular, a distancia L del sensor) y su número f; el stack del sensor, por hasta tres láminas plano‑paralelas con índice y dispersión propios (Cauchy a partir de n<sub>d</sub> y V). Para cada altura de imagen se trazan unos 380 rayos reales (127 posiciones de pupila × 3 longitudes de onda) hasta el plano de mejor foco, y de las posiciones de impacto se obtienen la mancha RMS, la MTF geométrica (multiplicada por el límite de difracción) y la PSF con la que se simula una esquina. Todo se calcula para dos sensores, A y B, con el mismo objetivo. Sin placa el modelo es perfecto: lo que ves es únicamente lo que añade el stack, es decir, el residual al montar un objetivo que no fue calculado para ese grosor.</p>
-  <p data-lang="en">The model: the lens is represented by its exit pupil (circular, at a distance L from the sensor) and its f-number; the sensor stack, by up to three plane-parallel plates with their own refractive index and dispersion (Cauchy from n<sub>d</sub> and V). For every image height some 380 real rays (127 pupil positions × 3 wavelengths) are traced to the plane of best focus, and from the impact positions come the RMS spot, the geometric MTF (multiplied by the diffraction limit) and the point spread function with which a corner is simulated. Everything is computed for two sensors, A and B, with the same lens. Without a plate the model is perfect: what you see is solely what the stack adds, that is, the residual left by fitting a lens that was never computed for that thickness.</p>
+  <p data-lang="es">Modelo: el objetivo se representa por su pupila de salida (circular, a distancia L del sensor) y su número f; el stack del sensor, por hasta tres láminas plano‑paralelas con índice y dispersión propios (Cauchy a partir de n<sub>d</sub> y V). Para cada altura de imagen se trazan unos 380 rayos reales (127 posiciones de pupila × 3 longitudes de onda) hasta el plano de mejor foco, y de las posiciones de impacto se obtienen la mancha RMS, la MTF geométrica (multiplicada por el límite de difracción) y la PSF con la que se simula una esquina. Todo se calcula para dos sensores, A y B, con el mismo objetivo. Sin placa el modelo es perfecto: lo que ves es únicamente lo que añade el stack, es decir, el residual al montar un objetivo que no fue calculado para ese grosor. Ese grosor de diseño es un control: si el objetivo se calculó ya con el vidrio del cuerpo, el residual es cero y la ficha lo dice.</p>
+  <p data-lang="en">The model: the lens is represented by its exit pupil (circular, at a distance L from the sensor) and its f-number; the sensor stack, by up to three plane-parallel plates with their own refractive index and dispersion (Cauchy from n<sub>d</sub> and V). For every image height some 380 real rays (127 pupil positions × 3 wavelengths) are traced to the plane of best focus, and from the impact positions come the RMS spot, the geometric MTF (multiplied by the diffraction limit) and the point spread function with which a corner is simulated. Everything is computed for two sensors, A and B, with the same lens. Without a plate the model is perfect: what you see is solely what the stack adds, that is, the residual left by fitting a lens that was never computed for that thickness. That design thickness is a control: if the lens was already computed with the body's glass, the residual is zero and the page says so.</p>
   <p class="srclinks">
     <a href="manual-stack-sensor.html" data-lang="es">Manual de uso</a>
     <a href="manual-stack-sensor.html" data-lang="en">User manual</a>
@@ -142,40 +177,55 @@
     <label><span data-lang="es">L (pupila de salida)</span><span data-lang="en">L (exit pupil)</span> <span class="v"><span id="epv"></span> mm</span><input type="range" id="ep" min="15" max="500" step="1" value="28"></label>
     <div class="row3">
       <label><span data-lang="es">Número f</span><span data-lang="en">f-number</span><input type="number" id="N" step="0.1" value="5.6"></label>
-      <label><span data-lang="es">Altura máx. h (mm)</span><span data-lang="en">Max. height h (mm)</span><input type="number" id="hmax" step="0.1" value="21.6"></label>
-      <label><span data-lang="es">Píxel (µm)</span><span data-lang="en">Pixel (µm)</span><input type="number" id="pix" step="0.1" value="4.3"></label>
+      <label><span data-lang="es">h máx. (mm)</span><span data-lang="en">max. h (mm)</span><input type="number" id="hmax" step="0.1" value="21.6"></label>
+      <label><span data-lang="es">Píxel (µm)</span><span data-lang="en">Pixel (µm)</span><input type="number" id="pix" step="0.01" value="3.76"></label>
     </div>
-    <div class="row3">
-      <label><span data-lang="es">λ diseño (nm)</span><span data-lang="en">Design λ (nm)</span><input type="number" id="lam" step="10" value="550"></label>
-      <label><span data-lang="es">MTF a (pl/mm)</span><span data-lang="en">MTF at (lp/mm)</span><input type="number" id="freq" step="5" value="30"></label>
+    <div class="row">
+      <label><span data-lang="es">Objetivo calculado para un stack de</span><span data-lang="en">Lens computed for a stack of</span>
+        <select id="st-design"></select></label>
       <label><span data-lang="es">Foco</span><span data-lang="en">Focus</span>
         <select id="focus"></select></label>
     </div>
+    <label id="st-dtw" class="hide"><span data-lang="es">Grosor de diseño (mm)</span><span data-lang="en">Design thickness (mm)</span><input type="number" id="st-designT" step="0.1" min="0" value="0.8"></label>
+    <p class="note" data-lang="es">Lo que degrada la esquina no es el vidrio que hay, sino el que <b>sobra o falta</b> respecto al que el calculista puso en el modelo. El trazado usa siempre ese <b>residual</b> = |grosor del stack − grosor de diseño|, con el mismo reparto de vidrios escalado: las aberraciones de una lámina son lineales en su espesor, y el signo solo intercambia los focos sagital y tangencial, no cambia el tamaño de la mancha. Qué objetivo se calculó con qué grosor es una hipótesis tuya, no un dato: por eso es un control.</p>
+    <p class="note" data-lang="en">What spoils the corner is not the glass that is there but the glass that is <b>left over or missing</b> with respect to what the designer assumed. The trace always uses that <b>residual</b> = |stack thickness − design thickness|, with the same distribution of glasses scaled down: the aberrations of a plate are linear in its thickness, and the sign only swaps the sagittal and tangential foci, it does not change the size of the spot. Which lens was computed for which thickness is your hypothesis, not a datum: hence the control.</p>
 
     <h2 style="margin-top:20px"><i class="sw"></i>Sensor A</h2>
     <label>Preset<select id="presetA" class="spreset"></select></label>
-    <table class="layers" id="layersA"></table>
-    <div class="row">
-      <label><span data-lang="es">Microlentes: L de diseño (mm)</span><span data-lang="en">Microlenses: design L (mm)</span><input type="number" id="ldA" step="5" value="40"></label>
-      <label><span data-lang="es">Tolerancia angular σ (°)</span><span data-lang="en">Angular tolerance σ (°)</span><input type="number" id="sgA" step="1" value="18"></label>
-    </div>
 
-    <h2 style="margin-top:20px"><i class="sw swB"></i>Sensor B</h2>
+    <h2 style="margin-top:16px"><i class="sw swB"></i>Sensor B</h2>
     <label>Preset<select id="presetB" class="spreset"></select></label>
-    <table class="layers" id="layersB"></table>
-    <div class="row">
-      <label><span data-lang="es">Microlentes: L de diseño (mm)</span><span data-lang="en">Microlenses: design L (mm)</span><input type="number" id="ldB" step="5" value="90"></label>
-      <label><span data-lang="es">Tolerancia angular σ (°)</span><span data-lang="en">Angular tolerance σ (°)</span><input type="number" id="sgB" step="1" value="18"></label>
-    </div>
 
-    <h2 style="margin-top:20px" data-lang="es">Opciones</h2>
-    <h2 style="margin-top:20px" data-lang="en">Options</h2>
-    <div class="chk">
-      <label><input type="checkbox" id="multiN"> <span data-lang="es">superponer f/2, f/4, f/8 (solo mancha)</span><span data-lang="en">overlay f/2, f/4, f/8 (spot only)</span></label>
-    </div>
-    <button id="csv"><span data-lang="es">Exportar CSV</span><span data-lang="en">Export CSV</span></button><button id="share"></button>
-    <p class="note" data-lang="es">Grosores de stack: valores publicados por talleres de conversión (Kolari y otros), aproximados y variables entre modelos; el reparto en capas y los vidrios son plausibles, no datos de fábrica. Edita lo que conozcas. Los parámetros de microlentes son un modelo heurístico: eficiencia relativa gaussiana en el desajuste entre el ángulo del rayo principal real y el de diseño; sirven para comparar tendencias, no para dar valores absolutos.</p>
-    <p class="note" data-lang="en">Stack thicknesses: figures published by conversion workshops (Kolari and others), approximate and variable between models; the division into layers and the choice of glasses are plausible, not factory data. Edit whatever you happen to know. The microlens parameters are a heuristic model: a Gaussian relative efficiency in the mismatch between the actual chief-ray angle and the design angle; they serve to compare trends, not to give absolute values.</p>
+    <button id="share"></button>
+
+    <details class="mdl" id="st-model">
+      <summary><span data-lang="es">Modelo: capas, vidrios y microlentes</span><span data-lang="en">Model: layers, glasses and microlenses</span></summary>
+      <div class="row">
+        <label><span data-lang="es">λ diseño (nm)</span><span data-lang="en">Design λ (nm)</span><input type="number" id="lam" step="10" value="550"></label>
+        <label><span data-lang="es">MTF a (pl/mm)</span><span data-lang="en">MTF at (lp/mm)</span><input type="number" id="freq" step="5" value="30"></label>
+      </div>
+
+      <h3><span data-lang="es">Capas del sensor A</span><span data-lang="en">Sensor A layers</span></h3>
+      <table class="layers" id="layersA"></table>
+      <div class="row">
+        <label><span data-lang="es">Microlentes: L de diseño (mm)</span><span data-lang="en">Microlenses: design L (mm)</span><input type="number" id="ldA" step="5" value="40"></label>
+        <label><span data-lang="es">Tolerancia angular σ (°)</span><span data-lang="en">Angular tolerance σ (°)</span><input type="number" id="sgA" step="1" value="18"></label>
+      </div>
+
+      <h3><span data-lang="es">Capas del sensor B</span><span data-lang="en">Sensor B layers</span></h3>
+      <table class="layers" id="layersB"></table>
+      <div class="row">
+        <label><span data-lang="es">Microlentes: L de diseño (mm)</span><span data-lang="en">Microlenses: design L (mm)</span><input type="number" id="ldB" step="5" value="90"></label>
+        <label><span data-lang="es">Tolerancia angular σ (°)</span><span data-lang="en">Angular tolerance σ (°)</span><input type="number" id="sgB" step="1" value="18"></label>
+      </div>
+
+      <div class="chk">
+        <label><input type="checkbox" id="multiN"> <span data-lang="es">superponer f/2, f/4, f/8 (solo mancha)</span><span data-lang="en">overlay f/2, f/4, f/8 (spot only)</span></label>
+      </div>
+      <button id="csv"><span data-lang="es">Exportar CSV</span><span data-lang="en">Export CSV</span></button>
+      <p class="note" data-lang="es">Grosores de stack: valores publicados por talleres de conversión (Kolari y otros), aproximados y variables entre modelos; el reparto en capas y los vidrios son plausibles, no datos de fábrica. Edita lo que conozcas. Los parámetros de microlentes son un modelo heurístico: eficiencia relativa gaussiana en el desajuste entre el ángulo del rayo principal real y el de diseño; sirven para comparar tendencias, no para dar valores absolutos.</p>
+      <p class="note" data-lang="en">Stack thicknesses: figures published by conversion workshops (Kolari and others), approximate and variable between models; the division into layers and the choice of glasses are plausible, not factory data. Edit whatever you happen to know. The microlens parameters are a heuristic model: a Gaussian relative efficiency in the mismatch between the actual chief-ray angle and the design angle; they serve to compare trends, not to give absolute values.</p>
+    </details>
   </section>
 
   <section class="grid2">
@@ -191,6 +241,16 @@
         <span data-lang="en">Solid: A. Dashed: B. Thin strokes: other apertures when enabled.</span>
       </div>
       <div class="verdict" id="verdict"></div>
+      <div class="verdict" id="st-thr" style="border-left-color:var(--sag)"></div>
+    </div>
+
+    <div class="panel">
+      <h2 data-lang="es">Este objetivo, diafragma a diafragma</h2>
+      <h2 data-lang="en">This lens, stop by stop</h2>
+      <p class="note" data-lang="es">Solo la esquina (h máx.), con el residual y el modo de foco actuales. El estado compara lo peor de la mancha y la cromática lateral con el límite del sistema, que es el mayor entre el disco de Airy a ese diafragma y el paso de píxel: <b>irrelevante</b> por debajo de la mitad de ese límite, <b>visible</b> hasta una vez y media, <b>clara</b> por encima. Son convenios declarados, como el MTF50 de la ficha de difracción; la fila resaltada es el diafragma que has puesto arriba.</p>
+      <p class="note" data-lang="en">The corner alone (max. h), with the current residual and focus mode. The status compares the worse of the spot and the lateral chromatic aberration against the system limit, the larger of the Airy disc at that aperture and the pixel pitch: <b>negligible</b> below half that limit, <b>visible</b> up to one and a half times it, <b>marked</b> above. These are declared conventions, like the MTF50 of the diffraction page; the highlighted row is the aperture set above.</p>
+      <div class="tscroll"><table class="heat"><thead id="st-stopshead"></thead><tbody id="st-stops"></tbody></table></div>
+      <div class="heatleg"><span data-lang="es">Verde: irrelevante · amarillo: visible · rojo: clara.</span><span data-lang="en">Green: negligible · yellow: visible · red: marked.</span><i></i></div>
     </div>
 
     <div class="panel">
@@ -216,7 +276,10 @@
         <figure><canvas id="simA" width="180" height="180"></canvas><figcaption id="capA">Sensor A</figcaption></figure>
         <figure><canvas id="simB" width="180" height="180"></canvas><figcaption id="capB">Sensor B</figcaption></figure>
       </div>
-      <p class="note"><span data-lang="es">Estrella de Siemens de 36 radios y una rejilla fina, muestreadas al paso de píxel indicado, convolucionadas con la PSF policromática trazada para la esquina (más un desenfoque gaussiano equivalente a la difracción). La dirección radial del campo es la horizontal: en el borde el astigmatismo hace que las líneas radiales y las tangenciales pierdan contraste a frecuencias distintas, y la cromática lateral aparece como desplazamiento horizontal entre los canales, que aquí se muestra en escala de grises como emborronamiento asimétrico. Recorte de </span><span data-lang="en">A 36-spoke Siemens star and a fine grid, sampled at the stated pixel pitch and convolved with the polychromatic point spread function traced for the corner (plus a Gaussian blur equivalent to diffraction). The radial direction of the field is the horizontal one: at the edge, astigmatism makes radial and tangential lines lose contrast at different frequencies, and lateral chromatic aberration appears as a horizontal displacement between the channels, shown here in greyscale as asymmetric smearing. Crop of </span><span id="simSize"></span>.</p>
+      <div class="chk">
+        <label><input type="checkbox" id="st-gray"> <span data-lang="es">en gris (como antes)</span><span data-lang="en">greyscale (as before)</span></label>
+      </div>
+      <p class="note"><span data-lang="es">Estrella de Siemens de 36 radios y una rejilla fina, muestreadas al paso de píxel indicado, convolucionadas con la PSF trazada para la esquina (más un desenfoque gaussiano equivalente a la difracción). Cada una de las tres longitudes de onda del trazado alimenta un canal —486 nm al azul, 588 al verde, 656 al rojo—, así que la cromática lateral se ve como lo que es: una franja magenta a un lado de cada línea radial y verde al otro. Con tres longitudes de onda el color es indicativo, no colorimétrico. La dirección radial del campo es la horizontal: en el borde el astigmatismo hace que las líneas radiales y las tangenciales pierdan contraste a frecuencias distintas. Recorte de </span><span data-lang="en">A 36-spoke Siemens star and a fine grid, sampled at the stated pixel pitch and convolved with the point spread function traced for the corner (plus a Gaussian blur equivalent to diffraction). Each of the three traced wavelengths feeds one channel — 486 nm to blue, 588 to green, 656 to red — so lateral chromatic aberration shows up as what it is: a magenta fringe on one side of every radial line and a green one on the other. With three wavelengths the colour is indicative, not colorimetric. The radial direction of the field is the horizontal one: at the edge, astigmatism makes radial and tangential lines lose contrast at different frequencies. Crop of </span><span id="simSize"></span>.</p>
     </div>
 
     <div class="panel">
@@ -233,6 +296,58 @@
       <table class="res" id="tbl"></table>
       <p class="note" data-lang="es"><b>Cómo se calcula.</b> Rayos desde 127 puntos de una pupila circular (7 anillos hexapolares) de radio L/(2N) hacia el punto imagen ideal (h, 0), en λ<sub>F</sub> = 486, λ<sub>d</sub> = 588 y λ<sub>C</sub> = 656 nm con pesos 1, 2, 1. Refracción vectorial en cada superficie plana. En el plano de mejor foco (mínimo de la varianza de impactos, que es cuadrática en el desenfoque y se resuelve en cerrado) o en el plano de mejor foco del centro del campo, se calculan el radio RMS respecto al centroide, la MTF geométrica en dirección radial y tangencial y la PSF. Cromática lateral: separación entre los rayos principales F y C. Microlentes: eficiencia = exp(−(θ − θ<sub>diseño</sub>)² / (2σ²)) con θ<sub>diseño</sub> = atan(h / L<sub>diseño</sub>). Se omiten difracción en el trazado (solo entra como factor en la MTF y como desenfoque gaussiano en la simulación), reflexiones y absorción.</p>
       <p class="note" data-lang="en"><b>How it is computed.</b> Rays from 127 points of a circular pupil (7 hexapolar rings) of radius L/(2N) towards the ideal image point (h, 0), at λ<sub>F</sub> = 486, λ<sub>d</sub> = 588 and λ<sub>C</sub> = 656 nm with weights 1, 2, 1. Vector refraction at every plane surface. At the plane of best focus (the minimum of the variance of the impacts, quadratic in defocus and solved in closed form), or at the plane of best focus for the centre of the field, come the RMS radius about the centroid, the geometric MTF along the radial and tangential directions, and the point spread function. Lateral chromatic aberration: separation between the F and C chief rays. Microlenses: efficiency = exp(−(θ − θ<sub>design</sub>)² / (2σ²)) with θ<sub>design</sub> = atan(h / L<sub>design</sub>). Diffraction within the trace (it enters only as a factor in the MTF and as a Gaussian blur in the simulation), reflections and absorption are all omitted.</p>
+    </div>
+
+    <div class="panel">
+      <h2 data-lang="es">Mapa: qué objetivo aguanta qué grosor residual</h2>
+      <h2 data-lang="en">Map: which lens tolerates which residual thickness</h2>
+      <p class="note" data-lang="es">Mancha en la esquina (2·r<sub>RMS</sub>, µm) para cada distancia de pupila de salida y cada grosor residual de vidrio, al número f, al píxel y al modo de foco que tengas puestos arriba. El color repite los umbrales del veredicto. Se lee en horizontal —cuánto vidrio de más aguanta este objetivo— y en vertical —qué objetivos sobreviven a este cuerpo—. La fila resaltada es tu objetivo; las columnas recuadradas, el residual de A (continua) y el de B (discontinua). El residual del stack es una lámina de filtro IR equivalente (n<sub>d</sub> 1,55, V 50).</p>
+      <p class="note" data-lang="en">Corner spot (2·r<sub>RMS</sub>, µm) for each exit-pupil distance and each residual thickness of glass, at the f-number, pixel pitch and focus mode set above. The colours repeat the thresholds of the verdict. Read horizontally — how much surplus glass this lens tolerates — and vertically — which lenses survive this body. The highlighted row is your lens; the outlined columns are A's residual (solid) and B's (dashed). The residual is modelled as an equivalent IR-filter plate (n<sub>d</sub> 1.55, V 50).</p>
+      <div class="tscroll"><table class="heat"><thead id="st-maphead"></thead><tbody id="st-map"></tbody></table></div>
+      <div class="heatleg"><span data-lang="es">Verde: irrelevante · amarillo: visible · rojo: clara.</span><span data-lang="en">Green: negligible · yellow: visible · red: marked.</span><i></i><span id="st-mapleg"></span></div>
+    </div>
+
+    <div class="panel prose">
+      <h2 data-lang="es">Qué significa todo esto</h2>
+      <h2 data-lang="en">What all this means</h2>
+
+      <h3><span data-lang="es">Por qué una lámina plana emborrona en la esquina</span><span data-lang="en">Why a flat plate blurs the corner</span></h3>
+      <p data-lang="es">Una lámina plano‑paralela no tiene potencia: en el eje solo empuja el foco hacia atrás <span class="fml">t·(1 − 1/n)</span>, unos 0,28 mm por cada milímetro de vidrio, y el objetivo lo compensa enfocando. En la esquina el haz llega inclinado un ángulo θ = arctan(h/L) y deja de ser así: los focos sagital y tangencial se separan. Con las fórmulas de Coddington para una lámina, <span class="fml">Δz<sub>s</sub> = t·[1 − cos θ / √(n² − sin²θ)]</span> y <span class="fml">Δz<sub>t</sub> = t·[1 − n²·cos³θ / (n² − sin²θ)<sup>3/2</sup>]</span>; su diferencia es el astigmatismo longitudinal, que es cero en el eje y crece deprisa con θ. De ahí las dos reglas que gobiernan esta ficha: <b>todo es proporcional a t</b> (el doble de vidrio, el doble de todo) y <b>todo crece con el ángulo</b>, es decir, con h y contra L. Un simétrico de telémetro con la pupila a 28 mm mira la esquina a casi 38°; un tele o un retrofoco con la pupila a 150 mm, a 8°, y no se entera.</p>
+      <p data-lang="en">A plane-parallel plate has no power: on axis it merely pushes focus back by <span class="fml">t·(1 − 1/n)</span>, some 0.28 mm per millimetre of glass, and the lens compensates by refocusing. In the corner the beam arrives tilted by θ = arctan(h/L) and that stops being true: the sagittal and tangential foci separate. With Coddington's formulae for a plate, <span class="fml">Δz<sub>s</sub> = t·[1 − cos θ / √(n² − sin²θ)]</span> and <span class="fml">Δz<sub>t</sub> = t·[1 − n²·cos³θ / (n² − sin²θ)<sup>3/2</sup>]</span>; their difference is the longitudinal astigmatism, zero on axis and rising fast with θ. Hence the two rules that govern this page: <b>everything is proportional to t</b> (twice the glass, twice of everything) and <b>everything grows with the angle</b>, that is, with h and against L. A symmetrical rangefinder design with its pupil at 28 mm looks at the corner from almost 38°; a tele or a retrofocus with the pupil at 150 mm, from 8°, and never notices.</p>
+      <p data-lang="es">Ese emborronamiento transversal es un error longitudinal visto a través del cono del diafragma: mide aproximadamente Δz/N, así que <b>se divide por dos cada vez que cierras un paso</b>. La difracción hace lo contrario, crece con N. Por eso siempre hay un diafragma a partir del cual el stack deja de contar, y por eso la tabla de arriba tiene sentido leerla de arriba abajo. El techo de difracción —disco de Airy, MTF de difracción, diafragma crítico— no se reexplica aquí: está desarrollado en <a href="sensor.html#difraccion">El sensor · difracción</a>.</p>
+      <p data-lang="en">That transverse smear is a longitudinal error seen through the cone of the aperture: it measures roughly Δz/N, so it <b>halves every time you stop down one stop</b>. Diffraction does the opposite, growing with N. That is why there is always an aperture beyond which the stack stops counting, and why the table above is worth reading from top to bottom. The diffraction ceiling — Airy disc, diffraction MTF, critical aperture — is not re-explained here: it is developed in <a href="sensor.html#difraccion">The sensor · diffraction</a>.</p>
+      <p data-lang="es">El grosor es un compromiso, no un descuido. La M8 llevó 0,5 mm de cubierta para no castigar las esquinas de los grandes angulares M, y a cambio dejó pasar infrarrojo: los negros sintéticos salían magenta y hubo que colgar filtros IR/UV delante del objetivo. Desde la M9 el stack ronda los 0,8 mm con vidrio absorbente, que es la mitad de lo que lleva una réflex y un tercio de un micro 4/3. Ese otro lado del problema —dónde deja de cortar el filtro, la deriva de color por incidencia oblicua en los cortes dieléctricos— se calcula en la pestaña <a href="filtro-nd-infrarrojo.html">El filtro ND y la fuga infrarroja</a>.</p>
+      <p data-lang="en">The thickness is a compromise, not an oversight. The M8 carried a 0.5 mm cover glass so as not to punish the corners of wide M lenses, and in exchange it let infrared through: synthetic blacks came out magenta and IR/UV filters had to be hung in front of the lens. From the M9 on, the stack is around 0.8 mm of absorbing glass, half of what an SLR carries and a third of a Micro 4/3. That other side of the problem — where the filter stops cutting, the colour drift of dielectric cuts under oblique incidence — is computed in the <a href="filtro-nd-infrarrojo.html">ND filter and infrared leakage</a> tab.</p>
+
+      <h3><span data-lang="es">Para tus cuerpos</span><span data-lang="en">For your bodies</span></h3>
+      <p data-lang="es">La pregunta útil nunca es «cuánto vidrio hay» sino «cuánto vidrio hay <i>de más</i>».</p>
+      <p data-lang="en">The useful question is never “how much glass is there” but “how much glass is there <i>in excess</i>”.</p>
+      <ul data-lang="es">
+        <li><b>M digital (M9…M11), ≈0,8 mm.</b> Un M ASPH moderno se calculó contando con ese vidrio: pon «M digital (0,8 mm)» y el residual es 0, la esquina es la del objetivo y esta ficha no tiene nada que decir. Un ZM, un Voigtländer o cualquier diseño de la era de película se calculó con aire: pon «película / M analógico o ZM (0 mm)» y el residual vuelve a ser los 0,8 mm completos. Esa es la diferencia entre las dos experiencias que se leen en los foros.</li>
+        <li><b>Objetivo fijo (Q3 43 y compañía).</b> El objetivo se calculó para su propio stack: el residual es 0 por construcción y la pregunta no se plantea. Solo reaparece si adaptas algo a ese cuerpo, cosa que un objetivo fijo no permite.</li>
+        <li><b>SL3‑S con M adaptados.</b> Aquí sí hay caso: residual = T<sub>SL3‑S</sub> − 0,8 mm para un M moderno, y T<sub>SL3‑S</sub> entero para un ZM o un objetivo de película. Leica no publica ese grosor y este sitio no se lo inventa: el preset «Leica SL3 / SL3‑S» lleva un marcador de 2,0 mm, el valor típico de un sin espejo de fotograma completo, señalado como tal para que lo edites. Mientras tanto, el mapa de arriba está hecho para eso: localiza la columna del grosor cuando lo sepas y lee la fila de tu objetivo. Con objetivos L nativos el residual es 0.</li>
+      </ul>
+      <ul data-lang="en">
+        <li><b>Digital M (M9…M11), ≈0.8 mm.</b> A modern M ASPH was computed counting on that glass: choose “digital M (0.8 mm)” and the residual is 0, the corner is the lens's own and this page has nothing to say. A ZM, a Voigtländer or any film-era design was computed with air: choose “film / analogue M or ZM (0 mm)” and the residual is the full 0.8 mm again. That is the difference between the two experiences one reads about in the forums.</li>
+        <li><b>Fixed lens (Q3 43 and the like).</b> The lens was computed for its own stack: the residual is zero by construction and the question does not arise. It only comes back if you adapt something to that body, which a fixed lens does not allow.</li>
+        <li><b>SL3-S with adapted M lenses.</b> Here there is a real case: residual = T<sub>SL3-S</sub> − 0.8 mm for a modern M, and the whole of T<sub>SL3-S</sub> for a ZM or a film-era lens. Leica does not publish that thickness and this site does not invent it: the “Leica SL3 / SL3-S” preset carries a 2.0 mm placeholder, the typical figure for a full-frame mirrorless body, flagged as such so you can edit it. In the meantime the map above exists precisely for this: find the column for the thickness once you know it and read your lens's row. With native L lenses the residual is 0.</li>
+      </ul>
+
+      <h3><span data-lang="es">Límites del modelo</span><span data-lang="en">Limits of the model</span></h3>
+      <ul data-lang="es">
+        <li>El objetivo es perfecto. Sin placa la mancha es cero, cosa que no ocurre en ninguna esquina real: lo que ves es lo que <i>añade</i> el vidrio, y se suma en cuadratura a las aberraciones propias del objetivo.</li>
+        <li>La pupila es circular, fija y no se desplaza con el campo: no hay viñeteo mecánico, ni aberración de pupila, ni distorsión.</li>
+        <li>La MTF geométrica sobreestima la degradación cuando la mancha ronda el disco de Airy; por debajo de él, fíate del veredicto, no del decimal.</li>
+        <li>Todo es lineal en el grosor: un ±20 % de error en t es un ±20 % en cada micra de esta página. Los grosores por defecto son aproximados y variables entre unidades.</li>
+        <li>Las microlentes son una heurística gaussiana en el desajuste angular: comparan tendencias, no predicen viñeteo ni deriva de color. No hay reflexiones, ni absorción, ni cortes dieléctricos: eso es la otra pestaña. Las recetas de decisión y las fuentes de los grosores están en el <a href="manual-stack-sensor.html">manual</a>.</li>
+      </ul>
+      <ul data-lang="en">
+        <li>The lens is perfect. Without a plate the spot is zero, which happens in no real corner: what you see is what the glass <i>adds</i>, and it sums in quadrature with the lens's own aberrations.</li>
+        <li>The pupil is circular, fixed and does not move with the field: there is no mechanical vignetting, no pupil aberration, no distortion.</li>
+        <li>The geometric MTF overstates the degradation once the spot is near the Airy disc; below it, trust the verdict, not the decimal.</li>
+        <li>Everything is linear in thickness: a ±20 % error in t is a ±20 % error in every micron on this page. The default thicknesses are approximate and vary between units.</li>
+        <li>The microlenses are a Gaussian heuristic on angular mismatch: they compare trends, they do not predict vignetting or colour drift. There are no reflections, no absorption and no dielectric cuts: that is the other tab. The decision recipes and the sources for the thicknesses are in the <a href="manual-stack-sensor.html">manual</a>.</li>
+      </ul>
     </div>
   </section>
 </main>
@@ -284,18 +399,25 @@
 <script>
 // ---------- utilidades ----------
 const $ = id => document.getElementById(id);
-const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+/* En la página fusionada las variables de esta parte viven en .part-st, no en :root:
+   leerlas de documentElement devolvía cadena vacía y los lienzos salían sin color. */
+let _cssHost=null;
+function cssHost(){ if(!_cssHost||!_cssHost.isConnected) _cssHost=document.querySelector('.part-st')||document.getElementById('ray')||document.documentElement; return _cssHost; }
+const css = v => getComputedStyle(cssHost()).getPropertyValue(v).trim();
 
 /* ---------- diccionario de cadenas generadas por JS ----------
    El diccionario NO puede llamarse T ni la función traductora t() o S():
    axes(g,W,H,L,R,T,B,…) recibe T, B, L y R como parámetros; readStack() y
    gaussBlur() declaran `const t`; evalField(), pattern(), convolvePSF(),
-   gaussBlur(), paint() y drawSim() usan `S`. Cualquiera de esos nombres
+   gaussBlur(), paintSim() y drawSim() usan `S`. Cualquiera de esos nombres
    quedaría eclipsado dentro de funciones que sí pintan texto. De ahí DICT/LBL. */
 const DICT={
  es:{
   // selectores
-  fmt216:'24×36 (semidiagonal 21.6 mm)', fmt142:'APS‑C (14.2 mm)', fmt108:'Micro 4/3 (10.8 mm)',
+  fmtM11:'Leica M11 / Q3 43 · 24×36 · píxel 3,76 µm', fmtSL:'Leica SL3‑S · 24×36 · píxel 5,94 µm',
+  fmt216:'24×36 genérico (semidiagonal 21.6 mm, píxel 4,3 µm)', fmt142:'APS‑C (14.2 mm)', fmt108:'Micro 4/3 (10.8 mm)',
+  dgFilm:'película, M analógico o ZM (0 mm)', dg08:'M digital (0,8 mm)',
+  dgNat:'este cuerpo (nativo: residual 0)', dgCustom:'personalizado (mm)',
   lp28:'Zeiss Biogon 21 mm ZM, Super Angulon 21 ≈28 mm',
   lp38:'Voigtländer 15/4.5 III, Elmarit 28 ASPH ≈38 mm',
   lp48:'Summicron 35 ASPH, Biogon 35 ≈48 mm',
@@ -306,8 +428,9 @@ const DICT={
   lpCustom:'Personalizado',
   focLocal:'mejor local', focCenter:'en el centro',
   // sensores y vidrios
-  snLeica:'Leica M9 / M240 / M10 / M11 (≈0.8 mm)', snNikonz:'Nikon Z (≈1.1 mm)',
+  snLeica:'Leica M digital (M9…M11, ≈0.8 mm)', snNikonz:'Nikon Z (≈1.1 mm)',
   snCanonrf:'Canon RF (≈1.5 mm)', snSony:'Sony E FF / Fujifilm X (≈2.0 mm)',
+  snSL:'Leica SL3 / SL3‑S, M adaptado — grosor por confirmar (2,0 mm provisional)',
   snEf:'Réflex Canon EF (≈2.5 mm)', snMft:'Micro 4/3 (≈4.0 mm)',
   snFilm:'Película (0 mm)', snCustom:'Personalizado',
   gD263:'cubierta D263', gBK7:'BK7', gIR:'filtro IR (BG/S8612, aprox.)', gQZ:'cuarzo (AA)',
@@ -319,13 +442,15 @@ const DICT={
   axUm:'µm', axMTF:'MTF @ {f} pl/mm',
   lblAiry:'Airy {v} µm', lblPix:'píxel {v} µm', lblDiff:'límite de difracción {v}',
   lblFocT:'foco tangencial', lblFocS:'foco sagital', lblFocN:'foco sin placa',
-  lblScale:'1 mm', lblSensorT:'Sensor {k}   T = {v} mm',
+  lblScale:'1 mm', lblSensorT:'Sensor {k}   residual {v} mm   (stack {p} mm)',
   lblAstig:'θ = {th}°,  u = ±{u}° (f/{N}),  astigmatismo longitudinal ≈ {a} µm',
   // simulación
-  capSim:'Sensor {k} ({T} mm): mancha {rms} µm, MTF{f} S/T {ms}/{mt}',
+  capSim:'Sensor {k} (residual {T} mm): mancha {rms} µm, MTF{f} S/T {ms}/{mt}',
   simSize:'{w} × {h} mm ({S} px de lado, mostrados ampliados)',
   // tabla
   rT:'Grosor total del stack',
+  rTd:'Grosor para el que se calculó el objetivo',
+  rTr:'Grosor residual que ve el objetivo',
   rTh:'Ángulo del rayo principal en el borde',
   rU:'Semiángulo del cono (f/{N})',
   rDf:'Desplazamiento del mejor foco respecto al nominal',
@@ -339,15 +464,31 @@ const DICT={
   rPix:'Paso de píxel',
   // veredicto
   vJudge0:'irrelevante: mancha por debajo de la mitad del píxel y del disco de Airy',
-  vJudge1:'visible en las esquinas a plena abertura',
+  vJudge1:'visible en las esquinas',
   vJudge2:'clara: bordes blandos con nitidez radial y tangencial distinta y franjas de color',
   vMain:'Sensor A: degradación {a}. Sensor B: degradación {b}. ',
   vRatio:'Mancha de B respecto a A en el borde: {r}×. ',
   vCenter:'Con el foco fijado en el centro se suma la curvatura de campo que introduce la placa; cambia a “mejor local” para ver solo el astigmatismo y la coma.',
-  vLocal:'Foco optimizado en cada punto del campo: la curvatura de campo de la placa no está incluida; cambia a “en el centro” para verla.'
+  vLocal:'Foco optimizado en cada punto del campo: la curvatura de campo de la placa no está incluida; cambia a “en el centro” para verla.',
+  // umbrales
+  vZero:'Residual cero en los dos: con este grosor de diseño el stack no añade nada y la esquina es la del objetivo. ',
+  vOkFrom:'{k} (residual {t} mm) deja de contar a partir de {n}. ',
+  vOkAll:'{k} (residual {t} mm) es irrelevante ya a plena abertura. ',
+  vOkNever:'{k} (residual {t} mm) no baja de visible ni a f/16. ',
+  vBadBelow:'Por debajo de {n} la esquina de {k} es claramente peor. ',
+  vTmax:'A {N} y {pix} µm de píxel, con este objetivo un residual de hasta {t} mm sería irrelevante, y hasta {t2} mm solo visible. ',
+  vPair:'Cambio de modo de foco a {N}: la esquina de A pasa de {a1} a {a2} µm y la de B de {b1} a {b2} µm (mejor local → en el centro). ',
+  // tablas de decisión
+  thStop:'diafragma', thSpot:'mancha', thLat:'crom.', thMTF:'MTF S/T', thState:'estado',
+  thL:'objetivo (pupila L)', thRes:'residual (mm)',
+  stOk:'irrelevante', stVis:'visible', stBad:'clara',
+  mapLeg:' · 2·rRMS en µm en la esquina, a {N}, {pix} µm de píxel, foco «{foc}».'
  },
  en:{
-  fmt216:'24×36 (semi-diagonal 21.6 mm)', fmt142:'APS‑C (14.2 mm)', fmt108:'Micro 4/3 (10.8 mm)',
+  fmtM11:'Leica M11 / Q3 43 · 24×36 · 3.76 µm pixel', fmtSL:'Leica SL3-S · 24×36 · 5.94 µm pixel',
+  fmt216:'Generic 24×36 (semi-diagonal 21.6 mm, 4.3 µm pixel)', fmt142:'APS‑C (14.2 mm)', fmt108:'Micro 4/3 (10.8 mm)',
+  dgFilm:'film, analogue M or ZM (0 mm)', dg08:'digital M (0.8 mm)',
+  dgNat:'this body (native: zero residual)', dgCustom:'custom (mm)',
   lp28:'Zeiss Biogon 21 mm ZM, Super Angulon 21 ≈28 mm',
   lp38:'Voigtländer 15/4.5 III, Elmarit 28 ASPH ≈38 mm',
   lp48:'Summicron 35 ASPH, Biogon 35 ≈48 mm',
@@ -357,8 +498,9 @@ const DICT={
   lp400:'Quasi-telecentric ≈400 mm',
   lpCustom:'Custom',
   focLocal:'best local', focCenter:'at the centre',
-  snLeica:'Leica M9 / M240 / M10 / M11 (≈0.8 mm)', snNikonz:'Nikon Z (≈1.1 mm)',
+  snLeica:'Digital Leica M (M9…M11, ≈0.8 mm)', snNikonz:'Nikon Z (≈1.1 mm)',
   snCanonrf:'Canon RF (≈1.5 mm)', snSony:'Sony E FF / Fujifilm X (≈2.0 mm)',
+  snSL:'Leica SL3 / SL3-S, adapted M — thickness to confirm (2.0 mm placeholder)',
   snEf:'Canon EF SLR (≈2.5 mm)', snMft:'Micro 4/3 (≈4.0 mm)',
   snFilm:'Film (0 mm)', snCustom:'Custom',
   gD263:'D263 cover glass', gBK7:'BK7', gIR:'IR filter (BG/S8612, approx.)', gQZ:'quartz (AA filter)',
@@ -368,11 +510,13 @@ const DICT={
   axUm:'µm', axMTF:'MTF @ {f} lp/mm',
   lblAiry:'Airy {v} µm', lblPix:'pixel {v} µm', lblDiff:'diffraction limit {v}',
   lblFocT:'tangential focus', lblFocS:'sagittal focus', lblFocN:'focus without plate',
-  lblScale:'1 mm', lblSensorT:'Sensor {k}   T = {v} mm',
+  lblScale:'1 mm', lblSensorT:'Sensor {k}   residual {v} mm   (stack {p} mm)',
   lblAstig:'θ = {th}°,  u = ±{u}° (f/{N}),  longitudinal astigmatism ≈ {a} µm',
-  capSim:'Sensor {k} ({T} mm): spot {rms} µm, MTF{f} S/T {ms}/{mt}',
+  capSim:'Sensor {k} (residual {T} mm): spot {rms} µm, MTF{f} S/T {ms}/{mt}',
   simSize:'{w} × {h} mm ({S} px per side, shown enlarged)',
   rT:'Total stack thickness',
+  rTd:'Thickness the lens was computed for',
+  rTr:'Residual thickness the lens sees',
   rTh:'Chief-ray angle at the edge',
   rU:'Half-angle of the cone (f/{N})',
   rDf:'Shift of best focus from nominal',
@@ -385,12 +529,23 @@ const DICT={
   rAiry:'Airy disc 2.44·λ·N',
   rPix:'Pixel pitch',
   vJudge0:'negligible: the spot stays below half the pixel and half the Airy disc',
-  vJudge1:'visible in the corners at full aperture',
+  vJudge1:'visible in the corners',
   vJudge2:'marked: soft edges, radial and tangential sharpness differing, and colour fringing',
   vMain:'Sensor A: degradation {a}. Sensor B: degradation {b}. ',
   vRatio:'B’s spot relative to A at the edge: {r}×. ',
   vCenter:'With focus fixed at the centre, the field curvature introduced by the plate is added in; switch to “best local” to see astigmatism and coma alone.',
-  vLocal:'Focus optimised at every point of the field: the field curvature of the plate is not included; switch to “at the centre” to see it.'
+  vLocal:'Focus optimised at every point of the field: the field curvature of the plate is not included; switch to “at the centre” to see it.',
+  vZero:'Zero residual on both: with this design thickness the stack adds nothing and the corner is the lens’s own. ',
+  vOkFrom:'{k} (residual {t} mm) stops counting from {n} on. ',
+  vOkAll:'{k} (residual {t} mm) is already negligible wide open. ',
+  vOkNever:'{k} (residual {t} mm) never drops below visible, not even at f/16. ',
+  vBadBelow:'Below {n} the corner of {k} is clearly worse. ',
+  vTmax:'At {N} and a {pix} µm pixel, with this lens a residual of up to {t} mm would be negligible, and up to {t2} mm merely visible. ',
+  vPair:'Change of focus mode at {N}: A’s corner goes from {a1} to {a2} µm and B’s from {b1} to {b2} µm (best local → at the centre). ',
+  thStop:'aperture', thSpot:'spot', thLat:'chrom.', thMTF:'MTF S/T', thState:'status',
+  thL:'lens (pupil L)', thRes:'residual (mm)',
+  stOk:'negligible', stVis:'visible', stBad:'marked',
+  mapLeg:' · 2·rRMS in µm at the corner, at {N}, a {pix} µm pixel, focus “{foc}”.'
  }
 };
 const LANG = () => document.documentElement.lang==='en' ? 'en' : 'es';
@@ -418,16 +573,24 @@ const SENSORS=[
   {id:'nikonz',key:'snNikonz',layers:[[0.5,'D263'],[0.6,'IR'],[0,'QZ']],ld:80},
   {id:'canonrf',key:'snCanonrf',layers:[[0.5,'D263'],[1.0,'IR'],[0,'QZ']],ld:80},
   {id:'sony',key:'snSony',layers:[[0.7,'D263'],[1.3,'IR'],[0,'QZ']],ld:90},
+  /* Leica no publica el grosor del stack del SL3 / SL3-S. Lo que va aquí es un
+     marcador con el valor típico de un sin espejo de fotograma completo, rotulado
+     como «por confirmar» en el propio selector: se edita en cuanto se sepa. */
+  {id:'sl',key:'snSL',layers:[[0.7,'D263'],[1.3,'IR'],[0,'QZ']],ld:90},
   {id:'ef',key:'snEf',layers:[[0.5,'D263'],[1.0,'IR'],[1.0,'QZ']],ld:100},
   {id:'mft',key:'snMft',layers:[[0.7,'D263'],[1.5,'IR'],[1.8,'QZ']],ld:80},
   {id:'film',key:'snFilm',layers:[[0,'D263'],[0,'IR'],[0,'QZ']],ld:60},
   {id:'custom',key:'snCustom',layers:null},
 ];
 /* opciones traducibles de los tres selectores fijos */
-const OPT_FMT=[['21.6,4.3','fmt216'],['14.2,3.9','fmt142'],['10.8,3.3','fmt108']];
+const OPT_FMT=[['21.6,3.76','fmtM11'],['21.6,5.94','fmtSL'],['21.6,4.3','fmt216'],
+               ['14.2,3.9','fmt142'],['10.8,3.3','fmt108']];
 const OPT_LENS=[['28','lp28'],['38','lp38'],['48','lp48'],['65','lp65'],['95','lp95'],
                 ['150','lp150'],['400','lp400'],['custom','lpCustom']];
 const OPT_FOCUS=[['local','focLocal'],['center','focCenter']];
+/* Grosor para el que se calculó el objetivo: lo que degrada la esquina es el
+   residual |T_stack − T_diseño|, no el stack entero. 'native' = el propio stack. */
+const OPT_DESIGN=[['0','dgFilm'],['0.8','dg08'],['native','dgNat'],['custom','dgCustom']];
 function setOptions(id,pairs){
   const sel=$(id), v=sel.value;
   sel.innerHTML=pairs.map(([val,k])=>`<option value="${val}">${LBL(k)}</option>`).join('');
@@ -459,10 +622,37 @@ function readStack(k){
   const layers=[]; for(let i=1;i<=3;i++){ const th=+$(`t${k}${i}`).value; if(th>0){ const nd=+$(`n${k}${i}`).value,V=+$(`V${k}${i}`).value; layers.push({t:th,nd,V,...cauchy(nd,V)}); } }
   return {layers, T:layers.reduce((a,l)=>a+l.t,0), ld:+$('ld'+k).value, sg:+$('sg'+k).value*Math.PI/180};
 }
+/* ---------- residual: lo que el objetivo no esperaba ----------
+   Las aberraciones de una lámina son lineales en su espesor y el signo del
+   desajuste solo intercambia los focos sagital y tangencial, así que trazar
+   |T_stack − T_diseño| con el mismo reparto de vidrios escalado da la mancha
+   correcta. Si el cuerpo no lleva vidrio (película) y el objetivo se calculó
+   con él, el residual se modela con una lámina de filtro IR equivalente. */
+function designT(st){
+  const v=$('st-design').value;
+  if(v==='native') return st.T;
+  if(v==='custom') return Math.max(0,+$('st-designT').value||0);
+  return +v||0;
+}
+function residualStack(st){
+  const Td=designT(st), Tr=Math.abs(st.T-Td);
+  let layers;
+  if(Tr<1e-6) layers=[];
+  else if(st.T>1e-6){ const s=Tr/st.T; layers=st.layers.map(l=>({t:l.t*s,nd:l.nd,V:l.V,A:l.A,B:l.B})); }
+  else { const g=GLASS.IR; layers=[{t:Tr,nd:g.n,V:g.V,...cauchy(g.n,g.V)}]; }
+  return {layers,T:Tr,Tphys:st.T,Td,ld:st.ld,sg:st.sg};
+}
+/* lámina suelta de filtro IR de grosor t: la usa el mapa y el cálculo de T máximo */
+function plateStack(t,ld,sg){
+  const g=GLASS.IR;
+  return {layers: t>1e-6?[{t,nd:g.n,V:g.V,...cauchy(g.n,g.V)}]:[], T:t, Tphys:t, Td:0, ld:ld, sg:sg};
+}
 function params(){
   return { ep:+$('ep').value, N:+$('N').value, hmax:+$('hmax').value, pix:+$('pix').value, lam:+$('lam').value*1e-3,
-    freq:+$('freq').value, focus:$('focus').value, multiN:$('multiN').checked, A:readStack('A'), B:readStack('B') };
+    freq:+$('freq').value, focus:$('focus').value, multiN:$('multiN').checked, gray:$('st-gray').checked,
+    A:residualStack(readStack('A')), B:residualStack(readStack('B')) };
 }
+const fNum = N => 'f/'+(N>=10?N.toFixed(0):(Math.abs(N-Math.round(N))<0.05?String(Math.round(N)):N.toFixed(1)));
 
 // ---------- trazado ----------
 const GAP=1.0; // mm entre cara trasera del stack y plano del sensor (solo geometría)
@@ -505,9 +695,9 @@ function spotAt(B,u,freq){
 }
 function diffMTF(freq,lam,N){ const nu=freq*lam*1e-3*N; if(nu>=1) return 0; return (2/Math.PI)*(Math.acos(nu)-nu*Math.sqrt(1-nu*nu)); }
 
-function evalField(p,st,h,N,uCenter){
+function evalField(p,st,h,N,uCenter,fmode){
   const B=traceBundle(p,st,h,N);
-  const u = p.focus==='center' ? uCenter : bestFocus(B);
+  const u = (fmode||p.focus)==='center' ? uCenter : bestFocus(B);
   const S=spotAt(B,u,p.freq);
   const dm=diffMTF(p.freq,p.lam,N);
   const cF=B.chief[LF], cC=B.chief[LC];
@@ -533,12 +723,33 @@ function axes(g,W,H,L,R,T,B,p,ymax,ylabel,fmtY){
 }
 function line(g,pts,X,Y,key,col,dash,w){ g.setLineDash(dash); g.strokeStyle=css(col); g.lineWidth=w; g.beginPath(); pts.forEach((q,i)=>{ const x=X(q.h),y=Y(q[key]); i?g.lineTo(x,y):g.moveTo(x,y); }); g.stroke(); g.setLineDash([]); }
 
+/* ---------- umbrales: convenios declarados, como el MTF50 de la difracción ----------
+   límite del sistema = el mayor entre el disco de Airy a ese diafragma y el píxel;
+   irrelevante por debajo de medio límite, visible hasta 1,5 límites, clara por encima. */
+const STOPS=[1.4,2,2.8,4,5.6,8,11,16];
+const OK_F=0.5, VIS_F=1.5;
+const limAt=(p,N)=>Math.max(2.44*p.lam*N,p.pix);
+const worstOf=r=>Math.max(r.rms2,r.latC);
+const stateOf=(w,lim)=> w<OK_F*lim ? 0 : (w<VIS_F*lim ? 1 : 2);
+function edgeAt(p,st,N,fmode){
+  const uc = fmode==='center' ? centerFocus(p,st,N) : 0;
+  return evalField(p,st,p.hmax,N,uc,fmode);
+}
+
 let RES=null;
 function compute(p){
   const M=36; const res={A:[],B:[],extra:{A:{},B:{}}};
   for(const k of ['A','B']){ const st=p[k]; const uc=centerFocus(p,st,p.N);
     for(let i=0;i<=M;i++) res[k].push(evalField(p,st,p.hmax*i/M,p.N,uc));
     if(p.multiN) for(const N of [2,4,8]){ const uc2=centerFocus(p,st,N); res.extra[k][N]=[]; for(let i=0;i<=M;i+=2) res.extra[k][N].push(evalField(p,st,p.hmax*i/M,N,uc2)); } }
+  // barrido de diafragmas en la esquina (381 rayos por punto, 8×2 puntos)
+  res.stops=STOPS.map(N=>({N,A:edgeAt(p,p.A,N,p.focus),B:edgeAt(p,p.B,N,p.focus)}));
+  // el mismo borde en el otro modo de foco, para dar siempre el par de cifras
+  const other = p.focus==='center' ? 'local' : 'center';
+  res.other=other;
+  res.alt={A:edgeAt(p,p.A,p.N,other),B:edgeAt(p,p.B,p.N,other)};
+  // referencia de 1,00 mm de vidrio: por linealidad da el grosor residual tolerable
+  res.ref=edgeAt(p,plateStack(1.0,p.A.ld,p.A.sg),p.N,p.focus);
   return res;
 }
 function drawChart(p,res){
@@ -586,14 +797,37 @@ function gaussBlur(a,S,sig){ if(sig<0.15) return a; const r=Math.ceil(3*sig); co
   for(let y=0;y<S;y++)for(let x=0;x<S;x++){ let v=0; for(let i=-r;i<=r;i++){ const xx=Math.min(S-1,Math.max(0,x+i)); v+=k[i+r]*a[y*S+xx]; } tmp[y*S+x]=v; }
   for(let y=0;y<S;y++)for(let x=0;x<S;x++){ let v=0; for(let i=-r;i<=r;i++){ const yy=Math.min(S-1,Math.max(0,y+i)); v+=k[i+r]*tmp[yy*S+x]; } o[y*S+x]=v; }
   return o; }
-function paint(id,a,S){ const c=$(id), g=c.getContext('2d'); const img=g.createImageData(S,S); for(let i=0;i<S*S;i++){ const v=Math.round(255*(0.08+0.84*Math.min(1,Math.max(0,a[i])))); img.data[4*i]=v;img.data[4*i+1]=v;img.data[4*i+2]=v;img.data[4*i+3]=255; } g.putImageData(img,0,0); }
+/* Un canal por longitud de onda trazada: 486 nm → azul, 588 → verde, 656 → rojo.
+   El número total de impactos convolucionados es el mismo que antes (381), solo
+   que repartidos en tres acumuladores, así que el coste no cambia. */
+function simChannels(p,r,S){
+  const out=[];
+  for(const [lam,w] of LAMS){
+    let a=PAT;
+    if(r){ const s=r.S, Bd=r.B, dxs=[],dys=[],ws=[];
+      for(let i=0;i<s.xs.length;i++) if(Bd.lam[i]===lam){ dxs.push((s.xs[i]-s.mx)*1000/p.pix); dys.push((s.ys[i]-s.my)*1000/p.pix); ws.push(1); }
+      a=convolvePSF(PAT,S,dxs,dys,ws); }
+    out.push({lam,w,img:gaussBlur(a,S,0.42*lam*p.N/p.pix)});
+  }
+  return out;
+}
+function paintSim(id,chs,S,gray){
+  const c=$(id), g=c.getContext('2d'); const img=g.createImageData(S,S);
+  const cb=chs[0].img, cg=chs[1].img, cr=chs[2].img;   // F, d, C
+  const q=x=>Math.round(255*(0.08+0.84*Math.min(1,Math.max(0,x))));
+  for(let i=0;i<S*S;i++){
+    let R,G,Bl;
+    if(gray){ const v=(cb[i]+2*cg[i]+cr[i])/4; R=G=Bl=v; } else { R=cr[i]; G=cg[i]; Bl=cb[i]; }
+    img.data[4*i]=q(R); img.data[4*i+1]=q(G); img.data[4*i+2]=q(Bl); img.data[4*i+3]=255;
+  }
+  g.putImageData(img,0,0);
+}
 let PAT=null;
 function drawSim(p,res){
   const S=180; if(!PAT) PAT=pattern(S);
-  const sig=0.42*p.lam*p.N/p.pix;         // gaussiana ≈ Airy, en píxeles
-  paint('sim0',gaussBlur(PAT,S,sig),S);
-  for(const k of ['A','B']){ const r=res[k].at(-1); const s=r.S; const dxs=[],dys=[]; for(let i=0;i<s.xs.length;i++){ dxs.push((s.xs[i]-s.mx)*1000/p.pix); dys.push((s.ys[i]-s.my)*1000/p.pix); }
-    paint('sim'+k,gaussBlur(convolvePSF(PAT,S,dxs,dys,r.B.w),S,sig),S);
+  paintSim('sim0',simChannels(p,null,S),S,p.gray);
+  for(const k of ['A','B']){ const r=res[k].at(-1);
+    paintSim('sim'+k,simChannels(p,r,S),S,p.gray);
     $('cap'+k).textContent=LBL('capSim',{k,T:nf(p[k].T,2),rms:nf(r.rms2,1),f:p.freq,ms:nf(r.mtfS,2),mt:nf(r.mtfT,2)}); }
   $('simSize').textContent=LBL('simSize',{w:nf(S*p.pix/1000,2),h:nf(S*p.pix/1000,2),S});
 }
@@ -620,7 +854,7 @@ function drawRays(p){
   tr.forEach((o,ri)=>{ const y0=ri*rowH; const ymid=(o.yTan+o.ySag)/2-0.15;
     const px=z=>pad+(z-zmin)*sc, py=y=>y0+rowH/2-(y-ymid)*sc;
     if(ri){ g.strokeStyle=css('--line'); g.beginPath(); g.moveTo(0,y0); g.lineTo(W,y0); g.stroke(); }
-    g.fillStyle=css('--ink'); g.textAlign='left'; g.font='bold 12px IBM Plex Sans, system-ui'; g.fillText(LBL('lblSensorT',{k:o.k,v:nf(o.st.T,2)}),12,y0+18);
+    g.fillStyle=css('--ink'); g.textAlign='left'; g.font='bold 12px IBM Plex Sans, system-ui'; g.fillText(LBL('lblSensorT',{k:o.k,v:nf(o.st.T,2),p:nf(o.st.Tphys,2)}),12,y0+18);
     g.font='12px IBM Plex Sans, system-ui'; g.fillStyle=css('--mute');
     g.fillText(LBL('lblAstig',{th:nf(th*180/Math.PI,1),u:nf(u*180/Math.PI,1),N:p.N,a:nf((o.zTan-o.zSag)*1000,0)}),12,y0+34);
     g.save(); g.beginPath(); g.rect(0,y0+40,W,rowH-40); g.clip();
@@ -643,7 +877,9 @@ function fill(p,res){
   const um=LBL('axUm');
   const f=(x,d,u)=>nf(x,d)+' '+u;
   const rows=[
-    [LBL('rT'),f(p.A.T,2,'mm'),f(p.B.T,2,'mm')],
+    [LBL('rT'),f(p.A.Tphys,2,'mm'),f(p.B.Tphys,2,'mm')],
+    [LBL('rTd'),f(p.A.Td,2,'mm'),f(p.B.Td,2,'mm')],
+    [LBL('rTr'),f(p.A.T,2,'mm'),f(p.B.T,2,'mm')],
     [LBL('rTh'),f(a.th*180/Math.PI,1,'°'),''],
     [LBL('rU',{N:p.N}),f(Math.atan(1/(2*p.N))*180/Math.PI,1,'°'),''],
     [LBL('rDf'),f(a.u*1000,0,um),f(b.u*1000,0,um)],
@@ -657,19 +893,105 @@ function fill(p,res){
     [LBL('rPix'),f(p.pix,1,um),''],
   ];
   $('tbl').innerHTML='<tr><td class="k"></td><td><b>A</b></td><td><b>B</b></td></tr>'+rows.map(r=>`<tr><td class="k">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('');
-  const lim=Math.max(airy,p.pix);
-  const judge=m=>{ const w=Math.max(m.rms2,m.latC); return LBL(w<lim*0.5?'vJudge0':w<lim*1.5?'vJudge1':'vJudge2'); };
+  const lim=limAt(p,p.N);
+  const judge=m=>LBL(['vJudge0','vJudge1','vJudge2'][stateOf(worstOf(m),lim)]);
   const ratio=a.rms2>0.05?nf(b.rms2/a.rms2,2):'';
   $('verdict').textContent=LBL('vMain',{a:judge(a),b:judge(b)})
     +(ratio?LBL('vRatio',{r:ratio}):'')
     +LBL(p.focus==='center'?'vCenter':'vLocal');
+  thresholds(p,res);
+  stopsTable(p,res);
+}
+
+/* ---------- umbrales: desde qué diafragma deja de contar, cuánto grosor tolera ---------- */
+function thresholds(p,res){
+  const out=[];
+  const zero = p.A.T<1e-6 && p.B.T<1e-6;
+  if(zero) out.push(LBL('vZero'));
+  else for(const k of ['A','B']){
+    const t=nf(p[k].T,2);
+    let iOk=-1, iVis=-1;
+    res.stops.forEach((s,i)=>{ const st=stateOf(worstOf(s[k]),limAt(p,s.N));
+      if(iOk<0&&st===0) iOk=i; if(iVis<0&&st<=1) iVis=i; });
+    if(iOk===0) out.push(LBL('vOkAll',{k,t}));
+    else if(iOk<0) out.push(LBL('vOkNever',{k,t}));
+    else out.push(LBL('vOkFrom',{k,t,n:fNum(STOPS[iOk])}));
+    if(iVis>0) out.push(LBL('vBadBelow',{k,n:fNum(STOPS[iVis])}));
+  }
+  // grosor residual tolerable al diafragma actual, por linealidad en t sobre 1,00 mm
+  const wRef=worstOf(res.ref);
+  if(wRef>1e-6){
+    const lim=limAt(p,p.N);
+    out.push(LBL('vTmax',{N:fNum(p.N),pix:nf(p.pix,2),t:nf(OK_F*lim/wRef,2),t2:nf(VIS_F*lim/wRef,2)}));
+  }
+  // el par de cifras de foco: nunca un modo solo
+  const loc = res.other==='center' ? {A:res.A.at(-1),B:res.B.at(-1)} : res.alt;
+  const cen = res.other==='center' ? res.alt : {A:res.A.at(-1),B:res.B.at(-1)};
+  out.push(LBL('vPair',{N:fNum(p.N),a1:nf(loc.A.rms2,1),a2:nf(cen.A.rms2,1),b1:nf(loc.B.rms2,1),b2:nf(cen.B.rms2,1)}));
+  $('st-thr').textContent=out.join('');
+}
+
+function heatBG(w,lim){ const q=Math.max(0,Math.min(1,w/(VIS_F*lim))); return 'hsl('+(130*(1-q)).toFixed(0)+' 50% 82%)'; }
+const STATEKEY=['stOk','stVis','stBad'];
+function stopsTable(p,res){
+  $('st-stopshead').innerHTML=
+    '<tr><th rowspan="2">'+LBL('thStop')+'</th><th colspan="4">A</th><th colspan="4">B</th></tr>'+
+    '<tr>'+['A','B'].map(()=>['thSpot','thLat','thMTF','thState'].map(x=>'<th>'+LBL(x)+'</th>').join('')).join('')+'</tr>';
+  let iSel=0, best=1e9;
+  res.stops.forEach((s,i)=>{ const d=Math.abs(Math.log(s.N/p.N)); if(d<best){best=d;iSel=i;} });
+  $('st-stops').innerHTML=res.stops.map((s,i)=>{
+    const lim=limAt(p,s.N);
+    const cells=['A','B'].map(k=>{ const r=s[k], w=worstOf(r), stt=stateOf(w,lim), bg=heatBG(w,lim);
+      return `<td class="hc" style="background:${bg}">${nf(r.rms2,1)}</td>`+
+             `<td class="hc" style="background:${bg}">${nf(r.latC,1)}</td>`+
+             `<td class="hc" style="background:${bg}">${nf(r.mtfS,2)}/${nf(r.mtfT,2)}</td>`+
+             `<td class="hc" style="background:${bg}">${LBL(STATEKEY[stt])}</td>`; }).join('');
+    return `<tr class="${i===iSel?'rowsel':''}"><td${i===iSel?' class="now"':''}>${fNum(s.N)}</td>${cells}</tr>`;
+  }).join('');
+}
+
+/* ---------- mapa objetivo × grosor residual ---------- */
+const MAP_L=[28,38,48,65,95,150,400];
+const MAP_T=[0,0.25,0.5,0.8,1.1,1.5,2.0,2.5,4.0];
+function nearestCol(t){ let j=-1,d=0.13; MAP_T.forEach((v,i)=>{ const q=Math.abs(v-t); if(q<d){d=q;j=i;} }); return j; }
+function drawMap(p){
+  const lim=limAt(p,p.N);
+  $('st-maphead').innerHTML=
+    '<tr><th rowspan="2">'+LBL('thL')+'</th><th colspan="'+MAP_T.length+'">'+LBL('thRes')+'</th></tr>'+
+    '<tr>'+MAP_T.map(t=>'<th>'+nf(t,2)+'</th>').join('')+'</tr>';
+  const cA=nearestCol(p.A.T), cB=nearestCol(p.B.T);
+  let iSel=0, best=1e9;
+  MAP_L.forEach((L,i)=>{ const d=Math.abs(Math.log(L/p.ep)); if(d<best){best=d;iSel=i;} });
+  $('st-map').innerHTML=MAP_L.map((L,i)=>{
+    const pl={...p,ep:L};
+    const cells=MAP_T.map((t,j)=>{
+      const st=plateStack(t,p.A.ld,p.A.sg);
+      const r=edgeAt(pl,st,p.N,p.focus), w=worstOf(r);
+      const cls=['hc']; if(j===cA) cls.push('colA'); if(j===cB) cls.push('colB');
+      return `<td class="${cls.join(' ')}" style="background:${heatBG(w,lim)}">${nf(r.rms2,r.rms2<10?1:0)}</td>`;
+    }).join('');
+    const full=LBL(OPT_LENS[i][1]);
+    return `<tr class="${i===iSel?'rowsel':''}"><td title="${full.replace(/"/g,'&quot;')}">L = ${L} mm</td>${cells}</tr>`;
+  }).join('');
+  $('st-mapleg').textContent=LBL('mapLeg',{N:fNum(p.N),pix:nf(p.pix,2),foc:LBL(p.focus==='center'?'focCenter':'focLocal')});
 }
 
 // ---------- estado en URL, CSV ----------
-const IDS=['fmt','lensPreset','ep','N','hmax','pix','lam','freq','focus','presetA','presetB','ldA','sgA','ldB','sgB','multiN'];
+const IDS=['fmt','lensPreset','ep','N','hmax','pix','lam','freq','focus','st-design','st-designT',
+           'presetA','presetB','ldA','sgA','ldB','sgB','multiN','st-gray'];
 for(const k of ['A','B']) for(let i=1;i<=3;i++) IDS.push('t'+k+i,'n'+k+i,'V'+k+i);
-function saveURL(){ const o={}; IDS.forEach(id=>{ const e=$(id); o[id]=e.type==='checkbox'?(e.checked?1:0):e.value; }); history.replaceState(null,'','#'+new URLSearchParams(o).toString()); }
-function loadURL(){ if(!location.hash) return false; const q=new URLSearchParams(location.hash.slice(1)); IDS.forEach(id=>{ if(q.has(id)){ const e=$(id); if(e.type==='checkbox') e.checked=q.get(id)==='1'; else e.value=q.get(id); } }); return true; }
+/* En la página fusionada el <nav> de pestañas lee location.hash al arrancar para
+   decidir qué pestaña muestra, y lo hace después de este script. Si escribiéramos
+   el estado en el hash durante el arranque, un enlace a filtro-sensor.html#stack
+   abriría la otra pestaña. De ahí URLOK: la primera escritura se aplaza un turno
+   del bucle de eventos, cuando el conmutador ya ha resuelto la pestaña. */
+let URLOK=false;
+function saveURL(){ if(!URLOK) return; const o={}; IDS.forEach(id=>{ const e=$(id); o[id]=e.type==='checkbox'?(e.checked?1:0):e.value; }); history.replaceState(null,'','#'+new URLSearchParams(o).toString()); }
+/* Devuelve true solo si el hash trae estado de verdad: en la página fusionada el
+   hash puede ser el nombre de una pestaña («#stack»), y entonces hay que aplicar
+   los presets por defecto igual que si no hubiera hash. */
+function loadURL(){ if(!location.hash) return false; const q=new URLSearchParams(location.hash.slice(1)); let n=0;
+  IDS.forEach(id=>{ if(q.has(id)){ n++; const e=$(id); if(e.type==='checkbox') e.checked=q.get(id)==='1'; else e.value=q.get(id); } }); return n>0; }
 function exportCSV(p,res){
   const head=['h_mm','theta_deg','rmsA_um','rmsB_um','latCA_um','latCB_um','mtfS_A','mtfT_A','mtfS_B','mtfT_B','effA','effB'];
   const lines=[head.join(';')]; res.A.forEach((r,i)=>{ const b=res.B[i]; lines.push([r.h.toFixed(2),(r.th*180/Math.PI).toFixed(2),r.rms2.toFixed(2),b.rms2.toFixed(2),r.latC.toFixed(2),b.latC.toFixed(2),r.mtfS.toFixed(3),r.mtfT.toFixed(3),b.mtfS.toFixed(3),b.mtfT.toFixed(3),r.eff.toFixed(3),b.eff.toFixed(3)].join(';')); });
@@ -680,8 +1002,10 @@ function exportCSV(p,res){
 let timer=null;
 function update(){
   const p=params(); $('epv').textContent=p.ep;
+  $('st-dtw').classList.toggle('hide',$('st-design').value!=='custom');
   RES=compute(p); drawChart(p,RES); drawMTF(p,RES); drawRays(p); fill(p,RES); saveURL();
-  clearTimeout(timer); timer=setTimeout(()=>drawSim(p,RES),60);
+  /* el mapa y la simulación son lo más caro: se difieren para no frenar el arrastre */
+  clearTimeout(timer); timer=setTimeout(()=>{ drawSim(p,RES); drawMap(p); },60);
 }
 /* ---------- rótulos que sólo existen en JavaScript ----------
    Se reescriben al cambiar de idioma; los <option> se reconstruyen desde el
@@ -689,6 +1013,7 @@ function update(){
    conservando el valor seleccionado. */
 function retitle(){
   setOptions('fmt',OPT_FMT); setOptions('lensPreset',OPT_LENS); setOptions('focus',OPT_FOCUS);
+  setOptions('st-design',OPT_DESIGN);
   for(const k of ['A','B']){
     setOptions('preset'+k,SENSORS.map(s=>[s.id,s.key]));
     const tb=$('layers'+k), hd=tb&&tb.querySelector('th.hcapa'); if(hd) hd.textContent=LBL('colCapa');
@@ -703,6 +1028,7 @@ window.onLangChange=function(){ if(!READY) return; retitle(); update(); };
 
 buildLayers('A'); buildLayers('B');
 setOptions('fmt',OPT_FMT); setOptions('lensPreset',OPT_LENS); setOptions('focus',OPT_FOCUS);
+setOptions('st-design',OPT_DESIGN);
 $('share').textContent=LBL('btnShare');
 if(!loadURL()){ $('presetA').value='leica'; applySensorPreset('A','leica'); $('presetB').value='sony'; applySensorPreset('B','sony'); }
 else { for(const k of ['A','B']){ LASTPRESET[k]=$('preset'+k).value; labelGlasses(k); } }
@@ -714,11 +1040,18 @@ for(const k of ['A','B']){
 $('fmt').addEventListener('change',e=>{ const [h,px]=e.target.value.split(','); $('hmax').value=h; $('pix').value=px; update(); });
 $('lensPreset').addEventListener('change',e=>{ if(e.target.value!=='custom') $('ep').value=e.target.value; update(); });
 $('ep').addEventListener('input',()=>{ $('lensPreset').value='custom'; update(); });
-['N','hmax','pix','lam','freq','focus','multiN'].forEach(id=>$(id).addEventListener('input',update));
+['N','hmax','pix','lam','freq','focus','multiN','st-design','st-designT','st-gray'].forEach(id=>$(id).addEventListener('input',update));
 $('csv').addEventListener('click',()=>exportCSV(params(),RES));
-$('share').addEventListener('click',()=>{ navigator.clipboard.writeText(location.href).then(()=>{ $('share').textContent=LBL('btnShared'); setTimeout(()=>$('share').textContent=LBL('btnShare'),1500); }); });
+$('share').addEventListener('click',()=>{ saveURL(); navigator.clipboard.writeText(location.href).then(()=>{ $('share').textContent=LBL('btnShared'); setTimeout(()=>$('share').textContent=LBL('btnShare'),1500); }); });
 READY=true;
 update();
+/* DOMContentLoaded, no un temporizador: garantiza que el <script> del conmutador
+   de pestañas (que va después de este) ya ha leído el hash. No se escribe nada
+   aquí: el hash sigue siendo «#stack» hasta que el usuario toque un control o
+   pida el enlace con el estado, así que ese enlace sobrevive a una recarga. */
+function enableURL(){ URLOK=true; }
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',enableURL);
+else enableURL();
 </script>
 </body>
 </html>

@@ -86,6 +86,25 @@
     border-radius:6px;padding:10px 14px;margin:14px 0 0;font-size:13.5px;color:var(--ink2);max-width:85ch}
   .netnote b{color:var(--ink)}
   .sisters{font-size:13px;color:var(--ink2);margin:10px 0 0;max-width:85ch}
+  .verdict{background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--gold);
+    border-radius:6px;padding:12px 16px;max-width:88ch}
+  .verdict p{margin:0 0 9px;font-size:14px;color:var(--ink2)}
+  .verdict p:last-child{margin:0}
+  .verdict b{color:var(--ink)}
+  .verdict .hl{color:var(--gold);font-weight:700}
+  .verdict .no{color:var(--ink2)}
+  .readout{font-family:var(--mono);font-size:12.5px;color:var(--ink);background:#fffdf4;
+    border:1px solid var(--line);border-radius:6px;padding:8px 10px;margin-top:6px;min-height:2.7em;line-height:1.5}
+  .readout .k{color:var(--ink2)}
+  .rowline{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-top:10px}
+  .rowline label{margin-bottom:3px}
+  .hint{font-family:var(--mono);font-size:11.5px;color:var(--ink2);flex-basis:100%;margin-top:2px}
+  input.narrow{width:96px}
+  tr.rowgold td{background:#f7ecd0}
+  tr.rownight td{background:#e8ecf5}
+  .tag.fit{background:var(--good)}
+  .tag.near{background:var(--gold)}
+  .tag.out{background:#a2967d}
   .moonrow{display:flex;align-items:center;gap:12px;margin-top:10px;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 14px}
   .moonrow b{display:block;font-size:14px;font-weight:600;color:var(--ink)}
   .moonrow span{display:block;font-size:12px;color:var(--ink2);margin-top:1px;font-family:var(--mono)}
@@ -151,7 +170,14 @@
 
   <section>
     <h2><span data-lang="es">La cinta del día</span><span data-lang="en">The day ribbon</span></h2>
+    <p class="note" data-lang="es">Pasa el ratón (o el dedo) por la cinta para leer la posición del Sol y de la Luna en ese instante; el campo de hora fija un momento concreto.</p>
+    <p class="note" data-lang="en">Move the pointer (or your finger) along the ribbon to read the Sun and Moon position at that instant; the time field pins one exact moment.</p>
     <div id="ribbon"></div>
+    <div class="rowline">
+      <div><label for="ln-time"><span data-lang="es">Hora</span><span data-lang="en">Time</span></label><input id="ln-time" type="time" class="narrow"></div>
+      <button id="ln-now" class="ghost" type="button"><span data-lang="es">Ahora</span><span data-lang="en">Now</span></button>
+    </div>
+    <div class="readout" id="ln-read"></div>
     <div class="legend" id="riblegend"></div>
   </section>
 
@@ -162,21 +188,45 @@
   </section>
 
   <section>
+    <h2><span data-lang="es">El veredicto del día</span><span data-lang="en">The verdict for the day</span></h2>
+    <div class="verdict" id="ln-verdict"></div>
+  </section>
+
+  <section>
     <h2><span data-lang="es">Los próximos 14 días</span><span data-lang="en">The next 14 days</span></h2>
     <p class="note" data-lang="es">Para elegir el día de la semana que viene: dorada de mañana y de tarde con su duración, salida y puesta de la Luna con acimut, fase e iluminación.</p>
     <p class="note" data-lang="en">To pick the right day next week: morning and evening golden hour with duration, moonrise and moonset with azimuth, phase and illumination.</p>
     <div class="wrap"><table id="t14"></table></div>
+    <div class="note" data-lang="es">
+      <p style="margin:8px 0 0"><span style="background:#f7ecd0;padding:1px 6px;border-radius:3px">Fondo dorado</span>: la Luna sale con el Sol poniéndose (± 45 min) e iluminación ≥ 90 %, o se pone con el Sol saliendo — la tarde o el amanecer de «Luna llena sobre el horizonte».</p>
+      <p style="margin:4px 0 0"><span style="background:#e8ecf5;padding:1px 6px;border-radius:3px">Fondo azulado</span>: al menos 4 h de noche astronómica sin Luna sobre el horizonte — la noche para vía láctea y paisaje nocturno.</p>
+    </div>
+    <div class="note" data-lang="en">
+      <p style="margin:8px 0 0"><span style="background:#f7ecd0;padding:1px 6px;border-radius:3px">Golden row</span>: the Moon rises within 45 min of sunset with illumination ≥ 90 %, or sets within 45 min of sunrise — the “full Moon over the horizon” evening or dawn.</p>
+      <p style="margin:4px 0 0"><span style="background:#e8ecf5;padding:1px 6px;border-radius:3px">Blue row</span>: at least 4 h of astronomical night with no Moon above the horizon — the night for the Milky Way and nightscapes.</p>
+    </div>
   </section>
 
   <section>
     <h2><span data-lang="es">Buscador de alineaciones</span><span data-lang="en">Alignment finder</span></h2>
     <p class="note" data-lang="es">El cálculo de «la Luna llena detrás del castillo»: indica el acimut de tu encuadre — hacia dónde mira la cámara; por ejemplo, «el faro está al 245°» — y una tolerancia. La herramienta barre los 60 días siguientes a la fecha elegida y lista los momentos en que la Luna (o el Sol, en la segunda pestaña) cruza ese acimut con altura entre 0° y 15°: saliendo o poniéndose, que es cuando se fotografía grande contra el horizonte.</p>
     <p class="note" data-lang="en">The computation behind “the full Moon behind the castle”: give the azimuth of your frame — where the camera points; for instance, “the lighthouse sits at 245°” — and a tolerance. The tool sweeps the 60 days after the chosen date and lists the moments when the Moon (or the Sun, on the second tab) crosses that azimuth at an altitude between 0° and 15°: rising or setting, which is when it photographs large against the horizon.</p>
+    <p class="note" data-lang="es"><b>La geometría del objeto y del objetivo.</b> Si das el alto del objeto y tu distancia a él, la ficha calcula a qué altura angular queda su cúspide — <code>atan(h/d)</code>, medida desde tu punto de disparo, no desde el nivel del mar — y compara esa altura con la de la Luna en cada cruce. Con la cámara y la focal calcula el campo horizontal, <code>2·atan(18/f)</code>, el diámetro aparente de la Luna ese día y cuántos píxeles ocupa en tu sensor; y con la tolerancia «± medio campo» ata el acimut a lo que de verdad entra en el encuadre.</p>
+    <p class="note" data-lang="en"><b>The geometry of the object and of the lens.</b> Give the height of the object and your distance to it and the page works out the angular altitude of its top — <code>atan(h/d)</code>, measured from your shooting spot, not from sea level — and compares it with the Moon&#8217;s altitude at each crossing. From the camera and focal length it derives the horizontal field, <code>2·atan(18/f)</code>, the apparent diameter of the Moon that day and how many pixels it covers on your sensor; and the “± half the frame” tolerance ties the azimuth to what actually fits in the shot.</p>
     <div class="panel controls" style="margin-top:12px">
       <div><label for="alaz"><span data-lang="es">Acimut del encuadre</span><span data-lang="en">Frame azimuth</span></label><input id="alaz" type="number" min="0" max="360" step="1" value="245" data-ph-es="p. ej. 245" data-ph-en="e.g. 245"></div>
       <div><label for="altol"><span data-lang="es">Tolerancia</span><span data-lang="en">Tolerance</span></label>
-        <select id="altol"><option value="2">±2°</option><option value="3">±3°</option><option value="5" selected>±5°</option><option value="8">±8°</option><option value="10">±10°</option></select></div>
+        <select id="altol"><option value="2">±2°</option><option value="3">±3°</option><option value="5" selected>±5°</option><option value="8">±8°</option><option value="10">±10°</option>
+          <option value="fov" data-es="± medio campo" data-en="± half the frame">± medio campo</option>
+          <option value="fov4" data-es="± centrada (¼ campo)" data-en="± centred (¼ frame)">± centrada (¼ campo)</option></select></div>
+      <div><label for="ln-cam"><span data-lang="es">Cámara</span><span data-lang="en">Camera</span></label>
+        <select id="ln-cam"><option value="m11">M11 · 9528×6328</option><option value="q3">Q3 43 · 9520×6328 · 43 mm</option><option value="sl3s">SL3-S · 6000×4000</option></select></div>
+      <div><label for="ln-focal"><span data-lang="es">Focal (mm)</span><span data-lang="en">Focal length (mm)</span></label><input id="ln-focal" type="number" min="8" max="1200" step="1" value="180" class="narrow"></div>
+      <div><label for="ln-oh"><span data-lang="es">Alto objeto (m)</span><span data-lang="en">Object height (m)</span></label><input id="ln-oh" type="number" min="0" max="9000" step="1" value="" class="narrow" data-ph-es="p. ej. 34" data-ph-en="e.g. 34"></div>
+      <div><label for="ln-od"><span data-lang="es">Distancia (m)</span><span data-lang="en">Distance (m)</span></label><input id="ln-od" type="number" min="1" max="200000" step="1" value="" class="narrow" data-ph-es="p. ej. 900" data-ph-en="e.g. 900"></div>
       <button id="albtn" type="button"><span data-lang="es">Buscar</span><span data-lang="en">Search</span></button>
+      <button id="ln-copy" class="ghost" type="button"><span data-lang="es">Copiar enlace</span><span data-lang="en">Copy link</span></button>
+      <div class="hint" id="ln-geo"></div>
       <div class="status" id="alstat"></div>
     </div>
     <div class="tabs" role="tablist">
@@ -190,8 +240,12 @@
     <h2><span data-lang="es">Cómo se calcula</span><span data-lang="en">How it is computed</span></h2>
     <div class="note" data-lang="es">
       <ul>
-        <li><b>Todo en local.</b> La astronomía se calcula en este navegador con fórmulas de baja precisión (las del clásico <code>suncalc</code>, las mismas que usa la herramienta de astrofotografía del sitio): error típico &lt; 0,5° en posición y de pocos minutos en los eventos. Suficiente para planificar; no sustituye a unas efemérides de precisión.</li>
+        <li><b>Todo en local.</b> La astronomía se calcula en este navegador. Para el <b>Sol</b>, las fórmulas de baja precisión del clásico <code>suncalc</code>: error típico &lt; 0,5° en posición y de pocos minutos en los eventos. Para la <b>Luna</b>, una serie truncada de Meeus con los doce términos principales de longitud — ecuación del centro (6,289°), <i>evección</i> (1,274°), <i>variación</i> (0,658°), ecuación anual (0,186°)… — seis de latitud y ocho de distancia: error típico de 0,2° a 0,3°, frente a 1,5°–2° del modelo de un solo término que usa la herramienta de astrofotografía del sitio (esa conserva su copia antigua). Suficiente para planificar; no sustituye a unas efemérides de precisión.</li>
+        <li><b>Paralaje de la Luna.</b> La Luna se ve desde la superficie, no desde el centro de la Tierra: en el horizonte aparece unos 0,95° más baja de lo que dice el cálculo geocéntrico. Las alturas lunares que deciden un encuadre — la lectura de la cinta, el veredicto y el buscador de alineaciones — llevan ya esa corrección topocéntrica, <code>alt − (6378/d)·cos alt</code>. Las salidas y puestas mantienen el umbral geocéntrico +0,125°, que es la convención que ya incorpora el paralaje.</li>
         <li><b>Convención de acimut:</b> norte 0°, este 90°, sur 180°, oeste 270°.</li>
+        <li><b>Encuadre y tamaño de la Luna.</b> Campo horizontal <code>2·atan(18/f)</code> para el formato 36×24 de las tres cámaras del sitio (M11 9528×6328 px, Q3 43 9520×6328 px con 43 mm fijos, SL3-S 6000×4000 px). Diámetro aparente de la Luna <code>2·asin(1737,4/d)</code>, entre 29,4′ en apogeo y 33,5′ en perigeo: con 400 mm en la M11 la Luna llena mide unos 570 px de ancho, el 6 % del fotograma.</li>
+        <li><b>Exposición orientativa (EV a ISO 100).</b> Sol por encima de 30°, EV 15 — la regla del 16 del <a href="guia-simulador.html">simulador de exposición</a>; entre 6° y 30°, EV 14; hora dorada, EV 12–13; hora azul, EV 8–10; crepúsculo náutico, EV 3–6. Con luz de Luna, <code>EV ≈ −3 + log₂(ilum) − 0,3·(1/sen alt − 1)</code>: orden de magnitud para el primer disparo, sin nubes ni albedo del terreno.</li>
+        <li><b>Noche oscura y centro galáctico.</b> «Noche oscura» son las horas de noche astronómica (Sol &lt; −18°) con la Luna bajo el horizonte. El núcleo de la Vía Láctea se sitúa en AR 17 h 45,7 m, Dec −29,0°: la ficha da el tramo en que supera 15° de altura dentro de esa noche oscura.</li>
         <li><b>Refracción en salidas y puestas:</b> el Sol sale y se pone cuando su centro cruza la altura geométrica −0,833° (refracción estándar en el horizonte 0,567° más semidiámetro 0,267°); la Luna, cuando cruza +0,125° (su paralaje, ≈ 0,95°, compensa de sobra refracción y semidiámetro). Las demás alturas de la página son geométricas, sin refracción.</li>
         <li><b>Horas doradas y azules por altura del Sol,</b> no por minutos fijos: dorada con el Sol entre −4° y +6°; azul entre −6° y −4°. Por eso su duración cambia con la latitud y la estación.</li>
         <li><b>Eventos por bisección</b> sobre la función continua de altura o de acimut: un muestreo de 2 a 4 minutos solo acota cada cruce y la bisección afina el instante por debajo del segundo. En el buscador de alineaciones, el punto de máxima aproximación se refina con pasos de 15 s.</li>
@@ -200,8 +254,12 @@
     </div>
     <div class="note" data-lang="en">
       <ul>
-        <li><b>Everything local.</b> The astronomy is computed in this browser with low-precision formulae (those of the classic <code>suncalc</code>, the same ones the site&#8217;s astrophotography tool uses): typical error &lt; 0.5° in position and a few minutes in event times. Enough for planning; not a substitute for precision ephemerides.</li>
+        <li><b>Everything local.</b> The astronomy is computed in this browser. For the <b>Sun</b>, the low-precision formulae of the classic <code>suncalc</code>: typical error &lt; 0.5° in position and a few minutes in event times. For the <b>Moon</b>, a truncated Meeus series with the twelve leading longitude terms — equation of the centre (6.289°), <i>evection</i> (1.274°), <i>variation</i> (0.658°), annual equation (0.186°)… — six in latitude and eight in distance: typical error 0.2° to 0.3°, against 1.5°–2° for the single-term model used by the site&#8217;s astrophotography tool (which keeps its older copy). Enough for planning; not a substitute for precision ephemerides.</li>
+        <li><b>Lunar parallax.</b> The Moon is seen from the surface, not from the centre of the Earth: near the horizon it sits about 0.95° lower than the geocentric figure. The lunar altitudes that decide a frame — the ribbon readout, the verdict and the alignment finder — already carry that topocentric correction, <code>alt − (6378/d)·cos alt</code>. Rise and set keep the geocentric +0.125° threshold, the convention that already folds parallax in.</li>
         <li><b>Azimuth convention:</b> north 0°, east 90°, south 180°, west 270°.</li>
+        <li><b>Frame and Moon size.</b> Horizontal field <code>2·atan(18/f)</code> for the 36×24 format of the three cameras on this site (M11 9528×6328 px, Q3 43 9520×6328 px with a fixed 43 mm, SL3-S 6000×4000 px). Apparent lunar diameter <code>2·asin(1737.4/d)</code>, between 29.4′ at apogee and 33.5′ at perigee: with 400 mm on the M11 the full Moon is about 570 px wide, 6 % of the frame.</li>
+        <li><b>Indicative exposure (EV at ISO 100).</b> Sun above 30°, EV 15 — the sunny 16 rule of the <a href="guia-simulador.html">exposure simulator</a>; between 6° and 30°, EV 14; golden hour, EV 12–13; blue hour, EV 8–10; nautical twilight, EV 3–6. Under moonlight, <code>EV ≈ −3 + log₂(illum) − 0.3·(1/sin alt − 1)</code>: an order of magnitude for the first frame, with no clouds and no ground albedo.</li>
+        <li><b>Dark night and galactic centre.</b> “Dark night” means the hours of astronomical night (Sun &lt; −18°) with the Moon below the horizon. The Milky Way core sits at RA 17 h 45.7 m, Dec −29.0°: the page gives the stretch in which it climbs above 15° inside that dark night.</li>
         <li><b>Refraction at rise and set:</b> the Sun rises and sets when its centre crosses geometric altitude −0.833° (standard horizon refraction 0.567° plus semidiameter 0.267°); the Moon, when it crosses +0.125° (its parallax, ≈ 0.95°, more than offsets refraction and semidiameter). All other altitudes on the page are geometric, without refraction.</li>
         <li><b>Golden and blue hours by solar altitude,</b> not by fixed minutes: golden with the Sun between −4° and +6°; blue between −6° and −4°. That is why their duration changes with latitude and season.</li>
         <li><b>Events by bisection</b> over the continuous altitude or azimuth function: a 2-to-4-minute sweep only brackets each crossing and bisection then refines the instant to below one second. In the alignment finder, the point of closest approach is refined with 15 s steps.</li>
@@ -272,16 +330,50 @@
       moon_allup:"no se pone",moon_alldown:"no sale",
       cont:"sin corte: el Sol no supera +6°",
       illum:"iluminación",dist:"distancia",
-      th14:["Día","Dorada mañana","Dorada tarde","Luna ↑","Luna ↓","Fase","Ilum."],
-      thalm:["Fecha","Hora","Altura","Acimut","Movimiento","Fase","Ilum.","Luz"],
-      thals:["Fecha","Hora","Altura","Acimut","Evento","Luz"],
+      th14:["Día","Dorada mañana","Dorada tarde","Sol ↓","Azul tarde","Luna ↑","Luna ↓","Luna en la azul","Noche oscura","Núcleo > 15°","Fase"],
+      thalm:["Fecha","Hora","Altura","Acimut","Δ acimut","Δ altura","Ø Luna ′ / px","Movimiento","Fase","Luz","Veredicto"],
+      thals:["Fecha","Hora","Altura","Acimut","Δ acimut","Δ altura","Ø Sol ′ / px","Evento","Luz","Veredicto"],
       rising:"saliendo",setting:"poniéndose",ev_rise:"amanecer",ev_set:"atardecer",
       lday:"día",ltwi:"crepúsculo",lnight:"noche",
       al_none:"Sin cruces en 60 días con esa tolerancia: amplíala o revisa el acimut.",
       al_bad:"Introduce un acimut entre 0° y 360°.",
       al_sum:"60 días desde {d} · Luna: {m} cruces · Sol: {s} cruces",
+      al_best:" · mejor: {d} {t} (Δaz {a}°{b})",
+      al_fit:"encaja",al_near:"roza",al_out:"fuera",
+      al_geo:"Campo horizontal {f}° con {c} a {mm} mm ({px} px de ancho) · tolerancia ±{t}° · {o}",
+      al_obj:"objeto de {h} m a {d} m → cúspide a {a}° de altura",
+      al_obj_no:"sin objeto: da alto y distancia para comparar alturas",
+      al_copied:"Enlace copiado al portapapeles.",
+      al_copyfail:"Copia el enlace a mano: ",
       geoerr:"Sin posición: ",now:"ahora",
       leg:["noche (Sol < −18°)","crep. astronómico (−18…−12°)","crep. náutico (−12…−6°)","hora azul (−6…−4°)","hora dorada (−4…+6°)","día pleno (> +6°)","trayectoria de la Luna (opacidad = iluminación)"],
+      leg_sun:"altura del Sol (misma escala 0–90°)",
+      bandnm:["noche","crep. astronómico","crep. náutico","hora azul","hora dorada","día pleno"],
+      rd_wait:"Pasa el ratón o el dedo por la cinta —o escribe una hora— para leer dónde están el Sol y la Luna.",
+      rd_sun:"Sol",rd_moon:"Luna",rd_below:"bajo el horizonte",rd_shadow:"sombra",rd_ev:"EV",
+      r_alt:"Sol a +{h}° · sombra {s}×",
+      v_gold_e:"<b>La mejor luz de hoy:</b> la dorada de tarde, {iv}, con el Sol entrando del acimut {a1} al {a2}. Exposición orientativa EV 12–13 a ISO 100; en la azul, EV 8–10.",
+      v_gold_m:"Por la mañana la dorada va de {iv}, del acimut {a1} al {a2}.",
+      v_gold_m_no:"Por la mañana no hay dorada en este lugar.",
+      v_gold_no:"<b>Hoy no hay dorada de tarde aquí:</b> el Sol no cruza la franja de −4° a +6° después del mediodía.",
+      v_gold_cont:"<b>Luz rasante sin corte:</b> el Sol no pasa de +6° en todo el día, así que la franja dorada es continua, {iv}.",
+      v_noon:"Mediodía solar a las {t} con el Sol a {alt}: sombras de {sh} la altura del sujeto.",
+      v_noon_low:"Mediodía solar a las {t} con el Sol a {alt}: ni a esa hora hay sombra que valga.",
+      v_blue:"<b>Hora azul de tarde</b> {iv}: {m}",
+      v_blue_no:"<b>Hoy no hay hora azul de tarde</b> en este lugar.",
+      v_blue_moon:"la Luna estará a {alt} de altura por el {az}, {p} % iluminada.",
+      v_blue_moon_no:"la Luna estará bajo el horizonte.",
+      v_rule_full:"<span class=\"hl\">Luna llena saliendo al atardecer:</span> sale a las {mt} por el {maz} y el Sol se pone a las {st} — {d} min de diferencia con {p} % de iluminación. Es la tarde de la Luna grande contra el horizonte.",
+      v_rule_fullset:"<span class=\"hl\">Luna llena poniéndose al amanecer:</span> se pone a las {mt} por el {maz} mientras el Sol sale a las {st} — {d} min de diferencia.",
+      v_rule_low:"<span class=\"hl\">Luna baja en la hora azul:</span> a {alt} sobre el horizonte {az}, con el cielo todavía con color.",
+      v_rule_none:"Sin coincidencias notables entre la Luna y el crepúsculo: hoy la Luna ni sale con el Sol poniéndose ni queda baja durante la azul.",
+      v_night:"<b>Noche oscura:</b> {h} de noche astronómica sin Luna dentro de la ventana de {a} a {b}. Paisaje nocturno con EV ≈ {ev} a ISO 100.",
+      v_night_moonlit:"<b>Noche con Luna:</b> la noche astronómica va de {a} a {b} y la Luna ({p} % iluminada) la ocupa casi entera: solo {h} sin ella.",
+      v_night_full:"<b>Noche con Luna:</b> la noche astronómica va de {a} a {b} y la Luna ({p} % iluminada) está sobre el horizonte durante toda ella.",
+      v_night_no:"<b>No hay noche astronómica hoy aquí:</b> el Sol no baja de −18°.",
+      v_gc:"El núcleo de la Vía Láctea pasa de 15° de altura de {a} a {b} por el {az}; {h} coinciden con la noche oscura.",
+      v_gc_no:"El núcleo de la Vía Láctea no llega a 15° de altura esta noche.",
+      hh:"h",
       thchk:["Comprobación","Calculado","Esperado","Estado"],
       chk1:"Dorada de tarde a 43,36° N: 21 jun frente a 21 dic 2026",
       chk1e:"≈ 65 y ≈ 67 min: casi iguales a esta latitud",
@@ -293,6 +385,8 @@
       chk4e:"0 % — Luna nueva: eclipse solar total ese instante",
       chk5:"Luna del 20 ago 2027 (efemérides: llena el 17 ago)",
       chk5e:"gibosa menguante, ≈ 90 %",
+      chk6:"Diámetro aparente de la Luna en 2026: apogeo y perigeo",
+      chk6e:"≈ 29,4′ y ≈ 33,5′ (406 000 y 357 000 km)",
       okv:"✓ correcto",kov:"✗ revisar"
     },
     en:{
@@ -309,16 +403,50 @@
       moon_allup:"does not set",moon_alldown:"does not rise",
       cont:"uninterrupted: the Sun never exceeds +6°",
       illum:"illumination",dist:"distance",
-      th14:["Day","Morning golden","Evening golden","Moon ↑","Moon ↓","Phase","Illum."],
-      thalm:["Date","Time","Altitude","Azimuth","Motion","Phase","Illum.","Light"],
-      thals:["Date","Time","Altitude","Azimuth","Event","Light"],
+      th14:["Day","Morning golden","Evening golden","Sun ↓","Evening blue","Moon ↑","Moon ↓","Moon in the blue","Dark night","Core > 15°","Phase"],
+      thalm:["Date","Time","Altitude","Azimuth","Δ azimuth","Δ altitude","Moon Ø ′ / px","Motion","Phase","Light","Verdict"],
+      thals:["Date","Time","Altitude","Azimuth","Δ azimuth","Δ altitude","Sun Ø ′ / px","Event","Light","Verdict"],
       rising:"rising",setting:"setting",ev_rise:"sunrise",ev_set:"sunset",
       lday:"day",ltwi:"twilight",lnight:"night",
       al_none:"No crossings in 60 days at that tolerance: widen it or check the azimuth.",
       al_bad:"Enter an azimuth between 0° and 360°.",
       al_sum:"60 days from {d} · Moon: {m} crossings · Sun: {s} crossings",
+      al_best:" · best: {d} {t} (Δaz {a}°{b})",
+      al_fit:"fits",al_near:"grazes",al_out:"misses",
+      al_geo:"Horizontal field {f}° with {c} at {mm} mm ({px} px wide) · tolerance ±{t}° · {o}",
+      al_obj:"object {h} m tall at {d} m → top at {a}° of altitude",
+      al_obj_no:"no object: give height and distance to compare altitudes",
+      al_copied:"Link copied to the clipboard.",
+      al_copyfail:"Copy the link by hand: ",
       geoerr:"No position: ",now:"now",
       leg:["night (Sun < −18°)","astronomical twil. (−18…−12°)","nautical twil. (−12…−6°)","blue hour (−6…−4°)","golden hour (−4…+6°)","full daylight (> +6°)","Moon path (opacity = illumination)"],
+      leg_sun:"Sun altitude (same 0–90° scale)",
+      bandnm:["night","astronomical twil.","nautical twil.","blue hour","golden hour","full daylight"],
+      rd_wait:"Move the pointer or your finger along the ribbon — or type a time — to read where the Sun and the Moon are.",
+      rd_sun:"Sun",rd_moon:"Moon",rd_below:"below the horizon",rd_shadow:"shadow",rd_ev:"EV",
+      r_alt:"Sun at +{h}° · shadow {s}×",
+      v_gold_e:"<b>The best light today:</b> the evening golden hour, {iv}, with the Sun sweeping from azimuth {a1} to {a2}. Indicative exposure EV 12–13 at ISO 100; in the blue hour, EV 8–10.",
+      v_gold_m:"In the morning the golden hour runs {iv}, from azimuth {a1} to {a2}.",
+      v_gold_m_no:"There is no morning golden hour here.",
+      v_gold_no:"<b>No evening golden hour here today:</b> the Sun does not cross the −4° to +6° band after noon.",
+      v_gold_cont:"<b>Grazing light all day:</b> the Sun never exceeds +6°, so the golden band is uninterrupted, {iv}.",
+      v_noon:"Solar noon at {t} with the Sun at {alt}: shadows {sh} the height of the subject.",
+      v_noon_low:"Solar noon at {t} with the Sun at {alt}: not even then is there a shadow to speak of.",
+      v_blue:"<b>Evening blue hour</b> {iv}: {m}",
+      v_blue_no:"<b>No evening blue hour here today.</b>",
+      v_blue_moon:"the Moon will sit {alt} high towards {az}, {p} % lit.",
+      v_blue_moon_no:"the Moon will be below the horizon.",
+      v_rule_full:"<span class=\"hl\">Full Moon rising at sunset:</span> it rises at {mt} towards {maz} and the Sun sets at {st} — {d} min apart with {p} % illumination. This is the evening of the big Moon against the horizon.",
+      v_rule_fullset:"<span class=\"hl\">Full Moon setting at sunrise:</span> it sets at {mt} towards {maz} while the Sun rises at {st} — {d} min apart.",
+      v_rule_low:"<span class=\"hl\">Low Moon in the blue hour:</span> {alt} above the {az} horizon, with colour still in the sky.",
+      v_rule_none:"No notable Moon-and-twilight coincidence: today the Moon neither rises with the setting Sun nor stays low through the blue hour.",
+      v_night:"<b>Dark night:</b> {h} of astronomical night with no Moon inside the window from {a} to {b}. Nightscapes at about EV {ev} at ISO 100.",
+      v_night_moonlit:"<b>Moonlit night:</b> astronomical night runs from {a} to {b} and the Moon ({p} % lit) fills nearly all of it: only {h} without it.",
+      v_night_full:"<b>Moonlit night:</b> astronomical night runs from {a} to {b} and the Moon ({p} % lit) stays above the horizon throughout.",
+      v_night_no:"<b>No astronomical night here today:</b> the Sun never drops below −18°.",
+      v_gc:"The Milky Way core climbs above 15° from {a} to {b} towards {az}; {h} of that falls inside the dark night.",
+      v_gc_no:"The Milky Way core does not reach 15° of altitude tonight.",
+      hh:"h",
       thchk:["Check","Computed","Expected","Status"],
       chk1:"Evening golden hour at 43.36° N: 21 Jun vs 21 Dec 2026",
       chk1e:"≈ 65 and ≈ 67 min: nearly equal at this latitude",
@@ -330,6 +458,8 @@
       chk4e:"0 % — new moon: total solar eclipse at that instant",
       chk5:"Moon on 20 Aug 2027 (ephemerides: full on 17 Aug)",
       chk5e:"waning gibbous, ≈ 90 %",
+      chk6:"Apparent lunar diameter in 2026: apogee and perigee",
+      chk6e:"≈ 29.4′ and ≈ 33.5′ (406,000 and 357,000 km)",
       okv:"✓ correct",kov:"✗ check"
     }
   };
@@ -348,21 +478,60 @@
         L=M+RAD*(1.9148*Math.sin(M)+0.02*Math.sin(2*M)+0.0003*Math.sin(3*M))+RAD*102.9372+Math.PI;
     return {dec:decl(L,0),ra:rasc(L,0)};
   }
+  /* Luna: serie truncada de Meeus (Astronomical Algorithms, tablas 47.A y 47.B,
+     términos principales). Mejora la versión de un solo término que trae
+     astro.html — que conserva su copia — con la evección (1,27°), la variación
+     (0,66°), la ecuación anual (0,19°) y la serie de distancia: entre 2026 y
+     2027 la diferencia de longitud con el modelo antiguo llega a 2,5°.
+     Lp longitud media · Ma anomalía de la Luna · Ms anomalía del Sol ·
+     D elongación media · F argumento de latitud. */
   function moonCoords(d){
-    var L=RAD*(218.316+13.176396*d),M=RAD*(134.963+13.064993*d),F=RAD*(93.272+13.229350*d),
-        l=L+RAD*6.289*Math.sin(M),b=RAD*5.128*Math.sin(F),dt=385001-20905*Math.cos(M);
+    var Lp=RAD*(218.316+13.176396*d), Ma=RAD*(134.963+13.064993*d),
+        F =RAD*(93.272+13.229350*d),  D =RAD*(297.850+12.190749*d),
+        Ms=RAD*(357.529+0.985600*d), sn=Math.sin, cs=Math.cos;
+    var l=Lp+RAD*( 6.2888*sn(Ma) + 1.2740*sn(2*D-Ma) + 0.6583*sn(2*D)
+                 + 0.2136*sn(2*Ma) - 0.1851*sn(Ms)   - 0.1143*sn(2*F)
+                 + 0.0588*sn(2*D-2*Ma) + 0.0571*sn(2*D-Ms-Ma) + 0.0533*sn(2*D+Ma)
+                 + 0.0458*sn(2*D-Ms)   - 0.0409*sn(Ms-Ma)     - 0.0347*sn(D)
+                 - 0.0304*sn(Ms+Ma) );
+    var b=RAD*( 5.1281*sn(F) + 0.2806*sn(Ma+F) - 0.2777*sn(Ma-F) + 0.1732*sn(2*D-F)
+              + 0.0554*sn(2*D-Ma+F) - 0.0463*sn(2*D-Ma-F) + 0.0326*sn(2*D+F)
+              + 0.0172*sn(2*Ma+F) );
+    var dt=385000.56 - 20905.355*cs(Ma) - 3699.111*cs(2*D-Ma) - 2955.968*cs(2*D)
+          - 569.925*cs(2*Ma) + 48.888*cs(Ms) - 3.149*cs(2*F) + 246.158*cs(2*D-2*Ma)
+          - 204.586*cs(2*D-Ms) - 170.733*cs(2*D+Ma) - 152.138*cs(2*D-Ms-Ma)
+          - 129.620*cs(Ms-Ma) + 108.743*cs(D) + 104.755*cs(Ms+Ma);
     return {ra:rasc(l,b),dec:decl(l,b),dist:dt};
   }
+  /* Distancia Tierra–Sol en km (para el diámetro aparente del disco solar). */
+  function sunDist(d){
+    var M=RAD*(357.5291+0.98560028*d);
+    return 149597870*(1.00014-0.01671*Math.cos(M)-0.00014*Math.cos(2*M));
+  }
+  /* Núcleo de la Vía Láctea: Sgr A*, AR 17 h 45,7 m, Dec −29,01°. */
+  function gcCoords(){ return {ra:RAD*266.417,dec:RAD*-29.008}; }
   /* Altura y ACIMUT (añadido sobre la base de astro.html).
      Convención: norte 0°, este 90°, sur 180°, oeste 270°. */
   function bodyPos(ms,lat,lon,coordsFn){
     var d=toDays(ms),lw=RAD*-lon,phi=RAD*lat,c=coordsFn(d),H=sidereal(d,lw)-c.ra;
     var alt=Math.asin(Math.sin(phi)*Math.sin(c.dec)+Math.cos(phi)*Math.cos(c.dec)*Math.cos(H))/RAD;
     var az=((Math.atan2(Math.sin(H),Math.cos(H)*Math.sin(phi)-Math.tan(c.dec)*Math.cos(phi))/RAD)+180+360)%360;
-    return {alt:alt,az:az};
+    return {alt:alt,az:az,dist:c.dist};
   }
   function sunPos(ms,lat,lon){ return bodyPos(ms,lat,lon,sunCoords); }
   function moonPos(ms,lat,lon){ return bodyPos(ms,lat,lon,moonCoords); }
+  function gcPos(ms,lat,lon){ return bodyPos(ms,lat,lon,gcCoords); }
+  /* Altura topocéntrica de la Luna: se ve desde la superficie, no desde el
+     centro de la Tierra, y en el horizonte queda ≈ 0,95° más baja.
+     Las salidas y puestas siguen usando el umbral geocéntrico +0,125°, que es
+     la convención que ya lleva el paralaje incorporado. */
+  function moonPosTopo(ms,lat,lon){
+    var p=moonPos(ms,lat,lon);
+    return {alt:p.alt-(6378.14/p.dist)*Math.cos(p.alt*RAD)/RAD,az:p.az,dist:p.dist};
+  }
+  /* Diámetros aparentes en minutos de arco. */
+  function moonDiamMin(dist){ return 2*Math.asin(1737.4/dist)/RAD*60; }
+  function sunDiamMin(ms){ return 2*Math.asin(696000/sunDist(toDays(ms)))/RAD*60; }
   /* Fase e iluminación (reutilizado de astro.html): phase 0 nueva, 0.25 cuarto
      creciente, 0.5 llena, 0.75 menguante. */
   function moonIllum(ms){
@@ -441,32 +610,75 @@
      aproximación al acimut pedido (afinado a 15 s); se acepta si queda dentro
      de la tolerancia. */
   function alignScan(posFn,ms0,days,azT,tol){
-    var out=[], st=120000, end=ms0+days*DAYMS, seg=null, ms, p, ad, m2, q, bd, bm, q2;
-    function dif(a){ return Math.abs(((a-azT+540)%360)-180); }
+    var out=[], st=120000, end=ms0+days*DAYMS, seg=null, ms, p, sd, ad, a, b, m, i, m2, q, bd, bm;
+    /* Diferencia con signo respecto al acimut buscado, −180…+180. */
+    function sdif(az){ return ((az-azT+540)%360)-180; }
+    function push(mm){
+      var q1=posFn(mm), q2=posFn(mm+60000);
+      out.push({ms:mm,alt:q1.alt,az:q1.az,daz:Math.abs(sdif(q1.az)),dist:q1.dist,rising:q2.alt>q1.alt});
+    }
+    /* Al cerrar un tramo sin cruce real: punto de máxima aproximación, afinado
+       a 15 s, si entra en la tolerancia. */
     function flush(){
-      if(seg&&seg.best<=tol+2){
+      if(seg&&!seg.hit&&seg.best<=tol+2){
         bd=seg.best; bm=seg.ms;
         for(m2=seg.ms-st; m2<=seg.ms+st; m2+=15000){
           q=posFn(m2);
-          if(q.alt>=0&&q.alt<=15){ ad=dif(q.az); if(ad<bd){bd=ad;bm=m2;} }
+          if(q.alt>=0&&q.alt<=15){ ad=Math.abs(sdif(q.az)); if(ad<bd){ bd=ad; bm=m2; } }
         }
-        if(bd<=tol){
-          q=posFn(bm); q2=posFn(bm+60000);
-          out.push({ms:bm,alt:q.alt,az:q.az,rising:q2.alt>q.alt});
-        }
+        if(bd<=tol) push(bm);
       }
       seg=null;
     }
     for(ms=ms0; ms<=end; ms+=st){
       p=posFn(ms);
       if(p.alt>=0&&p.alt<=15){
-        ad=dif(p.az);
-        if(!seg) seg={best:ad,ms:ms};
-        else if(ad<seg.best){ seg.best=ad; seg.ms=ms; }
+        sd=sdif(p.az);
+        if(!seg) seg={best:Math.abs(sd),ms:ms,prev:sd,pms:ms,hit:false};
+        else{
+          /* Cada cambio de signo es un cruce del acimut y se afina por
+             bisección. Un tramo continuo de 0–15° puede durar días en latitudes
+             altas y contener varios cruces: antes se guardaba solo el mejor y
+             salida y puesta se perdían en uno solo. El salto de ±180° (el astro
+             pasa por el acimut opuesto) no cuenta como cruce. */
+          if((seg.prev<0)!==(sd<0)&&Math.abs(seg.prev-sd)<180){
+            a=seg.pms; b=ms;
+            for(i=0;i<24;i++){ m=(a+b)/2; if((sdif(posFn(a).az)<0)!==(sdif(posFn(m).az)<0)) b=m; else a=m; }
+            push((a+b)/2); seg.hit=true;
+          }
+          if(Math.abs(sd)<seg.best){ seg.best=Math.abs(sd); seg.ms=ms; }
+          seg.prev=sd; seg.pms=ms;
+        }
       } else flush();
     }
     flush();
     return out;
+  }
+  /* ---------- noche oscura y centro galáctico ----------
+     Ventana de noche astronómica que empieza esta tarde, las horas de esa
+     ventana con la Luna bajo el horizonte y el tramo con el núcleo sobre 15°. */
+  function nightWindow(ms0,lat,lon){
+    var sf=function(m){ return sunPos(m,lat,lon); };
+    var a=ms0+DAYMS/2, b=ms0+1.5*DAYMS, ev=crossings(sf,a,b,-18,4), i, st=null, en=null;
+    for(i=0;i<ev.length;i++){ if(st===null){ if(!ev[i].rising) st=ev[i].ms; } else if(ev[i].rising){ en=ev[i].ms; break; } }
+    if(st===null||en===null){
+      if(sf(ms0+DAYMS).alt<-18) return {start:a,end:b,polar:true,dark:0,gc:null};
+      return null;
+    }
+    var res={start:st,end:en,polar:false}, ms, dark=0, gcOn=null, gcOff=null, gcAz=[], step=120000, gp;
+    for(ms=st; ms<=en; ms+=step){
+      if(moonPos(ms,lat,lon).alt<0.125) dark+=step;
+      gp=gcPos(ms,lat,lon);
+      if(gp.alt>15){ if(gcOn===null) gcOn=ms; gcOff=ms; gcAz.push(gp.az); }
+    }
+    res.dark=dark/3600000;
+    res.gc=(gcOn!==null&&gcOff>gcOn)?{start:gcOn,end:gcOff,az0:Math.min.apply(null,gcAz),az1:Math.max.apply(null,gcAz)}:null;
+    if(res.gc){
+      var gdark=0;
+      for(ms=res.gc.start; ms<=res.gc.end; ms+=step) if(moonPos(ms,lat,lon).alt<0.125) gdark+=step;
+      res.gc.dark=gdark/3600000;
+    }
+    return res;
   }
 
   /* ---------- formato ---------- */
@@ -479,9 +691,113 @@
   function durMin(iv){ return Math.round((iv[1]-iv[0])/60000); }
   function spanTxt(a,b){ return fmtHM(a)+"–"+fmtHM(b); }
   function ivTxt(iv){ return spanTxt(iv[0],iv[1])+" · "+durMin(iv)+" "+LBL("minu"); }
+  /* Plantillas del diccionario: TPL("v_gold_e",{iv:…,a1:…}). */
+  function TPL(k,vals){
+    var s=LBL(k), j;
+    for(j in vals) if(Object.prototype.hasOwnProperty.call(vals,j)) s=s.split("{"+j+"}").join(vals[j]);
+    return s;
+  }
+  function hoursTxt(hrs){
+    var t=Math.round(hrs*60), hh=Math.floor(t/60), mm=t%60;
+    return hh?(hh+" "+LBL("hh")+(mm?" "+mm+" "+LBL("minu"):"")):(mm+" "+LBL("minu"));
+  }
+  function altTxt(a){ return fmtN(a,1)+"°"; }
+  function shadowOf(a){ return a>0.5?fmtN(1/Math.tan(a*RAD),1)+"×":"—"; }
+  /* Exposición orientativa a ISO 100. Con el Sol, la escala clásica que usa
+     guia-simulador (regla del 16 = EV 15); con luz de Luna, un orden de
+     magnitud a partir de la iluminación y de la altura. */
+  function evOf(sunAlt,moonAlt,illum){
+    if(sunAlt>30) return "15";
+    if(sunAlt>6)  return "14";
+    if(sunAlt>-4) return "12–13";
+    if(sunAlt>-6) return "8–10";
+    if(sunAlt>-12) return "3–6";
+    if(moonAlt>3&&illum>0.05){
+      var e=-3+Math.log(illum)/Math.LN2-0.3*(1/Math.sin(Math.max(moonAlt,3)*RAD)-1);
+      return fmtN(Math.max(-9,Math.min(-1,e)),1);
+    }
+    return "−11";
+  }
+
+  /* ---------- cámara y encuadre ---------- */
+  var CAMS={
+    m11 :{n:"M11",   w:9528,h:6328,f:null},
+    q3  :{n:"Q3 43", w:9520,h:6328,f:43},
+    sl3s:{n:"SL3-S", w:6000,h:4000,f:null}
+  };
+  function camNow(){ return CAMS[$id("ln-cam").value]||CAMS.m11; }
+  function focalNow(){
+    var cam=camNow(), f;
+    if(cam.f) return cam.f;
+    f=parseFloat($id("ln-focal").value);
+    return (f>=8&&f<=1200)?f:180;
+  }
+  /* Formato 36×24: campo horizontal = 2·atan(18/f). */
+  function hfovNow(){ return 2*Math.atan(18/focalNow())/RAD; }
+  function objAltNow(){
+    var oh=parseFloat($id("ln-oh").value), od=parseFloat($id("ln-od").value);
+    return (oh>0&&od>0)?Math.atan(oh/od)/RAD:null;
+  }
+  function tolNow(){
+    var v=$id("altol").value, fov=hfovNow();
+    if(v==="fov")  return fov/2;
+    if(v==="fov4") return fov/4;
+    return parseFloat(v);
+  }
+  function syncCam(){
+    var cam=camNow();
+    $id("ln-focal").disabled=!!cam.f;
+    if(cam.f) $id("ln-focal").value=cam.f;
+  }
 
   /* ---------- estado ---------- */
   var STATE={lat:43.3623,lon:-8.4115,dstr:""}, DAY=null, FT=null, ALIGN=null, CHK=null, TABSEL="moon", READY=false;
+  var CURMS=null;              /* instante señalado en la cinta del día */
+  var SKEY="ln-state";         /* clave propia: no toca 'pn-lang' */
+  /* Sitio, encuadre y óptica se recuerdan aquí y viajan en la URL; la fecha
+     solo viaja en la URL, porque mañana el plan de ayer ya no sirve. */
+  function saveState(){
+    try{
+      localStorage.setItem(SKEY,JSON.stringify({
+        lat:STATE.lat, lon:STATE.lon, az:$id("alaz").value, tol:$id("altol").value,
+        cam:$id("ln-cam").value, focal:$id("ln-focal").value,
+        oh:$id("ln-oh").value, od:$id("ln-od").value
+      }));
+    }catch(e){}
+  }
+  function loadState(){
+    var qs=null, st=null, i, opts, v, n;
+    try{ qs=new URLSearchParams(location.search); }catch(e){}
+    try{ st=JSON.parse(localStorage.getItem(SKEY)||"null"); }catch(e){ st=null; }
+    function get(k){
+      var q=qs?qs.get(k):null;
+      if(q!==null&&q!=="") return q;
+      return (st&&st[k]!=null&&st[k]!=="")?String(st[k]):null;
+    }
+    function num(elId,k,lo,hi){
+      var raw=get(k);
+      if(raw===null) return;
+      n=parseFloat(raw);
+      if(isFinite(n)&&n>=lo&&n<=hi) $id(elId).value=raw;
+    }
+    num("lat","lat",-89.9,89.9); num("lon","lon",-180,180); num("alaz","az",0,360);
+    num("ln-focal","focal",8,1200); num("ln-oh","oh",0,9000); num("ln-od","od",1,200000);
+    v=get("tol");
+    if(v){ opts=$id("altol").options; for(i=0;i<opts.length;i++) if(opts[i].value===v) $id("altol").value=v; }
+    v=get("cam"); if(v&&CAMS[v]) $id("ln-cam").value=v;
+    v=qs?qs.get("date"):null;
+    if(v&&/^\d{4}-\d{2}-\d{2}$/.test(v)) $id("fecha").value=v;
+  }
+  function shareURL(){
+    var qs=new URLSearchParams(), lang=document.documentElement.lang;
+    qs.set("lat",STATE.lat.toFixed(4)); qs.set("lon",STATE.lon.toFixed(4));
+    qs.set("date",STATE.dstr); qs.set("az",$id("alaz").value); qs.set("tol",$id("altol").value);
+    qs.set("cam",$id("ln-cam").value); qs.set("focal",String(focalNow()));
+    if($id("ln-oh").value) qs.set("oh",$id("ln-oh").value);
+    if($id("ln-od").value) qs.set("od",$id("ln-od").value);
+    if(lang==="es"||lang==="en") qs.set("lang",lang);
+    return location.href.split("?")[0].split("#")[0]+"?"+qs.toString();
+  }
   function isoOf(dd){ return dd.getFullYear()+"-"+two(dd.getMonth()+1)+"-"+two(dd.getDate()); }
   function dayStart(dstr,plus){
     var p=dstr.split("-");
@@ -537,6 +853,14 @@
       else pen=false;
     }
     g+='<path d="'+pd+'" fill="none" stroke="#5b4794" stroke-width="2.5" stroke-linecap="round" opacity="'+(0.3+0.7*D.mi.illum).toFixed(2)+'"/>';
+    /* curva de altura del Sol, misma escala 0–90° que la Luna */
+    pd=""; pen=false;
+    for(ms=D.ms0; ms<=D.ms1; ms+=240000){
+      var sAlt=sunPos(ms,D.lat,D.lon).alt;
+      if(sAlt>0){ pd+=(pen?"L":"M")+Xof(ms).toFixed(1)+","+(yB-(yB-yT)*Math.min(sAlt,90)/90).toFixed(1)+" "; pen=true; }
+      else pen=false;
+    }
+    g+='<path d="'+pd+'" fill="none" stroke="#8a5e12" stroke-width="2" stroke-linecap="round" opacity="0.85"/>';
     /* marcas de salida y puesta */
     for(i=0;i<D.sunRS.length;i++){
       ev=D.sunRS[i]; xx=Math.min(Math.max(Xof(ev.ms),30),970);
@@ -560,11 +884,63 @@
       g+='<line x1="'+xx.toFixed(1)+'" x2="'+xx.toFixed(1)+'" y1="'+yB+'" y2="'+(yB+4)+'" stroke="#6f6350"/>'
         +'<text x="'+xx.toFixed(1)+'" y="'+(yB+18)+'" font-size="10" text-anchor="middle" fill="#6f6350" font-family="IBM Plex Mono">'+two(i)+"</text>";
     }
-    $id("ribbon").innerHTML='<svg viewBox="0 0 1000 190" role="img">'+g+"</svg>";
+    $id("ribbon").innerHTML='<svg viewBox="0 0 1000 190" role="img" style="touch-action:pan-y">'+g
+      +'<g id="ln-cursor"></g></svg>';
     var lg="", labels=LBL("leg");
     for(i=0;i<6;i++) lg+='<i style="background:'+BANDCOL[i]+'"></i>'+labels[i];
     lg+='<i style="background:#5b4794;height:3px;border:0"></i>'+labels[6];
+    lg+='<i style="background:#8a5e12;height:3px;border:0"></i>'+LBL("leg_sun");
     $id("riblegend").innerHTML=lg;
+    bindRibbon();
+    drawCursor();
+  }
+
+  /* ---------- lectura puntual sobre la cinta ---------- */
+  function ribbonX(ms){ return 8+984*(ms-DAY.ms0)/DAYMS; }
+  function bindRibbon(){
+    var svgEl=$id("ribbon").querySelector("svg");
+    if(!svgEl) return;
+    function msFrom(ev){
+      var r=svgEl.getBoundingClientRect();
+      if(!r.width) return DAY.ms0;
+      var t=((ev.clientX-r.left)/r.width*1000-8)/984;
+      return DAY.ms0+Math.max(0,Math.min(1,t))*DAYMS;
+    }
+    svgEl.addEventListener("pointermove",function(ev){ if(ev.pointerType!=="touch"||ev.buttons) setCursor(msFrom(ev)); });
+    svgEl.addEventListener("pointerdown",function(ev){ setCursor(msFrom(ev)); });
+  }
+  function setCursor(ms){
+    CURMS=Math.max(DAY.ms0,Math.min(DAY.ms1-1,ms));
+    var z=new Date(CURMS);
+    $id("ln-time").value=two(z.getHours())+":"+two(z.getMinutes());
+    drawCursor();
+  }
+  function readoutHTML(ms){
+    var sp=sunPos(ms,DAY.lat,DAY.lon), mp=moonPosTopo(ms,DAY.lat,DAY.lon), mi=moonIllum(ms);
+    var band=LBL("bandnm")[bandClass(sp.alt)];
+    var l1="<b>"+fmtHM(ms)+"</b> · "+band+" · "+LBL("rd_sun")+" alt "+altTxt(sp.alt)+" · az "+fmtAz(sp.az)
+      +(sp.alt>0.5?" · "+LBL("rd_shadow")+" "+shadowOf(sp.alt):"");
+    var l2=LBL("rd_moon")+" "+(mp.alt>-0.5
+        ? "alt "+altTxt(mp.alt)+" · az "+fmtAz(mp.az)
+        : LBL("rd_below"))
+      +" · "+Math.round(100*mi.illum)+" % · Ø "+fmtN(moonDiamMin(mp.dist),1)+"′"
+      +" · "+LBL("rd_ev")+" "+evOf(sp.alt,mp.alt,mi.illum);
+    return l1+"<br>"+l2;
+  }
+  function drawCursor(){
+    var gEl=document.getElementById("ln-cursor");
+    if(!gEl) return;
+    if(CURMS===null||CURMS<DAY.ms0||CURMS>=DAY.ms1){
+      gEl.innerHTML="";
+      $id("ln-read").innerHTML='<span class="k">'+LBL("rd_wait")+"</span>";
+      return;
+    }
+    var x=ribbonX(CURMS), sp=sunPos(CURMS,DAY.lat,DAY.lon), mp=moonPosTopo(CURMS,DAY.lat,DAY.lon);
+    var ys=160-120*Math.min(Math.max(sp.alt,0),90)/90, ym=160-120*Math.min(Math.max(mp.alt,0),90)/90;
+    gEl.innerHTML='<line x1="'+x.toFixed(1)+'" x2="'+x.toFixed(1)+'" y1="34" y2="166" stroke="#2b2417" stroke-width="1.2"/>'
+      +(sp.alt>0?'<circle cx="'+x.toFixed(1)+'" cy="'+ys.toFixed(1)+'" r="3.5" fill="#8a5e12" stroke="#fffdf4" stroke-width="1"/>':"")
+      +(mp.alt>0?'<circle cx="'+x.toFixed(1)+'" cy="'+ym.toFixed(1)+'" r="3.5" fill="#5b4794" stroke="#fffdf4" stroke-width="1"/>':"");
+    $id("ln-read").innerHTML=readoutHTML(CURMS);
   }
 
   /* ---------- tabla del día ---------- */
@@ -585,10 +961,11 @@
     h+="<tr><td>"+LBL("r_civil")+"</td><td>"+pair(firstRise(D.c6),firstRise(D.sunRS))+"</td><td>"+pair(lastSet(D.sunRS),lastSet(D.c6))+"</td></tr>";
     h+="<tr><td>"+LBL("r_blue")+"</td><td>"+(blue.am?ivTxt(blue.am):"—")+"</td><td>"+(blue.pm?ivTxt(blue.pm):"—")+"</td></tr>";
     var goldNote=(D.gold.length===1&&D.noon.alt<=6&&D.noon.alt>-4);
+    function goldTxt(iv){ return ivTxt(iv)+" · az "+Math.round(sf(iv[0]).az)+"→"+Math.round(sf(iv[1]).az)+"°"; }
     h+="<tr><td>"+LBL("r_gold")+"</td>"
       +(goldNote
-        ?'<td colspan="2" class="lft">'+ivTxt(D.gold[0])+" · "+LBL("cont")+"</td>"
-        :"<td>"+(gold.am?ivTxt(gold.am):"—")+"</td><td>"+(gold.pm?ivTxt(gold.pm):"—")+"</td>")
+        ?'<td colspan="2" class="lft">'+goldTxt(D.gold[0])+" · "+LBL("cont")+"</td>"
+        :"<td>"+(gold.am?goldTxt(gold.am):"—")+"</td><td>"+(gold.pm?goldTxt(gold.pm):"—")+"</td>")
       +"</tr>";
     var sr=firstRise(D.sunRS), ss=lastSet(D.sunRS);
     var sunNone=(!sr&&!ss)?(D.noon.alt>-0.833?LBL("sun_allup"):LBL("sun_alldown")):null;
@@ -606,24 +983,101 @@
     h+='<tr><td>'+LBL("r_noon")+'</td><td colspan="2" class="lft">'+fmtHM(D.noon.ms)+" · alt "+fmtN(nAlt,1)+"° · "+LBL("shadow")+" "+nSh+"</td></tr>";
     var shTxt=[6,10,20,30].map(function(a){ return "+"+a+"° → "+fmtN(1/Math.tan(a*RAD),1)+"×"; }).join(" · ");
     h+='<tr><td>'+LBL("r_shadow")+'</td><td colspan="2" class="lft">'+shTxt+" · "+LBL("noonw")+" ("+fmtN(nAlt,1)+"°) → "+nSh+"</td></tr>";
+    /* Hasta qué hora sigue siendo rasante la luz, y de dónde viene: horas y
+       acimuts en que el Sol cruza cada altura. Se omite la que no alcanza. */
+    [10,20,30,45].forEach(function(ha){
+      var cr=crossings(sf,D.ms0,D.ms1,ha,4), up=firstRise(cr), dn=lastSet(cr);
+      if(!up&&!dn&&nAlt<ha) return;
+      h+="<tr><td>"+TPL("r_alt",{h:ha,s:fmtN(1/Math.tan(ha*RAD),1)})+"</td>"
+        +"<td>"+(up?evTxt(up,sf):"—")+"</td><td>"+(dn?evTxt(dn,sf):"—")+"</td></tr>";
+    });
     $id("tday").innerHTML=h;
     $id("moonbox").innerHTML=moonSVG(D.mi.illum,D.mi.phase,40)
       +"<div><b>"+moonName(D.mi.phase,D.mi.illum)+"</b>"
       +"<span>"+Math.round(100*D.mi.illum)+" % "+LBL("illum")+" · "+LBL("dist")+" "+Math.round(D.mi.dist).toLocaleString(LOC())+" km</span></div>";
   }
 
+  /* ---------- veredicto del día ----------
+     Tres párrafos: la luz (dorada y mediodía), la Luna frente al crepúsculo con
+     sus reglas de umbral, y la noche (horas oscuras y núcleo galáctico). */
+  function renderVerdict(){
+    var D=DAY, sf=function(m){ return sunPos(m,D.lat,D.lon); };
+    var gold=splitAM(D.gold,D.noon.ms), blue=splitAM(D.blue,D.noon.ms);
+    var goldCont=(D.gold.length===1&&D.noon.alt<=6&&D.noon.alt>-4);
+    var pp=[], p1, p2, p3, rules=[], mAlt=null, mAz=null, mIl=0;
+
+    /* 1 · la luz */
+    if(goldCont) p1=TPL("v_gold_cont",{iv:ivTxt(D.gold[0])});
+    else{
+      p1=gold.pm
+        ? TPL("v_gold_e",{iv:ivTxt(gold.pm),a1:fmtAz(sf(gold.pm[0]).az),a2:fmtAz(sf(gold.pm[1]).az)})
+        : LBL("v_gold_no");
+      p1+=" "+(gold.am
+        ? TPL("v_gold_m",{iv:ivTxt(gold.am),a1:fmtAz(sf(gold.am[0]).az),a2:fmtAz(sf(gold.am[1]).az)})
+        : LBL("v_gold_m_no"));
+    }
+    p1+=" "+TPL(D.noon.alt>0.5?"v_noon":"v_noon_low",{t:fmtHM(D.noon.ms),alt:altTxt(D.noon.alt),sh:shadowOf(D.noon.alt)});
+    pp.push(p1);
+
+    /* 2 · la Luna frente al crepúsculo */
+    if(blue.pm){
+      var mid=(blue.pm[0]+blue.pm[1])/2, mp=moonPosTopo(mid,D.lat,D.lon), mi=moonIllum(mid);
+      mAlt=mp.alt; mAz=mp.az; mIl=mi.illum;
+      p2=TPL("v_blue",{iv:ivTxt(blue.pm),m:(mAlt>0
+        ? TPL("v_blue_moon",{alt:altTxt(mAlt),az:fmtAz(mAz),p:Math.round(100*mIl)})
+        : LBL("v_blue_moon_no"))});
+    } else p2=LBL("v_blue_no");
+    var mr=firstRise(D.moonRS), msE=lastSet(D.moonRS), sr=firstRise(D.sunRS), ss=lastSet(D.sunRS);
+    if(mr&&ss&&D.mi.illum>=0.9&&Math.abs(mr.ms-ss.ms)<=2700000)
+      rules.push(TPL("v_rule_full",{mt:fmtHM(mr.ms),maz:fmtAz(moonPos(mr.ms,D.lat,D.lon).az),
+        st:fmtHM(ss.ms),d:Math.round(Math.abs(mr.ms-ss.ms)/60000),p:Math.round(100*D.mi.illum)}));
+    if(msE&&sr&&D.mi.illum>=0.9&&Math.abs(msE.ms-sr.ms)<=2700000)
+      rules.push(TPL("v_rule_fullset",{mt:fmtHM(msE.ms),maz:fmtAz(moonPos(msE.ms,D.lat,D.lon).az),
+        st:fmtHM(sr.ms),d:Math.round(Math.abs(msE.ms-sr.ms)/60000)}));
+    if(mAlt!==null&&mAlt>=2&&mAlt<=15)
+      rules.push(TPL("v_rule_low",{alt:altTxt(mAlt),az:card16(mAz)}));
+    if(!rules.length) rules.push(LBL("v_rule_none"));
+    pp.push(p2+" "+rules.join(" "));
+
+    /* 3 · la noche */
+    var nw=nightWindow(D.ms0,D.lat,D.lon);
+    if(!nw) p3=LBL("v_night_no");
+    else{
+      var midN=(nw.start+nw.end)/2, miN=moonIllum(midN);
+      p3=(nw.dark>=0.5)
+        ? TPL("v_night",{h:hoursTxt(nw.dark),a:fmtHM(nw.start),b:fmtHM(nw.end),ev:evOf(-20,0,0)})
+        : TPL(nw.dark<0.02?"v_night_full":"v_night_moonlit",
+            {a:fmtHM(nw.start),b:fmtHM(nw.end),p:Math.round(100*miN.illum),h:hoursTxt(nw.dark)});
+      p3+=" "+(nw.gc
+        ? TPL("v_gc",{a:fmtHM(nw.gc.start),b:fmtHM(nw.gc.end),
+                      az:Math.round(nw.gc.az0)+"–"+Math.round(nw.gc.az1)+"°",h:hoursTxt(nw.gc.dark)})
+        : LBL("v_gc_no"));
+    }
+    pp.push(p3);
+    $id("ln-verdict").innerHTML=pp.map(function(t){ return "<p>"+t+"</p>"; }).join("");
+  }
+
   /* ---------- próximos 14 días ---------- */
   function computeFourteen(){
-    var rows=[], k, ms0, ms1, noon, gold, gl, mrs, mr, msE, mi;
+    var rows=[], k, ms0, ms1, noon, gold, gl, blue, bl, mrs, mr, msE, mi, srs, sr, ss, nw, bmoon, row;
+    var sf=function(m){ return sunPos(m,STATE.lat,STATE.lon); };
+    var mf=function(m){ return moonPos(m,STATE.lat,STATE.lon); };
     for(k=0;k<14;k++){
       ms0=dayStart(STATE.dstr,k); ms1=ms0+DAYMS;
       noon=solarNoon(ms0,STATE.lat,STATE.lon);
-      gold=bandIntervals(function(m){return sunPos(m,STATE.lat,STATE.lon);},ms0,ms1,-4,6);
-      gl=splitAM(gold,noon.ms);
-      mrs=crossings(function(m){return moonPos(m,STATE.lat,STATE.lon);},ms0,ms1,0.125,4);
-      mr=firstRise(mrs); msE=lastSet(mrs);
+      gold=bandIntervals(sf,ms0,ms1,-4,6); gl=splitAM(gold,noon.ms);
+      blue=bandIntervals(sf,ms0,ms1,-6,-4); bl=splitAM(blue,noon.ms).pm;
+      srs=crossings(sf,ms0,ms1,-0.833,4); sr=firstRise(srs); ss=lastSet(srs);
+      mrs=crossings(mf,ms0,ms1,0.125,4); mr=firstRise(mrs); msE=lastSet(mrs);
       mi=moonIllum(ms0+43200e3);
-      rows.push({ms0:ms0,am:gl.am,pm:gl.pm,mr:mr,msE:msE,mi:mi});
+      nw=nightWindow(ms0,STATE.lat,STATE.lon);
+      bmoon=bl?moonPosTopo((bl[0]+bl[1])/2,STATE.lat,STATE.lon):null;
+      row={ms0:ms0,am:gl.am,pm:gl.pm,blue:bl,sr:sr,ss:ss,mr:mr,msE:msE,mi:mi,nw:nw,bmoon:bmoon};
+      /* Días señalados: Luna casi llena pegada al ocaso o al orto del Sol,
+         y noches con cuatro horas o más de oscuridad sin Luna. */
+      row.gold=(mi.illum>=0.9&&((mr&&ss&&Math.abs(mr.ms-ss.ms)<=2700000)||(msE&&sr&&Math.abs(msE.ms-sr.ms)<=2700000)));
+      row.dark=(nw&&nw.dark>=4);
+      rows.push(row);
     }
     return rows;
   }
@@ -632,25 +1086,42 @@
     FT.forEach(function(r){
       function gcell(iv){ return iv?fmtHM(iv[0])+" · "+durMin(iv)+" "+LBL("minu"):"—"; }
       function mcell(ev){ return ev?fmtHM(ev.ms)+" · "+Math.round(moonPos(ev.ms,STATE.lat,STATE.lon).az)+"°":"—"; }
-      h+="<tr><td>"+fmtDate(r.ms0)+"</td><td>"+gcell(r.am)+"</td><td>"+gcell(r.pm)+"</td>"
+      var cls=r.gold?' class="rowgold"':(r.dark?' class="rownight"':"");
+      h+="<tr"+cls+"><td>"+fmtDate(r.ms0)+"</td><td>"+gcell(r.am)+"</td><td>"+gcell(r.pm)+"</td>"
+        +"<td>"+(r.ss?fmtHM(r.ss.ms)+" · "+Math.round(sunPos(r.ss.ms,STATE.lat,STATE.lon).az)+"°":"—")+"</td>"
+        +"<td>"+gcell(r.blue)+"</td>"
         +"<td>"+mcell(r.mr)+"</td><td>"+mcell(r.msE)+"</td>"
-        +'<td style="text-align:center">'+moonSVG(r.mi.illum,r.mi.phase,16)+"</td>"
-        +"<td>"+Math.round(100*r.mi.illum)+" %</td></tr>";
+        +"<td>"+(r.bmoon?(r.bmoon.alt>0?altTxt(r.bmoon.alt)+" · "+Math.round(r.bmoon.az)+"°":"—"):"—")+"</td>"
+        +"<td>"+(r.nw&&r.nw.dark>0.05?hoursTxt(r.nw.dark):"—")+"</td>"
+        +"<td>"+(r.nw&&r.nw.gc?spanTxt(r.nw.gc.start,r.nw.gc.end):"—")+"</td>"
+        +'<td style="text-align:center">'+moonSVG(r.mi.illum,r.mi.phase,16)+" "+Math.round(100*r.mi.illum)+" %</td></tr>";
     });
     $id("t14").innerHTML=h;
   }
 
   /* ---------- alineaciones ---------- */
   function computeAlign(){
-    var azT=parseFloat($id("alaz").value), tol=parseFloat($id("altol").value);
+    var azT=parseFloat($id("alaz").value), tol=tolNow();
     if(!(azT>=0&&azT<=360)){ ALIGN={bad:true}; return; }
     var ms0=dayStart(STATE.dstr,0);
     ALIGN={
       bad:false, az:azT, tol:tol, from:ms0,
-      moon:alignScan(function(m){return moonPos(m,STATE.lat,STATE.lon);},ms0,60,azT,tol),
+      objAlt:objAltNow(), objH:$id("ln-oh").value, objD:$id("ln-od").value,
+      hfov:hfovNow(), cam:camNow(), focal:focalNow(),
+      /* la Luna, con altura topocéntrica: es la que se ve desde el trípode */
+      moon:alignScan(function(m){return moonPosTopo(m,STATE.lat,STATE.lon);},ms0,60,azT,tol),
       sun:alignScan(function(m){return sunPos(m,STATE.lat,STATE.lon);},ms0,60,azT,tol)
     };
+    saveState();
   }
+  /* Veredicto por cruce: bien centrado en el encuadre y a la altura del objeto,
+     rozando, o fuera porque el astro pasa muy por encima o por debajo. */
+  function fitOf(daz,dalt,tol){
+    if(daz<=tol/2&&(dalt===null||Math.abs(dalt)<=1)) return "fit";
+    if(daz<=tol&&(dalt===null||Math.abs(dalt)<=2.5)) return "near";
+    return "out";
+  }
+  function fitTag(k){ return '<span class="tag '+k+'">'+LBL("al_"+k)+"</span>"; }
   function lightTag(ms){
     var a=sunPos(ms,STATE.lat,STATE.lon).alt;
     if(a>-0.833) return '<span class="tag day">'+LBL("lday")+"</span>";
@@ -658,35 +1129,46 @@
     return '<span class="tag night">'+LBL("lnight")+"</span>";
   }
   function renderAlign(){
-    var h, list;
+    var h, list, moon=(TABSEL==="moon"), best=null, bestScore=1e9;
     if(!ALIGN||ALIGN.bad){
       $id("alstat").textContent=LBL("al_bad");
+      $id("ln-geo").textContent="";
       $id("alout").innerHTML="";
       return;
     }
-    $id("alstat").textContent=LBL("al_sum")
-      .replace("{d}",new Date(ALIGN.from).toLocaleDateString(LOC(),{day:"2-digit",month:"2-digit",year:"numeric"}))
-      .replace("{m}",ALIGN.moon.length).replace("{s}",ALIGN.sun.length);
-    if(TABSEL==="moon"){
-      list=ALIGN.moon;
-      h="<tr>"+LBL("thalm").map(function(x){return "<th>"+x+"</th>";}).join("")+"</tr>";
-      if(!list.length) h+='<tr><td colspan="8" class="lft">'+LBL("al_none")+"</td></tr>";
-      list.forEach(function(r){
-        var mi=moonIllum(r.ms);
-        h+="<tr><td>"+fmtDate(r.ms)+"</td><td>"+fmtHM(r.ms)+"</td><td>"+fmtN(r.alt,1)+"°</td><td>"+fmtAz(r.az)+"</td>"
-          +"<td>"+LBL(r.rising?"rising":"setting")+"</td>"
-          +'<td style="text-align:center">'+moonSVG(mi.illum,mi.phase,16)+"</td>"
-          +"<td>"+Math.round(100*mi.illum)+" %</td><td>"+lightTag(r.ms)+"</td></tr>";
-      });
-    } else {
-      list=ALIGN.sun;
-      h="<tr>"+LBL("thals").map(function(x){return "<th>"+x+"</th>";}).join("")+"</tr>";
-      if(!list.length) h+='<tr><td colspan="6" class="lft">'+LBL("al_none")+"</td></tr>";
-      list.forEach(function(r){
-        h+="<tr><td>"+fmtDate(r.ms)+"</td><td>"+fmtHM(r.ms)+"</td><td>"+fmtN(r.alt,1)+"°</td><td>"+fmtAz(r.az)+"</td>"
-          +"<td>"+LBL(r.rising?"ev_rise":"ev_set")+"</td><td>"+lightTag(r.ms)+"</td></tr>";
-      });
-    }
+    var oAlt=ALIGN.objAlt, tol=ALIGN.tol, cam=ALIGN.cam, fov=ALIGN.hfov;
+    $id("ln-geo").textContent=TPL("al_geo",{
+      f:fmtN(fov,1), c:cam.n, mm:fmtN(ALIGN.focal,0), px:cam.w.toLocaleString(LOC()), t:fmtN(tol,1),
+      o:(oAlt!==null?TPL("al_obj",{h:ALIGN.objH,d:ALIGN.objD,a:fmtN(oAlt,1)}):LBL("al_obj_no"))
+    });
+    list=moon?ALIGN.moon:ALIGN.sun;
+    list.forEach(function(r){
+      var sc=r.daz+(oAlt!==null?Math.abs(r.alt-oAlt):0);
+      if(sc<bestScore){ bestScore=sc; best=r; }
+    });
+    var stat=TPL("al_sum",{
+      d:new Date(ALIGN.from).toLocaleDateString(LOC(),{day:"2-digit",month:"2-digit",year:"numeric"}),
+      m:ALIGN.moon.length, s:ALIGN.sun.length});
+    if(best) stat+=TPL("al_best",{d:fmtDate(best.ms),t:fmtHM(best.ms),a:fmtN(best.daz,1),
+      b:(oAlt!==null?" · Δalt "+fmtN(best.alt-oAlt,1)+"°":"")});
+    $id("alstat").textContent=stat;
+
+    h="<tr>"+LBL(moon?"thalm":"thals").map(function(x){return "<th>"+x+"</th>";}).join("")+"</tr>";
+    if(!list.length) h+='<tr><td colspan="'+(moon?11:10)+'" class="lft">'+LBL("al_none")+"</td></tr>";
+    list.forEach(function(r){
+      var dAlt=(oAlt!==null)?(r.alt-oAlt):null;
+      var diam=moon?moonDiamMin(r.dist):sunDiamMin(r.ms);
+      var px=Math.round(diam/60/fov*cam.w);
+      var mi=moon?moonIllum(r.ms):null;
+      h+="<tr"+(r===best?' class="rowgold"':"")+"><td>"+fmtDate(r.ms)+"</td><td>"+fmtHM(r.ms)+"</td>"
+        +"<td>"+fmtN(r.alt,1)+"°</td><td>"+fmtAz(r.az)+"</td>"
+        +"<td>"+fmtN(r.daz,1)+"°</td>"
+        +"<td>"+(dAlt===null?"—":(dAlt>0?"+":"")+fmtN(dAlt,1)+"°")+"</td>"
+        +"<td>"+fmtN(diam,1)+"′ / "+px.toLocaleString(LOC())+" px</td>"
+        +"<td>"+LBL(moon?(r.rising?"rising":"setting"):(r.rising?"ev_rise":"ev_set"))+"</td>"
+        +(moon?'<td style="text-align:center">'+moonSVG(mi.illum,mi.phase,16)+" "+Math.round(100*mi.illum)+" %</td>":"")
+        +"<td>"+lightTag(r.ms)+"</td><td>"+fitTag(fitOf(r.daz,dAlt,tol))+"</td></tr>";
+    });
     $id("alout").innerHTML=h;
   }
 
@@ -712,6 +1194,18 @@
     var e2=moonIllum(Date.UTC(2027,7,20,12,0));
     out.push({k:"chk5",val:fmtN(100*e2.illum,1)+" % · "+moonName(e2.phase,e2.illum).toLowerCase(),
               ok:e2.illum>0.85&&e2.illum<0.95&&e2.phase>0.5&&e2.phase<0.75});
+    /* Serie de distancia: barrido de 2026 con paso de 3 h. Cerca del perigeo y
+       del apogeo la distancia cambia de forma cuadrática, así que ese paso
+       basta (el error del extremo es de un par de kilómetros). */
+    var y0=new Date(2026,0,1).getTime(), y1=new Date(2027,0,1).getTime(), mn=1e9, mx=0, ms, dd;
+    for(ms=y0; ms<y1; ms+=10800000){
+      dd=moonCoords(toDays(ms)).dist;
+      if(dd<mn) mn=dd;
+      if(dd>mx) mx=dd;
+    }
+    var dApo=moonDiamMin(mx), dPer=moonDiamMin(mn);
+    out.push({k:"chk6",val:fmtN(dApo,1)+"′ / "+fmtN(dPer,1)+"′",
+              ok:dApo>29.2&&dApo<29.6&&dPer>33.2&&dPer<33.8});
     return out;
   }
   function renderChecks(){
@@ -726,7 +1220,7 @@
 
   /* ---------- orquestación ---------- */
   function renderAll(){
-    renderRibbon(); renderDayTable(); render14(); renderAlign(); renderChecks();
+    renderRibbon(); renderDayTable(); renderVerdict(); render14(); renderAlign(); renderChecks();
     var tz="";
     try{ tz=Intl.DateTimeFormat().resolvedOptions().timeZone||""; }catch(e){}
     $id("stat").textContent=STATE.lat.toFixed(4)+", "+STATE.lon.toFixed(4)+(tz?" · "+tz:"");
@@ -738,6 +1232,12 @@
     DAY=computeDay(dayStart(STATE.dstr,0),STATE.lat,STATE.lon);
     FT=computeFourteen();
     computeAlign();
+    /* La cinta arranca en «ahora» si el día elegido es hoy; si no, sin cursor. */
+    var nowMs=Date.now();
+    CURMS=(nowMs>=DAY.ms0&&nowMs<DAY.ms1)?nowMs:null;
+    if(CURMS===null) $id("ln-time").value="";
+    else{ var z=new Date(CURMS); $id("ln-time").value=two(z.getHours())+":"+two(z.getMinutes()); }
+    saveState();
     renderAll();
   }
   function shiftDate(nd){
@@ -745,6 +1245,8 @@
     recompute();
   }
   $id("fecha").value=isoOf(new Date());
+  loadState();
+  syncCam();
   $id("fecha").addEventListener("change",recompute);
   $id("lat").addEventListener("change",recompute);
   $id("lon").addEventListener("change",recompute);
@@ -760,6 +1262,32 @@
     },function(err){ $id("stat").textContent=LBL("geoerr")+err.message; });
   });
   $id("albtn").addEventListener("click",function(){ computeAlign(); renderAlign(); });
+  $id("ln-cam").addEventListener("change",function(){ syncCam(); computeAlign(); renderAlign(); });
+  $id("ln-focal").addEventListener("change",function(){ computeAlign(); renderAlign(); });
+  $id("ln-oh").addEventListener("change",function(){ computeAlign(); renderAlign(); });
+  $id("ln-od").addEventListener("change",function(){ computeAlign(); renderAlign(); });
+  $id("altol").addEventListener("change",function(){ computeAlign(); renderAlign(); });
+  $id("ln-copy").addEventListener("click",function(){
+    var url=shareURL();
+    try{ history.replaceState(null,"",url); }catch(e){}
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(
+        function(){ $id("alstat").textContent=LBL("al_copied"); },
+        function(){ $id("alstat").textContent=LBL("al_copyfail")+url; });
+    } else $id("alstat").textContent=LBL("al_copyfail")+url;
+  });
+  $id("ln-time").addEventListener("change",function(){
+    var v=$id("ln-time").value, p;
+    if(!v){ CURMS=null; drawCursor(); return; }
+    p=v.split(":");
+    var z=new Date(DAY.ms0); z.setHours(+p[0],+p[1],0,0);   /* respeta el cambio de hora */
+    CURMS=z.getTime();
+    drawCursor();
+  });
+  $id("ln-now").addEventListener("click",function(){
+    var nowMs=Date.now();
+    setCursor((nowMs>=DAY.ms0&&nowMs<DAY.ms1)?nowMs:DAY.noon.ms);
+  });
   $id("tabmoon").addEventListener("click",function(){
     TABSEL="moon";
     $id("tabmoon").classList.add("on"); $id("tabsun").classList.remove("on");

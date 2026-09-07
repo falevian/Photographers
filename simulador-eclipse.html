@@ -212,6 +212,27 @@
   footer{margin-top:26px;font-size:11.5px;color:var(--muted);line-height:1.55}
   footer a{color:var(--gold)}
 
+  /* comparador, mapa de calor y bloque de supuestos */
+  table.heat{font-size:12px;table-layout:fixed;margin-top:8px}
+  table.heat th,table.heat td{text-align:center;padding:6px 3px;border:1px solid var(--bg);font-family:var(--mono)}
+  table.heat th{text-transform:none;letter-spacing:0;font-size:11px}
+  table.heat td:first-child,table.heat th:first-child{text-align:left;color:var(--muted)}
+  table.heat td.sel{outline:2px solid var(--gold);outline-offset:-2px}
+  table.heat td b{display:block;font-size:14px;font-weight:600;line-height:1.15}
+  table.heat td small{font-size:9.5px;opacity:.9;letter-spacing:-0.02em}
+  .tlb{position:absolute;top:0;bottom:0;width:2px;background:var(--ok);opacity:.9}
+  .fold{display:none;margin-top:12px}
+  .fold.on{display:block}
+  td.abB{color:var(--gold);font-family:var(--mono);text-align:right}
+  .abtag{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:600;
+    padding:0 5px;border-radius:3px;margin-right:5px;color:#1a1206}
+  .abtag.a{background:var(--corona)} .abtag.b{background:var(--gold)}
+  dl.spec{margin:0}
+  dl.spec dt{font-family:var(--display);font-weight:600;font-size:13.5px;margin-top:13px;color:var(--text)}
+  dl.spec dd{margin:3px 0 0;font-size:13px;color:var(--muted);max-width:74ch;line-height:1.55}
+  dl.spec dd a{color:var(--gold)}
+  dl.spec code{font-family:var(--mono);color:var(--text);font-size:12px}
+
   /* ficha de campo (solo al imprimir) */
   #printCard{display:none}
   @media print{
@@ -325,6 +346,10 @@
           <div class="stat"><div class="k" data-lang="es">El disco solar ocupa</div><div class="k" data-lang="en">The solar disc occupies</div><div class="v" id="sSun">—</div></div>
           <div class="stat"><div class="k" data-lang="es">Escala de placa</div><div class="k" data-lang="en">Plate scale</div><div class="v" id="sScale">—</div></div>
           <div class="stat"><div class="k" data-lang="es">Deriva en la totalidad</div><div class="k" data-lang="en">Drift during totality</div><div class="v" id="sDrift">—</div></div>
+          <div class="stat"><div class="k" data-lang="es">El disco solar mide</div><div class="k" data-lang="en">The solar disc measures</div><div class="v" id="ecSunPx">—</div></div>
+          <div class="stat"><div class="k" data-lang="es">Tu corona mide</div><div class="k" data-lang="en">Your corona measures</div><div class="v" id="ecCorPx">—</div></div>
+          <div class="stat"><div class="k" data-lang="es">Focal para llenar el 80 %</div><div class="k" data-lang="en">Focal length to fill 80 %</div><div class="v" id="ecFrec">—</div></div>
+          <div class="stat"><div class="k" data-lang="es">Focal máxima sin seguimiento</div><div class="k" data-lang="en">Longest focal without tracking</div><div class="v" id="ecFmax">—</div></div>
         </div>
         <div class="actions">
           <button class="abtn" id="btnCard" type="button">🖨 Ficha de campo imprimible</button>
@@ -340,7 +365,7 @@
           <div class="clock" id="tClock">—</div>
           <div class="ctx" style="text-align:right;font-family:var(--mono);font-size:12px" id="tState">—</div>
         </div>
-        <div class="tlbar" id="tlbar"><div class="tltot" id="tltot"></div><div class="tlnow" id="tlnow"></div></div>
+        <div class="tlbar" id="tlbar"><div class="tltot" id="tltot"></div><div class="tlb" id="ecTlB2"></div><div class="tlb" id="ecTlB3"></div><div class="tlnow" id="tlnow"></div></div>
         <div class="tlticks"><span id="tkA">C1</span><span id="tkB">C2</span><span id="tkC">C4</span></div>
         <input type="range" id="inst" min="0" max="1000" value="500" aria-label="Instante">
         <div class="qrow" id="qrow">
@@ -351,7 +376,11 @@
           <button class="qbtn" type="button" data-q="c2" data-lang="en">C2 · ring</button>
           <button class="qbtn" type="button" data-q="max" data-lang="es">Máximo</button>
           <button class="qbtn" type="button" data-q="max" data-lang="en">Maximum</button>
+          <button class="qbtn" type="button" data-q="b2" data-lang="es">Ráfaga C2</button>
+          <button class="qbtn" type="button" data-q="b2" data-lang="en">C2 burst</button>
           <button class="qbtn" type="button" data-q="c3">C3</button>
+          <button class="qbtn" type="button" data-q="b3" data-lang="es">Ráfaga C3</button>
+          <button class="qbtn" type="button" data-q="b3" data-lang="en">C3 burst</button>
           <button class="qbtn" type="button" data-q="end" data-lang="es">Final</button>
           <button class="qbtn" type="button" data-q="end" data-lang="en">End</button>
           <button class="qbtn" type="button" data-q="live" data-lang="es">⏱ En vivo</button>
@@ -373,6 +402,23 @@
         </table>
       </div>
 
+      <div class="card" id="ecAbCard">
+        <h2 data-lang="es"><span class="pin"></span>Tu equipo (A) frente al equipo B</h2>
+        <h2 data-lang="en"><span class="pin"></span>Your kit (A) against kit B</h2>
+        <p class="ctx" style="margin:0 0 10px" id="ecAbIntro"></p>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr>
+              <th id="ecAbTh0">Magnitud</th>
+              <th style="text-align:right" id="ecAbThA">A</th>
+              <th style="text-align:right" id="ecAbThB">B</th>
+            </tr></thead>
+            <tbody id="ecAbTab"></tbody>
+          </table>
+        </div>
+        <div class="hint" id="ecAbNote"></div>
+      </div>
+
       <div class="card">
         <h2 data-lang="es"><span class="pin"></span>Horquilla de exposición</h2>
         <h2 data-lang="en"><span class="pin"></span>Exposure bracket</h2>
@@ -388,6 +434,8 @@
           <div id="bracketSeq" style="font-family:var(--mono);font-size:13.5px;color:var(--text);line-height:1.7"></div>
           <div id="bracketNote" class="hint" style="margin-top:8px"></div>
         </div>
+        <svg id="ecChart" viewBox="0 0 760 190" role="img" style="width:100%;height:auto;display:block;margin-top:14px;border-radius:9px;background:#04040a;border:1px solid var(--line)"></svg>
+        <div class="hint" id="ecChartNote"></div>
         <div id="planWrap">
           <h2 style="margin-top:18px" data-lang="es"><span class="pin"></span>Plan de tandas: qué marcar en la cámara</h2>
           <h2 style="margin-top:18px" data-lang="en"><span class="pin"></span>Run plan: what to dial on the camera</h2>
@@ -401,6 +449,10 @@
             <tbody id="planTab"></tbody>
           </table>
           <div id="planNote" class="hint" style="margin-top:8px"></div>
+          <h2 style="margin-top:20px" data-lang="es"><span class="pin"></span>ISO × diafragma: dónde cabe la horquilla</h2>
+          <h2 style="margin-top:20px" data-lang="en"><span class="pin"></span>ISO × aperture: where the bracket fits</h2>
+          <div style="overflow-x:auto"><table class="heat" id="ecHeatTab"></table></div>
+          <div class="hint" id="ecHeatNote"></div>
         </div>
       </div>
 
@@ -426,6 +478,18 @@
       <div class="card">
         <h2 data-lang="es"><span class="pin"></span>Tu equipo</h2>
         <h2 data-lang="en"><span class="pin"></span>Your kit</h2>
+
+        <div class="ctl">
+          <label class="lab" for="ecCam" data-lang="es">Cuerpo y modo de archivo</label>
+          <label class="lab" for="ecCam" data-lang="en">Body and file mode</label>
+          <select id="ecCam"></select>
+          <div class="seg" id="ecShut" role="group" style="margin-top:9px">
+            <button type="button" data-sh="m" aria-pressed="true">Mecánico</button>
+            <button type="button" data-sh="e" aria-pressed="false">Electrónico</button>
+          </div>
+          <div class="hint" id="ecCamNow"></div>
+          <div class="hint" id="ecCamHint"></div>
+        </div>
 
         <div class="ctl">
           <label class="lab" for="focalNum"><span data-lang="es">Focal real del objetivo</span><span data-lang="en">Actual focal length of the lens</span> <b><span id="focalv">500</span> mm</b></label>
@@ -481,6 +545,39 @@
           </div>
           <div class="hint" data-lang="es"><code>Fotograma</code> llena el visor con lo que grabará el sensor. <code>Cielo</code> aleja la vista para ver qué queda fuera.</div>
           <div class="hint" data-lang="en"><code>Frame</code> fills the viewer with what the sensor will record. <code>Sky</code> pulls back to show what falls outside.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 data-lang="es"><span class="pin"></span>Comparar con un segundo equipo</h2>
+        <h2 data-lang="en"><span class="pin"></span>Compare with a second kit</h2>
+        <div class="ctl">
+          <div class="seg" id="ecCmp" role="group">
+            <button type="button" data-c="0" aria-pressed="true">Apagado</button>
+            <button type="button" data-c="1" aria-pressed="false">Encendido</button>
+          </div>
+          <div class="hint" data-lang="es">Dibuja un segundo encuadre en ocre discontinuo sobre el visor y abre una tabla A/B con los dos equipos lado a lado. Todo lo demás (sitio, instante, ISO, diafragma, paso y cadencia) es común.</div>
+          <div class="hint" data-lang="en">Draws a second frame in dashed ochre over the viewer and opens an A/B table with both kits side by side. Everything else (site, instant, ISO, aperture, step and drive rate) is shared.</div>
+        </div>
+        <div class="fold" id="ecCmpBox">
+          <div class="ctl">
+            <label class="lab" for="ecCamB" data-lang="es">Cuerpo B</label>
+            <label class="lab" for="ecCamB" data-lang="en">Body B</label>
+            <select id="ecCamB"></select>
+          </div>
+          <div class="ctl">
+            <label class="lab" for="ecFB"><span data-lang="es">Focal real de B</span><span data-lang="en">Actual focal length of B</span> <b><span id="ecFBv">280</span> mm</b></label>
+            <input class="num" type="number" id="ecFB" min="10" max="6000" step="1" value="280">
+          </div>
+          <div class="ctl">
+            <label class="lab" for="ecTcB" data-lang="es">Multiplicador de B</label>
+            <label class="lab" for="ecTcB" data-lang="en">Multiplier of B</label>
+            <select id="ecTcB">
+              <option value="1">Sin teleconvertidor (1×)</option>
+              <option value="1.4">1,4×</option>
+              <option value="2">2×</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -576,10 +673,12 @@
           <label class="lab" for="smax" data-lang="es">Velocidad máxima de la cámara</label>
           <label class="lab" for="smax" data-lang="en">Fastest shutter speed of the camera</label>
           <select id="smax">
+            <option value="2000">1/2000</option>
             <option value="4000">1/4000</option>
             <option value="8000" selected>1/8000</option>
             <option value="16000">1/16000</option>
             <option value="32000">1/32000</option>
+            <option value="40000">1/40000</option>
             <option value="64000">1/64000</option>
           </select>
           <div class="hint" id="smaxHint"></div>
@@ -649,6 +748,16 @@
           <input type="number" id="obst" min="1" max="500" step="1" value="15">
           <div class="hint" id="obstHint"></div>
         </div>
+        <div class="ctl">
+          <button class="abtn" id="ecTestBtn" type="button" style="width:100%">☀ Probar hoy con el Sol</button>
+          <div class="hint" id="ecTestOut"></div>
+        </div>
+        <div class="ctl">
+          <label class="lab" for="ecNdc"><span data-lang="es">Desviación medida de tu filtro</span><span data-lang="en">Measured deviation of your filter</span> <b><span id="ecNdcv">0</span> EV</b></label>
+          <input type="number" id="ecNdc" min="-3" max="3" step="0.1" value="0">
+          <div class="hint" data-lang="es">Los filtros solares reales se desvían del ND nominal hasta un paso, y esa es la mayor incertidumbre de toda la fase parcial. Haz la prueba de arriba cualquier día despejado, mide cuántos pasos te sobran o te faltan y anótalos aquí (positivo si tu filtro es más denso de lo nominal y pide más exposición): la corrección se suma al Q del filtro en todas las tablas de la parcial, en la ficha impresa y en el enlace que compartas.</div>
+          <div class="hint" data-lang="en">Real solar filters stray from their nominal ND by up to a stop, and that is the largest uncertainty in the whole partial phase. Run the test above on any clear day, measure how many stops over or under you are and enter them here (positive if your filter is denser than nominal and asks for more exposure): the correction is added to the filter's Q in every partial-phase table, in the printed sheet and in the link you share.</div>
+        </div>
       </div>
 
       <div class="card">
@@ -676,6 +785,40 @@
       </div>
     </div>
 
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <h2 data-lang="es"><span class="pin"></span>Cómo se calcula</h2>
+    <h2 data-lang="en"><span class="pin"></span>How it is computed</h2>
+    <dl class="spec" data-lang="es">
+      <dt>Geometría del encuadre</dt><dd>Campo de visión <code>2·arctan(lado / 2·f)</code> con el lado del sensor y la focal efectiva (focal real × teleconvertidor). Disco solar <code>0,5253°</code> para la distancia Tierra-Sol del 2 de agosto de 2027 (1,0149 UA); disco lunar <code>1,079 ×</code> el solar. Escala de placa <code>206265 · paso / f</code> ″/px, con el paso deducido de los milímetros y los megapíxeles. Más detalle en el <a href="manual-tecnico-eclipse.html">manual técnico</a>.</dd>
+      <dt>Posición de la Luna instante a instante</dt><dd>La separación de centros se ajusta a los contactos calculados del sitio: velocidad relativa constante en cada rama, entrada y salida por separado, y una separación mínima que reproduce la duración de la totalidad. La fracción de fotosfera cubierta es el área de intersección de dos círculos dividida por el área del disco solar. El ángulo de posición del movimiento lunar sale de la velocidad relativa Luna-Sol proyectada al marco alt-azimutal del sitio.</dd>
+      <dt>Fotometría</dt><dd>Guía de Fred Espenak: <code>t = f² / (ISO · 2^(Q − ΔEV))</code>. Q por estructura: anillo de diamantes 13, perlas de Baily 12, cromosfera 11, protuberancias 9; corona 7 a 0,1 R☉, 5 a 0,2, 3 a 0,5, 1 a 1 R☉ y 0 a 2 R☉, interpolando en logaritmo del radio. Más allá de 2 R☉ se extrapola con <code>Q = −log₂(r/2)</code>, que es la caída de la ley de Baumbach redondeada a un paso por duplicación del radio: por eso una corona de 4 R☉ vale Q ≈ −1.</dd>
+      <dt>Atmósfera</dt><dd>Refracción de Bennett sobre la altura geométrica; masa de aire de Kasten y Young sobre la altura aparente; extinción <code>ΔEV = 1,327 · k · (X − 1)</code> con k = 0,20 en cielo limpio y 0,30 con calima. Seeing estimado <code>2″ · X^0,6</code>. El achatamiento del disco y la dispersión 400-700 nm son consecuencia de la refracción diferencial entre los dos limbos.</dd>
+      <dt>Arrastre y horquilla</dt><dd>Deriva sidérea <code>ω = 15,041″/s · cos δ = 14,32″/s</code> para la declinación del 2 de agosto de 2027 (+17,78°). Tiempo máximo sin arrastre <code>t_max = b · escala / ω</code> con b el presupuesto en píxeles. Focal máxima sin seguimiento <code>f_max = 206265 · paso · b / (ω · t)</code> para la exposición más lenta de la horquilla. La horquilla va del extremo brillante elegido hasta el Q de tu corona con el paso marcado, y se reparte en tandas centradas del tamaño que admita el horquillado de la cámara.</dd>
+    </dl>
+    <dl class="spec" data-lang="en">
+      <dt>Framing geometry</dt><dd>Field of view <code>2·arctan(side / 2·f)</code> from the sensor side and the effective focal length (true focal × teleconverter). Solar disc <code>0.5253°</code> for the Earth-Sun distance of 2 August 2027 (1.0149 AU); lunar disc <code>1.079 ×</code> the solar one. Plate scale <code>206265 · pitch / f</code> ″/px, with the pitch derived from the millimetres and the megapixels. More detail in the <a href="manual-tecnico-eclipse.html">technical manual</a>.</dd>
+      <dt>The Moon's position instant by instant</dt><dd>The separation of centres is fitted to the computed contacts of the site: constant relative speed on each branch, ingress and egress separately, and a minimum separation that reproduces the duration of totality. The covered fraction of the photosphere is the intersection area of two circles over the area of the solar disc. The position angle of the lunar motion comes from the Moon-Sun relative velocity projected into the site's alt-azimuth frame.</dd>
+      <dt>Photometry</dt><dd>Fred Espenak's guide: <code>t = f² / (ISO · 2^(Q − ΔEV))</code>. Q by structure: diamond ring 13, Baily's beads 12, chromosphere 11, prominences 9; corona 7 at 0.1 R☉, 5 at 0.2, 3 at 0.5, 1 at 1 R☉ and 0 at 2 R☉, interpolated in the logarithm of the radius. Beyond 2 R☉ it extrapolates as <code>Q = −log₂(r/2)</code>, the Baumbach-law falloff rounded to one stop per doubling of the radius: that is why a 4 R☉ corona comes out at Q ≈ −1.</dd>
+      <dt>Atmosphere</dt><dd>Bennett refraction on the geometric altitude; Kasten and Young air mass on the apparent altitude; extinction <code>ΔEV = 1.327 · k · (X − 1)</code> with k = 0.20 for a clean sky and 0.30 for haze. Estimated seeing <code>2″ · X^0.6</code>. The flattening of the disc and the 400-700 nm dispersion both follow from differential refraction between the two limbs.</dd>
+      <dt>Trailing and the bracket</dt><dd>Sidereal drift <code>ω = 15.041″/s · cos δ = 14.32″/s</code> for the declination of 2 August 2027 (+17.78°). Longest untrailed time <code>t_max = b · scale / ω</code> with b the budget in pixels. Longest focal length without tracking <code>f_max = 206265 · pitch · b / (ω · t)</code> for the slowest exposure of the bracket. The bracket runs from the chosen bright end down to the Q of your corona at the chosen step, and is split into centred runs of whatever size the camera's bracketing allows.</dd>
+    </dl>
+
+    <h2 style="margin-top:22px" data-lang="es"><span class="pin"></span>Límites y supuestos</h2>
+    <h2 style="margin-top:22px" data-lang="en"><span class="pin"></span>Limits and assumptions</h2>
+    <dl class="spec" data-lang="es">
+      <dt>Un dibujo, no una efemérides</dt><dd>La corona del visor se dibuja con la caída de Baumbach y ocho penachos de posición fija: enseña el tamaño y la extensión, no la forma real, que nadie conoce hasta el día. Los contactos son los publicados por sitio, con una incertidumbre del orden del segundo; la magnitud 1,079 se aplica igual a los nueve sitios, cuando en realidad varía unas milésimas entre el borde y el eje de la franja.</dd>
+      <dt>La exposición es un punto de partida</dt><dd>La tabla de Q de Espenak describe una corona media con cielo limpio. Ni la actividad solar del día, ni las nubes altas, ni la temperatura del sensor entran en el cálculo, y los filtros solares reales se desvían de su ND nominal hasta un paso: para eso está el ensayo con el Sol de hoy y el campo de desviación medida. Horquilla siempre.</dd>
+      <dt>El arrastre manda antes que la difracción</dt><dd>A estas focales el seeing suele valer más que el disco de Airy y que el presupuesto de arrastre de un píxel: exigir 1 px es más estricto que la propia atmósfera. El techo de detalle por cuerpo y por diafragma se resuelve en la <a href="sensor.html#difraccion">pestaña de difracción</a>, no aquí.</dd>
+      <dt>Nueve sitios, no un mapa</dt><dd>Solo se calculan los nueve lugares tabulados. Para un punto cualquiera de la franja, la duración de la totalidad crece al acercarse al eje central y cae a cero en los bordes; los sitios cercanos al borde norte (Málaga, Cádiz) son los más sensibles a moverse unos kilómetros.</dd>
+    </dl>
+    <dl class="spec" data-lang="en">
+      <dt>A drawing, not an ephemeris</dt><dd>The corona in the viewer is drawn with the Baumbach falloff and eight streamers at fixed positions: it shows the size and the extent, not the real shape, which nobody knows until the day. The contacts are those published per site, with an uncertainty of the order of a second; the 1.079 magnitude is applied identically to all nine sites, when in reality it varies by thousandths between the edge and the axis of the path.</dd>
+      <dt>The exposure is a starting point</dt><dd>Espenak's Q table describes an average corona under a clean sky. Neither the solar activity of the day, nor high cloud, nor sensor temperature enter the calculation, and real solar filters stray from their nominal ND by up to a stop: that is what the rehearsal with today's Sun and the measured-deviation field are for. Always bracket.</dd>
+      <dt>Trailing rules before diffraction</dt><dd>At these focal lengths the seeing is usually larger than the Airy disc and than a one-pixel trailing budget: asking for 1 px is stricter than the atmosphere itself. The detail ceiling per body and per aperture is settled in the <a href="sensor.html#difraccion">diffraction tab</a>, not here.</dd>
+      <dt>Nine sites, not a map</dt><dd>Only the nine tabulated places are computed. For any other point on the path, the duration of totality grows toward the central axis and falls to zero at the edges; the sites near the northern edge (Málaga, Cádiz) are the most sensitive to moving a few kilometres.</dd>
+    </dl>
   </div>
 
   <footer data-lang="es">
@@ -800,7 +943,6 @@
     vt5x:"La corona cabe holgada, con cielo alrededor. Margen de sobra para componer y para no perder los penachos.",
     vt6t:"Plano amplio",
     vt6x:"El eclipse queda pequeño dentro del fotograma: territorio de paisaje. Con el Sol a {alt}° hace falta un angular muy corto para meter también el horizonte en la toma.",
-    vAddDrift:" Ojo: sobre trípode fijo el Sol se desplaza {d} durante la totalidad, un {p} % del lado corto. Colócalo descentrado hacia arriba y a la izquierda.",
     vAddHorizon:" El horizonte entra en el fotograma: composición de paisaje disponible.",
 
     refPhoto:"Fotosfera (disco solar)",
@@ -882,8 +1024,6 @@
     alertHint:"Con los avisos encendidos, el navegador emite un pitido y vibra 30 s antes de C2 y 15 s antes de C3, y mantiene la pantalla despierta. Requiere un toque previo en la página.",
     alertOnMsg:"Avisos activos. Pantalla mantenida despierta mientras esta pestaña esté visible.",
     alertNoWake:"Avisos activos. Este navegador no permite mantener la pantalla despierta.",
-    alertC2:"Fuera el filtro en 30 segundos",
-    alertC3:"Filtro puesto en 15 segundos",
 
     ndName11:"ND 4,0", ndName8:"ND 5,0 / Baader visual", ndName12:"Baader ND 3,8 (solo foto)",
     pcTitle:"Ficha de campo · Eclipse total de Sol · {loc} · 2 de agosto de 2027",
@@ -918,6 +1058,72 @@
     pcTop11:"cromosfera (Q 11)", pcTop9:"protuberancias (Q 9)",
     pcAtm:"Atmósfera en el máximo: {am} masas de aire, extinción +{ev} EV, dispersión {disp}″, achatamiento {flat} %.",
     pcHorizon:"Sol a {alt}° y azimut {az}°: un obstáculo de {h} m debe quedar a más de {d} m.",
+
+    /* --- presets de cuerpo --- */
+    camOpts:{
+      m11l:"Leica M11 · L-DNG 60,3 Mpx", m11m:"Leica M11 · M-DNG 36,3 Mpx", m11s:"Leica M11 · S-DNG 18,4 Mpx",
+      q343:"Leica Q3 43 · 43 mm (60,3 Mpx)", q360:"Leica Q3 43 · recorte 60 mm (31 Mpx)",
+      q375:"Leica Q3 43 · recorte 75 mm (19,8 Mpx)", q390:"Leica Q3 43 · recorte 90 mm (13,8 Mpx)",
+      q3120:"Leica Q3 43 · recorte 120 mm (7,7 Mpx)", q3150:"Leica Q3 43 · recorte 150 mm (5,0 Mpx)",
+      sl24:"Leica SL3-S · 24,6 Mpx nativos", sl48:"Leica SL3-S · 48 Mpx multishot (malla de 24,6)",
+      sl96:"Leica SL3-S · 96 Mpx multishot", manual:"Otro (manual)"
+    },
+    segMech:"Mecánico", segElec:"Electrónico",
+    camHint:"El preset rellena formato, resolución, tope de obturador y cadencia; el resto lo eliges tú. En cuanto tocas el formato, los Mpx, el tope o (en la Q3) la focal, el cuerpo pasa a <code>Otro (manual)</code>. La Q3 43 lleva la focal fija en 43 mm: sus recortes son ventanas del mismo sensor, así que el simulador los trata como un sensor menor con menos píxeles, que es exactamente lo que son. El multishot de 48 Mpx no cambia la malla de muestreo (mismo paso que los 24,6): añade color y relación señal-ruido, no detalle.",
+    camNow:"{cam}: sensor {sw} × {sh} mm, {mp} Mpx, paso {p} µm, obturador hasta {smax}, ráfaga {fps} fps.",
+    /* --- píxeles y modo --- */
+    vSunPx:" A esta escala el Sol mide <b>{sp} px</b> de diámetro y tu corona de {r} R☉, {cp} px.",
+    vModeOk:" La mancha real —seeing de {see}″ sumado en cuadratura al disco de Airy a f/{f}— mide {spx} px en este modo: el archivo mayor no añadiría detalle, solo tamaño. Con {mode} basta.",
+    vModeUp:" La mancha real —seeing de {see}″ sumado en cuadratura al disco de Airy a f/{f}— solo mide {spx} px en este modo: queda detalle sin muestrear, sube a {mode}.",
+    vModeMax:" La mancha real —seeing de {see}″ sumado en cuadratura al disco de Airy a f/{f}— mide {spx} px en este modo y no tienes archivo mayor: aquí manda la malla del sensor, no la atmósfera. {mode} es el que más detalle recoge.",
+    vMulti:" Sobre trípode fijo el Sol recorre {pxs} px por segundo a esta escala: las tomas del multishot no se registran entre sí. Ese modo exige seguimiento.",
+    /* --- deriva --- */
+    dirN:"arriba", dirNE:"arriba y a la derecha", dirE:"la derecha", dirSE:"abajo y a la derecha",
+    dirS:"abajo", dirSW:"abajo y a la izquierda", dirW:"la izquierda", dirNW:"arriba y a la izquierda",
+    offL:"un {v} % del ancho a la izquierda", offR:"un {v} % del ancho a la derecha",
+    offU:"un {v} % del alto por encima", offD:"un {v} % del alto por debajo",
+    vDrift:" Ojo: sobre trípode fijo el Sol se mueve hacia {dir} (PA {pa}°) y recorre {d} durante la totalidad, un {p} % del lado corto. Colócalo al empezar {sx} y {sy} del centro: pasará por el centro en el máximo y saldrá por el lado contrario.",
+    vwStart:"inicio",
+    /* --- problema inverso --- */
+    fmaxFree:"sin límite",
+    vFocal:" Para que esa corona llene el 80 % del lado corto harían falta <b>{f} mm</b>; para que el disco ocupe la mitad del lado corto, {fd} mm.",
+    vFmax:" Con la exposición más lenta de tu horquilla ({t}) y {b} px de presupuesto, la focal máxima sin seguimiento es {fm} mm: a {fe} mm efectivos {adv}",
+    vFmaxOk:"vas sobrado.",
+    vFmaxNo:"te pasas; sube el presupuesto a 2 o 3 px, recorta la horquilla o usa seguimiento.",
+    /* --- comparador A/B --- */
+    abIntro:"Mismo sitio, mismo instante, mismo ISO y diafragma: lo único que cambia entre A y B es el cuerpo, la focal y el teleconvertidor. Los tiempos de serie suponen tu cadencia y tu paso de horquilla.",
+    abTh0:"Magnitud", abKit:"Equipo", abFov:"Campo de visión (H × V)",
+    abSunPct:"El Sol ocupa (% del lado corto)", abSunPx:"El Sol mide (px)",
+    abCorPct:"La corona ocupa (% del lado corto)", abCorPx:"La corona mide (px)",
+    abScale:"Escala de placa (″/px)", abLim:"Límite de arrastre a {b} px",
+    abShots:"Disparos de la horquilla", abSerie:"Duración de una serie",
+    abRuns:"Tandas", abFits:"Cabe en la totalidad", abVerdict:"Veredicto de encuadre",
+    abYes:"sí", abTight:"ajustado", abNo:"no",
+    abNote:"El veredicto de encuadre usa los mismos seis niveles que el visor. «Cabe en la totalidad» compara la serie completa con los {d} s de {loc}: sí por debajo del 80 %, ajustado hasta el 100 %.",
+    /* --- gráfica de la horquilla --- */
+    chAria:"La horquilla sobre la escala de tiempos de obturación",
+    chLabs:["anillo","perlas","cromo.","protub.","0,1 R","0,5 R","1 R","2 R","tuya"],
+    chScale:"escala de la cámara", chDriftL:"arrastre {b} px", chIso2:"ISO {n}",
+    chNote:"Escala logarítmica de tiempos. La banda clara es lo que tu cámara ofrece entre {smax} y 30 s; la línea roja, el tiempo a partir del cual el Sol arrastra más de {b} px sobre trípode fijo. Arriba, dónde cae cada estructura; en medio, los fotogramas de cada tanda, con la base resaltada; abajo, la misma horquilla al doble de ISO, que la desplaza un paso entera hacia la izquierda.",
+    /* --- mapa ISO × diafragma --- */
+    heatIso:"ISO",
+    heatNote:"Cada celda ejecuta el plan completo con ese ISO y ese diafragma, dejando el resto como lo tienes. El número grande son las tandas, que dependen del paso y del extremo brillante, no del ISO; ▲ cuenta las velocidades que arrastran y ✕ las que se salen de la escala de la cámara, que es justo lo que el ISO y el diafragma gobiernan, y por eso son las que dan el color: verde sin arrastre ni recortes, ámbar hasta dos arrastres y un recorte, rojo el resto. Tu pareja actual va recuadrada. Si toda la tabla sale roja, el problema no es el ISO: sube el tope del obturador, baja el extremo brillante o agranda el paso.",
+    heatNoteTrack:" Con seguimiento no hay arrastre, así que solo cuentan las tandas y los recortes de escala.",
+    /* --- ráfagas del anillo --- */
+    runB2:"Ráfaga C2", runB3:"Ráfaga C3", runBcov:"anillo y perlas · fija, sin horquillar",
+    planBurst:" Las dos ráfagas del anillo no se horquillan: velocidad fija, el dedo abajo desde 6 s antes del contacto hasta 3 s después. A {fps} fps son {n} fotogramas por ráfaga.",
+    burstWin:"{a} → {b}",
+    alertC2b:"Fuera el filtro en 30 s · ráfaga del anillo desde {t}",
+    alertC3b:"Filtro puesto en 15 s · ráfaga del anillo desde {t}",
+    /* --- ensayo con el Sol de hoy --- */
+    testBtn:"☀ Probar hoy con el Sol",
+    testOut:"Hoy a las {t} en {loc} el Sol está a {alt}° ({am} masas de aire): con {nd}, ISO {iso} y f/{f} espera <b>{v}</b>. La declinación de hoy es {dec}°, así que la deriva vale {dr}″/s y el límite de arrastre a {b} px, {lim}. Dispara, mira el histograma y anota la diferencia en pasos aquí abajo.",
+    testNight:"Ahora mismo el Sol está bajo el horizonte en {loc} ({alt}°). Vuelve a probar a media mañana, que es la altura del eclipse.",
+    ndcApplied:" Desviación medida del filtro aplicada: {v} EV.",
+    /* --- difracción --- */
+    airyNote:"A f/{f} el disco de Airy mide {a} px y el seeing {s} px: manda {who}. Puedes cerrar hasta f/{n} antes de que la difracción iguale a la atmósfera. El techo por cuerpo y por modo, con veredicto, está en la {link}.",
+    airySee:"la atmósfera", airyDiff:"la difracción", airyLink:"pestaña de difracción",
+    instBurst:" Ráfagas del anillo: {a} y {b}.",
     dateLocale:"es-ES"
   },
   en:{
@@ -988,7 +1194,6 @@
     vt5x:"The corona fits comfortably, with sky around it. Ample margin to compose and to keep the streamers.",
     vt6t:"Wide shot",
     vt6x:"The eclipse sits small within the frame: landscape territory. With the Sun at {alt}° it takes a very short wide angle to bring the horizon into the same shot.",
-    vAddDrift:" Note: on a fixed tripod the Sun moves {d} during totality, {p}% of the short side. Offset it up and to the left.",
     vAddHorizon:" The horizon falls inside the frame: a landscape composition is available.",
 
     refPhoto:"Photosphere (solar disc)",
@@ -1070,8 +1275,6 @@
     alertHint:"With alerts on, the browser beeps and vibrates 30 s before second contact and 15 s before third contact, and keeps the screen awake. It needs one tap on the page first.",
     alertOnMsg:"Alerts active. Screen kept awake while this tab is visible.",
     alertNoWake:"Alerts active. This browser will not keep the screen awake.",
-    alertC2:"Filter off in 30 seconds",
-    alertC3:"Filter back on in 15 seconds",
 
     ndName11:"ND 4.0", ndName8:"ND 5.0 / Baader visual", ndName12:"Baader ND 3.8 (photo only)",
     pcTitle:"Field sheet · Total solar eclipse · {loc} · 2 August 2027",
@@ -1106,6 +1309,72 @@
     pcTop11:"chromosphere (Q 11)", pcTop9:"prominences (Q 9)",
     pcAtm:"Atmosphere at maximum: {am} air masses, extinction +{ev} EV, dispersion {disp}″, flattening {flat}%.",
     pcHorizon:"Sun at {alt}° and azimuth {az}°: an obstacle {h} m high must stand more than {d} m away.",
+
+    /* --- body presets --- */
+    camOpts:{
+      m11l:"Leica M11 · L-DNG 60.3 MP", m11m:"Leica M11 · M-DNG 36.3 MP", m11s:"Leica M11 · S-DNG 18.4 MP",
+      q343:"Leica Q3 43 · 43 mm (60.3 MP)", q360:"Leica Q3 43 · 60 mm crop (31 MP)",
+      q375:"Leica Q3 43 · 75 mm crop (19.8 MP)", q390:"Leica Q3 43 · 90 mm crop (13.8 MP)",
+      q3120:"Leica Q3 43 · 120 mm crop (7.7 MP)", q3150:"Leica Q3 43 · 150 mm crop (5.0 MP)",
+      sl24:"Leica SL3-S · 24.6 MP native", sl48:"Leica SL3-S · 48 MP multishot (24.6 grid)",
+      sl96:"Leica SL3-S · 96 MP multishot", manual:"Other (manual)"
+    },
+    segMech:"Mechanical", segElec:"Electronic",
+    camHint:"The preset fills in format, resolution, shutter ceiling and drive rate; the rest is yours. The moment you touch the format, the megapixels, the ceiling or (on the Q3) the focal length, the body switches to <code>Other (manual)</code>. The Q3 43 has its focal length fixed at 43 mm: its crops are windows on the same sensor, so the simulator treats them as a smaller sensor with fewer pixels, which is exactly what they are. The 48 MP multishot does not change the sampling grid (same pitch as the 24.6): it adds colour and signal-to-noise, not detail.",
+    camNow:"{cam}: sensor {sw} × {sh} mm, {mp} MP, {p} µm pitch, shutter to {smax}, {fps} fps burst.",
+    /* --- pixels and mode --- */
+    vSunPx:" At this scale the Sun is <b>{sp} px</b> across and your corona at {r} R☉, {cp} px.",
+    vModeOk:" The real blur —seeing of {see}″ added in quadrature to the Airy disc at f/{f}— spans {spx} px in this mode: the larger file would add no detail, only size. {mode} is enough.",
+    vModeUp:" The real blur —seeing of {see}″ added in quadrature to the Airy disc at f/{f}— spans only {spx} px in this mode: detail is left unsampled, move up to {mode}.",
+    vModeMax:" The real blur —seeing of {see}″ added in quadrature to the Airy disc at f/{f}— spans {spx} px in this mode and you have no larger file: here the sensor grid rules, not the atmosphere. {mode} collects the most detail.",
+    vMulti:" On a fixed tripod the Sun travels {pxs} px per second at this scale: the multishot frames will not register against one another. That mode demands tracking.",
+    /* --- drift --- */
+    dirN:"up", dirNE:"up and to the right", dirE:"the right", dirSE:"down and to the right",
+    dirS:"down", dirSW:"down and to the left", dirW:"the left", dirNW:"up and to the left",
+    offL:"{v}% of the width to the left", offR:"{v}% of the width to the right",
+    offU:"{v}% of the height above", offD:"{v}% of the height below",
+    vDrift:" Note: on a fixed tripod the Sun moves toward {dir} (PA {pa}°) and travels {d} during totality, {p}% of the short side. Place it at the start {sx} and {sy} of centre: it will cross the centre at maximum and leave on the opposite side.",
+    vwStart:"start",
+    /* --- inverse problem --- */
+    fmaxFree:"no limit",
+    vFocal:" For that corona to fill 80% of the short side you would need <b>{f} mm</b>; for the disc to take half the short side, {fd} mm.",
+    vFmax:" With the slowest exposure of your bracket ({t}) and a {b} px budget, the maximum focal length without tracking is {fm} mm: at {fe} mm effective {adv}",
+    vFmaxOk:"you have room to spare.",
+    vFmaxNo:"you are over it; raise the budget to 2 or 3 px, trim the bracket, or use tracking.",
+    /* --- A/B comparison --- */
+    abIntro:"Same site, same instant, same ISO and aperture: all that changes between A and B is the body, the focal length and the teleconverter. The series times assume your drive rate and your bracket step.",
+    abTh0:"Quantity", abKit:"Kit", abFov:"Field of view (H × V)",
+    abSunPct:"The Sun takes (% of short side)", abSunPx:"The Sun measures (px)",
+    abCorPct:"The corona takes (% of short side)", abCorPx:"The corona measures (px)",
+    abScale:"Plate scale (″/px)", abLim:"Trailing limit at {b} px",
+    abShots:"Frames in the bracket", abSerie:"Length of one series",
+    abRuns:"Runs", abFits:"Fits inside totality", abVerdict:"Framing verdict",
+    abYes:"yes", abTight:"tight", abNo:"no",
+    abNote:"The framing verdict uses the same six levels as the viewer. \u201cFits inside totality\u201d compares the whole series with the {d} s of {loc}: yes below 80%, tight up to 100%.",
+    /* --- bracket chart --- */
+    chAria:"The bracket on the shutter-speed scale",
+    chLabs:["ring","beads","chromo.","prom.","0.1 R","0.5 R","1 R","2 R","yours"],
+    chScale:"camera scale", chDriftL:"trailing {b} px", chIso2:"ISO {n}",
+    chNote:"Logarithmic time scale. The light band is what your camera offers between {smax} and 30 s; the red line is the time beyond which the Sun trails more than {b} px on a fixed tripod. Above, where each structure falls; in the middle, the frames of each run with the base highlighted; below, the same bracket at twice the ISO, which shifts it a whole stop to the left.",
+    /* --- ISO × aperture map --- */
+    heatIso:"ISO",
+    heatNote:"Each cell runs the whole plan at that ISO and that aperture, leaving everything else as you have it. The large number is the count of runs, which depends on the step and on the bright end rather than on the ISO; ▲ counts the speeds that trail and ✕ those outside the camera scale, which is exactly what ISO and aperture govern, and that is what sets the colour: green for no trailing and no clipping, amber for up to two trailing speeds and one clip, red for the rest. Your current pair is outlined. If the whole table comes out red, the ISO is not the problem: raise the shutter ceiling, lower the bright end, or widen the step.",
+    heatNoteTrack:" With tracking there is no trailing, so only the runs and the scale clipping count.",
+    /* --- diamond-ring bursts --- */
+    runB2:"C2 burst", runB3:"C3 burst", runBcov:"ring and beads · fixed, no bracketing",
+    planBurst:" The two ring bursts are not bracketed: fixed speed, finger down from 6 s before the contact to 3 s after. At {fps} fps that is {n} frames per burst.",
+    burstWin:"{a} → {b}",
+    alertC2b:"Filter off in 30 s · ring burst from {t}",
+    alertC3b:"Filter on in 15 s · ring burst from {t}",
+    /* --- rehearsal with today's Sun --- */
+    testBtn:"☀ Try it today with the Sun",
+    testOut:"Today at {t} in {loc} the Sun stands at {alt}° ({am} air masses): with {nd}, ISO {iso} and f/{f} expect <b>{v}</b>. Today's declination is {dec}°, so the drift is {dr}″/s and the trailing limit at {b} px is {lim}. Shoot, read the histogram and note the difference in stops below.",
+    testNight:"The Sun is below the horizon in {loc} right now ({alt}°). Try again in mid-morning, which is the altitude of the eclipse.",
+    ndcApplied:" Measured filter deviation applied: {v} EV.",
+    /* --- diffraction --- */
+    airyNote:"At f/{f} the Airy disc is {a} px and the seeing {s} px: {who} rules. You can stop down to f/{n} before diffraction matches the atmosphere. The ceiling per body and per mode, with a verdict, is in the {link}.",
+    airySee:"the atmosphere", airyDiff:"diffraction", airyLink:"diffraction tab",
+    instBurst:" Ring bursts: {a} and {b}.",
     dateLocale:"en-GB"
   }};
 
@@ -1332,6 +1601,8 @@
     corR:4.0,
     iso:400, fnum:8, nd:8, mp:24,
     track:false, dpx:1, ext:1, smax:8000, fps:2.5, step:1, qtop:13, maxf:"nikon",
+    cam:"m11l", sht:"m", ndc:0,
+    cmp:false, camB:"sl24", focalB:280, tcB:1,
     loc:"tarifa",
     inst:null,        // ms del instante mostrado; null = mitad de la totalidad
     live:false,
@@ -1347,6 +1618,87 @@
     return Math.max(l.tC1,Math.min(l.tEnd,st.inst));
   }
   function isTotal(ms){ var l=L(); return ms>=l.tC2&&ms<=l.tC3; }
+  function ndQ(){ return st.nd-st.ndc; }   // Q del filtro con la desviación medida
+
+  /* =========================================================================
+     4b. CUERPOS · presets Leica
+     Los tres cuerpos son de formato completo, 36 × 24 mm. Los recortes de la
+     Q3 43 son ventanas del mismo sensor: se modelan como un sensor menor con
+     la focal real de 43 mm, lo que reproduce a la vez el campo, el paso de
+     píxel y los megapíxeles que la cámara escribe en el DNG. El modo de 48 Mpx
+     del SL3-S conserva la malla de 24,6 (cuatro desplazamientos de un píxel
+     entero), así que su muestreo es el del modo nativo.
+     ========================================================================= */
+  var CAMS={
+    m11l:{sw:36,sh:24,mp:60.3,sm:4000,se:16000,fps:5,maxf:5,fam:"m11"},
+    m11m:{sw:36,sh:24,mp:36.3,sm:4000,se:16000,fps:5,maxf:5,fam:"m11"},
+    m11s:{sw:36,sh:24,mp:18.4,sm:4000,se:16000,fps:5,maxf:5,fam:"m11"},
+    sl24:{sw:36,sh:24,mp:24.6,sm:8000,se:16000,fps:10,maxf:5,fam:"sl"},
+    sl48:{sw:36,sh:24,mp:24.6,sm:8000,se:16000,fps:10,maxf:5,fam:"sl"},
+    sl96:{sw:36,sh:24,mp:96.0,sm:8000,se:16000,fps:10,maxf:5,fam:"sl",multi:true}
+  };
+  var CAMIDS=["m11l","m11m","m11s","q343","q360","q375","q390","q3120","q3150","sl24","sl48","sl96","manual"];
+  (function(){
+    [43,60,75,90,120,150].forEach(function(fe){
+      var k=43/fe, r4=function(x){ return Math.round(x*1e4)/1e4; };
+      CAMS["q3"+fe]={sw:r4(36*k),sh:r4(24*k),mp:Math.round(60.3*k*k*10)/10,
+                     sm:2000,se:40000,fps:2.5,maxf:5,fam:"q3",fixed:43};
+    });
+  })();
+  var FAMMODES={m11:["m11s","m11m","m11l"], sl:["sl24","sl48","sl96"]};
+
+  function camPreset(id,shut){
+    var p=CAMS[id]; if(!p) return null;
+    return {sw:p.sw,sh:p.sh,mp:p.mp,smax:(shut==="e"?p.se:p.sm),
+            fps:p.fps,maxf:p.maxf,fixed:p.fixed||0,fam:p.fam,multi:!!p.multi};
+  }
+  function camName(id){ var o=tArr("camOpts"); return o[id]||id; }
+  function segSync(id,attr,val){
+    [].forEach.call($(id).querySelectorAll("button"),function(b){
+      b.setAttribute("aria-pressed",b.getAttribute("data-"+attr)===val?"true":"false");
+    });
+  }
+  var focalFree=500;                 // última focal elegida con un cuerpo de focal libre
+  function applyCam(){
+    var p=camPreset(st.cam,st.sht);
+    if(!p) return;
+    if(!p.fixed&&st.focal===43&&focalFree!==43) st.focal=focalFree;
+    st.sw=p.sw; st.sh=p.sh; st.mp=p.mp; st.smax=p.smax; st.fps=p.fps; st.maxf=p.maxf;
+    if(p.fixed) st.focal=p.fixed; else focalFree=st.focal;
+    if(Math.abs(p.sw-36)<1e-6&&Math.abs(p.sh-24)<1e-6){
+      st.custom=false; $("sensor").value="36,24,3:2"; $("customBox").classList.remove("on");
+    } else {
+      st.custom=true; $("sensor").value="custom"; $("customBox").classList.add("on");
+      $("cw").value=p.sw; $("ch").value=p.sh;
+    }
+    $("mp").value=st.mp; $("smax").value=String(st.smax);
+    $("fps").value=String(st.fps); $("maxf").value=String(st.maxf);
+    $("focal").value=focalToT(st.focal); $("focalNum").value=st.focal; $("focalv").textContent=st.focal;
+    buildShut();
+  }
+  // cualquier control que contradiga el preset devuelve el cuerpo a "manual"
+  function camManual(){
+    if(st.cam!=="manual"){ st.cam="manual"; $("ecCam").value="manual"; }
+  }
+  function cloneSt(){
+    var o={}; for(var k in st) if(Object.prototype.hasOwnProperty.call(st,k)) o[k]=st[k];
+    return o;
+  }
+  // ejecuta fn con otro estado; restaura la escala de obturación si hacía falta
+  function withState(sx,fn){
+    var old=st, oS=SHUT, oMin=SHUT_MIN, oMax=SHUT_MAX, need=(sx.smax!==old.smax);
+    st=sx;
+    if(need) buildShut();
+    try{ return fn(); }
+    finally{ st=old; if(need){ SHUT=oS; SHUT_MIN=oMin; SHUT_MAX=oMax; } }
+  }
+  function stateB(){
+    var sx=cloneSt(), p=camPreset(st.camB,st.sht);
+    sx.cam=st.camB; sx.focal=st.focalB; sx.tc=st.tcB;
+    if(p){ sx.sw=p.sw; sx.sh=p.sh; sx.mp=p.mp; sx.smax=p.smax; sx.fps=p.fps; sx.maxf=p.maxf;
+           if(p.fixed) sx.focal=p.fixed; }
+    return sx;
+  }
   function hhmm(ms,secs){
     var d=new Date(ms+L().tz*3600000);   // hora local del sitio elegido
     function z(n){ return (n<10?"0":"")+n; }
@@ -1371,6 +1723,35 @@
              minFov:Math.min(hFov,vFov), corR_deg:st.corR*R_SUN, corDia:2*st.corR*R_SUN,
              scale:scale, tmax:st.dpx*scale/DRIFT };
   }
+  // problema inverso: focal que hace que un objeto de "dia" grados llene "frac"
+  // del lado corto del fotograma
+  function focalFill(c,frac,dia){
+    return (Math.min(c.w,c.h)/2)/Math.tan(dia*D2R/(2*frac));
+  }
+  // focal máxima sin seguimiento para una exposición dada y el presupuesto en px
+  function focalMaxNoTrack(tslow){
+    return 206265*(pxPitch()/1000)*st.dpx/(DRIFT*Math.max(1e-4,tslow));
+  }
+  function sunPxOf(c){ return D_SUN*3600/c.scale; }
+  function corPxOf(c){ return c.corDia*3600/c.scale; }
+  // dirección de la deriva y punto de partida, en el marco de la imagen
+  // (+x a la derecha, +y hacia abajo, como el visor)
+  var DIRK=["dirN","dirNE","dirE","dirSE","dirS","dirSW","dirW","dirNW"];
+  function driftInfo(c){
+    var l=L(), dd=DRIFT*l.dur/3600, pa=((l.paDrift%360)+360)%360, r=pa*D2R;
+    var ux=Math.sin(r), uy=-Math.cos(r);          // sentido del movimiento
+    var sx=-ux*dd/2, sy=-uy*dd/2;                 // punto de partida, media deriva atrás
+    return { dd:dd, pa:pa, ux:ux, uy:uy, sx:sx, sy:sy,
+             dir:t(DIRK[Math.round(pa/45)%8]),
+             px:sx/c.hFov*100, py:sy/c.vFov*100, pct:dd/c.minFov*100 };
+  }
+  function driftText(c){
+    var d=driftInfo(c);
+    var sx=t(d.px<0?"offL":"offR",{v:fN(Math.abs(d.px))});
+    var sy=t(d.py<0?"offU":"offD",{v:fN(Math.abs(d.py))});
+    return t("vDrift",{dir:d.dir,pa:Math.round(d.pa),d:fmtArc(d.dd),
+                       p:Math.round(d.pct),sx:sx,sy:sy});
+  }
   function fmtDeg(d){ return d>=1?dec(d.toFixed(2))+"°":Math.round(d*60)+"′"; }
   function fmtArc(d){ // grados -> ° o ′
     return d>=1?dec(d.toFixed(2))+"°":(d*60>=1?f1(d*60)+"′":Math.round(d*3600)+"″");
@@ -1380,6 +1761,7 @@
      6. EXPOSICIÓN
      ========================================================================= */
   // fracciones en pasos de 1/3 hasta 1/64000; se recorta al tope de la cámara
+  var SMAXV=[2000,4000,8000,16000,32000,40000,64000];
   var FR_ALL=[64000,51200,40000,32000,25600,20000,16000,12800,10000,
               8000,6400,5000,4000,3200,2500,2000,1600,1250,1000,800,640,500,400,320,
               250,200,160,125,100,80,60,50,40,30,25,20,15,13,10,8,6,5,4,3,2];
@@ -1468,7 +1850,7 @@
     return out;
   }
 
-  function draw(c,ms){
+  function draw(c,ms,cB){
     var l=L(), W=1000,H=750,cx=W/2,cy=H/2;
     var total=isTotal(ms);
     var atm=extNow(ms);
@@ -1482,7 +1864,9 @@
     if(st.zoom==="fit"){
       scale=0.96*Math.min(W/c.hFov,H/c.vFov);
     } else {
-      span=Math.max(Math.max(c.hFov,c.vFov),c.corDia)*1.25;
+      span=Math.max(Math.max(c.hFov,c.vFov),c.corDia);
+      if(cB) span=Math.max(span,Math.max(cB.hFov,cB.vFov));
+      span*=1.25;
       span=Math.max(span,D_SUN*5);
       scale=0.9*Math.min(W,H)/span;
     }
@@ -1583,18 +1967,30 @@
     }
     svg+='</g>';
 
-    // rastro de deriva durante la totalidad sobre trípode fijo
+    // rastro de deriva sobre trípode fijo: arranca en el punto de partida
+    // (media deriva antes del centro) y acaba media deriva después
     if(!st.track){
-      var dd=DRIFT*l.dur/3600*scale, pa=l.paDrift*Math.PI/180;
-      var ex=cx+Math.sin(pa)*dd, ey=cy-Math.cos(pa)*dd;
-      svg+='<g opacity="0.8"><line x1="'+cx+'" y1="'+cy+'" x2="'+esc(ex)+'" y2="'+esc(ey)+'" '
+      var di=driftInfo(c), dd=di.dd*scale;
+      var s0x=cx+di.sx*scale, s0y=cy+di.sy*scale;
+      var ex=s0x+di.ux*dd, ey=s0y+di.uy*dd;
+      svg+='<g opacity="0.85"><line x1="'+esc(s0x)+'" y1="'+esc(s0y)+'" x2="'+esc(ex)+'" y2="'+esc(ey)+'" '
         +  'stroke="#6fe3a6" stroke-width="2" stroke-dasharray="6 5"/>'
-        +  '<circle cx="'+esc(ex)+'" cy="'+esc(ey)+'" r="4" fill="#6fe3a6"/></g>';
+        +  '<circle cx="'+esc(s0x)+'" cy="'+esc(s0y)+'" r="8" fill="none" stroke="#6fe3a6" stroke-width="2"/>'
+        +  '<circle cx="'+esc(ex)+'" cy="'+esc(ey)+'" r="4" fill="#6fe3a6"/>'
+        +  '<text x="'+esc(s0x)+'" y="'+esc(s0y-14)+'" font-family="JetBrains Mono, monospace" font-size="15" '
+        +  'fill="#6fe3a6" text-anchor="middle">'+t("vwStart")+'</text></g>';
     }
 
     // máscara fuera del fotograma y marco
     svg+='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#04040a" opacity="'+(st.zoom==="fit"?0.75:0.66)+'" mask="url(#outside)"/>';
     svg+='<rect x="'+esc(fx)+'" y="'+esc(fy)+'" width="'+esc(fw)+'" height="'+esc(fh)+'" fill="none" stroke="#ffcf6b" stroke-width="2.2" rx="3"/>';
+    if(cB){
+      var bw=cB.hFov*scale, bh=cB.vFov*scale;
+      svg+='<rect x="'+esc(cx-bw/2)+'" y="'+esc(cy-bh/2)+'" width="'+esc(bw)+'" height="'+esc(bh)+'" '
+        +  'fill="none" stroke="#c9903c" stroke-width="2" stroke-dasharray="10 7" rx="3"/>'
+        +  '<text x="'+esc(cx-bw/2+8)+'" y="'+esc(cy-bh/2+24)+'" font-family="JetBrains Mono, monospace" '
+        +  'font-size="19" font-weight="600" fill="#c9903c">B</text>';
+    }
     var tk=16;
     [[fx,fy,1,1],[fx+fw,fy,-1,1],[fx,fy+fh,1,-1],[fx+fw,fy+fh,-1,-1]].forEach(function(p){
       svg+='<path d="M'+esc(p[0])+' '+esc(p[1]+p[3]*tk)+' L'+esc(p[0])+' '+esc(p[1])+' L'+esc(p[0]+p[2]*tk)+' '+esc(p[1])+'" stroke="#ffcf6b" stroke-width="2.2" fill="none"/>';
@@ -1626,8 +2022,8 @@
   /* =========================================================================
      8. PANELES
      ========================================================================= */
-  function verdict(c,ms){
-    var l=L(), m=c.minFov, sun=D_SUN, inner=4*R_SUN, corDia=c.corDia, tag,txt;
+  function verdictOf(c,ms){
+    var m=c.minFov, sun=D_SUN, inner=4*R_SUN, corDia=c.corDia, tag,txt;
     var total=isTotal(ms), alt=f1(extNow(ms).altApp);
     if(!total){
       if(m<sun*0.95){ tag=t("vp1t"); txt=t("vp1x"); }
@@ -1640,11 +2036,43 @@
     else if(m<corDia*1.15){ tag=t("vt4t"); txt=t("vt4x"); }
     else if(m<5){ tag=t("vt5t"); txt=t("vt5x"); }
     else { tag=t("vt6t"); txt=t("vt6x",{alt:alt}); }
-    var dd=DRIFT*l.dur/3600;                     // grados de deriva en la totalidad
-    if(!st.track&&dd>0.12*m) txt+=t("vAddDrift",{d:fmtArc(dd),p:Math.round(dd/m*100)});
-    if(c.vFov/2>extNow(ms).altApp) txt+=t("vAddHorizon");
-    $("vtag").textContent=tag;
-    $("vtext").textContent=txt;
+    return {tag:tag,txt:txt};
+  }
+  // paso de píxel de un preset, en µm, para comparar modos del mismo cuerpo
+  function pitchOfCam(id){
+    var p=camPreset(id,st.sht); if(!p) return null;
+    return p.sw/Math.sqrt(p.mp*1e6*p.sw/p.sh)*1000;
+  }
+  // mancha real en el sensor, µm: seeing y disco de Airy en cuadratura
+  function blurUm(fe,see){
+    return Math.sqrt(Math.pow(see*fe/206.265,2)+Math.pow(1.342*st.fnum,2));
+  }
+  function verdict(c,ms,tSlow){
+    var v=verdictOf(c,ms), txt=v.txt;
+    var a=extNow(ms), see=seeingArcsec(a.X);
+    txt+=t("vSunPx",{sp:Math.round(sunPxOf(c)),r:f1(st.corR),cp:Math.round(corPxOf(c))});
+    var p=camPreset(st.cam,st.sht);
+    if(p&&FAMMODES[p.fam]){
+      var ids=FAMMODES[p.fam], pick=ids[ids.length-1], found=false, bl=blurUm(c.fe,see);
+      for(var i=0;i<ids.length;i++){
+        if(bl/pitchOfCam(ids[i])>=2){ pick=ids[i]; found=true; break; }
+      }
+      var iCur=ids.indexOf(st.cam), iPick=ids.indexOf(pick);
+      // si ningún modo llega a muestrear la mancha, manda la malla: gana el mayor
+      var key=found?(iPick<=iCur?"vModeOk":"vModeUp"):(iCur>=iPick?"vModeMax":"vModeUp");
+      txt+=t(key,{see:f1(see),f:fN(st.fnum),spx:f1(bl/pxPitch()),mode:camName(pick)});
+      if(p.multi&&!st.track) txt+=t("vMulti",{pxs:f1(DRIFT/c.scale)});
+    }
+    txt+=t("vFocal",{f:Math.round(focalFill(c,0.8,c.corDia)),fd:Math.round(focalFill(c,0.5,D_SUN))});
+    if(!st.track){
+      var fm=focalMaxNoTrack(tSlow);
+      txt+=t("vFmax",{t:shutFor(tSlow).label,b:st.dpx,fm:Math.round(fm),fe:Math.round(c.fe),
+                      adv:t(c.fe<=fm?"vFmaxOk":"vFmaxNo")});
+      if(driftInfo(c).pct>12) txt+=driftText(c);
+    }
+    if(c.vFov/2>a.altApp) txt+=t("vAddHorizon");
+    $("vtag").textContent=v.tag;
+    $("vtext").innerHTML=txt;
   }
 
   function refTable(c){
@@ -1679,12 +2107,15 @@
     if(!total){
       $("expCol").textContent=t("colPartial");
       $("bracketBox").style.display="none"; $("planWrap").style.display="none";
-      rows=[[t("rowPhot"),st.nd],[t("rowCresc"),st.nd-2]];
+      rows=[[t("rowPhot"),ndQ()],[t("rowCresc"),ndQ()-2]];
       var a1=f1(appAlt(sunAltAz(l.tC1,l.lat,l.lon).alt)), a2=f1(appAlt(sunAltAz(l.tEnd,l.lat,l.lon).alt));
-      $("expIntro").innerHTML=t("expIntroPar",{a1:a1,a2:a2})+extTxt;
+      $("expIntro").innerHTML=t("expIntroPar",{a1:a1,a2:a2})+extTxt
+        +(st.ndc?t("ndcApplied",{v:(st.ndc>0?"+":"")+f1(st.ndc)}):"");
+      $("ecChart").style.display="none"; $("ecChartNote").style.display="none";
     } else {
       $("expCol").textContent=t("colStruct");
       $("bracketBox").style.display="block"; $("planWrap").style.display="block";
+      $("ecChart").style.display=""; $("ecChartNote").style.display="";
       var T=totalityData(c,ev);
       rows=T.rows;
       $("expIntro").innerHTML=t("expIntroTot",{r:f1(st.corR),n:Math.round(st.qtop-T.qOuter)})+extTxt;
@@ -1716,6 +2147,8 @@
         : t("setsMany",{m:nf,k:kRuns,r:REARM,s:f1(tSerie)})
           + (stepMin<=3?t("setsStep",{n:f1(need),m:nf,p:f1(stepMin),rec:dec(String(stepRec))}):"");
       renderPlan(plan,nf);
+      chartDraw(c,ev,T,plan);
+      heatDraw(c,ev);
       var fits=tSerie<=l.dur*0.8?"seqFits":(tSerie<=l.dur?"seqTight":"seqOver");
       $("bracketNote").innerHTML=t("seqNote",{n:T.seq.length-no,f:fN(st.fnum),iso:st.iso,fps:dec(String(st.fps)),st:dec(String(st.step)),
             s:f1(tSerie),e:f1(plan.expSum)})
@@ -1768,35 +2201,180 @@
     });
     return {runs:runs,total:total,expSum:expSum,ev:ev};
   }
+  // ventanas fijas de la ráfaga del anillo de diamantes: contacto −6 s a +3 s
+  function burstWins(){
+    var l=L();
+    return { a:t("burstWin",{a:hhmm(l.tC2-6000,true),b:hhmm(l.tC2+3000,true)}),
+             b:t("burstWin",{a:hhmm(l.tC3-6000,true),b:hhmm(l.tC3+3000,true)}) };
+  }
+  function burstRow(which,ev){
+    var w=burstWins(), sB=shutFor(expTime(11,ev)), n=Math.round(9*st.fps);
+    return '<tr><td>'+t(which==="a"?"runB2":"runB3")+'</td>'
+      + '<td class="n"'+(sB.out?' style="color:var(--gold)"':'')+'><b>'+sB.label+'</b></td>'
+      + '<td class="n">'+n+'</td>'
+      + '<td class="n">'+(which==="a"?w.a:w.b)
+      + ' <span style="color:var(--muted)">('+t("runBcov")+')</span></td></tr>';
+  }
   function renderPlan(plan,nf){
     $("thRun").textContent=t("thRun"); $("thBase").textContent=t("thBase");
     $("thFrames").textContent=t("thFrames"); $("thCov").textContent=t("thCov");
-    $("planTab").innerHTML=plan.runs.map(function(r,i){
+    $("planTab").innerHTML=burstRow("a",plan.ev)+plan.runs.map(function(r,i){
       return '<tr><td>'+(i+1)+'</td>'
         + '<td class="n"'+(r.base.out?' style="color:var(--gold)"':'')+'><b>'+r.base.label+'</b></td>'
         + '<td class="n">'+(r.n?r.n+" × "+dec(String(st.step))+" EV":"—")+'</td>'
         + '<td class="n">'+r.fast.label+' → '+r.slow.label
         + ' <span style="color:var(--muted)">(Q '+f1(r.qTop)+' → '+f1(r.qBot)+')</span></td></tr>';
-    }).join("");
+    }).join("")+burstRow("b",plan.ev);
     var last=plan.runs[plan.runs.length-1], first=plan.runs[0], extra="";
     if(last.qBot<qCorona(st.corR)-0.15) extra+=t("planOver",{q:f1(last.qBot)});
     var dia=shutFor(expTime(st.qtop,plan.ev));
     if(dia.out) extra+=t("planClip",{v:dia.label,smax:smaxLabel()});
     if(last.slow.out) extra+=t("planBulb",{v:last.slow.label});
-    $("planNote").innerHTML=t("planNote")+extra;
+    $("planNote").innerHTML=t("planNote")+extra
+      +t("planBurst",{fps:dec(String(st.fps)),n:Math.round(9*st.fps)});
+  }
+
+  /* =========================================================================
+     8b. LA HORQUILLA SOBRE LA ESCALA DE TIEMPOS
+     ========================================================================= */
+  function chartDraw(c,ev,T,plan){
+    var W=760,H=190,x0=62,x1=W-14,yAx=168;
+    var lo=Math.log(1/64000), hi=Math.log(30), sp=hi-lo;
+    function X(v){ return x0+(Math.log(Math.max(1e-7,Math.min(120,v)))-lo)/sp*(x1-x0); }
+    var g='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#04040a"/>';
+    g+='<rect x="'+esc(X(SHUT_MIN))+'" y="6" width="'+esc(X(SHUT_MAX)-X(SHUT_MIN))+'" height="'+(yAx-6)+'" fill="rgba(255,255,255,0.055)"/>';
+    var ticks=[[1/64000,"1/64k"],[1/8000,"1/8000"],[1/1000,"1/1000"],[1/125,"1/125"],[1/15,"1/15"],[1,'1"'],[8,'8"'],[30,'30"']];
+    ticks.forEach(function(tk){
+      var x=X(tk[0]);
+      g+='<line x1="'+esc(x)+'" y1="6" x2="'+esc(x)+'" y2="'+yAx+'" stroke="rgba(255,255,255,0.08)"/>'
+       + '<text x="'+esc(x)+'" y="'+(yAx+15)+'" font-family="JetBrains Mono, monospace" font-size="10" fill="#8b90a6" text-anchor="middle">'+tk[1]+'</text>';
+    });
+    g+='<line x1="'+x0+'" y1="'+yAx+'" x2="'+x1+'" y2="'+yAx+'" stroke="rgba(255,255,255,0.25)"/>';
+    // estructuras
+    var labs=tArr("chLabs"), qv=[13,12,11,9,7,3,1,0,T.qOuter];
+    for(var i=0;i<qv.length;i++){
+      var xq=X(expTime(qv[i],ev)), yl=(i%2?16:28);
+      g+='<line x1="'+esc(xq)+'" y1="32" x2="'+esc(xq)+'" y2="46" stroke="rgba(255,207,107,0.55)"/>'
+       + '<text x="'+esc(xq)+'" y="'+yl+'" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#ffcf6b" text-anchor="middle">'+labs[i]+'</text>';
+    }
+    // fotogramas de cada tanda y fila fantasma al doble de ISO
+    g+='<text x="'+(x0-8)+'" y="74" font-family="JetBrains Mono, monospace" font-size="10" fill="#8b90a6" text-anchor="end">'+t("chIso2",{n:st.iso.toLocaleString(t("dateLocale"))})+'</text>'
+     + '<text x="'+(x0-8)+'" y="122" font-family="JetBrains Mono, monospace" font-size="10" fill="#5f6478" text-anchor="end">'+t("chIso2",{n:(st.iso*2).toLocaleString(t("dateLocale"))})+'</text>';
+    plan.runs.forEach(function(r,ri){
+      var m=r.n||(Math.ceil((r.qTop-r.qBot)/st.step-1e-9)+1);
+      for(var j=0;j<m;j++){
+        var q=r.n?(r.qTop-j*st.step):(m>1?r.qTop-j*(r.qTop-r.qBot)/(m-1):r.qTop);
+        var tt=expTime(q,ev), warn=!st.track&&tt>c.tmax, out=(tt>SHUT_MAX||tt<SHUT_MIN);
+        var col=warn?"#ff5b52":"#ffcf6b";
+        g+='<circle cx="'+esc(X(tt))+'" cy="70" r="3.4" fill="'+(out?"none":col)+'" stroke="'+col+'" stroke-width="1.2"/>'
+         + '<circle cx="'+esc(X(tt/2))+'" cy="118" r="2.4" fill="none" stroke="rgba(255,207,107,0.35)"/>';
+      }
+      var xb=X(r.base.sec);
+      g+='<circle cx="'+esc(xb)+'" cy="70" r="7" fill="none" stroke="#f6f2e6" stroke-width="1.5"/>'
+       + '<text x="'+esc(xb)+'" y="92" font-family="JetBrains Mono, monospace" font-size="10" fill="#f6f2e6" text-anchor="middle">'+(ri+1)+'</text>';
+    });
+    // límite de arrastre
+    if(!st.track&&c.tmax>1/64000&&c.tmax<30){
+      var xd=X(c.tmax);
+      g+='<line x1="'+esc(xd)+'" y1="6" x2="'+esc(xd)+'" y2="'+yAx+'" stroke="#ff5b52" stroke-width="1.6" stroke-dasharray="4 3"/>'
+       + '<text x="'+esc(Math.min(xd+5,x1-70))+'" y="'+(yAx-6)+'" font-family="JetBrains Mono, monospace" font-size="10" fill="#ff5b52">'+t("chDriftL",{b:st.dpx})+'</text>';
+    }
+    g+='<text x="'+esc(X(SHUT_MIN)+5)+'" y="150" font-family="JetBrains Mono, monospace" font-size="10" fill="#8b90a6">'+t("chScale")+'</text>';
+    var el=$("ecChart");
+    el.setAttribute("aria-label",t("chAria"));
+    el.innerHTML=g;
+    $("ecChartNote").textContent=t("chNote",{smax:smaxLabel(),b:st.dpx});
+  }
+
+  /* =========================================================================
+     8c. MAPA ISO × DIAFRAGMA
+     ========================================================================= */
+  var HISO=[100,200,400,800,1600,3200,6400], HFN=[2.8,4,5.6,8,11,16];
+  function heatDraw(c,ev){
+    var html='<thead><tr><th>'+t("heatIso")+'</th>'
+           + HFN.map(function(n){ return '<th>f/'+fN(n)+'</th>'; }).join("")+'</tr></thead><tbody>';
+    HISO.forEach(function(iso){
+      html+='<tr><td>'+iso.toLocaleString(t("dateLocale"))+'</td>';
+      HFN.forEach(function(fn){
+        var sx=cloneSt(); sx.iso=iso; sx.fnum=fn;
+        var r=withState(sx,function(){
+          var T2d=totalityData(c,ev), pl=buildPlan(framesPerRun(),st.qtop-T2d.qOuter,ev,c), w=0,o=0;
+          T2d.seq.forEach(function(x){ if(x.warn) w++; if(x.out) o++; });
+          return {k:pl.runs.length,w:w,o:o};
+        });
+        // el color mide lo que el ISO y el diafragma gobiernan de verdad
+        // (arrastre y recortes de escala); el número, las tandas
+        var good=(r.w===0&&r.o===0);
+        var mid=(!good&&r.w<=2&&r.o<=1);
+        var col=good?"#6fe3a6":(mid?"#ffcf6b":"#ff5b52");
+        var bg=good?"rgba(111,227,166,0.15)":(mid?"rgba(255,207,107,0.14)":"rgba(255,91,82,0.14)");
+        var sel=(Math.abs(Math.log(st.iso/iso))<0.18&&Math.abs(Math.log(st.fnum/fn))<0.09)?"sel":"";
+        html+='<td class="'+sel+'" style="background:'+bg+';color:'+col+'"><b>'+r.k+'</b>'
+            + '<small>'+((r.w?"▲"+r.w:"")+(r.o?" ✕"+r.o:"")||"·")+'</small></td>';
+      });
+      html+='</tr>';
+    });
+    $("ecHeatTab").innerHTML=html+'</tbody>';
+    $("ecHeatNote").textContent=t("heatNote")+(st.track?t("heatNoteTrack"):"");
+  }
+
+  /* =========================================================================
+     8d. COMPARADOR A/B
+     ========================================================================= */
+  function kitStats(sx,cc,ms,ev){
+    return withState(sx,function(){
+      var T=totalityData(cc,ev), pl=buildPlan(framesPerRun(),st.qtop-T.qOuter,ev,cc), no=0;
+      T.seq.forEach(function(x){ if(x.out) no++; });
+      var tS=pl.total+(pl.runs.length-1)*2, dur=L().dur;
+      return { kit:camName(st.cam)+" · "+Math.round(cc.fe)+" mm",
+               fov:fmtDeg(cc.hFov)+" × "+fmtDeg(cc.vFov),
+               sunPct:Math.round(D_SUN/cc.minFov*100), sunPx:Math.round(sunPxOf(cc)),
+               corPct:Math.round(cc.corDia/cc.minFov*100), corPx:Math.round(corPxOf(cc)),
+               scale:f2(cc.scale), lim:shutFor(cc.tmax).label,
+               shots:T.seq.length-no, serie:f1(tS)+" s", runs:pl.runs.length,
+               fits:t(tS<=dur*0.8?"abYes":(tS<=dur?"abTight":"abNo")),
+               vt:verdictOf(cc,ms).tag };
+    });
+  }
+  function abTable(c,ms,ev,cB){
+    var card=$("ecAbCard");
+    if(!st.cmp||!cB){ card.style.display="none"; return; }
+    card.style.display="";
+    var l=L(), A=kitStats(cloneSt(),c,ms,ev), B=kitStats(stateB(),cB,ms,ev);
+    var rows=[
+      [t("abKit"),A.kit,B.kit],
+      [t("abFov"),A.fov,B.fov],
+      [t("abSunPct"),A.sunPct+" %",B.sunPct+" %"],
+      [t("abSunPx"),A.sunPx,B.sunPx],
+      [t("abCorPct"),A.corPct+" %",B.corPct+" %"],
+      [t("abCorPx"),A.corPx,B.corPx],
+      [t("abScale"),A.scale,B.scale],
+      [t("abLim",{b:st.dpx}),A.lim,B.lim],
+      [t("abShots"),A.shots,B.shots],
+      [t("abRuns"),A.runs,B.runs],
+      [t("abSerie"),A.serie,B.serie],
+      [t("abFits"),A.fits,B.fits],
+      [t("abVerdict"),A.vt,B.vt]
+    ];
+    $("ecAbIntro").textContent=t("abIntro");
+    $("ecAbTab").innerHTML=rows.map(function(r){
+      return '<tr><td>'+r[0]+'</td><td class="n">'+r[1]+'</td><td class="abB">'+r[2]+'</td></tr>';
+    }).join("");
+    $("ecAbNote").textContent=t("abNote",{d:l.dur,loc:l.name});
   }
   function partialPlan(c){
     var l=L(), out="", ndName=t({8:"ndName8",12:"ndName12"}[st.nd]||"ndName11");
     var steps=10, t0=l.tC1, t1=l.tEnd;
     var ev0=extEVraw(st.ext,appAlt(sunAltAz(t0,l.lat,l.lon).alt));
     var ev1=extEVraw(st.ext,appAlt(sunAltAz(t1,l.lat,l.lon).alt));
-    $("parPlanIntro").textContent=t("parPlanIntro",{nd:ndName,iso:st.iso,f:fN(st.fnum),dev:f1(Math.abs(ev0-ev1))});
+    $("parPlanIntro").innerHTML=t("parPlanIntro",{nd:ndName,iso:st.iso,f:fN(st.fnum),dev:f1(Math.abs(ev0-ev1))})
+      +(st.ndc?t("ndcApplied",{v:(st.ndc>0?"+":"")+f1(st.ndc)}):"");
     for(var i=0;i<=steps;i++){
       var ms=t0+(t1-t0)*i/steps;
       if(ms>=l.tC2&&ms<=l.tC3) continue;
       var aa=sunAltAz(ms,l.lat,l.lon), ha=appAlt(aa.alt), X=airmass(ha);
       var ev=Math.round(extEVraw(st.ext,ha)*2)/2;
-      var s=shutFor(expTime(st.nd,ev));
+      var s=shutFor(expTime(ndQ(),ev));
       out+='<tr><td>'+hhmm(ms,false)+'</td><td class="n">'+f1(ha)+'°</td><td class="n">'+f1(X)+'</td>'
          + '<td class="n">+'+f1(ev)+'</td><td class="n"'+(s.out?' style="color:var(--gold)"':'')+'>'+s.label+'</td></tr>';
     }
@@ -1822,7 +2400,7 @@
     + '<div class="hint" style="margin-top:10px">'+t(l.noteKey)+t("ctxFilter",{d:l.dur})+' '+t("ctxSrc")+'</div>';
   }
 
-  function atmPanel(ms){
+  function atmPanel(ms,c){
     var l=L(), a=extNow(ms), X=a.X;
     var flat=flattening(a.altApp)*100, disp=dispersionArcsec(a.altApp), see=seeingArcsec(X);
     var rows=[
@@ -1836,7 +2414,14 @@
     ];
     $("atmBox").innerHTML=rows.map(function(r){
       return '<div class="line"><span>'+r[0]+'</span><span>'+r[1]+'</span></div>';
-    }).join("")+'<div class="hint" style="margin-top:10px">'+t("atmNote")+'</div>';
+    }).join("")
+      +'<div class="hint" style="margin-top:10px">'
+      +t("airyNote",{f:fN(st.fnum),a:f1(1.342*st.fnum/pxPitch()),s:f1(see/c.scale),
+          who:t(see/c.scale>=1.342*st.fnum/pxPitch()?"airySee":"airyDiff"),
+          n:fN(Math.max(1,(see/c.scale)*pxPitch()/1.342)),
+          link:'<a href="sensor.html#difraccion" style="color:var(--gold)">'+t("airyLink")+'</a>'})
+      +'</div>'
+      +'<div class="hint" style="margin-top:8px">'+t("atmNote")+'</div>';
     var hh=+$("obst").value||15;
     $("obstv").textContent=hh;
     $("obstHint").innerHTML=t("obstHint",{alt:f1(l.altApp),h:hh,
@@ -1849,6 +2434,9 @@
     $("tlnow").style.left=(pos*100)+"%";
     $("tltot").style.left=((l.tC2-t0)/span*100)+"%";
     $("tltot").style.width=Math.max(0.6,(l.tC3-l.tC2)/span*100)+"%";
+    $("ecTlB2").style.left=((l.tC2-6000-t0)/span*100)+"%";
+    $("ecTlB3").style.left=((l.tC3-6000-t0)/span*100)+"%";
+    $("ecTlB2").style.width=$("ecTlB3").style.width=Math.max(0.35,9000/span*100)+"%";
     $("tkA").textContent=hhmm(l.tC1,false);
     $("tkB").textContent=hhmm(l.tC2,false);
     $("tkC").textContent=hhmm(l.tEnd,false);
@@ -1860,9 +2448,10 @@
     else st_=(l.tC4>l.tSet?t("tsSet"):t("tsAfter"));
     $("tClock").innerHTML=hhmm(ms,true)+' <small>'+l.tzName+'</small>';
     $("tState").textContent=t("tState",{ph:st_,ob:(ob>=1||ob<=0)?Math.round(ob*100):f1(ob*100)});
-    $("instHint").textContent=st.live
+    $("instHint").textContent=(st.live
       ? t("instLive",{off:st.clockOff})
-      : (isTotal(ms)?t("instHintTot",{r:Math.max(0,Math.round((l.tC3-ms)/1000))}):t("instHintPar"));
+      : (isTotal(ms)?t("instHintTot",{r:Math.max(0,Math.round((l.tC3-ms)/1000))}):t("instHintPar")))
+      + t("instBurst",burstWins());
     if(!st.live) $("inst").value=Math.round(pos*1000);
     [].forEach.call($("qrow").querySelectorAll("button"),function(b){
       b.classList.toggle("on",b.dataset.q==="live"&&st.live);
@@ -1887,10 +2476,20 @@
     $("sSun").innerHTML=(sunPct>999?"&gt;999":(sunPct<1?f1(sunPct):Math.round(sunPct)))+' <small>'+t("sunUnit")+'</small>';
     $("sScale").innerHTML=f2(c.scale)+' <small>'+t("pxUnit")+'</small>';
     $("sDrift").innerHTML=fmtArc(DRIFT*l.dur/3600)+' <small>/ '+l.dur+' s</small>';
+    var qO=qCorona(st.corR), tSlow=shutFor(expTime(qO,a.ev)).sec;
+    var cB=st.cmp?withState(stateB(),compute):null;
+    $("ecSunPx").innerHTML=Math.round(sunPxOf(c))+' <small>px</small>';
+    $("ecCorPx").innerHTML=Math.round(corPxOf(c))+' <small>px</small>';
+    $("ecFrec").innerHTML=Math.round(focalFill(c,0.8,c.corDia))+' <small>mm</small>';
+    $("ecFmax").innerHTML=st.track?t("fmaxFree")
+      :(Math.round(focalMaxNoTrack(tSlow))+' <small>mm</small>');
+    $("ecCamNow").textContent=t("camNow",{cam:camName(st.cam),sw:f1(st.sw),sh:f1(st.sh),
+      mp:dec(String(st.mp)),p:f2(pxPitch()),smax:smaxLabel(),fps:dec(String(st.fps))});
     $("dpxHint").textContent=t("dpxHint",{s:f2(c.scale),am:f1(a.X),
       see:f1(seeingArcsec(a.X)),sp:f1(seeingArcsec(a.X)/c.scale)});
-    verdict(c,ms); refTable(c); exposure(c,ms); partialPlan(c); atmPanel(ms); timeline(ms);
-    draw(c,ms);
+    verdict(c,ms,tSlow); refTable(c); exposure(c,ms); partialPlan(c);
+    atmPanel(ms,c); timeline(ms); abTable(c,ms,a.ev,cB);
+    draw(c,ms,cB);
     saveURLSoon();
   }
   // requestAnimationFrame necesita el receptor Window: desligarlo lanza Illegal invocation
@@ -1916,10 +2515,18 @@
     function setOpts(sel,arr){
       [].forEach.call(sel.options,function(o,i){ if(arr[i]!=null) o.textContent=arr[i]; });
     }
+    function setCamOpts(sel){
+      var o=tArr("camOpts");
+      [].forEach.call(sel.options,function(op){ if(o[op.value]) op.textContent=o[op.value]; });
+    }
+    setCamOpts($("ecCam")); setCamOpts($("ecCamB"));
     setOpts($("tc"),tArr("tcOpts"));
+    setOpts($("ecTcB"),tArr("tcOpts"));
     setOpts($("sensor"),tArr("sensorOpts"));
     setOpts($("nd"),tArr("ndOpts"));
     [["orient","o",{h:"segH",v:"segV"}],
+     ["ecShut","sh",{m:"segMech",e:"segElec"}],
+     ["ecCmp","c",{"0":"segOff","1":"segOn"}],
      ["zoom","z",{fit:"segFit",sky:"segSky"}],
      ["track","t",{"0":"segFixed","1":"segTrack"}],
      ["alerts","a",{"0":"segOff","1":"segOn"}]].forEach(function(g){
@@ -1933,6 +2540,9 @@
       if(LOCS[o.value]) o.textContent=LOCS[o.value].name;
     });
     $("alertHint").textContent=t("alertHint");
+    $("ecCamHint").innerHTML=t("camHint");
+    $("ecTestBtn").textContent=t("testBtn");
+    $("ecAbTh0").textContent=t("abTh0");
     $("smaxHint").textContent=t("smaxHint");
     $("fpsHint").textContent=t("fpsHint");
     $("stepHint").textContent=t("stepHint");
@@ -1954,15 +2564,49 @@
     });
   }
   $("focal").addEventListener("input",function(){
-    st.focal=tToFocal(+this.value);
+    if(camPreset(st.cam,st.sht)&&camPreset(st.cam,st.sht).fixed) camManual();
+    st.focal=tToFocal(+this.value); focalFree=st.focal;
     $("focalNum").value=st.focal; $("focalv").textContent=st.focal; paint();
   });
   $("focalNum").addEventListener("input",function(){
-    var v=Math.max(FMIN,Math.min(FMAX,+this.value||FMIN));
+    if(camPreset(st.cam,st.sht)&&camPreset(st.cam,st.sht).fixed) camManual();
+    var v=Math.max(FMIN,Math.min(FMAX,+this.value||FMIN)); focalFree=v;
     st.focal=v; $("focalv").textContent=v; $("focal").value=focalToT(v); paint();
   });
   $("tc").addEventListener("change",function(){ st.tc=+this.value||1; paint(); });
+  $("ecCam").addEventListener("change",function(){
+    st.cam=(this.value==="manual"||CAMS[this.value])?this.value:"manual";
+    applyCam(); paint();
+  });
+  seg("ecShut","sh",function(v){ st.sht=v==="e"?"e":"m"; applyCam(); });
+  seg("ecCmp","c",function(v){ st.cmp=v==="1"; $("ecCmpBox").classList.toggle("on",st.cmp); });
+  $("ecCamB").addEventListener("change",function(){
+    st.camB=(this.value==="manual"||CAMS[this.value])?this.value:"manual"; paint();
+  });
+  $("ecFB").addEventListener("input",function(){
+    st.focalB=Math.max(FMIN,Math.min(FMAX,+this.value||FMIN));
+    $("ecFBv").textContent=st.focalB; paint();
+  });
+  $("ecTcB").addEventListener("change",function(){ st.tcB=+this.value||1; paint(); });
+  $("ecNdc").addEventListener("input",function(){
+    st.ndc=Math.max(-3,Math.min(3,+this.value||0));
+    $("ecNdcv").textContent=dec(String(st.ndc)); paint();
+  });
+  // ensayo con el Sol de hoy: misma fotometría, la altura y la declinación de hoy
+  $("ecTestBtn").addEventListener("click",function(){
+    var l=L(), n=nowMs(), aa=sunAltAz(n,l.lat,l.lon), ha=appAlt(aa.alt);
+    if(aa.alt<3){ $("ecTestOut").innerHTML=t("testNight",{loc:l.name,alt:f1(aa.alt)}); return; }
+    var X=airmass(ha), ev=Math.round(extEVraw(st.ext,ha)*2)/2;
+    var om=15.041*Math.cos(aa.dec*Math.PI/180), c=compute();
+    $("ecTestOut").innerHTML=t("testOut",{
+      t:hhmm(n,false), loc:l.name, alt:f1(ha), am:f2(X),
+      nd:t({8:"ndName8",12:"ndName12"}[st.nd]||"ndName11"),
+      iso:st.iso.toLocaleString(t("dateLocale")), f:fN(st.fnum),
+      v:shutFor(expTime(ndQ(),ev)).label,
+      dec:f1(aa.dec), dr:f2(om), b:st.dpx, lim:shutFor(st.dpx*c.scale/om).label});
+  });
   $("sensor").addEventListener("change",function(){
+    camManual();
     if(this.value==="custom"){
       st.custom=true; $("customBox").classList.add("on");
       st.sw=+$("cw").value||36; st.sh=+$("ch").value||24;
@@ -1973,6 +2617,7 @@
     paint();
   });
   function customUpdate(){
+    camManual();
     st.sw=Math.max(3,+$("cw").value||3); st.sh=Math.max(3,+$("ch").value||3); paint();
   }
   $("cw").addEventListener("input",customUpdate);
@@ -1988,7 +2633,7 @@
   $("iso").addEventListener("input",function(){ st.iso=Math.max(25,+this.value||25); paint(); });
   $("fnum").addEventListener("input",function(){ st.fnum=Math.max(1,+this.value||1); paint(); });
   $("nd").addEventListener("change",function(){ st.nd=+this.value||8; paint(); });
-  $("mp").addEventListener("input",function(){ st.mp=Math.max(2,+this.value||2); paint(); });
+  $("mp").addEventListener("input",function(){ camManual(); st.mp=Math.max(2,+this.value||2); paint(); });
   $("qtop").addEventListener("change",function(){
     var v=+this.value; st.qtop=[13,12,11,9].indexOf(v)>=0?v:13; paint();
   });
@@ -2004,7 +2649,8 @@
     var v=+this.value; st.fps=[1,2.5,5,10,20,30].indexOf(v)>=0?v:2.5; paint();
   });
   $("smax").addEventListener("change",function(){
-    var v=+this.value; st.smax=[4000,8000,16000,32000,64000].indexOf(v)>=0?v:8000;
+    camManual();
+    var v=+this.value; st.smax=SMAXV.indexOf(v)>=0?v:8000;
     buildShut(); paint();
   });
   $("ext").addEventListener("change",function(){ st.ext=+this.value||0; paint(); });
@@ -2033,6 +2679,8 @@
              : q==="half"?Math.round(l.tC1+(l.tC2-l.tC1)*0.5)
              : q==="c2"?l.tC2+1000
              : q==="max"?l.tCX
+             : q==="b2"?l.tC2-6000
+             : q==="b3"?l.tC3-6000
              : q==="c3"?l.tC3-1000
              : l.tEnd-1000;
     }
@@ -2056,6 +2704,9 @@
       q.set("iso",st.iso); q.set("fn",st.fnum); q.set("nd",st.nd);
       q.set("mp",st.mp); q.set("tr",st.track?1:0); q.set("dp",st.dpx); q.set("sm",st.smax); q.set("fps",st.fps); q.set("bs",st.step); q.set("mf",st.maxf); q.set("qt",st.qtop);
       q.set("ex",st.ext); q.set("loc",st.loc);
+      q.set("cam",st.cam); q.set("sht",st.sht);
+      if(st.ndc) q.set("ndc",st.ndc);
+      if(st.cmp){ q.set("cmp","1"); q.set("camB",st.camB); q.set("fB",st.focalB); q.set("tcB",st.tcB); }
       if(!st.live&&st.inst!=null) q.set("ti",Math.round((st.inst-L().tC1)/1000));
       if(st.live) q.set("live","1");
       history.replaceState(null,"","#"+q.toString());
@@ -2065,6 +2716,18 @@
     try{
       var h=location.hash.replace(/^#/,""); if(!h) return;
       var q=new URLSearchParams(h);
+      // el cuerpo se aplica primero: los parámetros explícitos que vengan
+      // después (s, mp, sm, fps, mf, f) mandan sobre el preset, de modo que un
+      // enlace antiguo sin "cam" reproduce exactamente lo que guardó
+      if(q.has("sht")) st.sht=q.get("sht")==="e"?"e":"m";
+      var cm=q.get("cam");
+      st.cam=(cm&&(cm==="manual"||CAMS[cm]))?cm:"manual";
+      if(st.cam!=="manual") applyCam();
+      if(q.has("ndc")) st.ndc=Math.max(-3,Math.min(3,+q.get("ndc")||0));
+      if(q.get("cmp")==="1") st.cmp=true;
+      if(q.has("camB")){ var cb=q.get("camB"); st.camB=(cb==="manual"||CAMS[cb])?cb:"sl24"; }
+      if(q.has("fB")) st.focalB=Math.max(FMIN,Math.min(FMAX,+q.get("fB")||st.focalB));
+      if(q.has("tcB")){ var tb=+q.get("tcB"); st.tcB=[1,1.4,2].indexOf(tb)>=0?tb:1; }
       if(q.has("loc")&&(q.get("loc") in LOCS)) st.loc=q.get("loc");
       if(q.has("f")) st.focal=Math.max(FMIN,Math.min(FMAX,+q.get("f")||st.focal));
       if(q.has("tc")){ var v=+q.get("tc"); st.tc=[1,1.4,2].indexOf(v)>=0?v:1; }
@@ -2096,7 +2759,7 @@
       }
       if(q.has("bs")){ var bv=+q.get("bs"); st.step=[0.5,1,1.3,1.5,1.7,2,3].indexOf(bv)>=0?bv:1; }
       if(q.has("fps")){ var fv=+q.get("fps"); st.fps=[1,2.5,5,10,20,30].indexOf(fv)>=0?fv:2.5; }
-      if(q.has("sm")){ var sm=+q.get("sm"); st.smax=[4000,8000,16000,32000,64000].indexOf(sm)>=0?sm:8000; }
+      if(q.has("sm")){ var sm=+q.get("sm"); st.smax=SMAXV.indexOf(sm)>=0?sm:8000; }
       if(q.has("tr")) st.track=q.get("tr")==="1";
       if(q.has("dp")){ var dv=+q.get("dp"); st.dpx=[1,2,3].indexOf(dv)>=0?dv:1; }
       if(q.has("ex")){ var ev=+q.get("ex"); st.ext=[0,1,2].indexOf(ev)>=0?ev:1; }
@@ -2134,7 +2797,7 @@
       var ha=appAlt(sunAltAz(ms,l.lat,l.lon).alt);
       var ev=Math.round(extEVraw(st.ext,ha)*2)/2;
       parRows+='<tr><td>'+hhmm(ms,false)+' · '+f1(ha)+'° · +'+f1(ev)+' EV</td><td>'
-             + shutFor(expTime(st.nd,ev)).label+'</td></tr>';
+             + shutFor(expTime(ndQ(),ev)).label+'</td></tr>';
     });
     var seqHtml=T.seq.map(function(s){
       return '<span class="pc-chip">☐ '+s.label+(s.warn?' ▲':'')+'</span>';
@@ -2154,6 +2817,7 @@
       +'<tr><td>'+hhmm(l.tC4,true)+(l.c4est?' *':'')+'</td><td>'+t("pcEndRow",{e:t(l.endKey)})+'</td><td>'+t("pcOn")+'</td></tr>'
       +'<tr><td>'+hhmm(l.tSet,true)+'</td><td>'+t("pcSetRow")+'</td><td>—</td></tr></table>'
       +'<div class="pc-sec">'+t("pcKit")+'</div>'
+      +'<p><strong>'+camName(st.cam)+'</strong>'+(st.cmp?' · B: '+camName(st.camB)+' · '+st.focalB+' mm':'')+'</p>'
       +'<p>'+t("pcKitLine",{f:st.focal,tc:st.tc,fe:Math.round(c.fe),sw:f1(st.sw),sh:f1(st.sh),
             orient:(st.orient==="h"?t("orientH"):t("orientV")),eq:Math.round(c.eq),
             hf:fmtDeg(c.hFov),vf:fmtDeg(c.vFov),sc:f2(c.scale),
@@ -2166,14 +2830,20 @@
       +'<p>'+seqHtml+'</p>'
       +'<div class="pc-sec">'+t("pcPlan")+'</div>'
       +'<table><tr><th>'+t("thRun")+'</th><th>'+t("thBase")+'</th><th>'+t("thFrames")+'</th><th>'+t("thCov")+'</th></tr>'
+      +'<tr><td>'+t("runB2")+'</td><td><strong>'+shutFor(expTime(11,evTot)).label+'</strong></td>'
+      +'<td>'+Math.round(9*st.fps)+'</td><td>'+burstWins().a+'</td></tr>'
       +pc.runs.map(function(r,i){
          return '<tr><td>'+(i+1)+'</td><td><strong>'+r.base.label+'</strong></td>'
               +'<td>'+(r.n?r.n+" × "+dec(String(st.step))+" EV":"—")+'</td>'
               +'<td>'+r.fast.label+' → '+r.slow.label+'</td></tr>';
-       }).join("")+'</table>'
-      +'<p>'+t("pcBurst",{v:shutFor(expTime(11,evTot)).label})+'</p>'
+       }).join("")
+      +'<tr><td>'+t("runB3")+'</td><td><strong>'+shutFor(expTime(11,evTot)).label+'</strong></td>'
+      +'<td>'+Math.round(9*st.fps)+'</td><td>'+burstWins().b+'</td></tr>'
+      +'</table>'
+      +'<p>'+t("pcBurst",{v:shutFor(expTime(11,evTot)).label})+t("instBurst",burstWins())+'</p>'
       +'<p>'+t("pcSeries",{k:Math.max(0,Math.floor((l.dur-20)/Math.max(0.5,pc.total+(pc.runs.length-1)*2)))})+'</p>'
-      +'<p>'+t("pcDrift",{lim:shutFor(c.tmax).label,b:st.dpx,d:l.dur,dr:fmtArc(DRIFT*l.dur/3600)})+'</p>'
+      +'<p>'+t("pcDrift",{lim:shutFor(c.tmax).label,b:st.dpx,d:l.dur,dr:fmtArc(DRIFT*l.dur/3600)})
+            +(st.track?"":driftText(c))+'</p>'
       +'<p>'+t("pcRange",{smax:smaxLabel()+" · "+dec(String(st.fps))+" fps",n:f1(st.qtop-T.qOuter),
             av:f1(Math.log((st.track?SHUT_MAX:c.tmax)/SHUT_MIN)/Math.LN2)})+'</p>'
       +'<p>'+t("pcAtm",{am:f2(X),ev:f1(extEVraw(st.ext,l.altApp)),
@@ -2233,8 +2903,9 @@
     $("edNext").textContent=lab;
     if(st.alerts){
       var d2=(l.tC2-n)/1000, d3=(l.tC3-n)/1000;
-      if(d2<=30&&d2>26&&!fired.c2){ fired.c2=1; beep(3); $("edNext").textContent=t("alertC2"); }
-      if(d3<=15&&d3>11&&!fired.c3){ fired.c3=1; beep(4); $("edNext").textContent=t("alertC3"); }
+      var bw=burstWins();
+      if(d2<=30&&d2>26&&!fired.c2){ fired.c2=1; beep(3); $("edNext").textContent=t("alertC2b",{t:bw.a}); }
+      if(d3<=15&&d3>11&&!fired.c3){ fired.c3=1; beep(4); $("edNext").textContent=t("alertC3b",{t:bw.b}); }
     }
     if(st.live) paint();
   }
@@ -2242,7 +2913,21 @@
   /* =========================================================================
      15. ARRANQUE
      ========================================================================= */
+  (function(){
+    var sa=$("ecCam"), sb=$("ecCamB");
+    CAMIDS.forEach(function(id){
+      var o=document.createElement("option"); o.value=id; o.textContent=id; sa.appendChild(o);
+      sb.appendChild(o.cloneNode(true));
+    });
+  })();
   loadURL();
+  if(!location.hash&&st.cam!=="manual") applyCam();
+  if(!(camPreset(st.cam,st.sht)&&camPreset(st.cam,st.sht).fixed)) focalFree=st.focal;
+  $("ecCam").value=st.cam; $("ecCamB").value=st.camB;
+  $("ecFB").value=st.focalB; $("ecFBv").textContent=st.focalB;
+  $("ecTcB").value=String(st.tcB);
+  $("ecNdc").value=st.ndc; $("ecNdcv").textContent=dec(String(st.ndc));
+  $("ecCmpBox").classList.toggle("on",st.cmp);
   $("loc").value=st.loc;
   $("focal").value=focalToT(st.focal);
   $("focalNum").value=st.focal; $("focalv").textContent=st.focal;
@@ -2254,6 +2939,7 @@
   buildShut();
   $("clockOff").value=st.clockOff; $("clockOffv").textContent=st.clockOff;
   [["orient","o",st.orient],["zoom","z",st.zoom],
+   ["ecShut","sh",st.sht],["ecCmp","c",st.cmp?"1":"0"],
    ["track","t",st.track?"1":"0"],["dpx","d",String(st.dpx)],
    ["alerts","a",st.alerts?"1":"0"]].forEach(function(g){
     [].forEach.call($(g[0]).querySelectorAll("button"),function(b){

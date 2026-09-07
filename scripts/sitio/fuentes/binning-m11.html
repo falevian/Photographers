@@ -39,10 +39,9 @@
     --bg:#e9ecef; --panel:#f7f8f9; --ink:#1b2430; --mute:#5b6773; --line:#c9d0d6;
     --sag:#0b6e99; --tan:#b3541e; --col:#7a3d9e; --sph:#2f7d4a; --ref:#8a949c; --eff:#a8871a;
   }
-  @media (prefers-color-scheme: dark){
-    :root{ --bg:#14181c; --panel:#1d2329; --ink:#e6eaee; --mute:#98a3ad; --line:#3a444d;
-      --sag:#4fb0dc; --tan:#e08a52; --col:#b58ad6; --sph:#6cc48a; --ref:#7d878f; --eff:#d6b24a; }
-  }
+  /* Sin bloque «prefers-color-scheme: dark»: esta parte se funde en sensor.html,
+     cuya cáscara es siempre clara (#F4F5F2); una paleta oscura solo aquí dejaba
+     paneles negros dentro de una página clara. */
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font:14.5px/1.5 "IBM Plex Sans","Segoe UI",system-ui,sans-serif}
   header{padding:24px 28px 6px;max-width:1300px;margin:0 auto}
@@ -73,6 +72,17 @@
   .note b{color:var(--ink);font-weight:600}
   .verdict{margin-top:12px;padding:10px 12px;border-left:3px solid var(--tan);font-size:13.5px}
   code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px}
+  select{font:inherit;font-size:13px;padding:4px 6px;border:1px solid var(--line);border-radius:4px;background:transparent;color:var(--ink)}
+  .decbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:2px 0 12px;font-size:12.5px;color:var(--mute)}
+  .decbar label{margin-top:0}
+  .decbar input[type=number]{width:82px;margin-top:0}
+  ul.dec{list-style:none;margin:0;padding:0}
+  ul.dec li{padding:7px 0 7px 13px;border-left:3px solid var(--line);margin-bottom:6px;font-size:13.5px}
+  ul.dec li.noise{border-left-color:var(--sag)}
+  ul.dec li.diff{border-left-color:var(--col)}
+  ul.dec li.dest{border-left-color:var(--sph)}
+  .decfinal{margin:12px 0 0;padding:10px 12px;border-left:3px solid var(--tan);background:rgba(179,84,30,.06);font-size:14px}
+  .decfinal b{font-weight:600}
   .sim{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
   .sim figure{margin:0}.sim figcaption{font-size:12px;color:var(--mute);margin-top:4px;text-align:center}
   .sim canvas{image-rendering:pixelated;border:1px solid var(--line)}
@@ -124,11 +134,17 @@
   </div>
   <p data-lang="es">La Leica M11 escribe tres tamaños de DNG desde el mismo sensor de 60 Mpx: L-DNG (60), M-DNG (36) y S-DNG (18). ¿Hace binning físico el Maestro III o remuestrea? Las medidas del artículo — imagen-diferencia de dos tomas idénticas, demosaico AHD lineal, canal G, parche subexpuesto (μ ≈ 0,08), tres disparos por modo — dicen que remuestrea aplicando un filtrado suave del ruido: la ganancia real ronda los 3 dB (medio paso) a ISO medio-alto, es la misma en M y en S pese al factor 2 de píxeles, y a ISO base es nula o negativa. Esta herramienta deja explorar un modelo de transferencia fotónica calibrado sobre esas medidas y contrastarlo con el binning ideal.</p>
   <p data-lang="en">The Leica M11 writes three DNG sizes from the same 60 MP sensor: L-DNG (60), M-DNG (36) and S-DNG (18). Does the Maestro III perform physical binning, or does it resample? The article’s measurements — difference image of two identical exposures, linear AHD demosaicing, G channel, underexposed patch (μ ≈ 0.08), three frames per mode — say it resamples while applying gentle noise filtering: the real gain sits around 3 dB (half a stop) at medium-to-high ISO, it is identical in M and in S despite the factor of 2 in pixel count, and at base ISO it is nil or negative. This tool lets you explore a photon-transfer model calibrated on those measurements and set it against ideal binning.</p>
+  <p data-lang="es"><b>Alcance de lo medido.</b> Todo lo que hay aquí está medido en una <b>M11</b> (Maestro III). La <b>Q3</b>, la <b>Q3 43</b> y la <b>SL3</b> montan el mismo sensor de 60 Mpx y escriben los mismos tres tamaños (9528×6328, 7416×4928, 5272×3498), pero con <b>Maestro IV</b>: no están medidas, así que la ganancia de ≈3 dB es en ellas una <b>hipótesis a comprobar</b> con este mismo método, no un dato. La <b>M11 Monochrom</b> no lleva mosaico de color ni demosaico: queda fuera del modelo.</p>
+  <p data-lang="en"><b>What was actually measured.</b> Everything here is measured on an <b>M11</b> (Maestro III). The <b>Q3</b>, the <b>Q3 43</b> and the <b>SL3</b> carry the same 60 MP sensor and write the same three sizes (9528×6328, 7416×4928, 5272×3498), but with <b>Maestro IV</b>: they have not been measured, so on them the ≈3 dB gain is a <b>hypothesis to be checked</b> with this same method, not a datum. The <b>M11 Monochrom</b> has no colour mosaic and no demosaicing: it falls outside the model.</p>
   <p class="srclinks">
     <a href="https://rafaelvida.com/2026/04/25/binning-en-leica/" data-lang="es">Artículo con las medidas ↗</a>
     <a href="https://rafaelvida.com/2026/04/25/binning-en-leica/" data-lang="en">Article with the measurements ↗</a>
-    <a href="sensor-al-papel.html" data-lang="es">Del sensor al papel: ¿cuántos píxeles necesitas de verdad?</a>
-    <a href="sensor-al-papel.html" data-lang="en">From sensor to paper: how many pixels do you really need?</a>
+    <a href="sensor.html#difraccion" data-lang="es">Difracción: qué archivo basta a cada diafragma</a>
+    <a href="sensor.html#difraccion" data-lang="en">Diffraction: which file is enough at each aperture</a>
+    <a href="sensor.html#datos" data-lang="es">Datos del sensor: ruido de lectura y ganancia dual</a>
+    <a href="sensor.html#datos" data-lang="en">Sensor data: read noise and dual gain</a>
+    <a href="sensor-al-papel.html#binLine" data-lang="es">Del sensor al papel: ¿cuántos píxeles necesitas de verdad?</a>
+    <a href="sensor-al-papel.html#binLine" data-lang="en">From sensor to paper: how many pixels do you really need?</a>
   </p>
 </header>
 <main>
@@ -140,6 +156,8 @@
     <label><span data-lang="es">Exposición del parche (EV bajo saturación)</span><span data-lang="en">Patch exposure (EV below saturation)</span> <span class="v"><span id="evV"></span> EV · μ = <span id="muV"></span></span>
       <input type="range" id="ev" min="-8" max="-1" step="0.02" value="-3.64"></label>
     <button id="btnPatch"><span data-lang="es">Volver al parche del artículo (μ ≈ 0,08)</span><span data-lang="en">Back to the article’s patch (μ ≈ 0.08)</span></button>
+    <p class="note" data-lang="es"><b>La ganancia es un dato de sombras.</b> Los ≈3 dB de M y S están medidos en un parche a μ ≈ 0,08, es decir −3,6 EV bajo saturación. En medios tonos manda el ruido fotónico y un filtrado suave cambia poco lo visible: <b>no está medido</b>. Mover este deslizador desplaza la curva de L y la simulación, pero <b>no la ganancia</b>, que el modelo supone independiente de la exposición.</p>
+    <p class="note" data-lang="en"><b>The gain is a shadow figure.</b> The ≈3 dB of M and S are measured on a patch at μ ≈ 0.08, that is −3.6 EV below saturation. In midtones photon noise dominates and gentle filtering changes little of what you see: <b>that has not been measured</b>. Moving this slider shifts the L curve and the simulation, but <b>not the gain</b>, which the model assumes independent of exposure.</p>
 
     <h3 data-lang="es">Sensor efectivo (calibración)</h3>
     <h3 data-lang="en">Effective sensor (calibration)</h3>
@@ -205,6 +223,60 @@
     </div>
 
     <div class="panel">
+      <h2 data-lang="es">Qué DNG pongo ahora</h2>
+      <h2 data-lang="en">Which DNG do I set right now</h2>
+      <p class="note" data-lang="es">La respuesta no la da el ruido solo. El <b>ISO</b> sale del deslizador de la izquierda; el <b>diafragma</b> decide cuánto detalle llega al sensor (lo calcula la pestaña de difracción con el mismo techo práctico, 550 nm) y el <b>destino</b> de la copia decide cuántos píxeles hacen falta. Aquí se juntan las tres.</p>
+      <p class="note" data-lang="en">Noise alone does not answer this. The <b>ISO</b> comes from the slider on the left; the <b>aperture</b> decides how much detail reaches the sensor (computed by the diffraction tab with the same practical ceiling, 550 nm) and the <b>destination</b> of the print decides how many pixels are needed. Here the three come together.</p>
+      <div class="decbar">
+        <label for="bn-fnum" data-lang="es">Diafragma de trabajo</label>
+        <label for="bn-fnum" data-lang="en">Working aperture</label>
+        <select id="bn-fnum">
+          <option value="2" data-es="f/2" data-en="f/2">f/2</option>
+          <option value="2.8" data-es="f/2,8" data-en="f/2.8">f/2,8</option>
+          <option value="4" data-es="f/4" data-en="f/4">f/4</option>
+          <option value="5.6" selected data-es="f/5,6" data-en="f/5.6">f/5,6</option>
+          <option value="8" data-es="f/8" data-en="f/8">f/8</option>
+          <option value="11" data-es="f/11" data-en="f/11">f/11</option>
+          <option value="16" data-es="f/16" data-en="f/16">f/16</option>
+          <option value="22" data-es="f/22" data-en="f/22">f/22</option>
+        </select>
+        <label for="bn-dmpx" data-lang="es">Mpx que pide el destino</label>
+        <label for="bn-dmpx" data-lang="en">MP the destination asks for</label>
+        <input type="number" id="bn-dmpx" step="1" min="1" max="60" value="18">
+        <span id="bn-decIso"></span>
+      </div>
+      <ul class="dec">
+        <li class="noise" id="bn-dnoise"></li>
+        <li class="diff"><span id="bn-ddiff"></span> <a href="sensor.html#difraccion" data-lang="es">ver la calculadora de difracción →</a><a href="sensor.html#difraccion" data-lang="en">see the diffraction calculator →</a></li>
+        <li class="dest"><span id="bn-ddest"></span> <a href="sensor-al-papel.html#binLine" data-lang="es">calcular los píxeles que pide la copia →</a><a href="sensor-al-papel.html#binLine" data-lang="en">work out the pixels the print needs →</a></li>
+      </ul>
+      <p class="decfinal" id="bn-dfinal"></p>
+
+      <h3 data-lang="es">Lo que cuesta cada modo en tarjeta</h3>
+      <h3 data-lang="en">What each mode costs on the card</h3>
+      <div class="decbar" style="margin:8px 0 4px">
+        <label for="bn-mbl" data-lang="es">MB por L-DNG</label>
+        <label for="bn-mbl" data-lang="en">MB per L-DNG</label>
+        <input type="number" id="bn-mbl" step="0.5" min="1" max="400" value="75">
+        <label for="bn-mbm" data-lang="es">MB por M-DNG</label>
+        <label for="bn-mbm" data-lang="en">MB per M-DNG</label>
+        <input type="number" id="bn-mbm" step="0.5" min="1" max="400" value="45.5">
+        <label for="bn-mbs" data-lang="es">MB por S-DNG</label>
+        <label for="bn-mbs" data-lang="en">MB per S-DNG</label>
+        <input type="number" id="bn-mbs" step="0.5" min="1" max="400" value="22.9">
+      </div>
+      <div style="overflow-x:auto"><table class="res" style="margin-top:8px"><thead><tr>
+        <th><span data-lang="es">Modo</span><span data-lang="en">Mode</span></th>
+        <th><span data-lang="es">píxeles</span><span data-lang="en">pixels</span></th>
+        <th>Mpx</th><th>MB</th>
+        <th><span data-lang="es">en 64 GB</span><span data-lang="en">in 64 GB</span></th>
+        <th><span data-lang="es">en 128 GB</span><span data-lang="en">in 128 GB</span></th>
+      </tr></thead><tbody id="bn-tbsize"></tbody></table></div>
+      <p class="note" data-lang="es"><b>Ninguna de las tres cifras está medida</b>, tampoco la de L: no procede de la hoja de especificaciones de la M11 ni de ningún cálculo. Los DNG de la M11 son de compresión sin pérdida y el tamaño depende de la escena y del ISO, así que los tres campos son un punto de partida que debes sustituir por el tamaño medio de <b>tus propios ficheros</b> (mira las propiedades de un DNG tuyo de cada modo). Mientras no toques M y S, se recalculan al editar L en proporción a los píxeles (0,606× y 0,306×); esa proporcionalidad <b>sobreestima</b> M y S, porque el M-DNG y el S-DNG salen ya remuestreados y con el ruido filtrado, de modo que comprimen mejor por píxel que el L-DNG y en la tarjeta caben más de los que dice la tabla. Tarjeta contada a 1 GB = 1000 MB. <b>Esta es la única razón para poner S-DNG:</b> en calidad nunca gana.</p>
+      <p class="note" data-lang="en"><b>None of the three figures is measured</b>, the L one included: it comes neither from the M11 spec sheet nor from any calculation. M11 DNGs use lossless compression and the size depends on the scene and on the ISO, so all three fields are a starting point you should replace with the average size of <b>your own files</b> (check the properties of one of your DNGs in each mode). As long as you leave M and S alone, editing L recomputes them in proportion to pixel count (0.606× and 0.306×); that proportionality <b>overestimates</b> M and S, because the M-DNG and the S-DNG come out already resampled and noise-filtered, so they compress better per pixel than the L-DNG and more of them fit on the card than the table says. Card counted at 1 GB = 1000 MB. <b>This is the only reason to set S-DNG:</b> on quality it never wins.</p>
+    </div>
+
+    <div class="panel">
       <h2 data-lang="es">Simulación visual del parche de sombra, a tamaño común (18 Mpx)</h2>
       <h2 data-lang="en">Visual simulation of the shadow patch, at a common size (18 MP)</h2>
       <div class="sim">
@@ -213,8 +285,12 @@
         <figure><canvas id="cvBin" width="176" height="176"></canvas><figcaption id="capBin"></figcaption></figure>
       </div>
       <p class="note" id="simInfo"></p>
-      <p class="note" data-lang="es">Parche sintético (gradiente, textura tenue y una banda central de barras finas) generado a «60 Mpx» con ruido de Poisson más ruido de lectura al ISO elegido, y reducido ×1,81 lineal por tres caminos: L reescalado con Lanczos-3, pipeline «Maestro» (prefiltro gaussiano suave + diezmado bilineal) y binning ideal (media de bloques). La SNR de cada recuadro se mide como en el artículo, por imagen-diferencia de dos realizaciones independientes. El prefiltro del camino «Maestro» se modula con la ganancia calibrada: a ISO base apenas filtra; fíjate entonces en cómo el binning ideal borra las barras finas mientras Lanczos las conserva.</p>
-      <p class="note" data-lang="en">A synthetic patch (gradient, faint texture and a central band of fine bars) generated at “60 MP” with Poisson noise plus read noise at the chosen ISO, then reduced ×1.81 linear along three paths: L downsampled with Lanczos-3, the “Maestro” pipeline (gentle Gaussian pre-filter + bilinear decimation) and ideal binning (block average). The SNR of each tile is measured as in the article, by the difference image of two independent realisations. The “Maestro” pre-filter is modulated by the calibrated gain: at base ISO it barely filters; notice then how ideal binning wipes out the fine bars while Lanczos keeps them.</p>
+      <p class="note" data-lang="es">Parche sintético (gradiente, textura tenue y una banda central de barras) generado a «60 Mpx» con ruido de Poisson más ruido de lectura al ISO elegido, y reducido ×1,81 lineal por tres caminos: L reescalado con Lanczos-3, pipeline «Maestro» (prefiltro gaussiano suave + diezmado bilineal) y binning ideal (media de bloques). La SNR de cada recuadro se mide como en el artículo, por imagen-diferencia de dos realizaciones independientes. El prefiltro del camino «Maestro» se modula con la ganancia calibrada: a ISO base apenas filtra.</p>
+      <p class="note" data-lang="en">A synthetic patch (gradient, faint texture and a central band of bars) generated at “60 MP” with Poisson noise plus read noise at the chosen ISO, then reduced ×1.81 linear along three paths: L downsampled with Lanczos-3, the “Maestro” pipeline (gentle Gaussian pre-filter + bilinear decimation) and ideal binning (block average). The SNR of each tile is measured as in the article, by the difference image of two independent realisations. The “Maestro” pre-filter is modulated by the calibrated gain: at base ISO it barely filters.</p>
+      <p class="note" data-lang="es"><b>Detalle conservado.</b> Las barras tienen un periodo de 5,0 px a «60 Mpx», que tras la reducción quedan en 2,8 px (0,36 ciclos/px): <b>por debajo del Nyquist de salida</b>, así que lo que sobrevive es detalle resuelto y no aliasing. El porcentaje de cada recuadro es la amplitud de esa senoide en la salida dividida por su amplitud en el parche original, medida por proyección de mínimos cuadrados sobre seno y coseno a la frecuencia conocida, y calculada <b>sobre el parche sin ruido</b>: es la MTF del camino a esa frecuencia, no depende de la realización. Es la contrapartida del ruido: el camino que más limpia es el que menos detalle deja.</p>
+      <p class="note" data-lang="en"><b>Detail retained.</b> The bars have a period of 5.0 px at “60 MP”, which after the reduction becomes 2.8 px (0.36 cycles/px): <b>below the output Nyquist</b>, so what survives is resolved detail and not aliasing. The percentage on each tile is the amplitude of that sinusoid in the output divided by its amplitude in the original patch, measured by least-squares projection onto sine and cosine at the known frequency, and computed <b>on the noise-free patch</b>: it is the MTF of the path at that frequency and does not depend on the realisation. It is the counterpart of the noise figure: the path that cleans the most is the one that leaves the least detail.</p>
+      <p class="note" data-lang="es"><b>Aviso: la SNR simulada no es la medida.</b> Esta simulación genera <b>ruido blanco por píxel y sin demosaico</b>, y el ruido blanco se promedia mucho mejor de lo que se promedia el ruido real del artículo, correlado por el AHD. Por eso aquí Lanczos gana ≈ +6 dB al reducir a 18 Mpx donde el artículo mide +2,39 dB, y por eso el camino «Maestro» puede salir por encima del binning ideal, que no es lo que ocurre en la cámara. <b>Las cifras que valen son las de las tablas medidas</b>; esta simulación sirve para ver <i>en qué se nota</i> cada camino — grano y detalle —, no para cuantificar la ganancia.</p>
+      <p class="note" data-lang="en"><b>Warning: the simulated SNR is not the measured one.</b> This simulation generates <b>white per-pixel noise with no demosaicing</b>, and white noise averages down far better than the article’s real noise, which is correlated by the AHD. That is why Lanczos gains ≈ +6 dB here when reducing to 18 MP where the article measures +2.39 dB, and why the “Maestro” path can come out above ideal binning, which is not what happens in the camera. <b>The figures that count are those in the measured tables</b>; this simulation is here to show <i>what each path looks like</i> — grain and detail — not to quantify the gain.</p>
     </div>
 
     <div class="panel">
@@ -246,7 +322,15 @@
           <h3 data-lang="en">Engineering DR (dB)</h3>
           <table class="res"><thead><tr><th><span data-lang="es">Modo</span><span data-lang="en">Mode</span></th><th>ISO 64</th><th>ISO 1600</th><th>ISO 6400</th></tr></thead><tbody id="tbDR"></tbody></table>
         </div>
+        <div>
+          <h3 data-lang="es">Todo a 36 Mpx comunes (modelo)</h3>
+          <h3 data-lang="en">Everything at a common 36 MP (model)</h3>
+          <table class="res"><thead><tr><th><span data-lang="es">Vía</span><span data-lang="en">Path</span></th><th>ISO 64</th><th>ISO 1600</th><th>ISO 6400</th></tr></thead><tbody id="bn-tb36"></tbody></table>
+          <p class="note" id="bn-note36"></p>
+        </div>
       </div>
+      <p class="note" data-lang="es"><b>Por qué 36 Mpx y no solo 18.</b> La comparación a 18 Mpx reduce a L y a M por igual y es la que midió el artículo; pero el tamaño en que de verdad compiten M-DNG y L-DNG es <b>36 Mpx, el tamaño nativo de M</b>. Ahí no hay medida: la fila L→36 es <b>modelo</b>. Se calcula reduciendo L con Lanczos-3 en ×1,289 (√(60,3/36,3)), lo que con ruido blanco daría +3,18 dB (Σw² = 0,693 por eje), y aplicando después la <b>eficiencia observada</b> en la reducción medida a 18 Mpx: el artículo mide +2,39 dB donde la teoría de ruido blanco daría +6,13 dB, o sea un 39 % — el ruido real está correlado por el demosaico y se promedia peor. Incertidumbre ≈ ±1 dB; queda pendiente de medir.</p>
+      <p class="note" data-lang="en"><b>Why 36 MP and not only 18.</b> The 18 MP comparison shrinks L and M alike and is the one the article measured; but the size where M-DNG and L-DNG really compete is <b>36 MP, M’s native size</b>. There is no measurement there: the L→36 row is a <b>model</b>. It is computed by reducing L with Lanczos-3 at ×1.289 (√(60.3/36.3)), which with white noise would give +3.18 dB (Σw² = 0.693 per axis), and then applying the <b>observed efficiency</b> of the measured reduction to 18 MP: the article measures +2.39 dB where white-noise theory would give +6.13 dB, that is 39 % — real noise is correlated by the demosaicing and averages down less well. Uncertainty ≈ ±1 dB; still to be measured.</p>
       <p class="note" data-lang="es">Ratios lineales medidos: L→M 1,28×, L→S 1,81×. Método: imagen-diferencia de dos tomas idénticas, demosaico AHD lineal, canal G, parche subexpuesto μ ≈ 0,08, tres disparos por modo.</p>
       <p class="note" data-lang="en">Measured linear ratios: L→M 1.28×, L→S 1.81×. Method: difference image of two identical exposures, linear AHD demosaicing, G channel, underexposed patch μ ≈ 0.08, three frames per mode.</p>
 
@@ -315,7 +399,17 @@
 "use strict";
 // ---------- utilidades ----------
 const $ = id => document.getElementById(id);
-const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+/* Las variables de color hay que leerlas de un elemento DENTRO de esta parte, no de
+   documentElement: al fusionar en sensor.html, fusionar.py convierte «:root{--sag…}»
+   en «.part-bn{--sag…}», así que en la página fusionada documentElement no tiene
+   ninguna de estas variables y css() devolvía '' — los cuatro lienzos se pintaban
+   enteros en negro. El propio lienzo las hereda en los dos casos. */
+let CSSHOST=null;
+function cssHost(){
+  if(!CSSHOST||!CSSHOST.isConnected) CSSHOST=document.querySelector('.part-bn')||$('chartSNR')||document.documentElement;
+  return CSSHOST;
+}
+const css = v => getComputedStyle(cssHost()).getPropertyValue(v).trim();
 
 /* ---------- diccionario de cadenas generadas por JS ----------
    Como en stack-sensor.html, el diccionario se llama DICT y el traductor LBL():
@@ -330,18 +424,40 @@ const DICT={
   axDR:'DR ingenieril (dB)',
   ax18:'SNR a 18 Mpx comunes (dB)',
   idealLbl:'ideal {m} +{v} dB',
+  gvCross:'cruce · ISO', gvPlat:'meseta 90 % · ISO',
   winTag:'mejor',
   nameLan:'L reescalado (Lanczos-3)',
   nameMae:'pipeline «Maestro» (prefiltro + diezmado)',
   nameBin:'binning ideal (media de bloques)',
-  capSim:'{name} · SNR {snr} dB ({d} dB frente a L nativo)',
+  capSim:'{name} · SNR {snr} dB ({d} dB frente a L nativo) · detalle {det} %',
   simInfo:'Parche a «60 Mpx» ({b}×{b}): μ ≈ {mu} e⁻ por píxel, SNR nativa {snr} dB, medida por imagen-diferencia de dos realizaciones.',
   vGainNow:'Ganancia modelada a ISO {iso}: {gm} dB en M-DNG y {gs} dB en S-DNG (binning ideal: +{bm} y +{bs} dB). ',
-  vBase:'Veredicto: a ISO base, dispara L-DNG siempre. El remuestreo no regala nada (medido: −1,88 dB en M frente a L) y, todo reducido a 18 Mpx, L→Lanczos gana al mejor rival por 3,3 dB.',
-  vMid:'Zona de transición: la ganancia sube hacia su meseta de ≈3 dB pero aún no es completa. Si puedes bajar el ISO, baja el ISO y dispara L-DNG; si no, M-DNG ya recupera casi toda la ganancia.',
-  vHigh:'Veredicto: a ISO alto, dispara M-DNG: la ganancia entera (≈3 dB, medio paso) con la mitad de archivo; a 18 Mpx comunes M→Lanczos también gana (25,57 dB frente a 23,92 a ISO 1600).',
+  vCross:'Con esta calibración, M-DNG empieza a compensar a partir de ISO ≈{c} y da toda su ganancia (90 %) desde ISO ≈{p}. ',
+  vBase:'Veredicto: por debajo de ese cruce, dispara L-DNG siempre. El remuestreo no regala nada (medido: −1,88 dB en M frente a L a ISO 64) y, todo reducido a 18 Mpx, L→Lanczos gana al mejor rival por 3,3 dB.',
+  vMid:'Zona de transición: la ganancia sube hacia su meseta de ≈3 dB pero aún no es completa. Si puedes bajar el ISO, baja el ISO y dispara L-DNG; si no, M-DNG ya recupera casi toda la ganancia. Ojo: entre ISO 64 y 1600 no hay ninguna medida — este tramo entero es una interpolación suave entre los dos extremos medidos.',
+  vHigh:'Veredicto: a ISO alto, dispara M-DNG: la ganancia entera (≈3 dB, medio paso) con la mitad de archivo; a 18 Mpx comunes M→Lanczos también gana (medido a ISO 1600: 25,57 dB frente a 23,92).',
   vS:' S-DNG da la misma ganancia que M con la mitad de resolución: nunca es la mejor opción de calidad.',
+  vEV:' A esta exposición ({ev} EV bajo saturación) la diferencia entre modos será apenas visible: los ≈3 dB están medidos en sombras profundas (μ ≈ 0,08).',
   rowL18:'L → 18 Mpx', rowM18:'M → 18 Mpx', rowS18:'S-DNG nativo',
+  row36L:'L → 36 Mpx (modelo)', row36M:'M-DNG nativo (medido)', row36D:'ventaja de M',
+  note36:'Reducción ×{r} con Lanczos-3: +{th} dB con ruido blanco (Σw² = {sw} por eje), ×{ef} de eficiencia observada = {gg} dB reales sobre la SNR nativa de L.',
+  decIso:'con el ISO {iso} del deslizador',
+  dNoiseLo:'Ruido: a ISO {iso} el remuestreo aún resta ({gm} dB en M-DNG). Manda el L-DNG.',
+  dNoiseMid:'Ruido: a ISO {iso} M-DNG va por {gm} dB de los {gh} dB de meseta. Zona de transición, y sin ninguna medida entre ISO 64 y 1600.',
+  dNoiseHi:'Ruido: a ISO {iso} M-DNG da {gm} dB sobre L, la ganancia completa (medio paso en sombras).',
+  dDiffS:'Difracción: a {n} el techo práctico del formato son {cp} Mpx, por debajo de los 18 del S-DNG. Ni M ni L añaden un solo detalle aquí.',
+  dDiffM:'Difracción: a {n} el techo práctico son {cp} Mpx: el M-DNG (36 Mpx) ya recoge todo lo que entra por el objetivo; el L-DNG no añade detalle.',
+  dDiffL:'Difracción: a {n} el techo práctico son {cp} Mpx, por encima de los 36 del M-DNG: el L-DNG todavía aporta detalle real (deja de aportar sobre M en {nm} y sobre S en {ns}).',
+  dDestS:'Destino: {d} Mpx los da ya el S-DNG ({ms} Mpx nativos), así que por píxeles de salida los tres modos llegan.',
+  dDestM:'Destino: {d} Mpx pasan de los {ms} del S-DNG y no llegan a los {mm} del M-DNG: el M ya cubre la copia sin interpolar.',
+  dDestL:'Destino: {d} Mpx pasan de los {mm} del M-DNG: solo el L-DNG los da sin interpolar.',
+  dFinLo:'Ahora: <b>L-DNG</b>. A este ISO no hay ganancia que comprar y, si luego reduces, L→Lanczos gana a todos.',
+  dFinMid:'Ahora: <b>si puedes bajar el ISO por debajo de {c}, bájalo y dispara L-DNG</b>; si no puedes, M-DNG ya recupera {gm} dB de los {gh} dB de meseta.',
+  dFinM0:'Ahora: <b>M-DNG, y sin coste de detalle</b>: a {n} la difracción ya se come lo que el L-DNG tendría de más, y M compra {gm} dB en las sombras.',
+  dFinM1L:'Ahora: <b>L-DNG</b>. A {n} el objetivo todavía entrega más de los 36 Mpx del M-DNG y tu destino pide {d}: ese detalle lo vas a ver, y lo que pagas por él son {gm} dB de sombras, medio paso.',
+  dFinM1M:'Ahora: <b>M-DNG</b>. A {n} el L-DNG aún aportaría detalle, pero tu destino pide {d} Mpx y el M-DNG ya los cubre: te llevas los {gm} dB de las sombras sin perder nada que la copia vaya a enseñar. Si vas a recortar fuerte, vuelve al L-DNG.',
+  dFinNeedNo:' Tu destino pide {d} Mpx y a {n} la difracción no los llena: los píxeles de más del L-DNG saldrían vacíos.',
+  dFinSok:' A este diafragma el L-DNG ya no aporta muestreo sobre el S-DNG: es la única situación en que el archivo pequeño casi no cuesta resolución — sigue costando el margen de recorte y el suavizado del remuestreo (mira el «detalle %» de la simulación).',
   ckBinM:'Binning ideal M: 10·log₁₀(60/36)',
   ckBinS:'Binning ideal S: 10·log₁₀(60/18)',
   ckL:'SNR del modelo L a ISO {iso}',
@@ -358,18 +474,40 @@ const DICT={
   axDR:'engineering DR (dB)',
   ax18:'SNR at a common 18 MP (dB)',
   idealLbl:'ideal {m} +{v} dB',
+  gvCross:'crossing · ISO', gvPlat:'90 % plateau · ISO',
   winTag:'best',
   nameLan:'L downsampled (Lanczos-3)',
   nameMae:'“Maestro” pipeline (pre-filter + decimation)',
   nameBin:'ideal binning (block average)',
-  capSim:'{name} · SNR {snr} dB ({d} dB vs native L)',
+  capSim:'{name} · SNR {snr} dB ({d} dB vs native L) · detail {det} %',
   simInfo:'“60 MP” patch ({b}×{b}): μ ≈ {mu} e⁻ per pixel, native SNR {snr} dB, measured from the difference image of two realisations.',
   vGainNow:'Modelled gain at ISO {iso}: {gm} dB in M-DNG and {gs} dB in S-DNG (ideal binning: +{bm} and +{bs} dB). ',
-  vBase:'Verdict: at base ISO, always shoot L-DNG. The resampling gives nothing back (measured: −1.88 dB in M against L) and, with everything reduced to 18 MP, L→Lanczos beats the best rival by 3.3 dB.',
-  vMid:'Transition zone: the gain climbs towards its ≈3 dB plateau but is not yet complete. If you can lower the ISO, lower it and shoot L-DNG; otherwise M-DNG already recovers almost all of the gain.',
-  vHigh:'Verdict: at high ISO, shoot M-DNG: the whole gain (≈3 dB, half a stop) at half the file size; at a common 18 MP, M→Lanczos wins too (25.57 dB against 23.92 at ISO 1600).',
+  vCross:'With this calibration, M-DNG starts to pay from ISO ≈{c} and delivers its whole gain (90 %) from ISO ≈{p}. ',
+  vBase:'Verdict: below that crossing, always shoot L-DNG. The resampling gives nothing back (measured: −1.88 dB in M against L at ISO 64) and, with everything reduced to 18 MP, L→Lanczos beats the best rival by 3.3 dB.',
+  vMid:'Transition zone: the gain climbs towards its ≈3 dB plateau but is not yet complete. If you can lower the ISO, lower it and shoot L-DNG; otherwise M-DNG already recovers almost all of the gain. Mind you: between ISO 64 and 1600 there is no measurement at all — this whole stretch is a smooth interpolation between the two measured ends.',
+  vHigh:'Verdict: at high ISO, shoot M-DNG: the whole gain (≈3 dB, half a stop) at half the file size; at a common 18 MP, M→Lanczos wins too (measured at ISO 1600: 25.57 dB against 23.92).',
   vS:' S-DNG delivers the same gain as M at half the resolution: it is never the best quality option.',
+  vEV:' At this exposure ({ev} EV below saturation) the difference between modes will barely show: the ≈3 dB are measured in deep shadow (μ ≈ 0.08).',
   rowL18:'L → 18 MP', rowM18:'M → 18 MP', rowS18:'native S-DNG',
+  row36L:'L → 36 MP (model)', row36M:'native M-DNG (measured)', row36D:'M’s advantage',
+  note36:'×{r} reduction with Lanczos-3: +{th} dB with white noise (Σw² = {sw} per axis), ×{ef} observed efficiency = {gg} dB real over the native L SNR.',
+  decIso:'with ISO {iso} from the slider',
+  dNoiseLo:'Noise: at ISO {iso} the resampling still subtracts ({gm} dB in M-DNG). L-DNG rules.',
+  dNoiseMid:'Noise: at ISO {iso} M-DNG stands at {gm} dB of the {gh} dB plateau. Transition zone, and not one measurement between ISO 64 and 1600.',
+  dNoiseHi:'Noise: at ISO {iso} M-DNG gives {gm} dB over L, the whole gain (half a stop in the shadows).',
+  dDiffS:'Diffraction: at {n} the practical ceiling of the format is {cp} MP, below the 18 of the S-DNG. Neither M nor L adds a single detail here.',
+  dDiffM:'Diffraction: at {n} the practical ceiling is {cp} MP: the M-DNG (36 MP) already collects everything the lens delivers; the L-DNG adds no detail.',
+  dDiffL:'Diffraction: at {n} the practical ceiling is {cp} MP, above the 36 of the M-DNG: the L-DNG still brings real detail (it stops adding over M at {nm} and over S at {ns}).',
+  dDestS:'Destination: {d} MP are already given by the S-DNG ({ms} MP native), so on output pixels all three modes reach it.',
+  dDestM:'Destination: {d} MP go beyond the S-DNG\u2019s {ms} and fall short of the M-DNG\u2019s {mm}: the M already covers the print without interpolating.',
+  dDestL:'Destination: {d} MP go beyond the M-DNG\u2019s {mm}: only the L-DNG gives them without interpolating.',
+  dFinLo:'Right now: <b>L-DNG</b>. At this ISO there is no gain to buy and, if you downsample later, L→Lanczos beats all of them.',
+  dFinMid:'Right now: <b>if you can drop the ISO below {c}, drop it and shoot L-DNG</b>; if you cannot, M-DNG already recovers {gm} dB of the {gh} dB plateau.',
+  dFinM0:'Right now: <b>M-DNG, and at no cost in detail</b>: at {n} diffraction already eats what the L-DNG would have had extra, and M buys {gm} dB in the shadows.',
+  dFinM1L:'Right now: <b>L-DNG</b>. At {n} the lens still delivers more than the M-DNG\u2019s 36 MP and your destination asks for {d}: that detail will show, and what you pay for it is {gm} dB of shadows, half a stop.',
+  dFinM1M:'Right now: <b>M-DNG</b>. At {n} the L-DNG would still add detail, but your destination asks for {d} MP and the M-DNG already covers them: you take the {gm} dB in the shadows without losing anything the print will show. If you are going to crop, keep the L-DNG.',
+  dFinNeedNo:' Your destination asks for {d} MP and at {n} diffraction does not fill them: the L-DNG\u2019s extra pixels would come out empty.',
+  dFinSok:' At this aperture the S-DNG loses no detail either: it is the one situation where the small file costs nothing.',
   ckBinM:'Ideal binning M: 10·log₁₀(60/36)',
   ckBinS:'Ideal binning S: 10·log₁₀(60/18)',
   ckL:'Model L SNR at ISO {iso}',
@@ -390,20 +528,20 @@ function LBL(k,vars){
 /* Separador decimal: coma en español, punto en inglés. */
 const nf = (x,d) => (typeof x==='number' ? x.toFixed(d) : String(x)).replace('.', LANG()==='es'?',':'.');
 const sgnf = (x,d) => (x>=0?'+':'')+nf(x,d);
+/* Enteros grandes con el separador de millares del idioma. */
+const nInt = x => Math.round(x).toLocaleString(LANG()==='es'?'es-ES':'en-GB');
 
 /* ---------- datos medidos del artículo (incrustados) ---------- */
 const MEAS={
   iso:[64,1600,6400],
-  snr:{ L:[33.42,20.66,14.48], M:[31.54,23.86,23.92], S:[32.53,17.47,17.77] },
+  snr:{ L:[33.42,20.66,14.48], M:[31.54,23.86,17.47], S:[32.53,23.92,17.77] },
   gain:{ M:[-1.88,3.20,2.99], S:[-0.89,3.26,3.29] },
   gainTheoryArticle:{ M:2.2, S:5.2 },
   to18:{ L:[35.81,23.05,16.86], M:[32.10,25.57,19.07], S:[32.53,23.92,17.77] },
   dr:{ L:[39.43,37.21,32.57], M:[39.15,38.90,34.96], S:[39.57,38.92,35.31] },
-  ratios:{ LM:1.28, LS:1.81 }
+  ratios:{ LM:1.28, LS:1.81 },
+  px:{ L:[9528,6328], M:[7416,4928], S:[5272,3498] }        // L/M/S de la M11 (y de Q3, Q3 43, SL3)
 };
-/* corrección: la SNR nativa de M y S a 1600/6400 (M 23,86/17,47 — errata arriba) */
-MEAS.snr.M=[31.54,23.86,17.47];
-MEAS.snr.S=[32.53,23.92,17.77];
 
 /* ---------- calibración del pipeline «Maestro» ---------- */
 const CAL={ fwc:28500, rn:1.5, gam:0.93, mu:0.08 };            // modelo L por defecto
@@ -424,11 +562,39 @@ function gainDB(iso,mode){
   const gg=GAINS[mode];
   return gg.base+(gg.hi-gg.base)*uOf(iso);
 }
+/* ---------- ISO de cruce y de meseta, calculados por bisección ----------
+   No son umbrales inventados: salen de la propia curva GAINS. Dependen solo de
+   GAINS (los tres ISO medidos), no de FWC, σr, γ ni EV: mover esos controles no
+   los cambia. Cruce: G_M = 0. Meseta: G_M alcanza el 90 % del recorrido entre el
+   valor medido a ISO 64 y la meseta medida a 1600–6400. */
+function isoWhere(mode,target){
+  let lo=64, hi=6400;
+  const fn=x=>gainDB(x,mode)-target;
+  if(fn(lo)>0) return lo;
+  if(fn(hi)<0) return hi;
+  for(let i=0;i<80;i++){ const mid=Math.sqrt(lo*hi); if(fn(mid)<=0) lo=mid; else hi=mid; }
+  return Math.sqrt(lo*hi);
+}
+function isoRound(x){ return x>=1000?Math.round(x/50)*50:x>=200?Math.round(x/10)*10:Math.round(x); }
+const ISOCROSS = isoWhere('M',0);
+const ISOPLAT  = isoWhere('M',GAINS.M.base+0.9*(GAINS.M.hi-GAINS.M.base));
+
+/* ---------- difracción: el mismo techo práctico que la pestaña #difraccion ----------
+   ceilP = A·(2·0,404/(λ·N))² en Mpx, con A = 36×24 mm² y λ = 0,55 µm (550 nm), y los
+   mismos umbrales de modeFor(): 1,15× de margen sobre los 18,4 / 36,3 Mpx útiles. */
+const AFF=36*24, LAM=0.55;
+const ceilP = nn => AFF*Math.pow(2*0.404/(LAM*1e-3*nn),2)/1e6;
+const nForCeil = mp => 2*0.404/(LAM*1e-3*Math.sqrt(mp*1e6/AFF));
+const MPM=36.3, MPS=18.4, CEILMARGIN=1.15;
+const NLIMM=nForCeil(MPM), NLIMS=nForCeil(MPS);          // f/7,17 y f/10,07
+const fNum = nn => 'f/'+(nn>=10?nn.toFixed(0):(Math.abs(nn-Math.round(nn))<0.05?String(Math.round(nn)):nf(nn,1)));
+
 function params(){
   const isoRaw=Math.pow(2,+$('iso').value);
   const iso=isoRaw>=1000?Math.round(isoRaw/50)*50:isoRaw>=200?Math.round(isoRaw/10)*10:Math.round(isoRaw);
   return { iso, ev:+$('ev').value, fwc:+$('fwc').value, rn:+$('rn').value,
-           gam:+$('gam').value, lift:+$('lift').value };
+           gam:+$('gam').value, lift:+$('lift').value,
+           fnum:+$('bn-fnum').value, mbl:Math.max(1,+$('bn-mbl').value||75) };
 }
 
 /* ---------- gráficas ---------- */
@@ -488,6 +654,14 @@ function drawGain(p){
     g.beginPath(); g.moveTo(56,Y(v)); g.lineTo(W-16,Y(v)); g.stroke();
     g.fillStyle=css('--ref'); g.textAlign='left'; g.fillText(LBL('idealLbl',{m:mm,v:nf(v,1)}),62,Y(v)-4);
   });
+  g.setLineDash([2,3]); g.lineWidth=1; g.strokeStyle=css('--mute');
+  [[ISOCROSS,LBL('gvCross')],[ISOPLAT,LBL('gvPlat')]].forEach(([iv,lab])=>{
+    const xx=X(iv);
+    g.beginPath(); g.moveTo(xx,Y(6)); g.lineTo(xx,Y(-3)); g.stroke();
+    g.fillStyle=css('--mute'); g.textAlign='center'; g.font='11px IBM Plex Sans, system-ui';
+    g.fillText(lab+' '+isoRound(iv),xx,Y(-3)-6);
+  });
+  g.font='12px IBM Plex Sans, system-ui';
   g.setLineDash([]);
   curve(g,X,Y,iso=>gainDB(iso,'M'),'--tan',[],2.2);
   curve(g,X,Y,iso=>gainDB(iso,'S'),'--sph',[],2.2);
@@ -539,13 +713,50 @@ function draw18(){
 function drawVerdict(p){
   const gm=gainDB(p.iso,'M'), gs=gainDB(p.iso,'S');
   let txt=LBL('vGainNow',{iso:p.iso, gm:sgnf(gm,2), gs:sgnf(gs,2), bm:nf(KIDEAL.M,1), bs:nf(KIDEAL.S,1)});
-  txt+=LBL(p.iso<200?'vBase':p.iso<800?'vMid':'vHigh');
+  txt+=LBL('vCross',{c:isoRound(ISOCROSS), p:isoRound(ISOPLAT)});
+  txt+=LBL(p.iso<ISOCROSS?'vBase':p.iso<ISOPLAT?'vMid':'vHigh');
   txt+=LBL('vS');
+  if(p.ev>-2) txt+=LBL('vEV',{ev:nf(p.ev,1)});
   $('verdict').textContent=txt;
+}
+
+/* ---------- «Qué DNG ahora»: ruido + difracción + destino ----------
+   La línea de difracción usa exactamente el modelo de la pestaña #difraccion
+   (techo práctico a 550 nm y los umbrales de modeFor con 1,15× de margen); aquí
+   no se reexplica la física, se enlaza. */
+function decisionZone(iso){ return iso<ISOCROSS?'lo':(iso<ISOPLAT?'mid':'hi'); }
+function diffTier(nn){ const cp=ceilP(nn); return cp<=MPS*CEILMARGIN?'S':(cp<=MPM*CEILMARGIN?'M':'L'); }
+function drawDecision(p){
+  const gm=gainDB(p.iso,'M'), zone=decisionZone(p.iso), tier=diffTier(p.fnum), cp=ceilP(p.fnum);
+  $('bn-decIso').textContent=LBL('decIso',{iso:p.iso});
+  $('bn-dnoise').textContent = zone==='lo' ? LBL('dNoiseLo',{iso:p.iso,gm:sgnf(gm,2)})
+    : zone==='mid' ? LBL('dNoiseMid',{iso:p.iso,gm:sgnf(gm,2),gh:sgnf(GAINS.M.hi,2)})
+    : LBL('dNoiseHi',{iso:p.iso,gm:sgnf(gm,2)});
+  $('bn-ddiff').textContent = tier==='S' ? LBL('dDiffS',{n:fNum(p.fnum),cp:nf(cp,cp<10?1:0)})
+    : tier==='M' ? LBL('dDiffM',{n:fNum(p.fnum),cp:nf(cp,cp<10?1:0)})
+    : LBL('dDiffL',{n:fNum(p.fnum),cp:nf(cp,0),nm:fNum(NLIMM),ns:fNum(NLIMS)});
+  const dest=Math.max(1,Math.min(60,+$('bn-dmpx').value||18));
+  $('bn-ddest').textContent = dest<=MPS ? LBL('dDestS',{d:nf(dest,0),ms:nf(MPS,1)})
+    : dest<=MPM ? LBL('dDestM',{d:nf(dest,0),ms:nf(MPS,1),mm:nf(MPM,1)})
+    : LBL('dDestL',{d:nf(dest,0),mm:nf(MPM,1)});
+  let fin;
+  if(zone==='lo') fin=LBL('dFinLo');
+  else if(zone==='mid') fin=LBL('dFinMid',{c:isoRound(ISOCROSS),gm:sgnf(gm,2),gh:sgnf(GAINS.M.hi,2)});
+  else if(tier!=='L') fin=LBL('dFinM0',{gm:sgnf(gm,2),n:fNum(p.fnum)});
+  else fin=(dest>MPM) ? LBL('dFinM1L',{gm:sgnf(gm,2),n:fNum(p.fnum),d:nf(dest,0)})
+                      : LBL('dFinM1M',{gm:sgnf(gm,2),n:fNum(p.fnum),d:nf(dest,0)});
+  if(zone!=='lo'&&dest>cp) fin+=LBL('dFinNeedNo',{d:nf(dest,0),n:fNum(p.fnum)});
+  if(tier==='S'&&zone!=='lo') fin+=LBL('dFinSok');
+  $('bn-dfinal').innerHTML=fin;
 }
 
 /* ---------- simulación visual (RNG congruente sembrado, nunca Math.random) ---------- */
 const BASE=319, OUT=176;              // 319/176 = 1,8125 ≈ ratio lineal medido 1,81×
+/* Frecuencia de las barras: 1,25 rad/px a «60 Mpx» = periodo 5,03 px, que tras la
+   reducción ×1,8125 queda en 2,77 px (0,361 ciclos/px), por DEBAJO del Nyquist de
+   salida. Con la frecuencia anterior (1,848 rad/px) el periodo de salida era 1,88 px:
+   lo que «Lanczos conservaba» era fuga y aliasing, no detalle resuelto. */
+const BARF=1.25;
 let SEED=1, FIELD=null;
 function makeRng(seed){
   let sd=(seed>>>0)||123456789;
@@ -565,7 +776,7 @@ function fieldOf(){
   for(let y=0;y<BASE;y++)for(let x=0;x<BASE;x++){
     const gx=0.55+0.9*x/(BASE-1);
     const tex=1+0.10*Math.sin(x*0.37)*Math.sin(y*0.29);
-    const bar=(y>BASE*0.42&&y<BASE*0.58)?1+0.16*Math.sin(x*1.848):1;
+    const bar=(y>BASE*0.42&&y<BASE*0.58)?1+0.16*Math.sin(x*BARF):1;
     FIELD[y*BASE+x]=gx*tex*bar;
   }
   return FIELD;
@@ -602,6 +813,23 @@ function wlistOf(mode){
     list.push({i0,ws});
   }
   return WCACHE[mode]=list;
+}
+/* Reducción de ruido blanco de un Lanczos-3 separable a un factor cualquiera:
+   con pesos normalizados la varianza queda multiplicada por (Σw²)² (un eje por
+   factor), así que la SNR sube −20·log₁₀(Σw²) dB. Se promedia sobre 256 fases de
+   salida porque Σw² depende de dónde caiga el centro entre muestras. */
+function noiseGainLanczos(ratio){
+  const NPH=256; let tot=0;
+  for(let o=0;o<NPH;o++){
+    const ctr=(o+0.5)*ratio-0.5, rad=3*ratio;
+    const i0=Math.ceil(ctr-rad), i1=Math.floor(ctr+rad);
+    const ws=[]; let sum=0;
+    for(let i=i0;i<=i1;i++){ const w=lanczos3((i-ctr)/ratio); ws.push(w); sum+=w; }
+    let s2=0; for(let i=0;i<ws.length;i++){ const wn=ws[i]/sum; s2+=wn*wn; }
+    tot+=s2;
+  }
+  const sw=tot/NPH;
+  return { sw, db:-20*Math.log10(sw) };
 }
 function resampleSep(src,mode){
   const wl=wlistOf(mode);
@@ -644,6 +872,33 @@ function snrStat(a1,a2,N,mg){
   const mean=sm/cnt, varr=Math.max(1e-12,d2/cnt-(d1/cnt)*(d1/cnt));
   return 20*Math.log10(mean/Math.sqrt(varr));
 }
+/* ---------- detalle conservado: MTF del camino a la frecuencia de las barras ----------
+   Proyección por mínimos cuadrados sobre seno y coseno a la frecuencia conocida,
+   dentro de la banda central y con margen para que el filtro vertical no mezcle
+   filas sin barras. Se mide sobre el parche SIN ruido: es una medida de detalle,
+   no depende de la realización. La amplitud es √(a²+b²), independiente de la fase. */
+function barAmp(a,N,ratio,y0,y1,mg){
+  const w=BARF*ratio, ph=BARF*(0.5*ratio-0.5);
+  let sa=0,sb=0,cnt=0;
+  for(let y=y0;y<=y1;y++)for(let x=mg;x<N-mg;x++){
+    const v=a[y*N+x], th=w*x+ph;
+    sa+=v*Math.cos(th); sb+=v*Math.sin(th); cnt++;
+  }
+  return cnt?2*Math.hypot(sa,sb)/cnt:0;
+}
+const DCACHE={};
+function detailPct(sgm){
+  const key=sgm.toFixed(3);
+  if(DCACHE[key]) return DCACHE[key];
+  const fld=fieldOf();
+  const yi0=Math.ceil(BASE*0.42)+8, yi1=Math.floor(BASE*0.58)-8;
+  const yo0=Math.ceil(OUT*0.42)+4,  yo1=Math.floor(OUT*0.58)-4;
+  const ref=barAmp(fld,BASE,1,yi0,yi1,15);
+  const rel=arr=>100*barAmp(arr,OUT,BASE/OUT,yo0,yo1,8)/ref;
+  if(!DCACHE.fix) DCACHE.fix={ lan:rel(resampleSep(fld,'lanczos')), bin:rel(resampleSep(fld,'box')) };
+  const out={ lan:DCACHE.fix.lan, mae:rel(resampleSep(blurSep(fld,BASE,sgm),'bilinear')), bin:DCACHE.fix.bin };
+  return DCACHE[key]=out;
+}
 function paint(cid,a,N,kD){
   const c=$(cid), g=c.getContext('2d'), img=g.createImageData(N,N);
   for(let i=0;i<N*N;i++){
@@ -658,16 +913,17 @@ function runSim(p){
   const nat=snrStat(s1,s2,BASE,6);
   const sgm=0.55*uOf(p.iso);
   const mb1=blurSep(s1,BASE,sgm), mb2=blurSep(s2,BASE,sgm);
+  const det=detailPct(sgm);
   const outs=[
-    ['cvL','capL','nameLan', resampleSep(s1,'lanczos'), resampleSep(s2,'lanczos')],
-    ['cvM','capM','nameMae', resampleSep(mb1,'bilinear'), resampleSep(mb2,'bilinear')],
-    ['cvBin','capBin','nameBin', resampleSep(s1,'box'), resampleSep(s2,'box')]
+    ['cvL','capL','nameLan', resampleSep(s1,'lanczos'), resampleSep(s2,'lanczos'), det.lan],
+    ['cvM','capM','nameMae', resampleSep(mb1,'bilinear'), resampleSep(mb2,'bilinear'), det.mae],
+    ['cvBin','capBin','nameBin', resampleSep(s1,'box'), resampleSep(s2,'box'), det.bin]
   ];
   const kD=Math.pow(2,p.lift)/(eScale*2.2);
-  outs.forEach(([cid,cap,key,o1,o2])=>{
+  outs.forEach(([cid,cap,key,o1,o2,dd])=>{
     const q=snrStat(o1,o2,OUT,3);
     paint(cid,o1,OUT,kD);
-    $(cap).textContent=LBL('capSim',{name:LBL(key),snr:nf(q,1),d:sgnf(q-nat,1)});
+    $(cap).textContent=LBL('capSim',{name:LBL(key),snr:nf(q,1),d:sgnf(q-nat,1),det:nf(dd,0)});
   });
   $('simInfo').textContent=LBL('simInfo',{b:BASE,mu:nf(eScale,eScale<100?1:0),snr:nf(nat,1)});
 }
@@ -679,6 +935,42 @@ function buildTables(){
   $('tbGain').innerHTML=['M','S'].map(kk=>rowHTML([kk+'-DNG'].concat(MEAS.gain[kk].map(v=>sgnf(v,2))).concat([sgnf(MEAS.gainTheoryArticle[kk],1)]))).join('');
   $('tbTo18').innerHTML=[['rowL18','L'],['rowM18','M'],['rowS18','S']].map(([rk,kk])=>rowHTML([LBL(rk)].concat(MEAS.to18[kk].map(v=>nf(v,2))))).join('');
   $('tbDR').innerHTML=['L','M','S'].map(kk=>rowHTML([kk+'-DNG'].concat(MEAS.dr[kk].map(v=>nf(v,2))))).join('');
+  build36();
+}
+/* Las <option> se reetiquetan por idioma (nunca se ocultan con display:none). */
+function relabelApertures(){
+  [].forEach.call(document.querySelectorAll('#bn-fnum option[data-es]'),function(o){
+    o.textContent=o.getAttribute('data-'+LANG())||o.textContent;
+  });
+}
+/* ---------- todo a 36 Mpx comunes: L→36 modelado frente a M-DNG medido ----------
+   No hay medida a 36 Mpx. Se modela la reducción L→36 con Lanczos-3 (×1,289) por su
+   reducción de ruido blanco, corregida por la eficiencia que se observa en la
+   reducción que sí está medida (a 18 Mpx: +2,39 dB medidos frente a +6,14 teóricos).
+   Etiquetado como modelo en la tabla y en la nota. */
+const R36=Math.sqrt(60.3/36.3), R18=Math.sqrt(60.3/18.4);
+const NG36=noiseGainLanczos(R36), NG18=noiseGainLanczos(R18);
+const EFF18=MEAS.iso.map((iso,i)=>MEAS.to18.L[i]-MEAS.snr.L[i]).reduce((a,b)=>a+b,0)/3/NG18.db;
+const G36=EFF18*NG36.db;
+function build36(){
+  const l36=MEAS.snr.L.map(v=>v+G36);
+  $('bn-tb36').innerHTML=[
+    rowHTML([LBL('row36L')].concat(l36.map(v=>nf(v,2)))),
+    rowHTML([LBL('row36M')].concat(MEAS.snr.M.map(v=>nf(v,2)))),
+    rowHTML([LBL('row36D')].concat(MEAS.snr.M.map((v,i)=>sgnf(v-l36[i],2))))
+  ].join('');
+  $('bn-note36').textContent=LBL('note36',{r:nf(R36,3),th:nf(NG36.db,2),sw:nf(NG36.sw,3),ef:nf(EFF18,2),gg:sgnf(G36,2)});
+}
+
+/* ---------- coste en tarjeta ---------- */
+function buildSize(p){
+  const mpx=k=>MEAS.px[k][0]*MEAS.px[k][1]/1e6;
+  const rows=['L','M','S'].map(k=>{
+    const mb=p.mbl*mpx(k)/mpx('L');
+    return rowHTML([k+'-DNG', MEAS.px[k][0]+'×'+MEAS.px[k][1], nf(mpx(k),2), nf(mb,1),
+                    nInt(Math.floor(64000/mb)), nInt(Math.floor(128000/mb))]);
+  });
+  $('bn-tbsize').innerHTML=rows.join('');
 }
 function buildVerif(){
   const ev0=Math.log2(CAL.mu);
@@ -705,7 +997,8 @@ function update(){
   $('evV').textContent=nf(p.ev,2);
   $('muV').textContent=nf(Math.pow(2,p.ev),3);
   $('liftV').textContent=sgnf(p.lift,1);
-  drawSNR(p); drawGain(p); drawDR(); draw18(); drawVerdict(p);
+  relabelApertures();
+  drawSNR(p); drawGain(p); drawDR(); draw18(); drawVerdict(p); drawDecision(p); buildSize(p);
   clearTimeout(timer); timer=setTimeout(()=>runSim(p),60);
 }
 /* El conmutador llama a onLangChange también al arrancar, antes de que la
@@ -714,7 +1007,8 @@ function update(){
 let READY=false;
 window.onLangChange=function(){ if(!READY) return; buildTables(); buildVerif(); update(); };
 
-['iso','ev','fwc','rn','gam','lift'].forEach(id=>$(id).addEventListener('input',update));
+['iso','ev','fwc','rn','gam','lift','bn-fnum','bn-mbl','bn-mbm','bn-mbs','bn-dmpx'].forEach(id=>$(id).addEventListener('input',update));
+$('bn-fnum').addEventListener('change',update);
 $('btnPatch').addEventListener('click',()=>{ $('ev').value=Math.log2(CAL.mu).toFixed(2); update(); });
 $('btnSeed').addEventListener('click',()=>{ SEED++; update(); });
 

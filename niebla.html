@@ -95,6 +95,14 @@
   .mlist{display:flex;flex-wrap:wrap;gap:8px;font-family:var(--mono);font-size:12px}
   .mlist label{display:inline-flex;align-items:center;gap:4px;text-transform:none;letter-spacing:0;font-size:12px;color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:3px 7px;background:#fff;margin:0}
   .mlist .st{color:var(--ink2)}.mlist .st.ok{color:#3e6d8a}.mlist .st.ko{color:#8c4a3a}
+  [hidden]{display:none!important}
+  input[type=range]{width:180px;padding:0;accent-color:var(--ok);background:transparent;border:none}
+  .rv{font-family:var(--mono);font-size:12px;color:var(--ink);margin-top:4px}
+  .hour.win{outline:2px solid var(--warn);outline-offset:-2px;border-radius:3px}
+  tr.best td{background:#e7eef3;font-weight:600}
+  .swatch{display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:-1px;margin:0 4px 0 10px}
+  .card a{color:var(--ok)}
+  .note p{margin:0 0 10px}.note p:last-child{margin-bottom:0}
 </style>
 </head>
 <body>
@@ -109,6 +117,7 @@
     <div><label for="lat" data-i18n="lat">Latitud</label><input id="lat" type="number" step="0.0001" value="43.3623"></div>
     <div><label for="lon" data-i18n="lon">Longitud</label><input id="lon" type="number" step="0.0001" value="-8.4115"></div>
     <div><label for="costa" data-i18n="env">Entorno</label><select id="costa"><option value="costa" data-i18n="env_coast">Costero (advección)</option><option value="interior" data-i18n="env_inland">Interior</option></select></div>
+    <div id="seawrap"><label for="seaaz" data-i18n="seaaz">Acimut hacia el mar</label><input id="seaaz" type="number" step="5" min="0" max="360" placeholder="—"></div>
     <button id="geo" class="ghost" type="button" data-i18n="geo">Usar mi posición</button>
   </div>
 
@@ -126,13 +135,40 @@
           <option value="meteofrance_seamless">AROME/ARPEGE</option><option value="ecmwf_ifs025">ECMWF IFS 0.25°</option><option value="ukmo_seamless">UKMO</option>
         </select></div>
       <button id="go1" type="button" data-i18n="compute">Calcular</button>
+      <button id="abtog" class="ghost" type="button">Comparar con otro sitio</button>
       <div class="status" id="st1"></div>
     </div>
+    <div class="panel controls" id="abpanel" hidden style="margin-top:0">
+      <div><label for="latB" data-i18n="latB">Latitud B</label><input id="latB" type="number" step="0.0001" value="43.2500"></div>
+      <div><label for="lonB" data-i18n="lonB">Longitud B</label><input id="lonB" type="number" step="0.0001" value="-8.1500"></div>
+      <div><label for="costaB" data-i18n="envB">Entorno B</label><select id="costaB"><option value="costa" data-i18n="env_coast">Costero (advección)</option><option value="interior" data-i18n="env_inland" selected>Interior</option></select></div>
+      <button id="goAB" type="button" data-i18n="ab_compute">Calcular B</button>
+      <div class="status" id="stAB"></div>
+    </div>
     <div class="cards" id="cards1"></div>
+    <section id="absec" hidden><h2 data-i18n="h_ab">A o B: comparación de dos emplazamientos</h2><div class="cards" id="cardsAB"></div><div id="chartAB"></div><div class="legend" id="legAB"></div><p class="note" id="abread"></p></section>
+    <section id="mornsec"><h2 data-i18n="h_morn">Próximas mañanas</h2><div class="wrap"><table id="tmorn"></table></div><p class="note" id="mornread"></p><p class="note" data-i18n="morn_note"></p></section>
     <section><h2 data-i18n="h_strip">Índice horario (48 h)</h2><div class="wrap"><div class="strip" id="strip"></div></div><div class="legend" data-i18n="strip_legend"></div></section>
+    <section><h2 data-i18n="h_brk">De qué se compone el índice, hora a hora</h2><div id="chartbrk"></div><div class="legend" id="legbrk"></div><p class="note" data-i18n="brk_note"></p></section>
     <section><h2 data-i18n="h_conv">Convergencia de temperatura y punto de rocío</h2><div id="chart1"></div><div class="legend" id="leg1"></div></section>
+    <section><h2 data-i18n="h_kos">Qué vas a ver: contraste, distancia y focal</h2>
+      <div class="panel controls" style="margin-top:0">
+        <div><label for="kv" data-i18n="k_vis">Visibilidad</label><input id="kv" type="range" min="0" max="100" step="1" value="50"><div class="rv" id="kvout"></div></div>
+        <div><label for="kd" data-i18n="k_dist">Distancia al sujeto</label><input id="kd" type="range" min="0" max="100" step="1" value="50"><div class="rv" id="kdout"></div></div>
+        <div><label for="kf" data-i18n="k_foc">Focal</label><select id="kf">
+          <option value="28">28 mm</option><option value="35">35 mm</option><option value="43" selected>43 mm</option><option value="50">50 mm</option><option value="75">75 mm</option><option value="90">90 mm</option><option value="135">135 mm</option>
+        </select></div>
+        <button id="kreset" class="ghost" type="button" data-i18n="k_reset">Volver a la previsión</button>
+      </div>
+      <div class="cards" id="kcards"></div>
+      <div id="kchart"></div>
+      <div class="legend" id="klegend"></div>
+      <div class="wrap" style="margin-top:14px"><table id="ktab"></table></div>
+      <p class="note" data-i18n="k_note"></p>
+    </section>
     <section><h2 data-i18n="h_table">Tabla horaria</h2><div class="wrap"><table id="tabla1"></table></div></section>
-    <section><h2 data-i18n="h_how">Cómo se calcula</h2><p class="note" data-i18n="how1"></p></section>
+    <section><h2 data-i18n="h_how">Cómo se calcula</h2><p class="note" data-i18n="how1"></p><div class="note" data-i18n="how_phys"></div></section>
+    <section><h2 data-i18n="h_field">Técnica de campo en niebla</h2><div class="note" data-i18n="field_txt"></div></section>
   </div>
 
   <div class="pane" id="p2">
@@ -161,6 +197,7 @@
         </div>
         <p class="note" data-i18n="obs_note"></p>
         <div class="wrap"><table id="tobs"></table></div>
+        <p class="note" id="lessons"></p>
       </div></section>
     <section><h2 data-i18n="h_method">Método</h2><p class="note" data-i18n="method"></p></section>
   </div>
@@ -174,7 +211,7 @@
     h_strip:'Índice horario (48 h)',strip_legend:'Barra: índice 0 a 100. Fondo gris: noche. Hora en rojo: amanecer. Ámbar (50 a 74): bruma posible. Rojizo (≥ 75): niebla probable.',
     h_conv:'Convergencia de temperatura y punto de rocío',leg1:'<i style="background:#1c262e"></i>T (°C) <i style="background:#3e6d8a"></i>Td (°C) <i style="background:#b8862b"></i>viento (km/h, eje derecho) <i style="background:#d9a0a0"></i>T − Td &lt; 2 °C <i style="background:#7a5ea8;height:6px"></i>visibilidad prevista &lt; 2 km (barra inferior)',
     h_table:'Tabla horaria',h_how:'Cómo se calcula',
-    how1:'El índice suma contribuciones y se satura en 100. <code>ΔT = T − Td</code>: 40 puntos si ΔT ≤ 0.5 °C, decreciendo linealmente hasta 0 en 4 °C. Viento a 10 m: 2 a 8 km/h (20), calma (14), 8 a 15 (8), &gt; 20 (0). Nubosidad por encima de la capa de niebla, es decir medias y altas (las bajas de un modelo pueden ser la propia niebla y no penalizan salvo que la visibilidad prevista sea buena, señal de estratos): &lt; 25 % (20), 25 a 60 % (8), más (0). Visibilidad modelada: &lt; 1 km (20), &lt; 3 km (10), &lt; 6 km (4); sin dato, 5. HR ≥ 97 %: +10. Lluvia &gt; 0.5 mm: −15. Persistencia: +2 por cada hora nocturna previa consecutiva con ΔT &lt; 1.5 °C y viento &lt; 12 km/h, hasta +8. En modo costero, advección: Td del aire por encima de la SST con viento de 8 a 30 km/h, hasta +30. De día se multiplica por 0.65, salvo en las dos horas siguientes al amanecer (0.85), cuando la niebla aún persiste. Umbrales: ≥ 75 niebla probable, 50 a 74 bruma posible.',
+    how1:'El índice suma contribuciones y se satura en 100. <code>ΔT = T − Td</code>: 40 puntos si ΔT ≤ 0.5 °C, decreciendo linealmente hasta 0 en 4 °C. Viento a 10 m: 2 a 8 km/h (20), calma (14), 8 a 15 (8), 15 a 20 (3), &gt; 20 (0). Nubosidad por encima de la capa de niebla, es decir medias y altas (las bajas de un modelo pueden ser la propia niebla y no penalizan salvo que la visibilidad prevista sea buena, señal de estratos): &lt; 25 % (20), 25 a 60 % (8), más (0). Visibilidad modelada: &lt; 1 km (20), &lt; 3 km (10), &lt; 6 km (4); sin dato, 5. HR ≥ 97 %: +10. Lluvia &gt; 0.5 mm: −15. Persistencia: +2 por cada hora nocturna previa consecutiva con ΔT &lt; 1.5 °C y viento &lt; 12 km/h, hasta +8. En modo costero, advección: Td del aire por encima de la SST con viento de 8 a 30 km/h, hasta +30. De día se multiplica por 0.65, salvo en las dos horas siguientes al amanecer (0.85), cuando la niebla aún persiste. Umbrales: ≥ 75 niebla probable, 50 a 74 bruma posible.',
     models_lbl:'Modelos y ensembles (descarga en paralelo; EPS/ENS son conjuntos de 30 a 50 miembros y tardan algo más)',alpha:'γ (peso de los modelos frente a la climatología, 0.1 a 1)',h_prob:'Probabilidad horaria por modelo y posterior',h_sun:'Estado del amanecer por modelo',h_w:'Pesos bayesianos y prior',h_obs:'Registro de observaciones (aprendizaje)',
     night_of:'Noche del',observed:'Observado al amanecer',o_fog:'Niebla (vis < 1 km)',o_mist:'Bruma o neblina',o_none:'Nada',save_obs:'Guardar observación',export:'Exportar JSON',import:'Importar JSON',clear:'Borrar registro',
     obs_note:'Cada vez que calculas, la previsión para el próximo amanecer queda congelada automáticamente, asociada a la fecha de esa noche. Por la mañana basta con elegir la noche recién terminada, indicar lo observado y guardar: la observación se empareja con la previsión que se congeló la víspera, nunca con una posterior. Si esa noche no llegaste a calcular, la observación solo actualiza el prior climatológico, no los pesos. El registro se guarda en este navegador; exporta el JSON si cambias de equipo.',
@@ -183,16 +220,39 @@
     dl:'Descargando previsión…',dl_n:'Descargando {n} modelos en paralelo…',err:'Error: ',nopos:'Sin posición: ',geo_wait:'Obteniendo posición… (acepta el permiso si el navegador lo pide)',geo_denied:'Permiso de ubicación denegado. Actívalo en el candado de la barra de direcciones, o escribe las coordenadas a mano.',geo_denied_app:'Permiso de ubicación denegado para la app de pantalla de inicio. En iPhone: Ajustes → Privacidad y seguridad → Localización activada, y en "Sitios web de Safari" elige "Al usar la app". Si sigue fallando, elimina el icono del escritorio y vuelve a añadirlo para que pida permiso de nuevo.',geo_timeout:'La posición tardó demasiado. Reintenta, o escribe las coordenadas a mano.',geo_unavail:'Posición no disponible en este dispositivo. Escribe las coordenadas a mano.',geo_insecure:'La geolocalización solo funciona con HTTPS (por ejemplo en GitHub Pages) o en localhost; abierta como archivo local el navegador la bloquea. Escribe las coordenadas a mano.',geo_unsupported:'Este navegador no ofrece geolocalización. Escribe las coordenadas a mano.',nossT:' · sin SST, advección desactivada',elev:'elevación',
     next6:'Próximas 6 horas',max_at:'máximo a las',sunrise:'Amanecer',window:'ventana −2.5 h a +1.5 h, máximo a las',mindt:'Mínima depresión del punto de rocío esta noche',at:'a las',wind:'viento',clouds:'nubes',pressure:'presión',
     fog:'Niebla probable',mist:'Bruma o neblina posible',unlikely:'Improbable',range:'rango',disp:'Dispersión entre modelos (amanecer)',agree_h:'Acuerdo alto',agree_m:'Acuerdo moderado',agree_l:'Desacuerdo',mean:'media',disp_note:'Desviación típica de las probabilidades de los modelos: incertidumbre epistémica.',
-    th1:['Hora','Índice','T','Td','ΔT','HR','Viento','Dir','Nubes','Bajas','Medias','Altas','Vis km','SST','P hPa'],thsun:['Modelo','P máx','hora','ΔT','HR','viento','nubes','vis km','señales'],thw:['Modelo','peso w','','log‑veros.'],thobs:['Noche','y'],posterior:'posterior',del:'eliminar',
+    th1:['Hora','Índice','T','Td','ΔT','HR','Viento','Dir','Nubes','Bajas','Medias','Altas','Vis km','SST','P hPa'],thsun:['Modelo','P máx','hora','ΔT','HR','viento','nubes','vis km','señales'],thw:['Modelo','peso w','Brier','aciertos','log‑veros.'],thobs:['Noche','y'],posterior:'posterior',del:'eliminar',
     post_leg:'posterior',range_leg:'rango',prior_info:'Prior: Beta({a}, {b}), media {pi} % sobre {n} noches registradas. Calibración p = σ((s − 70)/11).',
     sel1:'Selecciona al menos un modelo.',none:'Ningún modelo respondió a tiempo. Reintenta o reduce la selección.',fused:'{k} modelos fusionados',failed:', {f} sin respuesta',first:'Calcula primero.',badjson:'JSON no válido',confirm:'¿Borrar todo el registro de observaciones?',
-    h_cal:'Calibración (diagrama de fiabilidad)',cal_empty:'Se dibuja cuando el registro tenga noches con previsión congelada.',cal_few:'Aún hay pocas noches para leer la calibración (n={n}; orientativo a partir de 10, fiable a partir de 30).',cal_thin:'Los grupos extremos (0–25 % y 75–100 %) tienen pocas noches (n={n}); todavía no hay señal clara sobre γ.',cal_mixed:'Los grupos se contradicen entre sí: sin señal clara sobre γ; déjalo como está y sigue registrando.',cal_up:'Las frecuencias reales son más extremas que el posterior: sube γ (más confianza en los modelos).',cal_down:'Las frecuencias reales son menos extremas que el posterior: baja γ.',cal_ok:'La calibración es razonable: deja α como está.',cal_diag:'calibración perfecta',cal_x:'posterior predicho (%)',cal_y:'frecuencia real de niebla (%)',w_dT:'ΔT',w_vis:'vis',w_rain:'lluvia',w_adv:'advección',w_wind:'viento',w_cloud:'nubes',w_pers:'saturación',timeout:'timeout',error:'error',recal:'recalibrado (n={n}, a={a}, b={b})'},
+    h_cal:'Calibración (diagrama de fiabilidad)',cal_empty:'Se dibuja cuando el registro tenga noches con previsión congelada.',cal_few:'Aún hay pocas noches para leer la calibración (n={n}; orientativo a partir de 10, fiable a partir de 30).',cal_thin:'Los grupos extremos (0–25 % y 75–100 %) tienen pocas noches (n={n}); todavía no hay señal clara sobre γ.',cal_mixed:'Los grupos se contradicen entre sí: sin señal clara sobre γ; déjalo como está y sigue registrando.',cal_up:'Las frecuencias reales son más extremas que el posterior: sube γ (más confianza en los modelos).',cal_down:'Las frecuencias reales son menos extremas que el posterior: baja γ.',cal_ok:'La calibración es razonable: deja γ como está.',cal_diag:'calibración perfecta',cal_x:'posterior predicho (%)',cal_y:'frecuencia real de niebla (%)',w_dT:'ΔT',w_vis:'vis',w_rain:'lluvia',w_adv:'advección',w_wind:'viento',w_cloud:'nubes',w_pers:'saturación',timeout:'timeout',error:'error',recal:'recalibrado (n={n}, a={a}, b={b})',
+    seaaz:'Acimut hacia el mar',rose:['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSO','SO','OSO','O','ONO','NO','NNO'],w_sea:'del mar',w_land:'de tierra',w_rh:'HR',
+    win_lbl:'Ventana fotográfica',win_span:'de {a} a {b} · {dur}',win_none:'El índice no llega a {thr} en ninguna hora de la ventana: no hay niebla que defender.',win_full:'niebla plena, pico {s} a las {h}',win_mist:'solo bruma, pico {s} a las {h}',win_short:'Fugaz: menos de una hora por encima del umbral, no compensa el desplazamiento.',win_late:'El máximo cae después del amanecer: en la hora azul habrá poco que fotografiar y la luz ya estará alta cuando la niebla cuaje.',win_heur:'El tramo posterior al amanecer usa el factor heurístico 0.85 (la niebla tarda de una a dos horas en levantar): la hora de disipación es la parte menos firme del cálculo.',sun_link:'Sol, hora dorada y acimut de ese amanecer',
+    h_morn:'Próximas mañanas',thmorn:['Mañana','Amanecer','Índice','Veredicto','ΔT mín','Viento','Nubes M/A','Vis km','Confianza'],conf_h:'alta',conf_m:'orientativa',conf_l:'tendencia',
+    morn_best:'La mejor mañana de la semana es la del {d}, con índice {s}; la de mañana se queda en {s2}.',morn_best_first:'La mejor mañana de la semana es justo la de mañana ({s}): ninguna otra la supera.',morn_none:'Ninguna mañana de la semana pasa de 50: no hay salida que planificar todavía; la mejor es la del {d} con {s}.',
+    morn_note:'Un amanecer por fila, con el máximo del índice dentro de la ventana −2.5 h/+1.5 h y la mínima depresión del punto de rocío de esa noche. Viento, nubes y visibilidad son los de la hora del máximo. La pericia de los modelos cae con el plazo: los dos primeros días son la previsión de verdad, el tercero y el cuarto son orientativos y del quinto en adelante es una tendencia, no una previsión.',
+    h_brk:'De qué se compone el índice, hora a hora',brk_sat:'saturado a 100',
+    brk_note:'Cada barra desglosa los puntos que aporta cada término en esa hora, en el mismo orden en que se calculan; la lluvia se dibuja hacia abajo porque resta. La marca negra corta al valor final del índice, ya con el factor diurno aplicado y saturado a 100. Sirve para ver qué término limita cada hora: si la barra se queda corta por el segmento de nubes, lo que falla es la nubosidad media y alta, no la humedad; si el segmento de ΔT es alto y el total sigue bajo, el freno es el viento.',
+    h_kos:'Qué vas a ver: contraste, distancia y focal',k_vis:'Visibilidad',k_dist:'Distancia al sujeto',k_foc:'Focal',k_reset:'Volver a la previsión',k_c:'Contraste residual del sujeto',
+    k_v1:'volumen y textura',k_v2:'plano, silueta limpia',k_v3:'apenas insinuado',k_v4:'desaparece en el fondo',k_notable:'20 % de contraste a {d20}, 5 % a {d5}',k_field:'Campo horizontal a esa distancia',k_fov:'con {f} mm en formato 24×36',k_vfield:'y {h} de alto',
+    k_src_model:'visibilidad prevista por el modelo en el máximo del amanecer',k_src_def:'el modelo no da visibilidad: escenario supuesto a partir del índice',k_src_man:'visibilidad ajustada a mano',
+    thk:['Distancia','C/C₀','Lectura','Campo horizontal'],kos_x:'distancia al sujeto (m)',kos_y:'contraste C/C₀ (%)',
+    k_leg:'Curva C/C₀ = exp(−3.912·d/V) con V = {v} km. Marca vertical: la distancia elegida. Líneas grises: 50 %, 20 % y 5 % de contraste.',
+    k_note:'Ley de Koschmieder: un objeto oscuro sobre el fondo del cielo conserva un contraste C/C₀ = exp(−3.912·d/V), donde V es la visibilidad meteorológica, definida como la distancia a la que ese contraste cae al 5 %, el umbral del ojo. De ahí salen dos distancias que conviene memorizar: el 20 % de contraste está a 0.41·V y el 5 % a 0.77·V. Con V = 300 m un árbol a 120 m ya es una silueta plana y a 230 m ha desaparecido; por eso la niebla cerrada pide teleobjetivo y sujetos cercanos, y una niebla de 3 km deja trabajar con un angular. El campo horizontal sale de 36·d/f en formato 24×36, así que a 200 m un 43 mm abarca 167 m y un 135 mm, 53 m. La visibilidad modelada es la variable menos fiable de Open‑Meteo: trátala como un escenario ajustable y no como una medida, mueve el control y mira cómo cambia el encuadre.',
+    h_field:'Técnica de campo en niebla',
+    field_txt:'<p><b>Exposición.</b> La niebla es una escena clara de bajo contraste: el histograma se apelotona en los tonos medios altos y cualquier medición que busque un gris medio la subexpone. Con medición matricial hacen falta de +1 a +1.7 EV; con la medición ponderada al centro de la M11 y de la Q3 la desviación es mayor, porque el centro del encuadre suele ser justo la parte más blanca. La regla operativa es la de siempre en digital: subir hasta que el borde derecho del histograma toque el límite sin recortar y revelar hacia abajo, porque el ruido en las sombras de una escena así se ve enseguida.</p><p><b>Balance de blancos.</b> La luz difundida por gotas de 5 a 20 µm es casi neutra, pero antes del amanecer domina el azul del cielo dispersado y el automático tiende a enfriar todavía más. Fija 5600 K si quieres neutro y 6000 a 6500 K si prefieres conservar la dominante fría de la hora azul; en RAW no cambia el archivo, pero sí lo que ves y decides en el visor.</p><p><b>Enfoque.</b> El AF por detección de fase de la Q3 y de la SL3‑S necesita un borde con contraste, y la niebla es precisamente la ausencia de bordes con contraste: por debajo del 20 % de contraste residual el sistema empieza a bombear y por debajo del 5 % ya no engancha. La salida es buscar un borde duro y cercano (una rama, un poste, el filo de un edificio), bloquear y recomponer, o pasar a manual con la distancia que has calculado arriba. El telémetro de la M11 no depende del contraste de la escena sino de la coincidencia de dos imágenes, así que en niebla cerrada es el sistema de enfoque más fiable de los tres cuerpos.</p><p><b>Multishot.</b> Los 48 y 96 Mpx por desplazamiento del sensor de la SL3‑S exigen una escena inmóvil durante las ocho tomas. La niebla se mueve siempre, incluso cuando parece quieta, y el resultado es un promedio con textura sucia en los bordes de las capas. En niebla, una sola toma; el multishot queda para el paisaje ya despejado. (Nota sobre multishot y salitre en <a href="sensor.html#multishot">sensor.html</a>.)</p><p><b>Condensación.</b> Con HR del 100 % basta con que el frontal esté por debajo del punto de rocío para que se empañe, y eso pasa siempre que sacas el equipo frío de casa, o caliente del coche, a un exterior saturado. Deja la cámara a temperatura ambiente antes de salir, monta el parasol (retrasa el depósito y protege de la llovizna), lleva un paño de microfibra y revisa el frontal cada pocos minutos: una lente empañada da exactamente el mismo aspecto que un poco más de niebla y no se aprecia en el visor.</p>',
+    how_phys:'<p><b>Por qué el aire alcanza su punto de rocío.</b> En una noche despejada el suelo radia al espacio en el infrarrojo lejano y se enfría más deprisa de lo que el aire le devuelve calor. La capa de aire en contacto se enfría con él y, como la cantidad de vapor de agua no cambia, su humedad relativa sube hasta el 100 %: eso es el punto de rocío. ΔT = T − Td mide cuántos grados le faltan al aire para llegar, y es la variable con más peso del índice porque es la única que dice si la condensación es siquiera posible.</p><p><b>Por qué 2 a 8 km/h ayudan y la calma no.</b> Con viento nulo el enfriamiento se concentra en los primeros centímetros: se forma rocío o escarcha sobre la hierba y una capa saturada de un palmo de espesor que no es niebla fotografiable. Una turbulencia leve mezcla ese aire frío con los diez o veinte metros siguientes y satura toda la capa a la vez, que es lo que produce un banco con volumen. Por encima de unos 15 km/h la mezcla llega demasiado arriba, incorpora aire seco y templado de la capa superior y disuelve la niebla o la levanta en estratos.</p><p><b>Por qué las nubes medias y altas frenan.</b> Una capa de nubes por encima devuelve al suelo buena parte de la radiación infrarroja que este emite y el enfriamiento nocturno se para en seco: con cielo cubierto la temperatura mínima puede quedarse tres o cuatro grados por encima de la de una noche despejada. Por eso el índice penaliza las nubes medias y altas y no las bajas: la nubosidad baja que da un modelo puede ser la propia niebla que estás buscando, y solo se lee como estratos —y penaliza— cuando el mismo modelo da buena visibilidad.</p><p><b>Radiación frente a advección.</b> Todo lo anterior describe la niebla de radiación: se forma in situ, en valles y hondonadas donde el aire frío se acumula, empieza de madrugada y se disipa poco después del amanecer. La advección es otra cosa: aire húmedo y templado que viaja sobre agua más fría y se enfría desde abajo. No necesita cielo despejado ni calma; necesita viento que la traiga, de 8 a 30 km/h, y que el punto de rocío del aire esté por encima de la temperatura del mar. Puede durar todo el día y entra por la costa y por las rías. El modo costero añade hasta 30 puntos por esa diferencia Td − SST, y el acimut hacia el mar sirve para comprobar a mano que el viento viene de donde tiene que venir.</p>',
+    h_ab:'A o B: comparación de dos emplazamientos',latB:'Latitud B',lonB:'Longitud B',envB:'Entorno B',ab_toggle:'Comparar con otro sitio',ab_hide:'Ocultar la comparación',ab_compute:'Calcular B',ab_err:'Sitio B: ',ab_a:'Sitio A',ab_b:'Sitio B',
+    ab_read:'Próximo amanecer: A {a} · B {b}. {v}',ab_goA:'Ve a A.',ab_goB:'Ve a B.',ab_tie:'Empate práctico, menos de 8 puntos: decide por acceso, composición y hora de salida.',
+    ab_note:'Los dos sitios se calculan con el mismo modelo y la misma tubería, y la comparación vive solo en esta pestaña: la fusión bayesiana y el registro de observaciones siguen siendo de un único emplazamiento, el de las coordenadas de arriba. Mezclar dos sitios en el registro estropearía el aprendizaje.',
+    w_note:'Brier: media de (p − y)², donde 0 es perfecto y 0.25 es lo que da predecir siempre 50 %. Aciertos: porcentaje de noches en que el modelo cayó del lado correcto del 50 % y, entre paréntesis, cuántas noches tenía congeladas. La log‑verosimilitud es lo que fija el peso; Brier y aciertos son la misma información en unidades legibles.',
+    les_head:'Lecciones de tu registro:',les_none:'Todavía no hay noches con rasgos congelados. Cada vez que calculas en esta pestaña, la ficha guarda además el ΔT, el viento, las nubes y la visibilidad previstos para el amanecer de esa noche; en cuanto tengas una noche observada con esos rasgos, aquí aparecerán tus umbrales locales.',
+    les_fog:'En tu sitio ha habido niebla o bruma con ΔT previsto de hasta {dt} °C y viento de hasta {w} km/h ({n} noches).',les_cloud:'La mayor nubosidad media prevista con la que llegó a haberla fue del {c} %.',les_vis:'La visibilidad prevista más alta con la que llegó a haberla fue de {v} km.',les_nofog:'La noche sin nada con menor ΔT previsto tuvo {dt} °C ({n} noches sin nada).',les_tail:'Rasgos del modelo de mayor peso, sobre {n} noches con previsión congelada.',
+    ens_band:'p10–p90 {a}–{b} %',ens_frac:'{k} de {n} miembros con niebla',},
   en:{portada:'Home',guia:'Quick guide',astro_link:'Astrophotography',manual:'Manual',title:'Fog for photography',subtitle:'Tab 1: physical fog index from one model. Tab 2: Bayesian fusion of several models that learns from your observations. Open‑Meteo data, no API key.',
     lat:'Latitude',lon:'Longitude',env:'Setting',env_coast:'Coastal (advection)',env_inland:'Inland',geo:'Use my location',tab1:'Fog index',tab2:'Bayesian fusion',model:'Model',best:'Best available',compute:'Compute',
     h_strip:'Hourly index (48 h)',strip_legend:'Bar: index 0 to 100. Grey background: night. Red hour: sunrise. Amber (50 to 74): mist possible. Reddish (≥ 75): fog likely.',
     h_conv:'Temperature and dew point convergence',leg1:'<i style="background:#1c262e"></i>T (°C) <i style="background:#3e6d8a"></i>Td (°C) <i style="background:#b8862b"></i>wind (km/h, right axis) <i style="background:#d9a0a0"></i>T − Td &lt; 2 °C <i style="background:#7a5ea8;height:6px"></i>forecast visibility &lt; 2 km (bottom bar)',
     h_table:'Hourly table',h_how:'How it is computed',
-    how1:'The index adds independent contributions and saturates at 100. <code>ΔT = T − Td</code>: 40 points if ΔT ≤ 0.5 °C, decreasing linearly to 0 at 4 °C. 10 m wind: 2 to 8 km/h (20), calm (14), 8 to 15 (8), &gt; 20 (0). Cloud above the fog layer, i.e. mid and high (a model&#8217;s low cloud may be the fog itself and does not penalise unless forecast visibility is good, a sign of stratus): &lt; 25 % (20), 25 to 60 % (8), more (0). Model visibility: &lt; 1 km (20), &lt; 3 km (10), &lt; 6 km (4); missing, 5. RH ≥ 97 %: +10. Rain &gt; 0.5 mm: −15. Persistence: +2 for each preceding consecutive night hour with ΔT &lt; 1.5 °C and wind &lt; 12 km/h, up to +8. In coastal mode, advection: air dew point above SST with wind 8 to 30 km/h, up to +30. Daytime values are multiplied by 0.65, except the two hours after sunrise (0.85), when fog still lingers. Thresholds: ≥ 75 fog likely, 50 to 74 mist possible.',
+    how1:'The index adds independent contributions and saturates at 100. <code>ΔT = T − Td</code>: 40 points if ΔT ≤ 0.5 °C, decreasing linearly to 0 at 4 °C. 10 m wind: 2 to 8 km/h (20), calm (14), 8 to 15 (8), 15 to 20 (3), &gt; 20 (0). Cloud above the fog layer, i.e. mid and high (a model&#8217;s low cloud may be the fog itself and does not penalise unless forecast visibility is good, a sign of stratus): &lt; 25 % (20), 25 to 60 % (8), more (0). Model visibility: &lt; 1 km (20), &lt; 3 km (10), &lt; 6 km (4); missing, 5. RH ≥ 97 %: +10. Rain &gt; 0.5 mm: −15. Persistence: +2 for each preceding consecutive night hour with ΔT &lt; 1.5 °C and wind &lt; 12 km/h, up to +8. In coastal mode, advection: air dew point above SST with wind 8 to 30 km/h, up to +30. Daytime values are multiplied by 0.65, except the two hours after sunrise (0.85), when fog still lingers. Thresholds: ≥ 75 fog likely, 50 to 74 mist possible.',
     models_lbl:'Models and ensembles (parallel download; EPS/ENS are 30 to 50 member ensembles and take a bit longer)',alpha:'γ (weight of models vs climatology, 0.1 to 1)',h_prob:'Hourly probability per model and posterior',h_sun:'Sunrise state per model',h_w:'Bayesian weights and prior',h_obs:'Observation log (learning)',
     night_of:'Night of',observed:'Observed at sunrise',o_fog:'Fog (vis < 1 km)',o_mist:'Mist or haze',o_none:'Nothing',save_obs:'Save observation',export:'Export JSON',import:'Import JSON',clear:'Clear log',
     obs_note:'Every time you compute, the forecast for the next sunrise is frozen automatically and attached to the date of that night. In the morning just pick the night that has just ended, choose what you observed and save: the observation is paired with the forecast frozen the evening before, never with a later one. If you did not compute that night, the observation only updates the climatological prior, not the weights. The log lives in this browser; export the JSON if you change device.',
@@ -201,21 +261,47 @@
     dl:'Downloading forecast…',dl_n:'Downloading {n} models in parallel…',err:'Error: ',nopos:'No position: ',geo_wait:'Getting position… (accept the permission prompt if shown)',geo_denied:'Location permission denied. Enable it from the padlock in the address bar, or type the coordinates.',geo_denied_app:'Location permission denied for the home-screen app. On iPhone: Settings → Privacy & Security → Location Services on, and under "Safari Websites" choose "While Using the App". If it still fails, remove the home-screen icon and add it again so the prompt reappears.',geo_timeout:'Position took too long. Retry, or type the coordinates.',geo_unavail:'Position unavailable on this device. Type the coordinates.',geo_insecure:'Geolocation only works over HTTPS (e.g. GitHub Pages) or on localhost; browsers block it for local files. Type the coordinates.',geo_unsupported:'This browser does not offer geolocation. Type the coordinates.',nossT:' · no SST, advection disabled',elev:'elevation',
     next6:'Next 6 hours',max_at:'peak at',sunrise:'Sunrise',window:'window −2.5 h to +1.5 h, peak at',mindt:'Minimum dew point depression tonight',at:'at',wind:'wind',clouds:'clouds',pressure:'pressure',
     fog:'Fog likely',mist:'Mist or haze possible',unlikely:'Unlikely',range:'range',disp:'Spread between models (sunrise)',agree_h:'High agreement',agree_m:'Moderate agreement',agree_l:'Disagreement',mean:'mean',disp_note:'Standard deviation of model probabilities: epistemic uncertainty.',
-    th1:['Time','Index','T','Td','ΔT','RH','Wind','Dir','Clouds','Low','Mid','High','Vis km','SST','P hPa'],thsun:['Model','P max','time','ΔT','RH','wind','clouds','vis km','signals'],thw:['Model','weight w','','log‑lik.'],thobs:['Night','y'],posterior:'posterior',del:'delete',
+    th1:['Time','Index','T','Td','ΔT','RH','Wind','Dir','Clouds','Low','Mid','High','Vis km','SST','P hPa'],thsun:['Model','P max','time','ΔT','RH','wind','clouds','vis km','signals'],thw:['Model','weight w','Brier','hits','log‑lik.'],thobs:['Night','y'],posterior:'posterior',del:'delete',
     post_leg:'posterior',range_leg:'range',prior_info:'Prior: Beta({a}, {b}), mean {pi} % over {n} logged nights. Calibration p = σ((s − 70)/11).',
     sel1:'Select at least one model.',none:'No model answered in time. Retry or reduce the selection.',fused:'{k} models fused',failed:', {f} without response',first:'Compute first.',badjson:'Invalid JSON',confirm:'Delete the whole observation log?',
-    h_cal:'Calibration (reliability diagram)',cal_empty:'Drawn once the log has nights with a frozen forecast.',cal_few:'Too few nights yet to read calibration (n={n}; indicative from 10, reliable from 30).',cal_thin:'The extreme groups (0–25 % and 75–100 %) hold few nights (n={n}); no clear signal on γ yet.',cal_mixed:'The groups contradict each other: no clear signal on γ; leave it as it is and keep logging.',cal_up:'Actual frequencies are more extreme than the posterior: raise γ (more trust in the models).',cal_down:'Actual frequencies are less extreme than the posterior: lower γ.',cal_ok:'Calibration is reasonable: leave α as it is.',cal_diag:'perfect calibration',cal_x:'predicted posterior (%)',cal_y:'actual fog frequency (%)',w_dT:'ΔT',w_vis:'vis',w_rain:'rain',w_adv:'advection',w_wind:'wind',w_cloud:'clouds',w_pers:'saturation',timeout:'timeout',error:'error',recal:'recalibrated (n={n}, a={a}, b={b})'}
+    h_cal:'Calibration (reliability diagram)',cal_empty:'Drawn once the log has nights with a frozen forecast.',cal_few:'Too few nights yet to read calibration (n={n}; indicative from 10, reliable from 30).',cal_thin:'The extreme groups (0–25 % and 75–100 %) hold few nights (n={n}); no clear signal on γ yet.',cal_mixed:'The groups contradict each other: no clear signal on γ; leave it as it is and keep logging.',cal_up:'Actual frequencies are more extreme than the posterior: raise γ (more trust in the models).',cal_down:'Actual frequencies are less extreme than the posterior: lower γ.',cal_ok:'Calibration is reasonable: leave γ as it is.',cal_diag:'perfect calibration',cal_x:'predicted posterior (%)',cal_y:'actual fog frequency (%)',w_dT:'ΔT',w_vis:'vis',w_rain:'rain',w_adv:'advection',w_wind:'wind',w_cloud:'clouds',w_pers:'saturation',timeout:'timeout',error:'error',recal:'recalibrated (n={n}, a={a}, b={b})',
+    seaaz:'Azimuth towards the sea',rose:['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'],w_sea:'onshore',w_land:'offshore',w_rh:'RH',
+    win_lbl:'Photographic window',win_span:'from {a} to {b} · {dur}',win_none:'The index never reaches {thr} anywhere in the window: there is no fog to chase.',win_full:'full fog, peak {s} at {h}',win_mist:'mist only, peak {s} at {h}',win_short:'Fleeting: under an hour above the threshold, not worth the drive.',win_late:'The peak falls after sunrise: the blue hour will have little to photograph and the light will already be high by the time the fog sets in.',win_heur:'The stretch after sunrise uses the heuristic factor 0.85 (fog takes one to two hours to lift): the dissipation time is the least firm part of the calculation.',sun_link:'Sun, golden hour and azimuth for that sunrise',
+    h_morn:'Next mornings',thmorn:['Morning','Sunrise','Index','Verdict','Min ΔT','Wind','Cloud M/H','Vis km','Confidence'],conf_h:'high',conf_m:'indicative',conf_l:'trend',
+    morn_best:'The best morning of the week is {d}, index {s}; tomorrow only gets to {s2}.',morn_best_first:'The best morning of the week is tomorrow itself ({s}): nothing later beats it.',morn_none:'No morning this week gets past 50: nothing to plan yet; the best is {d} with {s}.',
+    morn_note:'One sunrise per row, with the peak index inside the −2.5 h/+1.5 h window and the minimum dew point depression of that night. Wind, cloud and visibility are those of the peak hour. Model skill drops with lead time: the first two days are the actual forecast, the third and fourth are indicative and from the fifth on it is a trend, not a forecast.',
+    h_brk:'What the index is made of, hour by hour',brk_sat:'saturated at 100',
+    brk_note:'Each bar breaks down the points every term contributes in that hour, in the order they are computed; rain is drawn downwards because it subtracts. The black tick marks the final index, with the daytime factor already applied and saturated at 100. It shows which term limits each hour: if the bar falls short because of the cloud segment, what fails is mid and high cloud, not humidity; if the ΔT segment is tall and the total still low, the brake is the wind.',
+    h_kos:'What you will see: contrast, distance and focal length',k_vis:'Visibility',k_dist:'Distance to subject',k_foc:'Focal length',k_reset:'Back to the forecast',k_c:'Residual contrast of the subject',
+    k_v1:'volume and texture',k_v2:'flat, clean silhouette',k_v3:'barely hinted at',k_v4:'lost in the background',k_notable:'20 % contrast at {d20}, 5 % at {d5}',k_field:'Horizontal field at that distance',k_fov:'with {f} mm on 24×36',k_vfield:'and {h} high',
+    k_src_model:'model visibility at the sunrise peak',k_src_def:'the model gives no visibility: scenario assumed from the index',k_src_man:'visibility set by hand',
+    thk:['Distance','C/C₀','Reading','Horizontal field'],kos_x:'distance to subject (m)',kos_y:'contrast C/C₀ (%)',
+    k_leg:'Curve C/C₀ = exp(−3.912·d/V) for V = {v} km. Vertical mark: the chosen distance. Grey lines: 50 %, 20 % and 5 % contrast.',
+    k_note:'Koschmieder law: a dark object against the sky keeps a contrast C/C₀ = exp(−3.912·d/V), where V is meteorological visibility, defined as the distance at which that contrast falls to 5 %, the threshold of the eye. Two distances are worth memorising: 20 % contrast sits at 0.41·V and 5 % at 0.77·V. With V = 300 m a tree at 120 m is already a flat silhouette and at 230 m it has gone; that is why thick fog calls for a long lens and near subjects, while a 3 km fog still lets you work wide. The horizontal field comes from 36·d/f on 24×36, so at 200 m a 43 mm covers 167 m and a 135 mm covers 53 m. Model visibility is the least reliable variable in Open‑Meteo: treat it as an adjustable scenario rather than a measurement, move the slider and watch the framing change.',
+    h_field:'Field technique in fog',
+    field_txt:'<p><b>Exposure.</b> Fog is a bright, low-contrast scene: the histogram bunches up in the upper midtones and any metering that aims for middle grey underexposes it. With matrix metering you need +1 to +1.7 EV; with the centre-weighted metering of the M11 and the Q3 the offset is larger, because the centre of the frame is usually the whitest part. The operating rule is the usual digital one: push until the right edge of the histogram touches the limit without clipping and develop downwards, since shadow noise in a scene like this shows up at once.</p><p><b>White balance.</b> Light scattered by 5 to 20 µm droplets is nearly neutral, but before sunrise the scattered blue of the sky dominates and auto white balance tends to cool it further. Set 5600 K for neutral, or 6000 to 6500 K to keep the cold cast of the blue hour; in RAW it does not change the file, but it does change what you see and decide in the finder.</p><p><b>Focus.</b> Phase-detect AF on the Q3 and the SL3‑S needs an edge with contrast, and fog is precisely the absence of edges with contrast: below 20 % residual contrast the system starts hunting and below 5 % it no longer locks. The way out is to find a hard, near edge (a branch, a post, the corner of a building), lock and recompose, or switch to manual using the distance you worked out above. The M11 rangefinder does not depend on scene contrast but on two images coinciding, so in thick fog it is the most reliable focusing system of the three bodies.</p><p><b>Multishot.</b> The 48 and 96 Mpx sensor-shift modes of the SL3‑S need a still scene across the eight frames. Fog always moves, even when it looks still, and the result is an average with dirty texture along the edges of the layers. In fog, one single frame; leave multishot for the landscape once it has cleared. (Note on multishot and salt spray in <a href="sensor.html#multishot">sensor.html</a>.)</p><p><b>Condensation.</b> At 100 % RH the front element only has to be below the dew point to fog over, and that happens every time you take cold gear out of the house, or warm gear out of the car, into saturated air. Let the camera reach ambient temperature before you leave, fit the hood (it delays deposition and keeps drizzle off), carry a microfibre cloth and check the front element every few minutes: a misted lens looks exactly like a bit more fog and does not show in the finder.</p>',
+    how_phys:'<p><b>Why the air reaches its dew point.</b> On a clear night the ground radiates to space in the far infrared and cools faster than the air returns heat to it. The layer of air in contact cools with it and, since the amount of water vapour does not change, its relative humidity climbs to 100 %: that is the dew point. ΔT = T − Td measures how many degrees the air still has to fall, and it is the heaviest variable in the index because it is the only one that says whether condensation is possible at all.</p><p><b>Why 2 to 8 km/h helps and dead calm does not.</b> With no wind the cooling stays in the first few centimetres: you get dew or frost on the grass and a saturated layer a hand deep, which is not photographable fog. Light turbulence mixes that cold air with the next ten or twenty metres and saturates the whole layer at once, which is what produces a bank with volume. Above about 15 km/h the mixing reaches too high, brings down dry, milder air from the layer above and either dissolves the fog or lifts it into stratus.</p><p><b>Why mid and high cloud hold it back.</b> A cloud deck above returns to the ground much of the infrared it emits and nocturnal cooling stops dead: under an overcast sky the minimum temperature can end up three or four degrees higher than on a clear night. That is why the index penalises mid and high cloud and not low cloud: the low cloud a model reports may be the very fog you are after, and it is only read as stratus — and penalised — when the same model also gives good visibility.</p><p><b>Radiation versus advection.</b> All of the above describes radiation fog: it forms in place, in valleys and hollows where cold air pools, starts in the small hours and dissipates shortly after sunrise. Advection is a different animal: humid, mild air travelling over colder water and cooling from below. It needs neither clear skies nor calm; it needs wind to bring it, 8 to 30 km/h, and the dew point of the air to be above the sea temperature. It can last all day and it comes in along the coast and up the estuaries. Coastal mode adds up to 30 points for that Td − SST difference, and the azimuth towards the sea lets you check by hand that the wind really comes from where it has to.</p>',
+    h_ab:'A or B: comparing two sites',latB:'Latitude B',lonB:'Longitude B',envB:'Setting B',ab_toggle:'Compare with another site',ab_hide:'Hide the comparison',ab_compute:'Compute B',ab_err:'Site B: ',ab_a:'Site A',ab_b:'Site B',
+    ab_read:'Next sunrise: A {a} · B {b}. {v}',ab_goA:'Go to A.',ab_goB:'Go to B.',ab_tie:'A practical tie, under 8 points: decide on access, composition and departure time.',
+    ab_note:'Both sites are computed with the same model and the same pipeline, and the comparison lives only in this tab: the Bayesian fusion and the observation log still belong to a single site, the one in the coordinates above. Mixing two sites in the log would wreck the learning.',
+    w_note:'Brier: mean of (p − y)², where 0 is perfect and 0.25 is what always predicting 50 % gives. Hits: percentage of nights the model fell on the right side of 50 %, with the number of frozen nights in brackets. The log-likelihood is what sets the weight; Brier and hits are the same information in readable units.',
+    les_head:'Lessons from your log:',les_none:'No nights with frozen features yet. Every time you compute in this tab the page also stores the ΔT, wind, cloud and visibility forecast for that night at sunrise; as soon as one observed night carries those features, your local thresholds will appear here.',
+    les_fog:'At your site there has been fog or mist with a forecast ΔT of up to {dt} °C and wind up to {w} km/h ({n} nights).',les_cloud:'The highest forecast mid cloud it ever appeared with was {c} %.',les_vis:'The highest forecast visibility it ever appeared with was {v} km.',les_nofog:'The blank night with the lowest forecast ΔT had {dt} °C ({n} blank nights).',les_tail:'Features from the highest-weight model, over {n} nights with a frozen forecast.',
+    ens_band:'p10–p90 {a}–{b} %',ens_frac:'{k} of {n} members with fog',}
   };
   function $(s){return document.querySelector(s);}
   let LANG='es'; try{LANG=new URLSearchParams(location.search).get('lang')||localStorage.getItem('pn-lang')||localStorage.getItem('niebla_lang')||((navigator.language||'es').startsWith('en')?'en':'es');}catch(e){} if(!I18N[LANG]) LANG='es';
   const t=(k,v)=>{let s=I18N[LANG][k]; if(s==null) s=I18N.es[k]; if(v&&typeof s==='string') Object.keys(v).forEach(x=>s=s.replace('{'+x+'}',v[x])); return s;};
   const LOC=()=>LANG==='en'?'en-GB':'es-ES';
+  const AB={on:false,B:null};
   function applyLang(){
     document.documentElement.lang=LANG; document.title=t('title');
     document.querySelectorAll('[data-i18n]').forEach(e=>{e.innerHTML=t(e.dataset.i18n);});
     $('#leg1').innerHTML=t('leg1'); $('#manual-link').href='manual-niebla.html?lang='+LANG; $('#astro-link').href='astro.html?lang='+LANG; $('#guia-link').href='guia-niebla.html?lang='+LANG; $('#portada-link').href='index.html?lang='+LANG;
     document.documentElement.lang=LANG; $('#lg-es').classList.toggle('on',LANG==='es'); $('#lg-en').classList.toggle('on',LANG==='en');
-    if(R1) render1(); if(B.last) render2(); calib();
+    $('#abtog').textContent=t(AB.on?'ab_hide':'ab_toggle');
+    if(R1) render1(); else renderK();
+    if(B.last) render2(); calib();
   }
   ['es','en'].forEach(l=>$('#lg-'+l).addEventListener('click',()=>{LANG=l; try{localStorage.setItem('pn-lang',l);localStorage.setItem('niebla_lang',l);}catch(e){} applyLang();}));
 
@@ -224,40 +310,73 @@
   const logit=p=>Math.log(p/(1-p)), sig=z=>1/(1+Math.exp(-z));
   const fmtH=iso=>iso.slice(11,16);
   const fmtD=iso=>new Date(iso).toLocaleDateString(LOC(),{weekday:'short',day:'2-digit'})+' '+iso.slice(11,16);
+  const fmtT=ts=>new Date(ts).toLocaleTimeString(LOC(),{hour:'2-digit',minute:'2-digit'});
+  const fmtDur=ms=>{const m=Math.max(0,Math.round(ms/60000)),hh=Math.floor(m/60); return hh?hh+' h '+String(m%60).padStart(2,'0'):m+' min';};
+  const rose=d=>d==null?'':t('rose')[Math.round((((d%360)+360)%360)/22.5)%16];
+  const seaAz=()=>{const el=$('#seaaz'); if(!el||el.value==='') return null; const n=+el.value; return isFinite(n)?(((n%360)+360)%360):null;};
+  const onshore=r=>{const az=seaAz(); if(az==null||r.wdir==null) return null; let dd=Math.abs(r.wdir-az)%360; if(dd>180) dd=360-dd; return dd<=60;};
   const HOURLY='temperature_2m,relative_humidity_2m,dew_point_2m,wind_speed_10m,wind_direction_10m,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,visibility,precipitation,surface_pressure';
   const coords=()=>({lat:+$('#lat').value,lon:+$('#lon').value,costero:$('#costa').value==='costa'});
   function fetchJSON(url,ms){const c=new AbortController();const tm=setTimeout(()=>c.abort(),ms);return fetch(url,{signal:c.signal}).then(r=>r.json()).finally(()=>clearTimeout(tm));}
   let sstCache={key:null,data:null};
   async function getSST(lat,lon){const key=lat+','+lon; if(sstCache.key===key) return sstCache.data; let m=null;
-    try{m=await fetchJSON(`https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=sea_surface_temperature&timezone=auto&forecast_days=3`,10000); if(m.error) m=null;}catch(e){m=null;}
+    const murl=n=>`https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=sea_surface_temperature&timezone=auto&forecast_days=${n}`;
+    try{m=await fetchJSON(murl(7),10000); if(m.error) m=null;}catch(e){m=null;}
+    if(!m){ try{m=await fetchJSON(murl(3),10000); if(m.error) m=null;}catch(e){m=null;} } // degradar al horizonte corto si el largo no está publicado
     sstCache={key,data:m}; return m;}
   const sstAt=(m,iso)=>{if(!m||!m.hourly) return null; const j=m.hourly.time.indexOf(iso); return j>=0?m.hourly.sea_surface_temperature[j]:null;};
   function score(h,costero){
-    const dT=h.t-h.td; let s=0, why=[];
-    s+= dT<=0.5?40:lin(dT,0.5,40,4,0); why.push(['w_dT',dT.toFixed(1)]);
-    const w=h.wind; s+= w<2?14 : w<=8?20 : w<=15?8 : w<=20?3:0;
+    const dT=h.t-h.td; let s=0, why=[]; const P={dT:0,wind:0,cloud:0,vis:0,rh:0,rain:0,adv:0,pers:0};
+    P.dT= dT<=0.5?40:lin(dT,0.5,40,4,0); s+=P.dT; why.push(['w_dT',dT.toFixed(1)]);
+    const w=h.wind; P.wind= w<2?14 : w<=8?20 : w<=15?8 : w<=20?3:0; s+=P.wind;
     // enfriamiento radiativo: lo que importa es la nubosidad POR ENCIMA de la capa de niebla (medias y altas);
     // la nubosidad baja de un modelo puede ser la propia niebla, y no debe penalizar.
     let above=(h.cloudM!=null||h.cloudH!=null)?Math.max(h.cloudM||0,0.6*(h.cloudH||0)):h.cloud;
     if(h.cloudL!=null&&h.cloudL>70&&h.vis!=null&&h.vis>5000) above=Math.max(above,h.cloudL); // estratos con buena visibilidad: sí bloquean el enfriamiento
-    let sC= above<25?20 : above<=60?8:0; if(!h.night) sC*=.5; s+=sC;
-    if(h.vis!=null){ s+= h.vis<1000?20 : h.vis<3000?10 : h.vis<6000?4:0; if(h.vis<3000) why.push(['w_vis',(h.vis/1000).toFixed(1)+' km']); } else s+=5; // sin visibilidad: valor neutro
-    if(h.rh>=97) s+=10;
-    if(h.precip>0.5){ s-=15; why.push(['w_rain','']); }
-    if(costero&&h.sst!=null){ const ex=h.td-h.sst; if(ex>0&&w>=8&&w<=30){ s+=lin(ex,0,8,2,30); why.push(['w_adv','+'+ex.toFixed(1)]);} }
-    if(h.pers>=3) why.push(['w_pers',h.pers+' h']); s+=Math.min(h.pers||0,4)*2; // persistencia de la saturación
-    if(!h.night) s*=(h.sinceSun!=null&&h.sinceSun<2)?0.85:0.65; // tras el amanecer la niebla tarda 1 a 2 h en disiparse
+    let sC= above<25?20 : above<=60?8:0; if(!h.night) sC*=.5; s+=sC; P.cloud=sC;
+    if(h.vis!=null){ P.vis= h.vis<1000?20 : h.vis<3000?10 : h.vis<6000?4:0; s+=P.vis; if(h.vis<3000) why.push(['w_vis',(h.vis/1000).toFixed(1)+' km']); } else { s+=5; P.vis=5; } // sin visibilidad: valor neutro
+    if(h.rh>=97){ s+=10; P.rh=10; }
+    if(h.precip>0.5){ s-=15; P.rain=-15; why.push(['w_rain','']); }
+    if(costero&&h.sst!=null){ const ex=h.td-h.sst; if(ex>0&&w>=8&&w<=30){ P.adv=lin(ex,0,8,2,30); s+=P.adv; why.push(['w_adv','+'+ex.toFixed(1)]);} }
+    if(h.pers>=3) why.push(['w_pers',h.pers+' h']); P.pers=Math.min(h.pers||0,4)*2; s+=P.pers; // persistencia de la saturación
+    let fday=1;
+    if(!h.night){ fday=(h.sinceSun!=null&&h.sinceSun<2)?0.85:0.65; s*=fday; } // tras el amanecer la niebla tarda 1 a 2 h en disiparse
     s=clamp(Math.round(s),0,100);
+    if(fday!==1) Object.keys(P).forEach(k=>{P[k]*=fday;});
     if(w>20) why.push(['w_wind',w.toFixed(0)]); if(above>60&&h.night) why.push(['w_cloud',Math.round(above)+'%']);
-    return {s,why};
+    return {s,why,parts:P,fday};
   }
   // racha de horas nocturnas previas con ΔT < 1.5 °C y viento < 12 km/h (la niebla necesita tiempo de enfriamiento)
   function persistence(seq){ let k=0; seq.forEach(h=>{ if(!h) {k=0; return;} h.pers=k; const sat=(h.t-h.td)<1.5&&h.wind<12&&(h.night||(h.sinceSun!=null&&h.sinceSun<2)); k=sat?Math.min(k+1,6):0; }); }
   const whyTxt=why=>why.map(([k,v])=>(t(k)+' '+v).trim()).join(', ');
   const clsS=s=>s>=75?'a':s>=50?'m':'b', verS=s=>t(s>=75?'fog':s>=50?'mist':'unlikely');
   const clsP=p=>p>=.5?'a':p>=.25?'m':'b', verP=p=>t(p>=.5?'fog':p>=.25?'mist':'unlikely');
+  // ventana fotográfica: tramo continuo alrededor del máximo en el que el valor se mantiene por encima del umbral,
+  // buscado entre amanecer −4 h y amanecer +6 h e interpolado linealmente entre horas en los dos bordes.
+  function winRange(rows,sunrise,val,thr){
+    let i0=-1,i1=-1;
+    for(let i=0;i<rows.length;i++){ const ts=rows[i].ts; if(ts>=sunrise-4*3600e3&&ts<=sunrise+6*3600e3){ if(i0<0) i0=i; i1=i; } }
+    if(i0<0) return null;
+    let pk=i0,pv=val(rows[i0]);
+    for(let i=i0;i<=i1;i++){ const v=val(rows[i]); if(v>pv){pv=v;pk=i;} }
+    if(pv<thr) return {none:true,peak:rows[pk],pv};
+    let a=pk; while(a>i0&&val(rows[a-1])>=thr) a--;
+    let b=pk; while(b<i1&&val(rows[b+1])>=thr) b++;
+    let t0=rows[a].ts,t1=rows[b].ts;
+    if(a>0){ const v0=val(rows[a-1]),v1=val(rows[a]); if(v1>v0) t0=rows[a-1].ts+(thr-v0)/(v1-v0)*(rows[a].ts-rows[a-1].ts); }
+    if(b<rows.length-1){ const v1=val(rows[b]),v2=val(rows[b+1]); if(v1>v2) t1=rows[b].ts+(v1-thr)/(v1-v2)*(rows[b+1].ts-rows[b].ts); }
+    return {none:false,t0,t1,dur:t1-t0,a,b,pk,peak:rows[pk],pv};
+  }
+  function winTxt(wr,thr,peakTs,sunrise,full,fmt){
+    if(!wr) return '';
+    if(wr.none) return t('win_none',{thr:fmt(thr)});
+    let s=t('win_span',{a:fmtT(wr.t0),b:fmtT(wr.t1),dur:fmtDur(wr.dur)})+' · '+t(wr.pv>=full?'win_full':'win_mist',{s:fmt(wr.pv),h:fmtT(wr.peak.ts)});
+    if(wr.dur<3600e3) s+=' '+t('win_short');
+    if(peakTs>sunrise+1800e3) s+=' '+t('win_late');
+    return s;
+  }
   function dayInfo(d){const sr=d.daily.sunrise.map(x=>new Date(x).getTime()), ss=d.daily.sunset.map(x=>new Date(x).getTime());
-    return {isNight:x=>{for(let i=0;i<sr.length;i++) if(x>=sr[i]&&x<ss[i]) return false; return true;}, sinceSun:x=>{for(let i=0;i<sr.length;i++){const d=(x-sr[i])/3600e3; if(d>=0&&d<6) return d;} return null;}, nextSunrise:sr.find(x=>x>Date.now())};}
+    return {isNight:x=>{for(let i=0;i<sr.length;i++) if(x>=sr[i]&&x<ss[i]) return false; return true;}, sinceSun:x=>{for(let i=0;i<sr.length;i++){const d=(x-sr[i])/3600e3; if(d>=0&&d<6) return d;} return null;}, nextSunrise:sr.find(x=>x>Date.now()),sunrises:sr};}
   const sunLabel=ts=>t('sunrise')+' '+new Date(ts).toLocaleDateString(LOC(),{weekday:'long'})+' '+new Date(ts).toLocaleTimeString(LOC(),{hour:'2-digit',minute:'2-digit'});
 
   document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
@@ -287,33 +406,164 @@
 
   /* ===== pestaña 1 ===== */
   let R1=null;
+  // una sola tubería de descarga y puntuación, reutilizada por el sitio A y por el sitio B de la comparación
+  async function loadSite(lat,lon,costero,model,days){
+    const d=await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=${HOURLY}&daily=sunrise,sunset&timezone=auto&forecast_days=${days}&models=${model}`,15000);
+    if(d.error) throw new Error(d.reason);
+    const m=costero?await getSST(lat,lon):null;
+    const H=d.hourly, now=Date.now(), {isNight,sinceSun,nextSunrise,sunrises}=dayInfo(d), all=[];
+    for(let i=0;i<H.time.length;i++){const ts=new Date(H.time[i]).getTime(); if(ts<now-3600e3) continue;
+      const r={time:H.time[i],ts,t:H.temperature_2m[i],td:H.dew_point_2m[i],rh:H.relative_humidity_2m[i],wind:H.wind_speed_10m[i],wdir:H.wind_direction_10m[i],cloud:H.cloud_cover[i],cloudL:H.cloud_cover_low?H.cloud_cover_low[i]:null,cloudM:H.cloud_cover_mid?H.cloud_cover_mid[i]:null,cloudH:H.cloud_cover_high?H.cloud_cover_high[i]:null,vis:H.visibility?H.visibility[i]:null,precip:H.precipitation[i],p:H.surface_pressure[i],night:isNight(ts),sinceSun:sinceSun(ts),sst:sstAt(m,H.time[i]),sun:ts<=nextSunrise&&nextSunrise<ts+3600e3};
+      if(r.t==null||r.td==null||r.wind==null) continue; all.push(r);}
+    persistence(all); all.forEach(r=>{const sc=score(r,costero); r.s=sc.s; r.why=sc.why; r.parts=sc.parts;});
+    return {all,rows:all.slice(0,48),nextSunrise,sunrises,model,elev:d.elevation,lat,lon,costero,nosst:costero&&!m};
+  }
   async function run1(){
     const {lat,lon,costero}=coords(), model=$('#model').value;
-    $('#st1').textContent=t('dl'); let d;
-    try{d=await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=${HOURLY}&daily=sunrise,sunset&timezone=auto&forecast_days=3&models=${model}`,15000); if(d.error) throw new Error(d.reason);}catch(e){$('#st1').textContent=t('err')+e.message;return;}
-    const m=costero?await getSST(lat,lon):null;
-    const H=d.hourly, now=Date.now(), {isNight,sinceSun,nextSunrise}=dayInfo(d), rows=[];
-    for(let i=0;i<H.time.length;i++){const ts=new Date(H.time[i]).getTime(); if(ts<now-3600e3) continue; if(rows.length>=48) break;
-      const r={time:H.time[i],ts,t:H.temperature_2m[i],td:H.dew_point_2m[i],rh:H.relative_humidity_2m[i],wind:H.wind_speed_10m[i],wdir:H.wind_direction_10m[i],cloud:H.cloud_cover[i],cloudL:H.cloud_cover_low?H.cloud_cover_low[i]:null,cloudM:H.cloud_cover_mid?H.cloud_cover_mid[i]:null,cloudH:H.cloud_cover_high?H.cloud_cover_high[i]:null,vis:H.visibility?H.visibility[i]:null,precip:H.precipitation[i],p:H.surface_pressure[i],night:isNight(ts),sinceSun:sinceSun(ts),sst:sstAt(m,H.time[i]),sun:ts<=nextSunrise&&nextSunrise<ts+3600e3};
-      if(r.t==null||r.td==null||r.wind==null) continue; rows.push(r);}
-    persistence(rows); rows.forEach(r=>{const sc=score(r,costero); r.s=sc.s; r.why=sc.why;});
-    R1={rows,nextSunrise,model,elev:d.elevation,lat,lon,nosst:costero&&!m};
-    render1();
+    $('#st1').textContent=t('dl'); let S;
+    try{S=await loadSite(lat,lon,costero,model,7);}catch(e){$('#st1').textContent=t('err')+e.message;return;}
+    R1=S; render1();
+    if(AB.on) runB();
   }
   function render1(){const {rows,nextSunrise,model,elev,lat,lon,nosst}=R1;
     $('#st1').textContent=`${model} · ${lat.toFixed(4)}, ${lon.toFixed(4)} · ${t('elev')} ${elev} m · ${new Date().toLocaleTimeString(LOC())}`+(nosst?t('nossT'):'');
-    cards1(rows,nextSunrise); strip1(rows); chart1(rows); table1(rows);}
+    cards1(rows,nextSunrise); strip1(rows); brk1(rows); chart1(rows); morn(); table1(rows); renderK();
+    if(AB.B) renderAB();}
   function cards1(rows,sunrise){
     const n6=rows.slice(0,6), m6=n6.reduce((a,b)=>b.s>a.s?b:a,n6[0]);
     const win=rows.filter(r=>r.ts>=sunrise-2.5*3600e3&&r.ts<=sunrise+1.5*3600e3), ms=win.length?win.reduce((a,b)=>b.s>a.s?b:a,win[0]):null;
     const tonight=rows.filter(r=>r.night&&r.ts<sunrise+3600e3), md=tonight.length?tonight.reduce((a,b)=>(b.t-b.td)<(a.t-a.td)?b:a,tonight[0]):null;
-    const card=(eb,s,when,why)=>`<div class="card"><div class="eyebrow">${eb}</div><div class="big v-${clsS(s)}">${s}</div><div class="verdict">${verS(s)}</div><div class="when">${when}</div><div class="why">${why}</div></div>`;
+    R1.win=winRange(rows,sunrise,r=>r.s,50);
+    const card=(eb,s,when,why,extra)=>`<div class="card"><div class="eyebrow">${eb}</div><div class="big v-${clsS(s)}">${s}</div><div class="verdict">${verS(s)}</div><div class="when">${when}</div><div class="why">${why}</div>${extra||''}</div>`;
     let h=card(t('next6'),m6.s,t('max_at')+' '+fmtD(m6.time),whyTxt(m6.why));
-    if(ms) h+=card(sunLabel(sunrise),ms.s,t('window')+' '+fmtH(ms.time),whyTxt(ms.why));
+    if(ms){const on=onshore(ms);
+      const extra=`<div class="when" style="margin-top:8px"><b>${t('win_lbl')}</b>: ${winTxt(R1.win,50,ms.ts,sunrise,75,v=>Math.round(v))}</div>`
+        +`<div class="why">${t('wind')} ${ms.wind.toFixed(0)} km/h ${rose(ms.wdir)}${on==null?'':' · '+t(on?'w_sea':'w_land')} · ${t('win_heur')}</div>`
+        +`<div class="why"><a href="luz-natural.html?lang=${LANG}">${t('sun_link')} →</a></div>`;
+      h+=card(sunLabel(sunrise),ms.s,t('window')+' '+fmtH(ms.time),whyTxt(ms.why),extra);}
     if(md) h+=`<div class="card"><div class="eyebrow">${t('mindt')}</div><div class="big">${(md.t-md.td).toFixed(1)}<span style="font-size:18px"> °C</span></div><div class="verdict">T ${md.t.toFixed(1)} °C · Td ${md.td.toFixed(1)} °C</div><div class="when">${t('at')} ${fmtD(md.time)} · ${t('wind')} ${md.wind.toFixed(0)} km/h · ${t('clouds')} ${md.cloud}%</div><div class="why">${md.sst!=null?'SST '+md.sst.toFixed(1)+' °C · ':''}${t('pressure')} ${md.p.toFixed(0)} hPa</div></div>`;
     $('#cards1').innerHTML=h;
   }
-  function strip1(rows){$('#strip').innerHTML=rows.map(r=>`<div class="hour ${r.night?'night':''} ${r.sun?'sun':''}" title="${fmtD(r.time)} · ${r.s} · ${whyTxt(r.why)}"><div class="bar"><span class="${clsS(r.s)}" style="height:${r.s}%"></span></div><div class="t">${fmtH(r.time).slice(0,2)}</div></div>`).join('');}
+  function strip1(rows){const wr=R1.win;
+    $('#strip').innerHTML=rows.map((r,i)=>`<div class="hour ${r.night?'night':''} ${r.sun?'sun':''} ${(wr&&!wr.none&&i>=wr.a&&i<=wr.b)?'win':''}" title="${fmtD(r.time)} · ${r.s} · ${whyTxt(r.why)}"><div class="bar"><span class="${clsS(r.s)}" style="height:${r.s}%"></span></div><div class="t">${fmtH(r.time).slice(0,2)}</div></div>`).join('');}
+  /* ---------- desglose del índice: qué término suma o resta en cada hora ---------- */
+  const BRKT=[['dT','w_dT','#3e6d8a'],['wind','w_wind','#b8862b'],['cloud','w_cloud','#6f8f3a'],['vis','w_vis','#7a5ea8'],['rh','w_rh','#2f9c8a'],['adv','w_adv','#d17f3a'],['pers','w_pers','#4a8f5c'],['rain','w_rain','#8c4a3a']];
+  function brk1(rows){
+    const W=1000,Hh=250,pl=34,pr=14,pt=12,pb=26,n=rows.length, ymin=-20,ymax=112;
+    const y=v=>pt+(Hh-pt-pb)*(1-(v-ymin)/(ymax-ymin)), bw=(W-pl-pr)/n, wr=R1.win;
+    let g='';
+    rows.forEach((r,i)=>{if(r.night) g+=`<rect x="${(pl+bw*i).toFixed(1)}" y="${pt}" width="${bw.toFixed(2)}" height="${(Hh-pt-pb).toFixed(1)}" fill="#e3e8ec"/>`;});
+    if(wr&&!wr.none) g+=`<rect x="${(pl+bw*wr.a).toFixed(1)}" y="${pt}" width="${(bw*(wr.b-wr.a+1)).toFixed(1)}" height="${(Hh-pt-pb).toFixed(1)}" fill="none" stroke="#b8862b" stroke-width="1.5"/>`;
+    [-15,0,50,75,100].forEach(v=>{g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="${v===0?'#c5ccd3':'#eceff2'}"/><text x="${pl-5}" y="${(y(v)+3.5).toFixed(1)}" font-size="10" text-anchor="end" fill="#55636d" font-family="IBM Plex Mono">${v}</text>`;});
+    rows.forEach((r,i)=>{const x0=pl+bw*i+0.6, w2=Math.max(bw-1.2,1), P=r.parts||{}; let up=0,dn=0;
+      BRKT.forEach(([k,,c])=>{const v=P[k]||0;
+        if(v>0){ g+=`<rect x="${x0.toFixed(1)}" y="${y(up+v).toFixed(1)}" width="${w2.toFixed(2)}" height="${(y(up)-y(up+v)).toFixed(1)}" fill="${c}"/>`; up+=v; }
+        else if(v<0){ g+=`<rect x="${x0.toFixed(1)}" y="${y(dn).toFixed(1)}" width="${w2.toFixed(2)}" height="${(y(dn+v)-y(dn)).toFixed(1)}" fill="${c}"/>`; dn+=v; }});
+      if(up>100) g+=`<rect x="${x0.toFixed(1)}" y="${y(110).toFixed(1)}" width="${w2.toFixed(2)}" height="4" fill="#1c262e" opacity=".45"/>`;
+      g+=`<line x1="${x0.toFixed(1)}" x2="${(x0+w2).toFixed(1)}" y1="${y(r.s).toFixed(1)}" y2="${y(r.s).toFixed(1)}" stroke="#1c262e" stroke-width="1.8"/>`;});
+    rows.forEach((r,i)=>{if(i%6===0) g+=`<text x="${(pl+bw*(i+.5)).toFixed(1)}" y="${Hh-8}" font-size="10" text-anchor="middle" fill="#55636d" font-family="IBM Plex Mono">${fmtH(r.time)}</text>`;});
+    $('#chartbrk').innerHTML=`<svg viewBox="0 0 ${W} ${Hh}" role="img">${g}</svg>`;
+    $('#legbrk').innerHTML=BRKT.map(([k,lb,c])=>`<span class="swatch" style="background:${c}"></span>${t(lb)}`).join('')
+      +`<span class="swatch" style="background:#1c262e"></span>${t('th1')[1]}<span class="swatch" style="background:#1c262e;opacity:.45"></span>${t('brk_sat')}`;
+  }
+  /* ---------- próximas mañanas: un amanecer por fila ---------- */
+  function morn(){
+    const {all,sunrises}=R1, now=Date.now(), out=[];
+    (sunrises||[]).filter(x=>x>now-1800e3).slice(0,7).forEach((sr,k)=>{
+      const win=all.filter(r=>r.ts>=sr-2.5*3600e3&&r.ts<=sr+1.5*3600e3); if(!win.length) return;
+      const best=win.reduce((a,b)=>b.s>a.s?b:a);
+      const night=all.filter(r=>r.night&&r.ts>=sr-12*3600e3&&r.ts<=sr+3600e3);
+      const md=night.length?night.reduce((a,b)=>(b.t-b.td)<(a.t-a.td)?b:a):best;
+      out.push({sr,best,md,conf:k<2?'conf_h':k<4?'conf_m':'conf_l'});});
+    if(!out.length){$('#tmorn').innerHTML=''; $('#mornread').textContent=''; return;}
+    const top=out.reduce((a,b)=>b.best.s>a.best.s?b:a);
+    let h='<tr>'+t('thmorn').map(x=>'<th>'+x+'</th>').join('')+'</tr>';
+    out.forEach(o=>{const b=o.best, on=onshore(b);
+      h+=`<tr class="${o===top?'best':''}"><td>${new Date(o.sr).toLocaleDateString(LOC(),{weekday:'long',day:'2-digit',month:'2-digit'})}</td><td>${fmtT(o.sr)}</td><td><span class="tag ${clsS(b.s)}">${b.s}</span></td><td style="text-align:left">${verS(b.s)}</td><td>${(o.md.t-o.md.td).toFixed(1)}</td><td>${b.wind.toFixed(0)} ${rose(b.wdir)}${on==null?'':' · '+t(on?'w_sea':'w_land')}</td><td>${b.cloudM!=null?b.cloudM:'–'} / ${b.cloudH!=null?b.cloudH:'–'}</td><td>${b.vis!=null?(b.vis/1000).toFixed(1):'–'}</td><td>${t(o.conf)}</td></tr>`;});
+    $('#tmorn').innerHTML=h;
+    const dn=x=>new Date(x).toLocaleDateString(LOC(),{weekday:'long',day:'2-digit'});
+    $('#mornread').textContent = top.best.s<50 ? t('morn_none',{d:dn(top.sr),s:top.best.s})
+      : (top===out[0] ? t('morn_best_first',{s:top.best.s}) : t('morn_best',{d:dn(top.sr),s:top.best.s,s2:out[0].best.s}));
+  }
+  /* ---------- contraste por visibilidad (Koschmieder) ---------- */
+  const KLV=Math.log(50), KLD=Math.log(150);
+  const kV=()=>0.2*Math.exp(KLV*(+$('#kv').value)/100);
+  const kD=()=>20*Math.exp(KLD*(+$('#kd').value)/100);
+  const kSetV=v=>{$('#kv').value=Math.round(100*Math.log(clamp(v,0.2,10)/0.2)/KLV);};
+  const kC=(d,V)=>Math.exp(-3.912*(d/1000)/V);
+  const kRead=c=>t(c>=.5?'k_v1':c>=.2?'k_v2':c>=.05?'k_v3':'k_v4');
+  const kCls=c=>c>=.5?'b':c>=.2?'m':'a';
+  const mfmt=d=>d>=1000?(d/1000).toLocaleString(LOC(),{maximumFractionDigits:2})+' km':Math.round(d).toLocaleString(LOC())+' m';
+  let kTouch=false;
+  function kDefault(){
+    const w=R1&&R1.win, p=w&&w.peak;
+    if(!p) return {v:3,src:'k_src_def'};
+    if(p.vis!=null) return {v:clamp(p.vis/1000,0.2,10),src:'k_src_model'};
+    return {v:p.s>=75?1:p.s>=50?3:8,src:'k_src_def'};
+  }
+  function renderK(){
+    if(!$('#kv')) return;
+    let src='k_src_man';
+    if(!kTouch){const d0=kDefault(); kSetV(d0.v); src=d0.src;}
+    const V=kV(), d=kD(), f=+$('#kf').value, C=kC(d,V), fov=36*d/f;
+    const d20=1000*V*Math.log(5)/3.912, d5=1000*V*Math.log(20)/3.912;
+    $('#kvout').textContent=V.toLocaleString(LOC(),{maximumFractionDigits:2})+' km';
+    $('#kdout').textContent=mfmt(d);
+    $('#kcards').innerHTML=
+      `<div class="card"><div class="eyebrow">${t('k_c')}</div><div class="big v-${kCls(C)}">${(100*C).toFixed(0)}<span style="font-size:18px"> %</span></div><div class="verdict">${kRead(C)}</div><div class="when">${mfmt(d)} · V = ${V.toLocaleString(LOC(),{maximumFractionDigits:2})} km · ${t(src)}</div><div class="why">${t('k_notable',{d20:mfmt(d20),d5:mfmt(d5)})}</div></div>`
+      +`<div class="card"><div class="eyebrow">${t('k_field')}</div><div class="big">${mfmt(fov)}</div><div class="verdict">${t('k_fov',{f:f})}</div><div class="when">${mfmt(d)} · ${t('k_vfield',{h:mfmt(24*d/f)})}</div></div>`;
+    // curva
+    const dmax=clamp(2.2*V*1000,300,3000), W=1000,Hh=240,pl=44,pr=18,pt=12,pb=32;
+    const X=x=>pl+(W-pl-pr)*clamp(x/dmax,0,1), Y=c=>pt+(Hh-pt-pb)*(1-c);
+    let g='';
+    [1,.75,.5,.25,0].forEach(c=>{g+=`<line x1="${pl}" x2="${W-pr}" y1="${Y(c).toFixed(1)}" y2="${Y(c).toFixed(1)}" stroke="#eceff2"/><text x="${pl-6}" y="${(Y(c)+3.5).toFixed(1)}" font-size="10" text-anchor="end" fill="#55636d" font-family="IBM Plex Mono">${(100*c).toFixed(0)}</text>`;});
+    [.5,.2,.05].forEach(c=>{g+=`<line x1="${pl}" x2="${W-pr}" y1="${Y(c).toFixed(1)}" y2="${Y(c).toFixed(1)}" stroke="#c5ccd3" stroke-dasharray="4 4"/>`;});
+    for(let i=0;i<=6;i++){const dd=dmax*i/6; g+=`<text x="${X(dd).toFixed(1)}" y="${Hh-12}" font-size="10" text-anchor="middle" fill="#55636d" font-family="IBM Plex Mono">${Math.round(dd)}</text>`;}
+    let pth=''; for(let i=0;i<=120;i++){const dd=dmax*i/120; pth+=(i?'L':'M')+X(dd).toFixed(1)+','+Y(kC(dd,V)).toFixed(1)+' ';}
+    g+=`<path d="${pth}" fill="none" stroke="#3e6d8a" stroke-width="2"/>`;
+    if(d<=dmax) g+=`<line x1="${X(d).toFixed(1)}" x2="${X(d).toFixed(1)}" y1="${pt}" y2="${Hh-pb}" stroke="#8c4a3a" stroke-width="1.3"/><circle cx="${X(d).toFixed(1)}" cy="${Y(C).toFixed(1)}" r="4" fill="#8c4a3a"/>`;
+    g+=`<text x="${((pl+W-pr)/2).toFixed(1)}" y="${Hh-1}" font-size="10" text-anchor="middle" fill="#55636d" font-family="IBM Plex Mono">${t('kos_x')}</text>`;
+    $('#kchart').innerHTML=`<svg viewBox="0 0 ${W} ${Hh}" role="img">${g}</svg>`;
+    $('#klegend').textContent=t('k_leg',{v:V.toLocaleString(LOC(),{maximumFractionDigits:2})})+' · '+t('kos_y');
+    $('#ktab').innerHTML='<tr>'+t('thk').map(x=>'<th>'+x+'</th>').join('')+'</tr>'
+      +[50,150,500,1000].map(dd=>{const c=kC(dd,V); return `<tr><td>${mfmt(dd)}</td><td><span class="tag ${kCls(c)}">${(100*c).toFixed(0)}%</span></td><td style="text-align:left">${kRead(c)}</td><td>${mfmt(36*dd/f)}</td></tr>`;}).join('');
+  }
+  /* ---------- comparación de dos emplazamientos ---------- */
+  const sunBest=S=>{const w=S.rows.filter(r=>r.ts>=S.nextSunrise-2.5*3600e3&&r.ts<=S.nextSunrise+1.5*3600e3); return w.length?w.reduce((a,b)=>b.s>a.s?b:a):null;};
+  async function runB(){
+    if(!R1) return;
+    const lat=+$('#latB').value, lon=+$('#lonB').value, costero=$('#costaB').value==='costa';
+    $('#stAB').textContent=t('dl'); let S;
+    try{S=await loadSite(lat,lon,costero,$('#model').value,7);}catch(e){$('#stAB').textContent=t('ab_err')+e.message;return;}
+    AB.B=S; $('#stAB').textContent=`${lat.toFixed(4)}, ${lon.toFixed(4)} · ${t('elev')} ${S.elev} m`+(S.nosst?t('nossT'):'');
+    renderAB();
+  }
+  function renderAB(){
+    const A=R1, Bs=AB.B; if(!A||!Bs) return;
+    $('#absec').hidden=false;
+    const n6=S=>{const q=S.rows.slice(0,6); return q.length?q.reduce((a,b)=>b.s>a.s?b:a,q[0]):null;};
+    const card=(tag,eb,r,when)=>r?`<div class="card"><div class="eyebrow">${tag} · ${eb}</div><div class="big v-${clsS(r.s)}">${r.s}</div><div class="verdict">${verS(r.s)}</div><div class="when">${when}</div><div class="why">${whyTxt(r.why)}</div></div>`:'';
+    const a6=n6(A), b6=n6(Bs), aS=sunBest(A), bS=sunBest(Bs);
+    $('#cardsAB').innerHTML=card(t('ab_a'),t('next6'),a6,a6?t('max_at')+' '+fmtD(a6.time):'')
+      +card(t('ab_b'),t('next6'),b6,b6?t('max_at')+' '+fmtD(b6.time):'')
+      +card(t('ab_a'),t('sunrise'),aS,aS?t('window')+' '+fmtH(aS.time):'')
+      +card(t('ab_b'),t('sunrise'),bS,bS?t('window')+' '+fmtH(bS.time):'');
+    const rows=A.rows, mp={}; Bs.rows.forEach(r=>{mp[r.ts]=r.s;});
+    const W=1000,Hh=250,pl=34,pr=14,pt=12,pb=28,n=rows.length;
+    const x=i=>pl+(W-pl-pr)*i/Math.max(n-1,1), y=v=>pt+(Hh-pt-pb)*(1-v/100), wr=A.win;
+    let g='';
+    rows.forEach((r,i)=>{const x0=x(Math.max(i-.5,0)),x1=x(Math.min(i+.5,n-1)); if(r.night) g+=`<rect x="${x0.toFixed(1)}" y="${pt}" width="${(x1-x0).toFixed(1)}" height="${(Hh-pt-pb).toFixed(1)}" fill="#e3e8ec"/>`;});
+    if(wr&&!wr.none) g+=`<rect x="${x(wr.a).toFixed(1)}" y="${pt}" width="${(x(wr.b)-x(wr.a)).toFixed(1)}" height="${(Hh-pt-pb).toFixed(1)}" fill="#b8862b" opacity=".14"/>`;
+    [0,50,75,100].forEach(v=>{g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="#eceff2"/><text x="${pl-5}" y="${(y(v)+3.5).toFixed(1)}" font-size="10" text-anchor="end" fill="#55636d" font-family="IBM Plex Mono">${v}</text>`;});
+    g+=`<path d="${rows.map((r,i)=>(i?'L':'M')+x(i).toFixed(1)+','+y(r.s).toFixed(1)).join(' ')}" fill="none" stroke="#1c262e" stroke-width="2.2"/>`;
+    let db='',fst=true; rows.forEach((r,i)=>{const v=mp[r.ts]; if(v==null) return; db+=(fst?'M':'L')+x(i).toFixed(1)+','+y(v).toFixed(1)+' '; fst=false;});
+    g+=`<path d="${db}" fill="none" stroke="#b8862b" stroke-width="2.2"/>`;
+    rows.forEach((r,i)=>{if(i%6===0) g+=`<text x="${x(i).toFixed(1)}" y="${Hh-8}" font-size="10" text-anchor="middle" fill="#55636d" font-family="IBM Plex Mono">${fmtH(r.time)}</text>`;});
+    $('#chartAB').innerHTML=`<svg viewBox="0 0 ${W} ${Hh}" role="img">${g}</svg>`;
+    $('#legAB').innerHTML=`<span class="swatch" style="background:#1c262e"></span>${t('ab_a')}<span class="swatch" style="background:#b8862b"></span>${t('ab_b')}`;
+    const va=aS?aS.s:0, vb=bS?bS.s:0;
+    $('#abread').textContent=t('ab_read',{a:va,b:vb,v:Math.abs(va-vb)<8?t('ab_tie'):(va>vb?t('ab_goA'):t('ab_goB'))})+' '+t('ab_note');
+  }
   function chart1(rows){
     const W=1000,Hh=300,pl=44,pr=44,pt=16,pb=30,n=rows.length,x=i=>pl+(W-pl-pr)*i/(n-1);
     const ts=rows.flatMap(r=>[r.t,r.td]), ymin=Math.floor(Math.min(...ts))-1, ymax=Math.ceil(Math.max(...ts))+1, y=v=>pt+(Hh-pt-pb)*(1-(v-ymin)/(ymax-ymin));
@@ -327,8 +577,17 @@
     $('#chart1').innerHTML=`<svg viewBox="0 0 ${W} ${Hh}" role="img">${g}<path d="${path('wind',yw)}" fill="none" stroke="#b8862b" stroke-width="1.3"/><path d="${path('t',y)}" fill="none" stroke="#1c262e" stroke-width="2"/><path d="${path('td',y)}" fill="none" stroke="#3e6d8a" stroke-width="2"/></svg>`;
   }
   function table1(rows){
-    $('#tabla1').innerHTML='<tr>'+t('th1').map(h=>'<th>'+h+'</th>').join('')+'</tr>'+rows.map(r=>`<tr class="${r.sun?'sun':''}"><td>${fmtD(r.time)}${r.night?'':' ☼'}</td><td><span class="tag ${clsS(r.s)}">${r.s}</span></td><td>${r.t.toFixed(1)}</td><td>${r.td.toFixed(1)}</td><td>${(r.t-r.td).toFixed(1)}</td><td>${r.rh}%</td><td>${r.wind.toFixed(0)}</td><td>${r.wdir}°</td><td>${r.cloud}%</td><td>${r.cloudL!=null?r.cloudL+'%':'–'}</td><td>${r.cloudM!=null?r.cloudM+'%':'–'}</td><td>${r.cloudH!=null?r.cloudH+'%':'–'}</td><td>${r.vis!=null?(r.vis/1000).toFixed(1):'–'}</td><td>${r.sst!=null?r.sst.toFixed(1):'–'}</td><td>${r.p!=null?r.p.toFixed(0):'–'}</td></tr>`).join('');
+    $('#tabla1').innerHTML='<tr>'+t('th1').map(h=>'<th>'+h+'</th>').join('')+'</tr>'+rows.map(r=>{const on=onshore(r);
+      return `<tr class="${r.sun?'sun':''}"><td>${fmtD(r.time)}${r.night?'':' ☼'}</td><td><span class="tag ${clsS(r.s)}">${r.s}</span></td><td>${r.t.toFixed(1)}</td><td>${r.td.toFixed(1)}</td><td>${(r.t-r.td).toFixed(1)}</td><td>${r.rh}%</td><td>${r.wind.toFixed(0)}</td><td>${r.wdir}° ${rose(r.wdir)}${on==null?'':' · '+t(on?'w_sea':'w_land')}</td><td>${r.cloud}%</td><td>${r.cloudL!=null?r.cloudL+'%':'–'}</td><td>${r.cloudM!=null?r.cloudM+'%':'–'}</td><td>${r.cloudH!=null?r.cloudH+'%':'–'}</td><td>${r.vis!=null?(r.vis/1000).toFixed(1):'–'}</td><td>${r.sst!=null?r.sst.toFixed(1):'–'}</td><td>${r.p!=null?r.p.toFixed(0):'–'}</td></tr>`;}).join('');
   }
+  $('#kv').addEventListener('input',()=>{kTouch=true; renderK();});
+  $('#kd').addEventListener('input',()=>renderK());
+  $('#kf').addEventListener('change',()=>renderK());
+  $('#kreset').addEventListener('click',()=>{kTouch=false; renderK();});
+  $('#seaaz').addEventListener('input',()=>{if(R1) render1();});
+  $('#costa').addEventListener('change',()=>{$('#seawrap').hidden=$('#costa').value!=='costa';});
+  $('#abtog').addEventListener('click',()=>{AB.on=!AB.on; $('#abpanel').hidden=!AB.on; $('#absec').hidden=!AB.on||!AB.B; $('#abtog').textContent=t(AB.on?'ab_hide':'ab_toggle'); if(AB.on&&!AB.B) runB();});
+  $('#goAB').addEventListener('click',runB);
   $('#go1').addEventListener('click',run1);
 
   /* ===== pestaña 2 ===== */
@@ -400,7 +659,9 @@
     act.forEach(mo=>{ const seq=rows.map(r=>r.per[mo.id]||null); persistence(seq);
       rows.forEach(r=>{const q=r.per[mo.id]; if(!q) return;
         if(!q.isEns){ const sc=score(q,costero); q.s=sc.s; q.why=sc.why; q.p=p_of(sc.s); }
-        else { const ss=[],pp=[]; q.members.forEach(h=>{h.pers=q.pers; const sc=score(h,costero); ss.push(sc.s); pp.push(p_of(sc.s));}); ss.sort((a,b)=>a-b);
+        else { const ss=[],pp=[]; q.members.forEach(h=>{h.pers=q.pers; const sc=score(h,costero); ss.push(sc.s); pp.push(p_of(sc.s));});
+          q.nfog=ss.filter(x=>x>=75).length; ss.sort((a,b)=>a-b); const sp=pp.slice().sort((a,b)=>a-b), qt=u=>sp[clamp(Math.round(u*(sp.length-1)),0,sp.length-1)];
+          q.p10=qt(.1); q.p90=qt(.9); q.frac=q.nfog/ss.length;
           q.s=ss[Math.floor(ss.length/2)]; q.p=clamp(pp.reduce((a,b)=>a+b,0)/pp.length,0.005,0.995); q.nm=pp.length; q.why=score(q,costero).why; delete q.members; }
       });});
     const {w,ll}=weights(), pr=prior(), Zw=act.reduce((a,mo)=>a+w[mo.id],0), wa={}; act.forEach(mo=>wa[mo.id]=w[mo.id]/Zw);
@@ -418,9 +679,15 @@
   const sunWin=()=>{const {rows,nextSunrise}=B.last; return rows.filter(r=>r.ts>=nextSunrise-2.5*3600e3&&r.ts<=nextSunrise+1.5*3600e3);};
   function cards2(){
     const {rows,nextSunrise,act,alpha}=B.last, n6=rows.slice(0,6), m6=n6.reduce((a,b)=>b.post>a.post?b:a,n6[0]), win=sunWin(), ms=win.length?win.reduce((a,b)=>b.post>a.post?b:a,win[0]):null;
-    const card=(eb,r,when)=>`<div class="card"><div class="eyebrow">${eb}</div><div class="big v-${clsP(r.post)}">${(100*r.post).toFixed(0)}<span style="font-size:18px"> %</span></div><div class="verdict">${verP(r.post)}</div><div class="when">${when} · ${t('range')} ${(100*r.min).toFixed(0)} – ${(100*r.max).toFixed(0)} %</div><div class="why">${act.map(mo=>r.per[mo.id]?mo.name+' '+(100*r.per[mo.id].p).toFixed(0)+'%':'').filter(Boolean).join(' · ')}</div></div>`;
+    const card=(eb,r,when,extra)=>`<div class="card"><div class="eyebrow">${eb}</div><div class="big v-${clsP(r.post)}">${(100*r.post).toFixed(0)}<span style="font-size:18px"> %</span></div><div class="verdict">${verP(r.post)}</div><div class="when">${when} · ${t('range')} ${(100*r.min).toFixed(0)} – ${(100*r.max).toFixed(0)} %</div><div class="why">${act.map(mo=>r.per[mo.id]?mo.name+' '+(100*r.per[mo.id].p).toFixed(0)+'%':'').filter(Boolean).join(' · ')}</div>${extra||''}</div>`;
     let h=card(t('next6'),m6,t('max_at')+' '+fmtD(m6.time));
-    if(ms){h+=card(sunLabel(nextSunrise),ms,t('max_at')+' '+fmtH(ms.time));
+    if(ms){
+      const wr2=winRange(rows,nextSunrise,r=>r.post,0.25), pc=v=>(100*v).toFixed(0)+' %';
+      const ens=act.filter(mo=>mo.ens&&ms.per[mo.id]&&ms.per[mo.id].nm).map(mo=>{const q=ms.per[mo.id]; return mo.name+' '+t('ens_band',{a:(100*q.p10).toFixed(0),b:(100*q.p90).toFixed(0)})+', '+t('ens_frac',{k:q.nfog,n:q.nm});});
+      const x2=`<div class="when" style="margin-top:8px"><b>${t('win_lbl')}</b>: ${winTxt(wr2,0.25,ms.ts,nextSunrise,0.5,pc)}</div>`
+        +(ens.length?`<div class="why">${ens.join(' · ')}</div>`:'')
+        +`<div class="why">${t('win_heur')}</div><div class="why"><a href="luz-natural.html?lang=${LANG}">${t('sun_link')} →</a></div>`;
+      h+=card(sunLabel(nextSunrise),ms,t('max_at')+' '+fmtH(ms.time),x2);
       const ps=act.map(mo=>ms.per[mo.id]?.p).filter(x=>x!=null), mean=ps.reduce((a,b)=>a+b,0)/ps.length, sd=Math.sqrt(ps.reduce((a,b)=>a+(b-mean)**2,0)/ps.length);
       h+=`<div class="card"><div class="eyebrow">${t('disp')}</div><div class="big">${(100*sd).toFixed(0)}<span style="font-size:18px"> pp</span></div><div class="verdict">${t(sd<.1?'agree_h':sd<.2?'agree_m':'agree_l')}</div><div class="when">${t('mean')} ${(100*mean).toFixed(0)} % · γ = ${alpha}</div><div class="why">${t('disp_note')}</div></div>`;}
     $('#cards2').innerHTML=h;
@@ -440,14 +707,39 @@
   function tsun(){const {act}=B.last, win=sunWin(); if(!win.length){$('#tsun').innerHTML='';return;}
     let h='<tr>'+t('thsun').map(x=>'<th>'+x+'</th>').join('')+'</tr>';
     act.forEach(mo=>{const c=win.filter(r=>r.per[mo.id]); if(!c.length) return; const best=c.reduce((a,b)=>b.per[mo.id].p>a.per[mo.id].p?b:a), q=best.per[mo.id];
-      h+=`<tr><td>${mo.name}</td><td><span class="tag ${clsP(q.p)}">${(100*q.p).toFixed(0)}%</span></td><td>${fmtH(best.time)}</td><td>${(q.t-q.td).toFixed(1)}</td><td>${q.rh}%</td><td>${q.wind.toFixed(0)}</td><td>${q.cloud}%</td><td>${q.vis!=null?(q.vis/1000).toFixed(1):'–'}</td><td style="text-align:left">${whyTxt(q.why)}</td></tr>`;});
+      h+=`<tr><td>${mo.name}</td><td><span class="tag ${clsP(q.p)}">${(100*q.p).toFixed(0)}%</span></td><td>${fmtH(best.time)}</td><td>${(q.t-q.td).toFixed(1)}</td><td>${q.rh}%</td><td>${q.wind.toFixed(0)}</td><td>${q.cloud}%</td><td>${q.vis!=null?(q.vis/1000).toFixed(1):'–'}</td><td style="text-align:left">${whyTxt(q.why)}${(mo.ens&&q.nm)?' · '+t('ens_band',{a:(100*q.p10).toFixed(0),b:(100*q.p90).toFixed(0)})+' · '+t('ens_frac',{k:q.nfog,n:q.nm}):''}</td></tr>`;});
     $('#tsun').innerHTML=h;}
-  function tw(){const {act,wa,ll,pr}=B.last; let h='<tr>'+t('thw').map(x=>'<th>'+x+'</th>').join('')+'</tr>';
-    act.forEach(mo=>h+=`<tr><td>${mo.name}</td><td>${wa[mo.id].toFixed(3)}</td><td><span class="wbar" style="width:${(120*wa[mo.id]).toFixed(0)}px"></span></td><td>${ll[mo.id].toFixed(2)}</td></tr>`);
-    $('#tw').innerHTML=h; $('#priorinfo').textContent=t('prior_info',{a:pr.a.toFixed(1),b:pr.b.toFixed(1),pi:(100*pr.pi).toFixed(1),n:store.obs.length});}
-  function tobs(){let h='<tr>'+t('thobs').map(x=>'<th>'+x+'</th>').join('')+MODELS.map(m=>'<th>'+m.name+'</th>').join('')+'<th>'+t('posterior')+'</th><th></th></tr>';
-    store.obs.slice().reverse().forEach((o,k)=>{const idx=store.obs.length-1-k; h+=`<tr><td>${o.date}</td><td>${o.y}</td>`+MODELS.map(m=>'<td>'+(o.p&&o.p[m.id]!=null?(100*o.p[m.id]).toFixed(0)+'%':'–')+'</td>').join('')+`<td>${o.post!=null?(100*o.post).toFixed(0)+'%':'<span style="color:var(--warn)">'+t('pending')+'</span>'}</td><td><button class="small ghost" data-i="${idx}">${t('del')}</button></td></tr>`;});
-    $('#tobs').innerHTML=h; document.querySelectorAll('#tobs button').forEach(b=>b.addEventListener('click',()=>{store.obs.splice(+b.dataset.i,1);save(); if(B.last) render2(); else tobs(); calib();}));}
+  // Brier y aciertos al 50 % por modelo: la misma información que la log-verosimilitud, en unidades legibles
+  function modelStats(){const st={}; MODELS.forEach(m=>{let n=0,br=0,hit=0;
+      store.obs.forEach(o=>{const p=o.p&&o.p[m.id]; if(p==null||o.y==null) return; n++; br+=(p-o.y)*(p-o.y); if((p>=0.5)===(o.y>=0.5)) hit++;});
+      st[m.id]={n,br:n?br/n:null,hit:n?hit/n:null};}); return st;}
+  function tw(){const {act,wa,ll,pr}=B.last, st=modelStats(); let h='<tr>'+t('thw').map(x=>'<th>'+x+'</th>').join('')+'</tr>';
+    act.forEach(mo=>{const k=st[mo.id];
+      h+=`<tr><td>${mo.name}</td><td>${wa[mo.id].toFixed(3)} <span class="wbar" style="width:${(60*wa[mo.id]).toFixed(0)}px"></span></td><td>${k.br!=null?k.br.toFixed(3):'–'}</td><td>${k.hit!=null?(100*k.hit).toFixed(0)+'% ('+k.n+')':'–'}</td><td>${ll[mo.id].toFixed(2)}</td></tr>`;});
+    $('#tw').innerHTML=h; $('#priorinfo').textContent=t('prior_info',{a:pr.a.toFixed(1),b:pr.b.toFixed(1),pi:(100*pr.pi).toFixed(1),n:store.obs.length})+' '+t('w_note');}
+  function tobs(){
+    const withData=MODELS.filter(m=>store.obs.some(o=>o.p&&o.p[m.id]!=null)), cols=withData.length?withData:MODELS.filter(m=>m.on); // en móvil, solo las columnas con datos
+    let h='<tr>'+t('thobs').map(x=>'<th>'+x+'</th>').join('')+cols.map(m=>'<th>'+m.name+'</th>').join('')+'<th>'+t('posterior')+'</th><th></th></tr>';
+    store.obs.slice().reverse().forEach((o,k)=>{const idx=store.obs.length-1-k; h+=`<tr><td>${o.date}</td><td>${o.y}</td>`+cols.map(m=>'<td>'+(o.p&&o.p[m.id]!=null?(100*o.p[m.id]).toFixed(0)+'%':'–')+'</td>').join('')+`<td>${o.post!=null?(100*o.post).toFixed(0)+'%':'<span style="color:var(--warn)">'+t('pending')+'</span>'}</td><td><button class="small ghost" data-i="${idx}">${t('del')}</button></td></tr>`;});
+    $('#tobs').innerHTML=h; document.querySelectorAll('#tobs button').forEach(b=>b.addEventListener('click',()=>{store.obs.splice(+b.dataset.i,1);save(); if(B.last) render2(); else tobs(); calib();}));
+    lessons();}
+  // lectura pura de store.snap[fecha].feat cruzada con store.obs: los umbrales locales que el registro ya contiene
+  function lessons(){
+    const el=$('#lessons'); if(!el) return;
+    const w=weights().w, rec=[];
+    store.obs.forEach(o=>{const sn=store.snap[o.date]; if(!sn||!sn.feat||o.y==null) return;
+      const ids=Object.keys(sn.feat).filter(id=>sn.feat[id]&&sn.feat[id].dT!=null); if(!ids.length) return;
+      rec.push({y:o.y,f:sn.feat[ids.reduce((a,b)=>(w[b]||0)>(w[a]||0)?b:a)]});});
+    if(!rec.length){ el.textContent=t('les_none'); return; }
+    const fog=rec.filter(r=>r.y>=0.5), no=rec.filter(r=>r.y===0), out=[];
+    if(fog.length){
+      out.push(t('les_fog',{dt:Math.max(...fog.map(r=>r.f.dT)).toFixed(1),w:Math.max(...fog.map(r=>r.f.w)).toFixed(0),n:fog.length}));
+      const cm=fog.map(r=>r.f.cm).filter(x=>x!=null); if(cm.length) out.push(t('les_cloud',{c:Math.max(...cm)}));
+      const vv=fog.map(r=>r.f.v).filter(x=>x!=null); if(vv.length) out.push(t('les_vis',{v:(Math.max(...vv)/1000).toFixed(1)}));
+    }
+    if(no.length) out.push(t('les_nofog',{dt:Math.min(...no.map(r=>r.f.dT)).toFixed(1),n:no.length}));
+    el.textContent=t('les_head')+' '+out.join(' ')+' '+t('les_tail',{n:rec.length});
+  }
 /* ---------- calibración: diagrama de fiabilidad sobre el registro ---------- */
   function calBins(){
     const scored=store.obs.filter(o=>o.post!=null&&o.y!=null);
@@ -510,6 +802,7 @@
   $('#go2').addEventListener('click',run2);
   {const now=new Date(); $('#odate').value=isoLocal(now.getHours()<14?now.getTime()-86400e3:now.getTime());}
 
+  $('#seawrap').hidden=$('#costa').value!=='costa';
   applyLang(); run1(); calib();
 })();
 </script>

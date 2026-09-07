@@ -135,6 +135,27 @@
   .moonrow b{display:block;font-size:13px;font-weight:600;color:var(--ink)}
   .moonrow span{display:block;font-size:12px;color:var(--ink2);margin-top:1px}
 
+  /* --- veredicto en frase, panorama semanal, desglose del indice y panel de camara --- */
+  .say{font-size:13.5px;line-height:1.5;color:var(--ink2);margin:10px 0 0;padding-top:9px;border-top:1px solid var(--line)}
+  .say b{color:var(--ink)}
+  .say .act{display:block;margin-top:4px;color:var(--ink2)}
+  .useful{font-family:var(--mono);font-size:12px;color:var(--good);margin-top:6px}
+  .useful.none{color:var(--ink2)}
+  .gcline{font-family:var(--mono);font-size:12px;color:var(--ink2);margin-top:4px}
+  tr.astbest td{background:#16291f}
+  tr.astbest td:first-child{color:var(--ink);font-weight:600}
+  .stripsw{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink2);
+           text-transform:none;letter-spacing:0;margin:0 0 8px;cursor:pointer}
+  .stripsw input{cursor:pointer}
+  .hour .bar i{position:absolute;left:0;right:0;display:block}
+  .hour .vb{width:100%;height:3px;border-radius:2px;margin-top:3px;background:var(--fog)}
+  .hour .vb.a{background:var(--good)}.hour .vb.m{background:var(--warn)}.hour .vb.b{background:var(--bad)}
+  .hour .gcm{font-size:9px;line-height:1;color:#a98ad8;height:10px}
+  dl.lim{margin:0;font-size:13.5px;color:var(--ink2);max-width:80ch}
+  dl.lim dt{font-weight:600;color:var(--ink);margin-top:11px}
+  dl.lim dd{margin:2px 0 0}
+  dl.lim+dl.lim{margin-top:18px}
+
 </style>
 </head>
 <body>
@@ -180,10 +201,26 @@
       <div class="status" id="st1"></div>
     </div>
     <div class="cards" id="cards1"></div>
-    <section><h2 data-i18n="h_strip"></h2><div class="wrap"><div class="strip" id="strip"></div></div><div class="legend" data-i18n="strip_legend"></div></section>
+    <section><h2 data-i18n="h_week"></h2><p class="note" id="ast-weekbest"></p><div class="wrap"><table id="ast-week"></table></div><p class="note" data-i18n="week_note"></p></section>
+    <section><h2 data-i18n="h_strip"></h2><label class="stripsw" for="ast-parts"><input id="ast-parts" type="checkbox"> <span data-i18n="parts_lbl"></span></label><div class="wrap"><div class="strip" id="strip"></div></div><div class="legend" id="ast-striplegend" data-i18n="strip_legend"></div></section>
     <section><h2 data-i18n="h_chart"></h2><div id="chart1"></div><div class="legend" id="leg1"></div></section>
     <section><h2 data-i18n="h_table"></h2><div class="wrap"><table id="tabla1"></table></div></section>
     <section><h2 data-i18n="h_how"></h2><p class="note" data-i18n="how1"></p></section>
+    <section id="exposicion"><h2 data-i18n="h_cam"></h2>
+      <div class="panel controls" style="margin-top:0">
+        <div><label for="ast-sqm" data-i18n="cam_sky"></label><select id="ast-sqm">
+          <option value="21.9" data-i18n="cam_b1"></option><option value="21.5" selected data-i18n="cam_b3"></option>
+          <option value="21.0" data-i18n="cam_b4"></option><option value="20.5" data-i18n="cam_b5"></option>
+          <option value="19.3" data-i18n="cam_b6"></option><option value="18.5" data-i18n="cam_b7"></option>
+        </select></div>
+        <div><label for="ast-fnum" data-i18n="cam_f"></label><input id="ast-fnum" type="number" step="0.1" min="0.9" max="32" value="2"></div>
+        <div><label for="ast-focal" data-i18n="cam_focal"></label><input id="ast-focal" type="number" step="1" min="8" max="800" value="24"></div>
+      </div>
+      <p class="note" id="ast-camsky"></p>
+      <div class="wrap"><table id="ast-cam"></table></div>
+      <p class="note" data-i18n="cam_note"></p>
+    </section>
+    <section id="limites"><h2 data-i18n="h_lim"></h2><dl class="lim" data-i18n="limits_dl"></dl><dl class="lim" data-i18n="gloss_dl"></dl></section>
   </div>
 
   <div class="pane" id="p2">
@@ -264,10 +301,10 @@
   const I18N={
   es:{m_new:"Luna nueva",m_wax_cres:"Creciente",m_first:"Cuarto creciente",m_wax_gib:"Gibosa creciente",m_full:"Luna llena",m_wan_gib:"Gibosa menguante",m_last:"Cuarto menguante",m_wan_cres:"Menguante",fog_link:'Niebla',manual:'Manual',title:'Cielo para astrofotografía',subtitle:'Pestaña 1: índice de calidad de cielo nocturno con un modelo (nubes por capas, transparencia, seeing, humedad, Luna). Pestaña 2: fusión bayesiana de varios modelos que aprende de tus noches. Datos de Open‑Meteo, sin clave.',
     lat:'Latitud',lon:'Longitud',target:'Objetivo',t_deep:'Cielo profundo',t_planet:'Planetaria / Luna',t_wide:'Paisaje nocturno / Vía Láctea',geo:'Usar mi posición',tab1:'Índice de cielo',tab2:'Fusión bayesiana',model:'Modelo',best:'Mejor disponible',compute:'Calcular',
-    h_strip:'Índice horario (48 h)',strip_legend:'Barra: índice 0 a 100 (verde ≥ 70 excelente, ámbar 50 a 69 aceptable, rojo &lt; 50 malo). Fondo oscuro: noche astronómica. Hora en ámbar: Luna sobre el horizonte.',
+    h_strip:'Índice horario (48 h)',strip_legend:'Barra: índice 0 a 100 (verde ≥ 70 excelente, ámbar 50 a 69 aceptable, rojo &lt; 50 malo). Fondo oscuro: noche astronómica. Hora en ámbar: Luna sobre el horizonte. Rombo violeta: núcleo galáctico por encima de 10° en noche astronómica y sin Luna (solo con el objetivo Paisaje nocturno).',
     h_chart:'Nubes, Luna e índice',leg1:'<i style="background:#6dbb8a;height:4px"></i>índice <i style="background:#9aa7b5"></i>nubes totales % <i style="background:#5aa0c8"></i>nubes altas % <i style="background:#d9a441;height:8px;opacity:.5"></i>Luna sobre el horizonte (altura) <i style="background:#22304a;height:8px"></i>noche astronómica',
     h_table:'Tabla horaria',h_how:'Cómo se calcula',
-    how1:'El índice, de 0 a 100, suma: <b>nubes</b> hasta 45 puntos, <code>45·(1 − c/100)²</code> con c = cobertura efectiva = máx(nubes totales, 0.9·bajas + 0.7·medias + 0.45·altas); <b>transparencia</b> hasta 15: AOD 550 nm &lt; 0.08: 15, &lt; 0.15: 11, &lt; 0.3: 6, &lt; 0.5: 2, más: 0; <b>humedad</b> hasta 10: HR &lt; 60 %: 10, &lt; 75: 7, &lt; 85: 4, &lt; 92: 2, más: 0 (añade bruma y rocío); <b>seeing</b> hasta 15: viento a 250 hPa &lt; 50 km/h: 9, &lt; 90: 6, &lt; 130: 3, más: 0, más viento en superficie &lt; 10 km/h: 6, &lt; 20: 4, &lt; 30: 2; <b>rocío en la óptica</b> hasta 5: T − Td &gt; 4 °C: 5, &gt; 2: 3, &gt; 1: 1; <b>Luna</b> hasta 10: bajo el horizonte 10, si no 10·(1 − iluminación)·(1 − 0.7·sen(altura)). Luego se aplica el factor de oscuridad según la altura del Sol: &gt; −6°: 0, −6 a −12°: 0.3, −12 a −18°: 0.7, &lt; −18°: 1. El selector de objetivo reescala los pesos: planetaria premia seeing y tolera la Luna; paisaje nocturno penaliza la Luna y la humedad.',
+    how1:'El índice, de 0 a 100, suma: <b>nubes</b> hasta 45 puntos, <code>45·(1 − c/100)²</code> con c = cobertura efectiva = máx(nubes totales, 0.9·bajas + 0.7·medias + 0.45·altas); <b>transparencia</b> hasta 15: AOD 550 nm &lt; 0.08: 15, &lt; 0.15: 11, &lt; 0.3: 6, &lt; 0.5: 2, más: 0; <b>humedad</b> hasta 10: HR &lt; 60 %: 10, &lt; 75: 7, &lt; 85: 4, &lt; 92: 2, más: 0 (añade bruma y rocío); <b>seeing</b> hasta 15: viento a 250 hPa &lt; 50 km/h: 9, &lt; 90: 6, &lt; 130: 3, más: 0, más viento en superficie &lt; 10 km/h: 6, &lt; 20: 4, &lt; 30: 2; <b>rocío en la óptica</b> hasta 5: T − Td &gt; 4 °C: 5, &gt; 2: 3, &gt; 1: 1; <b>Luna</b> hasta 10: bajo el horizonte 10, si no 10·(1 − iluminación)·(1 − 0.7·sen(altura)). Luego se aplica el factor de oscuridad según la altura del Sol: &gt; −6°: 0, −6 a −12°: 0.3, −12 a −18°: 0.7, &lt; −18°: 1. El selector de objetivo reescala los pesos: planetaria premia seeing y tolera la Luna; paisaje nocturno penaliza la Luna y la humedad. Por encima de todo eso manda la <b>lluvia</b>: si la precipitación llega a 0,1 mm/h, esa hora vale 0 valga lo que valga el resto. Las <b>rachas</b> de viento se descargan y se avisan en el veredicto, pero no entran en el índice: el viento medio ya está en el término de seeing y contarlas dos veces descalibraría el registro aprendido.',
     models_lbl:'Modelos (descarga en paralelo con límite de 12 s; desmarca los lentos)',alpha:'γ (peso de los modelos frente a la climatología, 0.1 a 1)',h_prob:'Probabilidad horaria de cielo útil por modelo y posterior',h_night:'Esta noche por modelo',h_w:'Pesos bayesianos y prior',h_obs:'Registro de observaciones (aprendizaje)',
     night_of:'Noche del',observed:'Observado',o_clear:'Útil: despejado la mayor parte',o_part:'Parcial: nubes intermitentes',o_bad:'Inútil: cubierto o bruma',save_obs:'Guardar observación',export:'Exportar JSON',import:'Importar JSON',clear:'Borrar registro',
     obs_note:'Cada vez que calculas, la previsión de la próxima noche queda congelada automáticamente, asociada a la fecha de esa noche (la del atardecer). Al día siguiente elige esa noche, indica cómo fue y guarda: la observación se empareja con la previsión de la víspera. Si no calculaste esa tarde, la observación solo actualiza el prior. El registro se guarda en este navegador; exporta el JSON si cambias de equipo.',
@@ -277,17 +314,59 @@
     tonight:'Esta noche',tomorrow:'Mañana por la noche',no_night:'Sin noche astronómica en el intervalo',best_win:'mejor tramo',mean:'media',astro:'noche astronómica',moon:'Luna',illum:'iluminación',moon_up:'sobre el horizonte',moon_down:'bajo el horizonte',all_night:'toda la noche',dew:'rocío',
     exc:'Excelente',acc:'Aceptable',bad:'Malo',range:'rango',disp:'Dispersión entre modelos (esta noche)',agree_h:'Acuerdo alto',agree_m:'Acuerdo moderado',agree_l:'Desacuerdo',disp_note:'Desviación típica de las probabilidades de los modelos: incertidumbre epistémica.',
     usable:'Noche útil probable',maybe:'Noche útil posible',unlikely:'Noche útil improbable',
-    th1:['Hora','Índice','Nubes','Bajas','Medias','Altas','HR','T−Td','V10','V250','AOD','Luna','Sol°'],thnight:['Modelo','P útil','s₃','nubes','altas','HR','V250','tramo'],thw:['Modelo','peso w','','log‑veros.'],thobs:['Noche','y'],posterior:'posterior',del:'eliminar',
+    th1:['Hora','Índice','Nubes','Bajas','Medias','Altas','mm/h','HR','T−Td','V10','Rachas','V250','AOD','Luna','Sol°'],thnight:['Modelo','P útil','s₃','nubes','altas','HR','V250','tramo'],thw:['Modelo','peso w','','log‑veros.'],thobs:['Noche','y'],posterior:'posterior',del:'eliminar',
     post_leg:'posterior',range_leg:'rango',prior_info:'Prior: Beta({a}, {b}), media {pi} % sobre {n} noches registradas. Calibración p = σ((s₃ − 58)/12).',
-    h_cal:'Calibración (diagrama de fiabilidad)',cal_empty:'Se dibuja cuando el registro tenga noches con previsión congelada.',cal_few:'Aún hay pocas noches para leer la calibración (n={n}; orientativo a partir de 10, fiable a partir de 30).',cal_thin:'Los grupos extremos (0–25 % y 75–100 %) tienen pocas noches (n={n}); todavía no hay señal clara sobre γ.',cal_mixed:'Los grupos se contradicen entre sí: sin señal clara sobre γ; déjalo como está y sigue registrando.',cal_up:'Las frecuencias reales son más extremas que el posterior: sube γ.',cal_down:'Las frecuencias reales son menos extremas que el posterior: baja γ.',cal_ok:'La calibración es razonable: deja α como está.',cal_diag:'calibración perfecta',cal_x:'posterior predicho (%)',cal_y:'frecuencia real de noches útiles (%)',
+    h_cal:'Calibración (diagrama de fiabilidad)',cal_empty:'Se dibuja cuando el registro tenga noches con previsión congelada.',cal_few:'Aún hay pocas noches para leer la calibración (n={n}; orientativo a partir de 10, fiable a partir de 30).',cal_thin:'Los grupos extremos (0–25 % y 75–100 %) tienen pocas noches (n={n}); todavía no hay señal clara sobre γ.',cal_mixed:'Los grupos se contradicen entre sí: sin señal clara sobre γ; déjalo como está y sigue registrando.',cal_up:'Las frecuencias reales son más extremas que el posterior: sube γ.',cal_down:'Las frecuencias reales son menos extremas que el posterior: baja γ.',cal_ok:'La calibración es razonable: deja γ como está.',cal_diag:'calibración perfecta',cal_x:'posterior predicho (%)',cal_y:'frecuencia real de noches útiles (%)',
     sel1:'Selecciona al menos un modelo.',none:'Ningún modelo respondió a tiempo.',fused:'{k} modelos fusionados',failed:', {f} sin respuesta',first:'Calcula primero.',badjson:'JSON no válido',confirm:'¿Borrar todo el registro de observaciones?',
-    w_cloud:'nubes',w_high:'altas',w_aod:'AOD',w_rh:'HR',w_jet:'V250',w_wind:'viento',w_dew:'rocío',w_moon:'Luna',timeout:'timeout',error:'error'},
+    w_cloud:'nubes',w_high:'altas',w_aod:'AOD',w_rh:'HR',w_jet:'V250',w_wind:'viento',w_dew:'rocío',w_moon:'Luna',timeout:'timeout',error:'error',
+    /* ---- razones del veredicto, horas utiles, nucleo galactico, panorama semanal, camara ---- */
+    w_rain:'lluvia',w_gust:'rachas',th_gc:'Núcleo',
+    p_cloud:'nubes',p_aod:'transparencia',p_rh:'humedad',p_seeing:'seeing',p_dew:'rocío',p_moon:'Luna',
+    parts_lbl:'Desglosar cada barra en sus seis términos',
+    parts_note:'La altura total sigue siendo el índice; cada color es lo que <b>aporta</b> ese término, y el hueco que le falta hasta su tope es lo que te está costando. La franja de debajo es el veredicto de la hora.',
+    dirs:['N','NE','E','SE','S','SO','O','NO'],
+    usef:'{h} h de cielo oscuro sin Luna · {a}–{b}',
+    usef0:'Ni una hora de cielo oscuro sin Luna',
+    gc_vis:'Núcleo galáctico sobre 10° de {a} a {b} ({d1}→{d2}), máx {alt}°',
+    gc_low:'Núcleo galáctico por debajo de 10° toda la noche (máx {alt}°): paisaje con estrellas, no Vía Láctea',
+    gc_no:'El núcleo galáctico no sale de noche en esta época: paisaje con estrellas, no Vía Láctea',
+    r_cloud:'nubes al {v} %',r_high:'nubes altas al {v} %',r_aod:'calima (AOD {v})',r_rh:'humedad al {v} %',
+    r_seeing:'seeing pobre (chorro a {v} km/h)',r_dew:'aire al borde del rocío (T−Td {v} °C)',r_moon:'Luna al {v} %',
+    w_until:'hasta las {b}',w_from:'desde las {a}',w_between:'de {a} a {b}',and_j:' y ',
+    verdict_because:'<b class="v-{c}">{v}</b> por {r}.',
+    verdict_clean:'<b class="v-{c}">{v}</b>: ningún término penaliza de forma apreciable.',
+    verdict_model:'Según {m}, el modelo de más peso: <b class="v-{c}">{v}</b> por {r}.',
+    verdict_model_clean:'Según {m}, el modelo de más peso: <b class="v-{c}">{v}</b>, ningún término penaliza de forma apreciable.',
+    take:'Lo aprovechable: {a}–{b}, índice {s}.',
+    take_none:'No hay tramo que salvar.',
+    r_rainv:'<b class="v-b">Llueve</b> {w}, hasta {v} mm/h: el índice se anula en esas horas.',
+    r_dewwarn:'Rocío probable {w} (T−Td ≤ 1 °C): lleva cinta calefactora.',
+    r_gustw:'Rachas de {v} km/h {w}: trípode con peso y olvida la focal larga.',
+    h_week:'Próximas noches',
+    th7:['Noche','s₃','media','mejor tramo','astron.','sin Luna','Luna','nubes','altas','AOD','veredicto'],
+    week_best:'La mejor noche de la semana es la del <b>{d}</b> (s₃ {s}, {h} h de cielo oscuro sin Luna); la siguiente, la del {d2}.',
+    week_best1:'La mejor noche del intervalo es la del <b>{d}</b> (s₃ {s}, {h} h de cielo oscuro sin Luna).',
+    week_none:'No hay ninguna noche astronómica en el intervalo descargado.',
+    week_note:'De la tercera noche en adelante la fiabilidad de las nubes cae deprisa y la AOD deja de estar disponible: usa esta tabla para elegir día y reconsulta la víspera. El modelo francés baja de AROME a ARPEGE a partir del cuarto día.',
+    h_cam:'Y con mi cámara: cuánto dura cada toma',
+    cam_sky:'Cielo del sitio',cam_f:'Diafragma N',cam_focal:'Focal (mm)',
+    cam_b1:'Bortle 1 · SQM 21,9 · cielo negro',cam_b3:'Bortle 3 · SQM 21,5 · rural',
+    cam_b4:'Bortle 4 · SQM 21,0 · rural-suburbano',cam_b5:'Bortle 5 · SQM 20,5 · suburbano',
+    cam_b6:'Bortle 6 · SQM 19,3 · suburbano brillante',cam_b7:'Bortle 7 · SQM 18,5 · urbano',
+    thcam:['Cámara','píxel','ruido lect.','t cielo','t arrastre','veredicto'],
+    cam_mu:'Fondo de cielo en el mejor tramo de esta noche: <b>{mu} mag/arcsec²</b> ({d} mag respecto al sitio sin Luna ni calima), con f/{n} y {f} mm.',
+    cam_mu0:'Fondo de cielo del sitio, <b>{mu} mag/arcsec²</b>, sin corrección lunar: aún no hay previsión descargada.',
+    cam_sky_rules:'manda el cielo: {t} s',cam_trail_rules:'manda el arrastre: {t} s, apila más o sigue',
+    cam_note:'El fondo de cielo parte del brillo del sitio que elijas y se corrige por la Luna (modelo simplificado a partir de Krisciunas y Schaefer 1991: −3,5 mag con Luna llena en lo alto, −1,5 en cuarto, −0,3 en creciente fina, escalado por el seno de la altura lunar) y por la calima (−0,5 mag con AOD &gt; 0,3). De ahí salen los electrones de cielo por píxel y segundo, <code>e_cielo = K · 10^(−0,4·(μ − 21,5)) · (p/N)²</code>, con p en µm y K calibrado para dar 1,7 e⁻/s a SQM 21,5, f/2 y píxel de 3,76 µm. La subexposición mínima es la que entierra el ruido de lectura, <code>t_cielo = 10·σ_r²/e_cielo</code>, con σ_r por encima del cambio de ganancia (M11 ≈ 1,5 e⁻ desde ISO 200; Q3 ≈ 1,5 desde ISO 400; SL3-S ≈ 1,2 desde ISO 640). El máximo sin arrastre es la regla NPF, <code>t_NPF = (35·N + 30·p)/f</code>, la misma que calcula <a href="sensor.html#astro">sensor.html</a>. Es un orden de magnitud: la constante fotométrica, la eficiencia cuántica y la corrección lunar valen ±0,5 mag, un factor 1,6 en tiempo. El detalle del ruido de lectura por ISO está en <a href="sensor.html#ruido">sensor.html</a>, el apilado en <a href="manual-siril-apilado.html">manual-siril-apilado.html</a> y las salidas y puestas de Luna en <a href="luz-natural.html">luz-natural.html</a>.',
+    h_lim:'Límites y glosario',
+    limits_dl:'<dt>Seeing</dt><dd>No se mide: se estima por el viento a 250 hPa, la altura del chorro. El seeing real depende de la turbulencia integrada en toda la columna y de la topografía local; puede ser bueno con chorro fuerte y malo con chorro flojo.</dd><dt>Contaminación lumínica</dt><dd>El índice no la conoce: no sabe si estás en Bortle 3 o en Bortle 7. Eso lo pones tú al elegir sitio, y entra solo en el panel de subexposición.</dd><dt>Astronomía</dt><dd>Algoritmos de baja precisión, error por debajo de medio grado: sobra para crepúsculos, Luna y núcleo galáctico, no sirve para efemérides finas.</dd><dt>Aerosoles</dt><dd>La AOD de CAMS tiene resolución de decenas de kilómetros: no ve una calima de valle. Si CAMS falla, la transparencia queda en un valor neutro y la línea de estado lo dice.</dd><dt>Capas de nubes</dt><dd>No están disponibles en todos los modelos. Cuando faltan se usa el total para las bajas y cero para medias y altas: el término de cirros deja de discriminar.</dd><dt>Horizonte</dt><dd>Se supone horizonte libre. No hay relieve, ni árboles, ni el edificio de enfrente.</dd><dt>Alcance</dt><dd>De la tercera noche en adelante las nubes son orientativas y la AOD deja de estar disponible. La lluvia anula el índice, pero un chubasco a siete días vista es una hipótesis, no un pronóstico.</dd>',
+    gloss_dl:'<dt>AOD 550 nm</dt><dd>Profundidad óptica de aerosoles: cuánta luz se lleva el polvo en suspensión. Por debajo de 0,1 el cielo es transparente y las estrellas débiles llegan; 0,3 es calima visible, con halo alrededor de las luces y un fondo lechoso que se come el contraste; por encima de 0,5 no merece la pena montar.</dd><dt>Nubes altas</dt><dd>Cirros por encima de 6 km. Son lo peor previsto de toda la meteorología y lo más traicionero: no tapan la Luna ni disparan el higrómetro, pero convierten cada estrella en un halo. Un 30 % de nubes altas estropea una toma de cielo profundo más que un 30 % de nubes bajas lejos del encuadre.</dd><dt>T − Td</dt><dd>Temperatura menos punto de rocío. Por debajo de 2 °C el aire está a punto de condensar; por debajo de 1 °C la lente frontal se empaña en menos de una hora si no lleva cinta calefactora.</dd><dt>Viento a 250 hPa</dt><dd>Velocidad del chorro a unos 10 km de altura, el proxy de seeing. Por debajo de 50 km/h la atmósfera está en calma y las estrellas quedan puntuales; por encima de 130 km/h el disco de una estrella hierve y la planetaria no sale. Manda en planetaria y en cielo profundo a focal larga; a un paisaje de 24 mm casi no le afecta.</dd><dt>Noche astronómica</dt><dd>Sol por debajo de −18°. Antes de ese umbral queda luz crepuscular en el fondo de cielo; el índice lo recoge con un factor de oscuridad que vale 0,7 entre −12° y −18° y 1 por debajo.</dd><dt>Horas útiles</dt><dd>Noche astronómica y Luna bajo el horizonte a la vez. Es el presupuesto real de integración para cielo profundo y Vía Láctea: la media del índice no distingue una Luna al 30 % que se pone a las 23:00 de otra que aguanta hasta el alba.</dd><dt>Núcleo galáctico</dt><dd>El centro de la Vía Láctea, en Sagitario (AR 17 h 45 m, Dec −29°). Desde 43° N no pasa de unos 24° sobre el horizonte y solo es fotografiable de marzo a octubre; el resto del año el objetivo Paisaje nocturno sigue dando puntos, pero no hay banda que fotografiar.</dd>'},
   en:{m_new:"New moon",m_wax_cres:"Waxing crescent",m_first:"First quarter",m_wax_gib:"Waxing gibbous",m_full:"Full moon",m_wan_gib:"Waning gibbous",m_last:"Last quarter",m_wan_cres:"Waning crescent",fog_link:'Fog',manual:'Manual',title:'Sky for astrophotography',subtitle:'Tab 1: night‑sky quality index from one model (cloud layers, transparency, seeing, humidity, Moon). Tab 2: Bayesian fusion of several models that learns from your nights. Open‑Meteo data, no API key.',
     lat:'Latitude',lon:'Longitude',target:'Target',t_deep:'Deep sky',t_planet:'Planetary / Moon',t_wide:'Nightscape / Milky Way',geo:'Use my location',tab1:'Sky index',tab2:'Bayesian fusion',model:'Model',best:'Best available',compute:'Compute',
-    h_strip:'Hourly index (48 h)',strip_legend:'Bar: index 0 to 100 (green ≥ 70 excellent, amber 50 to 69 acceptable, red &lt; 50 poor). Dark background: astronomical night. Amber hour: Moon above the horizon.',
+    h_strip:'Hourly index (48 h)',strip_legend:'Bar: index 0 to 100 (green ≥ 70 excellent, amber 50 to 69 acceptable, red &lt; 50 poor). Dark background: astronomical night. Amber hour: Moon above the horizon. Violet diamond: galactic core above 10° in astronomical night with no Moon (Nightscape target only).',
     h_chart:'Clouds, Moon and index',leg1:'<i style="background:#6dbb8a;height:4px"></i>index <i style="background:#9aa7b5"></i>total clouds % <i style="background:#5aa0c8"></i>high clouds % <i style="background:#d9a441;height:8px;opacity:.5"></i>Moon above horizon (altitude) <i style="background:#22304a;height:8px"></i>astronomical night',
     h_table:'Hourly table',h_how:'How it is computed',
-    how1:'The index, 0 to 100, adds: <b>clouds</b> up to 45 points, <code>45·(1 − c/100)²</code> with c = effective cover = max(total, 0.9·low + 0.7·mid + 0.45·high); <b>transparency</b> up to 15: AOD 550 nm &lt; 0.08: 15, &lt; 0.15: 11, &lt; 0.3: 6, &lt; 0.5: 2, more: 0; <b>humidity</b> up to 10: RH &lt; 60 %: 10, &lt; 75: 7, &lt; 85: 4, &lt; 92: 2, more: 0 (adds haze and dew); <b>seeing</b> up to 15: 250 hPa wind &lt; 50 km/h: 9, &lt; 90: 6, &lt; 130: 3, more: 0, plus surface wind &lt; 10 km/h: 6, &lt; 20: 4, &lt; 30: 2; <b>dew on optics</b> up to 5: T − Td &gt; 4 °C: 5, &gt; 2: 3, &gt; 1: 1; <b>Moon</b> up to 10: below horizon 10, else 10·(1 − illumination)·(1 − 0.7·sin(altitude)). Then a darkness factor from solar altitude: &gt; −6°: 0, −6 to −12°: 0.3, −12 to −18°: 0.7, &lt; −18°: 1. The target selector rescales the weights: planetary rewards seeing and tolerates the Moon; nightscape penalises Moon and humidity.',
+    how1:'The index, 0 to 100, adds: <b>clouds</b> up to 45 points, <code>45·(1 − c/100)²</code> with c = effective cover = max(total, 0.9·low + 0.7·mid + 0.45·high); <b>transparency</b> up to 15: AOD 550 nm &lt; 0.08: 15, &lt; 0.15: 11, &lt; 0.3: 6, &lt; 0.5: 2, more: 0; <b>humidity</b> up to 10: RH &lt; 60 %: 10, &lt; 75: 7, &lt; 85: 4, &lt; 92: 2, more: 0 (adds haze and dew); <b>seeing</b> up to 15: 250 hPa wind &lt; 50 km/h: 9, &lt; 90: 6, &lt; 130: 3, more: 0, plus surface wind &lt; 10 km/h: 6, &lt; 20: 4, &lt; 30: 2; <b>dew on optics</b> up to 5: T − Td &gt; 4 °C: 5, &gt; 2: 3, &gt; 1: 1; <b>Moon</b> up to 10: below horizon 10, else 10·(1 − illumination)·(1 − 0.7·sin(altitude)). Then a darkness factor from solar altitude: &gt; −6°: 0, −6 to −12°: 0.3, −12 to −18°: 0.7, &lt; −18°: 1. The target selector rescales the weights: planetary rewards seeing and tolerates the Moon; nightscape penalises Moon and humidity. Above all of that, <b>rain</b> rules: if precipitation reaches 0.1 mm/h that hour scores 0, whatever the rest says. Wind <b>gusts</b> are downloaded and flagged in the verdict, but they do not enter the index: mean wind is already in the seeing term and counting it twice would decalibrate the learned log.',
     models_lbl:'Models (parallel download, 12 s limit; untick slow ones)',alpha:'γ (weight of models vs climatology, 0.1 to 1)',h_prob:'Hourly probability of usable sky per model and posterior',h_night:'Tonight per model',h_w:'Bayesian weights and prior',h_obs:'Observation log (learning)',
     night_of:'Night of',observed:'Observed',o_clear:'Usable: clear most of the night',o_part:'Partial: intermittent clouds',o_bad:'Useless: overcast or haze',save_obs:'Save observation',export:'Export JSON',import:'Import JSON',clear:'Clear log',
     obs_note:'Every time you compute, the forecast for the coming night is frozen automatically under the date of that night (the evening date). The next day pick that night, say how it went and save: the observation is paired with the previous evening’s forecast. If you did not compute that evening, the observation only updates the prior. The log lives in this browser; export the JSON if you change device.',
@@ -297,11 +376,53 @@
     tonight:'Tonight',tomorrow:'Tomorrow night',no_night:'No astronomical night in range',best_win:'best stretch',mean:'mean',astro:'astronomical night',moon:'Moon',illum:'illumination',moon_up:'above horizon',moon_down:'below horizon',all_night:'all night',dew:'dew',
     exc:'Excellent',acc:'Acceptable',bad:'Poor',range:'range',disp:'Spread between models (tonight)',agree_h:'High agreement',agree_m:'Moderate agreement',agree_l:'Disagreement',disp_note:'Standard deviation of model probabilities: epistemic uncertainty.',
     usable:'Usable night likely',maybe:'Usable night possible',unlikely:'Usable night unlikely',
-    th1:['Time','Index','Clouds','Low','Mid','High','RH','T−Td','W10','W250','AOD','Moon','Sun°'],thnight:['Model','P usable','s₃','clouds','high','RH','W250','stretch'],thw:['Model','weight w','','log‑lik.'],thobs:['Night','y'],posterior:'posterior',del:'delete',
+    th1:['Time','Index','Clouds','Low','Mid','High','mm/h','RH','T−Td','W10','Gusts','W250','AOD','Moon','Sun°'],thnight:['Model','P usable','s₃','clouds','high','RH','W250','stretch'],thw:['Model','weight w','','log‑lik.'],thobs:['Night','y'],posterior:'posterior',del:'delete',
     post_leg:'posterior',range_leg:'range',prior_info:'Prior: Beta({a}, {b}), mean {pi} % over {n} logged nights. Calibration p = σ((s₃ − 58)/12).',
-    h_cal:'Calibration (reliability diagram)',cal_empty:'Drawn once the log has nights with a frozen forecast.',cal_few:'Too few nights yet to read calibration (n={n}; indicative from 10, reliable from 30).',cal_thin:'The extreme groups (0–25 % and 75–100 %) hold few nights (n={n}); no clear signal on γ yet.',cal_mixed:'The groups contradict each other: no clear signal on γ; leave it as it is and keep logging.',cal_up:'Actual frequencies are more extreme than the posterior: raise γ.',cal_down:'Actual frequencies are less extreme than the posterior: lower γ.',cal_ok:'Calibration is reasonable: leave α as it is.',cal_diag:'perfect calibration',cal_x:'predicted posterior (%)',cal_y:'actual usable-night frequency (%)',
+    h_cal:'Calibration (reliability diagram)',cal_empty:'Drawn once the log has nights with a frozen forecast.',cal_few:'Too few nights yet to read calibration (n={n}; indicative from 10, reliable from 30).',cal_thin:'The extreme groups (0–25 % and 75–100 %) hold few nights (n={n}); no clear signal on γ yet.',cal_mixed:'The groups contradict each other: no clear signal on γ; leave it as it is and keep logging.',cal_up:'Actual frequencies are more extreme than the posterior: raise γ.',cal_down:'Actual frequencies are less extreme than the posterior: lower γ.',cal_ok:'Calibration is reasonable: leave γ as it is.',cal_diag:'perfect calibration',cal_x:'predicted posterior (%)',cal_y:'actual usable-night frequency (%)',
     sel1:'Select at least one model.',none:'No model answered in time.',fused:'{k} models fused',failed:', {f} without response',first:'Compute first.',badjson:'Invalid JSON',confirm:'Delete the whole observation log?',
-    w_cloud:'clouds',w_high:'high',w_aod:'AOD',w_rh:'RH',w_jet:'W250',w_wind:'wind',w_dew:'dew',w_moon:'Moon',timeout:'timeout',error:'error'}
+    w_cloud:'clouds',w_high:'high',w_aod:'AOD',w_rh:'RH',w_jet:'W250',w_wind:'wind',w_dew:'dew',w_moon:'Moon',timeout:'timeout',error:'error',
+    /* ---- verdict reasons, useful hours, galactic core, weekly outlook, camera ---- */
+    w_rain:'rain',w_gust:'gusts',th_gc:'Core',
+    p_cloud:'cloud',p_aod:'transparency',p_rh:'humidity',p_seeing:'seeing',p_dew:'dew',p_moon:'Moon',
+    parts_lbl:'Break each bar into its six terms',
+    parts_note:'The total height is still the index; each colour is what that term <b>contributes</b>, and the gap left up to its ceiling is what it is costing you. The strip underneath is the verdict for that hour.',
+    dirs:['N','NE','E','SE','S','SW','W','NW'],
+    usef:'{h} h of dark sky with no Moon · {a}–{b}',
+    usef0:'Not one hour of dark sky without the Moon',
+    gc_vis:'Galactic core above 10° from {a} to {b} ({d1}→{d2}), max {alt}°',
+    gc_low:'Galactic core stays under 10° all night (max {alt}°): starry landscape, not Milky Way',
+    gc_no:'The galactic core does not rise at night this time of year: starry landscape, not Milky Way',
+    r_cloud:'cloud at {v} %',r_high:'high cloud at {v} %',r_aod:'haze (AOD {v})',r_rh:'humidity at {v} %',
+    r_seeing:'poor seeing (jet at {v} km/h)',r_dew:'air on the edge of dew (T−Td {v} °C)',r_moon:'a {v} % Moon',
+    w_until:'until {b}',w_from:'from {a}',w_between:'from {a} to {b}',and_j:' and ',
+    verdict_because:'<b class="v-{c}">{v}</b> because of {r}.',
+    verdict_clean:'<b class="v-{c}">{v}</b>: no term penalises appreciably.',
+    verdict_model:'According to {m}, the heaviest model: <b class="v-{c}">{v}</b> because of {r}.',
+    verdict_model_clean:'According to {m}, the heaviest model: <b class="v-{c}">{v}</b>, no term penalises appreciably.',
+    take:'What is usable: {a}–{b}, index {s}.',
+    take_none:'There is no stretch worth saving.',
+    r_rainv:'<b class="v-b">It rains</b> {w}, up to {v} mm/h: the index is voided for those hours.',
+    r_dewwarn:'Dew likely {w} (T−Td ≤ 1 °C): take a heater band.',
+    r_gustw:'Gusts of {v} km/h {w}: weigh the tripod down and forget the long lens.',
+    h_week:'Next nights',
+    th7:['Night','s₃','mean','best stretch','astro.','Moon-free','Moon','cloud','high','AOD','verdict'],
+    week_best:'The best night of the week is <b>{d}</b> (s₃ {s}, {h} h of dark Moon-free sky); the next one, {d2}.',
+    week_best1:'The best night in range is <b>{d}</b> (s₃ {s}, {h} h of dark Moon-free sky).',
+    week_none:'There is no astronomical night in the downloaded range.',
+    week_note:'From the third night on, cloud reliability falls fast and AOD is no longer available: use this table to pick the day and re-check the evening before. The French model drops from AROME to ARPEGE beyond the fourth day.',
+    h_cam:'And with my camera: how long each frame lasts',
+    cam_sky:'Site sky',cam_f:'Aperture N',cam_focal:'Focal length (mm)',
+    cam_b1:'Bortle 1 · SQM 21.9 · black sky',cam_b3:'Bortle 3 · SQM 21.5 · rural',
+    cam_b4:'Bortle 4 · SQM 21.0 · rural-suburban',cam_b5:'Bortle 5 · SQM 20.5 · suburban',
+    cam_b6:'Bortle 6 · SQM 19.3 · bright suburban',cam_b7:'Bortle 7 · SQM 18.5 · urban',
+    thcam:['Camera','pixel','read noise','t sky','t trail','verdict'],
+    cam_mu:'Sky background over tonight best stretch: <b>{mu} mag/arcsec²</b> ({d} mag against the site with no Moon and no haze), at f/{n} and {f} mm.',
+    cam_mu0:'Site sky background, <b>{mu} mag/arcsec²</b>, with no lunar correction: no forecast downloaded yet.',
+    cam_sky_rules:'sky rules: {t} s',cam_trail_rules:'trailing rules: {t} s, stack more or track',
+    cam_note:'The sky background starts from the site brightness you pick and is corrected for the Moon (a simplified model after Krisciunas and Schaefer 1991: −3.5 mag with a high full Moon, −1.5 at quarter, −0.3 for a thin crescent, scaled by the sine of lunar altitude) and for haze (−0.5 mag with AOD &gt; 0.3). From that come the sky electrons per pixel per second, <code>e_sky = K · 10^(−0.4·(μ − 21.5)) · (p/N)²</code>, with p in µm and K calibrated to give 1.7 e⁻/s at SQM 21.5, f/2 and a 3.76 µm pixel. The minimum sub-exposure is the one that buries read noise, <code>t_sky = 10·σ_r²/e_sky</code>, with σ_r above the gain switch (M11 ≈ 1.5 e⁻ from ISO 200; Q3 ≈ 1.5 from ISO 400; SL3-S ≈ 1.2 from ISO 640). The untracked ceiling is the NPF rule, <code>t_NPF = (35·N + 30·p)/f</code>, the same one <a href="sensor.html#astro">sensor.html</a> computes. This is an order of magnitude: the photometric constant, the quantum efficiency and the lunar correction are worth ±0.5 mag, a factor 1.6 in time. Read noise per ISO is detailed in <a href="sensor.html#ruido">sensor.html</a>, stacking in <a href="manual-siril-apilado.html">manual-siril-apilado.html</a> and moonrise and moonset in <a href="luz-natural.html">luz-natural.html</a>.',
+    h_lim:'Limits and glossary',
+    limits_dl:'<dt>Seeing</dt><dd>It is not measured: it is estimated from the 250 hPa wind, the height of the jet. Real seeing depends on turbulence integrated over the whole column and on local topography; it can be good under a strong jet and bad under a weak one.</dd><dt>Light pollution</dt><dd>The index knows nothing about it: it cannot tell Bortle 3 from Bortle 7. That is your site choice, and it only enters the sub-exposure panel.</dd><dt>Astronomy</dt><dd>Low-precision algorithms, error under half a degree: ample for twilights, Moon and galactic core, useless for fine ephemerides.</dd><dt>Aerosols</dt><dd>CAMS AOD has a resolution of tens of kilometres: it cannot see haze sitting in one valley. If CAMS fails, transparency falls back to a neutral value and the status line says so.</dd><dt>Cloud layers</dt><dd>They are not available in every model. When missing, total is used for low cloud and zero for mid and high: the cirrus term stops discriminating.</dd><dt>Horizon</dt><dd>A free horizon is assumed. There is no terrain, no trees and no building across the street.</dd><dt>Range</dt><dd>From the third night on, cloud is indicative and AOD is gone. Rain voids the index, but a shower forecast seven days out is a hypothesis, not a prediction.</dd>',
+    gloss_dl:'<dt>AOD 550 nm</dt><dd>Aerosol optical depth: how much light the suspended dust takes away. Under 0.1 the sky is transparent and faint stars get through; 0.3 is visible haze, with halos around lights and a milky background that eats contrast; over 0.5 it is not worth setting up.</dd><dt>High cloud</dt><dd>Cirrus above 6 km. It is the worst-forecast element in all of meteorology and the most treacherous: it does not hide the Moon nor move the hygrometer, but it turns every star into a halo. A 30 % high cover ruins a deep-sky frame more than 30 % low cloud away from the frame.</dd><dt>T − Td</dt><dd>Temperature minus dew point. Under 2 °C the air is about to condense; under 1 °C the front element fogs up in less than an hour without a heater band.</dd><dt>250 hPa wind</dt><dd>Jet speed around 10 km up, the seeing proxy. Under 50 km/h the atmosphere is calm and stars stay pointlike; over 130 km/h a stellar disc boils and planetary work is off. It rules planetary and long-focal deep sky; a 24 mm nightscape barely notices.</dd><dt>Astronomical night</dt><dd>Sun below −18°. Before that threshold there is still twilight in the sky background; the index takes it in through a darkness factor worth 0.7 between −12° and −18° and 1 below.</dd><dt>Useful hours</dt><dd>Astronomical night and the Moon below the horizon at the same time. This is the real integration budget for deep sky and Milky Way: a mean index cannot tell a 30 % Moon setting at 23:00 from one that holds until dawn.</dd><dt>Galactic core</dt><dd>The centre of the Milky Way, in Sagittarius (RA 17 h 45 m, Dec −29°). From 43° N it never climbs much above 24° and is only photographable from March to October; the rest of the year the Nightscape target still hands out points, but there is no band to photograph.</dd>'}
   };
   function $(s){return document.querySelector(s);}
   /* El idioma lo fija el script canónico del <head> (clave compartida pn-lang) y vive en
@@ -315,7 +436,8 @@
     $('#leg1').innerHTML=t('leg1');
     /* Los enlaces cruzados son estáticos (niebla.html, manual-astro.html) y el idioma viaja
        por pn-lang; los botones ES/EN los marca el conmutador canónico. */
-    if(R1) render1(); if(B.last) render2();
+    if(R1) render1(); else camPanel();
+    if(B.last) render2();
     calib();
   }
   /* El conmutador canónico avisa por aquí al cambiar de idioma. El flag evita repintar
@@ -336,6 +458,19 @@
     const sunAlt=altitude(th-s.ra,phi,s.dec)/RAD; let moonAlt=altitude(th-m.ra,phi,m.dec)/RAD;
     const sd=149598000, phi2=Math.acos(Math.sin(s.dec)*Math.sin(m.dec)+Math.cos(s.dec)*Math.cos(m.dec)*Math.cos(s.ra-m.ra)), inc=Math.atan2(sd*Math.sin(phi2),m.dist-sd*Math.cos(phi2));
     const angle=Math.atan2(Math.cos(s.dec)*Math.sin(s.ra-m.ra),Math.sin(s.dec)*Math.cos(m.dec)-Math.cos(s.dec)*Math.sin(m.dec)*Math.cos(s.ra-m.ra)); /* fase 0 luna nueva, .25 cuarto creciente, .5 llena, .75 menguante */ const phase=0.5+0.5*inc*(angle<0?-1:1)/Math.PI; return {sunAlt,moonAlt,illum:(1+Math.cos(inc))/2,phase};}
+
+  /* ---------- núcleo galáctico (Sgr A*, J2000: AR 266.4168°, Dec −29.0078°) ----------
+     La precesión desde J2000 mueve el núcleo menos de 0.4°: irrelevante frente al medio grado
+     de error del resto de la astronomía de la página. El acimut se mide desde el norte. */
+  const GC_RA=RAD*266.4168, GC_DEC=RAD*(-29.00781);
+  function gcAltAz(ms,lat,lon){
+    const d=toDays(ms), lw=RAD*-lon, phi=RAD*lat, Hh=sidereal(d,lw)-GC_RA;
+    const alt=altitude(Hh,phi,GC_DEC)/RAD;
+    let az=Math.atan2(Math.sin(Hh),Math.cos(Hh)*Math.sin(phi)-Math.tan(GC_DEC)*Math.cos(phi))/RAD+180;
+    az=((az%360)+360)%360;
+    return {alt,az};
+  }
+  const dirName=az=>t('dirs')[Math.round(((az%360)+360)%360/45)%8];
 
   /* ---------- Luna ---------- */
 /* Terminador real: semicircunferencia exterior más arco elíptico cuyo semieje
@@ -369,30 +504,44 @@ function moonName(phase,illum){
   const logit=p=>Math.log(p/(1-p)), sig=z=>1/(1+Math.exp(-z));
   const fmtH=iso=>iso.slice(11,16);
   const fmtD=iso=>new Date(iso).toLocaleDateString(LOC(),{weekday:'short',day:'2-digit'})+' '+iso.slice(11,16);
-  const HOURLY='temperature_2m,relative_humidity_2m,dew_point_2m,wind_speed_10m,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,precipitation,wind_speed_250hPa';
+  /* Fin de una hora del pronóstico: aritmética sobre la cadena, nunca sobre Date, porque
+     las horas vienen en la zona del sitio y el navegador puede estar en otra. */
+  const endH=iso=>String((+iso.slice(11,13)+1)%24).padStart(2,'0')+':00';
+  const num=(x,d)=>Number(x).toLocaleString(LOC(),{minimumFractionDigits:d,maximumFractionDigits:d});
+  const HOURLY='temperature_2m,relative_humidity_2m,dew_point_2m,wind_speed_10m,wind_gusts_10m,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,precipitation,wind_speed_250hPa';
   const coords=()=>({lat:+$('#lat').value,lon:+$('#lon').value,target:$('#target').value});
   function fetchJSON(url,ms){const c=new AbortController();const tm=setTimeout(()=>c.abort(),ms);return fetch(url,{signal:c.signal}).then(r=>r.json()).finally(()=>clearTimeout(tm));}
   let aodCache={key:null,data:null};
   async function getAOD(lat,lon){const key=lat+','+lon; if(aodCache.key===key) return aodCache.data; let m=null;
-    try{m=await fetchJSON(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&hourly=aerosol_optical_depth&timezone=auto&forecast_days=3`,10000); if(m.error) m=null;}catch(e){m=null;}
+    try{m=await fetchJSON(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&hourly=aerosol_optical_depth&timezone=auto&forecast_days=7`,10000); if(m.error) m=null;}catch(e){m=null;}
     aodCache={key,data:m}; return m;}
   const aodAt=(m,iso)=>{if(!m||!m.hourly) return null; const j=m.hourly.time.indexOf(iso); return j>=0?m.hourly.aerosol_optical_depth[j]:null;};
 
   const WEIGHTS={deep:{cloud:45,aod:15,rh:10,seeing:15,dew:5,moon:10},planet:{cloud:45,aod:8,rh:6,seeing:30,dew:5,moon:1},wide:{cloud:45,aod:12,rh:14,seeing:4,dew:5,moon:20}};
+  const PARTS=['cloud','aod','rh','seeing','dew','moon'];
+  const PCOL={cloud:'#8fa6bd',aod:'#a98ad8',rh:'#5aa0c8',seeing:'#2fb3a0',dew:'#d9a441',moon:'#e8e2c8'};
+  const darkF=sunAlt=>sunAlt>-6?0:sunAlt>-12?0.3:sunAlt>-18?0.7:1;
+  const Wsum=W=>W.cloud+W.aod+W.rh+W.seeing+W.dew+W.moon;
+  /* Techo de cada término a esa hora: lo máximo que podría aportar si nada lo penalizase.
+     El desglose de la tira y las razones del veredicto se miden contra este techo. */
+  const partMax=(W,k,sunAlt)=>100*W[k]/Wsum(W)*darkF(sunAlt);
   function score(h,target){
     const W=WEIGHTS[target]||WEIGHTS.deep; let why=[];
+    const dark=darkF(h.sunAlt), Z=Wsum(W), zero={cloud:0,aod:0,rh:0,seeing:0,dew:0,moon:0};
+    /* Llueve: no hay índice que valer. Se anula antes de sumar nada. */
+    if(h.precip!=null&&h.precip>=0.1){ why.push(['w_rain',num(h.precip,1)+' mm/h']); return {s:0,why,parts:zero,rain:true}; }
     const c=Math.max(h.cloud,0.9*h.cloudL+0.7*h.cloudM+0.45*h.cloudH); const fc=Math.pow(1-clamp(c,0,100)/100,2);
-    let s=W.cloud*fc; if(c>30) why.push(['w_cloud',Math.round(c)+'%']); if(h.cloudH>40&&h.cloud<50) why.push(['w_high',h.cloudH+'%']);
-    let fa=0.7; if(h.aod!=null){fa=h.aod<0.08?1:h.aod<0.15?0.73:h.aod<0.3?0.4:h.aod<0.5?0.13:0; if(h.aod>=0.15) why.push(['w_aod',h.aod.toFixed(2)]);} s+=W.aod*fa;
-    const fr=h.rh<60?1:h.rh<75?0.7:h.rh<85?0.4:h.rh<92?0.2:0; s+=W.rh*fr; if(h.rh>=85) why.push(['w_rh',h.rh+'%']);
+    if(c>30) why.push(['w_cloud',Math.round(c)+'%']); if(h.cloudH>40&&h.cloud<50) why.push(['w_high',h.cloudH+'%']);
+    let fa=0.7; if(h.aod!=null){fa=h.aod<0.08?1:h.aod<0.15?0.73:h.aod<0.3?0.4:h.aod<0.5?0.13:0; if(h.aod>=0.15) why.push(['w_aod',h.aod.toFixed(2)]);}
+    const fr=h.rh<60?1:h.rh<75?0.7:h.rh<85?0.4:h.rh<92?0.2:0; if(h.rh>=85) why.push(['w_rh',h.rh+'%']);
     let fj=0.6; if(h.jet!=null){fj=h.jet<50?1:h.jet<90?0.66:h.jet<130?0.33:0; if(h.jet>=90) why.push(['w_jet',Math.round(h.jet)]);}
     const fw=h.wind<10?1:h.wind<20?0.66:h.wind<30?0.33:0; if(h.wind>=20) why.push(['w_wind',Math.round(h.wind)]);
-    s+=W.seeing*(0.6*fj+0.4*fw);
-    const dT=h.t-h.td; const fd=dT>4?1:dT>2?0.6:dT>1?0.2:0; s+=W.dew*fd; if(dT<=1) why.push(['w_dew','ΔT '+dT.toFixed(1)]);
-    let fm=1; if(h.moonAlt>0){fm=(1-h.illum)*(1-0.7*Math.sin(h.moonAlt*RAD)); if(h.illum>0.3) why.push(['w_moon',Math.round(100*h.illum)+'%']);} s+=W.moon*fm;
-    const Wsum=Object.values(W).reduce((a,b)=>a+b,0); s=100*s/Wsum;
-    const dark=h.sunAlt>-6?0:h.sunAlt>-12?0.3:h.sunAlt>-18?0.7:1; s*=dark;
-    return {s:clamp(Math.round(s),0,100),why};
+    const dT=h.t-h.td; const fd=dT>4?1:dT>2?0.6:dT>1?0.2:0; if(dT<=1) why.push(['w_dew','ΔT '+dT.toFixed(1)]);
+    let fm=1; if(h.moonAlt>0){fm=(1-h.illum)*(1-0.7*Math.sin(h.moonAlt*RAD)); if(h.illum>0.3) why.push(['w_moon',Math.round(100*h.illum)+'%']);}
+    const q=100*dark/Z, parts={cloud:q*W.cloud*fc,aod:q*W.aod*fa,rh:q*W.rh*fr,
+      seeing:q*W.seeing*(0.6*fj+0.4*fw),dew:q*W.dew*fd,moon:q*W.moon*fm};
+    const s=parts.cloud+parts.aod+parts.rh+parts.seeing+parts.dew+parts.moon;
+    return {s:clamp(Math.round(s),0,100),why,parts,rain:false};
   }
   const whyTxt=why=>why.map(([k,v])=>(t(k)+' '+v).trim()).join(', ');
   const clsS=s=>s>=70?'a':s>=50?'m':'b', verS=s=>t(s>=70?'exc':s>=50?'acc':'bad');
@@ -404,7 +553,35 @@ function moonName(phase,illum){
     out.forEach(n=>{ const dark=n.rows.filter(r=>r.sunAlt<-18); n.darkStart=dark.length?dark[0].time:null; n.darkEnd=dark.length?dark[dark.length-1].time:null;
       n.date=isoLocal(n.rows[0].ts-(new Date(n.rows[0].time).getHours()<12?86400e3:0));
       const best3=bestWindow(n.rows,3); n.s3=best3.mean; n.s3from=best3.from; n.s3to=best3.to; n.mean=n.rows.reduce((a,r)=>a+r.s,0)/n.rows.length; n.max=Math.max(...n.rows.map(r=>r.s));
-      const up=n.rows.filter(r=>r.moonAlt>0); n.moonUp=up.length; n.illum=n.rows[Math.floor(n.rows.length/2)].illum; n.phase=n.rows[Math.floor(n.rows.length/2)].phase; n.moonFrom=up.length?up[0].time:null; n.moonTo=up.length?up[up.length-1].time:null; });
+      const up=n.rows.filter(r=>r.moonAlt>0); n.moonUp=up.length; n.illum=n.rows[Math.floor(n.rows.length/2)].illum; n.phase=n.rows[Math.floor(n.rows.length/2)].phase; n.moonFrom=up.length?up[0].time:null; n.moonTo=up.length?up[up.length-1].time:null;
+      /* horas útiles = noche astronómica y Luna bajo el horizonte a la vez.
+         El total cuenta todas; la ventana es el tramo continuo más largo (con la Luna
+         saliendo o poniéndose una vez por noche, coinciden). */
+      n.astroH=dark.length;
+      n.usefulH=n.rows.filter(r=>r.sunAlt<-18&&r.moonAlt<=0).length;
+      {let bi=-1,bl=0,ci=-1,cl=0;
+       n.rows.forEach((r,i)=>{ if(r.sunAlt<-18&&r.moonAlt<=0){ if(cl===0) ci=i; cl++; if(cl>bl){bl=cl;bi=ci;} } else cl=0; });
+       n.usefulFrom=bl?n.rows[bi].time:null; n.usefulTo=bl?n.rows[bi+bl-1].time:null;}
+      const mean=f=>{const v=n.rows.map(f).filter(x=>x!=null); return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;};
+      n.cloudAvg=mean(r=>r.cloud); n.cloudHAvg=mean(r=>r.cloudH); n.aodAvg=mean(r=>r.aod);
+      const wet=n.rows.filter(r=>r.precip!=null&&r.precip>=0.1);
+      n.rainH=wet.length; n.rainFrom=wet.length?wet[0].time:null; n.rainTo=wet.length?wet[wet.length-1].time:null;
+      n.rainMax=wet.length?Math.max.apply(null,wet.map(r=>r.precip)):0;
+      const gu=n.rows.filter(r=>r.gust!=null&&r.gust>=35);
+      n.gustMax=n.rows.some(r=>r.gust!=null)?Math.max.apply(null,n.rows.filter(r=>r.gust!=null).map(r=>r.gust)):null;
+      n.gustFrom=gu.length?gu[0].time:null; n.gustTo=gu.length?gu[gu.length-1].time:null;
+      /* rocío: primera racha de dos horas seguidas con T − Td ≤ 1 °C */
+      n.dewFrom=null; n.dewTo=null;
+      for(let i=0;i+1<n.rows.length;i++){ if(n.rows[i].t-n.rows[i].td<=1&&n.rows[i+1].t-n.rows[i+1].td<=1){
+        let j=i; while(j<n.rows.length&&n.rows[j].t-n.rows[j].td<=1) j++;
+        n.dewFrom=n.rows[i].time; n.dewTo=n.rows[j-1].time; break; } }
+      /* núcleo galáctico por encima de 10° en noche astronómica */
+      const gcr=n.rows.filter(r=>r.gcAlt!=null&&r.gcAlt>10&&r.sunAlt<-18);
+      n.gcH=gcr.length; n.gcFrom=gcr.length?gcr[0].time:null; n.gcTo=gcr.length?gcr[gcr.length-1].time:null;
+      n.gcAzFrom=gcr.length?gcr[0].gcAz:null; n.gcAzTo=gcr.length?gcr[gcr.length-1].gcAz:null;
+      const gall=n.rows.filter(r=>r.gcAlt!=null&&r.sunAlt<-18);
+      n.gcMax=gall.length?Math.max.apply(null,gall.map(r=>r.gcAlt)):null;
+    });
     return out;}
   function bestWindow(rows,k){ if(rows.length<=k){const m=rows.reduce((a,r)=>a+r.s,0)/rows.length; return {mean:m,from:rows[0].time,to:rows[rows.length-1].time};}
     let best={mean:-1}; for(let i=0;i+k<=rows.length;i++){const m=rows.slice(i,i+k).reduce((a,r)=>a+r.s,0)/k; if(m>best.mean) best={mean:m,from:rows[i].time,to:rows[i+k-1].time};} return best;}
@@ -441,26 +618,111 @@ function moonName(phase,illum){
   function buildRows(H,aodM,lat,lon,target,limit){const now=Date.now(), rows=[];
     for(let i=0;i<H.time.length;i++){const ts=new Date(H.time[i]).getTime(); if(ts<now-3600e3) continue; if(rows.length>=limit) break;
       const a=astro(ts+1800e3,lat,lon);
-      const r={time:H.time[i],ts,t:H.temperature_2m[i],td:H.dew_point_2m[i],rh:H.relative_humidity_2m[i],wind:H.wind_speed_10m[i],cloud:H.cloud_cover[i],cloudL:H.cloud_cover_low[i],cloudM:H.cloud_cover_mid[i],cloudH:H.cloud_cover_high[i],precip:H.precipitation[i],jet:H.wind_speed_250hPa?H.wind_speed_250hPa[i]:null,aod:aodAt(aodM,H.time[i]),sunAlt:a.sunAlt,moonAlt:a.moonAlt,illum:a.illum, phase:a.phase};
+      const gc=gcAltAz(ts+1800e3,lat,lon);
+      const r={time:H.time[i],ts,t:H.temperature_2m[i],td:H.dew_point_2m[i],rh:H.relative_humidity_2m[i],wind:H.wind_speed_10m[i],cloud:H.cloud_cover[i],cloudL:H.cloud_cover_low[i],cloudM:H.cloud_cover_mid[i],cloudH:H.cloud_cover_high[i],precip:H.precipitation[i],gust:H.wind_gusts_10m?H.wind_gusts_10m[i]:null,jet:H.wind_speed_250hPa?H.wind_speed_250hPa[i]:null,aod:aodAt(aodM,H.time[i]),sunAlt:a.sunAlt,moonAlt:a.moonAlt,illum:a.illum, phase:a.phase,gcAlt:gc.alt,gcAz:gc.az};
       if(r.t==null||r.cloud==null||r.rh==null) continue; if(r.cloudL==null) r.cloudL=r.cloud; if(r.cloudM==null) r.cloudM=0; if(r.cloudH==null) r.cloudH=0; if(r.td==null) r.td=r.t-3;
-      const sc=score(r,target); r.s=sc.s; r.why=sc.why; rows.push(r);}
+      const sc=score(r,target); r.s=sc.s; r.why=sc.why; r.parts=sc.parts; r.rain=sc.rain; rows.push(r);}
     return rows;}
   async function run1(){
     const {lat,lon,target}=coords(), model=$('#model').value;
     $('#st1').textContent=t('dl'); let d;
-    try{d=await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=${HOURLY}&timezone=auto&forecast_days=3&models=${model}`,15000); if(d.error) throw new Error(d.reason);}catch(e){$('#st1').textContent=t('err')+e.message;return;}
+    try{d=await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=${HOURLY}&timezone=auto&forecast_days=7&models=${model}`,15000); if(d.error) throw new Error(d.reason);}catch(e){$('#st1').textContent=t('err')+e.message;return;}
     const aodM=await getAOD(lat,lon);
-    const rows=buildRows(d.hourly,aodM,lat,lon,target,48);
-    R1={rows,nights:nights(rows),model,elev:d.elevation,lat,lon,noaod:!aodM}; render1();
+    /* Siete días para el panorama semanal; las tarjetas, la tira, la gráfica y la tabla
+       siguen viviendo en las primeras 48 h, que es lo que se prevé con alguna fiabilidad. */
+    const rows=buildRows(d.hourly,aodM,lat,lon,target,168);
+    R1={rows,rows48:rows.slice(0,48),nights:nights(rows),model,elev:d.elevation,lat,lon,target,noaod:!aodM}; render1();
   }
-  function render1(){const {rows,model,elev,lat,lon,noaod}=R1;
+  function render1(){const {rows48,model,elev,lat,lon,noaod}=R1;
     $('#st1').textContent=`${model} · ${lat.toFixed(4)}, ${lon.toFixed(4)} · ${t('elev')} ${elev} m · ${new Date().toLocaleTimeString(LOC())}`+(noaod?t('noaod'):'');
-    cards1(); strip1(rows); chart1(rows); table1(rows);}
-  function nightCard(n,label){ if(!n) return `<div class="card"><div class="eyebrow">${label}</div><div class="why">${t('no_night')}</div></div>`;
-    const moon=n.moonUp===0?t('moon_down'):(n.moonUp===n.rows.length?t('all_night'):`${fmtH(n.moonFrom)} – ${fmtH(n.moonTo)}`);
-    return `<div class="card"><div class="eyebrow">${label} · ${new Date(n.rows[0].time).toLocaleDateString(LOC(),{weekday:'long',day:'2-digit'})}</div><div class="big v-${clsS(n.s3)}">${Math.round(n.s3)}</div><div class="verdict">${verS(n.s3)}</div><div class="when">${t('best_win')} ${fmtH(n.s3from)} – ${fmtH(n.s3to)} · ${t('mean')} ${Math.round(n.mean)}</div><div class="why">${t('astro')}: ${n.darkStart?fmtH(n.darkStart)+' – '+fmtH(n.darkEnd):'–'}</div><div class="moonrow">${moonSVG(n.illum,n.phase,34)}<div><b>${moonName(n.phase,n.illum)}</b><span>${Math.round(100*n.illum)}% ${t('illum')} · ${moon}</span></div></div></div>`;}
-  function cards1(){const N=R1.nights; $('#cards1').innerHTML=nightCard(N[0],t('tonight'))+nightCard(N[1],t('tomorrow'));}
-  function strip1(rows){$('#strip').innerHTML=rows.map(r=>`<div class="hour ${r.sunAlt<-18?'dark':''} ${r.moonAlt>0?'moon':''}" title="${fmtD(r.time)} · ${r.s} · ${whyTxt(r.why)}"><div class="bar"><span class="${clsS(r.s)}" style="height:${r.s}%"></span></div><div class="t">${fmtH(r.time).slice(0,2)}</div></div>`).join('');}
+    cards1(); week1(); strip1(rows48); chart1(rows48); table1(rows48); camPanel();}
+  /* ---------- el veredicto dicho en una frase ----------
+     Los dos términos que más restan en el mejor tramo, con la hora en que empiezan y acaban
+     de penalizar, y los avisos accionables (lluvia, rocío, rachas). Las razones ya existían
+     dentro de score(); antes solo viajaban en el title= de la tira, invisible en el móvil. */
+  const dayName=n=>new Date(n.rows[0].time).toLocaleDateString(LOC(),{weekday:'short',day:'2-digit',month:'2-digit'});
+  function winPhrase(n,a,b){ if(!a) return '';
+    const first=n.rows[0].time, last=n.rows[n.rows.length-1].time;
+    const s0=a<=first, s1=b>=last;
+    if(s0&&s1) return t('all_night');
+    if(s0) return t('w_until',{b:endH(b)});
+    if(s1) return t('w_from',{a:fmtH(a)});
+    return t('w_between',{a:fmtH(a),b:endH(b)});}
+  function termWin(n,W,k){ let i0=-1,i1=-1;
+    n.rows.forEach((r,i)=>{ if(r.rain) return; const mx=partMax(W,k,r.sunAlt); if(mx<=0) return;
+      if(mx-((r.parts&&r.parts[k])||0)>0.4*mx){ if(i0<0) i0=i; i1=i; } });
+    return {i0,i1};}
+  function termReason(n,W,k){ const q=termWin(n,W,k); if(q.i0<0) return null;
+    const seg=n.rows.slice(q.i0,q.i1+1), w=winPhrase(n,n.rows[q.i0].time,n.rows[q.i1].time);
+    const avg=f=>{const v=seg.map(f).filter(x=>x!=null); return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;};
+    let txt='';
+    if(k==='cloud'){ const ch=avg(r=>r.cloudH), ct=avg(r=>r.cloud),
+        ce=avg(r=>Math.max(r.cloud,0.9*r.cloudL+0.7*r.cloudM+0.45*r.cloudH));
+      txt=(ch!=null&&ch>40&&ct<50)?t('r_high',{v:Math.round(ch)}):t('r_cloud',{v:Math.round(ce)}); }
+    else if(k==='aod'){ const a=avg(r=>r.aod); if(a==null) return null; txt=t('r_aod',{v:num(a,2)}); }
+    else if(k==='rh') txt=t('r_rh',{v:Math.round(avg(r=>r.rh))});
+    else if(k==='seeing'){ const j=avg(r=>r.jet); if(j==null) return null; txt=t('r_seeing',{v:Math.round(j)}); }
+    else if(k==='dew') txt=t('r_dew',{v:num(Math.min.apply(null,seg.map(r=>r.t-r.td)),1)});
+    else if(k==='moon') txt=t('r_moon',{v:Math.round(100*n.illum)});
+    return txt?{txt,w}:null;}
+  function sayNight(n,target,mname){
+    const W=WEIGHTS[target]||WEIGHTS.deep, cls=clsS(n.s3);
+    const dry=n.rows.filter(r=>!r.rain);
+    const win=n.rows.filter(r=>r.time>=n.s3from&&r.time<=n.s3to&&!r.rain);
+    const use=win.length?win:(dry.length?dry:n.rows);
+    const def={}; PARTS.forEach(k=>def[k]=0);
+    use.forEach(r=>PARTS.forEach(k=>{def[k]+=partMax(W,k,r.sunAlt)-((r.parts&&r.parts[k])||0);}));
+    const top=PARTS.filter(k=>def[k]/use.length>=2).sort((a,b)=>def[b]-def[a]).slice(0,2);
+    const rs=top.map(k=>termReason(n,W,k)).filter(Boolean);
+    /* Si los dos términos penalizan en el mismo tramo, la ventana se dice una sola vez
+       al final: "nubes al 73 % y humedad al 97 % toda la noche". */
+    let frase='';
+    if(rs.length===2&&rs[0].w&&rs[0].w===rs[1].w) frase=rs[0].txt+t('and_j')+rs[1].txt+' '+rs[0].w;
+    else frase=rs.map(r=>r.txt+(r.w?' '+r.w:'')).join(t('and_j'));
+    let out=rs.length?t(mname?'verdict_model':'verdict_because',{m:mname,c:cls,v:verS(n.s3),r:frase})
+                     :t(mname?'verdict_model_clean':'verdict_clean',{m:mname,c:cls,v:verS(n.s3)});
+    out+=' '+(n.s3>0?t('take',{a:fmtH(n.s3from),b:endH(n.s3to),s:Math.round(n.s3)}):t('take_none'));
+    let act='';
+    if(n.rainH) act+=t('r_rainv',{w:winPhrase(n,n.rainFrom,n.rainTo),v:num(n.rainMax,1)})+' ';
+    if(n.dewFrom) act+=t('r_dewwarn',{w:winPhrase(n,n.dewFrom,n.dewTo)})+' ';
+    if(n.gustFrom) act+=t('r_gustw',{v:Math.round(n.gustMax),w:winPhrase(n,n.gustFrom,n.gustTo)})+' ';
+    if(act) out+='<span class="act">'+act.trim()+'</span>';
+    return '<p class="say">'+out+'</p>';}
+  const usefulLine=n=>n.usefulH
+    ? `<div class="useful">${t('usef',{h:n.usefulH,a:fmtH(n.usefulFrom),b:endH(n.usefulTo)})}</div>`
+    : `<div class="useful none">${t('usef0')}</div>`;
+  function gcLine(n){ if(n.gcH) return `<div class="gcline">${t('gc_vis',{a:fmtH(n.gcFrom),b:endH(n.gcTo),d1:dirName(n.gcAzFrom),d2:dirName(n.gcAzTo),alt:Math.round(n.gcMax)})}</div>`;
+    if(n.gcMax!=null&&n.gcMax>0) return `<div class="gcline">${t('gc_low',{alt:Math.round(n.gcMax)})}</div>`;
+    return `<div class="gcline">${t('gc_no')}</div>`;}
+  function nightCard(n,label,target){ if(!n) return `<div class="card"><div class="eyebrow">${label}</div><div class="why">${t('no_night')}</div></div>`;
+    const moon=n.moonUp===0?t('moon_down'):(n.moonUp===n.rows.length?t('all_night'):`${fmtH(n.moonFrom)} – ${endH(n.moonTo)}`);
+    return `<div class="card"><div class="eyebrow">${label} · ${new Date(n.rows[0].time).toLocaleDateString(LOC(),{weekday:'long',day:'2-digit'})}</div><div class="big v-${clsS(n.s3)}">${Math.round(n.s3)}</div><div class="verdict">${verS(n.s3)}</div><div class="when">${t('best_win')} ${fmtH(n.s3from)} – ${endH(n.s3to)} · ${t('mean')} ${Math.round(n.mean)}</div><div class="why">${t('astro')}: ${n.darkStart?fmtH(n.darkStart)+' – '+endH(n.darkEnd):'–'}</div>${usefulLine(n)}${target==='wide'?gcLine(n):''}${sayNight(n,target)}<div class="moonrow">${moonSVG(n.illum,n.phase,34)}<div><b>${moonName(n.phase,n.illum)}</b><span>${Math.round(100*n.illum)}% ${t('illum')} · ${moon}</span></div></div></div>`;}
+  function cards1(){const N=R1.nights; $('#cards1').innerHTML=nightCard(N[0],t('tonight'),R1.target)+nightCard(N[1],t('tomorrow'),R1.target);}
+  /* ---------- panorama de las próximas noches ---------- */
+  function week1(){const N=R1.nights, box=$('#ast-week'), lead=$('#ast-weekbest');
+    if(!N.length){box.innerHTML=''; lead.innerHTML=t('week_none'); return;}
+    const order=N.slice().sort((a,b)=>b.s3-a.s3), best=order[0];
+    lead.innerHTML=N.length>1
+      ? t('week_best',{d:dayName(best),s:Math.round(best.s3),h:best.usefulH,d2:dayName(order[1])})
+      : t('week_best1',{d:dayName(best),s:Math.round(best.s3),h:best.usefulH});
+    let h='<tr>'+t('th7').map(x=>'<th>'+x+'</th>').join('')+'</tr>';
+    N.forEach(nn=>{const mw=nn.moonUp?`${fmtH(nn.moonFrom).slice(0,2)}–${endH(nn.moonTo).slice(0,2)}`:'–';
+      h+=`<tr class="${nn===best?'astbest':''}"><td>${dayName(nn)}</td><td><span class="tag ${clsS(nn.s3)}">${Math.round(nn.s3)}</span></td><td>${Math.round(nn.mean)}</td><td>${fmtH(nn.s3from)}–${endH(nn.s3to)}</td><td>${nn.astroH} h</td><td>${nn.usefulH} h</td><td>${Math.round(100*nn.illum)}% ${mw}</td><td>${nn.cloudAvg!=null?Math.round(nn.cloudAvg)+'%':'–'}</td><td>${nn.cloudHAvg!=null?Math.round(nn.cloudHAvg)+'%':'–'}</td><td>${nn.aodAvg!=null?num(nn.aodAvg,2):'–'}</td><td>${verS(nn.s3)}</td></tr>`;});
+    box.innerHTML=h;}
+  function strip1(rows){
+    const pm=$('#ast-parts').checked, wide=R1&&R1.target==='wide';
+    $('#strip').innerHTML=rows.map(r=>{
+      let bar;
+      if(pm){ let acc=0,seg='';
+        PARTS.forEach(k=>{const v=(r.parts&&r.parts[k])||0; if(v>0.2) seg+=`<i style="bottom:${acc.toFixed(1)}%;height:${v.toFixed(1)}%;background:${PCOL[k]}"></i>`; acc+=v;});
+        bar=`<div class="bar">${seg}</div><div class="vb ${clsS(r.s)}"></div>`;
+      } else bar=`<div class="bar"><span class="${clsS(r.s)}" style="height:${r.s}%"></span></div>`;
+      const gcm=wide?`<div class="gcm">${(r.gcAlt>10&&r.sunAlt<-18&&r.moonAlt<=0)?'◆':''}</div>`:'';
+      return `<div class="hour ${r.sunAlt<-18?'dark':''} ${r.moonAlt>0?'moon':''}" title="${fmtD(r.time)} · ${r.s} · ${whyTxt(r.why)}">${bar}${gcm}<div class="t">${fmtH(r.time).slice(0,2)}</div></div>`;
+    }).join('');
+    $('#ast-striplegend').innerHTML=pm
+      ? PARTS.map(k=>`<i style="background:${PCOL[k]};height:8px"></i>${t('p_'+k)}`).join('')+' · '+t('parts_note')
+      : t('strip_legend');}
   function chart1(rows){
     const W=1000,Hh=300,pl=40,pr=16,pt=14,pb=30,n=rows.length,x=i=>pl+(W-pl-pr)*i/(n-1),y=v=>pt+(Hh-pt-pb)*(1-v/100);
     let g='';
@@ -473,8 +735,38 @@ function moonName(phase,illum){
     $('#chart1').innerHTML=`<svg viewBox="0 0 ${W} ${Hh}" role="img">${g}</svg>`;
   }
   function table1(rows){
-    $('#tabla1').innerHTML='<tr>'+t('th1').map(h=>'<th>'+h+'</th>').join('')+'</tr>'+rows.map(r=>`<tr class="${r.sunAlt<-18?'dark':''}"><td>${fmtD(r.time)}</td><td><span class="tag ${clsS(r.s)}">${r.s}</span></td><td>${r.cloud}%</td><td>${r.cloudL}%</td><td>${r.cloudM}%</td><td>${r.cloudH}%</td><td>${r.rh}%</td><td>${(r.t-r.td).toFixed(1)}</td><td>${r.wind.toFixed(0)}</td><td>${r.jet!=null?r.jet.toFixed(0):'–'}</td><td>${r.aod!=null?r.aod.toFixed(2):'–'}</td><td>${r.moonAlt>0?Math.round(r.moonAlt)+'° '+Math.round(100*r.illum)+'%':'–'}</td><td>${r.sunAlt.toFixed(0)}</td></tr>`).join('');
+    const wide=R1&&R1.target==='wide', th=t('th1').slice(); if(wide) th.push(t('th_gc'));
+    $('#tabla1').innerHTML='<tr>'+th.map(h=>'<th>'+h+'</th>').join('')+'</tr>'+rows.map(r=>`<tr class="${r.sunAlt<-18?'dark':''}"><td>${fmtD(r.time)}</td><td><span class="tag ${clsS(r.s)}">${r.s}</span></td><td>${r.cloud}%</td><td>${r.cloudL}%</td><td>${r.cloudM}%</td><td>${r.cloudH}%</td><td>${r.precip!=null?r.precip.toFixed(1):'–'}</td><td>${r.rh}%</td><td>${(r.t-r.td).toFixed(1)}</td><td>${r.wind.toFixed(0)}</td><td>${r.gust!=null?r.gust.toFixed(0):'–'}</td><td>${r.jet!=null?r.jet.toFixed(0):'–'}</td><td>${r.aod!=null?r.aod.toFixed(2):'–'}</td><td>${r.moonAlt>0?Math.round(r.moonAlt)+'° '+Math.round(100*r.illum)+'%':'–'}</td><td>${r.sunAlt.toFixed(0)}</td>${wide?`<td>${r.gcAlt>0?Math.round(r.gcAlt)+'° '+dirName(r.gcAz):'–'}</td>`:''}</tr>`).join('');
   }
+  /* ---------- y con mi cámara: subexposición limitada por el fondo de cielo ----------
+     Único punto del sitio donde la previsión se convierte en un ajuste de cámara. El detalle
+     del ruido de lectura está en sensor.html#ruido y la regla NPF en sensor.html#astro:
+     aquí solo se calcula el número y se enlaza. Orden de magnitud, no fotometría. */
+  const CAMS_A=[{name:'M11',pitch:3.76,rn:1.5},{name:'Q3 43',pitch:3.76,rn:1.5},{name:'SL3-S',pitch:5.94,rn:1.2}];
+  const KSKY=1.7/Math.pow(3.76/2,2);   /* 1.7 e⁻/s a SQM 21.5, f/2 y píxel de 3.76 µm */
+  const MOON_I=[0,0.1,0.5,1], MOON_M=[0,0.3,1.5,3.5];   /* Krisciunas y Schaefer 1991, simplificado */
+  function moonMag(illum,altDeg){ if(!(altDeg>0)) return 0; let m=MOON_M[MOON_M.length-1];
+    for(let i=1;i<MOON_I.length;i++){ if(illum<=MOON_I[i]){ m=MOON_M[i-1]+(MOON_M[i]-MOON_M[i-1])*(illum-MOON_I[i-1])/(MOON_I[i]-MOON_I[i-1]); break; } }
+    return m*Math.sin(altDeg*RAD);}
+  function camPanel(){
+    const box=$('#ast-cam'), lead=$('#ast-camsky'); if(!box||!lead) return;
+    const mu0=+$('#ast-sqm').value||21.5, N=clamp(+$('#ast-fnum').value||2,0.7,45), f=clamp(+$('#ast-focal').value||24,5,2000);
+    const n0=R1&&R1.nights?R1.nights[0]:null; let mu=mu0;
+    if(n0){ const seg=n0.rows.filter(r=>r.time>=n0.s3from&&r.time<=n0.s3to), use=seg.length?seg:n0.rows;
+      let dm=0; use.forEach(r=>{dm+=moonMag(r.illum,r.moonAlt);}); dm/=use.length;
+      const ao=use.map(r=>r.aod).filter(x=>x!=null), aa=ao.length?ao.reduce((a,b)=>a+b,0)/ao.length:null;
+      const dmag=dm+((aa!=null&&aa>0.3)?0.5:0); mu=mu0-dmag;
+      lead.innerHTML=t('cam_mu',{mu:num(mu,2),d:(dmag>=0.005?'−':'')+num(dmag,2),n:num(N,1),f:Math.round(f)});
+    } else lead.innerHTML=t('cam_mu0',{mu:num(mu0,2)});
+    let h='<tr>'+t('thcam').map(x=>'<th>'+x+'</th>').join('')+'</tr>';
+    CAMS_A.forEach(c=>{
+      const esky=KSKY*Math.pow(10,-0.4*(mu-21.5))*Math.pow(c.pitch/N,2);
+      const tsky=10*c.rn*c.rn/esky, tnpf=(35*N+30*c.pitch)/f, sky=tsky<=tnpf;
+      const dd=x=>num(x,x<10?1:0);
+      h+=`<tr><td>${c.name}</td><td>${num(c.pitch,2)} µm</td><td>${num(c.rn,1)} e⁻</td><td>${dd(tsky)} s</td><td>${dd(tnpf)} s</td><td><b class="v-${sky?'a':'m'}">${sky?t('cam_sky_rules',{t:dd(tsky)}):t('cam_trail_rules',{t:dd(tnpf)})}</b></td></tr>`;});
+    box.innerHTML=h;}
+  ['ast-sqm','ast-fnum','ast-focal'].forEach(id=>{const e=$('#'+id); e.addEventListener('input',camPanel); e.addEventListener('change',camPanel);});
+  $('#ast-parts').addEventListener('change',()=>{if(R1) strip1(R1.rows48);});
   $('#go1').addEventListener('click',run1);
 
   /* ===== pestaña 2 ===== */
@@ -499,23 +791,30 @@ function moonName(phase,illum){
     if(!sel.length){$('#st2').textContent=t('sel1');return;}
     B.ran=true; $('#st2').textContent=t('dl_n',{n:sel.length}); MODELS.forEach(m=>setSt(m.id,'')); sel.forEach(m=>setSt(m.id,'…'));
     const t0=performance.now(), aodP=getAOD(lat,lon);
-    const results=await Promise.allSettled(sel.map(m=>fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=${HOURLY}&timezone=auto&forecast_days=2&models=${m.id}`,TIMEOUT)
+    const results=await Promise.allSettled(sel.map(m=>fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=${HOURLY}&timezone=auto&forecast_days=3&models=${m.id}`,TIMEOUT)
       .then(d=>{if(d.error) throw new Error(d.reason); setSt(m.id,((performance.now()-t0)/1000).toFixed(1)+' s','ok'); return d;})
       .catch(e=>{setSt(m.id,t(e.name==='AbortError'?'timeout':'error'),'ko'); throw e;})));
     const aodM=await aodP, per={}; let ref=null;
-    results.forEach((r,k)=>{if(r.status==='fulfilled'){per[sel[k].id]=buildRows(r.value.hourly,aodM,lat,lon,target,36); if(!ref) ref=per[sel[k].id];}});
+    results.forEach((r,k)=>{if(r.status==='fulfilled'){per[sel[k].id]=buildRows(r.value.hourly,aodM,lat,lon,target,60); if(!ref) ref=per[sel[k].id];}});
     const act=sel.filter(m=>per[m.id]&&per[m.id].length);
     if(!act.length){$('#st2').textContent=t('none');return;}
     // filas comunes por hora
     const times=per[act[0].id].map(r=>r.time), rows=times.map((time,i)=>{const base=per[act[0].id][i]; const r={time,ts:base.ts,sunAlt:base.sunAlt,moonAlt:base.moonAlt,illum:base.illum,per:{}};
       act.forEach(mo=>{const q=per[mo.id].find(z=>z.time===time); if(q) r.per[mo.id]={...q,p:p_of(q.s)};}); return r;});
     const {w,ll}=weights(), pr=prior(), Zw=act.reduce((a,mo)=>a+w[mo.id],0), wa={}; act.forEach(mo=>wa[mo.id]=w[mo.id]/Zw);
-    rows.forEach(r=>{let num=0,den=0,ps=[]; act.forEach(mo=>{const q=r.per[mo.id]; if(!q) return; num+=wa[mo.id]*logit(q.p); den+=wa[mo.id]; ps.push(q.p);}); const zpool=den>0?num/den:logit(pr.pi); r.post=sig(logit(pr.pi)+alpha*(zpool-logit(pr.pi))); r.min=ps.length?Math.min(...ps):0; r.max=ps.length?Math.max(...ps):0;});
+    rows.forEach(r=>{let acc=0,den=0,ps=[]; act.forEach(mo=>{const q=r.per[mo.id]; if(!q) return; acc+=wa[mo.id]*logit(q.p); den+=wa[mo.id]; ps.push(q.p);}); const zpool=den>0?acc/den:logit(pr.pi); r.post=sig(logit(pr.pi)+alpha*(zpool-logit(pr.pi))); r.min=ps.length?Math.min(...ps):0; r.max=ps.length?Math.max(...ps):0;});
     // noche por modelo: s3 y p
     const nightsPer={}; act.forEach(mo=>{nightsPer[mo.id]=nights(per[mo.id]);});
-    const refN=nights(per[act[0].id])[0]||null; let nightP={}, nightPost=null;
-    if(refN){ let num=0,den=0; act.forEach(mo=>{const n=nightsPer[mo.id][0]; if(!n) return; nightP[mo.id]=p_of(n.s3); num+=wa[mo.id]*logit(nightP[mo.id]); den+=wa[mo.id];}); const zpool=den>0?num/den:logit(pr.pi); nightPost=sig(logit(pr.pi)+alpha*(zpool-logit(pr.pi))); }
-    B.last={rows,act,wa,ll,pr,alpha,lat,lon,nightsPer,refN,nightP,nightPost,fail:sel.length-act.length,secs:((performance.now()-t0)/1000).toFixed(1),noaod:!aodM};
+    /* Fusión de la noche j-ésima del modelo de referencia. j = 0 esta noche, j = 1 mañana:
+       la instantánea del registro (store.snap) sigue congelando solo refN, la noche 0. */
+    const fuseNight=j=>{ const nn=nightsPer[act[0].id][j]||null; if(!nn) return {n:null,p:{},post:null};
+      let acc=0,den=0,pp={}; act.forEach(mo=>{const nm=nightsPer[mo.id][j]; if(!nm) return; pp[mo.id]=p_of(nm.s3); acc+=wa[mo.id]*logit(pp[mo.id]); den+=wa[mo.id];});
+      const zpool=den>0?acc/den:logit(pr.pi); return {n:nn,p:pp,post:sig(logit(pr.pi)+alpha*(zpool-logit(pr.pi)))}; };
+    const f0=fuseNight(0), f1=fuseNight(1);
+    const refN=f0.n, nightP=f0.p, nightPost=f0.post;
+    B.last={rows,act,wa,ll,pr,alpha,lat,lon,target,nightsPer,refN,nightP,nightPost,
+            refN2:f1.n,nightP2:f1.p,nightPost2:f1.post,
+            fail:sel.length-act.length,secs:((performance.now()-t0)/1000).toFixed(1),noaod:!aodM};
     if(refN){ store.snap[refN.date]={p:nightP,post:nightPost,at:new Date().toISOString(),lat,lon,n:act.length,target}; save();
       const ex=store.obs.find(o=>o.date===refN.date&&!o.p); if(ex){ex.p=nightP; ex.post=nightPost; save();} }
     render2();
@@ -523,11 +822,16 @@ function moonName(phase,illum){
   function render2(){const L=B.last, sn=L.refN?store.snap[L.refN.date]:null;
     $('#st2').textContent=t('fused',{k:L.act.length})+(L.fail?t('failed',{f:L.fail}):'')+` · ${L.secs} s · ${L.lat.toFixed(4)}, ${L.lon.toFixed(4)}`+(L.noaod?t('noaod'):'')+(sn?' · '+t('snap_info',{d:L.refN.date,n:sn.n,h:new Date(sn.at).toLocaleTimeString(LOC(),{hour:'2-digit',minute:'2-digit'})}):'');
     cards2(); chart2(); tnight(); tw(); tobs();}
-  function cards2(){const {act,refN,nightP,nightPost,alpha}=B.last; if(!refN){$('#cards2').innerHTML=`<div class="card"><div class="why">${t('no_night')}</div></div>`;return;}
+  function cards2(){const {act,refN,nightP,nightPost,alpha,refN2,nightP2,nightPost2,nightsPer,wa,target}=B.last; if(!refN){$('#cards2').innerHTML=`<div class="card"><div class="why">${t('no_night')}</div></div>`;return;}
     const ps=act.map(mo=>nightP[mo.id]).filter(x=>x!=null), mean=ps.reduce((a,b)=>a+b,0)/ps.length, sd=Math.sqrt(ps.reduce((a,b)=>a+(b-mean)**2,0)/ps.length);
-    let h=`<div class="card"><div class="eyebrow">${t('tonight')} · ${new Date(refN.rows[0].time).toLocaleDateString(LOC(),{weekday:'long',day:'2-digit'})}</div><div class="big v-${clsP(nightPost)}">${(100*nightPost).toFixed(0)}<span style="font-size:18px"> %</span></div><div class="verdict">${verP(nightPost)}</div><div class="when">${t('range')} ${(100*Math.min(...ps)).toFixed(0)} – ${(100*Math.max(...ps)).toFixed(0)} % · ${t('astro')} ${refN.darkStart?fmtH(refN.darkStart)+' – '+fmtH(refN.darkEnd):'–'}</div><div class="why">${act.map(mo=>nightP[mo.id]!=null?mo.name+' '+(100*nightP[mo.id]).toFixed(0)+'%':'').filter(Boolean).join(' · ')}</div></div>`;
+    /* Las razones se leen del modelo de mayor peso: el consenso da el número, pero la frase
+       necesita filas horarias concretas y no un promedio de probabilidades. */
+    const topMo=act.slice().sort((a,b)=>wa[b.id]-wa[a.id]).filter(mo=>nightsPer[mo.id]&&nightsPer[mo.id][0])[0];
+    let h=`<div class="card"><div class="eyebrow">${t('tonight')} · ${new Date(refN.rows[0].time).toLocaleDateString(LOC(),{weekday:'long',day:'2-digit'})}</div><div class="big v-${clsP(nightPost)}">${(100*nightPost).toFixed(0)}<span style="font-size:18px"> %</span></div><div class="verdict">${verP(nightPost)}</div><div class="when">${t('range')} ${(100*Math.min(...ps)).toFixed(0)} – ${(100*Math.max(...ps)).toFixed(0)} % · ${t('astro')} ${refN.darkStart?fmtH(refN.darkStart)+' – '+endH(refN.darkEnd):'–'}</div>${usefulLine(refN)}<div class="why">${act.map(mo=>nightP[mo.id]!=null?mo.name+' '+(100*nightP[mo.id]).toFixed(0)+'%':'').filter(Boolean).join(' · ')}</div>${topMo?sayNight(nightsPer[topMo.id][0],target,topMo.name):''}</div>`;
+    if(refN2&&nightPost2!=null){ const ps2=act.map(mo=>nightP2[mo.id]).filter(x=>x!=null);
+      h+=`<div class="card"><div class="eyebrow">${t('tomorrow')} · ${new Date(refN2.rows[0].time).toLocaleDateString(LOC(),{weekday:'long',day:'2-digit'})}</div><div class="big v-${clsP(nightPost2)}">${(100*nightPost2).toFixed(0)}<span style="font-size:18px"> %</span></div><div class="verdict">${verP(nightPost2)}</div><div class="when">${ps2.length?t('range')+' '+(100*Math.min(...ps2)).toFixed(0)+' – '+(100*Math.max(...ps2)).toFixed(0)+' % · ':''}${t('astro')} ${refN2.darkStart?fmtH(refN2.darkStart)+' – '+endH(refN2.darkEnd):'–'}</div>${usefulLine(refN2)}<div class="why">${act.map(mo=>nightP2[mo.id]!=null?mo.name+' '+(100*nightP2[mo.id]).toFixed(0)+'%':'').filter(Boolean).join(' · ')}</div></div>`; }
     h+=`<div class="card"><div class="eyebrow">${t('disp')}</div><div class="big">${(100*sd).toFixed(0)}<span style="font-size:18px"> pp</span></div><div class="verdict">${t(sd<.1?'agree_h':sd<.2?'agree_m':'agree_l')}</div><div class="when">${t('mean')} ${(100*mean).toFixed(0)} % · γ = ${alpha}</div><div class="why">${t('disp_note')}</div></div>`;
-    h+=`<div class="card"><div class="eyebrow">${t('moon')}</div><div class="big">${Math.round(100*refN.illum)}<span style="font-size:18px"> %</span></div><div class="verdict">${refN.moonUp===0?t('moon_down'):refN.moonUp===refN.rows.length?t('all_night'):fmtH(refN.moonFrom)+' – '+fmtH(refN.moonTo)}</div><div class="when">${t('illum')}</div></div>`;
+    h+=`<div class="card"><div class="eyebrow">${t('moon')}</div><div class="big">${Math.round(100*refN.illum)}<span style="font-size:18px"> %</span></div><div class="verdict">${refN.moonUp===0?t('moon_down'):refN.moonUp===refN.rows.length?t('all_night'):fmtH(refN.moonFrom)+' – '+endH(refN.moonTo)}</div><div class="when">${t('illum')}</div></div>`;
     $('#cards2').innerHTML=h;}
   function chart2(){
     const {rows,act,wa}=B.last, W=1000,Hh=320,pl=40,pr=16,pt=14,pb=30,n=rows.length, x=i=>pl+(W-pl-pr)*i/(n-1), y=p=>pt+(Hh-pt-pb)*(1-p);
@@ -544,7 +848,7 @@ function moonName(phase,illum){
   function tnight(){const {act,nightsPer,nightP}=B.last; let h='<tr>'+t('thnight').map(x=>'<th>'+x+'</th>').join('')+'</tr>';
     act.forEach(mo=>{const n=nightsPer[mo.id][0]; if(!n) return; const mid=n.rows[Math.floor(n.rows.length/2)];
       const mc=Math.round(n.rows.reduce((a,r)=>a+r.cloud,0)/n.rows.length), mh=Math.round(n.rows.reduce((a,r)=>a+r.cloudH,0)/n.rows.length), mr=Math.round(n.rows.reduce((a,r)=>a+r.rh,0)/n.rows.length), jets=n.rows.filter(r=>r.jet!=null), mj=jets.length?Math.round(jets.reduce((a,r)=>a+r.jet,0)/jets.length):null;
-      h+=`<tr><td>${mo.name}</td><td><span class="tag ${clsP(nightP[mo.id])}">${(100*nightP[mo.id]).toFixed(0)}%</span></td><td>${Math.round(n.s3)}</td><td>${mc}%</td><td>${mh}%</td><td>${mr}%</td><td>${mj!=null?mj:'–'}</td><td>${fmtH(n.s3from)}–${fmtH(n.s3to)}</td></tr>`;});
+      h+=`<tr><td>${mo.name}</td><td><span class="tag ${clsP(nightP[mo.id])}">${(100*nightP[mo.id]).toFixed(0)}%</span></td><td>${Math.round(n.s3)}</td><td>${mc}%</td><td>${mh}%</td><td>${mr}%</td><td>${mj!=null?mj:'–'}</td><td>${fmtH(n.s3from)}–${endH(n.s3to)}</td></tr>`;});
     $('#tnight').innerHTML=h;}
   function tw(){const {act,wa,ll,pr}=B.last; let h='<tr>'+t('thw').map(x=>'<th>'+x+'</th>').join('')+'</tr>';
     act.forEach(mo=>h+=`<tr><td>${mo.name}</td><td>${wa[mo.id].toFixed(3)}</td><td><span class="wbar" style="width:${(120*wa[mo.id]).toFixed(0)}px"></span></td><td>${ll[mo.id].toFixed(2)}</td></tr>`);

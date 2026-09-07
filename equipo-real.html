@@ -135,6 +135,46 @@
   }
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
+  /* ---------- veredicto, controles, mapa de calor, A/B ---------- */
+  .verdict{
+    background:var(--panel); border:1px solid var(--rule);
+    border-left:3px solid var(--g1); padding:14px 16px; margin:16px 0 0;
+  }
+  .verdict h3{
+    font-family:var(--mono); font-size:10px; letter-spacing:.18em;
+    text-transform:uppercase; margin:0 0 9px; font-weight:600; color:var(--ink2);
+  }
+  .verdict p{font-family:var(--sans); font-size:12.5px; color:var(--ink); margin:0 0 7px; max-width:74ch}
+  .verdict p:last-child{margin-bottom:0}
+  .verdict b{font-weight:600}
+  .tag{
+    display:inline-block; font-family:var(--mono); font-size:9.5px; letter-spacing:.08em;
+    text-transform:uppercase; border:1px solid currentColor; padding:0 5px; margin-left:4px;
+  }
+  .tag.ok{color:var(--g6)} .tag.warn{color:var(--g3)} .tag.bad{color:var(--g1)}
+  .ctrl{
+    display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center;
+    font-family:var(--sans); font-size:11.5px; color:var(--ink2); margin:10px 0 0;
+  }
+  .ctrl label{display:flex; gap:6px; align-items:center}
+  .ctrl select{
+    font-family:var(--mono); font-size:11.5px; color:var(--ink);
+    background:var(--panel); border:1px solid var(--rule2); padding:3px 5px; border-radius:2px;
+  }
+  .ctrl input[type=range]{accent-color:var(--g1); width:200px; max-width:52vw}
+  .ctrl b{font-variant-numeric:tabular-nums; color:var(--ink); font-weight:600}
+  .stack{display:grid; grid-template-columns:1fr; gap:26px}
+  table.heat td{text-align:center; padding:4px 6px; font-size:11px; border-bottom:1px solid var(--rule)}
+  table.heat td.k,table.heat th.k{text-align:left; white-space:nowrap}
+  table.heat td.tot,table.heat tr.tot td{font-weight:600; background:transparent}
+  table.ab th:first-child{width:34%}
+  table.ab td.dif{color:var(--g1); font-weight:600}
+  .ab-a,.ab-b{
+    display:inline-block; font-family:var(--mono); font-size:9.5px; font-weight:600;
+    padding:1px 5px; color:#fff; margin-right:5px;
+  }
+  .ab-a{background:var(--ink)} .ab-b{background:var(--g1)}
+
   /* ---------- conmutador de idioma ---------- */
   html[lang="es"] [data-lang="en"]{display:none!important}
   html[lang="en"] [data-lang="es"]{display:none!important}
@@ -200,6 +240,11 @@
     <input id="pickDir" type="file" webkitdirectory multiple hidden>
     <label class="btn ghost" for="pickFiles" style="margin-left:8px"><span data-lang="es">Elegir archivos</span><span data-lang="en">Choose files</span></label>
     <input id="pickFiles" type="file" accept=".jpg,.jpeg,.jpe,.tif,.tiff,.dng,image/jpeg,image/tiff" multiple hidden>
+    <label class="btn ghost" for="er-pickCsv" style="margin-left:8px"><span data-lang="es">Importar CSV</span><span data-lang="en">Import CSV</span></label>
+    <input id="er-pickCsv" type="file" accept=".csv,text/csv" hidden>
+  </p>
+  <p class="ctrl" style="justify-content:center">
+    <label><input type="checkbox" id="er-addMode"><span data-lang="es">Añadir a lo ya cargado en vez de sustituirlo (se descartan las repetidas por nombre y fecha)</span><span data-lang="en">Add to what is already loaded instead of replacing it (duplicates by name and date are dropped)</span></label>
   </p>
   <div class="privacy" data-lang="es">Nada sale del navegador: sin subida, sin red, sin analítica. El EXIF se lee en tu equipo.</div>
   <div class="privacy" data-lang="en">Nothing leaves the browser: no upload, no network, no analytics. The EXIF is read on your machine.</div>
@@ -234,6 +279,12 @@
         <div class="sub" data-lang="en">in 35 mm equivalent; half of your photographs fall below it</div>
       </div>
       <div class="card">
+        <div class="lab" data-lang="es">Luz mediana</div>
+        <div class="lab" data-lang="en">Median light</div>
+        <div class="val" id="er-cEV">—</div>
+        <div class="sub"><span data-lang="es">EV de escena a ISO 100; la mitad central va de</span><span data-lang="en">scene EV at ISO 100; the middle half runs from</span> <b id="er-cEVq" class="num">—</b></div>
+      </div>
+      <div class="card">
         <div class="lab" data-lang="es">Pareja más usada</div>
         <div class="lab" data-lang="en">Most used pair</div>
         <div class="val small" id="cPair">—</div>
@@ -245,7 +296,20 @@
         <div class="val" id="cConc">—</div>
         <div class="sub"><span data-lang="es">de tus fotos salen del objetivo más usado:</span><span data-lang="en">of your photographs come from the most used lens:</span> <span id="cConcLens"></span></div>
       </div>
+      <div class="card incomodo">
+        <div class="lab" data-lang="es">La abertura que pagaste</div>
+        <div class="lab" data-lang="en">The aperture you paid for</div>
+        <div class="val" id="er-cWide">—</div>
+        <div class="sub"><span data-lang="es">a plena abertura, ±⅓ de paso, con</span><span data-lang="en">wide open, ±⅓ stop, with</span> <span id="er-cWideLens"></span></div>
+      </div>
+      <div class="card">
+        <div class="lab" data-lang="es">El objetivo dormido</div>
+        <div class="lab" data-lang="en">The sleeping lens</div>
+        <div class="val small" id="er-cSleep">—</div>
+        <div class="sub" id="er-cSleepSub"></div>
+      </div>
     </div>
+    <div class="verdict" id="er-verdict" hidden></div>
   </section>
 
   <section class="panel chartbox">
@@ -255,6 +319,14 @@
     </div>
     <svg id="svFocal" viewBox="0 0 860 300" role="img"
       data-aria-es="Histograma de focal equivalente" data-aria-en="Histogram of equivalent focal length"></svg>
+    <div class="ctrl">
+      <label><span data-lang="es">Si solo llevaras una focal</span><span data-lang="en">If you only carried one focal length</span>
+        <input type="range" id="er-cov" min="0" max="1000" value="500" step="1"
+          data-aria-es="Focal única para la cobertura" data-aria-en="Single focal length for coverage"></label>
+      <b id="er-covF">—</b>
+      <span id="er-covOut" class="num"></span>
+    </div>
+    <p class="note" id="er-covNote"></p>
     <p class="note" data-lang="es">Barras en focales canónicas (21, 24, 28, 35, 50, 75, 90, 135…),
       agrupando cada foto con la canónica que quede a menos de un ±15&nbsp;%; lo que no encaja
       conserva su milimetraje redondeado. Se usa <code>FocalLengthIn35mmFilm</code> cuando existe
@@ -263,6 +335,24 @@
       grouping each photograph with the canonical value within ±15&nbsp;%; whatever does not fit
       keeps its own rounded millimetres. <code>FocalLengthIn35mmFilm</code> is used when present
       and the raw focal length when not.</p>
+  </section>
+
+  <section class="panel chartbox">
+    <div class="head">
+      <h2 data-lang="es">Focal × diafragma · tu línea de programa real</h2>
+      <h2 data-lang="en">Focal length × aperture · your real program line</h2>
+    </div>
+    <div class="glass"><table class="heat" id="er-heat"></table></div>
+    <p class="note" data-lang="es">Cada celda es el porcentaje de tus fotos que caen en esa focal
+      canónica y ese paso entero de diafragma (el diafragma se lleva al paso entero más próximo en
+      logaritmo, de modo que f/2,5 cuenta como f/2,8). El diagrama de líneas de programa de
+      <a href="programa-camara.html">programa-camara.html</a> dice lo que haría la cámara; esta tabla
+      dice lo que haces tú.</p>
+    <p class="note" data-lang="en">Each cell is the percentage of your photographs falling at that
+      canonical focal length and that whole aperture stop (the aperture is snapped to the nearest
+      whole stop in log, so f/2.5 counts as f/2.8). The program-line diagram in
+      <a href="programa-camara.html">programa-camara.html</a> says what the camera would do; this
+      table says what you do.</p>
   </section>
 
   <section class="panel">
@@ -276,18 +366,37 @@
         <h2 data-lang="en">Aperture · whole and third stops</h2>
         <svg id="svAper" viewBox="0 0 860 260" role="img"
           data-aria-es="Histograma de diafragma" data-aria-en="Histogram of aperture"></svg>
+        <div class="ctrl">
+          <label><span data-lang="es">paso de píxel para la difracción</span><span data-lang="en">pixel pitch for diffraction</span>
+            <select id="er-pitch">
+              <option value="auto" data-es="según el cuerpo" data-en="from the body">según el cuerpo</option>
+              <option value="3.76" data-es="3,76 µm · M11 y Q3" data-en="3.76 µm · M11 and Q3">3,76 µm · M11 y Q3</option>
+              <option value="5.94" data-es="5,94 µm · SL3-S" data-en="5.94 µm · SL3-S">5,94 µm · SL3-S</option>
+              <option value="off" data-es="sin líneas" data-en="no lines">sin líneas</option>
+            </select></label>
+        </div>
+        <p class="note" id="er-difNote"></p>
       </div>
       <div class="chartbox">
         <h2 data-lang="es">ISO · pasos enteros</h2>
         <h2 data-lang="en">ISO · whole stops</h2>
         <svg id="svIso" viewBox="0 0 860 260" role="img"
           data-aria-es="Histograma de ISO" data-aria-en="Histogram of ISO"></svg>
+        <p class="note" id="er-gainNote"></p>
       </div>
       <div class="chartbox">
         <h2 data-lang="es">Velocidad de obturación · pasos enteros</h2>
         <h2 data-lang="en">Shutter speed · whole stops</h2>
         <svg id="svShut" viewBox="0 0 860 260" role="img"
           data-aria-es="Histograma de velocidad de obturación" data-aria-en="Histogram of shutter speed"></svg>
+        <p class="note" id="er-shakeNote"></p>
+      </div>
+      <div class="chartbox">
+        <h2 data-lang="es">Luz de la escena · EV a ISO 100</h2>
+        <h2 data-lang="en">Scene light · EV at ISO 100</h2>
+        <svg id="er-svEv" viewBox="0 0 860 260" role="img"
+          data-aria-es="Histograma de EV de escena" data-aria-en="Histogram of scene EV"></svg>
+        <p class="note" id="er-evNote"></p>
       </div>
       <div class="chartbox">
         <h2 data-lang="es">Hora del día</h2>
@@ -319,12 +428,38 @@
 
   <section class="panel">
     <div class="head">
+      <h2 data-lang="es">Tu costumbre, antes y ahora</h2>
+      <h2 data-lang="en">Your habit, then and now</h2>
+      <div class="muted" style="font-size:11px" data-lang="es">el filtro por equipo, si lo hay, se aplica a las dos columnas</div>
+      <div class="muted" style="font-size:11px" data-lang="en">the gear filter, if any, applies to both columns</div>
+    </div>
+    <div class="ctrl">
+      <label><span class="ab-a">A</span><select id="er-perA"
+        data-aria-es="Periodo A" data-aria-en="Period A"></select></label>
+      <label><span class="ab-b">B</span><select id="er-perB"
+        data-aria-es="Periodo B" data-aria-en="Period B"></select></label>
+    </div>
+    <div class="glass" style="margin-top:12px">
+      <table class="ab"><thead id="er-abHead"></thead><tbody id="er-ab"></tbody></table>
+    </div>
+    <p class="note" data-lang="es">«Últimos 12 meses» y «los 12 anteriores» se cuentan hacia atrás
+      desde la foto más reciente de lo cargado, no desde hoy: así un archivo antiguo no sale entero
+      como abandonado. Se resalta en rosa la fila donde A y B se separan más de medio paso —o más de
+      diez puntos porcentuales—, que es donde la costumbre ha cambiado de verdad.</p>
+    <p class="note" data-lang="en">"Last 12 months" and "the 12 before" count backwards from the most
+      recent photograph loaded, not from today: that way an old archive does not come out as
+      abandoned wholesale. The row where A and B differ by more than half a stop —or more than ten
+      percentage points— is highlighted in pink, and that is where the habit really changed.</p>
+  </section>
+
+  <section class="panel">
+    <div class="head">
       <h2 data-lang="es">Desglose por equipo</h2>
       <h2 data-lang="en">Breakdown by gear</h2>
       <div class="muted" style="font-size:11px" data-lang="es">clic en una fila = filtrar todos los gráficos a ese equipo; otro clic lo quita</div>
       <div class="muted" style="font-size:11px" data-lang="en">click a row = filter every chart to that piece of gear; click again to clear</div>
     </div>
-    <div class="grid2">
+    <div class="stack">
       <div class="glass">
         <h2 style="margin-bottom:8px" data-lang="es">Por cuerpo</h2>
         <h2 style="margin-bottom:8px" data-lang="en">By body</h2>
@@ -333,8 +468,17 @@
             <th><span data-lang="es">cuerpo</span><span data-lang="en">body</span></th>
             <th><span data-lang="es">fotos</span><span data-lang="en">photos</span></th>
             <th>%</th>
-            <th><span data-lang="es">focal media</span><span data-lang="en">mean focal</span></th>
-            <th><span data-lang="es">ISO mediana</span><span data-lang="en">median ISO</span></th>
+            <th><span data-lang="es">focal mna</span><span data-lang="en">median focal</span></th>
+            <th><span data-lang="es">N mna</span><span data-lang="en">median N</span></th>
+            <th><span data-lang="es">t mna</span><span data-lang="en">median t</span></th>
+            <th><span data-lang="es">ISO mna</span><span data-lang="en">median ISO</span></th>
+            <th><span data-lang="es">EV mna</span><span data-lang="en">median EV</span></th>
+            <th>% &lt; 1/f</th>
+            <th><span data-lang="es">% vert</span><span data-lang="en">% vert</span></th>
+            <th><span data-lang="es">% flash</span><span data-lang="en">% flash</span></th>
+            <th><span data-lang="es">desde</span><span data-lang="en">from</span></th>
+            <th><span data-lang="es">último</span><span data-lang="en">last</span></th>
+            <th><span data-lang="es">últ. 12 m</span><span data-lang="en">last 12 m</span></th>
           </tr></thead>
           <tbody id="tbBody"></tbody>
         </table>
@@ -347,13 +491,33 @@
             <th><span data-lang="es">objetivo</span><span data-lang="en">lens</span></th>
             <th><span data-lang="es">fotos</span><span data-lang="en">photos</span></th>
             <th>%</th>
-            <th><span data-lang="es">focal media</span><span data-lang="en">mean focal</span></th>
-            <th><span data-lang="es">ISO mediana</span><span data-lang="en">median ISO</span></th>
+            <th><span data-lang="es">focal mna</span><span data-lang="en">median focal</span></th>
+            <th><span data-lang="es">N mna</span><span data-lang="en">median N</span></th>
+            <th><span data-lang="es">plena</span><span data-lang="en">wide open</span></th>
+            <th><span data-lang="es">% a plena</span><span data-lang="en">% wide open</span></th>
+            <th><span data-lang="es">% a ≤ 1 paso</span><span data-lang="en">% within 1 stop</span></th>
+            <th><span data-lang="es">t mna</span><span data-lang="en">median t</span></th>
+            <th><span data-lang="es">ISO mna</span><span data-lang="en">median ISO</span></th>
+            <th>% &lt; 1/f</th>
+            <th><span data-lang="es">desde</span><span data-lang="en">from</span></th>
+            <th><span data-lang="es">último</span><span data-lang="en">last</span></th>
+            <th><span data-lang="es">últ. 12 m</span><span data-lang="en">last 12 m</span></th>
           </tr></thead>
           <tbody id="tbLens"></tbody>
         </table>
       </div>
     </div>
+    <p class="note" data-lang="es">«mna» es mediana, no media: un 400 mm ocasional no mueve la fila.
+      «% &lt; 1/f» es la cuota de fotos más lentas que el umbral de trepidación 1/f<sub>eq</sub>
+      —1/(2·f<sub>eq</sub>) en los cuerpos de 60 Mpx, M11 y Q3—, descontando las de más de un segundo,
+      que se dan por trípode. «desde», «último» y «últ. 12 m» se cuentan sobre
+      <code>DateTimeOriginal</code> y con la foto más reciente del archivo como presente.</p>
+    <p class="note" data-lang="en">"median" is the median, not the mean: an occasional 400 mm does not
+      move the row. "% &lt; 1/f" is the share of photographs slower than the camera-shake threshold
+      1/f<sub>eq</sub> —1/(2·f<sub>eq</sub>) on the 60 Mpx bodies, M11 and Q3—, leaving out anything
+      longer than a second, which is taken to be on a tripod. "from", "last" and "last 12 m" are
+      counted on <code>DateTimeOriginal</code>, with the most recent photograph of the archive as
+      the present.</p>
   </section>
 
 </div>
@@ -364,15 +528,25 @@
   <p class="note" data-lang="es">El lector EXIF es propio y funciona sin conexión: en los JPEG busca
     el segmento APP1 con cabecera <code>Exif</code> y dentro lee el TIFF; los DNG y TIFF son un TIFF
     desde el primer byte y entran por el mismo camino. Acepta los dos órdenes de byte (II y MM).
-    Etiquetas leídas: <code>Make</code>, <code>Model</code>, <code>ExposureTime</code>,
-    <code>FNumber</code>, <code>ISO</code>, <code>DateTimeOriginal</code>, <code>FocalLength</code>,
-    <code>FocalLengthIn35mmFilm</code> y <code>LensModel</code>. Nada más.</p>
+    Etiquetas leídas: <code>Make</code>, <code>Model</code>, <code>Orientation</code>,
+    <code>ExposureTime</code>, <code>FNumber</code>, <code>ISO</code>,
+    <code>RecommendedExposureIndex</code>, <code>ISOSpeed</code>, <code>DateTimeOriginal</code>,
+    <code>Flash</code>, <code>FocalLength</code>, <code>FocalLengthIn35mmFilm</code> y
+    <code>LensModel</code>. Nada más. <code>ISOSpeed</code> y
+    <code>RecommendedExposureIndex</code> solo se usan cuando <code>ISO</code> llega saturado a
+    65 535, que es lo que ocurre por encima de esa cifra al ir en un entero de 16 bits: sin ellas,
+    los ISO 102 400 y 204 800 de la SL3-S se leerían como 51 200.</p>
   <p class="note" data-lang="en">The EXIF reader is home-made and works offline: in JPEGs it looks for
     the APP1 segment with the <code>Exif</code> header and reads the TIFF inside; DNG and TIFF files
     are a TIFF from the very first byte and take the same path. Both byte orders (II and MM) are
-    accepted. Tags read: <code>Make</code>, <code>Model</code>, <code>ExposureTime</code>,
-    <code>FNumber</code>, <code>ISO</code>, <code>DateTimeOriginal</code>, <code>FocalLength</code>,
-    <code>FocalLengthIn35mmFilm</code> and <code>LensModel</code>. Nothing else.</p>
+    accepted. Tags read: <code>Make</code>, <code>Model</code>, <code>Orientation</code>,
+    <code>ExposureTime</code>, <code>FNumber</code>, <code>ISO</code>,
+    <code>RecommendedExposureIndex</code>, <code>ISOSpeed</code>, <code>DateTimeOriginal</code>,
+    <code>Flash</code>, <code>FocalLength</code>, <code>FocalLengthIn35mmFilm</code> and
+    <code>LensModel</code>. Nothing else. <code>ISOSpeed</code> and
+    <code>RecommendedExposureIndex</code> are used only when <code>ISO</code> arrives saturated at
+    65,535, which is what happens above that figure in a 16-bit integer: without them the SL3-S's
+    ISO 102,400 and 204,800 would read as 51,200.</p>
   <p class="note" data-lang="es">De cada archivo se leen solo los primeros 256&nbsp;KB
     (<code>File.slice</code>): el EXIF vive al principio, así que mil fotos caben en segundos y en
     poca memoria. Límites: HEIC y HEIF no se intentan y cuentan como no legibles; los vídeos y el
@@ -383,6 +557,16 @@
     and in very little memory. Limits: HEIC and HEIF are not attempted and count as unreadable;
     videos and every other file are ignored. A photograph without EXIF is counted and the reading
     moves on. And everything happens in the browser: no network is involved at any step.</p>
+  <p class="note" data-lang="es">Un aviso sobre los objetivos M: el cuerpo solo escribe
+    <code>LensModel</code> si lee el código de seis bits de la montura o si le has dicho a mano qué
+    objetivo llevas. Todo lo que no lleve código y no esté fijado en el menú de la M11 cae en un
+    único saco, «objetivo sin identificar», y arrastra ahí sus focales y sus diafragmas. Si tu saco
+    pesa, la solución está en la cámara, no aquí: fijar el objetivo a mano antes de disparar.</p>
+  <p class="note" data-lang="en">A warning about M lenses: the body only writes
+    <code>LensModel</code> if it reads the six-bit code on the mount or if you have told it by hand
+    which lens is fitted. Anything without a code and not set in the M11 menu falls into a single
+    bucket, "unidentified lens", dragging its focal lengths and apertures in with it. If that bucket
+    is heavy, the fix is in the camera, not here: set the lens by hand before shooting.</p>
   <p class="srclinks">
     <a href="analisis-centrado.html" data-lang="es">La otra mitad: dónde colocas al sujeto</a>
     <a href="analisis-centrado.html" data-lang="en">The other half: where you place the subject</a>
@@ -402,17 +586,152 @@
 const DICT={
   es:{
     read:"con EXIF", noexif:"sin EXIF", bad:"no legibles", ign:"ignorados",
-    reading:"leyendo EXIF…", nodata:"sin datos", photos:"fotos",
+    dup:"repetidas", reading:"leyendo EXIF…", nodata:"sin datos", photos:"fotos",
     unknownLens:"objetivo sin identificar", unknownBody:"cuerpo sin identificar",
     filterPre:"Filtro: ", filterPost:" — clic aquí o en la fila para quitarlo",
-    dow:["lun","mar","mié","jue","vie","sáb","dom"]
+    filterAnd:" + ",
+    dow:["lun","mar","mié","jue","vie","sáb","dom"],
+    csvBad:"Ese CSV no lleva la cabecera de equipo-real.csv: no se ha importado nada.",
+    csvOk:(n,d)=>"CSV importado: "+fmtN(n)+" filas nuevas"+(d?", "+fmtN(d)+" repetidas descartadas":"")+".",
+    /* marcas sobre los gráficos */
+    mkCrit:"crítico", mkLim:"limitado", mkGain:"ganancia", mkShake:"1/f mediana",
+    evRefs:[[15,"sol"],[12,"nublado"],[9,"interior"],[5,"noche"],[2,"calle"]],
+    evNote:(n,tot)=>"EV de escena a ISO 100: log₂(N²/t) − log₂(ISO/100). Entran las "+fmtN(n)+
+      " fotos que traen diafragma, velocidad e ISO a la vez, de "+fmtN(tot)+
+      "; las que van sueltas de alguno de los tres se quedan fuera de esta barra y solo de esta.",
+    evNone:"Ninguna foto trae diafragma, velocidad e ISO a la vez: sin esos tres números no hay EV.",
+    /* difracción */
+    difOff:"Líneas de difracción apagadas.",
+    difNone:"Ningún cuerpo reconocido (M11, Q3 o SL3-S) entre estas fotos: sin paso de píxel no hay diafragma crítico que dibujar. Puedes elegir uno a mano en el desplegable.",
+    difLine:(body,nc,p1,nl,p2,n)=>"<b>"+body+"</b> ("+fmtN(n)+(n===1?" foto":" fotos")+"): el <b>"+p1+
+      " %</b> están más cerradas que f/"+nc+", donde la difracción ya iguala al píxel; el <b>"+p2+
+      " %</b> pasan de f/"+nl+", donde el detalle real cae por debajo de la mitad del sensor.",
+    difVerd:(p)=> p<10 ? "Con menos del 10 % cruzando el diafragma crítico, el archivo aprovecha la resolución que pagaste: el L-DNG está justificado."
+                : p<30 ? "Entre el 10 y el 30 % cruzando el crítico, cerrar tanto es tu excepción, no tu costumbre: sigue en L-DNG y vigila las fotos de mucha profundidad."
+                : "Más de un tercio de tus fotos pasan del diafragma crítico: en ellas el L-DNG no aporta nada sobre el M-DNG. O abres más, o te ahorras la mitad del disco.",
+    difLink:"El porqué, con las cifras y el disco de Airy, en la pestaña de difracción de sensor.html.",
+    /* ganancia dual */
+    gainNone:"Ningún cuerpo con punto de conmutación conocido (M11 200, Q3 400, SL3-S 640) entre estas fotos.",
+    gainLine:(body,iso,p,n)=>"<b>"+body+"</b>: de sus "+fmtN(n)+
+      (n===1?" foto con poca luz":" fotos con poca luz")+" (EV &lt; 8), el <b>"+p+" %</b> se quedan por debajo de ISO "+iso+
+      ", el punto en que el sensor conmuta a la segunda ganancia.",
+    gainVerd:(p)=> p<25 ? "Ahí ya estás del lado bueno del escalón: nada que cambiar."
+                : p<50 ? "Un cuarto largo de tus fotos con poca luz se quedan a un paso de las sombras limpias: sube el mínimo del Auto-ISO hasta el punto de conmutación."
+                : "Más de la mitad de tus fotos con poca luz están en la zona de peor ruido de lectura: subir un paso de ISO te habría dado sombras más limpias sin coste de rango.",
+    gainLink:"Las dos series de ruido, cuerpo por cuerpo, en la sección de ruido de sensor.html.",
+    /* trepidación */
+    shakeNone:"Sin focal y velocidad a la vez no se puede medir la trepidación.",
+    shakeLine:(p,n,lim)=>"El <b>"+p+" %</b> de tus fotos a pulso ("+fmtN(n)+
+      ") van más lentas que su umbral 1/f (mediana del umbral: "+lim+
+      "). Se descartan las de más de un segundo, que se dan por trípode.",
+    shakeVerd:(p)=> p<15 ? "Por debajo del 15 %, tu pulso y tu velocidad están de acuerdo."
+                 : p<35 ? "Entre el 15 y el 35 %: te falta un paso de ISO, o te falta estabilización en las escenas oscuras."
+                 : "Más de un tercio por debajo de 1/f: a 60 Mpx eso se ve al 100 %. Sube el mínimo del Auto-ISO o pásate al cuerpo estabilizado para esas escenas.",
+    shakeLink:"El umbral 1/f y su versión con estabilizador, en programa-camara.html.",
+    /* cobertura */
+    covOut:(p15,p1)=>fmtN(p15,0)+" % a ±15 % · "+fmtN(p1,0)+" % a un paso de encuadre",
+    covNote:(one,pOne,a,b,pPair)=>"Tu mejor focal única sería <b>"+one+
+      " mm</b>: cubriría el "+pOne+" % de tus fotos a un paso de encuadre (×0,7–×1,4). "+
+      "La mejor pareja es <b>"+a+" + "+b+" mm</b>, con el "+pPair+" %.",
+    covVerd:(p)=> p>=70 ? "Con el "+fmtN(p,0)+" % en una sola focal, un objetivo te basta para viajar."
+                : p>=50 ? "Con el "+fmtN(p,0)+" %, una focal te deja fuera media docena de fotos de cada veinte: lleva dos."
+                : "Con el "+fmtN(p,0)+" %, una sola focal no cubre tu costumbre: necesitas dos, y son las de arriba.",
+    /* plena abertura */
+    wideNone:"—", wideNoLens:"sin objetivo identificado",
+    wideVerd:(p)=> p>=40 ? "usas la luminosidad que pagaste"
+                : p>=15 ? "la abres de vez en cuando"
+                : "pagaste una abertura que no usas",
+    /* objetivo dormido */
+    sleepNone:"todos tus objetivos se han usado en el último año",
+    sleepSub:(n,m,pct)=>"sin usar desde hace "+fmtN(m)+" meses · "+fmtN(n)+" fotos en total, el "+
+      fmtN(pct,1)+" % del archivo",
+    sleepSell:" · candidato a vender o a dejar en casa",
+    /* periodos y tabla A/B */
+    perAll:"todo el archivo", perLast12:"últimos 12 meses", perPrev12:"los 12 anteriores",
+    abRows:["fotos","focal mediana","N mediana","t mediana","ISO mediana","EV mediana",
+            "objetivo dominante","% a plena abertura","% bajo 1/f"],
+    abNone:"sin fotos en ese periodo",
+    /* veredicto */
+    vTitle:"Lo que dicen tus fotos",
+    vHabit:(mm,p,n,ev1,ev2,h1,h2)=>"Disparas sobre todo a <b>"+mm+" mm</b> ("+p+
+      " % de tus fotos), a <b>f/"+n+"</b> de mediana, con luz de <b>EV "+ev1+" a "+ev2+
+      "</b>, y sobre todo entre las "+h1+" y las "+h2+".",
+    vConc:(p,lens)=>"El <b>"+p+" %</b> sale de un solo objetivo, el <b>"+lens+"</b>.",
+    vWide:(lens,w,p)=>"Del <b>"+lens+"</b> (f/"+w+") solo el <b>"+p+
+      " %</b> de las fotos son a plena abertura, ±⅓ de paso: ",
+    vSleep:(lens,m)=>"El <b>"+lens+"</b> lleva <b>"+fmtN(m)+"</b> meses sin usarse.",
+    vFilter:(name)=>"Todo lo anterior se refiere al subconjunto filtrado: "+name+(/[.]$/.test(name)?"":"."),
+    vNoData:"Carga fotos para ver el veredicto."
   },
   en:{
     read:"with EXIF", noexif:"no EXIF", bad:"unreadable", ign:"ignored",
-    reading:"reading EXIF…", nodata:"no data", photos:"photos",
+    dup:"duplicates", reading:"reading EXIF…", nodata:"no data", photos:"photos",
     unknownLens:"unidentified lens", unknownBody:"unidentified body",
     filterPre:"Filter: ", filterPost:" — click here or on the row to clear it",
-    dow:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+    filterAnd:" + ",
+    dow:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
+    csvBad:"That CSV does not carry the equipo-real.csv header: nothing was imported.",
+    csvOk:(n,d)=>"CSV imported: "+fmtN(n)+" new rows"+(d?", "+fmtN(d)+" duplicates dropped":"")+".",
+    mkCrit:"critical", mkLim:"limited", mkGain:"gain", mkShake:"median 1/f",
+    evRefs:[[15,"sun"],[12,"overcast"],[9,"indoors"],[5,"night"],[2,"street"]],
+    evNote:(n,tot)=>"Scene EV at ISO 100: log₂(N²/t) − log₂(ISO/100). It takes the "+fmtN(n)+
+      " photographs that carry aperture, shutter and ISO at once, out of "+fmtN(tot)+
+      "; the ones missing any of the three stay out of this chart, and only of this one.",
+    evNone:"No photograph carries aperture, shutter and ISO at once: without those three numbers there is no EV.",
+    difOff:"Diffraction lines off.",
+    difNone:"No recognised body (M11, Q3 or SL3-S) among these photographs: without a pixel pitch there is no critical aperture to draw. You can pick one by hand in the dropdown.",
+    difLine:(body,nc,p1,nl,p2,n)=>"<b>"+body+"</b> ("+fmtN(n)+(n===1?" photograph":" photographs")+"): <b>"+p1+
+      " %</b> are stopped down beyond f/"+nc+", where diffraction already matches the pixel; <b>"+p2+
+      " %</b> go past f/"+nl+", where real detail falls below half the sensor.",
+    difVerd:(p)=> p<10 ? "With less than 10 % crossing the critical aperture, the archive uses the resolution you paid for: L-DNG is justified."
+                : p<30 ? "Between 10 and 30 % crossing the critical aperture, stopping down that far is your exception, not your habit: stay on L-DNG and watch the deep-depth shots."
+                : "More than a third of your photographs go past the critical aperture: in those, L-DNG adds nothing over M-DNG. Either open up, or save half the disk.",
+    difLink:"The why, with the figures and the Airy disc, in the diffraction tab of sensor.html.",
+    gainNone:"No body with a known switching point (M11 200, Q3 400, SL3-S 640) among these photographs.",
+    gainLine:(body,iso,p,n)=>"<b>"+body+"</b>: of its "+fmtN(n)+
+      (n===1?" low-light photograph":" low-light photographs")+" (EV &lt; 8), <b>"+p+" %</b> stay below ISO "+iso+
+      ", the point where the sensor switches to its second gain.",
+    gainVerd:(p)=> p<25 ? "You are already on the good side of the step: nothing to change."
+                : p<50 ? "A good quarter of your low-light photographs sit one stop short of clean shadows: raise the Auto-ISO floor to the switching point."
+                : "More than half of your low-light photographs are in the worst read-noise zone: one more stop of ISO would have given cleaner shadows at no cost in range.",
+    gainLink:"The two noise series, body by body, in the noise section of sensor.html.",
+    shakeNone:"Without focal length and shutter together, camera shake cannot be measured.",
+    shakeLine:(p,n,lim)=>"<b>"+p+" %</b> of your handheld photographs ("+fmtN(n)+
+      ") run slower than their own 1/f threshold (median threshold: "+lim+
+      "). Anything longer than a second is left out as tripod work.",
+    shakeVerd:(p)=> p<15 ? "Below 15 %, your hand and your shutter agree."
+                 : p<35 ? "Between 15 and 35 %: you are one stop of ISO short, or one stabiliser short, in the dark scenes."
+                 : "More than a third below 1/f: at 60 Mpx that shows at 100 %. Raise the Auto-ISO floor or move to the stabilised body for those scenes.",
+    shakeLink:"The 1/f threshold and its stabilised version, in programa-camara.html.",
+    covOut:(p15,p1)=>fmtN(p15,0)+" % within ±15 % · "+fmtN(p1,0)+" % within one framing stop",
+    covNote:(one,pOne,a,b,pPair)=>"Your best single focal length would be <b>"+one+
+      " mm</b>: it would cover "+pOne+" % of your photographs within one framing stop (×0.7–×1.4). "+
+      "The best pair is <b>"+a+" + "+b+" mm</b>, with "+pPair+" %.",
+    covVerd:(p)=> p>=70 ? "With "+fmtN(p,0)+" % on a single focal length, one lens is enough to travel with."
+                : p>=50 ? "At "+fmtN(p,0)+" %, one focal length leaves out half a dozen photographs in every twenty: take two."
+                : "At "+fmtN(p,0)+" %, a single focal length does not cover your habit: you need two, and they are the ones above.",
+    wideNone:"—", wideNoLens:"no identified lens",
+    wideVerd:(p)=> p>=40 ? "you do use the speed you paid for"
+                : p>=15 ? "you open it up now and then"
+                : "you paid for an aperture you do not use",
+    sleepNone:"every lens of yours has been used within the last year",
+    sleepSub:(n,m,pct)=>"unused for "+fmtN(m)+" months · "+fmtN(n)+" photographs in all, "+
+      fmtN(pct,1)+" % of the archive",
+    sleepSell:" · a candidate to sell or to leave at home",
+    perAll:"the whole archive", perLast12:"last 12 months", perPrev12:"the 12 before",
+    abRows:["photographs","median focal","median N","median t","median ISO","median EV",
+            "dominant lens","% wide open","% below 1/f"],
+    abNone:"no photographs in that period",
+    vTitle:"What your photographs say",
+    vHabit:(mm,p,n,ev1,ev2,h1,h2)=>"You shoot mostly at <b>"+mm+" mm</b> ("+p+
+      " % of your photographs), at <b>f/"+n+"</b> median, in light of <b>EV "+ev1+" to "+ev2+
+      "</b>, and mostly between "+h1+" and "+h2+".",
+    vConc:(p,lens)=>"<b>"+p+" %</b> comes from a single lens, the <b>"+lens+"</b>.",
+    vWide:(lens,w,p)=>"Of the <b>"+lens+"</b> (f/"+w+") only <b>"+p+
+      " %</b> of the photographs are wide open, ±⅓ stop: ",
+    vSleep:(lens,m)=>"The <b>"+lens+"</b> has gone <b>"+fmtN(m)+"</b> months unused.",
+    vFilter:(name)=>"Everything above refers to the filtered subset: "+name+(/[.]$/.test(name)?"":"."),
+    vNoData:"Load photographs to see the verdict."
   }
 };
 function LBL(k){ return (DICT[document.documentElement.lang]||DICT.es)[k]; }
@@ -431,10 +750,21 @@ function median(sorted){
   const n=sorted.length; if(!n) return NaN;
   return n%2 ? sorted[(n-1)/2] : (sorted[n/2-1]+sorted[n/2])/2;
 }
-function mean(a){ return a.length ? a.reduce((x,y)=>x+y,0)/a.length : NaN; }
 
-/* ---------- estado ---------- */
-const ST={ rows:[], counts:null, filter:null, busy:false };
+function medOf(a){ return median(a.slice().sort((x,y)=>x-y)); }
+function quart(a,q){
+  const s=a.slice().sort((x,y)=>x-y);
+  if(!s.length) return NaN;
+  const i=(s.length-1)*q, lo=Math.floor(i), hi=Math.ceil(i);
+  return s[lo]+(s[hi]-s[lo])*(i-lo);
+}
+
+/* ---------- estado ----------
+   filter lleva ahora las dos ranuras a la vez (cuerpo y objetivo), que se
+   combinan; period solo afecta a la tabla A/B. */
+const ST={ rows:[], counts:null, filter:{body:null,lens:null}, busy:false,
+           ref:Date.now() };
+const YEAR=365.2425*24*3600*1000;
 
 /* =====================================================================
    Lector EXIF: TIFF/IFD a mano.
@@ -503,13 +833,17 @@ function parseTIFF(dv,base){
     scanIFD(dv,base,dv.getUint32(base+4,le),le,(tag,typ,cnt,voff)=>{
       if(tag===0x010F) res.make=rdAscii(dv,voff,cnt);          /* Make  */
       else if(tag===0x0110) res.model=rdAscii(dv,voff,cnt);    /* Model */
+      else if(tag===0x0112) res.ori=rdInt(dv,typ,voff,le);     /* Orientation */
       else if(tag===0x8769) exifOff=rdInt(dv,typ,voff,le)||0;  /* Exif IFD */
     });
     if(exifOff) scanIFD(dv,base,exifOff,le,(tag,typ,cnt,voff)=>{
       if(tag===0x829A) res.tsec=rdRat(dv,voff,le);             /* ExposureTime */
       else if(tag===0x829D) res.fnum=rdRat(dv,voff,le);        /* FNumber */
-      else if(tag===0x8827) res.iso=rdInt(dv,typ,voff,le);     /* ISO */
+      else if(tag===0x8827) res.iso=rdInt(dv,typ,voff,le);     /* ISO (SHORT: satura a 65535) */
+      else if(tag===0x8832) res.rei=rdInt(dv,typ,voff,le);     /* RecommendedExposureIndex */
+      else if(tag===0x8833) res.isoSpeed=rdInt(dv,typ,voff,le);/* ISOSpeed (LONG) */
       else if(tag===0x9003) res.dto=rdAscii(dv,voff,cnt);      /* DateTimeOriginal */
+      else if(tag===0x9209) res.flash=rdInt(dv,typ,voff,le);   /* Flash */
       else if(tag===0x920A) res.focal=rdRat(dv,voff,le);       /* FocalLength */
       else if(tag===0xA405) res.focal35=rdInt(dv,typ,voff,le); /* FocalLengthIn35mmFilm */
       else if(tag===0xA434) res.lens=rdAscii(dv,voff,cnt);     /* LensModel */
@@ -580,16 +914,64 @@ function bodyName(make,model){
   if(model.toUpperCase().indexOf(mk)===0) return model;
   return make.split(" ")[0]+" "+model;
 }
+/* 0x8827 es un SHORT: por encima de 65535 llega saturado. Cuando eso pasa se
+   usa ISOSpeed (0x8833) o RecommendedExposureIndex (0x8832), que son LONG. */
+function isoOf(ex){
+  const raw=(ex.iso>0)?ex.iso:null;
+  if(raw!==null && raw<65535) return raw;
+  const alt=(ex.isoSpeed>0)?ex.isoSpeed:((ex.rei>0)?ex.rei:null);
+  return (alt!==null && alt>0) ? alt : raw;
+}
+/* EV de escena a ISO 100: log2(N²/t) − log2(ISO/100). */
+function evOf(r){
+  if(!(r.fnum>0 && r.tsec>0 && r.iso>0)) return null;
+  const v=Math.log2(r.fnum*r.fnum/r.tsec)-Math.log2(r.iso/100);
+  return Number.isFinite(v) ? v : null;
+}
 function toRow(file,ex){
   const focal=(ex.focal>0)?ex.focal:null;
   const f35=(ex.focal35>0)?ex.focal35:null;
-  return {
+  const o=ex.ori;
+  const r={
     name:file.name, date:parseDate(ex.dto),
     body:bodyName(ex.make,ex.model), lens:(ex.lens||"").trim(),
     focal:focal, focal35:f35, eq:(f35||focal||null),
     fnum:(ex.fnum>0)?ex.fnum:null, tsec:(ex.tsec>0)?ex.tsec:null,
-    iso:(ex.iso>0)?ex.iso:null
+    iso:isoOf(ex),
+    vert:(o>0) ? (o===5||o===6||o===7||o===8) : null,   /* Orientation 0x0112 */
+    flash:(ex.flash==null) ? null : !!(ex.flash&1)      /* Flash 0x9209, bit 0 */
   };
+  r.ev=evOf(r);
+  return r;
+}
+
+/* =====================================================================
+   Umbrales prestados de las otras fichas. No se rederivan aquí.
+   Paso de píxel y diafragma crítico: pestaña de difracción de sensor.html
+   (N crítico = 1,49·p en µm; claramente limitado, el doble).
+   Conmutación de la ganancia dual: sección de ruido de sensor.html.
+   Umbral de trepidación 1/f: programa-camara.html.
+   ===================================================================== */
+const PITCH=[{re:/SL3-S/i,p:5.94},{re:/M11/i,p:3.76},{re:/\bQ3\b/i,p:3.76}];
+const GAIN =[{re:/SL3-S/i,iso:640},{re:/M11/i,iso:200},{re:/\bQ3\b/i,iso:400}];
+const HIRES=/M11|\bQ3\b/i;                      /* 60 Mpx: umbral 1/(2f) */
+function bodyPitch(b){
+  if(!b) return null;
+  for(const e of PITCH) if(e.re.test(b)) return e.p;
+  return null;
+}
+function bodyGain(b){
+  if(!b) return null;
+  for(const e of GAIN) if(e.re.test(b)) return e.iso;
+  return null;
+}
+function nCrit(p){ return 1.49*p; }
+function shakeK(b){ return (b && HIRES.test(b)) ? 2 : 1; }
+/* Umbral de trepidación y si la foto lo cruza. Más de 1 s: trípode probable. */
+function shakeInfo(r){
+  if(!(r.eq>0 && r.tsec>0) || r.tsec>1) return null;
+  const lim=1/(shakeK(r.body)*r.eq);
+  return {lim:lim, under:r.tsec>lim};
 }
 
 /* ---------- ingesta ---------- */
@@ -609,7 +991,48 @@ function paintSummary(){
     fmtN(c.bad)+" "+LBL("bad")
   ];
   if(c.ign) bits.push(fmtN(c.ign)+" "+LBL("ign"));
+  if(c.dup) bits.push(fmtN(c.dup)+" "+LBL("dup"));
   $("#sumLine").textContent=bits.join(" · ");
+}
+
+/* La clave de deduplicación al añadir carpetas o importar el CSV. */
+function rowKey(r){ return r.name+" "+(r.date?r.date.getTime():""); }
+function addMode(){ return !!$("#er-addMode").checked; }
+/* Devuelve cuántas se descartaron por repetidas. */
+function mergeRows(fresh){
+  const keep=addMode() ? ST.rows.slice() : [];
+  const seen=new Set(keep.map(rowKey));
+  let dup=0;
+  fresh.forEach(r=>{
+    const k=rowKey(r);
+    if(seen.has(k)){ dup++; return; }
+    seen.add(k); keep.push(r);
+  });
+  ST.rows=keep;
+  return dup;
+}
+function mergeCounts(c){
+  if(addMode() && ST.counts){
+    c.ok+=ST.counts.ok; c.noexif+=ST.counts.noexif;
+    c.bad+=ST.counts.bad; c.ign+=ST.counts.ign; c.dup+=(ST.counts.dup||0);
+  }
+  ST.counts=c;
+}
+/* Presente del archivo: la foto más reciente, no el reloj del ordenador. */
+function refNow(){
+  let t=0;
+  ST.rows.forEach(r=>{ if(r.date && r.date.getTime()>t) t=r.date.getTime(); });
+  return t || Date.now();
+}
+function afterLoad(){
+  ST.filter={body:null,lens:null};
+  ST.ref=refNow();
+  buildPeriodOptions();
+  const any=ST.rows.length>0;
+  $("#wrap").hidden=!any;
+  $("#exportBtn").disabled=!any;
+  paintSummary();
+  if(any) paintAll();
 }
 
 async function processFiles(files){
@@ -635,26 +1058,32 @@ async function processFiles(files){
       await new Promise(r=>setTimeout(r,0));       /* deja pintar la barra */
     }
   }
-  ST.rows=rows; ST.counts=counts; ST.filter=null; ST.busy=false;
+  counts.dup=mergeRows(rows);
+  counts.ok-=counts.dup;          /* los cubos reparten: leídas = ok + repetidas */
+  mergeCounts(counts);
+  ST.busy=false;
   $("#prog").hidden=true;
-  paintSummary();
-  const any=rows.length>0;
-  $("#wrap").hidden=!any;
-  $("#exportBtn").disabled=!any;
-  if(any) paintAll();
+  afterLoad();
 }
 
-/* ---------- filtro por equipo ---------- */
-function subset(){
-  const f=ST.filter;
-  if(!f) return ST.rows;
-  return ST.rows.filter(r=> f.kind==="body" ? r.body===f.key : r.lens===f.key);
+/* ---------- filtro por equipo (cuerpo y objetivo se combinan) ---------- */
+function hasFilter(){ return ST.filter.body!==null || ST.filter.lens!==null; }
+function subset(rows){
+  const src=rows||ST.rows, f=ST.filter;
+  if(!hasFilter()) return src;
+  return src.filter(r=>
+    (f.body===null || r.body===f.body) && (f.lens===null || r.lens===f.lens));
+}
+function filterName(){
+  const f=ST.filter, bits=[];
+  if(f.body!==null) bits.push(dispBody(f.body));
+  if(f.lens!==null) bits.push(dispLens(f.lens));
+  return bits.join(LBL("filterAnd"));
 }
 function dispBody(b){ return b || LBL("unknownBody"); }
 function dispLens(l){ return l || LBL("unknownLens"); }
 function toggleFilter(kind,key){
-  const f=ST.filter;
-  ST.filter=(f && f.kind===kind && f.key===key) ? null : {kind:kind,key:key};
+  ST.filter[kind]=(ST.filter[kind]===key) ? null : key;
   paintAll();
 }
 
@@ -706,10 +1135,49 @@ function drawBars(svg,bins,opt){
          'text-anchor="middle">'+fmtN(b.n)+'</text>';
     g+='</g>';
   });
+  /* banda sombreada, detrás de las barras */
+  if(opt.band){
+    const a=binPos(opt.band.lo,bins,opt.linear), b=binPos(opt.band.hi,bins,opt.linear);
+    if(a!==null || b!==null){
+      const p0=(a===null)?0:a, p1=(b===null)?bins.length:b;
+      const x0=L+bw*Math.min(p0,p1), x1=L+bw*Math.max(p0,p1);
+      g='<rect x="'+x0+'" y="'+padT+'" width="'+Math.max(x1-x0,1)+'" height="'+ih+
+        '" fill="'+(opt.band.color||"var(--g1)")+'" opacity=".12"/>'+g;
+    }
+  }
+  /* marcas verticales de umbral, delante */
+  (opt.marks||[]).forEach((m,i)=>{
+    const p=binPos(m.v,bins,opt.linear);
+    if(p===null) return;
+    const x=L+bw*p, col=m.color||"var(--g1)";
+    const yl=padT+2+(i%2)*11;
+    g+='<g><line x1="'+x+'" y1="'+padT+'" x2="'+x+'" y2="'+(padT+ih)+'" stroke="'+col+
+       '" stroke-width="1.3" stroke-dasharray="4 3"/>'+
+       '<text x="'+(x+4)+'" y="'+yl+'" font-size="9" fill="'+col+'">'+esc(m.lab||"")+
+       '</text></g>';
+  });
   if(opt.cap)
     g+='<text x="'+(L+iw)+'" y="'+(H-4)+'" text-anchor="end" font-size="9" '+
        'fill="var(--ink2)">'+esc(opt.cap)+'</text>';
   svg.innerHTML=g;
+}
+
+/* Posición de un valor sobre las barras, en unidades de barra (0,5 = centro de
+   la primera), interpolando entre los valores de las barras contiguas. En log
+   por defecto —diafragmas, ISO, velocidades, focales—; lineal para el EV.
+   Devuelve null si el valor cae fuera del rango dibujado. */
+function binPos(v,bins,linear){
+  if(!bins.length || !Number.isFinite(v)) return null;
+  const at=(b)=> (b && Number.isFinite(b.v)) ? (linear ? b.v : Math.log(b.v)) : NaN;
+  const x=linear ? v : Math.log(v);
+  if(!Number.isFinite(x)) return null;
+  for(let i=0;i<bins.length-1;i++){
+    const a=at(bins[i]), b=at(bins[i+1]);
+    if(!Number.isFinite(a)||!Number.isFinite(b)) continue;
+    if(x>=Math.min(a,b) && x<=Math.max(a,b))
+      return i+0.5+((b===a)?0:(x-a)/(b-a));
+  }
+  return null;
 }
 
 /* escalas canónicas */
@@ -743,29 +1211,104 @@ function stopBins(vals,stops,labFn){
   cnt.forEach((n,i)=>{ if(n){ if(a<0)a=i; b=i; } });
   if(a<0) return [];
   const out=[];
-  for(let i=a;i<=b;i++) out.push({lab:labFn(stops[i]),n:cnt[i]});
+  for(let i=a;i<=b;i++) out.push({lab:labFn(stops[i]),n:cnt[i],v:stops[i]});
   return out;
+}
+/* EV: pasos enteros contiguos, escala lineal (puede ser negativa). */
+function evBins(vals){
+  const m=new Map();
+  let lo=Infinity,hi=-Infinity;
+  vals.forEach(v=>{
+    const k=Math.round(v);
+    if(k<-6||k>21) return;
+    m.set(k,(m.get(k)||0)+1);
+    if(k<lo) lo=k;
+    if(k>hi) hi=k;
+  });
+  if(!m.size) return [];
+  const out=[];
+  for(let k=lo;k<=hi;k++) out.push({lab:fmtN(k),n:m.get(k)||0,v:k});
+  return out;
+}
+/* Pasos enteros de diafragma para el mapa focal × diafragma. */
+const HEAT_N=[1,1.4,2,2.8,4,5.6,8,11,16,22,32];
+
+/* focales canónicas usadas, con su recuento */
+function focalMap(sub){
+  const fm=new Map();
+  sub.forEach(r=>{ if(r.eq){ const b=focalBin(r.eq); fm.set(b,(fm.get(b)||0)+1); } });
+  return fm;
+}
+/* El histograma de focal se repinta solo, sin tocar el resto, cuando se mueve
+   el deslizador de cobertura: la banda sombreada es lo único que cambia. */
+function paintFocal(){
+  const sub=subset();
+  const fm=focalMap(sub);
+  const fbins=[...fm.keys()].sort((a,b)=>a-b).map(mm=>({lab:fmtN(mm),n:fm.get(mm),v:mm}));
+  const f=covFocal();
+  drawBars($("#svFocal"),fbins,{h:300,color:"var(--g2)",tops:true,cap:"mm",
+    band:{lo:f*0.7,hi:f*1.4,color:"var(--g1)"}});
+}
+
+/* marcas de difracción sobre el histograma de diafragma */
+function aperMarks(sub){
+  const sel=$("#er-pitch").value;
+  if(sel==="off") return [];
+  let ps=[];
+  if(sel==="auto"){
+    const set=new Set();
+    sub.forEach(r=>{ const p=bodyPitch(r.body); if(p) set.add(p); });
+    ps=[...set].sort((a,b)=>a-b);
+  }else{
+    const v=parseFloat(sel);
+    if(v>0) ps=[v];
+  }
+  const out=[];
+  ps.forEach(p=>{
+    const nc=nCrit(p);
+    out.push({v:nc,lab:LBL("mkCrit")+" f/"+fmtN(nc,1),color:"var(--g1)"});
+    out.push({v:2*nc,lab:LBL("mkLim")+" f/"+fmtN(2*nc,1),color:"var(--g8)"});
+  });
+  return out;
+}
+/* marcas de conmutación de ganancia sobre el histograma de ISO */
+function isoMarks(sub){
+  const set=new Set();
+  sub.forEach(r=>{ const g=bodyGain(r.body); if(g) set.add(g); });
+  return [...set].sort((a,b)=>a-b)
+    .map(v=>({v:v,lab:LBL("mkGain")+" "+fmtN(v),color:"var(--g1)"}));
+}
+/* marca del umbral 1/f mediano sobre el histograma de velocidad */
+function shutMarks(sub){
+  const lims=[];
+  sub.forEach(r=>{ const s=shakeInfo(r); if(s) lims.push(s.lim); });
+  if(!lims.length) return [];
+  const m=medOf(lims);
+  return [{v:m,lab:LBL("mkShake")+" "+shutterLab(m),color:"var(--g1)"}];
 }
 
 function paintCharts(){
   const sub=subset();
 
-  /* focal equivalente */
-  const fm=new Map();
-  sub.forEach(r=>{ if(r.eq){ const b=focalBin(r.eq); fm.set(b,(fm.get(b)||0)+1); } });
-  const fbins=[...fm.keys()].sort((a,b)=>a-b).map(mm=>({lab:fmtN(mm),n:fm.get(mm)}));
-  drawBars($("#svFocal"),fbins,{h:300,color:"var(--g2)",tops:true,cap:"mm"});
+  paintFocal();
 
   /* diafragma, ISO, obturación */
   drawBars($("#svAper"),
     stopBins(sub.map(r=>r.fnum).filter(v=>v>0),AP_STOPS,v=>fmtN(v,v%1?1:0)),
-    {rot:true,color:"var(--g5)",cap:"f/"});
+    {rot:true,color:"var(--g5)",cap:"f/",marks:aperMarks(sub)});
   drawBars($("#svIso"),
     stopBins(sub.map(r=>r.iso).filter(v=>v>0),ISO_STOPS,v=>fmtN(v)),
-    {rot:true,color:"var(--g3)",cap:"ISO"});
+    {rot:true,color:"var(--g3)",cap:"ISO",marks:isoMarks(sub)});
   drawBars($("#svShut"),
     stopBins(sub.map(r=>r.tsec).filter(v=>v>0),SH_STOPS,shutterLab),
-    {rot:true,color:"var(--g7)"});
+    {rot:true,color:"var(--g7)",marks:shutMarks(sub)});
+
+  /* luz de la escena */
+  const evs=sub.map(r=>r.ev).filter(v=>v!=null);
+  drawBars($("#er-svEv"),evBins(evs),
+    {color:"var(--g9)",cap:"EV",linear:true,tops:true,
+     marks:LBL("evRefs").map(p=>({v:p[0],lab:p[1],color:"var(--g4)"}))});
+  $("#er-evNote").textContent=evs.length ? LBL("evNote")(evs.length,sub.length) : LBL("evNone");
 
   /* hora del día */
   const hh=new Array(24).fill(0);
@@ -809,6 +1352,308 @@ function paintCharts(){
   drawBars($("#svMonth"),mbins,{h:240,rot:mbins.length<=18,color:"var(--g8)"});
 }
 
+/* =====================================================================
+   Veredictos bajo los gráficos
+   ===================================================================== */
+function difStats(sub){
+  const sel=$("#er-pitch").value;
+  if(sel==="off") return null;
+  const fixed=(sel==="auto")?null:parseFloat(sel);
+  const m=new Map();
+  sub.forEach(r=>{
+    if(!(r.fnum>0)) return;
+    const p=(fixed!==null)?fixed:bodyPitch(r.body);
+    if(!(p>0)) return;
+    const k=r.body+" "+p;
+    let g=m.get(k);
+    if(!g){ g={body:r.body,p:p,n:0,over:0,over2:0}; m.set(k,g); }
+    g.n++;
+    const nc=nCrit(p);
+    if(r.fnum>nc+1e-9) g.over++;
+    if(r.fnum>2*nc+1e-9) g.over2++;
+  });
+  return [...m.values()].sort((a,b)=>b.n-a.n);
+}
+function paintDifNote(sub){
+  const el=$("#er-difNote"), st=difStats(sub);
+  if(st===null){ el.textContent=LBL("difOff"); return; }
+  if(!st.length){ el.textContent=LBL("difNone"); return; }
+  const worst=Math.max(...st.map(g=>100*g.over/g.n));
+  const html=st.map(g=>LBL("difLine")(esc(dispBody(g.body)),fmtN(nCrit(g.p),1),
+      fmtN(100*g.over/g.n,0),fmtN(2*nCrit(g.p),1),fmtN(100*g.over2/g.n,0),g.n)).join(" ");
+  el.innerHTML=html+" <b>"+esc(LBL("difVerd")(worst))+"</b> "+
+    '<a href="sensor.html#difraccion">'+esc(LBL("difLink"))+"</a>";
+}
+function gainStats(sub){
+  const m=new Map();
+  sub.forEach(r=>{
+    const gi=bodyGain(r.body);
+    if(!gi || !(r.iso>0) || r.ev==null || r.ev>=8) return;
+    let g=m.get(r.body);
+    if(!g){ g={body:r.body,iso:gi,n:0,below:0}; m.set(r.body,g); }
+    g.n++;
+    if(r.iso<gi) g.below++;
+  });
+  return [...m.values()].sort((a,b)=>b.n-a.n);
+}
+function paintGainNote(sub){
+  const el=$("#er-gainNote"), st=gainStats(sub);
+  if(!st.length){ el.textContent=LBL("gainNone"); return; }
+  const worst=Math.max(...st.map(g=>100*g.below/g.n));
+  const html=st.map(g=>LBL("gainLine")(esc(dispBody(g.body)),fmtN(g.iso),
+      fmtN(100*g.below/g.n,0),g.n)).join(" ");
+  el.innerHTML=html+" <b>"+esc(LBL("gainVerd")(worst))+"</b> "+
+    '<a href="sensor.html#ruido">'+esc(LBL("gainLink"))+"</a>";
+}
+function shakeStats(sub){
+  let n=0,under=0;
+  const lims=[];
+  sub.forEach(r=>{
+    const s=shakeInfo(r);
+    if(!s) return;
+    n++; lims.push(s.lim);
+    if(s.under) under++;
+  });
+  return n ? {n:n,under:under,pct:100*under/n,lim:medOf(lims)} : null;
+}
+function paintShakeNote(sub){
+  const el=$("#er-shakeNote"), st=shakeStats(sub);
+  if(!st){ el.textContent=LBL("shakeNone"); return; }
+  el.innerHTML=LBL("shakeLine")(fmtN(st.pct,0),st.n,shutterLab(st.lim))+
+    " <b>"+esc(LBL("shakeVerd")(st.pct))+"</b> "+
+    '<a href="programa-camara.html">'+esc(LBL("shakeLink"))+"</a>";
+}
+
+/* =====================================================================
+   Mapa focal × diafragma
+   ===================================================================== */
+function paintHeat(){
+  const el=$("#er-heat");
+  const sub=subset().filter(r=>r.eq>0 && r.fnum>0);
+  if(!sub.length){
+    el.innerHTML='<tbody><tr><td class="k">'+esc(LBL("nodata"))+'</td></tr></tbody>';
+    return;
+  }
+  const cell=new Map(), rowT=new Map(), colT=new Map();
+  const rowsSet=new Set(), colsSet=new Set();
+  sub.forEach(r=>{
+    const f=focalBin(r.eq), a=HEAT_N[snapIdx(r.fnum,HEAT_N)];
+    rowsSet.add(f); colsSet.add(a);
+    const k=f+"|"+a;
+    cell.set(k,(cell.get(k)||0)+1);
+    rowT.set(f,(rowT.get(f)||0)+1);
+    colT.set(a,(colT.get(a)||0)+1);
+  });
+  const rws=[...rowsSet].sort((a,b)=>a-b), cls=[...colsSet].sort((a,b)=>a-b);
+  const tot=sub.length;
+  const mx=Math.max(...[...cell.values()]);
+  let h='<thead><tr><th class="k">mm \\ f/</th>';
+  cls.forEach(a=>{ h+='<th>'+esc(fmtN(a,a%1?1:0))+'</th>'; });
+  h+='<th class="tot">%</th></tr></thead><tbody>';
+  rws.forEach(f=>{
+    h+='<tr><td class="k">'+esc(fmtN(f))+'</td>';
+    cls.forEach(a=>{
+      const n=cell.get(f+"|"+a)||0;
+      const s=n/mx;
+      const bg=n ? ' style="background:hsl(196 '+fmtN(28+34*s,0)+'% '+fmtN(96-30*s,0)+'%)"' : '';
+      h+='<td'+bg+' title="'+esc(fmtN(f)+" mm · f/"+fmtN(a,a%1?1:0)+" · "+fmtN(n)+" "+LBL("photos"))+'">'+
+         (n?fmtN(100*n/tot,1):"·")+'</td>';
+    });
+    h+='<td class="tot">'+fmtN(100*rowT.get(f)/tot,1)+'</td></tr>';
+  });
+  h+='<tr class="tot"><td class="k">%</td>';
+  cls.forEach(a=>{ h+='<td>'+fmtN(100*colT.get(a)/tot,1)+'</td>'; });
+  h+='<td>'+fmtN(100,0)+'</td></tr></tbody>';
+  el.innerHTML=h;
+}
+
+/* =====================================================================
+   Si solo llevaras una focal: cobertura
+   ===================================================================== */
+function covFocal(){
+  const el=$("#er-cov");
+  const t=(el?+el.value:500)/1000;
+  return Math.exp(Math.log(14)+t*(Math.log(200)-Math.log(14)));
+}
+function coverage(sub,f,lo,hi){
+  let n=0;
+  sub.forEach(r=>{ const q=r.eq/f; if(q>=lo && q<=hi) n++; });
+  return sub.length ? 100*n/sub.length : NaN;
+}
+/* Mejor focal única y mejor pareja, por fuerza bruta sobre las focales
+   canónicas que de hecho usas (una lista corta). */
+function bestKit(sub){
+  const fm=focalMap(sub);
+  const keys=[...fm.keys()].sort((a,b)=>a-b);
+  if(!keys.length) return null;
+  const covOf=(c)=>{ let s=0; keys.forEach(k=>{ const q=k/c; if(q>=0.7&&q<=1.4) s+=fm.get(k); }); return s; };
+  let one=keys[0], oneN=-1;
+  keys.forEach(c=>{ const n=covOf(c); if(n>oneN){ oneN=n; one=c; } });
+  let pa=keys[0], pb=keys[keys.length-1], pn=-1;
+  for(let i=0;i<keys.length;i++) for(let j=i+1;j<keys.length;j++){
+    let s=0;
+    keys.forEach(k=>{
+      const qa=k/keys[i], qb=k/keys[j];
+      if((qa>=0.7&&qa<=1.4)||(qb>=0.7&&qb<=1.4)) s+=fm.get(k);
+    });
+    if(s>pn){ pn=s; pa=keys[i]; pb=keys[j]; }
+  }
+  return {one:one, oneP:coverage(sub,one,0.7,1.4),
+          a:pa, b:pb, pairP:(keys.length>1 && pn>=0) ? 100*pn/sub.length : NaN};
+}
+function paintCov(){
+  const sub=subset().filter(r=>r.eq>0);
+  const f=covFocal();
+  $("#er-covF").textContent=fmtN(Math.round(f))+" mm";
+  if(!sub.length){
+    $("#er-covOut").textContent=LBL("nodata");
+    $("#er-covNote").textContent="";
+    return;
+  }
+  $("#er-covOut").textContent=LBL("covOut")(coverage(sub,f,0.85,1.15),coverage(sub,f,0.7,1.4));
+  const k=bestKit(sub);
+  if(!k){ $("#er-covNote").textContent=""; return; }
+  const pair=Number.isFinite(k.pairP) ? k.pairP : k.oneP;
+  $("#er-covNote").innerHTML=
+    LBL("covNote")(fmtN(k.one),fmtN(k.oneP,0),fmtN(k.a),fmtN(k.b),fmtN(pair,0))+
+    " <b>"+esc(LBL("covVerd")(k.oneP))+"</b>";
+}
+
+/* =====================================================================
+   Plena abertura: abertura máxima por objetivo
+   ===================================================================== */
+let WIDE=new Map();
+function buildWide(){
+  WIDE=new Map();
+  const mins=new Map();
+  ST.rows.forEach(r=>{
+    if(!r.lens || !(r.fnum>0)) return;
+    const c=mins.get(r.lens);
+    if(c==null || r.fnum<c) mins.set(r.lens,r.fnum);
+  });
+  const names=new Set();
+  ST.rows.forEach(r=>{ if(r.lens) names.add(r.lens); });
+  names.forEach(n=>{
+    /* «Summilux-M 1:1.4/35 ASPH.» → 1,4; en los zoom, el extremo luminoso */
+    const m=/1:\s*(\d+(?:[.,]\d+)?)/.exec(n);
+    let w=m ? parseFloat(m[1].replace(",",".")) : NaN;
+    if(!(w>=0.7 && w<=32)) w=NaN;
+    const obs=mins.get(n);
+    if(!Number.isFinite(w)) w=(obs!=null)?obs:NaN;
+    else if(obs!=null && obs<w) w=obs;      /* abriste más de lo que dice el nombre */
+    if(Number.isFinite(w)) WIDE.set(n,w);
+  });
+}
+function wideOf(lens){ const w=WIDE.get(lens); return (w>0)?w:null; }
+const THIRD=Math.pow(2,1/6);               /* un tercio de paso en N */
+
+/* =====================================================================
+   Periodos y tabla A frente a B
+   ===================================================================== */
+function periodKeys(){
+  const ys=new Set();
+  ST.rows.forEach(r=>{ if(r.date) ys.add(r.date.getFullYear()); });
+  return ["last12","prev12","all"].concat([...ys].sort((a,b)=>b-a).map(String));
+}
+function periodLabel(k){
+  if(k==="all") return LBL("perAll");
+  if(k==="last12") return LBL("perLast12");
+  if(k==="prev12") return LBL("perPrev12");
+  return k;
+}
+function buildPeriodOptions(){
+  const keys=periodKeys();
+  ["#er-perA","#er-perB"].forEach((sel,i)=>{
+    const el=$(sel), prev=el.value;
+    let h="";
+    keys.forEach(k=>{
+      const fixed=(k==="all"||k==="last12"||k==="prev12");
+      h+='<option value="'+esc(k)+'"'+
+         (fixed?' data-es="'+esc(DICT.es[k==="all"?"perAll":k==="last12"?"perLast12":"perPrev12"])+
+                '" data-en="'+esc(DICT.en[k==="all"?"perAll":k==="last12"?"perLast12":"perPrev12"])+'"':"")+
+         '>'+esc(fixed?periodLabel(k):k)+'</option>';
+    });
+    el.innerHTML=h;
+    const want=(prev && keys.indexOf(prev)>=0) ? prev : (i===0 ? "last12" : "prev12");
+    el.value=want;
+  });
+  relabelOptions();
+}
+function periodRows(key){
+  const rows=subset();
+  if(key==="all") return rows;
+  const ref=ST.ref;
+  if(key==="last12") return rows.filter(r=>r.date && ref-r.date.getTime()<=YEAR);
+  if(key==="prev12") return rows.filter(r=>r.date &&
+    ref-r.date.getTime()>YEAR && ref-r.date.getTime()<=2*YEAR);
+  const y=parseInt(key,10);
+  return Number.isFinite(y) ? rows.filter(r=>r.date && r.date.getFullYear()===y) : rows;
+}
+function periodStats(rows){
+  const s={n:rows.length};
+  s.focal=medOf(rows.map(r=>r.eq).filter(v=>v>0));
+  s.fnum=medOf(rows.map(r=>r.fnum).filter(v=>v>0));
+  s.tsec=medOf(rows.map(r=>r.tsec).filter(v=>v>0));
+  s.iso=medOf(rows.map(r=>r.iso).filter(v=>v>0));
+  s.ev=medOf(rows.map(r=>r.ev).filter(v=>v!=null));
+  const lm=new Map(); let lt=0;
+  rows.forEach(r=>{ if(r.lens){ lt++; lm.set(r.lens,(lm.get(r.lens)||0)+1); } });
+  let bk=null,bn=0;
+  lm.forEach((n,k)=>{ if(n>bn){ bn=n; bk=k; } });
+  s.lens=bk; s.lensP=lt ? 100*bn/lt : NaN;
+  let wn=0,wo=0;
+  rows.forEach(r=>{
+    const w=wideOf(r.lens);
+    if(w && r.fnum>0){ wn++; if(r.fnum<=w*THIRD+1e-9) wo++; }
+  });
+  s.wideP=wn ? 100*wo/wn : NaN;
+  const sh=shakeStats(rows);
+  s.shakeP=sh ? sh.pct : NaN;
+  return s;
+}
+/* medio paso, o diez puntos de cuota, es lo que marcamos como cambio */
+function bigDiff(kind,a,b){
+  if(!Number.isFinite(a)||!Number.isFinite(b)) return false;
+  if(kind==="pct") return Math.abs(a-b)>=10;
+  if(kind==="ev") return Math.abs(a-b)>=0.5;
+  if(kind==="n") return Math.abs(2*Math.log2(a/b))>=0.5;   /* un paso de N es ×√2 */
+  if(kind==="log") return Math.abs(Math.log2(a/b))>=0.5;
+  return false;
+}
+function paintAB(){
+  const ka=$("#er-perA").value, kb=$("#er-perB").value;
+  const A=periodRows(ka), B=periodRows(kb);
+  const sa=periodStats(A), sb=periodStats(B);
+  const L=LBL("abRows");
+  $("#er-abHead").innerHTML='<tr><th></th>'+
+    '<th class="num"><span class="ab-a">A</span>'+esc(periodLabel(ka))+'</th>'+
+    '<th class="num"><span class="ab-b">B</span>'+esc(periodLabel(kb))+'</th></tr>';
+  const nn=(v,d,suf)=>Number.isFinite(v) ? fmtN(v,d||0)+(suf||"") : "—";
+  const rows=[
+    [L[0],"log",sa.n,sb.n,nn(sa.n),nn(sb.n)],
+    [L[1],"log",sa.focal,sb.focal,nn(sa.focal,0," mm"),nn(sb.focal,0," mm")],
+    [L[2],"n",sa.fnum,sb.fnum,nn(sa.fnum,1),nn(sb.fnum,1)],
+    [L[3],"log",sa.tsec,sb.tsec,
+      Number.isFinite(sa.tsec)?shutterLab(sa.tsec):"—",
+      Number.isFinite(sb.tsec)?shutterLab(sb.tsec):"—"],
+    [L[4],"log",sa.iso,sb.iso,nn(sa.iso),nn(sb.iso)],
+    [L[5],"ev",sa.ev,sb.ev,nn(sa.ev,1),nn(sb.ev,1)],
+    [L[6],null,null,null,
+      sa.lens?esc(sa.lens)+" · "+nn(sa.lensP,0," %"):"—",
+      sb.lens?esc(sb.lens)+" · "+nn(sb.lensP,0," %"):"—",
+      sa.lens!==sb.lens],
+    [L[7],"pct",sa.wideP,sb.wideP,nn(sa.wideP,0," %"),nn(sb.wideP,0," %")],
+    [L[8],"pct",sa.shakeP,sb.shakeP,nn(sa.shakeP,0," %"),nn(sb.shakeP,0," %")]
+  ];
+  $("#er-ab").innerHTML=rows.map(r=>{
+    const hot=(r[1]===null) ? !!r[6] : bigDiff(r[1],r[2],r[3]);
+    const c=hot?' class="dif"':"";
+    return '<tr><th>'+esc(r[0])+'</th><td'+c+'>'+r[4]+'</td><td'+c+'>'+r[5]+'</td></tr>';
+  }).join("");
+  if(!A.length && !B.length)
+    $("#er-ab").innerHTML='<tr><th>'+esc(LBL("abNone"))+'</th><td></td><td></td></tr>';
+}
+
 /* ---------- tarjetas ---------- */
 function paintCards(){
   const sub=subset();
@@ -846,50 +1691,238 @@ function paintCards(){
   }else{
     $("#cConc").textContent="—"; $("#cConcLens").textContent="—";
   }
+
+  /* luz: EV mediana y mitad central */
+  const evs=sub.map(r=>r.ev).filter(v=>v!=null);
+  if(evs.length){
+    $("#er-cEV").textContent="EV "+fmtN(medOf(evs),1);
+    $("#er-cEVq").textContent=fmtN(quart(evs,0.25),1)+" a "+fmtN(quart(evs,0.75),1);
+  }else{
+    $("#er-cEV").textContent="—"; $("#er-cEVq").textContent="—";
+  }
+
+  /* plena abertura del objetivo más luminoso con peso suficiente */
+  const w=wideCard(sub);
+  if(w){
+    $("#er-cWide").textContent=fmtN(w.pct,0)+" %";
+    $("#er-cWideLens").textContent=w.lens+" (f/"+fmtN(w.w,w.w%1?1:0)+")";
+  }else{
+    $("#er-cWide").textContent=LBL("wideNone");
+    $("#er-cWideLens").textContent=LBL("wideNoLens");
+  }
+
+  /* el objetivo dormido */
+  const s=sleepCard();
+  if(s){
+    $("#er-cSleep").textContent=s.lens;
+    $("#er-cSleepSub").textContent=LBL("sleepSub")(s.n,s.months,s.pct)+
+      ((s.months>12 && s.pct<5) ? LBL("sleepSell") : "");
+  }else{
+    $("#er-cSleep").textContent="—";
+    $("#er-cSleepSub").textContent=LBL("sleepNone");
+  }
+}
+
+/* El objetivo más luminoso con al menos el 3 % de las fotos del subconjunto:
+   el que de verdad se compró por su abertura. */
+function wideCard(sub){
+  const m=new Map();
+  sub.forEach(r=>{
+    if(!r.lens || !(r.fnum>0)) return;
+    const w=wideOf(r.lens);
+    if(!w) return;
+    let g=m.get(r.lens);
+    if(!g){ g={lens:r.lens,w:w,n:0,open:0}; m.set(r.lens,g); }
+    g.n++;
+    if(r.fnum<=w*THIRD+1e-9) g.open++;
+  });
+  const tot=sub.length;
+  const cand=[...m.values()].filter(g=>g.n>=Math.max(5,0.03*tot));
+  if(!cand.length) return null;
+  cand.sort((a,b)=> a.w===b.w ? b.n-a.n : a.w-b.w);
+  const g=cand[0];
+  return {lens:g.lens,w:g.w,pct:100*g.open/g.n,n:g.n};
+}
+/* El objetivo con más meses sin usar (sobre el archivo entero, no el filtro:
+   un objetivo dormido no aparece en el subconjunto que lo excluye). */
+function sleepCard(){
+  const m=new Map();
+  ST.rows.forEach(r=>{
+    if(!r.lens) return;
+    let g=m.get(r.lens);
+    if(!g){ g={lens:r.lens,n:0,last:null}; m.set(r.lens,g); }
+    g.n++;
+    if(r.date && (!g.last || r.date>g.last)) g.last=r.date;
+  });
+  const tot=ST.rows.length;
+  let best=null;
+  m.forEach(g=>{
+    if(g.n<3 || !g.last) return;
+    const months=(ST.ref-g.last.getTime())/(YEAR/12);
+    if(months<6) return;
+    if(!best || months>best.months)
+      best={lens:g.lens,n:g.n,months:Math.round(months),pct:100*g.n/tot};
+  });
+  return best;
 }
 
 /* ---------- tablas ---------- */
 function groupRows(kind){
-  const m=new Map();
+  const m=new Map(), ref=ST.ref;
   ST.rows.forEach(r=>{
     const k=(kind==="body")?r.body:r.lens;
     let g=m.get(k);
-    if(!g){ g={n:0,eqs:[],isos:[]}; m.set(k,g); }
+    if(!g){
+      g={n:0,eqs:[],isos:[],fns:[],ts:[],evs:[],
+         vert:0,vertN:0,fl:0,flN:0,shU:0,shN:0,wo:0,w1:0,woN:0,
+         dmin:null,dmax:null,last12:0};
+      m.set(k,g);
+    }
     g.n++;
     if(r.eq>0) g.eqs.push(r.eq);
     if(r.iso>0) g.isos.push(r.iso);
+    if(r.fnum>0) g.fns.push(r.fnum);
+    if(r.tsec>0) g.ts.push(r.tsec);
+    if(r.ev!=null) g.evs.push(r.ev);
+    if(r.vert!==null){ g.vertN++; if(r.vert) g.vert++; }
+    if(r.flash!==null){ g.flN++; if(r.flash) g.fl++; }
+    const s=shakeInfo(r);
+    if(s){ g.shN++; if(s.under) g.shU++; }
+    const w=wideOf(r.lens);
+    if(w && r.fnum>0){
+      g.woN++;
+      if(r.fnum<=w*THIRD+1e-9) g.wo++;
+      if(r.fnum<=w*Math.SQRT2+1e-9) g.w1++;
+    }
+    if(r.date){
+      if(!g.dmin||r.date<g.dmin) g.dmin=r.date;
+      if(!g.dmax||r.date>g.dmax) g.dmax=r.date;
+      if(ref-r.date.getTime()<=YEAR) g.last12++;
+    }
   });
   return [...m.entries()].sort((a,b)=>b[1].n-a[1].n);
 }
+function fmtMon(d){
+  return d ? d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0") : "—";
+}
+function pctCell(a,b){ return b ? fmtN(100*a/b,0) : "—"; }
 function paintTable(kind,tbodyId){
   const rows=groupRows(kind), tot=ST.rows.length;
-  const f=ST.filter;
   let out="";
   rows.forEach(pair=>{
     const key=pair[0], g=pair[1];
-    const on=!!(f && f.kind===kind && f.key===key);
+    const on=(ST.filter[kind]===key);
     const name=(kind==="body")?dispBody(key):dispLens(key);
-    const eqM=g.eqs.length ? fmtN(mean(g.eqs),1) : "—";
-    const isoM=g.isos.length ? fmtN(Math.round(median(g.isos.slice().sort((a,b)=>a-b)))) : "—";
+    const eqM=g.eqs.length ? fmtN(medOf(g.eqs),0) : "—";
+    const nM=g.fns.length ? fmtN(medOf(g.fns),1) : "—";
+    const tM=g.ts.length ? shutterLab(medOf(g.ts)) : "—";
+    const isoM=g.isos.length ? fmtN(Math.round(medOf(g.isos))) : "—";
+    const evM=g.evs.length ? fmtN(medOf(g.evs),1) : "—";
+    let cells;
+    if(kind==="body"){
+      cells='<td>'+eqM+'</td><td>'+nM+'</td><td>'+tM+'</td><td>'+isoM+'</td>'+
+            '<td>'+evM+'</td><td>'+pctCell(g.shU,g.shN)+'</td>'+
+            '<td>'+pctCell(g.vert,g.vertN)+'</td><td>'+pctCell(g.fl,g.flN)+'</td>';
+    }else{
+      const w=wideOf(key);
+      cells='<td>'+eqM+'</td><td>'+nM+'</td>'+
+            '<td>'+(w?fmtN(w,w%1?1:0):"—")+'</td>'+
+            '<td>'+pctCell(g.wo,g.woN)+'</td><td>'+pctCell(g.w1,g.woN)+'</td>'+
+            '<td>'+tM+'</td><td>'+isoM+'</td><td>'+pctCell(g.shU,g.shN)+'</td>';
+    }
     out+='<tr data-k="'+esc(key)+'"'+(on?' class="on"':'')+'>'+
       '<td>'+esc(name)+'</td>'+
       '<td>'+fmtN(g.n)+'</td>'+
       '<td>'+fmtN(100*g.n/tot,1)+'</td>'+
-      '<td>'+eqM+'</td>'+
-      '<td>'+isoM+'</td></tr>';
+      cells+
+      '<td>'+fmtMon(g.dmin)+'</td><td>'+fmtMon(g.dmax)+'</td>'+
+      '<td>'+fmtN(g.last12)+'</td></tr>';
   });
   document.getElementById(tbodyId).innerHTML=out;
 }
 function paintChip(){
-  const f=ST.filter;
-  $("#chipRow").hidden=!f;
-  if(f){
-    const name=(f.kind==="body")?dispBody(f.key):dispLens(f.key);
-    $("#chip").textContent=LBL("filterPre")+name+LBL("filterPost");
-  }
+  const on=hasFilter();
+  $("#chipRow").hidden=!on;
+  if(on) $("#chip").textContent=LBL("filterPre")+filterName()+LBL("filterPost");
 }
+
+/* ---------- veredicto en prosa ---------- */
+function paintVerdict(){
+  const el=$("#er-verdict"), sub=subset();
+  if(!sub.length){ el.hidden=true; el.innerHTML=""; return; }
+  const P=[];
+
+  /* costumbre: focal dominante, N mediana, EV y horas */
+  const fm=focalMap(sub);
+  let topF=null,topFN=0,fTot=0;
+  fm.forEach((n,k)=>{ fTot+=n; if(n>topFN){ topFN=n; topF=k; } });
+  const fns=sub.map(r=>r.fnum).filter(v=>v>0);
+  const evs=sub.map(r=>r.ev).filter(v=>v!=null);
+  const hrs=sub.map(r=>r.date).filter(Boolean).map(d=>d.getHours());
+  if(topF!==null && fns.length && evs.length && hrs.length){
+    P.push(LBL("vHabit")(fmtN(topF),fmtN(100*topFN/fTot,0),fmtN(medOf(fns),1),
+      fmtN(quart(evs,0.25),0),fmtN(quart(evs,0.75),0),
+      fmtN(Math.round(quart(hrs,0.25)))+" h",fmtN(Math.round(quart(hrs,0.75)))+" h"));
+  }
+  /* concentración en un objetivo */
+  const lm=new Map(); let lTot=0;
+  sub.forEach(r=>{ if(r.lens){ lTot++; lm.set(r.lens,(lm.get(r.lens)||0)+1); } });
+  let topL=null,topLN=0;
+  lm.forEach((n,k)=>{ if(n>topLN){ topLN=n; topL=k; } });
+  if(topL!==null) P.push(LBL("vConc")(fmtN(100*topLN/lTot,0),esc(topL)));
+
+  /* plena abertura */
+  const w=wideCard(sub);
+  if(w) P.push(LBL("vWide")(esc(w.lens),fmtN(w.w,w.w%1?1:0),fmtN(w.pct,0))+
+    "<b>"+esc(LBL("wideVerd")(w.pct))+"</b>.");
+
+  /* difracción, por cuerpo */
+  const dif=difStats(sub);
+  if(dif && dif.length){
+    const g=dif[0];
+    P.push(LBL("difLine")(esc(dispBody(g.body)),fmtN(nCrit(g.p),1),fmtN(100*g.over/g.n,0),
+      fmtN(2*nCrit(g.p),1),fmtN(100*g.over2/g.n,0),g.n)+
+      " <b>"+esc(LBL("difVerd")(100*g.over/g.n))+"</b>");
+  }
+  /* trepidación */
+  const sh=shakeStats(sub);
+  if(sh) P.push(LBL("shakeLine")(fmtN(sh.pct,0),sh.n,shutterLab(sh.lim))+
+    " <b>"+esc(LBL("shakeVerd")(sh.pct))+"</b>");
+  /* ganancia dual */
+  const gs=gainStats(sub);
+  if(gs.length) P.push(LBL("gainLine")(esc(dispBody(gs[0].body)),fmtN(gs[0].iso),
+    fmtN(100*gs[0].below/gs[0].n,0),gs[0].n)+
+    " <b>"+esc(LBL("gainVerd")(100*gs[0].below/gs[0].n))+"</b>");
+  /* cobertura con una sola focal */
+  const kit=bestKit(sub.filter(r=>r.eq>0));
+  if(kit) P.push(LBL("covNote")(fmtN(kit.one),fmtN(kit.oneP,0),fmtN(kit.a),fmtN(kit.b),
+    fmtN(Number.isFinite(kit.pairP)?kit.pairP:kit.oneP,0))+
+    " <b>"+esc(LBL("covVerd")(kit.oneP))+"</b>");
+  /* objetivo dormido */
+  const sl=sleepCard();
+  if(sl) P.push(LBL("vSleep")(esc(sl.lens),sl.months));
+  /* aviso de filtro */
+  if(hasFilter()) P.push("<i>"+esc(LBL("vFilter")(filterName()))+"</i>");
+
+  el.innerHTML="<h3>"+esc(LBL("vTitle"))+"</h3>"+P.map(s=>"<p>"+s+"</p>").join("");
+  el.hidden=false;
+}
+
+/* Reetiqueta las <option> generadas, que no llevan bloques data-lang. */
+function relabelOptions(){
+  const l=(document.documentElement.lang==="en")?"en":"es";
+  [].forEach.call(document.querySelectorAll("option[data-"+l+"]"),function(o){
+    o.textContent=o.getAttribute("data-"+l);
+  });
+}
+
 function paintAll(){
+  ST.ref=refNow();
+  buildWide();
+  relabelOptions();
   paintCards(); paintCharts();
+  paintDifNote(subset()); paintGainNote(subset()); paintShakeNote(subset());
+  paintHeat(); paintCov(); paintAB(); paintVerdict();
   paintTable("body","tbBody"); paintTable("lens","tbLens");
   paintChip(); paintSummary();
 }
@@ -906,12 +1939,14 @@ function csvDate(d){
   return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+" "+
          p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds());
 }
+function csvBit(v){ return (v===null||v===undefined) ? "" : (v?"1":"0"); }
+/* Las columnas nuevas van al final, para no romper importaciones antiguas. */
 function exportCSV(){
-  const lines=["name,datetime,body,lens,focal_mm,focal35_mm,f_number,exposure_s,iso"];
+  const lines=["name,datetime,body,lens,focal_mm,focal35_mm,f_number,exposure_s,iso,vertical,flash"];
   ST.rows.forEach(r=>{
     lines.push([csvQ(r.name),csvDate(r.date),csvQ(r.body),csvQ(r.lens),
       csvNum(r.focal),csvNum(r.focal35),csvNum(r.fnum),csvNum(r.tsec),
-      csvNum(r.iso)].join(","));
+      csvNum(r.iso),csvBit(r.vert),csvBit(r.flash)].join(","));
   });
   const blob=new Blob([lines.join("\n")+"\n"],{type:"text/csv;charset=utf-8"});
   const a=document.createElement("a");
@@ -921,16 +1956,98 @@ function exportCSV(){
   setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },400);
 }
 
+/* ---------- importación del CSV ya exportado ---------- */
+function parseCSV(text){
+  const out=[]; let row=[], cur="", q=false, i=0;
+  while(i<text.length){
+    const c=text[i];
+    if(q){
+      if(c==='"'){
+        if(text[i+1]==='"'){ cur+='"'; i+=2; continue; }
+        q=false; i++; continue;
+      }
+      cur+=c; i++; continue;
+    }
+    if(c==='"'){ q=true; i++; continue; }
+    if(c===','){ row.push(cur); cur=""; i++; continue; }
+    if(c==='\n'){ row.push(cur); out.push(row); row=[]; cur=""; i++; continue; }
+    if(c==='\r'){ i++; continue; }
+    cur+=c; i++;
+  }
+  if(cur.length||row.length){ row.push(cur); out.push(row); }
+  return out;
+}
+function parseCsvDate(s){
+  const m=/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/.exec((s||"").trim());
+  if(!m) return null;
+  const d=new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+m[6]);
+  return isNaN(d.getTime()) ? null : d;
+}
+function rowsFromCSV(text){
+  const t=parseCSV(text);
+  if(!t.length) return null;
+  const head=t[0].map(s=>s.trim().toLowerCase());
+  const ix=(n)=>head.indexOf(n);
+  const iName=ix("name"), iDt=ix("datetime");
+  if(iName<0 || iDt<0) return null;                 /* no es nuestro CSV */
+  const iB=ix("body"), iL=ix("lens"), iF=ix("focal_mm"), iF35=ix("focal35_mm"),
+        iN=ix("f_number"), iT=ix("exposure_s"), iI=ix("iso"),
+        iV=ix("vertical"), iFl=ix("flash");
+  const out=[];
+  for(let k=1;k<t.length;k++){
+    const c=t[k];
+    if(c.length<2) continue;
+    const num=(j)=>{ if(j<0||j>=c.length) return null; const v=parseFloat(c[j]); return (Number.isFinite(v)&&v>0)?v:null; };
+    const txt=(j)=>(j>=0&&j<c.length)?(c[j]||""):"";
+    const bit=(j)=>{ if(j<0||j>=c.length) return null; const s=(c[j]||"").trim().toLowerCase();
+                     return s==="" ? null : (s==="1"||s==="true"); };
+    const focal=num(iF), f35=num(iF35);
+    const r={ name:txt(iName), date:parseCsvDate(txt(iDt)),
+      body:txt(iB).trim(), lens:txt(iL).trim(),
+      focal:focal, focal35:f35, eq:(f35||focal||null),
+      fnum:num(iN), tsec:num(iT), iso:num(iI), vert:bit(iV), flash:bit(iFl) };
+    r.ev=evOf(r);
+    if(r.name||r.date) out.push(r);
+  }
+  return out;
+}
+async function importCSV(file){
+  let txt="";
+  try{ txt=await file.text(); }catch(err){ txt=""; }
+  const rows=txt ? rowsFromCSV(txt) : null;
+  if(!rows || !rows.length){ $("#sumLine").textContent=LBL("csvBad"); return; }
+  const dup=mergeRows(rows);
+  mergeCounts({ok:rows.length-dup,noexif:0,bad:0,ign:0,dup:dup});
+  afterLoad();
+  $("#sumLine").textContent=LBL("csvOk")(rows.length-dup,dup);
+}
+
 /* =====================================================================
    Eventos
    ===================================================================== */
 $("#pickDir").addEventListener("change",e=>{ processFiles([...e.target.files]); e.target.value=""; });
 $("#pickFiles").addEventListener("change",e=>{ processFiles([...e.target.files]); e.target.value=""; });
-$("#exportBtn").addEventListener("click",exportCSV);
-$("#chip").addEventListener("click",()=>{ ST.filter=null; paintAll(); });
-$("#chip").addEventListener("keydown",e=>{
-  if(e.key==="Enter"||e.key===" "){ e.preventDefault(); ST.filter=null; paintAll(); }
+$("#er-pickCsv").addEventListener("change",e=>{
+  const f=e.target.files && e.target.files[0];
+  e.target.value="";
+  if(f) importCSV(f);
 });
+$("#exportBtn").addEventListener("click",exportCSV);
+function clearFilter(){ ST.filter={body:null,lens:null}; paintAll(); }
+$("#chip").addEventListener("click",clearFilter);
+$("#chip").addEventListener("keydown",e=>{
+  if(e.key==="Enter"||e.key===" "){ e.preventDefault(); clearFilter(); }
+});
+$("#er-pitch").addEventListener("change",()=>{
+  const sub=subset();
+  drawBars($("#svAper"),
+    stopBins(sub.map(r=>r.fnum).filter(v=>v>0),AP_STOPS,v=>fmtN(v,v%1?1:0)),
+    {rot:true,color:"var(--g5)",cap:"f/",marks:aperMarks(sub)});
+  paintDifNote(sub); paintVerdict();
+});
+$("#er-cov").addEventListener("input",()=>{ paintFocal(); paintCov(); });
+$("#er-perA").addEventListener("change",paintAB);
+$("#er-perB").addEventListener("change",paintAB);
 ["tbBody","tbLens"].forEach(id=>{
   document.getElementById(id).addEventListener("click",e=>{
     const tr=e.target.closest("tr[data-k]");
@@ -984,9 +2101,11 @@ window.addEventListener("drop",e=>{
    Protegido: en el arranque aún no hay datos y no hay nada que repintar.
    El estado (filas y filtro) se conserva tal cual. */
 window.onLangChange=function(){
+  relabelOptions();
   if(ST.counts) paintSummary();
   if(ST.rows.length) paintAll();
 };
+relabelOptions();
 </script>
 
 <script>
