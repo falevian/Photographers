@@ -51,7 +51,7 @@
   *{box-sizing:border-box}
   html,body{height:100%;margin:0}
   body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow:hidden;-webkit-font-smoothing:antialiased}
-  .app{display:grid;grid-template-columns:1fr var(--panelw);grid-template-rows:auto auto 1fr;height:100vh;height:100dvh}
+  .app{display:grid;grid-template-columns:1fr var(--panelw);grid-template-rows:auto auto auto 1fr;height:100vh;height:100dvh}
   header{grid-column:1 / -1;display:flex;align-items:baseline;gap:14px;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--bg2);flex-wrap:wrap}
   header h1{font-family:var(--disp);font-weight:600;font-size:18px;letter-spacing:-.01em;color:var(--head);margin:0}
   header .sub{font-family:var(--mono);font-size:12px;color:var(--faint)}
@@ -65,7 +65,28 @@
   .strip .st .v{font-family:var(--mono);font-size:13.5px;color:var(--head);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .strip .st .v em{font-style:normal;color:var(--amber)}
 
-  .stage{grid-column:1;grid-row:3;position:relative;overflow:auto;background:radial-gradient(1200px 800px at 55% 30%, #0e1219 0%, var(--bg) 70%)}
+  .strip .st .s{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  /* franja del reparto de saltos */
+  .dist{grid-column:1 / -1;border-bottom:1px solid var(--line);background:var(--bg2)}
+  .dist>summary{list-style:none;cursor:pointer;padding:7px 18px;font-family:var(--mono);font-size:11px;
+                letter-spacing:.05em;text-transform:uppercase;color:var(--muted);display:flex;gap:8px;align-items:center}
+  .dist>summary::-webkit-details-marker{display:none}
+  .dist>summary::before{content:"▸";color:var(--teal);font-size:11px}
+  .dist[open]>summary::before{content:"▾"}
+  .dist>summary:hover{color:var(--text)}
+  .distbody{display:flex;gap:16px;align-items:center;padding:0 18px 10px;flex-wrap:wrap}
+  .distbody svg{flex:1 1 480px;max-width:660px;height:auto;min-width:280px}
+  .distverdict{flex:1 1 240px;margin:0;font-size:11.5px;line-height:1.55;color:var(--muted)}
+  .distverdict em{font-style:normal;color:var(--amber)}
+  .hbar{fill:#2b3441}
+  .hsub{fill:none;stroke:var(--amber);stroke-width:1.2px;stroke-linejoin:round}
+  .haxis{font-family:var(--mono);font-size:9px;fill:var(--faint)}
+  .hrule{stroke:#232b36;stroke-width:1px}
+  .hmed{stroke:var(--amber);stroke-width:1px;stroke-dasharray:3 3}
+  .hlim{stroke:var(--faint);stroke-width:1px;stroke-dasharray:2 4}
+
+  .stage{grid-column:1;grid-row:4;position:relative;overflow:auto;background:radial-gradient(1200px 800px at 55% 30%, #0e1219 0%, var(--bg) 70%)}
   svg.tl{display:block}
   .pt{stroke:#0a0c10;stroke-width:1px;cursor:pointer}
   .pt.focus{stroke:#fff;stroke-width:1.8px}
@@ -81,7 +102,7 @@
   .lanesep{stroke:#121822;stroke-width:1px}
 
   /* panel */
-  .panel{grid-column:2;grid-row:3;background:var(--panel);border-left:1px solid var(--line);overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+  .panel{grid-column:2;grid-row:4;background:var(--panel);border-left:1px solid var(--line);overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
   .card{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:12px}
   .card h3{font-family:var(--disp);font-weight:500;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--teal);margin:0 0 10px}
   .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
@@ -113,8 +134,8 @@
   #info .lst.up h4{color:var(--violet)} #info .lst.down h4{color:var(--teal)}
   #info .chip{display:inline-block;font-size:11.5px;font-family:var(--mono);background:var(--bg2);border:1px solid var(--line2);border-radius:6px;padding:3px 8px;margin:0 5px 5px 0;cursor:pointer;color:var(--text)}
   #info .chip:hover{border-color:var(--teal);color:var(--teal)}
-  #info .ext{display:flex;gap:8px;margin-top:12px}
-  #info .ext a{font-size:12px;flex:1;text-align:center;padding:8px;border-radius:8px;border:1px solid var(--line2);color:var(--muted);text-decoration:none}
+  #info .ext{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  #info .ext a{font-size:12px;flex:1 1 40%;min-width:88px;text-align:center;padding:8px;border-radius:8px;border:1px solid var(--line2);color:var(--muted);text-decoration:none}
   #info .ext a:hover{color:var(--text);border-color:var(--muted)}
   .hint{font-size:11px;color:var(--faint);line-height:1.5}
 
@@ -133,8 +154,8 @@
 
   /* responsive */
   @media(max-width:820px){
-    .app{grid-template-columns:1fr;grid-template-rows:auto auto 1fr}
-    .stage{grid-column:1}
+    .app{grid-template-columns:1fr;grid-template-rows:auto auto auto 1fr}
+    .stage{grid-column:1;grid-row:4}
     .panel{position:fixed;left:0;right:0;bottom:0;top:auto;max-height:72vh;grid-column:1;grid-row:auto;
            border-left:none;border-top:1px solid var(--line2);border-radius:16px 16px 0 0;
            transform:translateY(calc(100% - 0px));transition:transform .25s ease;z-index:40;box-shadow:0 -12px 40px rgba(0,0,0,.5)}
@@ -145,6 +166,56 @@
     header .byline{display:none}
     .strip .st{min-width:140px}
   }
+
+  /* leyenda-filtro de movimientos */
+  .movchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+  .mchip{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-family:var(--mono);
+         background:var(--bg2);border:1px solid var(--line2);border-radius:20px;padding:3px 8px 3px 6px;
+         cursor:pointer;color:var(--text);line-height:1.3;transition:opacity .12s}
+  .mchip .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+  .mchip .ct{color:var(--faint)}
+  .mchip.off{opacity:.34;text-decoration:line-through}
+  .mchip:hover{border-color:var(--muted)}
+
+  /* botones segmentados (modo de linaje, orden de tabla) */
+  .seg{display:flex;border:1px solid var(--line2);border-radius:8px;overflow:hidden;margin-top:8px}
+  .seg button{flex:1;font-family:var(--sans);font-size:11px;background:var(--bg2);border:0;color:var(--muted);
+              padding:7px 4px;cursor:pointer;transition:background .12s,color .12s}
+  .seg button+button{border-left:1px solid var(--line2)}
+  .seg button:hover{color:var(--text)}
+  .seg button.on{background:rgba(63,202,176,.14);color:var(--teal)}
+
+  /* tabla de movimientos */
+  .tabwrap{overflow-x:auto;margin:0 -9px}
+  table.movtab{border-collapse:collapse;font-family:var(--mono);font-size:10px;width:100%}
+  table.movtab th{color:var(--muted);font-weight:500;text-align:right;padding:3px 2px;cursor:pointer;
+                  white-space:nowrap;border-bottom:1px solid var(--line2);user-select:none}
+  table.movtab th:first-child{text-align:left}
+  table.movtab th.on{color:var(--teal)}
+  table.movtab td{padding:3px 2px;text-align:right;white-space:nowrap;border-bottom:1px solid #151a22;color:var(--text)}
+  table.movtab td:first-child{text-align:left;max-width:96px;overflow:hidden;text-overflow:ellipsis}
+  table.movtab tr{cursor:pointer}
+  table.movtab tbody tr:hover td{background:rgba(63,202,176,.07)}
+  table.movtab tr.iso td{background:rgba(63,202,176,.13)}
+  table.movtab .dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px;vertical-align:middle}
+  table.movtab .agg{color:var(--faint)}
+  .exp{color:var(--amber)}
+  .foot{font-size:11px;color:var(--muted);line-height:1.5;margin:9px 0 0}
+  .foot em{font-style:normal;color:var(--amber)}
+
+  /* mis referentes */
+  .star{float:right;font-size:16px;line-height:1;background:none;border:0;cursor:pointer;color:var(--faint);padding:0 0 0 8px}
+  .star.on{color:var(--amber)}
+  .refchip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-family:var(--mono);
+           background:var(--bg2);border:1px solid var(--line2);border-radius:6px;padding:3px 6px 3px 8px;margin:0 5px 5px 0;color:var(--text)}
+  .refchip b{font-weight:400;cursor:pointer}
+  .refchip b:hover{color:var(--teal)}
+  .refchip .x{cursor:pointer;color:var(--faint);font-size:13px;line-height:1}
+  .refchip .x:hover{color:var(--red)}
+  .pt.ref{stroke:#fff;stroke-width:1.6px}
+  .pt.root{stroke:var(--amber);stroke-width:2px}
+  #refio{display:block;width:100%;margin-top:8px;background:var(--bg2);border:1px solid var(--line2);border-radius:8px;
+         color:var(--text);font-family:var(--mono);font-size:11px;padding:7px;min-height:56px;resize:vertical}
 
   /* ---------- conmutador de idioma ---------- */
   html[lang="es"] [data-lang="en"]{display:none!important}
@@ -187,6 +258,19 @@
 
   <div class="strip" id="strip"></div>
 
+  <details class="dist" id="dist" open>
+    <summary>
+      <span data-lang="es">Reparto del salto de influencia · cuánto tarda en llegar</span>
+      <span data-lang="en">Distribution of the influence jump · how long it takes to arrive</span>
+    </summary>
+    <div class="distbody">
+      <svg id="hist" viewBox="0 0 620 140" preserveAspectRatio="xMidYMid meet" role="img"
+           data-aria-es="Histograma del salto de influencia en años"
+           data-aria-en="Histogram of the influence jump in years"></svg>
+      <p class="distverdict" id="histverdict"></p>
+    </div>
+  </details>
+
   <div class="stage" id="stage">
     <svg class="tl" id="tl" role="img" aria-label="Cronología / Timeline"></svg>
   </div>
@@ -204,12 +288,52 @@
       <label class="fld" id="yrlab"><span data-lang="es">Rango de años (por décadas)</span><span data-lang="en">Year range (by decade)</span></label>
       <div class="rng"><input id="ymin" type="range" step="10"><span id="yminv"></span></div>
       <div class="rng"><input id="ymax" type="range" step="10"><span id="ymaxv"></span></div>
+
+      <label class="fld"><span data-lang="es">Movimientos (pincha un carril para ocultarlo)</span><span data-lang="en">Movements (click a lane to hide it)</span></label>
+      <div class="movchips" id="movchips"></div>
+
+      <label class="fld"><span data-lang="es">Al seleccionar un autor, dibujar…</span><span data-lang="en">When an author is selected, draw…</span></label>
+      <div class="seg" id="modeseg">
+        <button type="button" data-mode="one"><span data-lang="es">1 salto</span><span data-lang="en">1 step</span></button>
+        <button type="button" data-mode="line"><span data-lang="es">Linaje</span><span data-lang="en">Lineage</span></button>
+        <button type="button" data-mode="root"><span data-lang="es">Raíces</span><span data-lang="en">Roots</span></button>
+      </div>
+
       <div class="row" style="margin-top:10px">
         <button class="btn" id="allbtn" data-title-es="Quitar filtros y selección" data-title-en="Clear filters and selection">
           <span data-lang="es">Todos</span><span data-lang="en">All</span>
         </button>
         <span class="viscount" id="viscount"></span>
       </div>
+    </div>
+
+    <!-- mis referentes: la salida de decisión -->
+    <div class="card">
+      <h3 data-lang="es">Mis referentes</h3>
+      <h3 data-lang="en">My references</h3>
+      <div id="refbody"></div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="refiobtn"><span data-lang="es">Exportar / importar</span><span data-lang="en">Export / import</span></button>
+        <button class="btn" id="refclear"><span data-lang="es">Vaciar</span><span data-lang="en">Clear</span></button>
+      </div>
+      <div id="refiowrap" style="display:none">
+        <textarea id="refio" spellcheck="false"
+                  data-ph-es="Un nombre por línea" data-ph-en="One name per line"></textarea>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" id="refapply"><span data-lang="es">Aplicar la lista</span><span data-lang="en">Apply the list</span></button>
+          <span class="hint" id="refmsg"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- comparación de movimientos -->
+    <div class="card">
+      <h3 data-lang="es">Movimientos: quién irradia, quién absorbe</h3>
+      <h3 data-lang="en">Movements: who radiates, who absorbs</h3>
+      <div class="tabwrap"><table class="movtab" id="movtab"></table></div>
+      <p class="foot" id="movfoot"></p>
+      <p class="hint" style="margin:8px 0 0" data-lang="es">Pincha una fila para dejar ese carril solo en la cronología; vuelve a pincharla para devolver los demás. El índice de exportación mide <b>esta lista</b> de 467 influencias declaradas, no la historia de la fotografía.</p>
+      <p class="hint" style="margin:8px 0 0" data-lang="en">Click a row to leave that lane alone on the timeline; click it again to bring the others back. The export index measures <b>this list</b> of 467 declared influences, not the history of photography.</p>
     </div>
 
     <!-- cómo leerla -->
@@ -227,9 +351,34 @@
       <div class="method">
         <p style="margin:0" data-lang="es">El campo <code>year</code> es el año representativo de actividad de cada autor, no el de nacimiento. Las aristas son las mismas 467 relaciones de influencia declaradas de la red; aquí se leen sobre el eje del tiempo. Esta es la tercera proyección del mismo conjunto de datos:</p>
         <p style="margin:0" data-lang="en">The <code>year</code> field is each author's representative year of activity, not their year of birth. The edges are the same 467 declared influence relationships of the network; here they are read against the axis of time. This is the third projection of the same dataset:</p>
+
+        <p style="margin:10px 0 0" data-lang="es"><b>Qué es una influencia «declarada».</b> Una arista dice que la relación aparece afirmada en la bibliografía habitual —entrevistas, monografías, fichas de museo—, no que exista una prueba documental por arista: el conjunto <b>no guarda fuente para cada relación</b>. Léelas como consenso repetido, no como hecho verificado uno a uno.</p>
+        <p style="margin:10px 0 0" data-lang="en"><b>What a “declared” influence is.</b> An edge says the relationship is asserted in the usual bibliography —interviews, monographs, museum records—, not that there is documentary proof per edge: the dataset <b>keeps no source for each relationship</b>. Read them as repeated consensus, not as fact verified one by one.</p>
+
+        <p style="margin:10px 0 0" data-lang="es"><b>El pico de los 1980 mide la lista, no la historia.</b> El reparto por década va de 1 autor en 1820 a <span id="mn-peak"></span>, y baja a 22 en 2010 sólo porque a un autor reciente aún no se le han declarado influencias. La curva describe el criterio de quien compiló el corpus —canon occidental, autores con bibliografía en inglés— tanto como la densidad histórica. Ningún número de esta página es una medida del mundo: son medidas de <b>estas 293 fichas</b>.</p>
+        <p style="margin:10px 0 0" data-lang="en"><b>The 1980s peak measures the list, not history.</b> The per-decade split runs from 1 author in the 1820s to <span id="mn-peak-en"></span>, and falls to 22 in the 2010s only because a recent author has not yet had influences declared. The curve describes the criterion of whoever compiled the corpus —Western canon, authors with English-language bibliography— as much as historical density. No number on this page measures the world: they all measure <b>these 293 records</b>.</p>
+
+        <p style="margin:10px 0 0" data-lang="es"><b>Saltos de cero y negativos.</b> Como <code>year</code> es año de actividad y no de nacimiento, <span id="mn-zero"></span> aristas tienen salto cero y <span id="mn-neg"></span> son negativas (Robert Capa → Cartier-Bresson, −4). No son errores: son coetáneos que se influyeron mutuamente y a los que el corpus asigna una sola dirección. Por eso la franja da la <b>mediana</b> y no sólo la media.</p>
+        <p style="margin:10px 0 0" data-lang="en"><b>Zero and negative jumps.</b> Since <code>year</code> is a year of activity and not of birth, <span id="mn-zero-en"></span> edges have a zero jump and <span id="mn-neg-en"></span> are negative (Robert Capa → Cartier-Bresson, −4). They are not errors: they are contemporaries who influenced one another and to whom the corpus assigns a single direction. That is why the strip gives the <b>median</b> and not only the mean.</p>
+
+        <p style="margin:10px 0 0" data-lang="es"><b>El carril «otros».</b> Los movimientos con menos de tres miembros se funden en un carril gris agregado: <span id="mn-otros"></span>. No es un movimiento; es el resto.</p>
+        <p style="margin:10px 0 0" data-lang="en"><b>The “others” lane.</b> Movements with fewer than three members are merged into a grey aggregate lane: <span id="mn-otros-en"></span>. It is not a movement; it is the remainder.</p>
+
+        <p style="margin:10px 0 0" data-lang="es"><b>El nivel trófico</b> que aparece en la tarjeta de cada autor es su altura en la cadena de influencia: 1 significa que nadie le influyó dentro del corpus (una raíz), y cada nivel por encima es una capa de discípulos. Es el mismo número que usa la vista de linaje para ordenar el grafo.</p>
+        <p style="margin:10px 0 0" data-lang="en"><b>The trophic level</b> shown on each author's card is their height in the influence chain: 1 means nobody influenced them within the corpus (a root), and each level above is a layer of disciples. It is the same number the lineage view uses to order the graph.</p>
+
+        <p style="margin:10px 0 0" data-lang="es"><b>La escuela</b> (<span id="mn-esc"></span>) es una etiqueta de pertenencia —agencia, taller, escuela— independiente del movimiento: aparece bajo el nombre cuando el autor tiene una.</p>
+        <p style="margin:10px 0 0" data-lang="en"><b>The school</b> (<span id="mn-esc-en"></span>) is a membership label —agency, workshop, school— independent of the movement: it appears under the name when the author has one.</p>
+
+        <p style="margin:10px 0 0" data-lang="es"><b>Mis referentes</b> se guarda sólo en este navegador (clave <code>red_mis_referentes</code>); no viaja entre dispositivos. Usa «Exportar / importar» para llevártela.</p>
+        <p style="margin:10px 0 0" data-lang="en"><b>My references</b> is stored only in this browser (key <code>red_mis_referentes</code>); it does not travel between devices. Use “Export / import” to take it with you.</p>
+
+        <p style="margin:10px 0 0" data-lang="es">Las tres vistas del mismo dato, y qué contesta cada una:</p>
+        <p style="margin:10px 0 0" data-lang="en">The three views of the same data, and what each one answers:</p>
         <div class="views">
-          <span><a href="red-influencia.html">red-influencia.html</a> — <span data-lang="es">el linaje</span><span data-lang="en">the lineage</span></span>
-          <span><a href="explorador_distancias.html">explorador_distancias.html</a> — <span data-lang="es">el parecido</span><span data-lang="en">the resemblance</span></span>
+          <span><b data-lang="es">esta página</b><b data-lang="en">this page</b> — <span data-lang="es">el tiempo: ¿cuándo estuvo activo y cuánto tarda en llegar una influencia?</span><span data-lang="en">time: when were they active and how long does an influence take to arrive?</span></span>
+          <span><a href="red-influencia.html">red-influencia.html</a> — <span data-lang="es">el linaje: ¿quién viene de quién, y por qué camino?</span><span data-lang="en">the lineage: who comes from whom, and by which path?</span></span>
+          <span><a href="explorador_distancias.html">explorador_distancias.html</a> — <span data-lang="es">el parecido: ¿a qué se parecen sus imágenes?</span><span data-lang="en">the resemblance: what do their images look like?</span></span>
           <span><a href="index.html">index.html</a> — <span data-lang="es">la portada</span><span data-lang="en">the home page</span></span>
         </div>
       </div>
@@ -259,50 +408,94 @@
 
   /* ---------- diccionario de cadenas generadas por JS ---------- */
   var DICT={
-    es:{stMean:"salto medio de las {n} influencias", stLong:"la influencia más larga", stDec:"la década más poblada",
+    es:{stMed:"salto mediano · {n} influencias", stMedSub:"el 80 % entre {a} y {b} años · media {m}",
+        stLong:"la influencia más larga", stDec:"la década más poblada",
+        stCoet:"coetáneos (salto ≤ 3 años)", stCoetSub:"{z} de salto cero · {g} negativas",
+        stOf:"{a} de {b}", scopeMov:"{n} carriles", stEmpty:"sin aristas en este tramo",
         years:"años", authors:"autores", decFmt:"años {d}",
         lblInfluenced:"influyó a", lblInfluencedBy:"influido por", lblJump:"salto medio (años)",
+        lblLevels:"niveles hasta la raíz", lblToRoot:"años hasta la raíz", lblPerGen:"años por generación",
         hUpstream:"Le influyeron", hDownstream:"Influyó a", trophic:"nivel trófico",
         none:"ninguno", images:"Imágenes", visible:"{n} de 293 autores visibles",
-        otros:"otros", close:"Cerrar", controls:"Controles", tipInf:"influyó a"},
-    en:{stMean:"mean jump of the {n} influences", stLong:"the longest influence", stDec:"the busiest decade",
+        otros:"otros", close:"Cerrar", controls:"Controles", tipInf:"influyó a",
+        school:"escuela", roots:"Raíces de su linaje", linkNet:"En la red", linkSim:"Parecido",
+        addRef:"Añadir a mis referentes", remRef:"Quitar de mis referentes",
+        hAxis:"salto en años", hCorpus:"las 467 del corpus", hSubset:"el tramo elegido",
+        hSelUp:"le influyeron", hSelDown:"influyó a", hMed:"mediana",
+        hV1:"La mediana del corpus es de <em>{med} años</em>: una influencia declarada tarda {gen} en aparecer, y el 80 % cae entre {p10} y {p90} años.",
+        hV2:"Por debajo de {p10} años ({nlo} aristas) no hay transmisión de maestro a discípulo sino contemporaneidad: {sa} → {sb}, {sv} años.",
+        hV3:"Por encima de {p90} ({nhi} aristas) tampoco: es redescubrimiento por libros y museos, como {la} → {lb}, {lv} años.",
+        genShort:"menos de una generación", genOne:"una generación", genLong:"más de una generación",
+        thMov:"movimiento", thN:"n", thSpan:"tramo", thOut:"salen", thIn:"entran", thExp:"export.", thJump:"salto",
+        aggOtros:"otros ({n} autores)", aggNote:"agregado",
+        movFoot:"<em>{a}</em> es la gran exportadora de este corpus (índice {ea}); <em>{b}</em> la gran importadora (índice {eb}): recibe {r} veces más influencia de la que emite. Sólo se comparan los carriles con {min} autores o más.",
+        refEmpty:"Marca autores con la ★ de su tarjeta. Con dos o más, esta tarjeta busca los maestros en los que convergen y el hueco que te dejan.",
+        refOne:"Un referente marcado. Marca al menos otro para buscar la convergencia; de momento se listan sus propios maestros.",
+        refCommon:"Maestros compartidos", refReach:"{c}/{t}", refGap:"Del mismo tronco, sin marcar",
+        refV1all:"Tus {n} referentes convergen en {list}: mira ahí antes que en sus discípulos.",
+        refV1some:"Tus {n} referentes no comparten ni un maestro; lo más cerca es {list}, al que llegan {c} de ellos.",
+        refV1none:"Tus {n} referentes no comparten ningún maestro dentro de este corpus: son {n} linajes sueltos.",
+        refV1one:"El linaje de {name} sube hasta {list}.",
+        refV2:"Abarcan de {y0} a {y1} ({span} años) y {m} de los {M} carriles. {tail}",
+        refTailWide:"Es un reparto ancho: el hueco ya no está en el movimiento sino en la época.",
+        refTailNarrow:"Es una franja estrecha: el carril mayor que no tocas es {miss} ({k} autores).",
+        refTailTight:"Están muy concentrados: el carril mayor que no tocas es {miss} ({k} autores), y no es el único.",
+        refClearAsk:"Pincha otra vez para vaciar la lista",
+        refImported:"{n} nombres reconocidos", refNoMatch:"ningún nombre reconocido",
+        mnPeak:"{c} autores en los {d}", mnOtros:"{list} ({n} autores)"},
+    en:{stMed:"median jump · {n} influences", stMedSub:"80 % between {a} and {b} years · mean {m}",
+        stLong:"the longest influence", stDec:"the busiest decade",
+        stCoet:"contemporaries (jump ≤ 3 years)", stCoetSub:"{z} zero-jump · {g} negative",
+        stOf:"{a} of {b}", scopeMov:"{n} lanes", stEmpty:"no edges in this range",
         years:"years", authors:"authors", decFmt:"the {d}s",
         lblInfluenced:"influenced", lblInfluencedBy:"influenced by", lblJump:"mean jump (years)",
+        lblLevels:"levels to the root", lblToRoot:"years to the root", lblPerGen:"years per generation",
         hUpstream:"Influenced by", hDownstream:"Influenced", trophic:"trophic level",
         none:"none", images:"Images", visible:"{n} of 293 authors visible",
-        otros:"others", close:"Close", controls:"Controls", tipInf:"influenced"}
+        otros:"others", close:"Close", controls:"Controls", tipInf:"influenced",
+        school:"school", roots:"Roots of their lineage", linkNet:"In the network", linkSim:"Resemblance",
+        addRef:"Add to my references", remRef:"Remove from my references",
+        hAxis:"jump in years", hCorpus:"all 467 in the corpus", hSubset:"the chosen range",
+        hSelUp:"influenced by", hSelDown:"influenced", hMed:"median",
+        hV1:"The median for the corpus is <em>{med} years</em>: a declared influence takes {gen} to surface, and 80 % falls between {p10} and {p90} years.",
+        hV2:"Below {p10} years ({nlo} edges) there is no master-to-disciple transmission but contemporaneity: {sa} → {sb}, {sv} years.",
+        hV3:"Above {p90} ({nhi} edges) there is none either: that is rediscovery through books and museums, like {la} → {lb}, {lv} years.",
+        genShort:"less than a generation", genOne:"a generation", genLong:"more than a generation",
+        thMov:"movement", thN:"n", thSpan:"span", thOut:"out", thIn:"in", thExp:"export", thJump:"jump",
+        aggOtros:"others ({n} authors)", aggNote:"aggregate",
+        movFoot:"<em>{a}</em> is the great exporter of this corpus (index {ea}); <em>{b}</em> the great importer (index {eb}): it receives {r} times more influence than it emits. Only lanes with {min} authors or more are compared.",
+        refEmpty:"Star authors from their card. With two or more, this card looks for the masters they converge on and for the gap they leave you.",
+        refOne:"One reference starred. Star at least one more to look for convergence; for now its own masters are listed.",
+        refCommon:"Shared masters", refReach:"{c}/{t}", refGap:"Same trunk, not starred",
+        refV1all:"Your {n} references converge on {list}: look there before their disciples.",
+        refV1some:"Your {n} references share no single master; the closest is {list}, reached by {c} of them.",
+        refV1none:"Your {n} references share no master within this corpus: they are {n} loose lineages.",
+        refV1one:"{name}'s lineage climbs up to {list}.",
+        refV2:"They span {y0} to {y1} ({span} years) and {m} of the {M} lanes. {tail}",
+        refTailWide:"That is a wide spread: the gap is no longer in the movement but in the period.",
+        refTailNarrow:"That is a narrow band: the largest lane you do not touch is {miss} ({k} authors).",
+        refTailTight:"They are very concentrated: the largest lane you do not touch is {miss} ({k} authors), and it is not the only one.",
+        refClearAsk:"Click again to clear the list",
+        refImported:"{n} names recognised", refNoMatch:"no name recognised",
+        mnPeak:"{c} authors in the {d}s", mnOtros:"{list} ({n} authors)"}
   };
-  function LBL(k){ return (DICT[document.documentElement.lang==="en"?"en":"es"]||DICT.es)[k]; }
-  function fmt1(v){ var sTxt=v.toFixed(1); return document.documentElement.lang==="en"?sTxt:sTxt.replace(".",","); }
-
-  /* ---------- lecturas del corpus (calculadas, no escritas a mano) ---------- */
-  var jumps=linkObjs.map(function(l){return (+l.target.year||0)-(+l.source.year||0);});
-  var meanJump=d3.sum(jumps)/jumps.length;
-  var longest=null;
-  linkObjs.forEach(function(l){
-    var v=(+l.target.year||0)-(+l.source.year||0);
-    if(!longest||v>longest.v) longest={l:l,v:v};
-  });
-  var decCounts={};
-  nodes.forEach(function(n){var dcd=Math.floor((+n.year||0)/10)*10; decCounts[dcd]=(decCounts[dcd]||0)+1;});
-  var topDecade=null;
-  Object.keys(decCounts).forEach(function(k){
-    if(!topDecade||decCounts[k]>topDecade.c) topDecade={d:+k,c:decCounts[k]};
-  });
-  function renderStrip(){
-    var h="";
-    h+="<div class='st'><div class='l'>"+LBL("stMean").replace("{n}",String(jumps.length))+"</div><div class='v'><em>"+fmt1(meanJump)+"</em> "+LBL("years")+"</div></div>";
-    h+="<div class='st'><div class='l'>"+LBL("stLong")+"</div><div class='v'>"+longest.l.source.name+" → "+longest.l.target.name+" · <em>"+longest.v+"</em> "+LBL("years")+"</div></div>";
-    h+="<div class='st'><div class='l'>"+LBL("stDec")+"</div><div class='v'>"+LBL("decFmt").replace("{d}",String(topDecade.d))+" · <em>"+topDecade.c+"</em> "+LBL("authors")+"</div></div>";
-    document.getElementById("strip").innerHTML=h;
-  }
+  var SCHOOL_EN={"Magnum":"Magnum","Escuela japonesa":"Japanese school","Escuela de Düsseldorf":"Düsseldorf school",
+                 "Aperture / docencia":"Aperture / teaching","Dirección de arte":"Art direction"};
+  function isEN(){ return document.documentElement.lang==="en"; }
+  function LBL(k){ return (DICT[isEN()?"en":"es"]||DICT.es)[k]; }
+  function fmt1(v){ var sTxt=v.toFixed(1); return isEN()?sTxt:sTxt.replace(".",","); }
+  function fmt2(v){ var sTxt=v.toFixed(2); return isEN()?sTxt:sTxt.replace(".",","); }
+  function fmtI(v){ return Number(v).toLocaleString(isEN()?"en-GB":"es-ES"); }
+  function fmtQ(v){ return (Math.abs(v-Math.round(v))<1e-9)?fmtI(Math.round(v)):fmt1(v); }
+  function esc(sTxt){ return String(sTxt).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
 
   /* ---------- carriles: movimientos con >=3 miembros, orden por año mediano ---------- */
   var movCounts={};
   nodes.forEach(function(n){var m=n.primary_movement||"—";movCounts[m]=(movCounts[m]||0)+1;});
   function laneKey(n){var m=n.primary_movement||"—";return (movCounts[m]>=3)?m:OTROS;}
+  nodes.forEach(function(n){ n._lane=laneKey(n); });
   var laneMap={};
-  nodes.forEach(function(n){var k=laneKey(n);(laneMap[k]=laneMap[k]||[]).push(n);});
+  nodes.forEach(function(n){(laneMap[n._lane]=laneMap[n._lane]||[]).push(n);});
   var lanes=Object.keys(laneMap).map(function(k){
     var arr=laneMap[k];
     return {key:k, nodes:arr,
@@ -313,13 +506,321 @@
   function laneColor(L){return L.key===OTROS?OTROS_COLOR:color(L.key);}
   function laneName(L){return L.key===OTROS?LBL("otros"):L.key;}
 
+  /* ---------- estadística de saltos ---------- */
+  function jumpOf(l){ return (+l.target.year||0)-(+l.source.year||0); }
+  function quant(sorted,p){
+    if(!sorted.length)return null;
+    var k=(sorted.length-1)*p, f=Math.floor(k), c=Math.min(f+1,sorted.length-1);
+    return sorted[f]+(k-f)*(sorted[c]-sorted[f]);
+  }
+  var ALLJ=linkObjs.map(jumpOf).sort(function(a,b){return a-b;});
+  var G={med:quant(ALLJ,.5), p10:quant(ALLJ,.10), p90:quant(ALLJ,.90),
+         mean:d3.sum(ALLJ)/ALLJ.length,
+         zero:ALLJ.filter(function(v){return v===0;}).length,
+         neg:ALLJ.filter(function(v){return v<0;}).length,
+         nlo:ALLJ.filter(function(v){return v<quant(ALLJ,.10);}).length,
+         nhi:ALLJ.filter(function(v){return v>quant(ALLJ,.90);}).length};
+  var longestG=null, shortestG=null;
+  linkObjs.forEach(function(l){
+    var v=jumpOf(l);
+    if(!longestG||v>longestG.v) longestG={l:l,v:v};
+    if(!shortestG||v<shortestG.v) shortestG={l:l,v:v};
+  });
+
   /* ---------- escalas ---------- */
   var YR0=1820, YR1=2030;
   var rScale=d3.scaleSqrt().domain([0,d3.max(nodes,function(n){return +n.influenced||0;})||1]).range([3,10]);
   function radius(n){return rScale(+n.influenced||0);}
 
   /* ---------- estado ---------- */
-  var st={ymin:YR0,ymax:YR1,sel:null,hoverId:null};
+  var st={ymin:YR0,ymax:YR1,sel:null,hoverId:null,offMov:new Set(),mode:"one"};
+
+  /* ---------- mis referentes (clave nueva; no toca ninguna bitácora) ---------- */
+  var REFKEY="red_mis_referentes";
+  var refs=[];
+  try{
+    var rawRef=localStorage.getItem(REFKEY);
+    if(rawRef){ var parsed=JSON.parse(rawRef); if(Array.isArray(parsed)) refs=parsed.filter(function(x){return byId[x];}); }
+  }catch(e){ refs=[]; }
+  function saveRefs(){ try{ localStorage.setItem(REFKEY,JSON.stringify(refs)); }catch(e){} }
+  function isRef(id){ return refs.indexOf(id)>=0; }
+
+  /* ---------- filtros ---------- */
+  function visibleN(n){ var y=+n.year||0; return y>=st.ymin&&y<=st.ymax&&!st.offMov.has(n._lane); }
+  function laneShown(L){ return !st.offMov.has(L.key); }
+
+  /* ---------- ascendencia (BFS aguas arriba) ---------- */
+  function ancestry(f,respectFilter){
+    var lv={}; lv[f.id]=0;
+    var q=[f];
+    while(q.length){
+      var nq=[];
+      for(var i=0;i<q.length;i++){
+        var cur=q[i], lc=lv[cur.id];
+        var ups=cur.incoming_neighbors||[];
+        for(var j=0;j<ups.length;j++){
+          var pn=byId[ups[j]];
+          if(!pn) continue;
+          if(respectFilter&&!visibleN(pn)) continue;
+          if(lv[pn.id]==null){ lv[pn.id]=lc+1; nq.push(pn); }
+        }
+      }
+      q=nq;
+    }
+    return lv;
+  }
+  function hasUpstream(n,respectFilter){
+    var ups=n.incoming_neighbors||[];
+    for(var i=0;i<ups.length;i++){
+      var pn=byId[ups[i]];
+      if(pn&&(!respectFilter||visibleN(pn))) return true;
+    }
+    return false;
+  }
+  function rootsOf(f,respectFilter){
+    var lv=ancestry(f,respectFilter), out=[];
+    Object.keys(lv).forEach(function(id){
+      if(id===f.id) return;
+      if(!hasUpstream(byId[id],respectFilter)) out.push(byId[id]);
+    });
+    out.sort(function(a,b){return (+a.year)-(+b.year);});
+    return out;
+  }
+  function depthStats(f){
+    var lv=ancestry(f,true);
+    var ids=Object.keys(lv).filter(function(id){return id!==f.id;});
+    if(!ids.length) return null;
+    var deepest=0, oldest=null, oldestLv=1;
+    ids.forEach(function(id){
+      if(lv[id]>deepest) deepest=lv[id];
+      var y=+byId[id].year||0;
+      if(oldest==null||y<oldest){ oldest=y; oldestLv=lv[id]; }
+    });
+    /* los tres números de la tarjeta se refieren al MISMO camino: el que llega
+       al ancestro más antiguo alcanzable, para que total/niveles cuadre. */
+    var total=(+f.year||0)-oldest;
+    return {levels:Math.max(1,oldestLv), deepest:deepest, n:ids.length, oldest:oldest,
+            total:total, perGen:total/Math.max(1,oldestLv)};
+  }
+
+  /* ---------- subconjunto activo (filtro + selección) ---------- */
+  function neighSet(f){
+    var act=new Set([f.id]);
+    (f.incoming_neighbors||[]).forEach(function(x){if(byId[x])act.add(x);});
+    (f.outgoing_neighbors||[]).forEach(function(x){if(byId[x])act.add(x);});
+    return act;
+  }
+  function activeLinks(){
+    var base=linkObjs.filter(function(l){return visibleN(l.source)&&visibleN(l.target);});
+    if(st.sel) return base.filter(function(l){return l.source.id===st.sel.id||l.target.id===st.sel.id;});
+    return base;
+  }
+  function activeNodes(){
+    if(st.sel){ var s=neighSet(st.sel); return nodes.filter(function(n){return s.has(n.id)&&visibleN(n);}); }
+    return nodes.filter(visibleN);
+  }
+  function scopeTxt(){
+    var parts=[];
+    if(st.ymin>YR0||st.ymax<YR1) parts.push(st.ymin+"–"+st.ymax);
+    if(st.offMov.size) parts.push(LBL("scopeMov").replace("{n}",fmtI(lanes.length-st.offMov.size)));
+    if(st.sel) parts.push(st.sel.name);
+    return parts.length?" · "+parts.join(" · "):"";
+  }
+
+  /* ---------- franja de lecturas vivas ---------- */
+  function renderStrip(){
+    var sub=activeLinks();
+    var js=sub.map(jumpOf).sort(function(a,b){return a-b;});
+    var scope=scopeTxt(), h="";
+    if(!js.length){
+      h+="<div class='st'><div class='l'>"+esc(LBL("stMed").replace("{n}","0")+scope)+"</div><div class='v'>—</div>"+
+         "<div class='s'>"+esc(LBL("stEmpty"))+"</div></div>";
+    }else{
+      var med=quant(js,.5), p10=quant(js,.10), p90=quant(js,.90), mean=d3.sum(js)/js.length;
+      h+="<div class='st'><div class='l'>"+esc(LBL("stMed").replace("{n}",fmtI(js.length))+scope)+"</div>"+
+         "<div class='v'><em>"+fmtQ(med)+"</em> "+esc(LBL("years"))+"</div>"+
+         "<div class='s'>"+esc(LBL("stMedSub").replace("{a}",fmtQ(p10)).replace("{b}",fmtQ(p90)).replace("{m}",fmt1(mean)))+"</div></div>";
+    }
+    var lng=null;
+    sub.forEach(function(l){ var v=jumpOf(l); if(!lng||v>lng.v) lng={l:l,v:v}; });
+    h+="<div class='st'><div class='l'>"+esc(LBL("stLong")+scope)+"</div><div class='v'>"+
+       (lng?esc(lng.l.source.name)+" → "+esc(lng.l.target.name)+" · <em>"+fmtI(lng.v)+"</em> "+esc(LBL("years")):"—")+"</div>"+
+       "<div class='s'>"+(lng?esc(lng.l.source.year+" → "+lng.l.target.year):"")+"</div></div>";
+
+    var an=activeNodes(), dc={};
+    an.forEach(function(n){var d=Math.floor((+n.year||0)/10)*10; dc[d]=(dc[d]||0)+1;});
+    var top=null;
+    Object.keys(dc).forEach(function(k){ if(!top||dc[k]>top.c||(dc[k]===top.c&&+k<top.d)) top={d:+k,c:dc[k]}; });
+    h+="<div class='st'><div class='l'>"+esc(LBL("stDec")+scope)+"</div><div class='v'>"+
+       (top?esc(LBL("decFmt").replace("{d}",String(top.d)))+" · <em>"+fmtI(top.c)+"</em> "+esc(LBL("authors")):"—")+"</div>"+
+       "<div class='s'>"+esc(LBL("stOf").replace("{a}",fmtI(an.length)).replace("{b}",fmtI(nodes.length))+" "+LBL("authors"))+"</div></div>";
+
+    var coet=js.filter(function(v){return v<=3;}).length;
+    var zero=js.filter(function(v){return v===0;}).length;
+    var neg=js.filter(function(v){return v<0;}).length;
+    h+="<div class='st'><div class='l'>"+esc(LBL("stCoet")+scope)+"</div><div class='v'>"+
+       (js.length?"<em>"+fmtI(coet)+"</em> "+esc(LBL("stOf").replace("{a}","").replace("{b}",fmtI(js.length)).trim()):"—")+"</div>"+
+       "<div class='s'>"+esc(LBL("stCoetSub").replace("{z}",fmtI(zero)).replace("{g}",fmtI(neg)))+"</div></div>";
+    document.getElementById("strip").innerHTML=h;
+  }
+
+  /* ---------- histograma del salto ---------- */
+  var HB0=-5, HBW=5, HNB=16;
+  function bins(arr){
+    var b=[]; for(var i=0;i<HNB;i++) b.push(0);
+    arr.forEach(function(v){ var i=Math.floor((v-HB0)/HBW); if(i<0)i=0; if(i>=HNB)i=HNB-1; b[i]++; });
+    return b;
+  }
+  var GBINS=bins(ALLJ);
+  function renderHist(){
+    var sv=d3.select("#hist"); sv.selectAll("*").remove();
+    var W=620,H=140,ML=30,MR=8,MT=12,MB=28;
+    var x0=HB0, x1=HB0+HBW*HNB;
+    function gx(v){ return ML+(v-x0)/(x1-x0)*(W-ML-MR); }
+    var maxc=d3.max(GBINS)||1;
+    function gy(c){ return H-MB-(c/maxc)*(H-MB-MT); }
+
+    [0,Math.round(maxc/2),maxc].forEach(function(c){
+      sv.append("line").attr("class","hrule").attr("x1",ML).attr("x2",W-MR).attr("y1",gy(c)).attr("y2",gy(c));
+      sv.append("text").attr("class","haxis").attr("x",ML-5).attr("y",gy(c)+3).attr("text-anchor","end").text(fmtI(c));
+    });
+    GBINS.forEach(function(c,i){
+      if(!c) return;
+      var xa=gx(HB0+i*HBW)+1, wid=Math.max(1,gx(HB0+(i+1)*HBW)-gx(HB0+i*HBW)-2);
+      sv.append("rect").attr("class","hbar").attr("x",xa).attr("y",gy(c)).attr("width",wid).attr("height",H-MB-gy(c));
+    });
+    for(var t=0;t<=70;t+=10){
+      sv.append("text").attr("class","haxis").attr("x",gx(t)).attr("y",H-MB+13).attr("text-anchor","middle").text(fmtI(t));
+    }
+    sv.append("text").attr("class","haxis").attr("x",W-MR).attr("y",H-4).attr("text-anchor","end").text(LBL("hAxis"));
+
+    [[G.p10,"hlim"],[G.p90,"hlim"],[G.med,"hmed"]].forEach(function(p){
+      sv.append("line").attr("class",p[1]).attr("x1",gx(p[0])).attr("x2",gx(p[0])).attr("y1",MT-4).attr("y2",H-MB);
+    });
+    sv.append("text").attr("class","haxis").attr("x",gx(G.med)+4).attr("y",MT+2)
+      .attr("fill","#f4b13c").text(LBL("hMed")+" "+fmtQ(G.med));
+
+    /* el tramo elegido, como perfil sobre la distribución global */
+    var sub=activeLinks();
+    if(sub.length&&sub.length!==linkObjs.length){
+      var sb=bins(sub.map(jumpOf)), pts=[];
+      sb.forEach(function(c,i){
+        pts.push([gx(HB0+i*HBW),gy(c)]); pts.push([gx(HB0+(i+1)*HBW),gy(c)]);
+      });
+      sv.append("path").attr("class","hsub").attr("d","M"+pts.map(function(p){return p[0].toFixed(1)+","+p[1].toFixed(1);}).join("L"));
+    }
+    /* las aristas del autor seleccionado, como marcas */
+    if(st.sel){
+      linkObjs.forEach(function(l){
+        var inc=(l.target.id===st.sel.id), out=(l.source.id===st.sel.id);
+        if(!inc&&!out) return;
+        if(!visibleN(l.source)||!visibleN(l.target)) return;
+        var v=jumpOf(l), xx=gx(Math.max(x0,Math.min(x1,v)));
+        sv.append("line").attr("x1",xx).attr("x2",xx).attr("y1",H-MB).attr("y2",H-MB-13)
+          .attr("stroke",inc?"#9b8cff":"#3fcab0").attr("stroke-width",1.6).attr("stroke-opacity",.95);
+      });
+    }
+    var gen=G.med<15?LBL("genShort"):(G.med<=30?LBL("genOne"):LBL("genLong"));
+    var v1=LBL("hV1").replace("{med}",fmtQ(G.med)).replace("{gen}",gen).replace("{p10}",fmtQ(G.p10)).replace("{p90}",fmtQ(G.p90));
+    var v2=LBL("hV2").replace("{p10}",fmtQ(G.p10)).replace("{nlo}",fmtI(G.nlo))
+             .replace("{sa}",esc(shortestG.l.source.name)).replace("{sb}",esc(shortestG.l.target.name)).replace("{sv}",fmtI(shortestG.v));
+    var v3=LBL("hV3").replace("{p90}",fmtQ(G.p90)).replace("{nhi}",fmtI(G.nhi))
+             .replace("{la}",esc(longestG.l.source.name)).replace("{lb}",esc(longestG.l.target.name)).replace("{lv}",fmtI(longestG.v));
+    document.getElementById("histverdict").innerHTML=v1+" "+v2+" "+v3;
+  }
+
+  /* ---------- tabla de movimientos ---------- */
+  var laneStats=lanes.map(function(L){
+    var out=0,inn=0,sum=0;
+    linkObjs.forEach(function(l){
+      if(l.source._lane===L.key){ out++; sum+=jumpOf(l); }
+      if(l.target._lane===L.key){ inn++; }
+    });
+    var ys=L.nodes.map(function(n){return +n.year||0;}).sort(function(a,b){return a-b;});
+    return {key:L.key, lane:L, n:L.nodes.length, y0:ys[0], y1:ys[ys.length-1], span:ys[ys.length-1]-ys[0],
+            out:out, inn:inn, exp:(out+inn)?out/(out+inn):0, mj:out?sum/out:null};
+  });
+  var MOVMIN=10;
+  var tabSort={k:"exp",dir:-1};
+  function renderMovTab(){
+    var rowsAll=laneStats.slice().filter(function(r){return r.key!==OTROS;});
+    rowsAll.sort(function(a,b){
+      var va=a[tabSort.k], vb=b[tabSort.k];
+      if(tabSort.k==="key"){ va=a.key; vb=b.key; return (va<vb?-1:va>vb?1:0)*tabSort.dir; }
+      if(va==null) va=-1; if(vb==null) vb=-1;
+      return (va-vb)*tabSort.dir || (a.n-b.n);
+    });
+    var oth=laneStats.filter(function(r){return r.key===OTROS;});
+    var rows=rowsAll.concat(oth);
+    var cols=[["key","thMov"],["n","thN"],["y0","thSpan"],["out","thOut"],["inn","thIn"],["exp","thExp"],["mj","thJump"]];
+    var h="<thead><tr>"+cols.map(function(c){
+      return "<th data-k='"+c[0]+"'"+(tabSort.k===c[0]?" class='on'":"")+">"+esc(LBL(c[1]))+"</th>";
+    }).join("")+"</tr></thead><tbody>";
+    var iso=(st.offMov.size===lanes.length-1);
+    rows.forEach(function(r){
+      var isOn=iso&&!st.offMov.has(r.key);
+      var nm=r.key===OTROS?LBL("aggOtros").replace("{n}",fmtI(r.n)):r.key;
+      h+="<tr data-k='"+esc(r.key)+"'"+(isOn?" class='iso'":"")+(r.key===OTROS?" title='"+esc(LBL("aggNote"))+"'":"")+">"+
+         "<td"+(r.key===OTROS?" class='agg'":"")+"><span class='dot' style='background:"+laneColor(r.lane)+"'></span>"+esc(nm)+"</td>"+
+         "<td>"+fmtI(r.n)+"</td><td>"+r.y0+"–"+r.y1+"</td>"+
+         "<td>"+fmtI(r.out)+"</td><td>"+fmtI(r.inn)+"</td>"+
+         "<td class='exp'>"+fmt2(r.exp)+"</td>"+
+         "<td>"+(r.mj==null?"—":fmt1(r.mj))+"</td></tr>";
+    });
+    h+="</tbody>";
+    var tab=document.getElementById("movtab");
+    tab.innerHTML=h;
+    Array.prototype.forEach.call(tab.querySelectorAll("th"),function(el){
+      el.onclick=function(){
+        var k=el.getAttribute("data-k");
+        if(tabSort.k===k) tabSort.dir=-tabSort.dir; else { tabSort.k=k; tabSort.dir=(k==="key"||k==="y0")?1:-1; }
+        renderMovTab();
+      };
+    });
+    Array.prototype.forEach.call(tab.querySelectorAll("tbody tr"),function(el){
+      el.onclick=function(){ isolateLane(el.getAttribute("data-k")); };
+    });
+    var cand=laneStats.filter(function(r){return r.key!==OTROS&&r.n>=MOVMIN;});
+    if(cand.length>1){
+      var hi=cand.slice().sort(function(a,b){return b.exp-a.exp;})[0];
+      var lo=cand.slice().sort(function(a,b){return a.exp-b.exp;})[0];
+      document.getElementById("movfoot").innerHTML=
+        LBL("movFoot").replace("{a}",esc(hi.key)).replace("{ea}",fmt2(hi.exp))
+          .replace("{b}",esc(lo.key)).replace("{eb}",fmt2(lo.exp))
+          .replace("{r}",fmt1(lo.out?lo.inn/lo.out:0)).replace("{min}",fmtI(MOVMIN));
+    }
+  }
+  function isolateLane(key){
+    var others=lanes.map(function(L){return L.key;}).filter(function(k){return k!==key;});
+    var already=(st.offMov.size===others.length)&&!st.offMov.has(key);
+    st.offMov=new Set(already?[]:others);
+    afterMovChange();
+  }
+
+  /* ---------- leyenda-filtro de movimientos ---------- */
+  function renderChips(){
+    var box=document.getElementById("movchips");
+    box.innerHTML=lanes.map(function(L,i){
+      return "<span class='mchip"+(st.offMov.has(L.key)?" off":"")+"' data-i='"+i+"'>"+
+             "<span class='dot' style='background:"+laneColor(L)+"'></span>"+esc(laneName(L))+
+             " <span class='ct'>"+fmtI(L.nodes.length)+"</span></span>";
+    }).join("");
+    Array.prototype.forEach.call(box.querySelectorAll(".mchip"),function(el){
+      el.onclick=function(){
+        var L=lanes[+el.getAttribute("data-i")];
+        if(st.offMov.has(L.key)) st.offMov.delete(L.key);
+        else{
+          if(st.offMov.size>=lanes.length-1) return; /* nunca dejar la cronología vacía */
+          st.offMov.add(L.key);
+        }
+        afterMovChange();
+      };
+    });
+  }
+  function afterMovChange(){
+    renderChips(); renderMovTab(); draw(); renderStrip(); renderHist();
+    if(st.sel) showInfo(st.sel);
+  }
 
   /* ---------- beeswarm determinista dentro de cada carril ---------- */
   function beeswarm(pts){
@@ -349,11 +850,14 @@
   var stage=document.getElementById("stage");
   var svg=d3.select("#tl");
   var xSc, Wpx, Hpx, LANE_LABEL_H=13, M_TOP=26, M_BOT=26;
+  var shownLanes=lanes.slice(), shownNodes=nodes.slice();
   function computeLayout(){
     Wpx=Math.max(940,(stage.clientWidth||1000)-2);
     xSc=d3.scaleLinear().domain([YR0,YR1]).range([14,Wpx-20]);
+    shownLanes=lanes.filter(laneShown);
+    shownNodes=nodes.filter(function(n){return !st.offMov.has(n._lane);});
     var yCur=M_TOP;
-    lanes.forEach(function(L){
+    shownLanes.forEach(function(L){
       var pts=L.nodes.map(function(n){return {n:n,x:xSc(+n.year),r:radius(n)};});
       beeswarm(pts);
       var ext=d3.max(pts,function(p){return Math.abs(p.dy)+p.r;})||8;
@@ -387,7 +891,7 @@
     }
 
     /* bandas y nombres de carril */
-    lanes.forEach(function(L,i){
+    shownLanes.forEach(function(L,i){
       var c=laneColor(L);
       var x0=xSc(L.y0)-11, x1=xSc(L.y1)+11;
       gBands.append("rect").attr("x",x0).attr("y",L.top+LANE_LABEL_H-2).attr("width",Math.max(20,x1-x0))
@@ -400,7 +904,7 @@
     });
 
     /* puntos */
-    ptSel=gPts.selectAll("circle").data(nodes).join("circle")
+    ptSel=gPts.selectAll("circle").data(shownNodes).join("circle")
       .attr("class","pt")
       .attr("cx",function(d){return d.px;}).attr("cy",function(d){return d.py;})
       .attr("r",function(d){return radius(d);})
@@ -414,27 +918,33 @@
     if(st.sel)drawArcs(st.sel,true); else drawArcs(null,false);
   }
 
-  /* ---------- filtro de años ---------- */
-  function visibleN(n){var y=+n.year||0;return y>=st.ymin&&y<=st.ymax;}
+  /* ---------- pintado y atenuación ---------- */
   function focusSet(){
     var f=st.sel||(st.hoverId?byId[st.hoverId]:null);
     if(!f)return null;
-    var act=new Set([f.id]);
-    (f.incoming_neighbors||[]).forEach(function(x){if(byId[x])act.add(x);});
-    (f.outgoing_neighbors||[]).forEach(function(x){if(byId[x])act.add(x);});
-    return act;
+    if(st.sel&&st.mode!=="one") return new Set(Object.keys(ancestry(f,true)));
+    return neighSet(f);
   }
   function paint(){
     var act=focusSet();
+    var roots=null;
+    if(st.sel&&st.mode==="root"){
+      roots=new Set(); rootsOf(st.sel,true).forEach(function(n){roots.add(n.id);});
+    }
     ptSel.attr("opacity",function(d){
-        if(!visibleN(d))return .05;
-        if(act&&!act.has(d.id))return .12;
-        return .95;
+        var base;
+        if(!visibleN(d)) base=.05;
+        else if(act&&!act.has(d.id)) base=.12;
+        else base=.95;
+        if(isRef(d.id)&&base<.5) base=.5;
+        return base;
       })
       .style("pointer-events",function(d){return visibleN(d)?null:"none";})
-      .classed("focus",function(d){return !!(st.sel&&d.id===st.sel.id);});
+      .classed("focus",function(d){return !!(st.sel&&d.id===st.sel.id);})
+      .classed("ref",function(d){return isRef(d.id)&&!(st.sel&&d.id===st.sel.id);})
+      .classed("root",function(d){return !!(roots&&roots.has(d.id));});
     var vis=nodes.filter(visibleN).length;
-    document.getElementById("viscount").textContent=LBL("visible").replace("{n}",String(vis));
+    document.getElementById("viscount").textContent=LBL("visible").replace("{n}",fmtI(vis));
   }
 
   /* ---------- arcos de influencia ---------- */
@@ -444,76 +954,231 @@
     var my=Math.min(a.py,b.py)-bow;
     return {d:"M"+a.px+","+a.py+" Q"+mx+","+my+" "+b.px+","+b.py, lx:mx, ly:(a.py+b.py)/4+my/2};
   }
+  var MAXLV=4;
   function drawArcs(f,strong){
     gArcs.selectAll("*").remove();
     gLabs.selectAll("*").remove();
     if(!f)return;
-    var rel=linkObjs.filter(function(l){
-      return (l.source.id===f.id||l.target.id===f.id)&&visibleN(l.source)&&visibleN(l.target);
+    if(!strong||st.mode==="one"){
+      var rel=linkObjs.filter(function(l){
+        return (l.source.id===f.id||l.target.id===f.id)&&visibleN(l.source)&&visibleN(l.target);
+      });
+      rel.forEach(function(l){
+        var inc=(l.target.id===f.id); /* arco entrante: maestro -> f */
+        drawOneArc(l,inc,strong?1.8:1.3,strong?.95:.75,true);
+      });
+      return;
+    }
+    var lv=ancestry(f,true);
+    var cap=(st.mode==="root")?12:MAXLV; /* en «raíces» sólo se pinta un arco por raíz */
+    var edges=linkObjs.filter(function(l){
+      if(!visibleN(l.source)||!visibleN(l.target)) return false;
+      var ls=lv[l.source.id], lt=lv[l.target.id];
+      return ls!=null&&lt!=null&&ls>lt&&ls<=cap;
     });
-    rel.forEach(function(l){
-      var inc=(l.target.id===f.id); /* arco entrante: maestro -> f */
-      var pth=arcPath(l.source,l.target);
-      gArcs.append("path").attr("class","arc "+(inc?"up":"down"))
-        .attr("d",pth.d)
-        .attr("stroke-width",strong?1.8:1.3)
-        .attr("stroke-opacity",strong?.95:.75)
-        .attr("marker-end","url(#arrow-"+(inc?"up":"down")+")");
-      var dv=(+l.target.year||0)-(+l.source.year||0);
-      gLabs.append("text").attr("class","arclab "+(inc?"up":"down"))
-        .attr("x",pth.lx).attr("y",pth.ly-4).attr("text-anchor","middle")
-        .text((dv>0?"+":"")+dv);
+    if(st.mode==="root"){
+      edges=edges.filter(function(l){return !hasUpstream(l.source,true);});
+    }
+    edges.forEach(function(l){
+      var d=lv[l.source.id];
+      drawOneArc(l,true,Math.max(.7,1.9-(d-1)*.34),Math.max(.16,.95-(d-1)*.22),d<=2||st.mode==="root");
     });
+  }
+  function drawOneArc(l,inc,wid,op,withLabel){
+    var pth=arcPath(l.source,l.target);
+    gArcs.append("path").attr("class","arc "+(inc?"up":"down"))
+      .attr("d",pth.d).attr("stroke-width",wid).attr("stroke-opacity",op)
+      .attr("marker-end","url(#arrow-"+(inc?"up":"down")+")");
+    if(!withLabel) return;
+    var dv=jumpOf(l);
+    gLabs.append("text").attr("class","arclab "+(inc?"up":"down"))
+      .attr("x",pth.lx).attr("y",pth.ly-4).attr("text-anchor","middle")
+      .text((dv>0?"+":"")+dv);
   }
 
   /* ---------- selección ---------- */
   function selectNode(d){
     st.sel=d; st.hoverId=null;
-    drawArcs(d,true); paint(); showInfo(d);
+    drawArcs(d,true); paint(); showInfo(d); renderStrip(); renderHist();
+    try{ history.replaceState(null,"","#a="+encodeURIComponent(d.id)); }catch(e){}
     if(window.innerWidth<=820)document.getElementById("panel").classList.add("open");
   }
   function clearSel(){
     st.sel=null; st.hoverId=null;
-    drawArcs(null,false); paint();
+    drawArcs(null,false); paint(); renderStrip(); renderHist();
     d3.select("#info").style("display","none");
+    try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){}
   }
 
-  /* ---------- tarjeta ---------- */
+  /* ---------- tarjeta de selección ---------- */
   function outMeanJump(d){
     var out=linkObjs.filter(function(l){return l.source.id===d.id;});
     if(!out.length)return null;
-    return d3.sum(out,function(l){return (+l.target.year||0)-(+l.source.year||0);})/out.length;
+    return d3.sum(out,function(l){return jumpOf(l);})/out.length;
+  }
+  function schoolTxt(d){
+    var s=d.escuela||"";
+    if(!s) return "";
+    return isEN()?(SCHOOL_EN[s]||s):s;
   }
   function showInfo(d){
     var c=color(d.primary_movement||"—");
     var up=(d.incoming_neighbors||[]).filter(function(x){return byId[x];});
     var down=(d.outgoing_neighbors||[]).filter(function(x){return byId[x];});
-    var mj=outMeanJump(d);
-    function chips(arr){return arr.length?arr.map(function(x){return "<span class='chip' data-go='"+x.replace(/'/g,"&#39;")+"'>"+x+"</span>";}).join(""):"<span class='hint'>"+LBL("none")+"</span>";}
+    var mj=outMeanJump(d), dep=depthStats(d), sch=schoolTxt(d);
+    var rts=rootsOf(d,true).slice(0,6);
+    function chips(arr){return arr.length?arr.map(function(x){return "<span class='chip' data-go='"+esc(x)+"'>"+esc(x)+"</span>";}).join(""):"<span class='hint'>"+esc(LBL("none"))+"</span>";}
+    var marked=isRef(d.id);
     d3.select("#info").style("display","block").html(
-      "<div class='name'>"+d.name+"</div>"+
-      "<div class='meta'>"+(d.year||"—")+" · "+LBL("trophic")+" "+(d.trophic_level||"—")+"</div>"+
-      "<span class='badge' style='background:"+c+"'>"+(d.primary_movement||"—")+"</span>"+
-      "<div class='nums'><div class='n'><div class='v'>"+(d.influenced||0)+"</div><div class='l'>"+LBL("lblInfluenced")+"</div></div>"+
-      "<div class='n'><div class='v'>"+(d.influencers||0)+"</div><div class='l'>"+LBL("lblInfluencedBy")+"</div></div>"+
-      "<div class='n'><div class='v'>"+(mj==null?"—":fmt1(mj))+"</div><div class='l'>"+LBL("lblJump")+"</div></div></div>"+
-      "<div class='lst up'><h4>"+LBL("hUpstream")+"</h4>"+chips(up)+"</div>"+
-      "<div class='lst down'><h4>"+LBL("hDownstream")+"</h4>"+chips(down)+"</div>"+
-      (d.wikipedia_url||d.google_images_url?"<div class='ext'>"+(d.wikipedia_url?"<a href='"+d.wikipedia_url+"' target='_blank' rel='noopener'>Wikipedia</a>":"")+(d.google_images_url?"<a href='"+d.google_images_url+"' target='_blank' rel='noopener'>"+LBL("images")+"</a>":"")+"</div>":"")
+      "<button type='button' class='star"+(marked?" on":"")+"' id='refstar' title='"+esc(marked?LBL("remRef"):LBL("addRef"))+"' aria-label='"+esc(marked?LBL("remRef"):LBL("addRef"))+"'>"+(marked?"★":"☆")+"</button>"+
+      "<div class='name'>"+esc(d.name)+"</div>"+
+      "<div class='meta'>"+(d.year||"—")+" · "+esc(LBL("trophic"))+" "+(d.trophic_level||"—")+(sch?" · "+esc(LBL("school"))+": "+esc(sch):"")+"</div>"+
+      "<span class='badge' style='background:"+c+"'>"+esc(d.primary_movement||"—")+"</span>"+
+      "<div class='nums'><div class='n'><div class='v'>"+fmtI(d.influenced||0)+"</div><div class='l'>"+esc(LBL("lblInfluenced"))+"</div></div>"+
+      "<div class='n'><div class='v'>"+fmtI(d.influencers||0)+"</div><div class='l'>"+esc(LBL("lblInfluencedBy"))+"</div></div>"+
+      "<div class='n'><div class='v'>"+(mj==null?"—":fmt1(mj))+"</div><div class='l'>"+esc(LBL("lblJump"))+"</div></div></div>"+
+      "<div class='nums'><div class='n'><div class='v'>"+(dep?fmtI(dep.levels):"—")+"</div><div class='l'>"+esc(LBL("lblLevels"))+"</div></div>"+
+      "<div class='n'><div class='v'>"+(dep?fmtI(dep.total):"—")+"</div><div class='l'>"+esc(LBL("lblToRoot"))+"</div></div>"+
+      "<div class='n'><div class='v'>"+(dep?fmt1(dep.perGen):"—")+"</div><div class='l'>"+esc(LBL("lblPerGen"))+"</div></div></div>"+
+      (rts.length?"<div class='lst up'><h4>"+esc(LBL("roots"))+"</h4>"+
+        rts.map(function(n){return "<span class='chip' data-go='"+esc(n.id)+"'>"+esc(n.name)+" "+n.year+"</span>";}).join("")+"</div>":"")+
+      "<div class='lst up'><h4>"+esc(LBL("hUpstream"))+"</h4>"+chips(up)+"</div>"+
+      "<div class='lst down'><h4>"+esc(LBL("hDownstream"))+"</h4>"+chips(down)+"</div>"+
+      "<div class='ext'>"+
+        (d.wikipedia_url?"<a href='"+esc(d.wikipedia_url)+"' target='_blank' rel='noopener'>Wikipedia</a>":"")+
+        (d.google_images_url?"<a href='"+esc(d.google_images_url)+"' target='_blank' rel='noopener'>"+esc(LBL("images"))+"</a>":"")+
+        "<a href='red-influencia.html#a="+encodeURIComponent(d.id)+"'>"+esc(LBL("linkNet"))+"</a>"+
+        "<a href='explorador_distancias.html#a="+encodeURIComponent(d.id)+"'>"+esc(LBL("linkSim"))+"</a>"+
+      "</div>"
     );
     d3.select("#info").selectAll(".chip").on("click",function(){
       var id=this.getAttribute("data-go");
       if(byId[id]){scrollToNode(byId[id]);selectNode(byId[id]);}
     });
+    document.getElementById("refstar").onclick=function(ev){
+      ev.stopPropagation();
+      if(isRef(d.id)) refs=refs.filter(function(x){return x!==d.id;});
+      else refs.push(d.id);
+      saveRefs(); renderRefs(); showInfo(d); paint();
+    };
+  }
+
+  /* ---------- mis referentes ---------- */
+  function refAnalysis(){
+    var cover={};
+    refs.forEach(function(id){
+      var lv=ancestry(byId[id],false);
+      Object.keys(lv).forEach(function(a){ if(a!==id) cover[a]=(cover[a]||0)+1; });
+    });
+    var list=Object.keys(cover).filter(function(a){return !isRef(a);});
+    list.sort(function(a,b){
+      return (cover[b]-cover[a]) || ((+byId[a].year||0)-(+byId[b].year||0)) || ((byId[b].influenced||0)-(byId[a].influenced||0));
+    });
+    var full=list.filter(function(a){return cover[a]===refs.length;});
+    var seeds=(full.length?full:list).slice(0,3);
+    var gapSet={};
+    seeds.forEach(function(a){
+      var q=[byId[a]], depth=0;
+      var seen={}; seen[a]=true;
+      while(q.length&&depth<2){
+        var nq=[];
+        q.forEach(function(x){
+          (x.outgoing_neighbors||[]).forEach(function(y){
+            if(!byId[y]||seen[y]) return;
+            seen[y]=true; nq.push(byId[y]);
+            if(!isRef(y)&&list.indexOf(y)<0) gapSet[y]=true;
+          });
+        });
+        q=nq; depth++;
+      }
+    });
+    var gap=Object.keys(gapSet).sort(function(a,b){
+      return ((byId[b].influenced||0)-(byId[a].influenced||0))||((+byId[a].year||0)-(+byId[b].year||0));
+    }).slice(0,8);
+    return {cover:cover,list:list,full:full,gap:gap};
+  }
+  function renderRefs(){
+    var box=document.getElementById("refbody");
+    if(!refs.length){ box.innerHTML="<p class='hint' style='margin:0'>"+esc(LBL("refEmpty"))+"</p>"; wireRefChips(box); return; }
+    var h=refs.map(function(id){
+      return "<span class='refchip'><b data-go='"+esc(id)+"'>"+esc(byId[id].name)+"</b><span class='x' data-del='"+esc(id)+"'>×</span></span>";
+    }).join("");
+    var A=refAnalysis();
+    var top=(A.full.length?A.full:A.list).slice(0,6);
+    if(top.length){
+      h+="<div class='lst up' style='margin-top:10px'><h4>"+esc(LBL("refCommon"))+"</h4>"+
+         top.map(function(a){
+           return "<span class='chip' data-go='"+esc(a)+"'>"+esc(byId[a].name)+" "+byId[a].year+
+                  " <span style='color:var(--faint)'>"+esc(LBL("refReach").replace("{c}",fmtI(A.cover[a])).replace("{t}",fmtI(refs.length)))+"</span></span>";
+         }).join("")+"</div>";
+    }
+    if(A.gap.length){
+      h+="<div class='lst down'><h4>"+esc(LBL("refGap"))+"</h4>"+
+         A.gap.map(function(a){return "<span class='chip' data-go='"+esc(a)+"'>"+esc(byId[a].name)+" "+byId[a].year+"</span>";}).join("")+"</div>";
+    }
+    /* veredicto */
+    var v1;
+    if(refs.length===1){
+      v1=A.list.length?LBL("refV1one").replace("{name}",esc(byId[refs[0]].name)).replace("{list}",listNames(A.list.slice(0,2)))
+                      :LBL("refOne");
+    }else if(A.full.length){
+      v1=LBL("refV1all").replace("{n}",fmtI(refs.length)).replace("{list}",listNames(A.full.slice(0,3)));
+    }else if(A.list.length&&A.cover[A.list[0]]>1){
+      v1=LBL("refV1some").replace("{n}",fmtI(refs.length)).replace("{list}",listNames(A.list.slice(0,2)))
+           .replace("{c}",fmtI(A.cover[A.list[0]]));
+    }else{
+      v1=LBL("refV1none").replace(/\{n\}/g,fmtI(refs.length));
+    }
+    var ys=refs.map(function(id){return +byId[id].year||0;}).sort(function(a,b){return a-b;});
+    var mine={}; refs.forEach(function(id){ mine[byId[id]._lane]=true; });
+    var mCount=Object.keys(mine).length, ratio=mCount/lanes.length;
+    var missing=lanes.filter(function(L){return !mine[L.key];})
+                     .sort(function(a,b){return b.nodes.length-a.nodes.length;})[0];
+    var tail;
+    if(ratio>=.5) tail=LBL("refTailWide");
+    else{
+      tail=(ratio>=.25?LBL("refTailNarrow"):LBL("refTailTight"))
+             .replace("{miss}",missing?esc(laneName(missing)):"—")
+             .replace("{k}",missing?fmtI(missing.nodes.length):"0");
+    }
+    var v2=LBL("refV2").replace("{y0}",String(ys[0])).replace("{y1}",String(ys[ys.length-1]))
+             .replace("{span}",fmtI(ys[ys.length-1]-ys[0]))
+             .replace("{m}",fmtI(mCount)).replace("{M}",fmtI(lanes.length)).replace("{tail}",tail);
+    h+="<p class='foot'>"+v1+" "+v2+"</p>";
+    box.innerHTML=h;
+    wireRefChips(box);
+  }
+  function listNames(ids){
+    return ids.map(function(a){return "<em>"+esc(byId[a].name)+"</em> ("+byId[a].year+")";}).join(", ");
+  }
+  function wireRefChips(box){
+    Array.prototype.forEach.call(box.querySelectorAll("[data-go]"),function(el){
+      el.onclick=function(){ var n=byId[el.getAttribute("data-go")]; if(n){scrollToNode(n);selectNode(n);} };
+      el.style.cursor="pointer";
+    });
+    Array.prototype.forEach.call(box.querySelectorAll("[data-del]"),function(el){
+      el.onclick=function(){
+        var id=el.getAttribute("data-del");
+        refs=refs.filter(function(x){return x!==id;});
+        saveRefs(); renderRefs(); paint();
+        if(st.sel) showInfo(st.sel);
+      };
+    });
   }
 
   /* ---------- tooltip ---------- */
   var tip=document.getElementById("tip");
-  function showTip(ev,d){tip.innerHTML="<div class='t'>"+d.name+"</div><div class='m'>"+(d.primary_movement||"—")+" · "+(d.year||"—")+" · "+LBL("tipInf")+" "+(d.influenced||0)+"</div>";tip.style.opacity=1;moveTip(ev);}
+  function showTip(ev,d){
+    var sch=schoolTxt(d);
+    tip.innerHTML="<div class='t'>"+esc(d.name)+"</div><div class='m'>"+esc(d.primary_movement||"—")+" · "+(d.year||"—")+
+      " · "+esc(LBL("tipInf"))+" "+fmtI(d.influenced||0)+(sch?" · "+esc(sch):"")+"</div>";
+    tip.style.opacity=1;moveTip(ev);
+  }
   function moveTip(ev){var x=Math.min(ev.clientX+14,innerWidth-262),y=Math.min(ev.clientY+14,innerHeight-70);tip.style.left=x+"px";tip.style.top=y+"px";}
   function hideTip(){tip.style.opacity=0;}
 
   function scrollToNode(d){
+    if(d.px==null||d.py==null) return;
     stage.scrollTo({left:Math.max(0,d.px-stage.clientWidth/2),top:Math.max(0,d.py-stage.clientHeight/2),behavior:"smooth"});
   }
 
@@ -525,7 +1190,7 @@
     if(!q){resBox.style.display="none";return;}
     var hits=nodes.filter(function(n){return norm(n.name).indexOf(q)>=0;}).slice(0,12);
     resBox.style.display=hits.length?"block":"none";
-    resBox.innerHTML=hits.map(function(n){return "<div class='res' data-id='"+n.id.replace(/'/g,"&#39;")+"'>"+n.name+" <small>"+(n.primary_movement||"")+" · "+(n.year||"")+"</small></div>";}).join("");
+    resBox.innerHTML=hits.map(function(n){return "<div class='res' data-id='"+esc(n.id)+"'>"+esc(n.name)+" <small>"+esc(n.primary_movement||"")+" · "+(n.year||"")+"</small></div>";}).join("");
     Array.prototype.forEach.call(resBox.querySelectorAll(".res"),function(el){
       el.onclick=function(){var n=byId[el.getAttribute("data-id")];resBox.style.display="none";searchEl.value=n.name;scrollToNode(n);selectNode(n);};
     });
@@ -538,21 +1203,90 @@
   document.getElementById("yminv").textContent=YR0;
   document.getElementById("ymaxv").textContent=YR1;
   function afterYearChange(){
-    paint();
-    if(st.sel)drawArcs(st.sel,true);
+    paint(); renderStrip(); renderHist();
+    if(st.sel){ drawArcs(st.sel,true); showInfo(st.sel); }
     else if(st.hoverId)drawArcs(byId[st.hoverId],false);
   }
   ymin.addEventListener("input",function(){st.ymin=Math.min(+ymin.value,+ymax.value);ymin.value=st.ymin;document.getElementById("yminv").textContent=st.ymin;afterYearChange();});
   ymax.addEventListener("input",function(){st.ymax=Math.max(+ymax.value,+ymin.value);ymax.value=st.ymax;document.getElementById("ymaxv").textContent=st.ymax;afterYearChange();});
 
+  /* ---------- modo de arcos ---------- */
+  var modeseg=document.getElementById("modeseg");
+  function renderMode(){
+    Array.prototype.forEach.call(modeseg.querySelectorAll("button"),function(b){
+      b.classList.toggle("on",b.getAttribute("data-mode")===st.mode);
+    });
+  }
+  Array.prototype.forEach.call(modeseg.querySelectorAll("button"),function(b){
+    b.onclick=function(){
+      st.mode=b.getAttribute("data-mode");
+      renderMode();
+      if(st.sel){drawArcs(st.sel,true);paint();}
+    };
+  });
+
   document.getElementById("allbtn").onclick=function(){
-    st.ymin=YR0;st.ymax=YR1;
+    st.ymin=YR0;st.ymax=YR1;st.mode="one";st.offMov=new Set();
     ymin.value=YR0;ymax.value=YR1;
     document.getElementById("yminv").textContent=YR0;
     document.getElementById("ymaxv").textContent=YR1;
     searchEl.value="";resBox.style.display="none";
-    clearSel();paint();
+    renderMode();
+    st.sel=null; st.hoverId=null;
+    d3.select("#info").style("display","none");
+    try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){}
+    afterMovChange();
   };
+
+  /* ---------- exportar / importar referentes ---------- */
+  var refio=document.getElementById("refio"), refiowrap=document.getElementById("refiowrap");
+  document.getElementById("refiobtn").onclick=function(){
+    var open=refiowrap.style.display!=="block";
+    refiowrap.style.display=open?"block":"none";
+    if(open) refio.value=refs.map(function(id){return byId[id].name;}).join("\n");
+  };
+  document.getElementById("refapply").onclick=function(){
+    var lines=refio.value.split(/[\n;]+/).map(function(s){return s.trim();}).filter(Boolean);
+    var found=[];
+    lines.forEach(function(ln){
+      if(byId[ln]&&found.indexOf(ln)<0){ found.push(ln); return; }
+      var q=norm(ln);
+      for(var i=0;i<nodes.length;i++){ if(norm(nodes[i].name)===q&&found.indexOf(nodes[i].id)<0){ found.push(nodes[i].id); return; } }
+    });
+    document.getElementById("refmsg").textContent=found.length?LBL("refImported").replace("{n}",fmtI(found.length)):LBL("refNoMatch");
+    if(found.length){ refs=found; saveRefs(); renderRefs(); paint(); if(st.sel) showInfo(st.sel); }
+  };
+  var clearArmed=false;
+  document.getElementById("refclear").onclick=function(){
+    if(!clearArmed&&refs.length){ clearArmed=true; document.getElementById("refmsg").textContent=LBL("refClearAsk"); refiowrap.style.display="block"; return; }
+    clearArmed=false;
+    refs=[]; saveRefs(); renderRefs(); paint();
+    document.getElementById("refmsg").textContent="";
+    if(st.sel) showInfo(st.sel);
+  };
+
+  /* ---------- nota de método: cifras del propio corpus ---------- */
+  function fillMethod(){
+    var dc={};
+    nodes.forEach(function(n){var d=Math.floor((+n.year||0)/10)*10; dc[d]=(dc[d]||0)+1;});
+    var top=null;
+    Object.keys(dc).forEach(function(k){ if(!top||dc[k]>top.c) top={d:+k,c:dc[k]}; });
+    function setTxt(id,txt){ var el=document.getElementById(id); if(el) el.textContent=txt; }
+    setTxt("mn-peak",DICT.es.mnPeak.replace("{c}",String(top.c)).replace("{d}",String(top.d)));
+    setTxt("mn-peak-en",DICT.en.mnPeak.replace("{c}",String(top.c)).replace("{d}",String(top.d)));
+    setTxt("mn-zero",String(G.zero)); setTxt("mn-zero-en",String(G.zero));
+    setTxt("mn-neg",String(G.neg)); setTxt("mn-neg-en",String(G.neg));
+    var small=Object.keys(movCounts).filter(function(m){return movCounts[m]<3;}).sort();
+    var smallN=small.reduce(function(a,m){return a+movCounts[m];},0);
+    var smallTxt=small.join(", ");
+    setTxt("mn-otros",DICT.es.mnOtros.replace("{list}",smallTxt).replace("{n}",String(smallN)));
+    setTxt("mn-otros-en",DICT.en.mnOtros.replace("{list}",smallTxt).replace("{n}",String(smallN)));
+    var ec={};
+    nodes.forEach(function(n){ if(n.escuela) ec[n.escuela]=(ec[n.escuela]||0)+1; });
+    var eKeys=Object.keys(ec).sort(function(a,b){return ec[b]-ec[a];});
+    setTxt("mn-esc",eKeys.map(function(k){return k+" "+ec[k];}).join(" · "));
+    setTxt("mn-esc-en",eKeys.map(function(k){return (SCHOOL_EN[k]||k)+" "+ec[k];}).join(" · "));
+  }
 
   /* ---------- panel móvil ---------- */
   var panel=document.getElementById("panel"),ptoggle=document.getElementById("ptoggle");
@@ -566,16 +1300,30 @@
   });
 
   /* ---------- arranque ---------- */
-  renderStrip();
+  if(window.innerWidth<=820){ var dEl=document.getElementById("dist"); if(dEl) dEl.open=false; }
+  renderChips(); renderMode(); renderMovTab(); renderRefs(); fillMethod();
+  renderStrip(); renderHist();
   draw();
   ptoggle.textContent=LBL("controls");
+
+  /* enlace profundo: #a=Nombre del autor, compartido con las otras dos vistas */
+  (function(){
+    var m=/^#a=(.+)$/.exec(location.hash||"");
+    if(!m) return;
+    var id;
+    try{ id=decodeURIComponent(m[1]); }catch(e){ id=m[1]; }
+    var n=byId[id];
+    if(!n){ var q=norm(id); for(var i=0;i<nodes.length;i++){ if(norm(nodes[i].name)===q){ n=nodes[i]; break; } } }
+    if(n){ scrollToNode(n); selectNode(n); }
+  })();
 
   /* Repinta lo que el JS genera cuando cambia el idioma. Se declara al final
      del arranque, así que el apply() inicial del conmutador no lo encuentra
      todavía y no intenta repintar una app a medio construir. Conserva la
      selección y los filtros: sólo se rehacen los rótulos y el lienzo. */
   window.onLangChange=function(){
-    renderStrip();
+    renderChips(); renderMovTab(); renderRefs(); fillMethod();
+    renderStrip(); renderHist();
     draw();
     if(st.sel)showInfo(st.sel);
     ptoggle.textContent=panel.classList.contains("open")?LBL("close"):LBL("controls");

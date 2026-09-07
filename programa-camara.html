@@ -565,7 +565,8 @@ const DICT={
   cFits:'Las tres monedas salen aquí <b>a la par</b>: los {need} pasos que cederías en borrón o en profundidad son los mismos {ex} que el ISO añade sobre lo que el programa ya gasta ({st} en total, dentro de tu techo de {cap}). La exposición se conserva; lo que eliges no es cuánto pagar, sino en qué calidad perderlo.',
   cCheap:'Comparadas las tres monedas, la barata es el <b>ISO</b>: añade {ex} pasos sobre lo que el programa ya gasta —{st} en total, dentro de tu techo de {cap}— frente a los {need} pasos de borrón o de profundidad que cederías por no pagarlo.',
   cFree:'Y la cuenta se da la vuelta: la pareja que ejecuta tu intención pide {st} pasos de altas luces, <b>{x} menos</b> de los que el programa ya está gastando. Aquí no cedes nada: no falta luz, está mal repartida. Abre a f/{nn} y el ISO baja mientras el tiempo se acorta.',
-  cDofNever:'Antes que ninguna moneda: la profundidad que pides <b>no cabe en esta escala</b> —haría falta f/{nmin}—, así que ningún reparto de tiempo, diafragma e ISO la ejecuta; hay que mover la distancia, la focal o la intención. ',
+  cDofNever:'Antes que ninguna moneda: la profundidad que pides <b>se sale de la escala</b> —haría falta f/{nmin}, y el diagrama acaba en f/16—, así que ningún reparto de tiempo, diafragma e ISO la ejecuta; hay que mover la distancia, la focal o la intención. ',
+  cDofNone:'Antes que ninguna moneda: a esta distancia <b>ningún diafragma cubre la profundidad que pides</b>, así que no hay pareja de tiempo y diafragma que ejecute tu intención ni ISO que la compre; hay que mover la distancia, la focal o la intención. ',
   cClipUnder:'Y hay un problema anterior a la contabilidad: <b>no hay luz suficiente</b>. El programa ya está en su tiempo más largo, con el diafragma abierto y el ISO en el techo; lo que falta no se reparte entre monedas, se añade. ',
   cClipOver:'Y hay un problema anterior a la contabilidad: <b>sobra luz</b>. El programa toca el techo de obturación de este cuerpo ({cap}) y no puede apretar más el reparto; la moneda que falta es un <a href="filtro-sensor.html#nd">filtro ND</a>. ',
   cOverShoot:'Y no es ISO lo que falta: con el techo de obturación de este cuerpo ({cap}) esa pareja <b>sobreexpone {x} pasos</b>. La moneda que se paga aquí es luz de menos, es decir un <a href="filtro-sensor.html#nd">filtro ND</a>.',
@@ -647,7 +648,8 @@ const DICT={
   cFits:'The three currencies come out <b>at par</b> here: the {need} stops you would cede in blur or in depth are the same {ex} that ISO adds on top of what the program already spends ({st} in total, within your {cap} ceiling). Exposure is conserved; what you choose is not how much to pay, but which quality to lose it in.',
   cCheap:'With the three currencies compared, the cheap one is <b>ISO</b>: it adds {ex} stops on top of what the program already spends — {st} in total, within your {cap} ceiling — against the {need} stops of blur or depth you would cede by not paying it.',
   cFree:'And the accounting turns around: the pair that executes your intention asks for {st} stops of highlight range, <b>{x} fewer</b> than the program is already spending. You cede nothing here: the light is not missing, it is badly shared out. Open to f/{nn} and ISO falls while the time shortens.',
-  cDofNever:'Before any currency: the depth you ask for <b>does not fit this scale</b> — it would take f/{nmin} — so no split of time, aperture and ISO executes it; distance, focal length or intention has to move. ',
+  cDofNever:'Before any currency: the depth you ask for <b>runs off the scale</b> — it would take f/{nmin}, and the diagram ends at f/16 — so no split of time, aperture and ISO executes it; distance, focal length or intention has to move. ',
+  cDofNone:'Before any currency: at this distance <b>no aperture covers the depth you ask for</b>, so there is no time and aperture pair that executes your intention and no ISO that buys it; distance, focal length or intention has to move. ',
   cClipUnder:'And there is a problem prior to the accounting: <b>there is not enough light</b>. The program is already at its longest time, wide open and with ISO at the ceiling; what is missing is not shared between currencies, it has to be added. ',
   cClipOver:'And there is a problem prior to the accounting: <b>there is too much light</b>. The program hits this body’s shutter ceiling ({cap}) and cannot tighten the split any further; the missing currency is an <a href="filtro-sensor.html#nd">ND filter</a>. ',
   cOverShoot:'And ISO is not what is missing: with this body’s shutter ceiling ({cap}) that pair <b>overexposes by {x} stops</b>. The currency paid here is less light, that is an <a href="filtro-sensor.html#nd">ND filter</a>.',
@@ -1208,12 +1210,15 @@ function renderCost(){
   /* estados en los que la contabilidad en pasos no decide nada: la profundidad no cabe en la
      escala, o la exposición misma se sale por abajo o por arriba. Sin esto, el panel llegaba a
      declarar «no hay moneda que pagar» mientras el veredicto declaraba la toma inalcanzable. */
-  const stuck = jj.dofNever || !!jj.pt.clip;
-  if(jj.dofNever) note+=LBL('cDofNever',{nmin: goal.nMin===Infinity ? '∞' : fmtN(goal.nMin)});
+  if(jj.dofNever) note+= (goal.nMin===Infinity) ? LBL('cDofNone') : LBL('cDofNever',{nmin:fmtN(goal.nMin)});
   if(jj.pt.clip==='under') note+=LBL('cClipUnder');
   else if(jj.pt.clip==='over') note+=LBL('cClipOver',{cap:fmtT(1/bd.cap)});
-  if(need<0.05){
-    if(!stuck) note+= dIso>0.1 ? LBL('cNoneIso',{x:nf(dIso,1)}) : LBL('cNone');
+  if(jj.dofNever){
+    /* si la profundidad no la cubre ningún diafragma, ninguna pareja ejecuta la intención:
+       nombrar aquí «la pareja que sí la ejecuta» contradiría al veredicto. */
+  }
+  else if(need<0.05){
+    if(!jj.pt.clip) note+= dIso>0.1 ? LBL('cNoneIso',{x:nf(dIso,1)}) : LBL('cNone');
   }
   else{
     const sol=solveIntention();

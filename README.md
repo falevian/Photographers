@@ -74,9 +74,9 @@ la página es su manual; el código está en [`scripts/`](scripts/).
 
 | Documento | Qué hace | Peso |
 |---|---|---:|
-| [`red-influencia.html`](red-influencia.html) | 293 autores y 467 relaciones de influencia declaradas. Traza linajes hacia arriba o hacia abajo, busca la ruta entre dos autores y dimensiona los nodos por nivel trófico. Se adapta a pantalla pequeña y a interacción táctil. | 202 KB |
+| [`red-influencia.html`](red-influencia.html) | 293 autores y 467 relaciones de influencia declaradas. Traza linajes hacia arriba o hacia abajo, busca la ruta entre dos autores y dimensiona los nodos por nivel trófico. Se adapta a pantalla pequeña y a interacción táctil. | 246 KB |
 | [`explorador_distancias.html`](explorador_distancias.html) | 309 autores colocados por parecido entre sus imágenes, con las fotos incrustadas. Da la distancia de contenido de cada pareja y, a la vez, su distancia en la red de influencia. | 6,4 MB |
-| [`cronologia-red.html`](cronologia-red.html) | La tercera vista del mismo dato: los 293 autores sobre dos siglos, los movimientos como carriles y las influencias como arcos que cruzan décadas, con el salto medio en años de las 467 relaciones calculado del propio corpus. | 199 KB |
+| [`cronologia-red.html`](cronologia-red.html) | La tercera vista del mismo dato: los 293 autores sobre dos siglos, los movimientos como carriles y las influencias como arcos que cruzan décadas, con el salto medio en años de las 467 relaciones calculado del propio corpus. | 6,5 MB |
 | [`ficha-fases-juicio-estetico.html`](ficha-fases-juicio-estetico.html) | Cómo se juzga una imagen a lo largo del tiempo de procesamiento visual, tratado como actualización bayesiana; dónde cae cada herramienta de la ficha del marco en las tres fases, y un protocolo en tres tiempos para juzgar lo propio sin engañarse. La ficha hermana dice qué hacer; esta, cómo se juzga lo hecho. | 82 KB |
 | [`ficha-marco-pensar.html`](ficha-marco-pensar.html) | Ficha de consulta del ensayo «Marco para pensar la fotografía»: las cuatro fases de la práctica, el eje técnica frente a sentido —la demostración, el programa cumplido, la repetibilidad— con Szarkowski, Minor White, Robert y Ansel Adams, Provoke y Nakahira; nueve autores y ocho conceptos japoneses con los lemas de campo y las trampas de *La Foto Rota*. | 114 KB |
 
@@ -85,7 +85,7 @@ la página es su manual; el código está en [`scripts/`](scripts/).
 | Documento | Qué hace | Peso |
 |---|---|---:|
 | [`sensor-al-papel.html`](sensor-al-papel.html) | ¿A qué tamaño puedo imprimir esto y desde dónde se va a mirar? La cadena entera —píxeles, difracción, proceso de impresión y agudeza del ojo— con el eslabón limitante siempre a la vista. | 81 KB |
-| [`zine-generator.html`](zine-generator.html) | Maquetación de fanzines y fotolibros a partir de tus propias imágenes, con la imposición de cuadernillo resuelta y exportación a PDF. Las tipografías van incrustadas. | 668 KB |
+| [`zine-generator.html`](zine-generator.html) | Maquetación de fanzines y fotolibros a partir de tus propias imágenes, con la imposición de cuadernillo resuelta y exportación a PDF. Las tipografías van incrustadas. | 736 KB |
 
 ### Documentación
 
@@ -176,7 +176,7 @@ address. With no prior choice, the browser's language is followed.
 |---|---|---:|
 | [`simulador-eclipse.html`](simulador-eclipse.html) | Framing and exposure for the total solar eclipse of 2 August 2027 (southern Spain, northern Morocco, Egypt): whether the corona fits your frame, the phase-by-phase bracket with Espenak's photometry, nine sites from Tarifa to Luxor each in local time, and a printable field sheet. | 37 KB |
 | [`simulador-flash.html`](simulador-flash.html) | Flash optical bench. The hardness of a shadow is set by the angular size of the source as seen from the subject: shadows, light falloff from the guide number, overpowering the sun, and balance with ambient light. | 55 KB |
-| [`programa-camara.html`](programa-camara.html) | The automatic mode is not neutral: it carries a program. Draws the line it follows — shutter, aperture and ISO at each light level — overlays the blur and depth of field your intent demanded, and marks where they collide. Born of the essay's Flusser section. | 103 KB |
+| [`programa-camara.html`](programa-camara.html) | The automatic mode is not neutral: it carries a program. Draws the line it follows — shutter, aperture and ISO at each light level — overlays the blur and depth of field your intent demanded, and marks where they collide. Born of the essay's Flusser section. | 107 KB |
 | [`niebla.html`](niebla.html) | Whether fog will form at tomorrow's sunrise. A 48-hour hourly index on the convergence of temperature and dew point, plus a multi-model Bayesian fusion — now with ICON EPS, GFS ENS and ECMWF ENS ensembles of 30 to 50 members — that readjusts its weights from your own observations and recalibrates itself (Platt) from your log. The forecast is frozen automatically each night, so the morning's observation is compared against what was predicted the evening before and never against anything later. Needs a connection: the data comes from Open-Meteo. Manual: [`manual-niebla.html`](manual-niebla.html); quick guide: [`guia-niebla.html`](guia-niebla.html). | 105 KB |
 | [`astro.html`](astro.html) | Whether the night will be worth photographing the sky. An hourly index combining layered cloud, aerosol transparency (CAMS AOD), seeing from upper wind, dew and Moon, with weights that rescale for deep sky, planetary or nightscape work. Same Bayesian fusion and learning as the fog tool. Manual: [`manual-astro.html`](manual-astro.html). | 99 KB |
 | [`luz-natural.html`](luz-natural.html) | When the light is good and where the Moon will be, for any place and date: golden and blue hours with their real durations, rise and set azimuths, the lunar phase drawn, and the alignment finder for planning the Moon over your frame. All astronomy computed locally: works offline. | 48 KB |

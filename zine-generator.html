@@ -12,11 +12,11 @@
 <meta name="apple-mobile-web-app-title" content="Zines">
 <title>Generador de zines · Rafael Vida</title>
 <meta name="author" content="Rafael Vida">
-<meta name="description" content="Maquetación de fanzines y fotolibros a partir de tus propias fotos: ordena por fecha EXIF, calcula la imposición de cuadernillo y exporta un PDF A4 dúplex listo para imprimir y plegar.">
+<meta name="description" content="Maquetación de fanzines y fotolibros a partir de tus propias fotos: vista de pliegos, A5 vertical o apaisada, imposición de cuadernillo, pie con ficha técnica EXIF y PDF A4 dúplex listo para imprimir, plegar y grapar.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Photographers">
 <meta property="og:title" content="Generador de zines · Rafael Vida">
-<meta property="og:description" content="Maquetación de fanzines y fotolibros a partir de tus propias fotos: ordena por fecha EXIF, calcula la imposición de cuadernillo y exporta un PDF A4 dúplex listo para imprimir y plegar.">
+<meta property="og:description" content="Maquetación de fanzines y fotolibros a partir de tus propias fotos: vista de pliegos, A5 vertical o apaisada, imposición de cuadernillo, pie con ficha técnica EXIF y PDF A4 dúplex listo para imprimir, plegar y grapar.">
 <meta property="og:url" content="https://falevian.github.io/Photographers/zine-generator.html">
 <meta property="og:image" content="https://falevian.github.io/Photographers/og/papel.png">
 <meta property="og:image:width" content="1200">
@@ -139,10 +139,83 @@ main{padding:1.75rem 2.5rem;display:flex;flex-direction:column;gap:1.25rem}
 #status.err{color:var(--red)}
 #font-status{font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:.04em}
 
+/* ---------- veredictos, pliegos, método ---------- */
+.zg-verdicts{display:flex;flex-direction:column;gap:.5rem}
+.zg-v{border:1px solid var(--border);border-left:3px solid var(--fg2);background:#fff;border-radius:4px;padding:.6rem .8rem;font-size:12.5px;line-height:1.5;color:var(--fg2)}
+.zg-v b{color:var(--fg);font-weight:600}
+.zg-v.ok{border-left-color:var(--green)}
+.zg-v.warn{border-left-color:#b8741f}
+.zg-v.bad{border-left-color:var(--red)}
+.zg-tag{display:inline-block;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;border:1px solid currentColor;border-radius:2px;padding:0 5px;margin-right:6px;vertical-align:1px}
+.zg-tag.ok{color:var(--green)}.zg-tag.warn{color:#b8741f}.zg-tag.bad{color:var(--red)}
+.zg-tag.info{color:var(--fg2)}
+
+.zg-head{display:flex;align-items:baseline;gap:.8rem;flex-wrap:wrap;margin-bottom:.5rem}
+.zg-head .section-label{margin-bottom:0}
+.zg-head .zg-inline{display:flex;align-items:center;gap:.35rem;font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--fg2)}
+.zg-head select{background:#fff;border:1px solid var(--border);border-radius:3px;padding:3px 6px;font-family:var(--mono);font-size:10.5px;color:var(--fg)}
+.zg-head label{cursor:pointer}
+
+#zg-spreads{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.sp{border:1px solid var(--border);border-radius:4px;background:#fff;padding:6px}
+.sp-pair{display:flex;gap:0;position:relative;background:var(--bg2)}
+.sp-pair.stack{flex-direction:column}
+.sp-pair::after{content:'';position:absolute;left:50%;top:0;bottom:0;border-left:1px dashed var(--border2);pointer-events:none}
+.sp-pair.stack::after{left:0;right:0;top:50%;bottom:auto;border-left:0;border-top:1px dashed var(--border2)}
+.sp-pg{flex:1;position:relative;background:#fff;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.sp-pg img{max-width:100%;max-height:100%;object-fit:contain;display:block;pointer-events:none}
+.sp-pg.drag-ok{cursor:grab}
+.sp-pg.dragging{opacity:.35}
+.sp-pg.drop-hi{outline:2px solid var(--fg);outline-offset:-2px}
+.sp-pg .pn{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-family:var(--mono);font-size:7px;color:var(--fg3)}
+.sp-pg .kind{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--fg3);text-align:center;padding:4px}
+.sp-pg .mini-cover{font-family:var(--typewriter);font-size:9px;color:var(--fg);text-align:center;padding:6px;line-height:1.3}
+.sp-pg .cap{position:absolute;bottom:9px;left:3px;right:3px;font-family:var(--mono);font-size:5.5px;color:var(--fg3);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp-pg.rot180 img,.sp-pg.rot180 .mini-cover{transform:rotate(180deg)}
+.sp-lab{font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:var(--fg3);margin-top:4px;display:flex;justify-content:space-between}
+.sp-lab b{color:var(--fg2);font-weight:500}
+
+#thumbs .thumb .ppi{position:absolute;top:2px;left:11px;font-family:var(--mono);font-size:7px;padding:1px 3px;border-radius:2px;line-height:1.2;pointer-events:none;color:#fff;background:rgba(0,0,0,.55)}
+#thumbs .thumb .ppi.ok{background:rgba(39,112,74,.85)}
+#thumbs .thumb .ppi.warn{background:rgba(184,116,31,.85)}
+#thumbs .thumb .ppi.bad{background:rgba(192,57,43,.85)}
+#thumbs .thumb input.capin{position:absolute;left:2px;right:2px;bottom:12px;border:0;border-radius:2px;background:rgba(255,255,255,.9);font-family:var(--mono);font-size:7px;padding:2px 3px;color:#1a1a18;outline:none}
+.thumbs-foot{font-family:var(--mono);font-size:9.5px;color:var(--fg3);letter-spacing:.04em;margin-top:.45rem}
+.thumbs-foot a{color:var(--fg2)}
+
+section.method{border-top:1px solid var(--border);margin-top:.5rem;padding-top:1.5rem;max-width:74ch}
+section.method h2{font-family:var(--typewriter);font-size:16px;font-weight:400;letter-spacing:.02em;margin:1.4rem 0 .5rem}
+section.method h2:first-of-type{margin-top:0}
+section.method p{font-size:14px;line-height:1.55;color:var(--fg2);margin:0 0 .7rem}
+section.method p b{color:var(--fg);font-weight:600}
+section.method ul{margin:0 0 .9rem 1.1rem;font-size:13.5px;line-height:1.55;color:var(--fg2)}
+section.method li{margin-bottom:.3rem}
+section.method li b{color:var(--fg);font-weight:600}
+.zg-fold{background:#fff;border:1px solid var(--border);border-radius:4px;padding:.9rem 1rem;margin:.6rem 0 1rem}
+.zg-fold svg{width:100%;height:auto;display:block}
+.zg-fold .ctl{display:flex;align-items:center;gap:.7rem;margin-top:.6rem;font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--fg2)}
+.zg-fold .ctl input[type=range]{flex:1;accent-color:var(--fg)}
+.imp-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 0 1rem}
+table.imp{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:11px;font-variant-numeric:tabular-nums}
+table.imp th,table.imp td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--border);white-space:nowrap}
+table.imp th{background:var(--bg2);color:var(--fg2);font-weight:500;font-size:10px;letter-spacing:.06em;text-transform:uppercase}
+table.imp td b{color:var(--fg);font-weight:600}
+table.imp tr.sig td{background:var(--bg2);color:var(--fg2);font-size:10px;letter-spacing:.06em}
+
+.field .rangerow{display:flex;align-items:center;gap:.5rem}
+.field input[type=range]{padding:0;accent-color:var(--fg);width:100%}
+.field .rv{font-family:var(--mono);font-size:11px;color:var(--fg);min-width:44px;text-align:right}
+.field textarea{width:100%;background:#fff;border:1px solid var(--border);border-radius:3px;padding:6px 9px;font-family:var(--mono);font-size:11px;color:var(--fg);outline:none;resize:vertical;min-height:54px}
+.field textarea:focus{border-color:var(--fg2)}
+.chk{display:flex;align-items:flex-start;gap:.4rem;font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--fg2);margin-bottom:.45rem;cursor:pointer;line-height:1.35}
+.chk input{margin-top:1px;accent-color:var(--fg)}
+.hint{font-family:var(--mono);font-size:9px;color:var(--fg3);letter-spacing:.04em;line-height:1.45;margin-top:.3rem}
+
 @media(max-width:700px){
   .layout{grid-template-columns:1fr}
   aside{border-right:none;border-bottom:1px solid var(--border)}
   header,main,aside{padding:1.25rem}
+  #zg-spreads{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
 }
 
 /* ---------- conmutador de idioma ---------- */
@@ -219,6 +292,113 @@ header{padding-right:118px}
   </div>
 
   <div>
+    <div class="section-label" data-lang="es">Formato e impresión</div>
+    <div class="section-label" data-lang="en">Format and printing</div>
+    <div class="field">
+      <label data-lang="es">Formato de página</label>
+      <label data-lang="en">Page format</label>
+      <select id="zg-format">
+        <option value="portrait" selected data-es="A5 vertical · A4 apaisado plegado" data-en="A5 portrait · folded landscape A4">A5 vertical · A4 apaisado plegado</option>
+        <option value="landscape" data-es="A5 apaisada · A4 vertical plegado" data-en="A5 landscape · folded portrait A4">A5 apaisada · A4 vertical plegado</option>
+        <option value="auto" data-es="Automático · según tus fotos" data-en="Automatic · from your photos">Automático · según tus fotos</option>
+      </select>
+    </div>
+    <div class="field">
+      <label data-lang="es">Volteo del dúplex</label>
+      <label data-lang="en">Duplex flip</label>
+      <select id="zg-duplex">
+        <option value="short" selected data-es="Borde corto · espejo izquierda-derecha" data-en="Short edge · left-right mirror">Borde corto · espejo izquierda-derecha</option>
+        <option value="long" data-es="Borde largo · giro de 180°" data-en="Long edge · 180° turn">Borde largo · giro de 180°</option>
+      </select>
+      <div class="hint" data-lang="es">Si el dorso no cae donde toca, cambia esta opción. Antes, gasta una hoja con «Pliego de prueba».</div>
+      <div class="hint" data-lang="en">If the back side lands wrong, switch this. First spend one sheet on “Test sheet”.</div>
+    </div>
+    <div class="fields-2">
+      <div class="field">
+        <label data-lang="es">Hojas / cuadernillo</label>
+        <label data-lang="en">Sheets / signature</label>
+        <select id="zg-sig">
+          <option value="0" selected data-es="Todo en una firma" data-en="All in one signature">Todo en una firma</option>
+          <option value="2" data-es="2 hojas" data-en="2 sheets">2 hojas</option>
+          <option value="3" data-es="3 hojas" data-en="3 sheets">3 hojas</option>
+          <option value="4" data-es="4 hojas" data-en="4 sheets">4 hojas</option>
+          <option value="5" data-es="5 hojas" data-en="5 sheets">5 hojas</option>
+          <option value="6" data-es="6 hojas" data-en="6 sheets">6 hojas</option>
+          <option value="7" data-es="7 hojas" data-en="7 sheets">7 hojas</option>
+          <option value="8" data-es="8 hojas" data-en="8 sheets">8 hojas</option>
+        </select>
+      </div>
+      <div class="field">
+        <label data-lang="es">Papel</label>
+        <label data-lang="en">Paper</label>
+        <select id="zg-paper">
+          <option value="0.104" data-es="80 g/m²" data-en="80 gsm">80 g/m²</option>
+          <option value="0.13" selected data-es="100 g/m²" data-en="100 gsm">100 g/m²</option>
+          <option value="0.15" data-es="120 g/m²" data-en="120 gsm">120 g/m²</option>
+        </select>
+      </div>
+    </div>
+    <label class="chk"><input type="checkbox" id="zg-calib"><span data-lang="es">Añadir hoja de calibración</span><span data-lang="en">Add a calibration sheet</span></label>
+  </div>
+
+  <div>
+    <div class="section-label" data-lang="es">Página</div>
+    <div class="section-label" data-lang="en">Page</div>
+    <div class="field">
+      <label><span data-lang="es">Margen</span><span data-lang="en">Margin</span></label>
+      <div class="rangerow"><input id="zg-margin" type="range" min="0" max="20" step="0.5" value="7"><span class="rv" id="zg-margin-val">7 mm</span></div>
+    </div>
+    <div class="field">
+      <label data-lang="es">Encaje de la foto</label>
+      <label data-lang="en">Photo fit</label>
+      <select id="zg-fit">
+        <option value="contain" selected data-es="Encajar · foto entera" data-en="Fit · whole photo">Encajar · foto entera</option>
+        <option value="cover" data-es="Llenar · recorta al centro" data-en="Fill · centre crop">Llenar · recorta al centro</option>
+      </select>
+    </div>
+    <div class="field">
+      <label data-lang="es">Calidad de impresión</label>
+      <label data-lang="en">Print quality</label>
+      <select id="zg-quality">
+        <option value="240" data-es="240 ppp · borrador" data-en="240 ppi · draft">240 ppp · borrador</option>
+        <option value="300" selected data-es="300 ppp · copia" data-en="300 ppi · print">300 ppp · copia</option>
+        <option value="400" data-es="400 ppp · máximo" data-en="400 ppi · maximum">400 ppp · máximo</option>
+      </select>
+    </div>
+    <div class="field">
+      <label data-lang="es">Pie de foto</label>
+      <label data-lang="en">Photo caption</label>
+      <select id="zg-caption">
+        <option value="none" data-es="Sin pie" data-en="No caption">Sin pie</option>
+        <option value="date" selected data-es="Fecha de captura" data-en="Capture date">Fecha de captura</option>
+        <option value="exif" data-es="Ficha técnica EXIF" data-en="EXIF technical data">Ficha técnica EXIF</option>
+        <option value="custom" data-es="Texto propio · escríbelo bajo cada foto" data-en="Own text · type it under each photo">Texto propio · escríbelo bajo cada foto</option>
+      </select>
+    </div>
+  </div>
+
+  <div>
+    <div class="section-label" data-lang="es">Estructura</div>
+    <div class="section-label" data-lang="en">Structure</div>
+    <div class="field">
+      <label data-lang="es">Índice de miniaturas</label>
+      <label data-lang="en">Thumbnail index</label>
+      <select id="zg-index">
+        <option value="normal" selected data-es="Sí · rejilla amplia" data-en="Yes · roomy grid">Sí · rejilla amplia</option>
+        <option value="dense" data-es="Sí · rejilla densa" data-en="Yes · dense grid">Sí · rejilla densa</option>
+        <option value="none" data-es="No · ahorra páginas" data-en="No · saves pages">No · ahorra páginas</option>
+      </select>
+    </div>
+    <label class="chk"><input type="checkbox" id="zg-shift"><span data-lang="es">Arrancar las fotos una página después</span><span data-lang="en">Start the photos one page later</span></label>
+    <div class="field">
+      <label data-lang="es">Colofón (página 2)</label>
+      <label data-lang="en">Colophon (page 2)</label>
+      <textarea id="zg-colophon" maxlength="300" placeholder="Cámara, película, lugar, agradecimientos…" data-ph-es="Cámara, película, lugar, agradecimientos…" data-ph-en="Camera, film, place, thanks…"></textarea>
+      <div class="hint" id="zg-colophon-count"></div>
+    </div>
+  </div>
+
+  <div>
     <div class="section-label" data-lang="es">Vista previa portada</div>
     <div class="section-label" data-lang="en">Front cover preview</div>
     <div class="preview" id="cover-preview">
@@ -263,10 +443,39 @@ header{padding-right:118px}
     <div class="thumbs-hint" data-lang="es">Arrastra las miniaturas para reordenar · doble clic para borrar</div>
     <div class="thumbs-hint" data-lang="en">Drag the thumbnails to reorder · double-click to delete</div>
     <div id="thumbs"></div>
+    <div class="thumbs-foot">
+      <span data-lang="es">La insignia de ppp es la resolución real a la que se imprime cada foto en este formato, con el tope de calidad ya aplicado. Verde ≥ 300 ppp, ámbar 200–300, rojo &lt; 200 a 35 cm de lectura. La teoría completa —tamaño, distancia y agudeza— está en <a href="sensor-al-papel.html">Del sensor al papel</a>.</span>
+      <span data-lang="en">The ppi badge is the real resolution at which each photo prints in this format, with the quality cap already applied. Green ≥ 300 ppi, amber 200–300, red &lt; 200 at a 35 cm reading distance. The full theory — size, distance and acuity — lives in <a href="sensor-al-papel.html">From sensor to paper</a>.</span>
+    </div>
+  </div>
+
+  <div id="zg-verdicts" class="zg-verdicts"></div>
+
+  <div id="zg-spreads-section" style="display:none">
+    <div class="zg-head">
+      <div class="section-label" data-lang="es">Pliegos · lo que se ve al abrir</div>
+      <div class="section-label" data-lang="en">Spreads · what you see when it opens</div>
+      <span class="zg-inline">
+        <label for="zg-index2" data-lang="es">Índice</label>
+        <label for="zg-index2" data-lang="en">Index</label>
+        <select id="zg-index2">
+          <option value="normal" data-es="amplio" data-en="roomy">amplio</option>
+          <option value="dense" data-es="denso" data-en="dense">denso</option>
+          <option value="none" data-es="sin índice" data-en="no index">sin índice</option>
+        </select>
+      </span>
+      <span class="zg-inline">
+        <label><input type="checkbox" id="zg-shift2"> <span data-lang="es">desplazar una página</span><span data-lang="en">shift by one page</span></label>
+      </span>
+    </div>
+    <div class="thumbs-hint" data-lang="es">Arrastra una foto de un pliego a otro para reordenar. La página impar queda a la derecha del pliegue; el desplazamiento cambia todos los emparejamientos de golpe.</div>
+    <div class="thumbs-hint" data-lang="en">Drag a photo from one spread to another to reorder. The odd page sits to the right of the fold; the shift changes every pairing at once.</div>
+    <div id="zg-spreads"></div>
   </div>
 
   <div class="actions">
     <button class="btn btn-primary" id="btn-gen" disabled><span data-lang="es">Generar PDF cuadernillo</span><span data-lang="en">Generate booklet PDF</span></button>
+    <button class="btn btn-ghost" id="zg-test" disabled><span data-lang="es">Pliego de prueba</span><span data-lang="en">Test sheet</span></button>
     <button class="btn btn-ghost" id="btn-clear"><span data-lang="es">Limpiar</span><span data-lang="en">Clear</span></button>
   </div>
 
@@ -275,6 +484,35 @@ header{padding-right:118px}
     <div id="progress-label"></div>
   </div>
   <div id="status"></div>
+
+  <section class="method" id="zg-metodo">
+    <h2 data-lang="es">Cómo se dobla: la imposición de cuadernillo</h2>
+    <h2 data-lang="en">How it folds: the booklet imposition</h2>
+    <p data-lang="es">Un cuadernillo grapado no se imprime en orden de lectura. Cada hoja lleva cuatro páginas —dos por cara— y esas cuatro están muy separadas dentro del zine: en uno de ocho páginas, la primera hoja imprime la <b>8</b> y la <b>1</b> por delante y la <b>2</b> y la <b>7</b> por detrás. La regla es corta. En la hoja <i>s</i> de un cuadernillo de <i>N</i> páginas, el anverso lleva <b>N−2s+2</b> a la izquierda del pliegue y <b>2s−1</b> a la derecha; el dorso lleva <b>2s</b> a la izquierda y <b>N−2s+1</b> a la derecha. Cada pareja suma siempre <b>N+1</b>: por eso la última página acaba pegada a la primera, y por eso el total tiene que ser múltiplo de cuatro.</p>
+    <p data-lang="en">A saddle-stitched booklet is not printed in reading order. Each sheet carries four pages — two per side — and those four sit far apart inside the zine: in an eight-page one, the first sheet prints <b>8</b> and <b>1</b> on the front and <b>2</b> and <b>7</b> on the back. The rule is short. On sheet <i>s</i> of an <i>N</i>-page booklet, the front carries <b>N−2s+2</b> to the left of the fold and <b>2s−1</b> to the right; the back carries <b>2s</b> to the left and <b>N−2s+1</b> to the right. Each pair always adds up to <b>N+1</b>: that is why the last page ends up against the first, and why the total has to be a multiple of four.</p>
+
+    <div class="zg-fold">
+      <div id="zg-fold-svg"></div>
+      <div class="ctl">
+        <span data-lang="es">Plegado</span><span data-lang="en">Fold</span>
+        <input id="zg-fold-slider" type="range" min="0" max="100" step="1" value="0">
+        <span id="zg-fold-val">0 %</span>
+      </div>
+      <div class="hint" id="zg-fold-label"></div>
+    </div>
+
+    <h2 data-lang="es">La hoja de ruta del dúplex</h2>
+    <h2 data-lang="en">The duplex road map</h2>
+    <p data-lang="es">El anverso <b>[8 | 1]</b> y el dorso <b>[2 | 7]</b> sólo casan si la hoja se voltea como se pasa una página: girando sobre el eje vertical, de modo que la mitad derecha del anverso quede justo detrás de la mitad izquierda del dorso. En un documento A4 <b>apaisado</b> ese giro es el volteo por el <b>borde corto</b> —el borde de 210 mm—, no por el largo; es exactamente lo que documenta el «plegado de libro» de Word. En el formato A5 apaisada el documento es A4 vertical y el cuadernillo se hojea hacia arriba, así que hace falta la voltereta sobre el eje horizontal: en A4 vertical eso vuelve a ser el <b>borde corto</b>. La regla es la misma en los dos formatos. Si tu driver hace lo contrario, cambia el selector a borde largo: el dorso sale girado 180° para compensar. Y antes de tirar doce hojas, gasta una con el <b>pliego de prueba</b>: al doblarla, la página 2 tiene que quedar justo detrás de la 1.</p>
+    <p data-lang="en">The front <b>[8 | 1]</b> and the back <b>[2 | 7]</b> only match if the sheet is turned the way you turn a page: about the vertical axis, so the right half of the front lands right behind the left half of the back. In a <b>landscape</b> A4 document that turn is the <b>short-edge</b> flip — the 210 mm edge — not the long one; it is exactly what Word documents for its “book fold”. In the landscape A5 format the document is portrait A4 and the booklet is leafed upwards, so what you need is the tumble about the horizontal axis: on portrait A4 that is, again, the <b>short edge</b>. The rule is the same in both formats. If your driver does the opposite, switch the selector to long edge: the back side then comes out rotated 180° to compensate. And before wasting twelve sheets, spend one on the <b>test sheet</b>: when you fold it, page 2 must land right behind page 1.</p>
+    <div class="imp-wrap"><table class="imp" id="zg-imp-table"></table></div>
+
+    <h2 data-lang="es">Supuestos</h2>
+    <h2 data-lang="en">Assumptions</h2>
+    <p data-lang="es">Todo ocurre dentro del navegador: ni una foto sale del equipo. Estos son los números que gobiernan el PDF, con los valores que tienes puestos ahora mismo.</p>
+    <p data-lang="en">Everything happens inside the browser: not one photo leaves the machine. These are the numbers that govern the PDF, with the values you have set right now.</p>
+    <ul id="zg-assumptions"></ul>
+  </section>
 </main>
 </div>
 
@@ -286,11 +524,11 @@ header{padding-right:118px}
   var META={
     es:{
       title:"Generador de zines · Rafael Vida",
-      desc:"Maquetación de fanzines y fotolibros a partir de tus propias fotos: ordena por fecha EXIF, calcula la imposición de cuadernillo y exporta un PDF A4 dúplex listo para imprimir y plegar."
+      desc:"Maquetación de fanzines y fotolibros a partir de tus propias fotos: vista de pliegos, A5 vertical o apaisada, imposición de cuadernillo, pie con ficha técnica EXIF y PDF A4 dúplex listo para imprimir, plegar y grapar."
     },
     en:{
       title:"Zine generator · Rafael Vida",
-      desc:"Layout for fanzines and photobooks from your own photos: sort by EXIF capture date, work out the booklet imposition and export a duplex A4 PDF ready to print and fold."
+      desc:"Layout for fanzines and photobooks from your own photos: spread view, portrait or landscape A5, booklet imposition, EXIF caption line and a duplex A4 PDF ready to print, fold and staple."
     }
   };
   function apply(l){
@@ -323,7 +561,13 @@ header{padding-right:118px}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exifr@7.1.3/dist/full.umd.js"></script>
 <script>
-const { jsPDF } = window.jspdf;
+// Las dos librerías vienen de CDN. Si no hay red, la página NO se muere:
+// se queda viva, ordena por fecha de archivo y lo dice en el estado.
+const HAS_PDF  = !!(window.jspdf && window.jspdf.jsPDF);
+const HAS_EXIF = (typeof exifr !== 'undefined' && exifr && typeof exifr.parse === 'function');
+const jsPDF    = HAS_PDF ? window.jspdf.jsPDF : null;
+// Se pone a false si addFont falla: el mensaje de éxito no puede mentir.
+let fontEmbedded = true;
 
 // ═══════════════════════════════════════════════════════
 //  DICCIONARIO DE CADENAS GENERADAS POR JS
@@ -346,7 +590,11 @@ const T = {
     thumbnails:    'Miniaturas',
     backCover:     'Contraportada',
     padWord:       'relleno',
-    duplexNote:    'Dúplex A4 apaisado · volteo <b>borde largo</b>',
+    duplexNote:    (f, d) => 'Dúplex ' + f + ' · volteo <b>' + d + '</b>',
+    a4Land:        'A4 apaisado',
+    a4Port:        'A4 vertical',
+    shiftWord:     'desplazamiento',
+    fmtLine:       (f) => 'Página <b>' + f + '</b>',
     colourNote:    'Color · <b>sRGB</b> gestionado',
     wideGamut:     ' foto(s) en gama amplia → sRGB',
     tagSheets:     ' hojas · ',
@@ -366,9 +614,80 @@ const T = {
     indexLabel:    'ÍNDICE · ',
     issueUi:       'N.º ',
     issuePdf:      'N.',
+    colophonWord:  'Colofón',
+    calibWord:     'Calibración',
+    sigWord:       'Cuadernillo ',
+    fmtPortrait:   'A5 vertical',
+    fmtLandscape:  'A5 apaisada',
+    noPdfLib:      '⚠ Sin red: no se ha podido cargar jsPDF, así que no hay exportación a PDF. Todo lo demás —orden, pliegos, veredictos— sigue funcionando.',
+    noExifLib:     'sin EXIF (biblioteca no cargada) · orden por fecha de archivo',
+    testDone:      '✓ Pliego de prueba listo: una sola hoja, dos caras. Imprímela en dúplex, dóblala y comprueba que la página 2 queda detrás de la 1.',
+    courierNote:   ' · tipografía NO embebida, el PDF sale en Courier',
+    charsLeft:     ' caracteres libres',
+    thSheet:       'Hoja',
+    thFL:'Anverso izq.', thFR:'Anverso der.', thBL:'Dorso izq.', thBR:'Dorso der.',
+    thFT:'Anverso arriba', thFB:'Anverso abajo', thBT:'Dorso arriba', thBB:'Dorso abajo',
+    rot180:        ' ↻',
+    foldPct:       ' %',
+    foldClosed:    'Hoja abierta: ves el anverso, con el pliegue en el centro.',
+    foldMid:       'A medio plegar: la mitad izquierda gira sobre el pliegue.',
+    foldDone:      'Hoja plegada: la portada queda encima y el resto de páginas dentro.',
+    asFmt:'Formato', asPage:'Página', asSheet:'Hoja', asBox:'Caja útil de foto', asPpi:'Resolución de exportación',
+    asSheets:'Hojas', asPages:'Páginas totales', asBlanks:'Blancos de relleno', asPaper:'Grosor del papel',
+    asSig:'Cuadernillos', asDuplex:'Volteo dúplex', asLocal:'Todo el proceso ocurre en el navegador: ninguna foto sale del equipo.',
+    asShort:'borde corto', asLong:'borde largo', asIdx:'Páginas de índice', asNone:'ninguna',
+    spOuter:       'Exterior · contraportada + portada',
+    spPair:        'Pliego ',
+    spOf:          ' · páginas ',
+    dropHere:      'suelta aquí',
+    verdictFmt:    'Formato',
+    verdictFold:   'Plegado',
+    verdictPpi:    'Resolución',
+    verdictSize:   'Peso',
+    verdictStruct: 'Estructura',
+    vOrient: o => '<b>' + o.nl + ' de tus ' + o.n + ' fotos son apaisadas' + (o.np ? ' y ' + o.np + ' verticales' : '') +
+                  '.</b> En ' + o.thisName + ' llenan de media el <b>' + o.pctThis + ' %</b> de la caja de foto; en ' +
+                  o.otherName + ', el <b>' + o.pctOther + ' %</b> — ' + o.ratio + '× de área impresa.',
+    vOrientSwap: o => ' Cambia el formato a <b>' + o.otherName + '</b> y ganas ' + o.ratio + '× de superficie sin tocar nada más.',
+    vOrientOk:  ' El formato que tienes puesto ya es el que más papel aprovecha con estas fotos.',
+    vOrientAuto: o => ' El automático ha elegido <b>' + o.thisName + '</b> por mayoría.',
+    vCreepOk: o => '<b>' + o.sh + ' hojas en un cuadernillo</b> se doblan y se grapan sin drama. El desplazamiento al doblar es de ' +
+                   o.creep + ' mm: no se nota.',
+    vCreepBad: o => '<b>' + o.sh + ' hojas anidadas en una sola firma.</b> Al doblarlas, las páginas interiores sobresalen ' +
+                    o.creep + ' mm por el canto y ninguna grapadora doméstica llega: reparte en cuadernillos de 4 o 5 hojas, ' +
+                    'o guillotina el canto después de grapar.',
+    vCreepSplit: o => 'Repartido en <b>' + o.sigs + ' cuadernillos</b> de hasta ' + o.sh + ' hojas: se doblan y se grapan por separado, ' +
+                      'y luego se apilan en orden. Desplazamiento al doblar, ' + o.creep + ' mm.',
+    vPpiOk: o => 'Ninguna de tus ' + o.n + ' fotos baja de 200 ppp en este formato: la más justa se imprime a <b>' + o.min + ' ppp</b>.',
+    vPpiBad: o => '<b>' + o.k + ' foto(s) por debajo de 200 ppp</b> en este formato — la peor, a ' + o.min +
+                  ' ppp. A 35 cm se van a ver blandas: cámbialas, recórtalas menos o pásalas al índice.',
+    vSize: o => 'El PDF pesará del orden de <b>' + o.mb + ' MB</b> con la calidad puesta (' + o.ppi + ' ppp). ' + o.hint,
+    vSizeHintBig: 'Baja a 240 ppp si vas a mandarlo por correo.',
+    vSizeHintOk:  '',
+    vStruct: o => '<b>' + o.total + ' páginas en ' + o.sheets + ' hojas</b>, de las cuales ' + o.photos + ' son foto, ' +
+                  o.idx + ' de índice y ' + o.blank + ' en blanco.',
+    vStructWaste: ' Quitar el índice te devuelve las páginas que hoy se van en miniaturas.',
+    asMargin:  o => 'Margen exterior <b>' + o.pad + ' mm</b> y pie de <b>12 mm</b>, los dos fuera de la zona no imprimible; la caja de foto queda en <b>' + o.box + ' mm</b>.',
+    asQuality: o => 'Cada foto se reescala al tamaño exacto que ocupa impresa a <b>' + o.ppi + ' ppp</b> (aquí, como mucho <b>' + o.px + ' px</b> de lado mayor) y se codifica en JPEG con calidad <b>0,88</b>.',
+    asColour:  'Decodificación con <b>createImageBitmap</b> e <code>imageOrientation:\'none\'</code>: los píxeles llegan crudos y la matriz EXIF se aplica a mano, sin doble giro. El lienzo de destino es <b>sRGB</b>, que es la gama correcta para impresión doméstica; una foto en Display P3 o Adobe RGB se convierte ahí.',
+    asFit:     o => 'Encaje <b>' + o.fit + '</b>. Una foto que el navegador no sepa decodificar (HEIC, por ejemplo) no desaparece: sale un aspa roja con el nombre del archivo y un aviso al terminar.',
+    asFitContain: 'encajar, la foto entera dentro de la caja',
+    asFitCover:   'llenar, recorte centrado a la relación de la caja',
+    asImposition: o => 'Imposición de cuadernillo grapado de una firma, <b>' + o.sig + '</b>, con volteo por <b>' + o.dup + '</b>.',
+    asSigOne:  'todo junto',
+    asSigN:    o => o.sigs + ' cuadernillos de hasta ' + o.sh + ' hojas',
+    dupShort:  'borde corto',
+    dupLong:   'borde largo',
+    calibTitle:   'HOJA DE CALIBRACIÓN',
+    calibGrey:    'Cuña de grises · L* 0–100',
+    calibPrim:    'Primarios y secundarios sRGB',
+    calibLines:   'Grosor de línea (pt)',
+    calibBox:     'Caja de foto a tamaño real',
+    calibRead:    'Lee la hoja impresa: si los escalones de L* 0 a 15 se funden en un solo negro, sube las sombras entre 8 y 10 puntos antes de exportar; si el 85–100 se funde en blanco, baja las luces. Si las líneas por debajo de 0,2 pt no se ven, no uses filetes más finos. Y si el rectángulo grande no mide exactamente lo que dice, el driver está escalando: desactiva «ajustar a la página» e imprime al 100 %.',
     optFont:  { typewriter:'Special Elite · máquina de escribir', sans:'Inter · sans neutra', serif:'EB Garamond · serif editorial' },
     optOrder: { exif:'EXIF · fecha de captura', modified:'Fecha de archivo', name:'Nombre de archivo', manual:'Manual · arrastrar' },
-    pdfOk: (s, n, f) => '✓ PDF listo · ' + s + ' hojas · ' + n + ' páginas · tipografía ' + f + ' embebida',
+    pdfOk: (s, n, f, emb) => '✓ PDF listo · ' + s + ' hojas · ' + n + ' páginas · ' +
+                             (emb ? 'tipografía ' + f + ' embebida' : 'tipografía NO embebida, sale en Courier'),
     pdfWarn: (k, names) => '⚠ PDF generado, pero ' + k + ' imagen(es) no se pudieron decodificar y salen como hueco: ' +
                            names + '. Si son HEIC, conviértelas a JPEG (Chrome/Firefox no decodifican HEIC).'
   },
@@ -387,7 +706,11 @@ const T = {
     thumbnails:    'Thumbnails',
     backCover:     'Back cover',
     padWord:       'padding',
-    duplexNote:    'Landscape A4 duplex · <b>long-edge</b> flip',
+    duplexNote:    (f, d) => f + ' duplex · <b>' + d + '</b> flip',
+    a4Land:        'Landscape A4',
+    a4Port:        'Portrait A4',
+    shiftWord:     'shift',
+    fmtLine:       (f) => 'Page <b>' + f + '</b>',
     colourNote:    'Colour · managed <b>sRGB</b>',
     wideGamut:     ' wide-gamut photo(s) → sRGB',
     tagSheets:     ' sheets · ',
@@ -407,9 +730,80 @@ const T = {
     indexLabel:    'INDEX · ',
     issueUi:       'No. ',
     issuePdf:      'No.',
+    colophonWord:  'Colophon',
+    calibWord:     'Calibration',
+    sigWord:       'Signature ',
+    fmtPortrait:   'portrait A5',
+    fmtLandscape:  'landscape A5',
+    noPdfLib:      '⚠ Offline: jsPDF could not be loaded, so there is no PDF export. Everything else — ordering, spreads, verdicts — still works.',
+    noExifLib:     'no EXIF (library not loaded) · ordered by file date',
+    testDone:      '✓ Test sheet ready: one sheet, two sides. Print it duplex, fold it and check that page 2 lands behind page 1.',
+    courierNote:   ' · typeface NOT embedded, the PDF comes out in Courier',
+    charsLeft:     ' characters left',
+    thSheet:       'Sheet',
+    thFL:'Front left', thFR:'Front right', thBL:'Back left', thBR:'Back right',
+    thFT:'Front top', thFB:'Front bottom', thBT:'Back top', thBB:'Back bottom',
+    rot180:        ' ↻',
+    foldPct:       ' %',
+    foldClosed:    'Sheet open: you see the front, with the fold down the middle.',
+    foldMid:       'Half folded: the left half is turning about the fold.',
+    foldDone:      'Sheet folded: the cover ends up on top and the rest of the pages inside.',
+    asFmt:'Format', asPage:'Page', asSheet:'Sheet', asBox:'Usable photo box', asPpi:'Export resolution',
+    asSheets:'Sheets', asPages:'Total pages', asBlanks:'Padding blanks', asPaper:'Paper thickness',
+    asSig:'Signatures', asDuplex:'Duplex flip', asLocal:'The whole process happens in the browser: no photograph leaves the machine.',
+    asShort:'short edge', asLong:'long edge', asIdx:'Index pages', asNone:'none',
+    spOuter:       'Outside · back cover + front cover',
+    spPair:        'Spread ',
+    spOf:          ' · pages ',
+    dropHere:      'drop here',
+    verdictFmt:    'Format',
+    verdictFold:   'Folding',
+    verdictPpi:    'Resolution',
+    verdictSize:   'File size',
+    verdictStruct: 'Structure',
+    vOrient: o => '<b>' + o.nl + ' of your ' + o.n + ' photos are landscape' + (o.np ? ' and ' + o.np + ' portrait' : '') +
+                  '.</b> In ' + o.thisName + ' they fill on average <b>' + o.pctThis + ' %</b> of the photo box; in ' +
+                  o.otherName + ', <b>' + o.pctOther + ' %</b> — ' + o.ratio + '× the printed area.',
+    vOrientSwap: o => ' Switch the format to <b>' + o.otherName + '</b> and you gain ' + o.ratio + '× the surface without touching anything else.',
+    vOrientOk:  ' The format you have set is already the one that uses most of the paper with these photos.',
+    vOrientAuto: o => ' Automatic picked <b>' + o.thisName + '</b> by majority.',
+    vCreepOk: o => '<b>' + o.sh + ' sheets in one signature</b> fold and staple without drama. The creep when folding is ' +
+                   o.creep + ' mm: it does not show.',
+    vCreepBad: o => '<b>' + o.sh + ' sheets nested in a single signature.</b> Folded, the inner pages stick out ' +
+                    o.creep + ' mm at the fore edge and no home stapler reaches through: split into signatures of 4 or 5 sheets, ' +
+                    'or trim the fore edge after stapling.',
+    vCreepSplit: o => 'Split into <b>' + o.sigs + ' signatures</b> of up to ' + o.sh + ' sheets: each is folded and stapled on its own, ' +
+                      'then stacked in order. Creep when folding, ' + o.creep + ' mm.',
+    vPpiOk: o => 'None of your ' + o.n + ' photos falls below 200 ppi in this format: the tightest prints at <b>' + o.min + ' ppi</b>.',
+    vPpiBad: o => '<b>' + o.k + ' photo(s) below 200 ppi</b> in this format — the worst at ' + o.min +
+                  ' ppi. At 35 cm they will look soft: swap them, crop them less, or move them to the index.',
+    vSize: o => 'The PDF will weigh in the order of <b>' + o.mb + ' MB</b> at the quality you have set (' + o.ppi + ' ppi). ' + o.hint,
+    vSizeHintBig: 'Drop to 240 ppi if you are going to email it.',
+    vSizeHintOk:  '',
+    vStruct: o => '<b>' + o.total + ' pages on ' + o.sheets + ' sheets</b>, of which ' + o.photos + ' are photos, ' +
+                  o.idx + ' index and ' + o.blank + ' blank.',
+    vStructWaste: ' Turning the index off gives you back the pages that go into thumbnails today.',
+    asMargin:  o => 'Outer margin <b>' + o.pad + ' mm</b> and a <b>12 mm</b> footer, both outside the non-printable zone; the photo box is <b>' + o.box + ' mm</b>.',
+    asQuality: o => 'Each photo is rescaled to the exact size it occupies in print at <b>' + o.ppi + ' ppi</b> (here, at most <b>' + o.px + ' px</b> on the long side) and encoded as JPEG at quality <b>0.88</b>.',
+    asColour:  'Decoding with <b>createImageBitmap</b> and <code>imageOrientation:\'none\'</code>: the pixels arrive raw and the EXIF matrix is applied by hand, with no double rotation. The destination canvas is <b>sRGB</b>, which is the right gamut for home printing; a Display P3 or Adobe RGB photo is converted there.',
+    asFit:     o => 'Fit mode <b>' + o.fit + '</b>. A photo the browser cannot decode (HEIC, say) does not vanish: it comes out as a red cross with the file name, plus a warning at the end.',
+    asFitContain: 'fit, the whole photo inside the box',
+    asFitCover:   'fill, centred crop to the aspect of the box',
+    asImposition: o => 'Single-signature saddle-stitch imposition, <b>' + o.sig + '</b>, with a <b>' + o.dup + '</b> flip.',
+    asSigOne:  'all together',
+    asSigN:    o => o.sigs + ' signatures of up to ' + o.sh + ' sheets',
+    dupShort:  'short edge',
+    dupLong:   'long edge',
+    calibTitle:   'CALIBRATION SHEET',
+    calibGrey:    'Grey wedge · L* 0–100',
+    calibPrim:    'sRGB primaries and secondaries',
+    calibLines:   'Line width (pt)',
+    calibBox:     'Photo box at real size',
+    calibRead:    'Read the printed sheet: if the L* 0 to 15 steps merge into a single black, lift the shadows by 8 to 10 points before exporting; if 85–100 merges into white, pull the highlights down. If the lines below 0.2 pt do not show, do not use thinner rules. And if the large rectangle does not measure exactly what it says, the driver is scaling: turn off “fit to page” and print at 100 %.',
     optFont:  { typewriter:'Special Elite · typewriter', sans:'Inter · neutral sans', serif:'EB Garamond · editorial serif' },
     optOrder: { exif:'EXIF · capture date', modified:'File date', name:'File name', manual:'Manual · drag' },
-    pdfOk: (s, n, f) => '✓ PDF ready · ' + s + ' sheets · ' + n + ' pages · ' + f + ' typeface embedded',
+    pdfOk: (s, n, f, emb) => '✓ PDF ready · ' + s + ' sheets · ' + n + ' pages · ' +
+                             (emb ? f + ' typeface embedded' : 'typeface NOT embedded, it comes out in Courier'),
     pdfWarn: (k, names) => '⚠ PDF generated, but ' + k + ' image(s) could not be decoded and come out as gaps: ' +
                            names + '. If they are HEIC, convert them to JPEG (Chrome and Firefox do not decode HEIC).'
   }
@@ -439,10 +833,75 @@ let TOTAL_PAGES = 0;
 let SHEETS = 0;
 const thumbCache = new Map(); // file -> objectURL para no recrear cada render
 
-function calcLayout(nPhotos) {
-  const base = nPhotos + 6;
+// ───────────────────────────────────────────────────────
+//  FORMATOS DE PÁGINA
+//  portrait : A5 vertical desde A4 apaisado, dos medias páginas en columna,
+//             pliegue vertical, se hojea como un libro.
+//  landscape: A5 apaisada desde A4 vertical, dos medias páginas apiladas,
+//             pliegue horizontal, se hojea hacia arriba (lomo arriba). En ese
+//             plegado, la mitad de arriba del anverso va girada 180°: es
+//             inherente al pliegue horizontal, no un capricho.
+// ───────────────────────────────────────────────────────
+const FORMATS = {
+  portrait:  { PW:148.5, PH:210,   doc:'landscape', stack:false, idx:{ normal:[4,5], dense:[5,6] } },
+  landscape: { PW:210,   PH:148.5, doc:'portrait',  stack:true,  idx:{ normal:[5,4], dense:[6,5] } }
+};
+const FOOTER_H = 12;   // alto reservado al pie, fuera de la zona no imprimible
+
+function el(id) { return document.getElementById(id); }
+
+function resolveFormat(sel) {
+  if (sel === 'portrait' || sel === 'landscape') return sel;
+  let land = 0, port = 0;
+  items.forEach(it => { if (it.w && it.h) { if (it.w > it.h) land++; else port++; } });
+  return land > port ? 'landscape' : 'portrait';
+}
+
+function opts() {
+  const v = (id, d) => { const e = el(id); return e ? e.value : d; };
+  const c = (id, d) => { const e = el(id); return e ? e.checked : d; };
+  const fmtSel = v('zg-format', 'portrait');
+  return {
+    fmtSel:   fmtSel,
+    fmt:      resolveFormat(fmtSel),
+    duplex:   v('zg-duplex', 'short'),
+    index:    v('zg-index', 'normal'),
+    shift:    c('zg-shift', false) ? 1 : 0,
+    pad:      parseFloat(v('zg-margin', '7')),
+    fit:      v('zg-fit', 'contain'),
+    ppi:      parseInt(v('zg-quality', '300'), 10),
+    caption:  v('zg-caption', 'date'),
+    sig:      parseInt(v('zg-sig', '0'), 10),
+    caliper:  parseFloat(v('zg-paper', '0.13')),
+    calib:    c('zg-calib', false),
+    colophon: String(v('zg-colophon', '')).trim()
+  };
+}
+
+// Caja útil de foto: la misma cuenta de siempre, ahora con margen variable.
+function photoBox(F, pad) {
+  return { w: F.PW - pad * 2, h: F.PH - pad * 2 - FOOTER_H };
+}
+
+function idxGrid(F, dense) {
+  const g = F.idx[dense ? 'dense' : 'normal'];
+  return { cols: g[0], rows: g[1], per: g[0] * g[1] };
+}
+
+function calcLayout(nPhotos, o) {
+  o = o || opts();
+  const F = FORMATS[o.fmt];
+  const g = idxGrid(F, o.index === 'dense');
+  const idxPages = (o.index !== 'none' && nPhotos > 0) ? Math.ceil(nPhotos / g.per) : 0;
+  const shift = o.shift ? 1 : 0;
+  // portada + página 2 + índice + desplazamiento + fotos + blanco + contraportada
+  const base = nPhotos + 4 + idxPages + shift;
   const total = Math.ceil(Math.max(base, 4) / 4) * 4;
-  return { total, sheets: total / 4, padding: total - base };
+  return {
+    total, sheets: total / 4, padding: total - base,
+    idxPages, shift, per: g.per, cols: g.cols, rows: g.rows,
+    firstPhoto: 3 + idxPages + shift
+  };
 }
 
 function imposition(sheet, N) {
@@ -455,31 +914,87 @@ function imposition(sheet, N) {
   };
 }
 
-function pageInfo(p, N, nPhotos) {
-  if (p === 1)   return { type: 'cover' };
-  if (p === 2)   return { type: 'blank' };
-  if (p === 3)   return { type: 'thumbs', half: 0 };
-  if (p === 4)   return { type: 'thumbs', half: 1 };
-  if (p >= 5 && p <= 4 + nPhotos) return { type: 'photo', idx: p - 5 };
-  if (p === N)   return { type: 'backcover' };
-  if (p === N-1) return { type: 'blank' };
+function pageInfo(p, N, nPhotos, L) {
+  L = L || calcLayout(nPhotos);
+  if (p === 1) return { type: 'cover' };
+  if (p === 2) return { type: 'colophon' };
+  if (L.idxPages && p >= 3 && p <= 2 + L.idxPages) return { type: 'thumbs', half: p - 3 };
+  const fp = L.firstPhoto;
+  if (p >= fp && p <= fp + nPhotos - 1) return { type: 'photo', idx: p - fp };
+  if (p === N) return { type: 'backcover' };
   return { type: 'blank' };
 }
 
+// ───────────────────────────────────────────────────────
+//  REPARTO EN CUADERNILLOS (FIRMAS)
+//  Devuelve una lista de firmas: { sheets, offset }. Con sig = 0 hay una sola
+//  firma con todas las hojas, que es lo de siempre.
+// ───────────────────────────────────────────────────────
+function signatures(totalSheets, sigSheets) {
+  if (!sigSheets || sigSheets >= totalSheets) return [{ sheets: totalSheets, offset: 0 }];
+  const out = [];
+  let done = 0;
+  while (done < totalSheets) {
+    const k = Math.min(sigSheets, totalSheets - done);
+    out.push({ sheets: k, offset: done * 4 });
+    done += k;
+  }
+  return out;
+}
+
 async function readExif(file) {
+  const empty = { date: null, orientation: 1, colorSpace: null, tech: null };
+  if (!HAS_EXIF) return empty;
   try {
     const exif = await exifr.parse(file, {
-      pick: ['DateTimeOriginal', 'CreateDate', 'DateTime', 'Orientation', 'ColorSpace'],
+      pick: ['DateTimeOriginal', 'CreateDate', 'DateTime', 'Orientation', 'ColorSpace',
+             'Model', 'LensModel', 'FNumber', 'ExposureTime', 'ISO', 'FocalLength'],
       translateValues: false   // Orientation/ColorSpace llegan como enteros, no como texto
     });
-    if (!exif) return { date: null, orientation: 1, colorSpace: null };
+    if (!exif) return empty;
     return {
       date: exif.DateTimeOriginal || exif.CreateDate || exif.DateTime || null,
       orientation: exif.Orientation || 1,
       // 1 = sRGB · 2 = Adobe RGB · 65535 = sin calibrar (p. ej. Display P3) · null = sin tag
-      colorSpace: (exif.ColorSpace === undefined ? null : exif.ColorSpace)
+      colorSpace: (exif.ColorSpace === undefined ? null : exif.ColorSpace),
+      tech: {
+        model: exif.Model || null,
+        lens: exif.LensModel || null,
+        f: (typeof exif.FNumber === 'number' ? exif.FNumber : null),
+        t: (typeof exif.ExposureTime === 'number' ? exif.ExposureTime : null),
+        iso: (typeof exif.ISO === 'number' ? exif.ISO : (Array.isArray(exif.ISO) ? exif.ISO[0] : null)),
+        fl: (typeof exif.FocalLength === 'number' ? exif.FocalLength : null)
+      }
     };
-  } catch (e) { return { date: null, orientation: 1, colorSpace: null }; }
+  } catch (e) { return empty; }
+}
+
+// Ficha técnica en una línea: M11 · 35 mm · f/8 · 1/250 s · ISO 200.
+// Lo que falte, falta: un objetivo M sin codificar no deja hueco ni guiones.
+function techLine(it) {
+  const x = it.tech;
+  if (!x) return '';
+  const parts = [];
+  if (x.model) parts.push(String(x.model).replace(/^LEICA\s+/i, '').trim());
+  if (x.lens && x.model && String(x.lens).trim() && String(x.lens).trim() !== String(x.model).trim()) {
+    parts.push(String(x.lens).trim());
+  } else if (x.lens && !x.model) { parts.push(String(x.lens).trim()); }
+  if (x.fl) parts.push(Math.round(x.fl) + ' mm');
+  if (x.f)  parts.push('f/' + (x.f < 10 ? String(Math.round(x.f * 10) / 10).replace('.', ',') : Math.round(x.f)));
+  if (x.t)  parts.push(x.t >= 1 ? (Math.round(x.t * 10) / 10) + ' s' : '1/' + Math.round(1 / x.t) + ' s');
+  if (x.iso) parts.push('ISO ' + x.iso);
+  return parts.join(' · ');
+}
+
+function captionFor(it, mode) {
+  if (!it) return '';
+  if (mode === 'none') return '';
+  if (mode === 'custom') return (it.caption || '').trim();
+  if (mode === 'exif') {
+    const s = techLine(it);
+    return s || (it.exifDate ? fmtDate(it.exifDate) : '');
+  }
+  return it.exifDate ? fmtDate(it.exifDate) : '';
 }
 
 function fmtDate(d) {
@@ -496,17 +1011,26 @@ function thumbUrl(file) {
 
 function updateSpec() {
   const n = items.length;
-  const { total, sheets, padding } = calcLayout(n);
+  const o = opts();
+  const L = calcLayout(n, o);
+  const total = L.total, sheets = L.sheets, padding = L.padding;
   TOTAL_PAGES = total; SHEETS = sheets;
 
   const specEl = document.getElementById('spec-box');
   const tagEl = document.getElementById('header-tagline');
   const thumbsSection = document.getElementById('thumbs-section');
+  const spreadsSection = document.getElementById('zg-spreads-section');
+
+  syncMirrors(o);
+  renderMethod(n, o, L);
 
   if (n === 0) {
     specEl.textContent = t('loadPhotos');
     tagEl.textContent = '';
     thumbsSection.style.display = 'none';
+    spreadsSection.style.display = 'none';
+    document.getElementById('zg-verdicts').innerHTML = '';
+    document.getElementById('zg-spreads').innerHTML = '';
     return;
   }
 
@@ -515,24 +1039,407 @@ function updateSpec() {
   // son sRGB o irán como tal, y marcarlas sería un falso positivo.
   const wideGamut = items.filter(it => it.colorSpace != null && it.colorSpace !== 1).length;
 
+  const F = FORMATS[o.fmt];
+  const fmtName = o.fmt === 'portrait' ? t('fmtPortrait') : t('fmtLandscape');
+  const a4Name  = F.doc === 'landscape' ? t('a4Land') : t('a4Port');
+  const dupName = o.duplex === 'short' ? t('dupShort') : t('dupLong');
+  const fp = L.firstPhoto, lastPhoto = fp + n - 1;
+  const sigs = signatures(sheets, o.sig);
+
+  let rows =
+    t('pageSg') + '1 · ' + t('cover') + '<br>' +
+    t('pageSg') + '2 · ' + (o.colophon ? t('colophonWord') : t('blank')) + '<br>';
+  if (L.idxPages === 1) rows += t('pageSg') + '3 · ' + t('thumbnails') + '<br>';
+  else if (L.idxPages > 1) rows += t('pagePl') + '3–' + (2 + L.idxPages) + ' · ' + t('thumbnails') + '<br>';
+  if (L.shift) rows += t('pageSg') + (2 + L.idxPages + 1) + ' · ' + t('blank') + ' (' + t('shiftWord') + ')<br>';
+  rows += (n === 1 ? t('pageSg') + fp : t('pagePl') + fp + '–' + lastPhoto) +
+          ' · <b>' + n + (n !== 1 ? t('photos') : t('photo')) + '</b><br>';
+  if (padding > 0) {
+    rows += (padding === 1 ? t('pageSg') + (lastPhoto + 1)
+                           : t('pagePl') + (lastPhoto + 1) + '–' + (total - 2)) +
+            ' · ' + t('blank') + ' (' + padding + ' ' + t('padWord') + ')<br>';
+  }
+  rows += t('pageSg') + (total - 1) + ' · ' + t('blank') + '<br>' +
+          t('pageSg') + total + ' · ' + t('backCover') + '<br>';
+
   specEl.innerHTML =
     '<b>' + total + t('pagesDot') + sheets + t('sheetsDuplex') + '</b><br>' +
     '<span class="dim">──────────────────────</span><br>' +
-    t('pageSg') + '1 · ' + t('cover') + '<br>' +
-    t('pageSg') + '2 · ' + t('blank') + '<br>' +
-    t('pagePl') + '3–4 · ' + t('thumbnails') + '<br>' +
-    t('pagePl') + '5–' + (4 + n) + ' · <b>' + n + (n !== 1 ? t('photos') : t('photo')) + '</b><br>' +
-    (padding > 0 ? t('pagePl') + (5+n) + '–' + (total-2) + ' · ' + t('blank') + ' (' + padding + ' ' + t('padWord') + ')<br>' : '') +
-    t('pageSg') + (total-1) + ' · ' + t('blank') + '<br>' +
-    t('pageSg') + total + ' · ' + t('backCover') + '<br>' +
+    rows +
     '<span class="dim">──────────────────────</span><br>' +
-    t('duplexNote') + '<br>' +
+    t('fmtLine')(fmtName) + '<br>' +
+    t('duplexNote')(a4Name, dupName) + '<br>' +
+    (sigs.length > 1 ? '<span class="dim">' + sigs.length + ' × ' + t('sigWord').trim().toLowerCase() + '</span><br>' : '') +
+    (o.calib ? '<span class="dim">+ ' + t('calibWord') + '</span><br>' : '') +
     t('colourNote') +
     (wideGamut > 0 ? '<br><span class="dim">' + wideGamut + t('wideGamut') + '</span>' : '');
 
   tagEl.textContent = sheets + t('tagSheets') + total + t('tagPages');
 
   thumbsSection.style.display = '';
+  spreadsSection.style.display = '';
+  renderVerdicts(n, o, L);
+  renderSpreads(n, o, L);
+}
+
+// Los dos controles que se repiten sobre la tira de pliegos son espejos de los
+// del aside: una sola fuente de verdad (el aside), y el espejo sólo la refleja.
+function syncMirrors(o) {
+  const i2 = document.getElementById('zg-index2');
+  const s2 = document.getElementById('zg-shift2');
+  if (i2 && i2.value !== o.index) i2.value = o.index;
+  if (s2) s2.checked = !!o.shift;
+  const mv = document.getElementById('zg-margin-val');
+  if (mv) mv.textContent = String(o.pad).replace('.', document.documentElement.lang === 'en' ? '.' : ',') + ' mm';
+  const cc = document.getElementById('zg-colophon-count');
+  const ta = document.getElementById('zg-colophon');
+  if (cc && ta) cc.textContent = (300 - ta.value.length) + t('charsLeft');
+}
+
+// ═══════════════════════════════════════════════════════
+//  PPP REAL POR FOTO
+//  El lado impreso sale de la caja de foto del formato en curso; el tope de
+//  calidad recorta por arriba, así que lo que se enseña es el ppp que de
+//  verdad va al papel.
+// ═══════════════════════════════════════════════════════
+// Escala de impresión en mm por píxel: encajar toma el lado que primero topa,
+// llenar el que primero cubre. De ahí salen a la vez el tamaño impreso y el ppp.
+function printScale(it, o) {
+  if (!it.w || !it.h) return null;
+  const box = photoBox(FORMATS[o.fmt], o.pad);
+  const sx = box.w / it.w, sy = box.h / it.h;
+  return (o.fit === 'cover') ? Math.max(sx, sy) : Math.min(sx, sy);
+}
+
+function fitOf(it, o) {
+  const s = printScale(it, o);
+  if (!s) return null;
+  const box = photoBox(FORMATS[o.fmt], o.pad);
+  return (o.fit === 'cover') ? { w: box.w, h: box.h } : { w: it.w * s, h: it.h * s };
+}
+
+function ppiOf(it, o) {
+  const s = printScale(it, o);
+  if (!s) return null;
+  return Math.round(Math.min(25.4 / s, o.ppi));
+}
+
+function ppiClass(p) { return p >= 300 ? 'ok' : (p >= 200 ? 'warn' : 'bad'); }
+
+function nf(x, dec) {
+  const loc = document.documentElement.lang === 'en' ? 'en-GB' : 'es-ES';
+  return Number(x).toLocaleString(loc, { minimumFractionDigits: dec, maximumFractionDigits: dec });
+}
+
+// ═══════════════════════════════════════════════════════
+//  VEREDICTOS
+// ═══════════════════════════════════════════════════════
+
+// Fracción media de la caja de foto que llenan las fotos cargadas en un formato
+// dado. Siempre con encaje "encajar", que es la comparación honrada entre
+// formatos: llenar da 100 % en los dos y no dice nada.
+function fillFraction(fmtKey, o) {
+  const box = photoBox(FORMATS[fmtKey], o.pad);
+  const area = box.w * box.h;
+  let sum = 0, k = 0;
+  items.forEach(it => {
+    if (!it.w || !it.h) return;
+    const s = Math.min(box.w / it.w, box.h / it.h);
+    sum += (it.w * s) * (it.h * s) / area;
+    k++;
+  });
+  return k ? sum / k : 0;
+}
+
+function verdict(cls, label, html) {
+  return '<div class="zg-v ' + cls + '"><span class="zg-tag ' + cls + '">' + label + '</span>' + html + '</div>';
+}
+
+function renderVerdicts(n, o, L) {
+  const box = document.getElementById('zg-verdicts');
+  if (!box) return;
+  const out = [];
+
+  // ── formato y orientación ──────────────────────────────
+  const other = o.fmt === 'portrait' ? 'landscape' : 'portrait';
+  const thisName  = o.fmt === 'portrait' ? t('fmtPortrait') : t('fmtLandscape');
+  const otherName = other === 'portrait' ? t('fmtPortrait') : t('fmtLandscape');
+  const fThis = fillFraction(o.fmt, o), fOther = fillFraction(other, o);
+  const nl = items.filter(it => it.w && it.h && it.w > it.h).length;
+  const np = items.filter(it => it.w && it.h && it.w <= it.h).length;
+  if (fThis > 0) {
+    const ratio = fOther / fThis;
+    let html = t('vOrient')({
+      nl: nl, np: np, n: n,
+      thisName: thisName, otherName: otherName,
+      pctThis: Math.round(fThis * 100), pctOther: Math.round(fOther * 100),
+      ratio: nf(fOther / fThis > 1 ? fOther / fThis : fThis / fOther, 1)
+    });
+    if (o.fmtSel === 'auto') html += t('vOrientAuto')({ thisName: thisName });
+    if (ratio > 1.1) html += t('vOrientSwap')({ otherName: otherName, ratio: nf(ratio, 1) });
+    else html += t('vOrientOk');
+    out.push(verdict(ratio > 1.1 ? 'warn' : 'ok', t('verdictFmt'), html));
+  }
+
+  // ── plegado: hojas por firma y desplazamiento ─────────
+  const sigs = signatures(L.sheets, o.sig);
+  const maxSh = sigs.reduce((m, s) => Math.max(m, s.sheets), 0);
+  const creep = (maxSh - 1) * o.caliper;
+  if (sigs.length > 1) {
+    out.push(verdict('ok', t('verdictFold'),
+      t('vCreepSplit')({ sigs: sigs.length, sh: maxSh, creep: nf(creep, 2) })));
+  } else if (creep > 1 || maxSh > 6) {
+    out.push(verdict('bad', t('verdictFold'), t('vCreepBad')({ sh: maxSh, creep: nf(creep, 2) })));
+  } else {
+    out.push(verdict('ok', t('verdictFold'), t('vCreepOk')({ sh: maxSh, creep: nf(creep, 2) })));
+  }
+
+  // ── resolución real por archivo ───────────────────────
+  const ppis = items.map(it => ppiOf(it, o)).filter(p => p != null);
+  if (ppis.length) {
+    const min = Math.min.apply(null, ppis);
+    const bad = ppis.filter(p => p < 200).length;
+    out.push(bad
+      ? verdict('bad', t('verdictPpi'), t('vPpiBad')({ k: bad, min: min }))
+      : verdict('ok', t('verdictPpi'), t('vPpiOk')({ n: ppis.length, min: min })));
+  }
+
+  // ── peso estimado del PDF ─────────────────────────────
+  if (weightMB != null) {
+    out.push(verdict(weightMB > 60 ? 'warn' : 'ok', t('verdictSize'),
+      t('vSize')({ mb: nf(weightMB, weightMB < 10 ? 1 : 0), ppi: o.ppi,
+                   hint: weightMB > 60 ? t('vSizeHintBig') : t('vSizeHintOk') })));
+  }
+
+  // ── estructura ────────────────────────────────────────
+  let sHtml = t('vStruct')({
+    total: L.total, sheets: L.sheets, photos: n,
+    idx: L.idxPages, blank: L.total - n - L.idxPages - 2
+  });
+  if (L.idxPages && L.padding === 0 && L.idxPages >= 2) sHtml += t('vStructWaste');
+  out.push(verdict('info', t('verdictStruct'), sHtml));
+
+  box.innerHTML = out.join('');
+}
+
+// ═══════════════════════════════════════════════════════
+//  ESTIMACIÓN DE PESO
+//  Se procesa UNA foto con los ajustes en curso y se extrapola. Debounced,
+//  porque cada llamada decodifica una imagen de verdad.
+// ═══════════════════════════════════════════════════════
+let weightMB = null;
+let weightTimer = null;
+function scheduleWeight() {
+  if (weightTimer) clearTimeout(weightTimer);
+  weightTimer = setTimeout(runWeight, 450);
+}
+async function runWeight() {
+  weightTimer = null;
+  const o = opts();
+  const sample = items.filter(it => !it.broken && it.w && it.h)[0];
+  if (!sample) { weightMB = null; return; }
+  const fit = fitOf(sample, o);
+  const maxDim = Math.max(64, Math.ceil(o.ppi * Math.max(fit.w, fit.h) / 25.4));
+  const jpg = await prepareJpeg(sample.file, sample.orientation, 0.88, maxDim,
+                                o.fit === 'cover' ? fit.w / fit.h : 0);
+  if (!jpg) { weightMB = null; return; }
+  const comma = jpg.dataUrl.indexOf(',');
+  const bytes = (jpg.dataUrl.length - comma - 1) * 0.75;
+  const L = calcLayout(items.length, o);
+  const idxBytes = L.idxPages ? items.length * 30000 : 0;   // miniaturas del índice, 600 px q 0,7
+  weightMB = (bytes * items.length + idxBytes + 300000) * 1.05 / 1e6;
+  renderVerdicts(items.length, o, L);
+}
+
+// ═══════════════════════════════════════════════════════
+//  TIRA DE PLIEGOS
+//  Recorre pageInfo() de dos en dos y dibuja lo que se ve al abrir el zine.
+//  El primer naipe es el exterior (contraportada + portada).
+// ═══════════════════════════════════════════════════════
+let spDragIdx = null;
+
+function miniPage(p, N, n, L, o) {
+  const d = document.createElement('div');
+  d.className = 'sp-pg';
+  const info = pageInfo(p, N, n, L);
+  if (info.type === 'cover') {
+    const m = readMeta();
+    d.innerHTML = '<div class="mini-cover">' + escapeHtml(m.title.toUpperCase()) + '</div>';
+  } else if (info.type === 'backcover') {
+    d.innerHTML = '<div class="kind">' + t('backCover') + '</div>';
+  } else if (info.type === 'thumbs') {
+    d.innerHTML = '<div class="kind">' + t('thumbnails') + ' ' + (info.half + 1) + '</div>';
+  } else if (info.type === 'colophon') {
+    d.innerHTML = o.colophon ? '<div class="kind">' + t('colophonWord') + '</div>' : '';
+  } else if (info.type === 'photo') {
+    const it = items[info.idx];
+    if (it) {
+      const pad = (o.pad / FORMATS[o.fmt].PW * 100).toFixed(1);
+      const img = new Image();
+      img.src = thumbUrl(it.file);
+      img.style.padding = pad + '%';
+      img.draggable = false;
+      d.appendChild(img);
+      const cap = captionFor(it, o.caption);
+      if (cap) {
+        const c = document.createElement('div');
+        c.className = 'cap';
+        c.textContent = cap;
+        d.appendChild(c);
+      }
+      d.classList.add('drag-ok');
+      d.draggable = true;
+      d.dataset.pidx = String(info.idx);
+      attachSpreadDrag(d);
+    }
+  }
+  if (info.type !== 'blank') {
+    const pn = document.createElement('div');
+    pn.className = 'pn';
+    pn.textContent = p;
+    d.appendChild(pn);
+  }
+  return d;
+}
+
+function attachSpreadDrag(d) {
+  d.addEventListener('dragstart', e => {
+    spDragIdx = parseInt(d.dataset.pidx, 10);
+    d.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    try { e.dataTransfer.setData('text/plain', String(spDragIdx)); } catch (_) {}
+  });
+  d.addEventListener('dragend', () => {
+    d.classList.remove('dragging');
+    [].forEach.call(document.querySelectorAll('.sp-pg.drop-hi'), x => x.classList.remove('drop-hi'));
+    spDragIdx = null;
+  });
+  d.addEventListener('dragover', e => {
+    if (spDragIdx === null) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    d.classList.add('drop-hi');
+  });
+  d.addEventListener('dragleave', () => d.classList.remove('drop-hi'));
+  d.addEventListener('drop', e => {
+    e.preventDefault(); e.stopPropagation();
+    if (spDragIdx === null) return;
+    const dst = parseInt(d.dataset.pidx, 10);
+    if (dst === spDragIdx) return;
+    const target = items[dst];
+    const moved = items.splice(spDragIdx, 1)[0];
+    let ni = items.indexOf(target);
+    if (ni < 0) ni = items.length;
+    items.splice(ni, 0, moved);
+    document.getElementById('f-order').value = 'manual';
+    spDragIdx = null;
+    renderThumbs(); updateSpec();
+  });
+}
+
+/* ──────────────────────────────────────────────────────────────
+   BLOQUE DE MÉTODO: imposición, plegado y supuestos.
+   La tabla se construye con el MISMO sheetPlan() que arma el PDF, de modo
+   que no puede contradecir lo que sale por la impresora.
+   ────────────────────────────────────────────────────────────── */
+function renderMethod(n, o, L) {
+  const N = L.total, F = FORMATS[o.fmt], stack = F.stack;
+
+  /* 1 · tabla de imposición, hoja por hoja */
+  const tb = el('zg-imp-table');
+  if (tb) {
+    const heads = stack ? ['thSheet','thFT','thFB','thBT','thBB'] : ['thSheet','thFL','thFR','thBL','thBR'];
+    const cell = sl => sl ? (sl.page + (sl.rot === 180 ? t('rot180') : '')) : '—';
+    let h = '<thead><tr>' + heads.map(k => '<th>' + t(k) + '</th>').join('') + '</tr></thead><tbody>';
+    for (let sh = 1; sh <= L.sheets; sh++) {
+      const plan = sheetPlan(o, imposition(sh, N));
+      h += '<tr><td>' + sh + '</td><td>' + cell(plan.front[0]) + '</td><td>' + cell(plan.front[1]) +
+           '</td><td>' + cell(plan.back[0]) + '</td><td>' + cell(plan.back[1]) + '</td></tr>';
+    }
+    tb.innerHTML = h + '</tbody>';
+  }
+
+  /* 2 · plegado: la hoja exterior girando sobre el pliegue */
+  const svgHost = el('zg-fold-svg'), sl = el('zg-fold-slider');
+  if (svgHost && sl) {
+    const im = imposition(1, N), plan = sheetPlan(o, im);
+    const drawFold = () => {
+      const pct = Math.max(0, Math.min(100, parseFloat(sl.value) || 0));
+      const ang = pct / 100 * Math.PI / 2;           // 0 = abierta, π/2 = cerrada
+      const W = 260, H = 150, mx = 20, my = 18;
+      const half = (W - mx * 2) / 2, cx = mx + half; // el pliegue va en el centro
+      const wMov = half * Math.cos(ang);             // media hoja escorzada
+      const izq = plan.front[0], der = plan.front[1];
+      const cara = pct > 50 ? der : izq;             // al cerrarse asoma la portada
+      const g = [];
+      g.push('<rect x="' + cx + '" y="' + my + '" width="' + half.toFixed(1) + '" height="' + (H - my * 2) + '" fill="#fff" stroke="#c9c4bb"/>');
+      g.push('<text x="' + (cx + half / 2).toFixed(1) + '" y="' + (H / 2) + '" text-anchor="middle" font-family="monospace" font-size="15" fill="#6b6459">' + (der ? der.page : '') + '</text>');
+      g.push('<rect x="' + (cx - wMov).toFixed(1) + '" y="' + my + '" width="' + Math.max(0.5, wMov).toFixed(1) + '" height="' + (H - my * 2) + '" fill="' + (pct > 50 ? '#f3efe7' : '#fff') + '" stroke="#c9c4bb"/>');
+      if (wMov > 18) g.push('<text x="' + (cx - wMov / 2).toFixed(1) + '" y="' + (H / 2) + '" text-anchor="middle" font-family="monospace" font-size="15" fill="#6b6459">' + (izq ? izq.page : '') + '</text>');
+      g.push('<line x1="' + cx + '" y1="' + (my - 6) + '" x2="' + cx + '" y2="' + (H - my + 6) + '" stroke="#a8a096" stroke-dasharray="3 3"/>');
+      svgHost.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="max-width:300px;display:block;margin:0 auto"><rect width="' + W + '" height="' + H + '" fill="none"/>' + g.join('') + '</svg>';
+      const vv = el('zg-fold-val'); if (vv) vv.textContent = Math.round(pct) + t('foldPct');
+      const lb = el('zg-fold-label');
+      if (lb) lb.textContent = pct < 5 ? t('foldClosed') : (pct > 95 ? t('foldDone') : t('foldMid'));
+    };
+    if (!sl.dataset.wired) { sl.addEventListener('input', drawFold); sl.dataset.wired = '1'; }
+    drawFold();
+  }
+
+  /* 3 · supuestos, con los valores puestos ahora mismo */
+  const ul = el('zg-assumptions');
+  if (ul) {
+    const box = photoBox(F, o.pad), sz = sheetSize(F);
+    const nf = (x, d) => x.toLocaleString(document.documentElement.lang === 'en' ? 'en-GB' : 'es-ES',
+                                         { minimumFractionDigits: d, maximumFractionDigits: d });
+    const li = [];
+    const add = (k, v) => li.push('<li><b>' + t(k) + '</b>: ' + v + '</li>');
+    add('asFmt', t(o.fmtSel === 'landscape' ? 'fmtLandscape' : 'fmtPortrait'));
+    add('asPage', nf(F.PW, 1) + ' × ' + nf(F.PH, 1) + ' mm');
+    add('asSheet', nf(sz.w, 0) + ' × ' + nf(sz.h, 0) + ' mm');
+    add('asBox', nf(box.w, 1) + ' × ' + nf(box.h, 1) + ' mm (' + nf(o.pad, 1) + ' mm + ' + FOOTER_H + ' mm)');
+    add('asPpi', o.ppi + (document.documentElement.lang === 'en' ? ' ppi' : ' ppp'));
+    add('asPages', N + ' (' + n + ')');
+    add('asSheets', L.sheets);
+    add('asBlanks', L.padding);
+    add('asIdx', L.idxPages || t('asNone'));
+    add('asPaper', nf(o.caliper, 2) + ' mm');
+    add('asSig', o.sig ? o.sig : t('asSigOne'));
+    add('asDuplex', t(o.duplex === 'long' ? 'asLong' : 'asShort'));
+    li.push('<li>' + t('asLocal') + '</li>');
+    ul.innerHTML = li.join('');
+  }
+}
+
+function renderSpreads(n, o, L) {
+  const host = document.getElementById('zg-spreads');
+  if (!host) return;
+  host.innerHTML = '';
+  const N = L.total;
+  const F = FORMATS[o.fmt];
+  const pairs = [[N, 1, t('spOuter')]];
+  for (let p = 2; p <= N - 1; p += 2) pairs.push([p, p + 1, null]);
+
+  pairs.forEach((pair, i) => {
+    const card = document.createElement('div');
+    card.className = 'sp';
+    const wrap = document.createElement('div');
+    wrap.className = 'sp-pair' + (F.stack ? ' stack' : '');
+    wrap.style.aspectRatio = F.stack ? (F.PW + ' / ' + (F.PH * 2)) : ((F.PW * 2) + ' / ' + F.PH);
+    wrap.appendChild(miniPage(pair[0], N, n, L, o));
+    wrap.appendChild(miniPage(pair[1], N, n, L, o));
+    card.appendChild(wrap);
+    const lab = document.createElement('div');
+    lab.className = 'sp-lab';
+    lab.innerHTML = '<span>' + (pair[2] || (t('spPair') + i)) + '</span><b>' + pair[0] + ' · ' + pair[1] + '</b>';
+    card.appendChild(lab);
+    host.appendChild(card);
+  });
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
 // ═══════════════════════════════════════════════════════
@@ -794,22 +1701,28 @@ function fitImage(iw, ih, pw, ph) {
   return { x: (pw - iw*s)/2, y: (ph - ih*s)/2, w: iw*s, h: ih*s };
 }
 
-// Dimensión máxima (lado mayor) en píxeles para las imágenes embebidas.
-// 2480 px ≈ 210 mm a 300 ppp: suficiente para impresión, sin inflar el PDF.
-const MAX_IMG_DIM = 2480;
+// Tope absoluto de píxeles por imagen: red de seguridad. Quien manda de verdad
+// es la calidad elegida, que fija el lado en píxeles a partir del tamaño
+// impreso real de esa foto en esta página.
+const MAX_IMG_DIM = 4000;
 
 // Fotos que no se pudieron decodificar durante la última generación.
 const failedFiles = new Set();
 
+// Componer un giro de 180° con la orientación EXIF: así el giro de la media
+// página se hace en los píxeles, no con la matriz de jsPDF.
+const ROT180_EXIF = { 1:3, 2:4, 3:1, 4:2, 5:7, 6:8, 7:5, 8:6 };
+
 // ═══════════════════════════════════════════════════════
-//  DECODIFICACIÓN ORIENTADA + ESCALADO + JPEG, EN UN PASO
+//  DECODIFICACIÓN ORIENTADA + ESCALADO + RECORTE + JPEG, EN UN PASO
 //  createImageBitmap(..., {imageOrientation:'none'}) garantiza píxeles
 //  RAW (sin que el navegador auto-rote), y aquí aplicamos la matriz
 //  EXIF a mano. Determinista en cualquier navegador y sin doble giro.
+//  cropAR > 0 recorta al centro a esa relación de aspecto (encaje "llenar").
 //  Devuelve { dataUrl, w, h } con w/h ya en orientación final, o null
 //  si el navegador no sabe decodificar el formato (p. ej. HEIC).
 // ═══════════════════════════════════════════════════════
-async function prepareJpeg(file, orientation = 1, q = 0.88, maxDim = MAX_IMG_DIM) {
+async function prepareJpeg(file, orientation = 1, q = 0.88, maxDim = MAX_IMG_DIM, cropAR = 0) {
   let bmp;
   try {
     // imageOrientation:'none' → píxeles RAW (rotamos a mano más abajo)
@@ -824,7 +1737,14 @@ async function prepareJpeg(file, orientation = 1, q = 0.88, maxDim = MAX_IMG_DIM
   const dispW = swap ? bmp.height : bmp.width;   // dimensiones ya orientadas
   const dispH = swap ? bmp.width  : bmp.height;
 
-  const longSide = Math.max(dispW, dispH);
+  // tamaño final tras el recorte, para que el tope de píxeles se aplique a lo
+  // que de verdad se imprime
+  let cropW = dispW, cropH = dispH;
+  if (cropAR > 0) {
+    const ar = dispW / dispH;
+    if (ar > cropAR) cropW = dispH * cropAR; else cropH = dispW / cropAR;
+  }
+  const longSide = Math.max(cropW, cropH);
   const scale = longSide > maxDim ? maxDim / longSide : 1;
   const outW = Math.max(1, Math.round(dispW * scale));
   const outH = Math.max(1, Math.round(dispH * scale));
@@ -852,30 +1772,122 @@ async function prepareJpeg(file, orientation = 1, q = 0.88, maxDim = MAX_IMG_DIM
   }
   ctx.drawImage(bmp, 0, 0, rawW, rawH);  // escala el RAW al espacio transformado
   if (bmp.close) bmp.close();
-  return { dataUrl: c.toDataURL('image/jpeg', q), w: outW, h: outH };
+
+  let cv = c;
+  if (cropAR > 0) {
+    const tw = Math.max(1, Math.round(cropW * scale));
+    const th = Math.max(1, Math.round(cropH * scale));
+    if (tw < outW || th < outH) {
+      const c2 = document.createElement('canvas');
+      c2.width = tw; c2.height = th;
+      const x2 = c2.getContext('2d', { colorSpace: 'srgb' });
+      x2.imageSmoothingQuality = 'high';
+      x2.drawImage(c, Math.round((outW - tw) / 2), Math.round((outH - th) / 2), tw, th, 0, 0, tw, th);
+      cv = c2;
+    }
+  }
+  return { dataUrl: cv.toDataURL('image/jpeg', q), w: cv.width, h: cv.height };
+}
+
+// ═══════════════════════════════════════════════════════
+//  GEOMETRÍA DE LA HOJA Y PLUMILLA POR MEDIA PÁGINA
+//  slotGeom da la esquina de cada media página; pen() traduce coordenadas
+//  locales de página a coordenadas de hoja, incluido el giro de 180° que el
+//  plegado horizontal (A5 apaisada) exige en una de las dos mitades.
+// ═══════════════════════════════════════════════════════
+function slotGeom(F, i) {
+  return F.stack ? { offX: 0, offY: i === 0 ? 0 : F.PH }
+                 : { offX: i === 0 ? 0 : F.PW, offY: 0 };
+}
+function sheetSize(F) {
+  return F.stack ? { w: F.PW, h: F.PH * 2 } : { w: F.PW * 2, h: F.PH };
+}
+
+// Reparto de las cuatro páginas de una hoja en sus dos caras.
+//  portrait : pliegue vertical, se hojea como un libro, nada gira.
+//  landscape: pliegue horizontal y lomo arriba; la mitad de ARRIBA del anverso
+//             cae girada 180°. Es inherente al plegado, no un adorno.
+const FACE_PLAN = {
+  portrait:  { front: [{ i:0, rot:0,   k:'frontLeft' }, { i:1, rot:0, k:'frontRight' }],
+               back:  [{ i:0, rot:0,   k:'backLeft'  }, { i:1, rot:0, k:'backRight'  }] },
+  landscape: { front: [{ i:0, rot:180, k:'frontLeft' }, { i:1, rot:0, k:'frontRight' }],
+               back:  [{ i:0, rot:0,   k:'backLeft'  }, { i:1, rot:0, k:'backRight'  }] }
+};
+
+// Volteo por borde largo: la cara de atrás sale girada 180° entera, o sea que
+// las dos mitades se intercambian y cada una gira sobre sí misma.
+function flipLong(list) {
+  return list.map(s => ({ i: 1 - s.i, rot: (s.rot + 180) % 360, k: s.k }));
+}
+
+function sheetPlan(o, imp) {
+  const P = FACE_PLAN[o.fmt];
+  const back = (o.duplex === 'long') ? flipLong(P.back) : P.back;
+  const put = list => list.slice().sort((a, b) => a.i - b.i)
+                          .map(s => ({ page: imp[s.k], rot: s.rot, i: s.i }));
+  return { front: put(P.front), back: put(back) };
+}
+
+function pen(doc, F, slot) {
+  const g = slotGeom(F, slot.i);
+  const r = slot.rot === 180;
+  const X = x => r ? g.offX + F.PW - x : g.offX + x;
+  const Y = y => r ? g.offY + F.PH - y : g.offY + y;
+  return {
+    rot: r, offX: g.offX, offY: g.offY,
+    rect(x, y, w, h, st) {
+      const px = r ? X(x + w) : X(x), py = r ? Y(y + h) : Y(y);
+      if (st) doc.rect(px, py, w, h, st); else doc.rect(px, py, w, h);
+    },
+    line(x1, y1, x2, y2) { doc.line(X(x1), Y(y1), X(x2), Y(y2)); },
+    img(dataUrl, x, y, w, h) {
+      const px = r ? X(x + w) : X(x), py = r ? Y(y + h) : Y(y);
+      doc.addImage(dataUrl, 'JPEG', px, py, w, h);
+    },
+    // align: 'left' | 'center' | 'right', siempre en coordenadas de página.
+    // Con giro, jsPDF ancla el texto y lo tira hacia la izquierda y hacia
+    // abajo: por eso el ancla es el extremo derecho de la línea.
+    text(s, x, y, align, lh) {
+      const lines = Array.isArray(s) ? s : [s];
+      const step = lh || (doc.getFontSize() * 0.352778 * 1.15);
+      for (let k = 0; k < lines.length; k++) {
+        const yy = y + k * step;
+        if (!r) {
+          doc.text(lines[k], X(x), Y(yy), (align && align !== 'left') ? { align: align } : undefined);
+        } else {
+          let w = 0;
+          try { w = doc.getTextWidth(lines[k]); } catch (_) { w = 0; }
+          let x0 = x;
+          if (align === 'center') x0 = x - w / 2;
+          else if (align === 'right') x0 = x - w;
+          doc.text(lines[k], X(x0), Y(yy), { angle: 180 });
+        }
+      }
+    }
+  };
 }
 
 // Marcador visible en el PDF cuando una foto no se pudo decodificar,
 // para que un hueco silencioso no pase a imprenta.
-function drawMissing(doc, offX, pad, w, h, name) {
-  const x = offX + pad, y = pad;
+function drawMissing(doc, P, pad, w, h, name) {
   doc.setDrawColor(192, 57, 43);
   doc.setLineWidth(0.4);
-  doc.rect(x, y, w, h);
-  doc.line(x, y, x + w, y + h);
-  doc.line(x + w, y, x, y + h);
+  P.rect(pad, pad, w, h);
+  P.line(pad, pad, pad + w, pad + h);
+  P.line(pad + w, pad, pad, pad + h);
   setTypewriter(doc, 8);
   doc.setTextColor(192, 57, 43);
-  doc.text(t('undecodable'), offX + (w + pad*2)/2, y + h/2, { align: 'center' });
+  P.text(t('undecodable'), pad + w / 2, pad + h / 2, 'center');
   setTypewriter(doc, 6);
   doc.setTextColor(120, 118, 112);
-  doc.text(doc.splitTextToSize(name, w - 6), offX + (w + pad*2)/2, y + h/2 + 6, { align: 'center' });
+  P.text(doc.splitTextToSize(name, w - 6), pad + w / 2, pad + h / 2 + 6, 'center');
 }
 
 // ═══════════════════════════════════════════════════════
 //  RENDERIZADO DEL PDF
-//  PW = ancho de media página A4 apaisada = 148.5 mm
-//  PH = alto = 210 mm
+//  Todas las coordenadas son locales a la media página (0..PW, 0..PH) y las
+//  traduce la plumilla; así el mismo código sirve para las dos orientaciones
+//  y para la mitad girada del plegado horizontal.
 // ═══════════════════════════════════════════════════════
 
 function setTypewriter(doc, size) {
@@ -886,155 +1898,313 @@ function setTypewriter(doc, size) {
   doc.setFontSize(size);
 }
 
-async function renderPage(doc, p, N, nPhotos, offX, PW, PH, meta) {
-  const info = pageInfo(p, N, nPhotos);
-  const pad = 7;                  // margen exterior
-  const footerH = 12;             // alto reservado al pie (números, fecha) — fuera de zona no imprimible
-  const photoMaxH = PH - pad - footerH;  // alto útil para foto
+function pageNum(doc, P, F, p) {
+  setTypewriter(doc, 7);
+  doc.setTextColor(100, 100, 96);
+  P.text(String(p), F.PW / 2, F.PH - 8, 'center');
+}
 
-  // fondo blanco garantizado (cubre toda la media-A4)
+// Marca de canto, 4 pt en gris, para comprobar de un vistazo que el dorso
+// cayó donde tocaba al desplegar la hoja.
+function edgeMark(doc, P, F, slot, mark) {
+  if (!mark) return;
+  setTypewriter(doc, 4);
+  doc.setTextColor(175, 173, 167);
+  if (F.stack) {
+    if (slot.i === 0) P.text(mark, F.PW / 2, 3.4, 'center');
+    else              P.text(mark, F.PW / 2, F.PH - 1.6, 'center');
+  } else {
+    if (slot.i === 0) P.text(mark, 2.5, 4, 'left');
+    else              P.text(mark, F.PW - 2.5, 4, 'right');
+  }
+}
+
+async function renderPage(doc, p, N, nPhotos, F, slot, meta, o, L, mark) {
+  const P = pen(doc, F, slot);
+  const info = pageInfo(p, N, nPhotos, L);
+  const pad = o.pad;
+  const box = photoBox(F, pad);
+  const g = slotGeom(F, slot.i);
+
+  // fondo blanco garantizado (cubre toda la media página)
   doc.setFillColor(255, 255, 255);
-  doc.rect(offX, 0, PW, PH, 'F');
+  doc.rect(g.offX, g.offY, F.PW, F.PH, 'F');
 
   if (info.type === 'cover') {
-    renderCover(doc, offX, PW, PH, meta);
+    renderCover(doc, P, F, meta);
 
   } else if (info.type === 'backcover') {
-    renderBackCover(doc, offX, PW, PH, meta);
-    // número de página al pie central (sobre fondo blanco)
-    setTypewriter(doc, 7);
-    doc.setTextColor(100, 100, 96);
-    doc.text(String(p), offX + PW/2, PH - 8, { align: 'center' });
+    renderBackCover(doc, P, F, meta);
+    pageNum(doc, P, F, p);
+
+  } else if (info.type === 'colophon') {
+    if (o.colophon) { renderColophon(doc, P, F, o, pad); pageNum(doc, P, F, p); }
 
   } else if (info.type === 'blank') {
     // nada
 
   } else if (info.type === 'thumbs') {
-    await renderThumbnailPage(doc, info.half, offX, PW, PH);
-    // número de página
-    setTypewriter(doc, 7);
-    doc.setTextColor(100, 100, 96);
-    doc.text(String(info.half === 0 ? 3 : 4), offX + PW/2, PH - 8, { align: 'center' });
+    await renderThumbnailPage(doc, P, F, info.half, L, slot);
+    pageNum(doc, P, F, p);
 
   } else if (info.type === 'photo') {
     const it = items[info.idx];
     if (it) {
-      const jpg = await prepareJpeg(it.file, it.orientation);
+      // píxeles justos para el tamaño impreso real de ESTA foto a la calidad pedida
+      const fit0 = fitOf(it, o);
+      const maxDim = fit0 ? Math.max(64, Math.ceil(o.ppi * Math.max(fit0.w, fit0.h) / 25.4))
+                          : MAX_IMG_DIM;
+      const cropAR = (o.fit === 'cover') ? box.w / box.h : 0;
+      const or = P.rot ? (ROT180_EXIF[it.orientation || 1] || 3) : (it.orientation || 1);
+      const jpg = await prepareJpeg(it.file, or, 0.88, Math.min(maxDim, MAX_IMG_DIM), cropAR);
       if (jpg) {
-        const fit = fitImage(jpg.w, jpg.h, PW - pad*2, photoMaxH - pad);
-        doc.addImage(jpg.dataUrl, 'JPEG', offX + pad + fit.x, pad + fit.y, fit.w, fit.h);
+        const fit = fitImage(jpg.w, jpg.h, box.w, box.h);
+        P.img(jpg.dataUrl, pad + fit.x, pad + fit.y, fit.w, fit.h);
       } else {
-        drawMissing(doc, offX, pad, PW - pad*2, photoMaxH - pad, it.name);
+        drawMissing(doc, P, pad, box.w, box.h, it.name);
         failedFiles.add(it.file);
       }
-      // pie con fecha EXIF a la izquierda, número de página al centro
-      if (it.exifDate) {
+      // pie: fecha, ficha técnica o texto propio, a la izquierda
+      const cap = captionFor(it, o.caption);
+      if (cap) {
         setTypewriter(doc, 7);
         doc.setTextColor(120, 118, 112);
-        doc.text(fmtDate(it.exifDate), offX + pad, PH - 8);
+        const lines = doc.splitTextToSize(cap, F.PW - pad * 2 - 16);
+        P.text(lines.slice(0, 2), pad, F.PH - 8, 'left');
       }
     }
-    setTypewriter(doc, 7);
-    doc.setTextColor(100, 100, 96);
-    doc.text(String(p), offX + PW/2, PH - 8, { align: 'center' });
+    pageNum(doc, P, F, p);
   }
+  edgeMark(doc, P, F, slot, mark);
 }
 
-function renderCover(doc, offX, PW, PH, meta) {
+function renderCover(doc, P, F, meta) {
+  const PW = F.PW, PH = F.PH;
   setTypewriter(doc, 26);
   doc.setTextColor(0, 0, 0);
   const lines = doc.splitTextToSize(meta.title.toUpperCase(), PW - 24);
-  doc.text(lines, offX + 12, PH/2 - 4);
+  const step = 26 * 0.352778 * 1.15;
+  P.text(lines, 12, PH / 2 - 4 - (lines.length - 1) * step, 'left', step);
 
   doc.setDrawColor(0, 0, 0);
   doc.setLineWidth(0.5);
-  doc.line(offX + 12, PH/2 + 5, offX + PW - 12, PH/2 + 5);
+  P.line(12, PH / 2 + 5, PW - 12, PH / 2 + 5);
 
   setTypewriter(doc, 8);
   doc.setTextColor(70, 70, 66);
-  if (meta.author) doc.text(meta.author.toUpperCase(), offX + 12, PH/2 + 11);
-  doc.text(t('issuePdf') + meta.issue + '  ·  ' + meta.year, offX + PW - 12, PH/2 + 11, { align: 'right' });
+  if (meta.author) P.text(meta.author.toUpperCase(), 12, PH / 2 + 11, 'left');
+  P.text(t('issuePdf') + meta.issue + '  ·  ' + meta.year, PW - 12, PH / 2 + 11, 'right');
 
   // marco
   doc.setDrawColor(180, 178, 172);
   doc.setLineWidth(0.2);
-  doc.rect(offX + 1, 1, PW - 2, PH - 2);
+  P.rect(1, 1, PW - 2, PH - 2);
 }
 
-function renderBackCover(doc, offX, PW, PH, meta) {
+function renderBackCover(doc, P, F, meta) {
+  const PW = F.PW, PH = F.PH;
   setTypewriter(doc, 72);
   doc.setTextColor(230, 228, 222);
-  doc.text(meta.issue, offX + PW - 10, PH - 14, { align: 'right' });
+  P.text(meta.issue, PW - 10, PH - 14, 'right');
 
   setTypewriter(doc, 7.5);
   doc.setTextColor(0, 0, 0);
-  doc.text(meta.title.toUpperCase(), offX + 12, PH - 16);
-  doc.text(String(meta.year), offX + 12, PH - 11);
+  P.text(meta.title.toUpperCase(), 12, PH - 16, 'left');
+  P.text(String(meta.year), 12, PH - 11, 'left');
 
   doc.setDrawColor(180, 178, 172);
   doc.setLineWidth(0.2);
-  doc.rect(offX + 1, 1, PW - 2, PH - 2);
+  P.rect(1, 1, PW - 2, PH - 2);
 }
 
-async function renderThumbnailPage(doc, half, offX, PW, PH) {
-  const margin = 8, gap = 3, cols = 4, rows = 5;
+// Interior de portada: hasta hoy siempre en blanco, ahora colofón si lo hay.
+function renderColophon(doc, P, F, o, pad) {
+  const PW = F.PW, PH = F.PH;
+  setTypewriter(doc, 8);
+  doc.setTextColor(60, 60, 56);
+  const lines = doc.splitTextToSize(o.colophon, PW - pad * 2 - 16);
+  const step = 8 * 0.352778 * 1.5;
+  P.text(lines.slice(0, 22), pad + 8, PH * 0.58, 'left', step);
+  doc.setDrawColor(180, 178, 172);
+  doc.setLineWidth(0.2);
+  P.line(pad + 8, PH * 0.58 - 8, pad + 8 + 26, PH * 0.58 - 8);
+}
+
+async function renderThumbnailPage(doc, P, F, page, L, slot) {
+  const PW = F.PW, PH = F.PH;
+  const margin = 8, gap = 3, cols = L.cols, rows = L.rows;
   const headerH = 8;
-  const tW = (PW - margin*2 - gap*(cols-1)) / cols;
-  const tH = (PH - margin*2 - headerH - 8 - gap*(rows-1)) / rows;
+  const tW = (PW - margin * 2 - gap * (cols - 1)) / cols;
+  const tH = (PH - margin * 2 - headerH - 8 - gap * (rows - 1)) / rows;
 
   setTypewriter(doc, 8);
   doc.setTextColor(0, 0, 0);
-  doc.text(t('indexLabel') + (half === 0 ? 'I' : 'II'), offX + margin, margin + 3);
+  P.text(t('indexLabel') + roman(page + 1), margin, margin + 3, 'left');
 
-  const startIdx = half === 0 ? 0 : cols * rows;
-  for (let i = 0; i < cols * rows; i++) {
+  const startIdx = page * L.per;
+  for (let i = 0; i < L.per; i++) {
     const fi = startIdx + i;
     if (fi >= items.length) break;
     const it = items[fi];
     const col = i % cols;
     const row = Math.floor(i / cols);
-    const x = offX + margin + col * (tW + gap);
+    const x = margin + col * (tW + gap);
     const y = margin + headerH + row * (tH + gap);
-    const jpg = await prepareJpeg(it.file, it.orientation, 0.7, 600);
+    const or = P.rot ? (ROT180_EXIF[it.orientation || 1] || 3) : (it.orientation || 1);
+    const jpg = await prepareJpeg(it.file, or, 0.7, 600);
     if (jpg) {
       const fit = fitImage(jpg.w, jpg.h, tW, tH);
-      doc.addImage(jpg.dataUrl, 'JPEG', x + fit.x, y + fit.y, fit.w, fit.h);
+      P.img(jpg.dataUrl, x + fit.x, y + fit.y, fit.w, fit.h);
     } else {
       doc.setDrawColor(192, 57, 43);
       doc.setLineWidth(0.3);
-      doc.rect(x, y, tW, tH);
-      doc.line(x, y, x + tW, y + tH);
+      P.rect(x, y, tW, tH);
+      P.line(x, y, x + tW, y + tH);
     }
     setTypewriter(doc, 4.5);
     doc.setTextColor(100, 100, 96);
-    doc.text(String(fi + 1), x + tW, y + tH - .2, { align: 'right' });
+    P.text(String(fi + 1), x + tW, y + tH - 0.2, 'right');
   }
 }
 
-function drawFoldLine(doc, PW, PH) {
-  // línea de plegado punteada en el centro de la hoja
+function roman(n) {
+  const R = ['I','II','III','IV','V','VI','VII','VIII','IX','X'];
+  return R[n - 1] || String(n);
+}
+
+function drawFoldLine(doc, F) {
+  // línea de plegado punteada en el centro de la hoja, más marcas de tijera
   doc.setDrawColor(210, 208, 202);
   doc.setLineWidth(0.1);
-  for (let y = 2; y < PH - 2; y += 2.5) {
-    doc.line(PW, y, PW, Math.min(y + 1.2, PH - 2));
+  if (F.stack) {
+    for (let x = 2; x < F.PW - 2; x += 2.5) doc.line(x, F.PH, Math.min(x + 1.2, F.PW - 2), F.PH);
+    doc.setLineWidth(0.2);
+    doc.line(1, F.PH - 2.5, 1, F.PH + 2.5);
+    doc.line(F.PW - 1, F.PH - 2.5, F.PW - 1, F.PH + 2.5);
+  } else {
+    for (let y = 2; y < F.PH - 2; y += 2.5) doc.line(F.PW, y, F.PW, Math.min(y + 1.2, F.PH - 2));
+    doc.setLineWidth(0.2);
+    doc.line(F.PW - 2.5, 1, F.PW + 2.5, 1);
+    doc.line(F.PW - 2.5, F.PH - 1, F.PW + 2.5, F.PH - 1);
   }
-  // marcas de tijera arriba y abajo
-  doc.setLineWidth(0.2);
-  doc.line(PW - 2.5, 1, PW + 2.5, 1);
-  doc.line(PW - 2.5, PH - 1, PW + 2.5, PH - 1);
 }
 
-async function generatePDF() {
+// ═══════════════════════════════════════════════════════
+//  HOJA DE CALIBRACIÓN
+//  Media página con cuña de grises, primarios y grosores de línea; la otra
+//  media, el rectángulo de la caja de foto a tamaño exacto para pillar al
+//  driver si está escalando.
+// ═══════════════════════════════════════════════════════
+function labToSrgb255(L) {
+  const y = L > 8 ? Math.pow((L + 16) / 116, 3) : L / 903.3;
+  const v = y <= 0.0031308 ? 12.92 * y : 1.055 * Math.pow(y, 1 / 2.4) - 0.055;
+  return Math.round(Math.max(0, Math.min(1, v)) * 255);
+}
+
+function renderCalibration(doc, F, o) {
+  const ss = sheetSize(F);
+  doc.setFillColor(255, 255, 255);
+  doc.rect(0, 0, ss.w, ss.h, 'F');
+
+  const A = pen(doc, F, { i: 0, rot: 0 });
+  const B = pen(doc, F, { i: 1, rot: 0 });
+  const PW = F.PW, PH = F.PH, m = 10;
+
+  setTypewriter(doc, 9);
+  doc.setTextColor(0, 0, 0);
+  A.text(t('calibTitle'), m, 14, 'left');
+
+  // cuña de 21 grises, L* 0–100 de 5 en 5, en tres filas de siete
+  setTypewriter(doc, 6);
+  doc.setTextColor(90, 90, 86);
+  A.text(t('calibGrey'), m, 22, 'left');
+  const cw = (PW - m * 2) / 7;
+  for (let k = 0; k <= 20; k++) {
+    const Lstar = k * 5;
+    const v = labToSrgb255(Lstar);
+    const col = k % 7, row = Math.floor(k / 7);
+    const x = m + col * cw, y = 25 + row * 18;
+    doc.setFillColor(v, v, v);
+    A.rect(x, y, cw - 1, 10, 'F');
+    doc.setDrawColor(200, 198, 192);
+    doc.setLineWidth(0.1);
+    A.rect(x, y, cw - 1, 10);
+    setTypewriter(doc, 5);
+    doc.setTextColor(90, 90, 86);
+    A.text(String(Lstar), x, y + 13.5, 'left');
+  }
+
+  // primarios y secundarios sRGB
+  setTypewriter(doc, 6);
+  doc.setTextColor(90, 90, 86);
+  A.text(t('calibPrim'), m, 84, 'left');
+  const PRIM = [[255,0,0],[0,255,0],[0,0,255],[0,255,255],[255,0,255],[255,255,0],[0,0,0],[255,255,255]];
+  const pw = (PW - m * 2) / PRIM.length;
+  PRIM.forEach((c, k) => {
+    doc.setFillColor(c[0], c[1], c[2]);
+    A.rect(m + k * pw, 87, pw - 1, 10, 'F');
+    doc.setDrawColor(200, 198, 192);
+    doc.setLineWidth(0.1);
+    A.rect(m + k * pw, 87, pw - 1, 10);
+  });
+
+  // grosores de línea, de 0,1 a 0,5 pt
+  setTypewriter(doc, 6);
+  doc.setTextColor(90, 90, 86);
+  A.text(t('calibLines'), m, 106, 'left');
+  doc.setDrawColor(0, 0, 0);
+  for (let k = 1; k <= 5; k++) {
+    const wpt = k / 10;
+    doc.setLineWidth(wpt * 25.4 / 72);
+    const y = 110 + (k - 1) * 5;
+    A.line(m + 16, y, PW - m, y);
+    setTypewriter(doc, 5);
+    doc.setTextColor(90, 90, 86);
+    A.text(nfPdf(wpt), m, y + 1, 'left');
+  }
+
+  // caja de foto a tamaño exacto, en la otra media página
+  const box = photoBox(F, o.pad);
+  setTypewriter(doc, 6);
+  doc.setTextColor(90, 90, 86);
+  B.text(t('calibBox'), o.pad, o.pad - 2.5, 'left');
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.3);
+  B.rect(o.pad, o.pad, box.w, box.h);
+  setTypewriter(doc, 8);
+  doc.setTextColor(0, 0, 0);
+  B.text(nfPdf(Math.round(box.w * 10) / 10) + ' × ' + nfPdf(Math.round(box.h * 10) / 10) + ' mm',
+         o.pad + box.w / 2, o.pad + box.h / 2, 'center');
+}
+
+// Números para el PDF: coma decimal en español, punto en inglés.
+function nfPdf(x) {
+  const s = String(x);
+  return document.documentElement.lang === 'en' ? s : s.replace('.', ',');
+}
+
+// ═══════════════════════════════════════════════════════
+//  GENERACIÓN
+//  testOnly = true exporta una sola hoja (dos caras) para gastar un folio
+//  antes de tirar el cuadernillo entero.
+// ═══════════════════════════════════════════════════════
+async function generatePDF(testOnly) {
   if (!items.length) return;
+  if (!HAS_PDF) { statusEl.textContent = t('noPdfLib'); statusEl.className = 'err'; return; }
   btnGen.disabled = true;
+  const testBtn = document.getElementById('zg-test');
+  if (testBtn) testBtn.disabled = true;
   statusEl.textContent = ''; statusEl.className = '';
   failedFiles.clear();
+  fontEmbedded = true;
 
   const meta = readMeta();
+  const o = opts();
+  const F = FORMATS[o.fmt];
   const nPhotos = items.length;
-  const { total: N, sheets } = calcLayout(nPhotos);
-  const PW = 148.5, PH = 210;  // A4 apaisado dividido por la mitad
-  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  const L = calcLayout(nPhotos, o);
+  const N = L.total, sheets = L.sheets;
+  const doc = new jsPDF({ orientation: F.doc, unit: 'mm', format: 'a4' });
 
   // registrar la fuente seleccionada
   const f = FONTS[currentFontKey];
@@ -1042,47 +2212,86 @@ async function generatePDF() {
     doc.addFileToVFS(f.file, f.b64);
     doc.addFont(f.file, f.jsName, 'normal');
   } catch (e) {
+    fontEmbedded = false;
     console.warn(t('fontError'), e);
   }
 
   let firstPage = true;
+  function newPage() { if (!firstPage) doc.addPage(); firstPage = false; }
 
-  for (let sheet = 1; sheet <= sheets; sheet++) {
-    const imp = imposition(sheet, N);
-    const pct = Math.round(((sheet - 1) / sheets) * 95);
+  if (o.calib && !testOnly) {
+    newPage();
+    renderCalibration(doc, F, o);
+    drawFoldLine(doc, F);
+    newPage();
+    const ss = sheetSize(F);
+    doc.setFillColor(255, 255, 255);
+    doc.rect(0, 0, ss.w, ss.h, 'F');
+  }
 
-    setProgress(pct, t('sheetWord') + sheet + '/' + sheets + t('sideFront') + imp.frontLeft + ' | p' + imp.frontRight);
-    await tick();
-    if (!firstPage) doc.addPage();
-    firstPage = false;
-    await renderPage(doc, imp.frontLeft,  N, nPhotos, 0,  PW, PH, meta);
-    await renderPage(doc, imp.frontRight, N, nPhotos, PW, PW, PH, meta);
-    drawFoldLine(doc, PW, PH);
+  const sigs = signatures(sheets, o.sig);
+  const HL = t('sheetWord').trim().charAt(0);
+  const nSheets = testOnly ? 1 : sheets;
+  let done = 0, stop = false;
 
-    setProgress(pct + Math.round(48 / sheets), t('sheetWord') + sheet + '/' + sheets + t('sideBack') + imp.backLeft + ' | p' + imp.backRight);
-    await tick();
-    doc.addPage();
-    await renderPage(doc, imp.backLeft,  N, nPhotos, 0,  PW, PH, meta);
-    await renderPage(doc, imp.backRight, N, nPhotos, PW, PW, PH, meta);
-    drawFoldLine(doc, PW, PH);
+  for (let si = 0; si < sigs.length && !stop; si++) {
+    const sg = sigs[si];
+    const Nlocal = sg.sheets * 4;
+    for (let sheet = 1; sheet <= sg.sheets; sheet++) {
+      const il = imposition(sheet, Nlocal);
+      const imp = {
+        frontLeft:  il.frontLeft  + sg.offset,
+        frontRight: il.frontRight + sg.offset,
+        backLeft:   il.backLeft   + sg.offset,
+        backRight:  il.backRight  + sg.offset
+      };
+      const plan = sheetPlan(o, imp);
+      const gs = sg.offset / 4 + sheet;
+      const pct = Math.round((done / nSheets) * 95);
+
+      setProgress(pct, t('sheetWord') + gs + '/' + nSheets + t('sideFront') + plan.front[0].page + ' | p' + plan.front[1].page);
+      await tick();
+      newPage();
+      for (let k = 0; k < plan.front.length; k++) {
+        const s = plan.front[k];
+        await renderPage(doc, s.page, N, nPhotos, F, s, meta, o, L, HL + gs + '·A·p' + s.page);
+      }
+      drawFoldLine(doc, F);
+
+      setProgress(pct + Math.round(48 / nSheets), t('sheetWord') + gs + '/' + nSheets + t('sideBack') + plan.back[0].page + ' | p' + plan.back[1].page);
+      await tick();
+      newPage();
+      for (let k = 0; k < plan.back.length; k++) {
+        const s = plan.back[k];
+        await renderPage(doc, s.page, N, nPhotos, F, s, meta, o, L, HL + gs + '·B·p' + s.page);
+      }
+      drawFoldLine(doc, F);
+
+      done++;
+      if (testOnly) { stop = true; break; }
+    }
   }
 
   setProgress(99, t('packing'));
   await tick();
 
   const slug = meta.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-  doc.save('zine-' + slug + '-' + meta.issue + '.pdf');
+  doc.save('zine-' + slug + '-' + meta.issue + (testOnly ? '-test' : '') + '.pdf');
 
   progressWrap.style.display = 'none';
   if (failedFiles.size) {
     const names = [...failedFiles].map(f => f.name).join(', ');
-    statusEl.textContent = t('pdfWarn')(failedFiles.size, names);
+    statusEl.textContent = t('pdfWarn')(failedFiles.size, names) + (fontEmbedded ? '' : t('courierNote'));
     statusEl.className = 'warn';
+  } else if (testOnly) {
+    statusEl.textContent = t('testDone') + (fontEmbedded ? '' : t('courierNote'));
+    statusEl.className = 'ok';
   } else {
-    statusEl.textContent = t('pdfOk')(sheets, N, FONT_LABELS[currentFontKey]);
+    statusEl.textContent = t('pdfOk')(sheets, N, FONT_LABELS[currentFontKey], fontEmbedded);
     statusEl.className = 'ok';
   }
   btnGen.disabled = false;
+  if (testBtn) testBtn.disabled = false;
 }
 
 // ═══════════════════════════════════════════════════════
