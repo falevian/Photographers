@@ -68,7 +68,8 @@
   .tab.on{color:var(--head);border-bottom-color:var(--teal)}
 
   .grid{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:18px;margin-top:18px}
-  @media(max-width:700px){.grid{grid-template-columns:1fr}}
+  .grid>*{min-width:0}
+  @media(max-width:700px){.grid{grid-template-columns:minmax(0,1fr)}}
   .vis{display:flex;gap:14px;flex-wrap:wrap}
   figure{margin:0}
   canvas,svg.diag{border-radius:10px;border:1px solid var(--line2);display:block;background:var(--panel2)}
@@ -124,7 +125,7 @@
   .verdict p:last-child{margin-bottom:0}
   .verdict b{font-weight:500;color:var(--head)}
   .verdict code{font-family:var(--mono);font-size:12.5px;color:var(--head)}
-  .tblwrap{overflow-x:auto;margin-top:16px}
+  .tblwrap{overflow-x:auto;min-width:0;margin-top:16px}
   table.cmp{width:100%;border-collapse:collapse;font-size:12px}
   table.cmp th,table.cmp td{border-bottom:1px solid var(--line);padding:6px 7px;text-align:right;white-space:nowrap}
   table.cmp th:first-child,table.cmp td:first-child{text-align:left}
@@ -256,7 +257,7 @@
         <div class="ctl"><div class="row"><span data-lang="es">Albedo del techo</span><span data-lang="en">Ceiling albedo</span><span class="val"><span id="v-bcalb">0.7</span></span></div><input id="r-bcalb" type="range" min="0.4" max="0.9" step="0.05" value="0.7"></div>
         <div class="stats" style="grid-template-columns:repeat(2,1fr);margin-top:0">
           <div class="stat"><div class="l" data-lang="es">Mancha en el techo</div><div class="l" data-lang="en">Patch on the ceiling</div><div class="n am"><span id="st-bcd">0</span><span class="u">cm</span></div><div class="h" id="st-bcd-h"></div></div>
-          <div class="stat"><div class="l" data-lang="es">Pérdida del rebote</div><div class="l" data-lang="en">Bounce loss</div><div class="n rd">−<span id="st-bcl">0</span><span class="u">EV</span></div><div class="h" id="st-bcl-h"></div></div>
+          <div class="stat"><div class="l" data-lang="es">Pérdida del rebote</div><div class="l" data-lang="en">Bounce loss</div><div class="n rd"><span id="st-bcl">0</span><span class="u">EV</span></div><div class="h" id="st-bcl-h"></div></div>
         </div>
         <div class="hint" data-lang="es">El rebote escribe el diámetro, la distancia, la altura y la pérdida de arriba. Cobertura del cabezal fija en 60°.</div>
         <div class="hint" data-lang="en">The bounce writes the diameter, the distance, the height and the loss above. Head coverage fixed at 60°.</div>
@@ -470,13 +471,13 @@
       lgAmb:"ambiente", lgHead:"margen de flash",
       /* patrones de retrato */
       pFlat:"frontal plana", pButterfly:"mariposa", pLoop:"lazo", pRembrandt:"Rembrandt",
-      pSplit:"lateral", pUnder:"desde abajo",
+      pSplit:"lateral", pUnder:"desde abajo", pTop:"cenital",
       /* lecturas nuevas */
       needDl:"Ø para θ objetivo", needLl:"L para θ objetivo",
       needDh:"a la L de ahora", needLh:"con la fuente de ahora",
       outOfReach:"fuera del rango", tooClose:"casi encima del sujeto",
       reachL:"Alcance a f/", grpSpread:"entre filas", grpMin:"para ", grpOk:"ya cumples",
-      patch:"mancha", bounceOf:"albedo ", pulseCap:"captado ", frozen:"congela", ghost:"fantasma",
+      patch:"mancha", bounceOf:"albedo ", bcOver:" · impacto pasado el sujeto", pulseCap:"captado ", frozen:"congela", ghost:"fantasma",
       ambAt:"Ambiente a 1/", ambXsync:"Ambiente en X-sync 1/", gnAt:"GN efectivo a 1/",
       advOver:"frente a ", capped:"tope del cuerpo", noPower:"no llegas",
       /* avisos */
@@ -498,6 +499,7 @@
       vsFrameIn:function(x){return "La sombra cae a "+x+" cm del sujeto: con un encuadre de busto, unos 60 cm de fondo visible, cae dentro y hay que contar con ella.";},
       vsFrameOut:function(x){return "La sombra cae a "+x+" cm del sujeto: con un encuadre de busto, unos 60 cm de fondo visible, se sale del cuadro y el fondo queda limpio.";},
       vsBounce:function(dsp,L2,el,loss){return "En rebote, la mancha del techo mide "+dsp+" cm y queda a "+L2+" cm del sujeto, con la fuente elevada "+el+"° y "+loss+" EV de pérdida frente al directo.";},
+      vsBounceClip:function(d,L,el){return " El cálculo pide "+d+" cm de mancha a "+L+" cm y "+el+"° de elevación, fuera del recorrido de los mandos: el lienzo dibuja los valores recortados de arriba.";},
       vsBounceEye:" Por encima de 55° de elevación las cuencas se hunden: baja el cabezal o aleja el punto de impacto.",
       /* veredicto de caída */
       vfTitle:function(f,D,reach,N){return "f/"+f+" a "+D+" m · alcance "+reach+" m a f/"+N;},
@@ -551,12 +553,12 @@
       fSubjDark:"subject dark · raise the power",
       lgAmb:"ambient", lgHead:"flash headroom",
       pFlat:"flat frontal", pButterfly:"butterfly", pLoop:"loop", pRembrandt:"Rembrandt",
-      pSplit:"split", pUnder:"from below",
+      pSplit:"split", pUnder:"from below", pTop:"top light",
       needDl:"Ø for target θ", needLl:"L for target θ",
       needDh:"at the current L", needLh:"with the current source",
       outOfReach:"beyond the range", tooClose:"almost on the subject",
       reachL:"Reach at f/", grpSpread:"between rows", grpMin:"for ", grpOk:"already there",
-      patch:"patch", bounceOf:"albedo ", pulseCap:"captured ", frozen:"freezes", ghost:"ghost",
+      patch:"patch", bounceOf:"albedo ", bcOver:" · impact past the subject", pulseCap:"captured ", frozen:"freezes", ghost:"ghost",
       ambAt:"Ambient at 1/", ambXsync:"Ambient at X-sync 1/", gnAt:"Effective GN at 1/",
       advOver:"against ", capped:"body ceiling", noPower:"out of reach",
       fAboveSync:function(x){return "above X-sync 1/"+x+" · HSS required";},
@@ -575,6 +577,7 @@
       vsFrameIn:function(x){return "The shadow falls "+x+" cm from the subject: with a head-and-shoulders frame, some 60 cm of visible background, it lands inside and you have to reckon with it.";},
       vsFrameOut:function(x){return "The shadow falls "+x+" cm from the subject: with a head-and-shoulders frame, some 60 cm of visible background, it leaves the picture and the background stays clean.";},
       vsBounce:function(dsp,L2,el,loss){return "In bounce, the patch on the ceiling measures "+dsp+" cm and sits "+L2+" cm from the subject, with the source raised "+el+"° and "+loss+" EV of loss against direct flash.";},
+      vsBounceClip:function(d,L,el){return " The calculation asks for a "+d+" cm patch at "+L+" cm and "+el+"° of elevation, beyond the travel of the sliders: the canvas draws the clipped values above.";},
       vsBounceEye:" Past 55° of elevation the eye sockets sink: lower the head or move the point of impact away.",
       vfTitle:function(f,D,reach,N){return "f/"+f+" at "+D+" m · reach "+reach+" m at f/"+N;},
       vfMain:function(gn,iso,loss,gnEff,D,f,N,reach){return "With GN "+gn+" at ISO "+iso+" and a modifier loss of "+loss+" EV, the effective guide number is "+gnEff+": at "+D+" m correct exposure lands on f/"+f+", and with the f/"+N+" you chose the full-power reach is "+reach+" m. It is a hard limit, not a preference: every doubling of the distance costs 2 EV.";},
@@ -781,33 +784,56 @@
     var rise=Math.max(hc-hf,10);
     var L1=rise/Math.sin(beta);
     var xi=rise/Math.tan(beta);
-    var dx=Math.max(Dh-xi,15),dy=Math.max(hc-FACEH,20);
+    var over=xi>=Dh;                       /* el haz golpea el techo pasado el sujeto */
+    var dx=Math.max(Math.abs(Dh-xi),15),dy=Math.max(hc-FACEH,20);
     var L2d=Math.sqrt(dx*dx+dy*dy);
     var tanHalf=Math.tan(HEADCOV/2*Math.PI/180);
     var dSpot=2*L1*tanHalf/Math.sqrt(Math.sin(beta));
-    /* E_rebote / E_directo = albedo · tan²(cob/2) · (Dh/L2)² · cos(salida) */
-    var ratio=alb*tanHalf*tanHalf*(Dh*Dh)/(L2d*L2d)*(dy/L2d);
-    var loss=-L2(ratio);
+    /* referencia: el directo recorre la distancia real flash → cara, no la horizontal */
+    var Ddir=Math.sqrt(Dh*Dh+(FACEH-hf)*(FACEH-hf));
+    /* E_rebote / E_directo = albedo · tan²(cob/2) · (Ddir/L2)² · cos(salida), tratando
+       la mancha como fuente puntual. Esa aproximación se rompe cuando la mancha es
+       grande frente a L2: en el límite de campo cercano un plano lambertiano entrega
+       como mucho E = albedo·Φ/A_mancha, sea cual sea la distancia. Se toma el menor de
+       los dos: sin este techo la razón se dispara y el rebote «gana» al directo. */
+    var ratio=alb*tanHalf*tanHalf*(Ddir*Ddir)/(L2d*L2d)*(dy/L2d);
+    var ratioMax=alb*tanHalf*tanHalf*(Ddir*Ddir)/((dSpot/2)*(dSpot/2));
+    var near=ratio>ratioMax;
+    var loss=-L2(Math.min(ratio,ratioMax));
     var elev=Math.atan2(dy,dx)*180/Math.PI;
-    return {L1:L1,L2:L2d,d:dSpot,loss:loss,elev:elev,xi:xi};
+    return {L1:L1,L2:L2d,d:dSpot,loss:loss,elev:elev,xi:xi,over:over,near:near};
+  }
+  /* escribe solo los marcadores del cuadro de rebote: se repinta también al cambiar
+     de idioma, sin volver a tocar los deslizadores. */
+  function bounceStats(b){
+    b=b||bounceCalc();
+    $("st-bcd").textContent=nf(b.d,0);
+    $("st-bcd-h").textContent=t("patch")+" · "+nf(b.L1,0)+" cm"+(b.over?t("bcOver"):"");
+    $("st-bcl").textContent=(b.loss<0?"+":"−")+nf(Math.abs(b.loss),1);
+    $("st-bcl-h").textContent=t("bounceOf")+nf(num("r-bcalb"),2);
   }
   function bounceApply(){
     var b=bounceCalc();
     snap("r-d",b.d); snap("r-L",b.L2); snap("r-el",b.elev); setLoss(b.loss);
-    $("st-bcd").textContent=b.d.toFixed(0);
-    $("st-bcd-h").textContent=t("patch")+" · "+b.L1.toFixed(0)+" cm";
-    $("st-bcl").textContent=b.loss.toFixed(1);
-    $("st-bcl-h").textContent=t("bounceOf")+num("r-bcalb").toFixed(2);
+    bounceStats(b);
+  }
+  /* ¿el valor que dibuja el lienzo se ha salido del recorrido del mando? */
+  function offSnap(id,v){
+    var el=$(id),st=parseFloat(el.step)||1;
+    return Math.abs(parseFloat(el.value)-v)>st/2+1e-6;
   }
 
   /* ---------- sombras ---------- */
   function thetaTag(th){return th<5?t("hard"):th<15?t("mid"):t("soft");}
+  /* Nombre del patrón de retrato. El orden importa: la altura negativa manda sobre
+     todo lo demás (luz desde abajo), y los umbrales caen dentro del recorrido real de
+     los deslizadores (az ±60°, el −20…75°) para que ninguna rama sea inalcanzable. */
   function patternName(az,el){
     var a=Math.abs(az);
-    if(a<10&&el<25) return t("pFlat");
-    if(el<0) return t("pUnder");
-    if(a<12) return t("pButterfly");
-    if(a>=70) return t("pSplit");
+    if(el<0)   return t("pUnder");                            /* por debajo del mentón */
+    if(el>60)  return t("pTop");                              /* cenital */
+    if(a<12)   return el>=40?t("pButterfly"):t("pFlat");      /* mariposa 40–60°, plana por debajo */
+    if(a>=50)  return t("pSplit");                            /* lateral: el tope del mando */
     if(a>=40&&el>=30) return t("pRembrandt");
     return t("pLoop");
   }
@@ -928,8 +954,12 @@
        (G.shift<=FRAMEHALF?t("vsFrameIn")(nf(G.shift,0)):t("vsFrameOut")(nf(G.shift,0)))+"</p>";
     if(activeMod==="ceil"){
       var b=bounceCalc();
-      h+="<p>"+t("vsBounce")(nf(b.d,0),nf(b.L2,0),nf(b.elev,0),nf(b.loss,1))+
-         (b.elev>55?t("vsBounceEye"):"")+"</p>";
+      /* la prosa narra lo que el lienzo dibuja: G lleva ya los valores recortados al
+         recorrido de los deslizadores, no los crudos de bounceCalc(). */
+      var clip=offSnap("r-d",b.d)||offSnap("r-L",b.L2)||offSnap("r-el",b.elev);
+      h+="<p>"+t("vsBounce")(nf(G.d,0),nf(G.L,0),nf(G.elev,0),nf(b.loss,1))+
+         (G.elev>55?t("vsBounceEye"):"")+
+         (clip?t("vsBounceClip")(nf(b.d,0),nf(b.L2,0),nf(b.elev,0)):"")+"</p>";
     }
     $("v-shadow").innerHTML=h;
   }
@@ -1111,7 +1141,10 @@
   function renderBalance(){
     var E=num("r-bamb"),shO=BSH[num("r-bsh")],Nw=BAP[num("r-bap")],S=BIS[num("r-bis")],
         fpO=BPW[num("r-bfp")],D=num("r-bd"),gn=num("r-bgn"),loss=num("r-bloss");
-    var mode=bSeg("mode"),shut=bSeg("shut"),cam=camObj(),xs=cam.sync;
+    /* el X-sync que rige el segmentado «Plano focal» es el del cuerpo de plano focal de
+       referencia (el mismo refFP() que usa la pestaña del sol): con un cuerpo de
+       obturador central activo, su propio sync de 1/2000 no describe a un plano focal. */
+    var mode=bSeg("mode"),shut=bSeg("shut"),cam=camObj(),refB=refFP(),xs=refB.sync;
     var vel=num("r-bvel"),foc=FOCS[num("r-bfoc")];
     $("v-bamb").textContent=E;$("v-bsh").textContent=shO.l;$("v-bap").textContent="f/"+Nw;
     $("v-bis").textContent=S;$("v-bd").textContent=D;$("v-bgn").textContent=gn;$("v-bloss").textContent=loss;
@@ -1170,7 +1203,7 @@
     $("b-st-blur-h").textContent=ghost?t("ghost"):t("frozen");
 
     var fl=[];
-    if(shut==="fp"&&shO.t<1/xs) fl.push(bFlag(t("fAboveSync")(xs),"#ef6f53"));
+    if(shut==="fp"&&shO.t<1/xs) fl.push(bFlag(t("fAboveSync")(xs)+(refB.k!==cam.k?" ("+camName(refB)+")":""),"#ef6f53"));
     if(clipLoss>0.1) fl.push(bFlag(t("fClip")(clipLoss.toFixed(1),(pu.tEff*1000).toFixed(2),(shO.t*1000).toFixed(2)),clipLoss>1?"#ef6f53":"#f4b13c"));
     if(subjEV>1.2) fl.push(bFlag(t("fSubjBlown"),"#ef6f53"));
     if(bgEV>1.2) fl.push(bFlag(t("fBgBlown"),"#ef6f53"));
@@ -1250,6 +1283,7 @@
   window.onLangChange=function(){
     if(!ready) return;
     relabelChips();
+    if(activeMod==="ceil") bounceStats();   /* st-bcd-h / st-bcl-h no pasan por renderAll */
     renderAll();
   };
 })();

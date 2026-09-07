@@ -305,10 +305,6 @@
           <option value="90">90 mm</option><option value="135">135 mm</option>
           <option value="custom" data-es="a medida" data-en="custom">a medida</option>
         </select></div>
-      <div class="row"><span class="muted" data-lang="es">magnificador</span><span class="muted" data-lang="en">magnifier</span>
-        <select id="patchMag" class="sel" style="max-width:80px">
-          <option value="1">1×</option><option value="1.25">1,25×</option><option value="1.4">1,4×</option>
-        </select></div>
       <div class="row"><span class="muted" data-lang="es">semiancho del parche</span><span class="muted" data-lang="en">patch half-width</span>
         <output id="patchOut" class="num">0.20</output></div>
       <input id="patch" type="range" min="0.05" max="0.5" step="0.01" value="0.2" disabled
@@ -394,15 +390,22 @@
       <p class="note" data-lang="es">Coordenadas normalizadas al semieje: el borde del rectángulo es
         el límite del fotograma. La circunferencia segmentada reproduce el campo de
         8 mm que mide la célula del M5, y el rectángulo interior el parche del
-        telémetro, cuyo tamaño aparente depende de la focal, así que ajústalo a la
-        que estés usando. Si la hipótesis del enfocar y recomponer fuese cierta, la
+        telémetro a la escala del marco que elijas en «Referencias del visor»: el parche
+        mide siempre 3,4° × 1,9° aparentes, de modo que ocupa más fotograma cuanto más
+        larga es la focal del marco. Los marcos se dibujan suponiendo cobertura del 100 %
+        del fotograma de 36×24, que es el convenio de
+        <a href="telemetro-m11.html">telemetro-m11.html</a> y no exactamente lo que hace
+        la cámara. Si la hipótesis del enfocar y recomponer fuese cierta, la
         nube se concentraría dentro de esas dos figuras.</p>
       <p class="note" data-lang="en">Coordinates normalised to the semi-axis: the edge of the
         rectangle is the limit of the frame. The segmented circle reproduces the 8 mm
-        field read by the M5 cell, and the inner rectangle the rangefinder patch, whose
-        apparent size depends on the focal length, so set it to the one you are using.
-        If the focus-and-recompose hypothesis held, the cloud would gather inside those
-        two figures.</p>
+        field read by the M5 cell, and the inner rectangle the rangefinder patch at the
+        scale of the frame you pick under “Viewfinder references”: the patch always
+        subtends 3.4° × 1.9°, so it covers more of the frame the longer the frame
+        line. Frame lines are drawn assuming 100 % coverage of the 36×24 frame, which
+        is the convention of <a href="telemetro-m11.html">telemetro-m11.html</a> and not
+        exactly what the camera does. If the focus-and-recompose hypothesis held, the
+        cloud would gather inside those two figures.</p>
     </section>
 
     <section class="panel">
@@ -530,16 +533,16 @@
       <table id="tCrop" style="margin-top:16px"><thead></thead><tbody></tbody></table>
       <div class="head" style="margin:22px 0 8px"><h2 data-lang="es">Marcos de la Q3 43</h2><h2 data-lang="en">Q3 43 frames</h2></div>
       <table id="tCropQ"><thead></thead><tbody></tbody></table>
-      <p class="note" data-lang="es">El recorte se dibuja sobre el vidrio. Con anclaje en el centro del fotograma es el recorte que
-        haría la cámara; con anclaje en la mediana del grupo es el recorte que harías tú si persiguieras tu propio hábito, desplazado
+      <p class="note" data-lang="es">El recorte se dibuja sobre el vidrio. Con anclaje en el centro del fotograma es un solo rectángulo, el recorte que
+        haría la cámara; con anclaje en la mediana del grupo el vidrio dibuja un rectángulo por grupo activo, con su color, que es el recorte que harías tú si persiguieras tu propio hábito, desplazado
         hasta donde cabe sin salirse. «Dentro» es la fracción de centroides que sigue en el rectángulo; «margen ≥ umbral» exige además
         que el sujeto conserve, medido sobre el recorte, al menos el margen del panel Criterio. Los marcos de 60, 75 y 90 mm de la
         Q3 43 son recortes centrados de factor 43/60, 43/75 y 43/90 sobre el fotograma. Los megapíxeles salen de width·height del
         CSV, o del lado largo del cuerpo cuando el CSV no los trae. La cadena se para aquí: el tamaño de copia y la distancia de
         observación están en <a href="sensor-al-papel.html">sensor-al-papel.html</a>, y los datos de sensor en
         <a href="leica-sensores.html">leica-sensores.html</a>.</p>
-      <p class="note" data-lang="en">The crop is drawn on the ground glass. Anchored at the centre of the frame it is the crop the
-        camera would make; anchored at the median of the group it is the crop you would make if you followed your own habit, shifted
+      <p class="note" data-lang="en">The crop is drawn on the ground glass. Anchored at the centre of the frame it is a single rectangle, the crop the
+        camera would make; anchored at the median of the group the glass draws one rectangle per active group, in its colour, the crop you would make if you followed your own habit, shifted
         as far as it fits without leaving the frame. “Inside” is the fraction of centroids still in the rectangle; “margin ≥ threshold”
         also demands that the subject keep, measured on the crop, at least the margin from the Criterion panel. The Q3 43's 60, 75 and
         90 mm frames are centred crops of factor 43/60, 43/75 and 43/90 over the frame. Megapixels come from width·height in the CSV,
@@ -1077,7 +1080,7 @@ const T={
     vMarg1:"Queda aire suficiente en casi todos los fotogramas.",
     vMarg2:"Trabajas con mucho margen: el sujeto casi nunca se acerca al borde.",
     vHPatch:"Telémetro.", vP1:"Con el marco de ", vP2:" mm",
-    vP3:" y magnificador ×", vP3b:" sin magnificador", vP4:", el ",
+    vP4:", el ",
     vP5:" de los sujetos cae dentro del parche; el ",
     vP6:" restante exigió enfocar y recomponer.",
     vNote:"No hay una colocación correcta: el veredicto describe el hábito medido, no lo corrige.",
@@ -1093,18 +1096,16 @@ const T={
     avA:"A ", avB:" mm f/", avC:" y ", avD:" m, el foco aguanta hasta ",
     avE:"° de reencuadre, equivalente a r = ", avF:" en la diagonal. El ",
     avG:" de tus fotogramas pasa de ahí.",
-    avMed:"mediana de la selección",
+    avCorner:"° de reencuadre, más allá de la esquina del fotograma: a esa distancia y ese diafragma la profundidad de campo perdona cualquier reencuadre.",
     // ---- recorte ----
     thInCrop:"dentro", thKeepM:"margen ≥ umbral", thMpxLeft:"Mpx restantes",
     thLongSide:"lado largo (px)", thCropName:"recorte",
     cvA:"Si recortas a ", cvB:", el ",
     cvC:" de los fotogramas conserva el sujeto dentro y te quedan ",
     cvD:" Mpx de mediana.", cvNone:"sin fotogramas en la selección",
+    cvE:" Anclaje: ",
     cvAnchorC:"centro del fotograma", cvAnchorM:"mediana del grupo",
     cvNative:"Con el fotograma nativo no se recorta nada: elige una proporción para ver qué sobrevive. La tabla de la Q3 43 sí está calculada siempre.",
-    // ---- agrupación ----
-    gbYear:"año", gbFocal:"banda de focal", gbAp:"banda de diafragma",
-    gbNo:"sin dato",
     // ---- conjunto de ejemplo ----
     demoWarn:"datos de ejemplo, no son tuyos",
     demoRep:"AVISO: conjunto de ejemplo sintético; estos números no son los de tu archivo.",
@@ -1237,7 +1238,7 @@ const T={
     vMarg1:"There is enough air in almost every frame.",
     vMarg2:"You work with plenty of margin: the subject hardly ever approaches the edge.",
     vHPatch:"Rangefinder.", vP1:"With the ", vP2:" mm frame",
-    vP3:" and the ×", vP3b:" and no magnifier", vP4:", ",
+    vP4:", ",
     vP5:" of the subjects fall inside the patch; the remaining ",
     vP6:" required focusing and recomposing.",
     vNote:"There is no correct placement: the verdict describes the measured habit, it does not correct it.",
@@ -1253,18 +1254,16 @@ const T={
     avA:"At ", avB:" mm f/", avC:" and ", avD:" m, focus tolerates up to ",
     avE:"° of recomposing, equivalent to r = ", avF:" along the diagonal. ",
     avG:" of your frames go beyond that.",
-    avMed:"median of the selection",
+    avCorner:"° of recomposing, beyond the corner of the frame: at that distance and that aperture depth of field forgives any recomposition.",
     // ---- cropping ----
     thInCrop:"inside", thKeepM:"margin ≥ threshold", thMpxLeft:"Mpx left",
     thLongSide:"long side (px)", thCropName:"crop",
     cvA:"If you crop to ", cvB:", ",
     cvC:" of the frames keep the subject inside and you are left with ",
     cvD:" Mpx on median.", cvNone:"no frames in the selection",
+    cvE:" Anchor: ",
     cvAnchorC:"centre of the frame", cvAnchorM:"median of the group",
     cvNative:"With the native frame nothing is cropped: pick a ratio to see what survives. The Q3 43 table is always computed.",
-    // ---- grouping ----
-    gbYear:"year", gbFocal:"focal-length band", gbAp:"aperture band",
-    gbNo:"no value",
     // ---- sample set ----
     demoWarn:"sample data, not yours",
     demoRep:"NOTICE: synthetic sample set; these numbers are not those of your archive.",
@@ -1274,7 +1273,10 @@ const T={
 };
 function t(k){ const d=T[LANG()]||T.es; return d[k]!==undefined?d[k]:(T.es[k]!==undefined?T.es[k]:k); }
 /* «sin grupo» es la clave interna del grupo vacío; solo se traduce al pintarla. */
-const gname=g=>g==="sin grupo"?t("noGroup"):g;
+/* La clave de banda de diafragma lleva punto decimal por ser clave estable
+   entre idiomas; al pintarla se le pone el separador del idioma activo. */
+const gname=g=>g==="sin grupo"?t("noGroup")
+  :(S.groupBy==="apband"&&LANG()!=="en"?String(g).replace(/\./g,","):g);
 
 /* ---------- lectura de CSV ---------- */
 function parseCSV(text){
@@ -2864,10 +2866,20 @@ function derive(r){
 
 /* ---------- agrupación elegida en el navegador ---------- */
 const GB_NONE="sin grupo";
-function bandLabel(b,unit,dec){
-  if(b[0]===0) return "< "+b[1]+unit;
-  if(b[1]>=1e3) return "≥ "+b[0]+unit;
-  return b[0]+"–"+(dec?b[1]:b[1]-1)+unit;
+/* El prefijo va DENTRO de la etiqueta para que salga «≥ f/8.9» y no «f/≥ 8.9».
+   La etiqueta es tambien la CLAVE del grupo, asi que no se localiza aqui: el
+   separador decimal del idioma lo pone gname() al pintarla. */
+function bandLabel(b,unit,dec,pre){
+  const p=pre||"";
+  if(b[0]===0) return "< "+p+b[1]+unit;
+  if(b[1]>=1e3) return "≥ "+p+b[0]+unit;
+  return p+b[0]+"–"+(dec?b[1]:b[1]-1)+unit;
+}
+/* Etiquetas de banda en orden de limite inferior, para ordenar la leyenda. */
+function bandsFor(mode){
+  if(mode==="focalband") return FOCAL_BANDS.map(b=>bandLabel(b," mm",false,""));
+  if(mode==="apband") return AP_BANDS.map(b=>bandLabel(b,"",true,"f/"));
+  return null;
 }
 function groupKeyOf(r){
   const mode=S.groupBy||"group";
@@ -2877,20 +2889,29 @@ function groupKeyOf(r){
   if(mode==="focalband"){
     const fo=focalOf(r); if(!Number.isFinite(fo)) return GB_NONE;
     const b=FOCAL_BANDS.find(bb=>fo>=bb[0]&&fo<bb[1]);
-    return b?bandLabel(b," mm",false):GB_NONE;
+    return b?bandLabel(b," mm",false,""):GB_NONE;
   }
   if(mode==="apband"){
     const ap=r.f_number; if(!Number.isFinite(ap)) return GB_NONE;
     const b=AP_BANDS.find(bb=>ap>=bb[0]&&ap<bb[1]);
-    return b?"f/"+bandLabel(b,"",true):GB_NONE;
+    return b?bandLabel(b,"",true,"f/"):GB_NONE;
   }
   const v=r[mode];
   return (v===undefined||v===null||v==="")?GB_NONE:String(v);
 }
+let VE_CACHE=null;   // cache de los remuestreos del veredicto (veBoot)
 function regroup(){
   const cnt=new Map();
   S.rows.forEach(r=>{const k=groupKeyOf(r);cnt.set(k,(cnt.get(k)||0)+1);});
-  S.groups=[...cnt.keys()].sort();
+  // las bandas se ordenan por su limite inferior, no por el alfabeto: «<» va
+  // despues de los digitos y mandaba la banda mas ancha al penultimo lugar
+  const bl=bandsFor(S.groupBy);
+  if(bl){
+    const ord=new Map(bl.map((l,i)=>[l,i]));
+    S.groups=[...cnt.keys()].sort((a,b)=>
+      (ord.has(a)?ord.get(a):999)-(ord.has(b)?ord.get(b):999)||(a<b?-1:a>b?1:0));
+  } else S.groups=[...cnt.keys()].sort();
+  VE_CACHE=null;
   S.count=cnt;
   S.bySize=[...cnt.entries()].sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
   // con muchos grupos, dibujarlos todos es ilegible y la paleta se repite:
@@ -2903,11 +2924,14 @@ function regroup(){
    semiángulos atan(18/f) y atan(12/f) sobre cobertura del 100 % de 36×24. */
 const RF_MAG=0.73, RF_PW_DEG=3.4, RF_PH_DEG=1.9;
 const frameHalfDeg=f=>[Math.atan(18/f)*RF_MAG*DEGS, Math.atan(12/f)*RF_MAG*DEGS];
+/* El magnificador de ocular amplia por igual el parche y las lineas de marco,
+   asi que la razon parche/marco no depende de el: en telemetro-m11.html el
+   aumento extra solo entra en la base efectiva B*M*K. Por eso aqui no aparece. */
 function patchHalf(){
   const md=$("#patchFrame").value;
-  if(md==="custom"){const pw=+$("#patch").value; return {pw,ph:pw*0.72,f:null,k:1};}
-  const fo=+md, k=+$("#patchMag").value, hd=frameHalfDeg(fo);
-  return {pw:(RF_PW_DEG/2)*k/hd[0], ph:(RF_PH_DEG/2)*k/hd[1], f:fo, k};
+  if(md==="custom"){const pw=+$("#patch").value; return {pw,ph:pw*0.72,f:null};}
+  const fo=+md, hd=frameHalfDeg(fo);
+  return {pw:(RF_PW_DEG/2)/hd[0], ph:(RF_PH_DEG/2)/hd[1], f:fo};
 }
 
 /* ---------- recorte ----------
@@ -2935,13 +2959,6 @@ function longSideOf(r){
   const key=String(r.model||"")+" "+String(r.path||"");
   for(const bp of BODY_PX) if(bp[0].test(key)) return bp[1];
   return NaN;
-}
-function mpxOf(r){
-  if(Number.isFinite(r.mpx)) return r.mpx;
-  const ls=longSideOf(r);
-  if(!Number.isFinite(ls)) return NaN;
-  const ax=Number.isFinite(r.aspect)&&r.aspect>0?r.aspect:1.5;
-  return ls*(ls/ax)/1e6;
 }
 
 /* ---------- dibujo ---------- */
@@ -3022,17 +3039,23 @@ function drawGlass(rows){
     g+=`<rect x="${cx-w/2}" y="${cy-h/2}" width="${w}" height="${h}" fill="none"
       stroke="var(--ink)" stroke-width="1" stroke-dasharray="5 3" opacity=".7"/>`;
     g+=`<text x="${cx+w/2+5}" y="${cy-h/2-4}" font-size="9" fill="var(--ink2)"
-      font-family="var(--mono)">${esc(ph.f?ph.f+" mm"+(ph.k>1?" ×"+ph.k:""):"—")}</text>`;
+      font-family="var(--mono)">${esc(ph.f?ph.f+" mm":"—")}</text>`;
   }
-  // rectángulo del recorte
+  // rectangulo del recorte: con anclaje en la mediana, uno por grupo activo y
+  // con su color, que es lo que tabula la tabla de recorte
   const cb=cropBox(rows);
   if(!cb.native){
-    const rw=cb.hw*fw, rh=cb.hh*fh, rx=X(cb.cx)-rw/2, ry=Y(cb.cy)-rh/2;
-    g+=`<rect x="${rx.toFixed(1)}" y="${ry.toFixed(1)}" width="${rw.toFixed(1)}"
-      height="${rh.toFixed(1)}" fill="none" stroke="var(--g1)" stroke-width="1.6"
-      stroke-dasharray="8 4" opacity=".85"/>`;
-    g+=`<text x="${(rx+4).toFixed(1)}" y="${(ry+13).toFixed(1)}" font-size="9.5"
-      letter-spacing=".14em" fill="var(--g1)" font-family="var(--mono)">${esc(cropName())}</text>`;
+    const boxes=$("#cropAnchor").value==="m"
+      ? groupsOf(rows).map(pr=>[colorOf(pr[0]),cropBox(pr[1])])
+      : [["var(--g1)",cb]];
+    boxes.forEach(([col,bx],i)=>{
+      const rw=bx.hw*fw, rh=bx.hh*fh, rx=X(bx.cx)-rw/2, ry=Y(bx.cy)-rh/2;
+      g+=`<rect x="${rx.toFixed(1)}" y="${ry.toFixed(1)}" width="${rw.toFixed(1)}"
+        height="${rh.toFixed(1)}" fill="none" stroke="${col}" stroke-width="1.6"
+        stroke-dasharray="8 4" opacity=".85"/>`;
+      if(i===0) g+=`<text x="${(rx+4).toFixed(1)}" y="${(ry+13).toFixed(1)}" font-size="9.5"
+        letter-spacing=".14em" fill="${col}" font-family="var(--mono)">${esc(cropName())}</text>`;
+    });
   }
 
   // puntos
@@ -3267,16 +3290,38 @@ function dirWords(deg,compass){
   if(Math.abs(dy)>0.38) out.push(dy>0?t(compass?"dirN":"dirUp"):t(compass?"dirS":"dirDown"));
   return out.join(t("vBAnd"));
 }
+/* Los tres remuestreos del veredicto son lo mas caro del refresco. Se cachean
+   mientras no cambien ni la seleccion ni el numero de iteraciones, de modo que
+   mover un deslizante de umbral repinte sin volver a remuestrear, y respetan
+   el #iters del panel Criterio en vez de un 2000 escondido. */
+function veBoot(rv,xv,yv,iters,sig){
+  if(VE_CACHE&&VE_CACHE.sig===sig) return VE_CACHE.v;
+  const v={rci:bootstrapCI(rv,iters,11),
+           cix:bootstrapMeanCI(xv,iters,12),
+           ciy:bootstrapMeanCI(yv,iters,13)};
+  VE_CACHE={sig,v};
+  return v;
+}
 function drawVerdictEnc(rows){
   const box=$("#vEncuadre"), head=$("#vAxisEnc");
   const thr=parseFloat($("#thr").value)||0.15;
   const mth=parseFloat($("#mThr").value)||0.10;
+  const iters=Math.max(1000,Math.min(50000,parseInt($("#iters").value)||10000));
   if(head) head.textContent=`${rows.length} ${t("frames")} · ASP ${S.aspect.toFixed(2)}`;
   if(rows.length<20){ box.innerHTML=`<p class="note">${esc(t("veNeed"))}</p>`; return; }
   let html="";
   // 1 · centrado
   const rv=rows.map(v=>v.r_norm).filter(Number.isFinite);
-  const rmed=medianOf(rv), rci=bootstrapCI(rv,2000,11);
+  const xv=rows.map(v=>v.x_norm).filter(Number.isFinite);
+  const yv=rows.map(v=>v.y_norm).filter(Number.isFinite);
+  let sr=0,sx=0,sy=0;
+  for(const v of rv) sr+=v;
+  for(const v of xv) sx+=v;
+  for(const v of yv) sy+=v;
+  const BT=veBoot(rv,xv,yv,iters,
+    [rows.length,rv.length,xv.length,yv.length,iters,
+     sr.toFixed(6),sx.toFixed(6),sy.toFixed(6)].join("|"));
+  const rmed=medianOf(rv), rci=BT.rci;
   const hiBand=Math.max(thr+0.05,0.35);
   const cbn=rmed<thr?0:rmed<=hiBand?1:2;
   html+=`<p><b>${esc(t("vHCent"))}</b> ${esc(t("vC1"))}${fmt(rmed)}${esc(t("vC2"))}`
@@ -3284,10 +3329,8 @@ function drawVerdictEnc(rows){
     +`${esc(t("vC4"))}${pct(rv.filter(v=>v<thr).length/rv.length)}${esc(t("vC5"))}`
     +`r &lt; ${thr.toFixed(2)}.</p>`;
   // 2 · sesgo direccional
-  const xv=rows.map(v=>v.x_norm).filter(Number.isFinite);
-  const yv=rows.map(v=>v.y_norm).filter(Number.isFinite);
   const mx=mean(xv), my=mean(yv);
-  const cix=bootstrapMeanCI(xv,2000,12), ciy=bootstrapMeanCI(yv,2000,13);
+  const cix=BT.cix, ciy=BT.ciy;
   const sigX=Number.isFinite(cix[0])&&cix[0]*cix[1]>0;
   const sigY=Number.isFinite(ciy[0])&&ciy[0]*ciy[1]>0;
   const words=[];
@@ -3316,7 +3359,6 @@ function drawVerdictEnc(rows){
   if(hp.f){
     const inP=rows.filter(v=>Math.abs(v.x_norm)<=hp.pw&&Math.abs(v.y_norm)<=hp.ph).length/rows.length;
     html+=`<p><b>${esc(t("vHPatch"))}</b> ${esc(t("vP1"))}${hp.f}${esc(t("vP2"))}`
-      +(hp.k>1?esc(t("vP3"))+String(hp.k).replace(".",LANG()==="en"?".":","):esc(t("vP3b")))
       +`${esc(t("vP4"))}${pct(inP)}${esc(t("vP5"))}${pct(1-inP)}${esc(t("vP6"))}</p>`;
   }
   const nOr=new Set(rows.map(v=>v.orientation).filter(Boolean)).size;
@@ -3417,6 +3459,7 @@ const nloc=(v,d)=>Number.isFinite(v)
   ? v.toLocaleString(LANG()==="en"?"en-GB":"es-ES",
       {minimumFractionDigits:d,maximumFractionDigits:d})
   : "—";
+const pctloc=v=>Number.isFinite(v)?nloc(100*v,1)+" %":"—";
 function alphaMaxDeg(f,N,c,dmm){
   if(!(f>0&&N>0&&c>0&&dmm>0)) return NaN;
   const Hd=f*f/(N*c)+f;
@@ -3429,8 +3472,10 @@ function drawAlpha(rows){
   const box=$("#alVerdict");
   const av=rows.map(r=>r.alpha_deg).filter(Number.isFinite);
   if(!av.length){
-    emptyMsg(s,W,H,t("alNoFocal"));
-    box.innerHTML=`<p class="note">${esc(t("alNoFocal"))}</p>`;
+    // una seleccion vacia no es un CSV sin focal
+    const msg=rows.length?t("alNoFocal"):t("cvNone");
+    emptyMsg(s,W,H,msg);
+    box.innerHTML=`<p class="note">${esc(msg)}</p>`;
     return;
   }
   const sel=$("#alFoc").value;
@@ -3465,10 +3510,16 @@ function drawAlpha(rows){
   }
   s.innerHTML=g;
   const over=av.filter(v=>v>amax).length/av.length;
+  // r_norm vale 1 en la esquina por definicion: por encima de eso el
+  // equivalente en r no significa nada y se dice con palabras
   const rEq=Math.tan(amax*Math.PI/180)/Math.hypot(18/foc,12/foc);
-  box.innerHTML=`<p>${esc(t("avA"))}${nloc(foc,0)}${esc(t("avB"))}${nloc(Nu,1)}`
-    +`${esc(t("avC"))}${nloc(dm/1000,1)}${esc(t("avD"))}${nloc(amax,1)}`
-    +`${esc(t("avE"))}${fmt(rEq)}${esc(t("avF"))}${pct(over)}${esc(t("avG"))}</p>`;
+  const cab=`<p>${esc(t("avA"))}${nloc(foc,0)}${esc(t("avB"))}${nloc(Nu,1)}`
+    +`${esc(t("avC"))}${nloc(dm/1000,1)}${esc(t("avD"))}${nloc(amax,1)}`;
+  // la frase de la esquina solo si el equivalente EXISTE y se sale del fotograma:
+  // con amax no calculable se mantiene la frase con guiones
+  box.innerHTML=(Number.isFinite(rEq)&&rEq>1)
+    ? cab+`${esc(t("avCorner"))}</p>`
+    : cab+`${esc(t("avE"))}${nloc(rEq,3)}${esc(t("avF"))}${pctloc(over)}${esc(t("avG"))}</p>`;
 }
 
 /* ---------- recorte ---------- */
@@ -3502,8 +3553,8 @@ function cropStats(rs,hw,hh,cx,cy,mth){
 }
 function cropRow(name,swatch,st){
   return `<tr><td>${swatch}${esc(name)}</td><td>${st.n}</td>`
-    +`<td>${pct(st.inside)}</td><td>${pct(st.keep)}</td>`
-    +`<td>${Number.isFinite(st.mpx)?fmt(st.mpx,1):"—"}</td>`
+    +`<td>${pctloc(st.inside)}</td><td>${pctloc(st.keep)}</td>`
+    +`<td>${nloc(st.mpx,1)}</td>`
     +`<td>${nloc(Math.round(st.long),0)}</td></tr>`;
 }
 function drawCrop(rows){
@@ -3528,14 +3579,16 @@ function drawCrop(rows){
   // marcos de la Q3 43: recortes centrados de factor 43/f sobre el fotograma
   $("#tCropQ").querySelector("tbody").innerHTML=[60,75,90].map(fq=>{
     const sc=43/fq;
-    return cropRow(fq+" mm  ·  ×"+fmt(sc,3),"",cropStats(rows,sc,sc,0,0,mth));
+    return cropRow(fq+" mm  ·  ×"+nloc(sc,3),"",cropStats(rows,sc,sc,0,0,mth));
   }).join("");
   const cbAll=cropBox(rows);
   const st=cropStats(rows,cbAll.hw,cbAll.hh,cbAll.cx,cbAll.cy,mth);
+  const anc=$("#cropAnchor").value==="m"?t("cvAnchorM"):t("cvAnchorC");
   $("#cropVerdict").innerHTML=cbAll.native
     ? `<p class="note">${esc(t("cvNative"))}</p>`
-    : `<p>${esc(t("cvA"))}${esc(cropName())}${esc(t("cvB"))}${pct(st.inside)}`
-      +`${esc(t("cvC"))}${Number.isFinite(st.mpx)?fmt(st.mpx,1):"—"}${esc(t("cvD"))}</p>`;
+    : `<p>${esc(t("cvA"))}${esc(cropName())}${esc(t("cvB"))}${pctloc(st.inside)}`
+      +`${esc(t("cvC"))}${nloc(st.mpx,1)}${esc(t("cvD"))}`
+      +`${esc(t("cvE"))}${esc(anc)}.</p>`;
 }
 
 /* ---------- refresco ---------- */
@@ -3576,17 +3629,25 @@ function paintOuts(){
   $("#patchOut").textContent=patchHalf().pw.toFixed(3);
   $("#alDOut").textContent=nloc(+$("#alD").value,1)+" m";
 }
-["#conf","#area","#patch","#alD"].forEach(id=>$(id).addEventListener("input",()=>{
+["#conf","#area","#patch"].forEach(id=>$(id).addEventListener("input",()=>{
   paintOuts(); refresh();
 }));
+/* #alD solo alimenta el panel de reencuadre: se repinta ese panel, y con
+   retardo, en vez de rehacer el refresco entero en cada evento del arrastre. */
+(()=>{let tm;$("#alD").addEventListener("input",()=>{
+  $("#alDOut").textContent=nloc(+$("#alD").value,1)+" m";
+  clearTimeout(tm);tm=setTimeout(()=>drawAlpha(S.sel||[]),180);});})();
 ["#f0","#f1","#a0","#a1","#thr","#mThr","#iters","#q"].forEach(id=>{
   let tm; $(id).addEventListener("input",()=>{clearTimeout(tm);tm=setTimeout(refresh,260);});
 });
-["#patchFrame","#patchMag","#cropAspect","#cropAnchor","#alFoc","#alC"].forEach(id=>
+["#patchFrame","#cropAspect","#cropAnchor"].forEach(id=>
   $(id).addEventListener("change",()=>{
     $("#patch").disabled=$("#patchFrame").value!=="custom";
     paintOuts(); refresh();
   }));
+// el foco, el circulo y la distancia solo alimentan el panel de reencuadre
+["#alFoc","#alC"].forEach(id=>
+  $(id).addEventListener("change",()=>drawAlpha(S.sel||[])));
 $("#groupBy").addEventListener("change",()=>{
   S.groupBy=$("#groupBy").value;
   if(!S.rows.length) return;

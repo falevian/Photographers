@@ -77,6 +77,7 @@ a{color:var(--F);text-decoration:none}
 .slotdots{display:flex;gap:3px}
 .slotdots i{width:9px;height:9px;border-radius:50%;border:1px solid var(--line2);background:transparent}
 .navq{font-family:var(--mono);font-size:12px;background:var(--ink-700);border:1px solid var(--line2);color:var(--hi);padding:5px 9px;border-radius:var(--r);width:170px}
+#cuerpo{width:auto;max-width:250px;text-overflow:ellipsis}
 .navq::placeholder{color:var(--mut)}
 :focus-visible{outline:2px solid var(--F);outline-offset:2px}
 
@@ -234,6 +235,7 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-fa
   .panel-bd table:not(.mtx) td:first-child,.panel-bd table:not(.mtx) th:first-child,
   .panel-bd table:not(.mtx) td:nth-child(2){white-space:normal}
   .navq{width:120px}
+  .navq#cuerpo{width:120px;max-width:120px}
   .navlinks a{padding:5px 6px;font-size:11px}
 }
 @media (max-width:640px){
@@ -298,7 +300,7 @@ body.locked .langbar{opacity:0;pointer-events:none}
       <a href="#metodo" data-nav>Method</a>
     </div>
     <div class="navsel">
-      <select class="navq" id="cuerpo" style="width:auto;max-width:250px" aria-label="Cuerpo y modo"></select>
+      <select class="navq" id="cuerpo" aria-label="Cuerpo y modo"></select>
       <input class="navq" type="search" id="q" placeholder="buscar objetivo…" aria-label="Buscar objetivo">
       <span class="slotdots" id="dots" title="Selección para comparar"></span>
       <button class="chip" id="gocmp" type="button">Comparar</button>
@@ -349,7 +351,7 @@ body.locked .langbar{opacity:0;pointer-events:none}
   <div class="sechd"><span class="n">01</span>
     <h2 data-lang="es">Catálogo</h2><h2 data-lang="en">Catalogue</h2>
     <span class="kv"><span id="n-shown">0</span>
-      <span data-lang="es">visibles · pulse el nombre para la ficha, la casilla para comparar</span><span data-lang="en">visible · click the name for the sheet, the box to compare</span></span></div>
+      <span data-lang="es">visibles · pulse el nombre para la ficha, la casilla para comparar</span><span data-lang="en">visible · click the name for the sheet, the box to compare</span><span id="n-ref"></span></span></div>
   <div class="panel" style="margin-bottom:14px">
     <div class="panel-hd">
       <h3 style="margin:0" data-lang="es">Entrar por lo que quiere la foto</h3>
@@ -573,10 +575,10 @@ body.locked .langbar{opacity:0;pointer-events:none}
         <div>
           <p class="meth" data-lang="es"><b>Catalogado.</b> Paso de píxel y megapíxeles nominales de cada cuerpo y modo, de las fichas de Leica: M11 en L-DNG 60,3 Mpx y 3,76 µm, M-DNG 36,5 y 4,85, S-DNG 18,4 y 6,86; Q3 43 con el mismo sensor que la M11; SL3-S 24,6 Mpx y 5,94 µm, y 96 Mpx con 2,97 µm en multishot. Son los mismos valores que usa <a href="sensor.html#datos">datos del sensor</a>.</p>
           <p class="meth" data-lang="en"><b>Catalogued.</b> Pixel pitch and nominal megapixels of every body and mode, from Leica's data sheets: M11 in L-DNG 60.3 Mpx and 3.76 µm, M-DNG 36.5 and 4.85, S-DNG 18.4 and 6.86; Q3 43 with the same sensor as the M11; SL3-S 24.6 Mpx and 5.94 µm, and 96 Mpx at 2.97 µm in multishot. They are the same values used by <a href="sensor.html#datos">sensor data</a>.</p>
-          <p class="meth" data-lang="es"><b>Derivado.</b> Nyquist ν<sub>N</sub> = 1/(2p), MTF del píxel cuadrado |sinc(ν·p)|, MTF del sistema como producto de las tres piezas, y el techo del formato 864 mm²·(2ν<sub>50</sub>)², que para un objetivo perfecto es exactamente los 1 865/N² Mpx de la pestaña de <a href="sensor.html#difraccion">difracción y diafragma</a>. Aquí solo se añade el término que allí falta: el del objetivo.</p>
-          <p class="meth" data-lang="en"><b>Derived.</b> Nyquist ν<sub>N</sub> = 1/(2p), square-pixel MTF |sinc(ν·p)|, system MTF as the product of the three terms, and the format ceiling 864 mm²·(2ν<sub>50</sub>)², which for a perfect lens is exactly the 1,865/N² Mpx of the <a href="sensor.html#difraccion">diffraction and aperture</a> tab. All that is added here is the term missing there: the lens.</p>
-          <p class="meth" data-lang="es"><b>Derivado por regla.</b> El barrido de diafragma va de 0 a 5 pasos en tercios; ν<sub>50</sub> se resuelve por bisección sobre la MTF del sistema. El veredicto da el máximo, el intervalo con menos del 10 % de pérdida y el diafragma desde el que la difracción pesa más que las aberraciones sobre esa misma ν<sub>50</sub>. El marco del visor sale de la focal por proximidad logarítmica entre 28, 35, 50, 75, 90 y 135; el suelo del telémetro, de la distancia mínima (33 de las 129 filas de montura M enfocan por debajo de 0,70 m). El estado de montaje no es derivable y solo recoge lo que ya estaba escrito en la nota de dos filas.</p>
-          <p class="meth" data-lang="en"><b>Derived by rule.</b> The aperture sweep runs from 0 to 5 stops in thirds; ν<sub>50</sub> is solved by bisection on the system MTF. The verdict gives the peak, the interval where less than 10 % is lost, and the aperture from which diffraction weighs more than the aberrations at that same ν<sub>50</sub>. The finder frame follows from the focal length by logarithmic proximity among 28, 35, 50, 75, 90 and 135; the rangefinder floor, from the minimum focusing distance (33 of the 129 M-mount rows focus below 0.70 m). Mount status is not derivable and only records what was already written in the note of two rows.</p>
+          <p class="meth" data-lang="es"><b>Derivado.</b> Nyquist ν<sub>N</sub> = 1/(2p), MTF del píxel cuadrado |sinc(ν·p)|, MTF del sistema como producto de las tres piezas, y el techo del formato 864 mm²·(2ν<sub>50</sub>)². Sin cuerpo seleccionado y con un objetivo perfecto ese techo son exactamente los 1 865/N² Mpx de la pestaña de <a href="sensor.html#difraccion">difracción y diafragma</a>; con un cuerpo puesto ya no, porque aquí se añaden dos términos que allí no están: el del objetivo y el del píxel. Por eso la cifra del objetivo perfecto que imprime el veredicto se calcula con esa misma cadena, no con 1 865/N².</p>
+          <p class="meth" data-lang="en"><b>Derived.</b> Nyquist ν<sub>N</sub> = 1/(2p), square-pixel MTF |sinc(ν·p)|, system MTF as the product of the three terms, and the format ceiling 864 mm²·(2ν<sub>50</sub>)². With no body selected and a perfect lens that ceiling is exactly the 1,865/N² Mpx of the <a href="sensor.html#difraccion">diffraction and aperture</a> tab; with a body chosen it is not, because two terms are added here that are missing there: the lens and the pixel. That is why the perfect-lens figure the verdict prints is computed with that same chain, not with 1,865/N².</p>
+          <p class="meth" data-lang="es"><b>Derivado por regla.</b> El barrido de diafragma va de 0 a 5 pasos en tercios; ν<sub>50</sub> se resuelve por bisección sobre la MTF del sistema. El veredicto da el máximo, el intervalo con menos del 10 % de pérdida y el diafragma desde el que la difracción pesa más que las aberraciones sobre esa misma ν<sub>50</sub>. El marco del visor sale de la focal por proximidad logarítmica entre 28, 35, 50, 75, 90 y 135; el suelo de enfoque, de la distancia mínima frente a los 0,70 m en que el telémetro de la M deja de acoplar (33 de las 129 filas de montura M enfocan por debajo). El badge dice hasta dónde enfoca el objetivo y de qué lado de ese suelo cae, y no afirma acoplamiento: el catálogo no trae ese dato y en esta lista hay objetivos que enfocan por escala. El estado de montaje no es derivable y solo recoge lo que ya estaba escrito en la nota de dos filas.</p>
+          <p class="meth" data-lang="en"><b>Derived by rule.</b> The aperture sweep runs from 0 to 5 stops in thirds; ν<sub>50</sub> is solved by bisection on the system MTF. The verdict gives the peak, the interval where less than 10 % is lost, and the aperture from which diffraction weighs more than the aberrations at that same ν<sub>50</sub>. The finder frame follows from the focal length by logarithmic proximity among 28, 35, 50, 75, 90 and 135; the focusing floor, from the minimum focusing distance against the 0.70 m at which the M rangefinder stops coupling (33 of the 129 M-mount rows focus below it). The badge says how close the lens focuses and which side of that floor it falls on, and claims no coupling: the catalogue does not carry that datum and this list includes scale-focus lenses. Mount status is not derivable and only records what was already written in the note of two rows.</p>
         </div>
         <div>
           <p class="meth" data-lang="es"><b>Escena.</b> El diámetro del disco sobre el sensor es c = (f²/N)·|D<sub>f</sub>−D<sub>s</sub>| / (D<sub>f</sub>·(D<sub>s</sub>−f)), con todo en milímetros y el sujeto acotado por debajo a la distancia mínima de enfoque. El lienzo del simulador abarca 1,00 mm del sensor: en modo <i>cantidad</i> el disco se dibuja a esa escala y, si se sale, se recorta y se avisa, en vez de reescalar en silencio. En modo <i>estructura</i> el radio es constante, que es lo que hacía la página entera: sirve para leer la forma y no para comparar cuánto desenfoque hay.</p>
@@ -875,8 +877,8 @@ es:{
   ariaRef:"Objetivo de referencia", ariaEjeX:"Eje X", ariaEjeY:"Eje Y",
   ariaFicha:"Ficha del objetivo", ariaCerrar:"Cerrar ficha",
   ariaAnterior:"Anterior", ariaSiguiente:"Siguiente", ariaDisco:"Simulación del disco de desenfoque",
+  ariaCuerpo:"Cuerpo y modo",
   /* --- cuerpo y modo --- */
-  cuNinguno:"sin cuerpo",
   cu_m11l:"M11 · L-DNG 60,3 Mpx · 3,76 µm", cu_m11m:"M11 · M-DNG 36,5 Mpx · 4,85 µm",
   cu_m11s:"M11 · S-DNG 18,4 Mpx · 6,86 µm", cu_q3:"Q3 43 · 60,3 Mpx · 3,76 µm",
   cu_sl3s:"SL3-S · 24,6 Mpx · 5,94 µm", cu_sl3sm:"SL3-S multishot · 96 Mpx · 2,97 µm",
@@ -885,7 +887,8 @@ es:{
   cus_sl3s:"SL3-S", cus_sl3sm:"SL3-S multishot", cus_none:"sin cuerpo",
   /* --- veredicto por objetivo y cuerpo --- */
   vdTit:"Veredicto · {body}",
-  vd_max:"Máximo a {ap}: {mp} Mpx efectivos en el centro, cota inferior del modelo, frente a los {perf} que daría ahí un objetivo perfecto y los {nom} Mpx del archivo.",
+  vd_max:"Máximo a {ap}: {mp} Mpx efectivos en el centro, cota inferior del modelo, frente a los {perf} que daría ahí un objetivo perfecto sobre este mismo píxel y los {nom} Mpx del archivo.",
+  vd_maxTope:"Máximo a {ap}: {mp} Mpx efectivos en el centro, cota inferior del modelo, frente a los {nom} Mpx del archivo, que es hasta donde llegaría ahí un objetivo perfecto sobre este píxel.",
   vd_maxSin:"Máximo a {ap}: la MTF del objetivo por la difracción cae al 50 % en {n50} lp/mm.",
   vd_rango:"Se pierde menos del 10 % entre {a} y {b}.",
   vd_rangoUno:"Fuera de {a} ya se pierde más del 10 %.",
@@ -894,12 +897,12 @@ es:{
   vd_nyqA:"Manda el objetivo: a plena apertura el sistema baja del 50 % en {n50} lp/mm, el {pc} % del Nyquist de {nq} lp/mm que ofrece el cuerpo.",
   vd_nyqB:"Manda el sensor: a plena apertura el sistema aún pasa del 50 % en el Nyquist de {nq} lp/mm.",
   vd_esq:"Esquina a plena apertura: {mp} Mpx efectivos, el {pc} % del centro, con {ev} EV de caída y {um} µm de flecha de campo.",
+  vd_esqSin:"Esquina a plena apertura: cae al 50 % en {n50} lp/mm, el {pc} % de la ν50 del centro, con {ev} EV de caída y {um} µm de flecha de campo.",
   vd_aviso:"El factor de mejora al diafragmar de este modelo (1,42 sobre la frecuencia característica, tope en 2,2 pasos) es menos de la mitad del que exigen las curvas de fábrica del único objetivo contrastado. El óptimo sale sesgado hacia aperturas abiertas: léalo como rango, no como número.",
   vd_sinCuerpo:"Sin cuerpo seleccionado no hay Nyquist ni techo de muestreo. Elija uno en la barra superior para que este bloque dé megapíxeles.",
   vd_ref:"Fila de referencia: el objetivo fijo del Q3 43, que no se monta en una M. Está aquí para comparar, no para comprar.",
   vd_escala:"Los megapíxeles efectivos salen de la MTF modelada, cuyo módulo es conservador frente a las curvas de fábrica: son una cota inferior comparable entre objetivos, no una medida de resolución.",
   /* --- escala de los discos --- */
-  escTit:"Escala", escEstr:"Estructura", escCant:"Cantidad",
   escNotaEstr:"Todos los discos al mismo tamaño: se compara la estructura, no la cantidad de desenfoque.",
   escNotaCant:"Radio proporcional a f/N a encuadre constante: se compara la cantidad de desenfoque, y la estructura del de pupila pequeña deja de leerse.",
   /* --- geometría de escena --- */
@@ -909,16 +912,17 @@ es:{
   sc_fg:"Primer plano de igual disco: {dn} m.",
   sc_clip:"El disco se sale del lienzo, que abarca 1,00 mm del sensor: lo que ve está recortado por arriba.",
   sc_mfd:"Sujeto por debajo de la distancia mínima ({mfd} m): ajustado a ella.",
-  sc_span:"Lienzo = 1,00 mm del sensor.",
+  sc_fondo:"El fondo estaba por delante del sujeto o pegado a él: llevado a {db} m.",
+  sc_tope:"Fuera del intervalo del campo: acotado a {v} m.",
   /* --- monta, mide y encuadra --- */
   mo_ok:"monta en digital", mo_meter:"tapa el fotómetro", mo_nodig:"no montar en digital",
   mo_ref:"referencia · no montable",
   mo_marco:"levanta el marco de {m}", mo_visor:"sin marco propio · visor externo",
-  mo_rf:"telémetro hasta 0,70 m", mo_rfok:"telémetro en todo su recorrido",
-  mo_filtro:"Solo lo que monta",
+  mo_rf:"enfoca hasta {d} m · por debajo del suelo de 0,70 m del telémetro",
+  mo_rfok:"enfoca hasta {d} m · por encima del suelo de 0,70 m del telémetro",
   /* --- consulta por intención --- */
   iqTit:"Quiero", iqFocal:"Focal", iqApert:"Apertura mínima", iqMasa:"Masa máxima",
-  iqGo:"Buscar", iqNada:"Ningún objetivo del catálogo pasa esos filtros.",
+  iqNada:"Ningún objetivo del catálogo pasa esos filtros.",
   iq_crema:"fondo cremoso", iq_esquina:"máximo detalle en la esquina", iq_shift:"sin deriva de foco",
   iq_calle:"ligero para calle", iq_contraluz:"limpio en contraluz",
   iqw_crema:"0,60·cremosidad + 0,25·(100−nerviosismo) + 0,15·pupila normalizada",
@@ -935,9 +939,8 @@ es:{
   thMpx:"Mpx ef",
   q43:"Distancia al 43 del Q3: {d} (percentil {p} %). Lo que más los separa:",
   q43self:"Esta es la referencia contra la que se mide el resto.",
-  b_ref:"referencia",
-  /* --- MTF del sistema --- */
-  mtfSist:"sistema (objetivo × difracción × píxel)", mtfNyq:"Nyquist del cuerpo"
+  /* --- lista --- */
+  lst_ref:" · más la fila de referencia"
 },
 en:{
   /* --- general interface --- */
@@ -1089,8 +1092,8 @@ en:{
   ariaRef:"Reference lens", ariaEjeX:"X axis", ariaEjeY:"Y axis",
   ariaFicha:"Lens sheet", ariaCerrar:"Close lens sheet",
   ariaAnterior:"Previous", ariaSiguiente:"Next", ariaDisco:"Simulation of the defocus disc",
+  ariaCuerpo:"Body and mode",
   /* --- body and mode --- */
-  cuNinguno:"no body",
   cu_m11l:"M11 · L-DNG 60.3 Mpx · 3.76 µm", cu_m11m:"M11 · M-DNG 36.5 Mpx · 4.85 µm",
   cu_m11s:"M11 · S-DNG 18.4 Mpx · 6.86 µm", cu_q3:"Q3 43 · 60.3 Mpx · 3.76 µm",
   cu_sl3s:"SL3-S · 24.6 Mpx · 5.94 µm", cu_sl3sm:"SL3-S multishot · 96 Mpx · 2.97 µm",
@@ -1099,7 +1102,8 @@ en:{
   cus_sl3s:"SL3-S", cus_sl3sm:"SL3-S multishot", cus_none:"no body",
   /* --- verdict per lens and body --- */
   vdTit:"Verdict · {body}",
-  vd_max:"Peak at {ap}: {mp} effective Mpx at the centre, a lower bound of the model, against the {perf} a perfect lens would give there and the {nom} Mpx of the file.",
+  vd_max:"Peak at {ap}: {mp} effective Mpx at the centre, a lower bound of the model, against the {perf} a perfect lens would give there on this same pixel and the {nom} Mpx of the file.",
+  vd_maxTope:"Peak at {ap}: {mp} effective Mpx at the centre, a lower bound of the model, against the {nom} Mpx of the file, which is as far as a perfect lens would get there on this pixel.",
   vd_maxSin:"Peak at {ap}: lens MTF times diffraction falls to 50 % at {n50} lp/mm.",
   vd_rango:"Less than 10 % is lost between {a} and {b}.",
   vd_rangoUno:"Away from {a} more than 10 % is already lost.",
@@ -1108,12 +1112,12 @@ en:{
   vd_nyqA:"The lens is what limits: at full aperture the system drops below 50 % at {n50} lp/mm, {pc} % of the {nq} lp/mm Nyquist the body offers.",
   vd_nyqB:"The sensor is what limits: at full aperture the system still passes 50 % at the {nq} lp/mm Nyquist.",
   vd_esq:"Corner at full aperture: {mp} effective Mpx, {pc} % of the centre, with {ev} EV of falloff and {um} µm of field sag.",
+  vd_esqSin:"Corner at full aperture: it falls to 50 % at {n50} lp/mm, {pc} % of the centre ν50, with {ev} EV of falloff and {um} µm of field sag.",
   vd_aviso:"The stopping-down improvement factor in this model (1.42 on the characteristic frequency, capped at 2.2 stops) is less than half of what the factory curves of the one lens checked would demand. The optimum comes out biased towards open apertures: read it as a range, not as a number.",
   vd_sinCuerpo:"With no body selected there is no Nyquist and no sampling ceiling. Pick one in the top bar for this block to give megapixels.",
   vd_ref:"Reference row: the fixed lens of the Q3 43, which does not mount on an M. It is here to compare against, not to buy.",
   vd_escala:"The effective megapixels come from the modelled MTF, whose scale is conservative against factory curves: they are a lower bound that is comparable between lenses, not a resolution measurement.",
   /* --- disc scale --- */
-  escTit:"Scale", escEstr:"Structure", escCant:"Amount",
   escNotaEstr:"Every disc at the same size: what is compared is the structure, not the amount of defocus.",
   escNotaCant:"Radius proportional to f/N at constant framing: what is compared is the amount of defocus, and the structure of the small-pupil lenses stops being readable.",
   /* --- scene geometry --- */
@@ -1123,16 +1127,17 @@ en:{
   sc_fg:"Foreground of equal disc: {dn} m.",
   sc_clip:"The disc runs off the canvas, which spans 1.00 mm of sensor: what you see is clipped.",
   sc_mfd:"Subject closer than the minimum focusing distance ({mfd} m): set to it.",
-  sc_span:"Canvas = 1.00 mm of sensor.",
+  sc_fondo:"The background was in front of the subject or right on it: moved to {db} m.",
+  sc_tope:"Outside the range of the field: clamped to {v} m.",
   /* --- mounts, meters and frames --- */
   mo_ok:"mounts on digital", mo_meter:"blocks the meter", mo_nodig:"do not mount on digital",
   mo_ref:"reference · not mountable",
   mo_marco:"brings up the {m} frame", mo_visor:"no frame line · external finder",
-  mo_rf:"rangefinder down to 0.70 m", mo_rfok:"rangefinder over its whole range",
-  mo_filtro:"Mounts only",
+  mo_rf:"focuses to {d} m · below the 0.70 m rangefinder floor",
+  mo_rfok:"focuses to {d} m · above the 0.70 m rangefinder floor",
   /* --- query by intent --- */
   iqTit:"I want", iqFocal:"Focal length", iqApert:"Minimum aperture", iqMasa:"Maximum mass",
-  iqGo:"Search", iqNada:"No lens in the catalogue passes those filters.",
+  iqNada:"No lens in the catalogue passes those filters.",
   iq_crema:"a creamy background", iq_esquina:"maximum corner detail", iq_shift:"no focus shift",
   iq_calle:"light for the street", iq_contraluz:"clean against the light",
   iqw_crema:"0.60·creaminess + 0.25·(100−nervousness) + 0.15·normalised pupil",
@@ -1149,9 +1154,8 @@ en:{
   thMpx:"Eff. Mpx",
   q43:"Distance to the 43 of the Q3: {d} (percentile {p} %). What separates them most:",
   q43self:"This is the reference the rest is measured against.",
-  b_ref:"reference",
-  /* --- system MTF --- */
-  mtfSist:"system (lens × diffraction × pixel)", mtfNyq:"body Nyquist"
+  /* --- list --- */
+  lst_ref:" · plus the reference row"
 }
 };
 const LANG = ()=> document.documentElement.lang==="en" ? "en" : "es";
@@ -1575,6 +1579,11 @@ function nu50(res,N,st,p){
     a=nu; fa=f; }
   return top;
 }
+/* ν50 de un objetivo perfecto sobre el mismo píxel: la cadena entera menos el
+   término de aberración. Con res→∞ el n0 de mtfAb diverge y ese factor vale 1,
+   así que queda mtfDiff·pixMTF resuelto por el mismo bisector. Sin cuerpo
+   (p=0) devuelve la ν50 de solo difracción, la de los 1865/N².             */
+const nu50Perf = (N,p)=>nu50(Infinity,N,0,p);
 const AREA = 864;                                        /* mm² del 24×36 */
 function mpxEf(n50, nominal){
   const techo = AREA*Math.pow(2*n50,2)/1e6;
@@ -2019,7 +2028,11 @@ function filtrar(){
 }
 function pintarLista(){
   vista=filtrar(); const host=$("list"); host.innerHTML="";
-  $("n-shown").textContent=vista.length;
+  /* La fila de referencia no es un objetivo de montura M: se cuenta aparte
+     para que la cabecera no diga 130 donde la portada dice 129.            */
+  const nRef=vista.filter(l=>l.ref).length;
+  $("n-shown").textContent=vista.length-nRef;
+  $("n-ref").textContent=nRef?t("lst_ref"):"";
   vista.forEach(o=>{
     const r=document.createElement("div");
     r.className="lrow"; r.dataset.i=o.i; r.setAttribute("role","listitem");
@@ -2112,16 +2125,27 @@ function pintarVeredicto(L){
                    : tf("vd_nyqA",{n50:fmt(sw.pts[0].nc), nq:fmt(nq),
                                    pc:fmt(100*sw.pts[0].nc/nq)}));
   } else fr.push(t("vd_sinCuerpo"));
-  if(pp>0) fr.push(tf("vd_max",{ap:apOpt, mp:fmt(o.mc,1),
-      perf:fmt(1865/(o.N*o.N),1), nom:fmt(B.mpx,1)}));
+  if(pp>0){
+    /* El objetivo perfecto se calcula con la MISMA cadena que los {mp}: ν50 de
+       difracción por píxel y el mismo tope nominal. 1865/N² es el techo de solo
+       difracción y solo coincide sin cuerpo.                                */
+    const nP=nu50Perf(o.N,pp), techoP=mpxEf(nP,0);
+    fr.push(techoP>=B.mpx ? tf("vd_maxTope",{ap:apOpt, mp:fmt(o.mc,1), nom:fmt(B.mpx,1)})
+                          : tf("vd_max",{ap:apOpt, mp:fmt(o.mc,1),
+                                         perf:fmt(mpxEf(nP,B.mpx),1), nom:fmt(B.mpx,1)}));
+  }
   else     fr.push(tf("vd_maxSin",{ap:apOpt, n50:fmt(o.nc)}));
   fr.push(sw.lo===sw.hi ? tf("vd_rangoUno",{a:apOpt})
         : tf("vd_rango",{a:fapN(sw.pts[sw.lo].N), b:fapN(sw.pts[sw.hi].N)}));
   fr.push(sw.dif<0 ? t("vd_difrNo")
         : tf("vd_difr",{ap:fapN(sw.pts[sw.dif].N)}));
   const p0=sw.pts[0];
-  fr.push(tf("vd_esq",{mp:fmt(p0.mb,1), pc:fmt(100*p0.mb/Math.max(1e-6,p0.mc)),
-                       ev:fmt(L.vig,1), um:fmt(L.curv*1000)}));
+  /* Sin cuerpo no hay techo de muestreo que topar, así que la esquina se da en
+     lp/mm y no en megapíxeles: si no, contradice la primera frase.         */
+  fr.push(pp>0 ? tf("vd_esq",{mp:fmt(p0.mb,1), pc:fmt(100*p0.mb/Math.max(1e-6,p0.mc)),
+                              ev:fmt(L.vig,1), um:fmt(L.curv*1000)})
+               : tf("vd_esqSin",{n50:fmt(p0.nb), pc:fmt(100*p0.nb/Math.max(1e-6,p0.nc)),
+                                 ev:fmt(L.vig,1), um:fmt(L.curv*1000)}));
   let h="<div class='eyebrow' style='margin-bottom:6px'>"+tf("vdTit",{body:bodyShort(B)})+"</div>";
   if(L.ref) h+="<p class='meth' style='margin:0 0 7px;color:var(--d)'>"+t("vd_ref")+"</p>";
   h+="<p style='margin:0;font-size:14.5px;line-height:1.55;color:var(--txt)'>"+fr.join(" ")+"</p>";
@@ -2140,8 +2164,11 @@ function pintarMonta(L){
      objetivo que se monte en la M: la fila de referencia no lleva ninguno. */
   if(!L.ref){
     h+="<span class='badge'>"+(L.marco?tf("mo_marco",{m:L.marco}):t("mo_visor"))+"</span>";
+    /* El catálogo no trae el acoplamiento al telémetro (hay objetivos de foco
+       por escala en la lista), así que el badge solo afirma lo que sí es dato:
+       la distancia mínima y de qué lado cae del suelo de 0,70 m de la M.    */
     h+="<a class='badge' href='telemetro-m11.html' style='text-decoration:none'>"
-      +(L.rfBajo?t("mo_rf"):t("mo_rfok"))+"</a>";
+      +tf(L.rfBajo?"mo_rf":"mo_rfok",{d:fmt(L.mfd,2)})+"</a>";
   }
   $("f-monta").innerHTML=h;
 }
@@ -2664,7 +2691,7 @@ function aplicarEtiquetas(){
   $("f-prev").setAttribute("aria-label",t("ariaAnterior"));
   $("f-next").setAttribute("aria-label",t("ariaSiguiente"));
   $("bokeh").setAttribute("aria-label",t("ariaDisco"));
-  $("cuerpo").setAttribute("aria-label",t("vdTit").replace("{body}","").trim());
+  $("cuerpo").setAttribute("aria-label",t("ariaCuerpo"));
   $("iq-quiero").setAttribute("aria-label",t("iqTit"));
   $("iq-focal").setAttribute("aria-label",t("iqFocal"));
   $("iq-apert").setAttribute("aria-label",t("iqApert"));

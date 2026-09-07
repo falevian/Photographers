@@ -380,8 +380,6 @@
     <p class="explain" data-lang="en"><b>Motion.</b> With magnification m = f/(d−f), as in the rangefinder, the blur on the sensor is b = v·t·f/(d−f); your intention demands b ≤ b<sub>max</sub> (2 pixels of the chosen body — 7.52 µm on M11 and Q3, 11.88 on the SL3-S, 5.94 on its multishot — or the classic 30 µm), whence t<sub>max</sub> = b<sub>max</sub>·(d−f)/(v·f). The region t &gt; t<sub>max</sub> is shaded as motion blur.</p>
     <p class="explain" data-lang="es"><b>Profundidad de campo.</b> Las mismas fórmulas del repositorio: hiperfocal H = f²/(N·c₀) + f; límites d<sub>n</sub> = d(H−f)/(H+d−2f) y d<sub>f</sub> = d(H−f)/(H−d), con c₀ = 30 µm por defecto. N<sub>mín</sub> es la menor N cuya PdC cubre el intervalo pedido, resuelta por bisección sobre esas fórmulas; para paisaje (d<sub>f</sub> = ∞) hay forma cerrada, N<sub>mín</sub> = f²/(c₀·(d−f)). La región N &lt; N<sub>mín</sub> se sombrea como PdC insuficiente.</p>
     <p class="explain" data-lang="en"><b>Depth of field.</b> The repository’s own formulae: hyperfocal H = f²/(N·c₀) + f; limits d<sub>n</sub> = d(H−f)/(H+d−2f) and d<sub>f</sub> = d(H−f)/(H−d), with c₀ = 30 µm by default. N<sub>min</sub> is the smallest N whose depth of field covers the requested interval, solved by bisection over those formulae; for landscape (d<sub>f</sub> = ∞) there is a closed form, N<sub>min</sub> = f²/(c₀·(d−f)). The region N &lt; N<sub>min</sub> is shaded as insufficient depth of field.</p>
-  </div>
-
     <p class="explain" data-lang="es"><b>Trepidación.</b> La regla del 1/f es una convención, no una medida; aquí se calibra y se declara. Si a 50 mm, 1/50 s y 30 µm de borrón la regla se da por buena, la velocidad angular implícita del pulso es ω₀ = b/(f·t) = 0,03/(50·0,02) = <b>0,03 rad/s</b>. Cada paso de apoyo o de estabilización la divide por dos: ω = ω₀/2<sup>apoyo</sup>, y el tiempo que aguantas es t<sub>trep</sub> = b<sub>máx</sub>/(f·ω), con f en mm y b<sub>máx</sub> en mm. A nivel de píxel el resultado es duro: con b<sub>máx</sub> = 2 px la regla 1/f se queda <b>dos pasos corta</b> —a 50 mm y a pulso, t<sub>trep</sub> = 1/199, es decir 1/(4f)—, que es justo la opción que la M11 ofrece en el menú de Auto-ISO. Es un umbral, no una promesa: la dispersión entre fotógrafos es enorme.</p>
     <p class="explain" data-lang="en"><b>Camera shake.</b> The 1/f rule is a convention, not a measurement; here it is calibrated and declared. If at 50 mm, 1/50 s and 30 µm of blur the rule is taken as good, the implied angular speed of the pulse is ω₀ = b/(f·t) = 0.03/(50·0.02) = <b>0.03 rad/s</b>. Each stop of support or stabilisation halves it: ω = ω₀/2<sup>support</sup>, and the time you can hold is t<sub>shake</sub> = b<sub>max</sub>/(f·ω), with f in mm and b<sub>max</sub> in mm. At pixel level the result is harsh: with b<sub>max</sub> = 2 px the 1/f rule falls <b>two stops short</b> — at 50 mm handheld, t<sub>shake</sub> = 1/199, that is 1/(4f) — which is exactly the option the M11 offers in its Auto-ISO menu. It is a threshold, not a promise: the spread between photographers is enormous.</p>
     <p class="explain" data-lang="es"><b>El diafragma crítico del sensor.</b> Cerrar tiene un techo que no es de exposición sino de resolución: cuando el disco de Airy iguala el paso de píxel, N<sub>crít</sub> = p/(1,22·λ) con λ = 0,55 µm, cerrar más ya no compra nitidez. Da <b>f/5,6</b> con 3,76 µm (M11 y Q3), f/8,9 con 5,94 µm (SL3-S) y f/4,4 con 2,97 µm (multishot de 96 Mpx). La zona por encima de esa línea se sombrea en el diagrama: cuando el veredicto te manda cerrar a f/11 o f/16 por profundidad de campo, te está mandando pagar en difracción. La cuantificación —megapíxeles efectivos, MTF, disco de Airy— no se repite aquí: está en <a href="sensor.html#difraccion">la ficha de difracción</a>.</p>
@@ -564,7 +562,12 @@ const DICT={
   cNone:'El programa ya ejecuta tu intención a esta luz: no hay moneda que pagar.',
   cNoneIso:'El programa ya ejecuta tu intención a esta luz: lo único que pagas es el ISO, {x} pasos de altas luces.',
   cNeed:'El punto del programa se queda a <b>{need} pasos</b> de tu intención. La pareja que sí la ejecuta es <b>{tt} · f/{nn}</b>, y con esta luz eso pide <b>ISO {iso}</b>. ',
-  cFits:'La moneda barata aquí es el <b>ISO</b>: {st} pasos de altas luces, dentro de tu techo de {cap}.',
+  cFits:'Las tres monedas salen aquí <b>a la par</b>: los {need} pasos que cederías en borrón o en profundidad son los mismos {ex} que el ISO añade sobre lo que el programa ya gasta ({st} en total, dentro de tu techo de {cap}). La exposición se conserva; lo que eliges no es cuánto pagar, sino en qué calidad perderlo.',
+  cCheap:'Comparadas las tres monedas, la barata es el <b>ISO</b>: añade {ex} pasos sobre lo que el programa ya gasta —{st} en total, dentro de tu techo de {cap}— frente a los {need} pasos de borrón o de profundidad que cederías por no pagarlo.',
+  cFree:'Y la cuenta se da la vuelta: la pareja que ejecuta tu intención pide {st} pasos de altas luces, <b>{x} menos</b> de los que el programa ya está gastando. Aquí no cedes nada: no falta luz, está mal repartida. Abre a f/{nn} y el ISO baja mientras el tiempo se acorta.',
+  cDofNever:'Antes que ninguna moneda: la profundidad que pides <b>no cabe en esta escala</b> —haría falta f/{nmin}—, así que ningún reparto de tiempo, diafragma e ISO la ejecuta; hay que mover la distancia, la focal o la intención. ',
+  cClipUnder:'Y hay un problema anterior a la contabilidad: <b>no hay luz suficiente</b>. El programa ya está en su tiempo más largo, con el diafragma abierto y el ISO en el techo; lo que falta no se reparte entre monedas, se añade. ',
+  cClipOver:'Y hay un problema anterior a la contabilidad: <b>sobra luz</b>. El programa toca el techo de obturación de este cuerpo ({cap}) y no puede apretar más el reparto; la moneda que falta es un <a href="filtro-sensor.html#nd">filtro ND</a>. ',
   cOverShoot:'Y no es ISO lo que falta: con el techo de obturación de este cuerpo ({cap}) esa pareja <b>sobreexpone {x} pasos</b>. La moneda que se paga aquí es luz de menos, es decir un <a href="filtro-sensor.html#nd">filtro ND</a>.',
   cShort:'Se sale de tu techo de {cap} por <b>{k} pasos</b>. Las otras monedas: abrir hasta f/{no}, aceptar {k} pasos más de borrón ({b} µm = {px} px) o rebajar la profundidad pedida.',
   cDual:' Por encima de ISO {d} este cuerpo conmuta a ganancia dual y el ruido de lectura cae: los últimos pasos salen más baratos de lo que sugiere la barra.',
@@ -641,7 +644,12 @@ const DICT={
   cNone:'The program already executes your intention at this light: there is no currency to pay.',
   cNoneIso:'The program already executes your intention at this light: the only thing you pay is ISO, {x} stops of highlight range.',
   cNeed:'The program’s point falls <b>{need} stops</b> short of your intention. The pair that does execute it is <b>{tt} · f/{nn}</b>, and at this light that asks for <b>ISO {iso}</b>. ',
-  cFits:'The cheap currency here is <b>ISO</b>: {st} stops of highlight range, within your {cap} ceiling.',
+  cFits:'The three currencies come out <b>at par</b> here: the {need} stops you would cede in blur or in depth are the same {ex} that ISO adds on top of what the program already spends ({st} in total, within your {cap} ceiling). Exposure is conserved; what you choose is not how much to pay, but which quality to lose it in.',
+  cCheap:'With the three currencies compared, the cheap one is <b>ISO</b>: it adds {ex} stops on top of what the program already spends — {st} in total, within your {cap} ceiling — against the {need} stops of blur or depth you would cede by not paying it.',
+  cFree:'And the accounting turns around: the pair that executes your intention asks for {st} stops of highlight range, <b>{x} fewer</b> than the program is already spending. You cede nothing here: the light is not missing, it is badly shared out. Open to f/{nn} and ISO falls while the time shortens.',
+  cDofNever:'Before any currency: the depth you ask for <b>does not fit this scale</b> — it would take f/{nmin} — so no split of time, aperture and ISO executes it; distance, focal length or intention has to move. ',
+  cClipUnder:'And there is a problem prior to the accounting: <b>there is not enough light</b>. The program is already at its longest time, wide open and with ISO at the ceiling; what is missing is not shared between currencies, it has to be added. ',
+  cClipOver:'And there is a problem prior to the accounting: <b>there is too much light</b>. The program hits this body’s shutter ceiling ({cap}) and cannot tighten the split any further; the missing currency is an <a href="filtro-sensor.html#nd">ND filter</a>. ',
   cOverShoot:'And ISO is not what is missing: with this body’s shutter ceiling ({cap}) that pair <b>overexposes by {x} stops</b>. The currency paid here is less light, that is an <a href="filtro-sensor.html#nd">ND filter</a>.',
   cShort:'It overshoots your {cap} ceiling by <b>{k} stops</b>. The other currencies: open up to f/{no}, accept {k} more stops of blur ({b} µm = {px} px), or ask for less depth.',
   cDual:' Above ISO {d} this body switches to dual gain and read noise drops: the last stops come cheaper than the bar suggests.',
@@ -1197,7 +1205,16 @@ function renderCost(){
 
   const need=dTime+dAp;
   let note=LBL('cBase',{b:fmtIso(bd.isoBase)});
-  if(need<0.05){ note+= dIso>0.1 ? LBL('cNoneIso',{x:nf(dIso,1)}) : LBL('cNone'); }
+  /* estados en los que la contabilidad en pasos no decide nada: la profundidad no cabe en la
+     escala, o la exposición misma se sale por abajo o por arriba. Sin esto, el panel llegaba a
+     declarar «no hay moneda que pagar» mientras el veredicto declaraba la toma inalcanzable. */
+  const stuck = jj.dofNever || !!jj.pt.clip;
+  if(jj.dofNever) note+=LBL('cDofNever',{nmin: goal.nMin===Infinity ? '∞' : fmtN(goal.nMin)});
+  if(jj.pt.clip==='under') note+=LBL('cClipUnder');
+  else if(jj.pt.clip==='over') note+=LBL('cClipOver',{cap:fmtT(1/bd.cap)});
+  if(need<0.05){
+    if(!stuck) note+= dIso>0.1 ? LBL('cNoneIso',{x:nf(dIso,1)}) : LBL('cNone');
+  }
   else{
     const sol=solveIntention();
     const solIso=Math.max(100, sol.iso);
@@ -1205,7 +1222,14 @@ function renderCost(){
     if(sol.iso<100-1e-9){
       note+=LBL('cOverShoot',{x:nf(Math.log2(100/sol.iso),1), cap:fmtT(1/bd.cap)});
     } else if(solIso<=ST.isoCap+1e-6){
-      note+=LBL('cFits',{cap:fmtIso(ST.isoCap), st:nf(Math.log2(solIso/100),1)});
+      /* nombrar la moneda barata exige compararla antes: el coste del ISO es lo que AÑADE sobre
+         lo que el programa ya gasta ({st} es el total desde ISO 100), no el total, y eso es lo
+         que se mide contra los {need} pasos de borrón o profundidad que cederías. */
+      const stTot=Math.log2(solIso/100), ex=stTot-dIso;
+      const arg={ex:nf(Math.max(0,ex),1), need:nf(need,1), st:nf(stTot,1), cap:fmtIso(ST.isoCap)};
+      if(ex<-0.05) note+=LBL('cFree',{x:nf(-ex,1), st:nf(stTot,1), nn:fmtN(Math.pow(2,sol.av/2))});
+      else if(ex<need-0.05) note+=LBL('cCheap',arg);
+      else note+=LBL('cFits',arg);
     } else {
       const kk=Math.log2(solIso/ST.isoCap);
       const bb=Math.max(jj.blur, shakeUmP(ST.focal,jj.sec,supSteps()), goal.crit);
