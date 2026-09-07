@@ -110,6 +110,13 @@
   table.res td:first-child{text-align:left;font-family:var(--sans);color:var(--muted)}
   .v-ok{color:var(--teal)} .v-mid{color:var(--amber)} .v-bad{color:var(--red)}
   .tblwrap{overflow-x:auto}
+  table.res tr.sel td{background:rgba(63,202,176,.08)}
+  table.res tr.sel td:first-child{color:var(--teal)}
+  table.res tr.cmp td:first-child{color:var(--amber)}
+  .stat .n.sm{font-size:15px;line-height:1.35;padding-top:3px}
+  .stats.inv{margin-top:10px}
+  .stats.inv .stat{border-style:dashed}
+  .legend i.dash{background:repeating-linear-gradient(90deg,var(--amber) 0 4px,transparent 4px 7px)}
 
   ol.model{font-size:13px;color:var(--muted);line-height:1.65;padding-left:20px;margin:6px 0}
   ol.model li{margin-bottom:8px}
@@ -194,10 +201,29 @@
         <input type="number" id="mpx" min="2" max="200" step="1" value="24">
       </div>
       <div class="subinfo" id="camInfo"></div>
+      <div class="subinfo" id="pp-camNote"></div>
     </div>
     <div class="ctl">
       <div class="row"><span data-lang="es">Recorte del encuadre</span><span data-lang="en">Crop of the frame</span><span class="val" id="cropVal"></span></div>
       <input type="range" id="crop" min="25" max="100" step="1" value="100">
+      <div class="stops" id="pp-cropStops">
+        <button type="button" class="stop croppre" data-crop="100" data-fam=""><span data-lang="es">sin recorte</span><span data-lang="en">no crop</span></button>
+        <button type="button" class="stop croppre" data-crop="77" data-fam="m11"><span data-lang="es">M11 1,3× (77 %)</span><span data-lang="en">M11 1.3× (77 %)</span></button>
+        <button type="button" class="stop croppre" data-crop="56" data-fam="m11"><span data-lang="es">M11 1,8× (56 %)</span><span data-lang="en">M11 1.8× (56 %)</span></button>
+        <button type="button" class="stop croppre" data-crop="72" data-fam="q3"><span data-lang="es">Q3 43 → 60 mm (72 %)</span><span data-lang="en">Q3 43 → 60 mm (72 %)</span></button>
+        <button type="button" class="stop croppre" data-crop="57" data-fam="q3"><span data-lang="es">75 mm (57 %)</span><span data-lang="en">75 mm (57 %)</span></button>
+        <button type="button" class="stop croppre" data-crop="48" data-fam="q3"><span data-lang="es">90 mm (48 %)</span><span data-lang="en">90 mm (48 %)</span></button>
+        <button type="button" class="stop croppre" data-crop="36" data-fam="q3"><span data-lang="es">120 mm (36 %)</span><span data-lang="en">120 mm (36 %)</span></button>
+        <button type="button" class="stop croppre" data-crop="29" data-fam="q3"><span data-lang="es">150 mm (29 %)</span><span data-lang="en">150 mm (29 %)</span></button>
+        <button type="button" class="stop croppre" data-crop="83" data-fam=""><span data-lang="es">4:5 (83 %)</span><span data-lang="en">4:5 (83 %)</span></button>
+        <button type="button" class="stop croppre" data-crop="67" data-fam=""><span data-lang="es">cuadrado 1:1 (67 %)</span><span data-lang="en">square 1:1 (67 %)</span></button>
+      </div>
+      <div class="subinfo" data-lang="es">Recortes de cámara aprox. (Q3 43: c = 43/f; M11: 1/1,3 y 1/1,8); Leica recorta a píxeles enteros. Los de proporción conservan el lado corto y acortan el largo: de cada 6000 px quedan 5000 (4:5) o 4000 (1:1); los Mpx útiles indicados suponen 3:2.</div>
+      <div class="subinfo" data-lang="en">Camera crops are approximate (Q3 43: c = 43/f; M11: 1/1.3 and 1/1.8); Leica crops to whole pixels. Aspect crops keep the short side and shorten the long one: of every 6000 px, 5000 remain (4:5) or 4000 (1:1); the usable Mpx shown assume 3:2.</div>
+    </div>
+    <div class="ctl">
+      <div class="row"><span data-lang="es">Comparar con (línea discontinua)</span><span data-lang="en">Compare with (dashed line)</span></div>
+      <select id="pp-cmp"></select>
     </div>
 
     <div class="sep"></div>
@@ -206,6 +232,12 @@
     <div class="ctl">
       <div class="row"><span data-lang="es">Diafragma N (λ = 550 nm)</span><span data-lang="en">Aperture N (λ = 550 nm)</span><span class="val" id="apVal"></span></div>
       <input type="range" id="ap" min="0" max="8" step="1" value="4">
+    </div>
+    <div class="ctl">
+      <div class="row"><span data-lang="es">Objetivo (MTF50 en su óptimo)</span><span data-lang="en">Lens (MTF50 at its best)</span></div>
+      <select id="pp-lens"></select>
+      <div class="subinfo" data-lang="es">«Perfecto» reproduce el modelo clásico (sólo difracción). Con un objetivo real, difracción y óptica se combinan en cuadratura. Para situar el tuyo: <a href="caracter-optico-leica-m.html">carta de carácter óptico M</a>.</div>
+      <div class="subinfo" data-lang="en">“Perfect” reproduces the classic model (diffraction only). With a real lens, diffraction and optics combine in quadrature. To place yours: <a href="caracter-optico-leica-m.html">M optical character chart</a>.</div>
     </div>
 
     <div class="sep"></div>
@@ -251,15 +283,39 @@
           <div class="h" data-lang="en">hard ceiling of the printing</div>
         </div>
       </div>
+      <div class="stats inv" id="pp-inv">
+        <div class="stat" id="pp-boxMpx">
+          <div class="l" data-lang="es">Mpx necesarios</div><div class="l" data-lang="en">Mpx needed</div>
+          <div class="n"><span id="pp-sMpx"></span><span class="u" id="pp-uMpx"></span></div>
+          <div class="h" id="pp-hMpx"></div>
+        </div>
+        <div class="stat" id="pp-boxN">
+          <div class="l" data-lang="es">Diafragma máximo</div><div class="l" data-lang="en">Maximum aperture number</div>
+          <div class="n"><span id="pp-sN"></span></div>
+          <div class="h" id="pp-hN"></div>
+        </div>
+        <div class="stat" id="pp-boxW">
+          <div class="l" data-lang="es">Ancho máximo a d</div><div class="l" data-lang="en">Maximum width at d</div>
+          <div class="n"><span id="pp-sW"></span></div>
+          <div class="h" id="pp-hW"></div>
+        </div>
+        <div class="stat" id="pp-boxD">
+          <div class="l" data-lang="es">Distancia mínima</div><div class="l" data-lang="en">Minimum distance</div>
+          <div class="n"><span id="pp-sD"></span></div>
+          <div class="h" id="pp-hD"></div>
+        </div>
+      </div>
+      <p class="verdexp" id="pp-invLine"></p>
     </div>
 
     <div class="panel">
       <h2 data-lang="es">Ancho máximo de copia nítida frente a distancia de observación</h2>
       <h2 data-lang="en">Maximum sharp print width against viewing distance</h2>
-      <canvas id="chart" width="920" height="440"></canvas>
+      <canvas id="chart" width="920" height="440" role="img"></canvas>
       <div class="legend">
         <span><i style="background:var(--amber)"></i><span data-lang="es">techo por píxeles</span><span data-lang="en">pixel ceiling</span></span>
-        <span><i style="background:var(--violet)"></i><span data-lang="es">techo por difracción</span><span data-lang="en">diffraction ceiling</span></span>
+        <span><i style="background:var(--violet)"></i><span data-lang="es">techo por difracción (y óptica, si se indica)</span><span data-lang="en">diffraction ceiling (and optics, if set)</span></span>
+        <span id="pp-legCmp" hidden><i class="dash"></i><span data-lang="es">techo del cuerpo comparado</span><span data-lang="en">ceiling of the compared body</span></span>
         <span><i style="background:var(--red)"></i><span data-lang="es">zona donde el proceso no alcanza lo que pide la vista</span><span data-lang="en">zone where the process falls short of the eye</span></span>
         <span><i style="background:var(--faint)"></i><span data-lang="es">distancia natural 1,5 × diagonal</span><span data-lang="en">natural distance 1.5 × diagonal</span></span>
         <span><i style="background:var(--teal)"></i><span data-lang="es">tu copia</span><span data-lang="en">your print</span></span>
@@ -278,23 +334,44 @@
           <th data-lang="es">Papel</th><th data-lang="en">Paper</th>
           <th data-lang="es">entregados</th><th data-lang="en">delivered</th>
           <th data-lang="es">necesarios a d</th><th data-lang="en">needed at d</th>
+          <th data-lang="es">veredicto a d</th><th data-lang="en">verdict at d</th>
           <th data-lang="es">a 1,5×diag</th><th data-lang="en">at 1.5×diag</th>
-          <th data-lang="es">veredicto</th><th data-lang="en">verdict</th>
+          <th data-lang="es">veredicto a 1,5×diag</th><th data-lang="en">verdict at 1.5×diag</th>
         </tr></thead>
         <tbody id="papersBody"></tbody>
       </table>
       </div>
-      <p class="note" data-lang="es">«Entregados» es el mínimo de píxeles, difracción y proceso al ancho de cada papel (lado largo, con el recorte vigente). El veredicto compara lo entregado con lo que la vista pide a la distancia d elegida; la columna 1,5×diag da la exigencia a la distancia «natural» de ese papel. Unidades: ppp.</p>
-      <p class="note" data-lang="en">“Delivered” is the minimum of pixels, diffraction and process at each paper’s width (long side, current crop applied). The verdict compares what is delivered against what the eye demands at the chosen distance d; the 1.5×diag column gives the demand at that paper’s “natural” distance. Units: ppi.</p>
+      <p class="note" data-lang="es">«Entregados» es el mínimo de píxeles, difracción (y óptica, si se indica) y proceso al ancho de cada papel (lado largo, con el recorte vigente). Hay dos veredictos: el primero compara lo entregado con lo que la vista pide a la distancia d elegida (la misma para todos los papeles, como cuando se hojea un libro); el segundo lo compara con la exigencia a la distancia «natural» de ese papel, 1,5 × su diagonal (la de la pared: un 70×100 se mira desde 1,8 m, no desde 35 cm). Umbrales: <b>sobra</b> ≥ 1,15 × lo pedido, <b>justo</b> entre 0,85 y 1,15, <b>falta</b> por debajo. Unidades: ppp.</p>
+      <p class="note" data-lang="en">“Delivered” is the minimum of pixels, diffraction (and optics, if set) and process at each paper’s width (long side, current crop applied). Two verdicts: the first compares what is delivered against what the eye demands at the chosen distance d (the same for every paper, as when leafing through a book); the second compares it against the demand at that paper’s “natural” distance, 1.5 × its diagonal (the wall case: a 70×100 is viewed from 1.8 m, not from 35 cm). Thresholds: <b>to spare</b> ≥ 1.15 × the demand, <b>borderline</b> between 0.85 and 1.15, <b>short</b> below. Units: ppi.</p>
     </div>
 
     <div class="panel">
-      <h2 data-lang="es">Conexión con el binning</h2>
-      <h2 data-lang="en">Connection with binning</h2>
+      <h2 data-lang="es">Todas las cámaras y modos para esta copia</h2>
+      <h2 data-lang="en">Every camera and mode for this print</h2>
+      <p class="note" id="pp-cmpIntro"></p>
+      <div class="tblwrap">
+      <table class="res">
+        <thead><tr>
+          <th data-lang="es">Cámara · modo</th><th data-lang="en">Camera · mode</th>
+          <th data-lang="es">Mpx útiles</th><th data-lang="en">usable Mpx</th>
+          <th data-lang="es">entregados a W</th><th data-lang="en">delivered at W</th>
+          <th data-lang="es">ancho máx. a d</th><th data-lang="en">max. width at d</th>
+          <th data-lang="es">veredicto</th><th data-lang="en">verdict</th>
+        </tr></thead>
+        <tbody id="pp-cmpBody"></tbody>
+      </table>
+      </div>
+      <p class="note" data-lang="es">Misma copia, misma distancia, mismo diafragma y proceso para todas las filas; sólo cambian los píxeles y, con ellos, el aumento. Los cuerpos aplican el recorte vigente; las filas «Q3 43 → f mm» usan su propio recorte de cámara (c = 43/f) en lugar del vigente. La fila resaltada en verde es la cámara elegida; la ámbar, la del selector «comparar con» (su techo se dibuja discontinuo en la gráfica). El multishot de 96 Mpx del SL3-S exige trípode y escena estática: <a href="sensor.html#pixelshift">cuándo aporta el multishot</a>. Los diafragmas críticos de cada sensor están en <a href="sensor.html#difraccion">difracción y diafragma</a>.</p>
+      <p class="note" data-lang="en">Same print, same distance, same aperture and process for every row; only the pixels change and, with them, the magnification. Bodies apply the current crop; the “Q3 43 → f mm” rows use their own in-camera crop (c = 43/f) instead. The row highlighted in green is the chosen camera; the amber one is the “compare with” selection (its ceiling is drawn dashed on the chart). The SL3-S 96 Mpx multishot needs a tripod and a static scene: <a href="sensor.html#pixelshift">when multishot pays off</a>. The critical apertures of each sensor are in <a href="sensor.html#difraccion">diffraction and aperture</a>.</p>
+    </div>
+
+    <div class="panel">
+      <h2 data-lang="es">Qué archivo basta · conexión con el binning</h2>
+      <h2 data-lang="en">Which file suffices · connection with binning</h2>
       <p class="note" id="binLine"></p>
       <p class="note">
-        <span data-lang="es">Más sobre el archivo pequeño en <a href="sensor.html#binning">el binning de la M11</a>; para maquetar la copia, <a href="zine-generator.html">el generador de fanzines</a>; la agudeza ε viene del <a href="telemetro-m11.html">telémetro de la M11</a>.</span>
-        <span data-lang="en">More on the small file in <a href="sensor.html#binning">M11 binning</a>; to lay out the print, <a href="zine-generator.html">the zine generator</a>; the acuity ε comes from the <a href="telemetro-m11.html">M11 rangefinder tool</a>.</span>
+        <span data-lang="es">El criterio es el mismo del veredicto principal: un archivo basta cuando sus píxeles, al ancho de la copia, entregan al menos lo que el resto de la cadena (ojo a d, difracción, proceso) aprovecha. Más sobre el archivo pequeño en <a href="sensor.html#binning">el binning de la M11</a>; la difracción que fija el techo, en <a href="sensor.html#difraccion">difracción y diafragma</a>; para maquetar la copia, <a href="zine-generator.html">el generador de fanzines</a>; la agudeza ε viene del <a href="telemetro-m11.html">telémetro de la M11</a>.</span>
+        <span data-lang="en">The criterion is the one of the main verdict: a file suffices when its pixels, at the print width, deliver at least what the rest of the chain (eye at d, diffraction, process) can use. More on the small file in <a href="sensor.html#binning">M11 binning</a>; the diffraction that sets the ceiling, in <a href="sensor.html#difraccion">diffraction and aperture</a>; to lay out the print, <a href="zine-generator.html">the zine generator</a>; the acuity ε comes from the <a href="telemetro-m11.html">M11 rangefinder tool</a>.</span>
       </p>
     </div>
 
@@ -306,15 +383,17 @@
         <li data-lang="en"><b>Eye.</b> At distance d the resolvable detail is <code>s = d·tan ε</code>; a line pair needs 2s, hence <code>ν_eye = 1/(2·d·tan ε)</code> in lp/mm on the paper and <code>ppi_eye = 2·ν_eye·25.4</code>. With ε = 1′ and d = 25 cm this gives ≈ 350 ppi: the classic “300 ppi at reading distance” rule.</li>
         <li data-lang="es"><b>Píxeles.</b> Sensor de 36×24 mm; paso de píxel <code>= 36 mm / píxeles_ancho</code>. Con recorte c (fracción del encuadre) quedan <code>píxeles_ancho·c</code>, y los ppp entregados a un ancho de copia dado son <code>ppp_píx = píxeles_ancho·c / (ancho_copia / 25.4)</code>.</li>
         <li data-lang="en"><b>Pixels.</b> A 36×24 mm sensor; pixel pitch <code>= 36 mm / width_px</code>. With crop c (fraction of the frame) there remain <code>width_px·c</code>, and the ppi delivered at a given print width are <code>ppi_pix = width_px·c / (print_width / 25.4)</code>.</li>
-        <li data-lang="es"><b>Difracción.</b> Disco de Airy <code>c_A = 2.44·λ·N</code> con λ = 550 nm; frecuencia práctica en el sensor <code>ν_sensor ≈ 1/c_A</code> (convención explícita: un par de líneas por diámetro de Airy). Aumento <code>M = ancho_copia / (36 mm·c)</code>; en el papel queda <code>ν_sensor / M</code>, convertida a ppp igual que arriba: <code>ppp_dif = 2·(ν_sensor/M)·25.4</code>.</li>
-        <li data-lang="en"><b>Diffraction.</b> Airy disc <code>c_A = 2.44·λ·N</code> with λ = 550 nm; practical frequency at the sensor <code>ν_sensor ≈ 1/c_A</code> (explicit convention: one line pair per Airy diameter). Magnification <code>M = print_width / (36 mm·c)</code>; on the paper it becomes <code>ν_sensor / M</code>, converted to ppi as above: <code>ppi_diff = 2·(ν_sensor/M)·25.4</code>.</li>
+        <li data-lang="es"><b>Difracción.</b> Disco de Airy <code>c_A = 2.44·λ·N</code> con λ = 550 nm; frecuencia práctica en el sensor <code>ν_sensor ≈ 1/c_A</code> (convención explícita: un par de líneas por diámetro de Airy). Aumento <code>M = ancho_copia / (36 mm·c)</code>; en el papel queda <code>ν_sensor / M</code>, convertida a ppp igual que arriba: <code>ppp_dif = 2·(ν_sensor/M)·25.4</code>. Es la misma frontera que en <a href="sensor.html#difraccion">difracción y diafragma</a>: allí se usa el MTF50 de la difracción, <code>0,404/(λ·N)</code>, y aquí <code>1/(2,44·λ·N) = 0,41/(λ·N)</code>; coinciden al 1 % (92 frente a 93 pl/mm a f/8) y dan los mismos diafragmas críticos, donde la frecuencia de Airy iguala el Nyquist del sensor: f/5.6 para 60 Mpx, f/8.9 para 24, f/4.5 para el multishot de 96.</li>
+        <li data-lang="en"><b>Diffraction.</b> Airy disc <code>c_A = 2.44·λ·N</code> with λ = 550 nm; practical frequency at the sensor <code>ν_sensor ≈ 1/c_A</code> (explicit convention: one line pair per Airy diameter). Magnification <code>M = print_width / (36 mm·c)</code>; on the paper it becomes <code>ν_sensor / M</code>, converted to ppi as above: <code>ppi_diff = 2·(ν_sensor/M)·25.4</code>. This is the same frontier as in <a href="sensor.html#difraccion">diffraction and aperture</a>: that page uses the MTF50 of diffraction, <code>0.404/(λ·N)</code>, and this one <code>1/(2.44·λ·N) = 0.41/(λ·N)</code>; they agree to 1 % (92 vs 93 lp/mm at f/8) and yield the same critical apertures, where the Airy frequency meets the sensor’s Nyquist: f/5.6 for 60 Mpx, f/8.9 for 24, f/4.5 for the 96 Mpx multishot.</li>
+        <li data-lang="es"><b>Objetivo (opcional).</b> Por defecto la óptica es perfecta y la toma sólo pierde por difracción. Si se elige un objetivo con MTF50 ν_obj en su óptimo (120, 90 o 60 pl/mm), ambos se combinan en cuadratura: <code>ν_toma = 1/√(1/ν_obj² + 1/ν_sensor²)</code>, y ν_toma sustituye a ν_sensor en todo lo anterior. A plena abertura el techo deja de ser la ficción de 266–530 pl/mm de f/1.4–f/2.8 y pasa a mandar la óptica; al cerrar, la difracción vuelve a tomar el mando.</li>
+        <li data-lang="en"><b>Lens (optional).</b> By default the optics are perfect and the capture only loses to diffraction. If a lens with MTF50 ν_lens at its best (120, 90 or 60 lp/mm) is chosen, both combine in quadrature: <code>ν_capture = 1/√(1/ν_lens² + 1/ν_sensor²)</code>, and ν_capture replaces ν_sensor everywhere above. Wide open, the ceiling stops being the 266–530 lp/mm fiction of f/1.4–f/2.8 and the optics take over; stopping down hands control back to diffraction.</li>
         <li data-lang="es"><b>Proceso.</b> Techo duro del selector: inyección fine art 360, minilab químico 300, offset 175 lpi ≈ 300 equivalentes, rotulación de gran formato 150, pantalla 220 ppp.</li>
         <li data-lang="en"><b>Process.</b> Hard ceiling taken by the selector: fine-art inkjet 360, chemical minilab 300, offset 175 lpi ≈ 300 equivalent, wide-format signage 150, screen 220 ppi.</li>
-        <li data-lang="es"><b>Veredicto.</b> Los cuatro se expresan en ppp sobre el papel y el eslabón limitante es el mínimo. La gráfica invierte cada techo: iguala lo entregado a lo que pide la vista y despeja el ancho máximo, <code>ancho_píx = píxeles_ancho·c·d·tan ε</code> y <code>ancho_dif = 2·d·tan ε·ν_sensor·36·c</code>; el proceso da una distancia mínima <code>d_proc = 25.4 / (ppp_proc·tan ε)</code>.</li>
-        <li data-lang="en"><b>Verdict.</b> All four are expressed as ppi on the paper and the limiting link is the minimum. The chart inverts each ceiling: it equates what is delivered with what the eye demands and solves for the maximum width, <code>width_pix = width_px·c·d·tan ε</code> and <code>width_diff = 2·d·tan ε·ν_sensor·36·c</code>; the process yields a minimum distance <code>d_proc = 25.4 / (ppi_proc·tan ε)</code>.</li>
+        <li data-lang="es"><b>Veredicto.</b> Los cuatro se expresan en ppp sobre el papel y el eslabón limitante es el mínimo. La gráfica invierte cada techo: iguala lo entregado a lo que pide la vista y despeja el ancho máximo, <code>ancho_píx = píxeles_ancho·c·d·tan ε</code> y <code>ancho_dif = 2·d·tan ε·ν_sensor·36·c</code>; el proceso da una distancia mínima <code>d_proc = 25.4 / (ppp_proc·tan ε)</code>. La fila «para esta copia» despeja las mismas ecuaciones al revés: <code>Mpx_nec = (ppp_ojo·ancho/25.4)²·(2/3)/10⁶</code> (píxeles en el encuadre, imagen 3:2); <code>N_máx = 2·25.4·36·c / (2.44·λ·ancho·ppp_umbral)</code>, con ppp_umbral el mínimo de ojo, píxeles y proceso (es el diafragma a partir del cual la difracción pasaría a mandar; con objetivo, se despeja antes la cuadratura), redondeado hacia abajo al tercio de paso; <code>ancho_máx(d) = min(ancho_píx, ancho_dif)</code> a la d elegida; y <code>d_mín = max(ancho/k_píx, ancho/k_dif, d_proc)</code>, la distancia desde la que los cuatro eslabones cubren lo que pide la vista.</li>
+        <li data-lang="en"><b>Verdict.</b> All four are expressed as ppi on the paper and the limiting link is the minimum. The chart inverts each ceiling: it equates what is delivered with what the eye demands and solves for the maximum width, <code>width_pix = width_px·c·d·tan ε</code> and <code>width_diff = 2·d·tan ε·ν_sensor·36·c</code>; the process yields a minimum distance <code>d_proc = 25.4 / (ppi_proc·tan ε)</code>. The “for this print” row solves the same equations backwards: <code>Mpx_needed = (ppi_eye·width/25.4)²·(2/3)/10⁶</code> (pixels in the frame used, 3:2 image); <code>N_max = 2·25.4·36·c / (2.44·λ·width·ppi_threshold)</code>, with ppi_threshold the minimum of eye, pixels and process (the aperture beyond which diffraction would take over; with a lens, the quadrature is solved first), rounded down to the nearest third-stop; <code>width_max(d) = min(width_pix, width_diff)</code> at the chosen d; and <code>d_min = max(width/k_pix, width/k_diff, d_proc)</code>, the distance from which all four links cover what the eye demands.</li>
       </ol>
-      <p class="note" data-lang="es">Simplificaciones declaradas: sensor sin filtro AA ni pérdidas de demosaicado (los píxeles cuentan enteros), difracción como único defecto de la toma (sin trepidación, desenfoque ni aberraciones), y proceso resumido en una sola cifra. Todos los techos son optimistas por separado; el mínimo de los cuatro es, por ello, un techo optimista honesto.</p>
-      <p class="note" data-lang="en">Declared simplifications: a sensor without an AA filter or demosaicing losses (pixels count in full), diffraction as the sole defect of the capture (no shake, defocus or aberrations), and the process reduced to a single figure. Every ceiling is optimistic on its own; the minimum of the four is, for that reason, an honestly optimistic ceiling.</p>
+      <p class="note" data-lang="es">Simplificaciones declaradas: sensor sin filtro AA ni pérdidas de demosaicado (los píxeles cuentan enteros), difracción como único defecto de la toma salvo que se indique un objetivo (y aun así sin trepidación ni desenfoque), techos combinados por mínimo y no en cuadratura (salvo óptica y difracción entre sí), y proceso resumido en una sola cifra. Todos los techos son optimistas por separado; el mínimo de los cuatro es, por ello, un techo optimista honesto.</p>
+      <p class="note" data-lang="en">Declared simplifications: a sensor without an AA filter or demosaicing losses (pixels count in full), diffraction as the sole defect of the capture unless a lens is set (and even then no shake or defocus), ceilings combined by minimum rather than in quadrature (except optics and diffraction with each other), and the process reduced to a single figure. Every ceiling is optimistic on its own; the minimum of the four is, for that reason, an honestly optimistic ceiling.</p>
     </div>
 
     <div class="panel">
@@ -352,15 +431,15 @@
         </tbody>
       </table>
       </div>
-      <p class="note" data-lang="es">Las cuatro filas se recalculan con el mismo código del simulador cada vez que se abre la página; si alguna saliera de tolerancia se marcaría FALLA.</p>
-      <p class="note" data-lang="en">All four rows are recomputed with the simulator’s own code every time the page opens; any value out of tolerance would be flagged FAIL.</p>
+      <p class="note" data-lang="es">Las cuatro filas se recalculan con el mismo código del simulador cada vez que se abre la página; si alguna saliera de tolerancia se marcaría FALLA. La fila 3 fija la convención de difracción (1/(2,44·λ·N), tolerancia 90–96 pl/mm): cambiarla, por ejemplo al MTF50 = 0,404/(λ·N) de la ficha de difracción (92 pl/mm a f/8), sigue dentro de tolerancia, pero cualquier otra convención obligaría a actualizar esa fila. El objetivo opcional no interviene en la verificación: se calcula siempre con óptica perfecta.</p>
+      <p class="note" data-lang="en">All four rows are recomputed with the simulator’s own code every time the page opens; any value out of tolerance would be flagged FAIL. Row 3 pins the diffraction convention (1/(2.44·λ·N), tolerance 90–96 lp/mm): switching it, say, to the MTF50 = 0.404/(λ·N) of the diffraction page (92 lp/mm at f/8) stays within tolerance, but any other convention would require updating that row. The optional lens plays no part in the verification: it is always computed with perfect optics.</p>
     </div>
   </main>
 </div>
 
 <footer>
-  <span data-lang="es">Del sensor al papel · Rafael Vida · herramientas hermanas: <a href="sensor.html#binning">binning-m11</a> · <a href="zine-generator.html">zine-generator</a> · <a href="telemetro-m11.html">telemetro-m11</a> · <a href="simulador-flash.html">simulador-flash</a> · <a href="filtro-sensor.html#stack">stack-sensor</a></span>
-  <span data-lang="en">From sensor to paper · Rafael Vida · sibling tools: <a href="sensor.html#binning">binning-m11</a> · <a href="zine-generator.html">zine-generator</a> · <a href="telemetro-m11.html">telemetro-m11</a> · <a href="simulador-flash.html">simulador-flash</a> · <a href="filtro-sensor.html#stack">stack-sensor</a></span>
+  <span data-lang="es">Del sensor al papel · Rafael Vida · herramientas hermanas: <a href="sensor.html#binning">binning-m11</a> · <a href="sensor.html#difraccion">difracción</a> · <a href="sensor.html#pixelshift">multishot-sl3s</a> · <a href="zine-generator.html">zine-generator</a> · <a href="telemetro-m11.html">telemetro-m11</a> · <a href="simulador-flash.html">simulador-flash</a> · <a href="filtro-sensor.html#stack">stack-sensor</a></span>
+  <span data-lang="en">From sensor to paper · Rafael Vida · sibling tools: <a href="sensor.html#binning">binning-m11</a> · <a href="sensor.html#difraccion">diffraction</a> · <a href="sensor.html#pixelshift">multishot-sl3s</a> · <a href="zine-generator.html">zine-generator</a> · <a href="telemetro-m11.html">telemetro-m11</a> · <a href="simulador-flash.html">simulador-flash</a> · <a href="filtro-sensor.html#stack">stack-sensor</a></span>
 </footer>
 </div>
 
@@ -418,9 +497,52 @@ const DICT={
   cam60:'Leica M11 · DNG 60 Mpx (9528×6328)',
   cam36:'Leica M11 · M-DNG 36 Mpx (7416×4928)',
   cam18:'Leica M11 · S-DNG 18 Mpx (5272×3498)',
-  camQ3:'Leica Q3 · 60 Mpx (9520×6336)',
+  camQ3:'Leica Q3 / Q3 43 · 60 Mpx (9520×6336)',
+  camSL24:'Leica SL3-S · 24 Mpx (6000×4000)',
+  camSL96:'Leica SL3-S · multishot 96 Mpx (12000×8000)',
   camGen:'Genérica 24 Mpx (6000×4000)',
   camCus:'Personalizada…',
+  noteM11:'Marcos 1,3× y 1,8× de la M11: presets bajo el recorte. Los tres tamaños de DNG se comparan en «Qué archivo basta».',
+  noteQ3:'El Q3 43 comparte sensor con el Q3; sus recortes de 60 a 150 mm (c = 43/f) están en los presets bajo el recorte.',
+  noteSL24:'El modo de 48 Mpx del SL3-S no cambia el número de píxeles (6000×4000): mismo tamaño de copia que el nativo. Sólo el multishot de 96 duplica el lado (12000 px).',
+  noteSL96:'Multishot: 12000×8000 px reales, ocho tomas, trípode y escena estática. A f/8 la difracción (93 pl/mm) ya queda por debajo de su Nyquist (167 pl/mm): abre a f/4–f/4.5 para aprovecharlo.',
+  lensPerf:'Perfecto (sólo difracción)',
+  lens120:'Muy bueno · MTF50 120 pl/mm',
+  lens90:'Bueno · MTF50 90 pl/mm',
+  lens60:'Antiguo · MTF50 60 pl/mm',
+  cmpNone:'— ninguno —',
+  rM60:'Leica M11 · L-DNG 60 Mpx', rM36:'Leica M11 · M-DNG 36 Mpx', rM18:'Leica M11 · S-DNG 18 Mpx',
+  rQ3:'Leica Q3 / Q3 43 · 60 Mpx', rQ60:'Q3 43 → 60 mm', rQ75:'Q3 43 → 75 mm', rQ90:'Q3 43 → 90 mm', rQ120:'Q3 43 → 120 mm', rQ150:'Q3 43 → 150 mm',
+  rSL24:'Leica SL3-S · 24 Mpx', rSL96:'Leica SL3-S · multishot 96 Mpx',
+  lblDiff:'Difracción', lblCap:'Toma (óptica + difracción)',
+  hDiff:'techo de la toma a f/N', hCap:'óptica y difracción en cuadratura',
+  expCap:'A f/{N}, difracción ({nd} pl/mm) y óptica ({nl} pl/mm) combinadas en cuadratura dejan la toma en {nc} pl/mm sobre el sensor, {p} ppp en el papel con aumento {M}×: {who}',
+  whoDiff:'manda la difracción; abrir el diafragma sube el techo.',
+  whoLens:'manda la óptica; cerrar o abrir apenas cambia nada. Sólo menos aumento (copia menor o menos recorte) o un objetivo mejor suben el techo.',
+  hMpx:'en el encuadre usado ({px} px de lado largo, 3:2)',
+  hMpxCrop:'en el encuadre usado ({px} px de lado largo); con recorte al {c} % son {mt} Mpx de sensor',
+  nAny:'> f/22', hNAny:'cualquier diafragma: antes limitan los {th} ppp que fija {who}',
+  hNVal:'exacto f/{N}; más cerrado, la difracción baja de los {th} ppp que aprovecha la cadena',
+  nNone:'ninguno', hNNone:'ni a plena abertura: la óptica ({nl} pl/mm) ya queda bajo los {th} ppp que pide la cadena',
+  nLow:'< f/1.4', hNLow:'ni f/1.4 evita que la difracción baje de {th} ppp: hace falta menos aumento',
+  hW:'por píxeles y difracción a {d}; el proceso no interviene', hWProc:'por píxeles y difracción a {d}; pero a esa distancia {proc} ({pro} ppp) queda por debajo de la vista',
+  hD:'desde ahí los cuatro eslabones cubren lo que pide la vista', hDProc:'la fija el proceso: más cerca, {proc} no alcanza lo que pide la vista',
+  thEye:'la vista', thPix:'los píxeles', thPro:'el proceso',
+  invLine:'Para esta copia ({w} de ancho mirada desde {d}) bastan {mpx} Mpx en el encuadre y {nph}; se ve nítida desde {dmin} y, a {d}, podrías llegar a {wmax} de ancho.',
+  nphVal:'se puede cerrar hasta f/{N} sin que mande la difracción',
+  nphAny:'ningún diafragma hace notar la difracción',
+  nphNone:'la óptica limita antes que cualquier diafragma',
+  nphLow:'ni f/1.4 evita la difracción',
+  cmpIntro:'{w} de ancho mirada desde {d}: la vista pide {eye} ppp; el proceso ({proc}) entrega {pro} ppp a lo sumo; difracción y óptica a f/{N}, la que corresponda a cada aumento.',
+  cmpTag:'techo {name}',
+  mkMax:'máx. a d',
+  binFile:'Para {w} de ancho mirada desde {d}, el resto de la cadena aprovecha {th} ppp ({who}): basta el {file}, que entrega {p} ppp; los archivos mayores sólo pesan más.',
+  binNone:'Para {w} de ancho mirada desde {d}, el resto de la cadena aprovecha {th} ppp ({who}) y ni el L-DNG de 60 Mpx llega: entrega {p} ppp. Mandan los píxeles; conserva los 60 Mpx y reduce recorte o tamaño.',
+  binSLok:'Para {w} de ancho mirada desde {d}, el resto de la cadena aprovecha {th} ppp ({who}) y el archivo nativo de 24 Mpx del SL3-S ya entrega {p} ppp: el multishot de 96 no aporta a esta copia.',
+  binSLyes:'Para {w} de ancho mirada desde {d}, el nativo de 24 Mpx del SL3-S se queda en {p24} ppp frente a los {th} que aprovecha la cadena ({who}); el multishot de 96 sube a {p96} ppp y cubre la demanda: merece las ocho tomas.',
+  binSLpart:'Para {w} de ancho mirada desde {d}, el nativo de 24 Mpx del SL3-S se queda en {p24} ppp frente a los {th} que aprovecha la cadena ({who}); el multishot de 96 sube a {p96} ppp y sigue sin llegar, pero es la única mejora posible desde la cámara.',
+  fL:'L-DNG de 60 Mpx', fM:'M-DNG de 36 Mpx', fS:'S-DNG de 18 Mpx',
+  ariaChart:'Gráfica: ancho máximo de copia nítida frente a distancia de observación. {v}',
   procInk:'Inyección fine art · 360 ppp',
   procLab:'Minilab químico · 300 ppp',
   procOff:'Offset 175 lpi · ≈300 ppp equiv.',
@@ -452,9 +574,52 @@ const DICT={
   cam60:'Leica M11 · DNG 60 Mpx (9528×6328)',
   cam36:'Leica M11 · M-DNG 36 Mpx (7416×4928)',
   cam18:'Leica M11 · S-DNG 18 Mpx (5272×3498)',
-  camQ3:'Leica Q3 · 60 Mpx (9520×6336)',
+  camQ3:'Leica Q3 / Q3 43 · 60 Mpx (9520×6336)',
+  camSL24:'Leica SL3-S · 24 Mpx (6000×4000)',
+  camSL96:'Leica SL3-S · multishot 96 Mpx (12000×8000)',
   camGen:'Generic 24 Mpx (6000×4000)',
   camCus:'Custom…',
+  noteM11:'M11 1.3× and 1.8× frames: presets under the crop slider. The three DNG sizes are compared in “Which file suffices”.',
+  noteQ3:'The Q3 43 shares its sensor with the Q3; its 60 to 150 mm crops (c = 43/f) are in the presets under the crop slider.',
+  noteSL24:'The SL3-S 48 Mpx mode does not change the pixel count (6000×4000): same print size as native. Only the 96 Mpx multishot doubles the side (12000 px).',
+  noteSL96:'Multishot: a real 12000×8000 px, eight frames, tripod and static scene. At f/8 diffraction (93 lp/mm) already sits below its Nyquist (167 lp/mm): open to f/4–f/4.5 to make use of it.',
+  lensPerf:'Perfect (diffraction only)',
+  lens120:'Very good · MTF50 120 lp/mm',
+  lens90:'Good · MTF50 90 lp/mm',
+  lens60:'Vintage · MTF50 60 lp/mm',
+  cmpNone:'— none —',
+  rM60:'Leica M11 · L-DNG 60 Mpx', rM36:'Leica M11 · M-DNG 36 Mpx', rM18:'Leica M11 · S-DNG 18 Mpx',
+  rQ3:'Leica Q3 / Q3 43 · 60 Mpx', rQ60:'Q3 43 → 60 mm', rQ75:'Q3 43 → 75 mm', rQ90:'Q3 43 → 90 mm', rQ120:'Q3 43 → 120 mm', rQ150:'Q3 43 → 150 mm',
+  rSL24:'Leica SL3-S · 24 Mpx', rSL96:'Leica SL3-S · multishot 96 Mpx',
+  lblDiff:'Diffraction', lblCap:'Capture (optics + diffraction)',
+  hDiff:'ceiling of the capture at f/N', hCap:'optics and diffraction in quadrature',
+  expCap:'At f/{N}, diffraction ({nd} lp/mm) and optics ({nl} lp/mm) combined in quadrature leave the capture at {nc} lp/mm on the sensor, {p} ppi on paper at {M}× magnification: {who}',
+  whoDiff:'diffraction rules; opening up raises the ceiling.',
+  whoLens:'the optics rule; stopping down or opening up changes little. Only less magnification (a smaller print or less crop) or a better lens raises the ceiling.',
+  hMpx:'in the frame used ({px} px along the long side, 3:2)',
+  hMpxCrop:'in the frame used ({px} px along the long side); with a {c} % crop that is {mt} Mpx of sensor',
+  nAny:'> f/22', hNAny:'any aperture: the {th} ppi set by {who} limit first',
+  hNVal:'exactly f/{N}; any further stopped down, diffraction drops below the {th} ppi the chain can use',
+  nNone:'none', hNNone:'not even wide open: the optics ({nl} lp/mm) already sit below the {th} ppi the chain asks for',
+  nLow:'< f/1.4', hNLow:'not even f/1.4 keeps diffraction above {th} ppi: less magnification is needed',
+  hW:'by pixels and diffraction at {d}; the process plays no part', hWProc:'by pixels and diffraction at {d}; but at that distance {proc} ({pro} ppi) sits below the eye',
+  hD:'from there on, all four links cover what the eye demands', hDProc:'set by the process: any closer, {proc} falls short of the eye',
+  thEye:'the eye', thPix:'the pixels', thPro:'the process',
+  invLine:'For this print ({w} wide viewed from {d}) {mpx} Mpx in the frame suffice and {nph}; it looks sharp from {dmin} and, at {d}, you could go up to {wmax} wide.',
+  nphVal:'you can stop down to f/{N} before diffraction takes over',
+  nphAny:'no aperture makes diffraction show',
+  nphNone:'the optics limit before any aperture does',
+  nphLow:'not even f/1.4 avoids diffraction',
+  cmpIntro:'{w} wide viewed from {d}: the eye asks for {eye} ppi; the process ({proc}) delivers at most {pro} ppi; diffraction and optics at f/{N}, as they fall at each magnification.',
+  cmpTag:'ceiling {name}',
+  mkMax:'max at d',
+  binFile:'For {w} wide viewed from {d}, the rest of the chain can use {th} ppi ({who}): the {file} suffices, delivering {p} ppi; the larger files only weigh more.',
+  binNone:'For {w} wide viewed from {d}, the rest of the chain can use {th} ppi ({who}) and not even the 60 Mpx L-DNG gets there: it delivers {p} ppi. The pixels rule; keep the 60 Mpx and reduce crop or size.',
+  binSLok:'For {w} wide viewed from {d}, the rest of the chain can use {th} ppi ({who}) and the SL3-S native 24 Mpx file already delivers {p} ppi: the 96 Mpx multishot adds nothing to this print.',
+  binSLyes:'For {w} wide viewed from {d}, the SL3-S native 24 Mpx stops at {p24} ppi against the {th} the chain can use ({who}); the 96 Mpx multishot rises to {p96} ppi and covers the demand: worth the eight frames.',
+  binSLpart:'For {w} wide viewed from {d}, the SL3-S native 24 Mpx stops at {p24} ppi against the {th} the chain can use ({who}); the 96 Mpx multishot rises to {p96} ppi and still falls short, but it is the only improvement available from the camera.',
+  fL:'60 Mpx L-DNG', fM:'36 Mpx M-DNG', fS:'18 Mpx S-DNG',
+  ariaChart:'Chart: maximum sharp print width against viewing distance. {v}',
   procInk:'Fine-art inkjet · 360 ppi',
   procLab:'Chemical minilab · 300 ppi',
   procOff:'Offset 175 lpi · ≈300 ppi equiv.',
@@ -504,25 +669,67 @@ const CAMS=[
   ['m36','cam36',7416,4928],
   ['m18','cam18',5272,3498],
   ['q3','camQ3',9520,6336],
+  ['sl24','camSL24',6000,4000],
+  ['sl96','camSL96',12000,8000],
   ['g24','camGen',6000,4000],
   ['cus','camCus',0,0]
 ];
+const CAM_FAM={m60:'m11',m36:'m11',m18:'m11',q3:'q3',sl24:'sl',sl96:'sl'};   // familia → presets de recorte y línea de archivos
+const CAM_NOTE={m60:'noteM11',m36:'noteM11',m18:'noteM11',q3:'noteQ3',sl24:'noteSL24',sl96:'noteSL96'};
 const PROCS=[['ink','procInk','pnInk',360],['lab','procLab','pnLab',300],
              ['off','procOff','pnOff',300],['lgf','procLgf','pnLgf',150],
              ['scr','procScr','pnScr',220]];
-const PAPERS=[['10×15',152,102],['A4',297,210],['A3',420,297],
-              ['A2',594,420],['50×70',700,500],['70×100',1000,700]];
+const PAPERS=[['10×15',152,102],['A4',297,210],['30×40',400,300],['A3',420,297],
+              ['A2',594,420],['40×60',600,400],['50×70',700,500],['A1',841,594],
+              ['60×90',900,600],['70×100',1000,700]];
 const NAT_K=1.5*Math.sqrt(1+4/9); // d_natural = NAT_K · ancho (imagen 3:2) ≈ 1.8028
 const BIN_PXW=5272;               // S-DNG 18 Mpx
+const M11_FILES=[['fS',BIN_PXW],['fM',7416],['fL',9528]];   // S/M/L-DNG, de menor a mayor
+/* tabla comparativa: [id, claveDICT, px_ancho, recorte fijo (null = usa el vigente), camId equivalente] */
+const COMP=[
+  ['cM60','rM60',9528,null,'m60'],
+  ['cM36','rM36',7416,null,'m36'],
+  ['cM18','rM18',5272,null,'m18'],
+  ['cQ3','rQ3',9520,null,'q3'],
+  ['cQ60','rQ60',9520,0.72,null],     // c ≈ 43/f, redondeado al % como los presets del slider
+  ['cQ75','rQ75',9520,0.57,null],
+  ['cQ90','rQ90',9520,0.48,null],
+  ['cQ120','rQ120',9520,0.36,null],
+  ['cQ150','rQ150',9520,0.29,null],
+  ['cSL24','rSL24',6000,null,'sl24'],
+  ['cSL96','rSL96',12000,null,'sl96']
+];
+const LENSES=[['perf','lensPerf',Infinity],['120','lens120',120],['90','lens90',90],['60','lens60',60]];   // MTF50 en su óptimo, pl/mm
+const THIRDS=[1.4,1.6,1.8,2,2.2,2.5,2.8,3.2,3.5,4,4.5,5,5.6,6.3,7.1,8,9,10,11,13,14,16,18,20,22];
 
 /* ---------- física ---------- */
 const tanEps=eps=>Math.tan(eps/60*Math.PI/180);
 const ppiEye=(dmm,eps)=>25.4/(dmm*tanEps(eps));               // = 2·ν_ojo·25.4
 const nuEye=(dmm,eps)=>1/(2*dmm*tanEps(eps));                 // pl/mm en el papel
 const nuSensor=fnum=>1/(2.44*LAMBDA*fnum);                    // ≈ 1/c_A, pl/mm en el sensor
+/* techo de la toma: difracción sola, o difracción y óptica (MTF50 nuLens) en cuadratura */
+const nuCapture=(fnum,nuLens)=>{
+  const nd=nuSensor(fnum);
+  return (nuLens&&isFinite(nuLens)) ? 1/Math.sqrt(1/(nd*nd)+1/(nuLens*nuLens)) : nd;
+};
 const ppiPix=(pxwEff,wmm)=>pxwEff/(wmm/25.4);
-const ppiDiff=(fnum,wmm,cfr)=>2*25.4*nuSensor(fnum)*SENSOR_W*cfr/wmm; // ν_sensor/M → ppp
+const ppiDiff=(fnum,wmm,cfr,nuLens)=>2*25.4*nuCapture(fnum,nuLens)*SENSOR_W*cfr/wmm; // ν_toma/M → ppp
 const mpxNatural=eps=>{ const pxw=1/(NAT_K*tanEps(eps)); return pxw*pxw*(2/3)/1e6; };
+/* diafragma máximo: el N a partir del cual la toma entrega menos de ppiTh ppp al ancho wmm.
+   Devuelve {n: N exacto o Infinity (ningún N llega a bajar del umbral… con óptica finita) , kind:'val'|'any'|'none'|'low'} */
+function nMax(ppiTh,wmm,cfr,nuLens){
+  const nuReq=ppiTh*wmm/(2*25.4*SENSOR_W*cfr);          // pl/mm que la toma debe dar en el sensor
+  let nuDifReq=nuReq;
+  if(nuLens&&isFinite(nuLens)){
+    if(nuReq>=nuLens) return {n:0,kind:'none'};          // la óptica sola ya no llega
+    nuDifReq=1/Math.sqrt(1/(nuReq*nuReq)-1/(nuLens*nuLens));
+  }
+  const nn=1/(2.44*LAMBDA*nuDifReq);
+  if(nn>=22) return {n:nn,kind:'any'};
+  if(nn<1.4) return {n:nn,kind:'low'};
+  let th=THIRDS[0]; THIRDS.forEach(tt=>{ if(tt<=nn*1.0001) th=tt; });
+  return {n:nn,kind:'val',third:th};
+}
 
 /* ---------- estado de la interfaz ---------- */
 function readUI(){
@@ -537,32 +744,63 @@ function readUI(){
   const procId=$('proc').value;
   const proc=PROCS.find(pp=>pp[0]===procId)||PROCS[0];
   const wmm=+$('pw').value;
-  return {eps,dmm,camId,pxw,cfr,fnum,proc,wmm,pxwEff:pxw*cfr};
+  const lens=LENSES.find(ll=>ll[0]===$('pp-lens').value)||LENSES[0];
+  const nuLens=lens[2];
+  const cmpId=$('pp-cmp').value;
+  const cmp=COMP.find(cc=>cc[0]===cmpId)||null;
+  return {eps,dmm,camId,pxw,cfr,fnum,proc,wmm,pxwEff:pxw*cfr,nuLens,hasLens:isFinite(nuLens),cmp};
 }
 function fmtDist(mm){ return mm<1000?LBL('fmtCm',{v:nf(mm/10,0)}):LBL('fmtM',{v:nf(mm/1000,1)}); }
+/* recorte efectivo de una fila comparativa: el suyo propio (Q3 43 → f mm) o el vigente */
+const compCfr=(row,ui)=>row[3]!==null?row[3]:ui.cfr;
 
 /* ---------- veredicto ---------- */
 function verdict(ui){
   const eye=ppiEye(ui.dmm,ui.eps);
   const pix=ppiPix(ui.pxwEff,ui.wmm);
-  const dif=ppiDiff(ui.fnum,ui.wmm,ui.cfr);
+  const dif=ppiDiff(ui.fnum,ui.wmm,ui.cfr,ui.nuLens);
   const pro=ui.proc[3];
   const four=[['eye',eye],['pix',pix],['dif',dif],['pro',pro]];
   let lim=four[0]; four.forEach(ff=>{ if(ff[1]<lim[1]) lim=ff; });
-  return {eye,pix,dif,pro,limKey:lim[0],eff:lim[1]};
+  /* lecturas inversas para esta copia */
+  const tE=tanEps(ui.eps);
+  const kPix=ui.pxwEff*tE;                                    // ancho_máx = k·d (píxeles)
+  const kDiff=2*tE*nuCapture(ui.fnum,ui.nuLens)*SENSOR_W*ui.cfr; // ancho_máx = k·d (toma)
+  const dProc=25.4/(pro*tE);                                  // d mínima para que el proceso cubra la vista
+  const pxNeed=eye*ui.wmm/25.4;                               // píxeles de lado largo que pide la vista
+  const mpxNeed=pxNeed*pxNeed*(2/3)/1e6;
+  const thN=Math.min(eye,pix,pro);                            // umbral antes del cual la difracción no manda
+  const thKey=thN===eye?'thEye':(thN===pix?'thPix':'thPro');
+  const nmx=nMax(thN,ui.wmm,ui.cfr,ui.nuLens);
+  const wMax=Math.min(kPix,kDiff)*ui.dmm;
+  const dMin=Math.max(ui.wmm/kPix,ui.wmm/kDiff,dProc);
+  return {eye,pix,dif,pro,limKey:lim[0],eff:Math.min(pix,dif,pro),
+          kPix,kDiff,dProc,pxNeed,mpxNeed,thN,thKey,nmx,wMax,dMin};
 }
 function paintVerdict(ui,vd){
   const names={eye:'limEye',pix:'limPix',dif:'limDiff',pro:'limProc'};
   $('verdLim').textContent=LBL(names[vd.limKey]);
-  $('verdEff').textContent=LBL('verdEff',{v:nf(vd.eff,0)});
+  $('verdEff').textContent=LBL('verdEff',{v:nf(vd.eff,0)});   // lo que la cadena entrega de verdad (sin el ojo)
   const mUse=ui.pxwEff*ui.pxwEff*(2/3)/1e6;
+  const mag=ui.wmm/(SENSOR_W*ui.cfr);
   let exp='';
   if(vd.limKey==='eye') exp=LBL('expEye',{d:fmtDist(ui.dmm),p:nf(vd.eye,0)});
   else if(vd.limKey==='pix') exp=LBL('expPix',{m:nf(mUse,1),p:nf(vd.pix,0),w:fmtDist(ui.wmm)});
-  else if(vd.limKey==='dif') exp=LBL('expDiff',{N:ui.fnum,a:nf(2.44*LAMBDA*ui.fnum*1000,1),
-        p:nf(vd.dif,0),M:nf(ui.wmm/(SENSOR_W*ui.cfr),1)});
+  else if(vd.limKey==='dif'){
+    if(ui.hasLens){
+      const nd=nuSensor(ui.fnum), nc=nuCapture(ui.fnum,ui.nuLens);
+      exp=LBL('expCap',{N:ui.fnum,nd:nf(nd,0),nl:nf(ui.nuLens,0),nc:nf(nc,0),p:nf(vd.dif,0),M:nf(mag,1),
+                        who:LBL(nd<ui.nuLens?'whoDiff':'whoLens')});
+    }else{
+      exp=LBL('expDiff',{N:ui.fnum,a:nf(2.44*LAMBDA*ui.fnum*1000,1),p:nf(vd.dif,0),M:nf(mag,1)});
+    }
+  }
   else exp=LBL('expProc',{proc:LBL(ui.proc[2]),p:nf(vd.pro,0)});
   $('verdExp').textContent=exp;
+  /* la caja de difracción se llama «Toma» cuando hay objetivo */
+  const lblKey=ui.hasLens?'lblCap':'lblDiff', hKey=ui.hasLens?'hCap':'hDiff';
+  document.querySelectorAll('#boxDiff .l').forEach(el=>{ el.textContent=DICT[el.getAttribute('data-lang')][lblKey]; });
+  document.querySelectorAll('#boxDiff .h').forEach(el=>{ el.textContent=DICT[el.getAttribute('data-lang')][hKey]; });
   const boxes={eye:'boxEye',pix:'boxPix',dif:'boxDiff',pro:'boxProc'};
   const vals={eye:vd.eye,pix:vd.pix,dif:vd.dif,pro:vd.pro};
   const cells={eye:'sEye',pix:'sPix',dif:'sDiff',pro:'sProc'};
@@ -572,12 +810,48 @@ function paintVerdict(ui,vd){
     $(cells[kk]).textContent=nf(vals[kk],0);
     $(units[kk]).textContent=LBL('uPpp');
   });
+  paintInverse(ui,vd);
+}
+/* ---------- fila «para esta copia»: Mpx necesarios, N_máx, ancho máximo a d, distancia mínima ---------- */
+const fmtMpx=vv=>nf(vv,vv<10?1:0);
+function paintInverse(ui,vd){
+  const dTxt=fmtDist(ui.dmm), procName=LBL(ui.proc[2]);
+  // Mpx necesarios (en el encuadre usado; con recorte, también los del sensor entero)
+  $('pp-sMpx').textContent=fmtMpx(vd.mpxNeed);
+  $('pp-uMpx').textContent=LBL('uMpx');
+  $('pp-hMpx').textContent = ui.cfr<0.999
+    ? LBL('hMpxCrop',{px:nf(Math.round(vd.pxNeed),0),c:nf(ui.cfr*100,0),mt:fmtMpx(vd.mpxNeed/(ui.cfr*ui.cfr))})
+    : LBL('hMpx',{px:nf(Math.round(vd.pxNeed),0)});
+  // diafragma máximo (los números f llevan punto en ambos idiomas, como f/5.6 en el resto de la página)
+  const nm=vd.nmx, thTxt=nf(vd.thN,0), whoTxt=LBL(vd.thKey);
+  let nBig='', nHint='', nph='';
+  if(nm.kind==='val'){ nBig='f/'+String(nm.third); nHint=LBL('hNVal',{N:nm.n.toFixed(1),th:thTxt}); nph=LBL('nphVal',{N:String(nm.third)}); }
+  else if(nm.kind==='any'){ nBig=LBL('nAny'); nHint=LBL('hNAny',{th:thTxt,who:whoTxt}); nph=LBL('nphAny'); }
+  else if(nm.kind==='none'){ nBig=LBL('nNone'); nHint=LBL('hNNone',{nl:nf(ui.nuLens,0),th:thTxt}); nph=LBL('nphNone'); }
+  else { nBig=LBL('nLow'); nHint=LBL('hNLow',{th:thTxt}); nph=LBL('nphLow'); }
+  $('pp-sN').textContent=nBig; $('pp-hN').textContent=nHint;
+  // ancho máximo a d
+  const procShort=ui.dmm<vd.dProc*0.999;
+  $('pp-sW').textContent=fmtDist(vd.wMax);
+  $('pp-hW').textContent=procShort?LBL('hWProc',{d:dTxt,proc:procName,pro:nf(vd.pro,0)}):LBL('hW',{d:dTxt});
+  // distancia mínima
+  $('pp-sD').textContent=fmtDist(vd.dMin);
+  $('pp-hD').textContent=(vd.dProc>=Math.max(ui.wmm/vd.kPix,ui.wmm/vd.kDiff)) ? LBL('hDProc',{proc:procName}) : LBL('hD');
+  // la caja inversa que corresponde al eslabón limitante se resalta como su caja directa
+  const invBox={eye:'pp-boxW',pix:'pp-boxMpx',dif:'pp-boxN',pro:'pp-boxD'};
+  Object.keys(invBox).forEach(kk=>$(invBox[kk]).classList.toggle('lim',kk===vd.limKey));
+  $('pp-invLine').textContent=LBL('invLine',{w:fmtDist(ui.wmm),d:dTxt,mpx:fmtMpx(vd.mpxNeed),
+    nph,dmin:fmtDist(vd.dMin),wmax:fmtDist(vd.wMax)});
 }
 
 /* ---------- gráfica principal ---------- */
 function drawChart(ui,vd){
   const cv=$('chart'), gg=cv.getContext('2d');
-  const CW=cv.width, CH=cv.height;
+  /* coordenadas lógicas 920×440; el lienzo real se escala por devicePixelRatio para que no salga borroso en Retina */
+  const CW=920, CH=440;
+  const dpr=Math.max(1,Math.min(3,window.devicePixelRatio||1));
+  if(cv.width!==Math.round(CW*dpr)||cv.height!==Math.round(CH*dpr)){ cv.width=Math.round(CW*dpr); cv.height=Math.round(CH*dpr); }
+  gg.setTransform(dpr,0,0,dpr,0,0);
   gg.clearRect(0,0,CW,CH);
   const padL=58,padR=14,padT=16,padB=46;
   const dMin=100,dMax=10000,wMin=80,wMax=3000;   // mm
@@ -586,12 +860,12 @@ function drawChart(ui,vd){
   const YY=ww=>CH-padB-(CH-padT-padB)*Math.log(ww/wMin)/lgw;
 
   const tE=tanEps(ui.eps);
-  const kPix=ui.pxwEff*tE;                          // ancho_máx = k·d
-  const kDiff=2*tE*nuSensor(ui.fnum)*SENSOR_W*ui.cfr;
-  const dProc=25.4/(ui.proc[3]*tE);
+  const kPix=vd.kPix;                               // ancho_máx = k·d (calculados en verdict)
+  const kDiff=vd.kDiff;
+  const dProc=vd.dProc;
 
   // rejilla
-  gg.font='11px IBM Plex Mono, monospace'; gg.lineWidth=1;
+  gg.font='12.5px IBM Plex Mono, monospace'; gg.lineWidth=1;
   const xt=[100,200,350,500,1000,2000,3000,5000,10000];
   const yt=[100,200,300,500,700,1000,1500,2000,3000];
   xt.forEach(dd=>{ gg.strokeStyle=css('--line'); gg.beginPath(); gg.moveTo(XX(dd),padT); gg.lineTo(XX(dd),CH-padB); gg.stroke();
@@ -670,10 +944,29 @@ function drawChart(ui,vd){
   lineLabel(kDiff,LBL('curDiff',{N:ui.fnum}),'--violet');
   lineLabel(1/NAT_K,LBL('curNat'),'--faint');
 
+  // techo del cuerpo comparado (píxeles y toma juntos), en trazo discontinuo
+  if(ui.cmp){
+    const c2=compCfr(ui.cmp,ui);
+    const kCmp=Math.min(ui.cmp[2]*c2*tE, 2*tE*nuCapture(ui.fnum,ui.nuLens)*SENSOR_W*c2);
+    gg.strokeStyle=css('--amber'); gg.lineWidth=1.4; gg.setLineDash([7,5]);
+    gg.beginPath(); gg.moveTo(XX(dMin),YY(kCmp*dMin)); gg.lineTo(XX(dMax),YY(kCmp*dMax)); gg.stroke();
+    gg.setLineDash([]);
+    lineLabel(kCmp,LBL('cmpTag',{name:LBL(ui.cmp[1])}),'--amber');
+  }
+  $('pp-legCmp').hidden=!ui.cmp;
+
   // tu copia
   const sharp = Math.min(vd.pix,vd.dif,vd.pro) >= vd.eye*0.999;
   const px=XX(Math.max(dMin,Math.min(dMax,ui.dmm)));
   const py=YY(Math.max(wMin,Math.min(wMax,ui.wmm)));
+  // ancho máximo a la d actual: guía vertical desde «tu copia» y punto hueco rotulado con su valor
+  const pyMax=YY(Math.max(wMin,Math.min(wMax,vd.wMax)));
+  gg.strokeStyle=css('--teal'); gg.lineWidth=1; gg.setLineDash([2,3]);
+  gg.beginPath(); gg.moveTo(px,py); gg.lineTo(px,pyMax); gg.stroke(); gg.setLineDash([]);
+  gg.strokeStyle=css('--teal'); gg.lineWidth=1.4;
+  gg.beginPath(); gg.arc(px,pyMax,4,0,2*Math.PI); gg.stroke();
+  gg.fillStyle=css('--teal'); gg.textAlign=px>CW*0.7?'right':'left';
+  gg.fillText(fmtDist(vd.wMax)+' '+LBL('mkMax'),px+(px>CW*0.7?-8:8),pyMax-7);
   gg.fillStyle=sharp?css('--teal'):css('--red');
   gg.beginPath(); gg.arc(px,py,5.5,0,2*Math.PI); gg.fill();
   gg.strokeStyle=css('--head'); gg.lineWidth=1.2; gg.beginPath(); gg.arc(px,py,5.5,0,2*Math.PI); gg.stroke();
@@ -682,31 +975,67 @@ function drawChart(ui,vd){
   gg.restore();
 
   $('natLine').textContent=LBL('natNote',{e:nf(ui.eps,1),m:nf(mpxNatural(ui.eps),1)});
+  cv.setAttribute('aria-label',LBL('ariaChart',{v:$('pp-invLine').textContent}));
 }
 
 /* ---------- tabla de papeles ---------- */
+/* veredicto sobra/justo/falta con los umbrales 1,15 / 0,85 (compartidos por las tres tablas) */
+function verdCell(ratio){
+  const cls=ratio>=1.15?'v-ok':(ratio>=0.85?'v-mid':'v-bad');
+  const verd=ratio>=1.15?LBL('tSobra'):(ratio>=0.85?LBL('tJusto'):LBL('tFalta'));
+  return '<td class="'+cls+'">'+verd+'</td>';
+}
 function paintPapers(ui,vd){
   const rows=PAPERS.map(pp=>{
     const wmm=pp[1], hmm=pp[2];
-    const deliv=Math.min(ppiPix(ui.pxwEff,wmm),ppiDiff(ui.fnum,wmm,ui.cfr),ui.proc[3]);
+    const deliv=Math.min(ppiPix(ui.pxwEff,wmm),ppiDiff(ui.fnum,wmm,ui.cfr,ui.nuLens),ui.proc[3]);
     const needD=vd.eye;
     const dNat=1.5*Math.hypot(wmm,hmm);
     const needNat=ppiEye(dNat,ui.eps);
-    const ratio=deliv/needD;
-    const cls=ratio>=1.15?'v-ok':(ratio>=0.85?'v-mid':'v-bad');
-    const verd=ratio>=1.15?LBL('tSobra'):(ratio>=0.85?LBL('tJusto'):LBL('tFalta'));
-    return '<tr><td>'+pp[0]+' cm</td><td>'+nf(deliv,0)+'</td><td>'+nf(needD,0)+
-           '</td><td>'+nf(needNat,0)+'</td><td class="'+cls+'">'+verd+'</td></tr>';
+    return '<tr><td>'+(/^\d/.test(pp[0])?pp[0]+' cm':pp[0])+'</td><td>'+nf(deliv,0)+'</td><td>'+nf(needD,0)+'</td>'+verdCell(deliv/needD)+
+           '<td>'+nf(needNat,0)+'</td>'+verdCell(deliv/needNat)+'</tr>';
   });
   $('papersBody').innerHTML=rows.join('');
 }
 
+/* ---------- tabla comparativa: todas las cámaras y modos para esta copia ---------- */
+function paintCompare(ui,vd){
+  $('pp-cmpIntro').textContent=LBL('cmpIntro',{w:fmtDist(ui.wmm),d:fmtDist(ui.dmm),eye:nf(vd.eye,0),
+    proc:LBL(ui.proc[2]),pro:nf(vd.pro,0),N:ui.fnum});
+  // fila que corresponde a la cámara elegida: si es el Q3 con un preset de recorte 43/f, la fila de esa focal
+  let selId=null;
+  const byCam=COMP.find(cc=>cc[4]===ui.camId); if(byCam) selId=byCam[0];
+  if(ui.camId==='q3'){ const fq=COMP.find(cc=>cc[3]!==null&&Math.abs(cc[3]*100-ui.cfr*100)<0.6); if(fq) selId=fq[0]; }
+  const tE=tanEps(ui.eps);
+  const rows=COMP.map(cc=>{
+    const c2=compCfr(cc,ui), pxwEff=cc[2]*c2;
+    const mUse=pxwEff*pxwEff*(2/3)/1e6;
+    const deliv=Math.min(ppiPix(pxwEff,ui.wmm),ppiDiff(ui.fnum,ui.wmm,c2,ui.nuLens),ui.proc[3]);
+    const kk=Math.min(pxwEff*tE, 2*tE*nuCapture(ui.fnum,ui.nuLens)*SENSOR_W*c2);
+    const cls=(cc[0]===selId?'sel':'')+(ui.cmp&&ui.cmp[0]===cc[0]?' cmp':'');
+    return '<tr class="'+cls.trim()+'"><td>'+LBL(cc[1])+'</td><td>'+fmtMpx(mUse)+'</td><td>'+nf(deliv,0)+
+           '</td><td>'+fmtDist(kk*ui.dmm)+'</td>'+verdCell(deliv/vd.eye)+'</tr>';
+  });
+  $('pp-cmpBody').innerHTML=rows.join('');
+}
+
 /* ---------- binning ---------- */
 function paintBinning(ui,vd){
-  const pBin=ppiPix(BIN_PXW*ui.cfr,ui.wmm);
-  const th=Math.min(vd.eye,vd.dif,vd.pro);   // lo que la cadena sin píxeles aún aprovecharía
-  const key=pBin>=th?'binYes':'binNo';
-  $('binLine').textContent=LBL(key,{w:fmtDist(ui.wmm),d:fmtDist(ui.dmm),th:nf(th,0),p:nf(pBin,0)});
+  const th=Math.min(vd.eye,vd.dif,vd.pro);   // lo que la cadena sin píxeles aún aprovecharía (mismo criterio que el veredicto)
+  const whoKey=th===vd.eye?'thEye':(th===vd.dif?'limDiff':'thPro');
+  const base={w:fmtDist(ui.wmm),d:fmtDist(ui.dmm),th:nf(th,0),who:LBL(whoKey)};
+  let txt='';
+  if(CAM_FAM[ui.camId]==='sl'){
+    const p24=ppiPix(6000*ui.cfr,ui.wmm), p96=ppiPix(12000*ui.cfr,ui.wmm);
+    if(p24>=th) txt=LBL('binSLok',Object.assign(base,{p:nf(p24,0)}));
+    else txt=LBL(p96>=th?'binSLyes':'binSLpart',Object.assign(base,{p24:nf(p24,0),p96:nf(p96,0)}));
+  }else{
+    // familia M11 (y, por defecto, el resto): el menor de S/M/L-DNG cuyos píxeles cubren el umbral; BIN_PXW es el S-DNG
+    const fits=M11_FILES.find(ff=>ppiPix(ff[1]*ui.cfr,ui.wmm)>=th);
+    if(fits) txt=LBL('binFile',Object.assign(base,{file:LBL(fits[0]),p:nf(ppiPix(fits[1]*ui.cfr,ui.wmm),0)}));
+    else txt=LBL('binNone',Object.assign(base,{p:nf(ppiPix(M11_FILES[2][1]*ui.cfr,ui.wmm),0)}));
+  }
+  $('binLine').textContent=txt;
 }
 
 /* ---------- verificación numérica ---------- */
@@ -737,6 +1066,8 @@ function setOptions(id,pairs){
 function fillSelects(){
   setOptions('cam',CAMS.map(cc=>[cc[0],cc[1]]));
   setOptions('proc',PROCS.map(pp=>[pp[0],pp[1]]));
+  setOptions('pp-lens',LENSES.map(ll=>[ll[0],ll[1]]));
+  setOptions('pp-cmp',[['none','cmpNone']].concat(COMP.map(cc=>[cc[0],cc[1]])));
 }
 
 /* ---------- repintado global ---------- */
@@ -749,8 +1080,16 @@ function paintControls(ui){
   $('customWrap').style.display=ui.camId==='cus'?'block':'none';
   const pitch=SENSOR_W*1000/ui.pxw;
   $('camInfo').textContent=LBL('pitchLine',{p:nf(pitch,2),m:nf(ui.pxwEff*ui.pxwEff*(2/3)/1e6,1)});
+  $('pp-camNote').textContent=CAM_NOTE[ui.camId]?LBL(CAM_NOTE[ui.camId]):'';
   document.querySelectorAll('.epspre').forEach(bb=>{
     bb.classList.toggle('on',Math.abs(+bb.getAttribute('data-eps')-ui.eps)<0.011);
+  });
+  // presets de recorte: los de cámara sólo se muestran para su familia; se marca el que coincide con el slider
+  const fam=CAM_FAM[ui.camId]||'';
+  document.querySelectorAll('.croppre').forEach(bb=>{
+    const bf=bb.getAttribute('data-fam')||'';
+    bb.hidden=!!bf&&bf!==fam;
+    bb.classList.toggle('on',Math.abs(+bb.getAttribute('data-crop')-ui.cfr*100)<0.5);
   });
 }
 function recalc(){
@@ -760,6 +1099,7 @@ function recalc(){
   paintVerdict(ui,vd);
   drawChart(ui,vd);
   paintPapers(ui,vd);
+  paintCompare(ui,vd);
   paintBinning(ui,vd);
   paintVerif();
 }
@@ -768,12 +1108,15 @@ function recalc(){
 let LISTO=false;
 function init(){
   fillSelects();
-  $('cam').value='m60'; $('proc').value='ink';
+  $('cam').value='m60'; $('proc').value='ink'; $('pp-lens').value='perf'; $('pp-cmp').value='none';
   ['eps','dist','crop','ap','pw'].forEach(id=>$(id).addEventListener('input',recalc));
-  ['cam','proc'].forEach(id=>$(id).addEventListener('change',recalc));
+  ['cam','proc','pp-lens','pp-cmp'].forEach(id=>$(id).addEventListener('change',recalc));
   $('mpx').addEventListener('input',recalc);
   document.querySelectorAll('.epspre').forEach(bb=>{
     bb.addEventListener('click',()=>{ $('eps').value=bb.getAttribute('data-eps'); recalc(); });
+  });
+  document.querySelectorAll('.croppre').forEach(bb=>{
+    bb.addEventListener('click',()=>{ $('crop').value=bb.getAttribute('data-crop'); recalc(); });
   });
   const setDist=mm=>{ const vv=100*Math.log10(mm/100); $('dist').value=Math.max(0,Math.min(200,vv)); recalc(); };
   $('scBook').addEventListener('click',()=>setDist(350));

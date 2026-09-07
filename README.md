@@ -84,7 +84,7 @@ la página es su manual; el código está en [`scripts/`](scripts/).
 
 | Documento | Qué hace | Peso |
 |---|---|---:|
-| [`sensor-al-papel.html`](sensor-al-papel.html) | ¿A qué tamaño puedo imprimir esto y desde dónde se va a mirar? La cadena entera —píxeles, difracción, proceso de impresión y agudeza del ojo— con el eslabón limitante siempre a la vista. | 48 KB |
+| [`sensor-al-papel.html`](sensor-al-papel.html) | ¿A qué tamaño puedo imprimir esto y desde dónde se va a mirar? La cadena entera —píxeles, difracción, proceso de impresión y agudeza del ojo— con el eslabón limitante siempre a la vista. | 81 KB |
 | [`zine-generator.html`](zine-generator.html) | Maquetación de fanzines y fotolibros a partir de tus propias imágenes, con la imposición de cuadernillo resuelta y exportación a PDF. Las tipografías van incrustadas. | 668 KB |
 
 ### Documentación
@@ -227,7 +227,7 @@ the page is its manual; the code lives in [`scripts/`](scripts/).
 
 | Document | What it does | Size |
 |---|---|---:|
-| [`sensor-al-papel.html`](sensor-al-papel.html) | How large can I print this, and from where will it be seen? The whole chain — pixels, diffraction, printing process and the acuity of the eye — with the limiting link always in view. | 48 KB |
+| [`sensor-al-papel.html`](sensor-al-papel.html) | How large can I print this, and from where will it be seen? The whole chain — pixels, diffraction, printing process and the acuity of the eye — with the limiting link always in view. | 81 KB |
 | [`zine-generator.html`](zine-generator.html) | Layout for fanzines and photobooks from your own images, with the booklet imposition already solved and PDF export. Fonts are embedded. | 668 KB |
 
 ### Documentation
