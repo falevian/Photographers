@@ -348,9 +348,11 @@
       <div class="row"><span class="muted" data-lang="es">remuestreos</span><span class="muted" data-lang="en">resamples</span>
         <input id="iters" type="number" step="1000" value="10000" style="width:90px"></div>
       <p class="note" style="margin-top:8px" data-lang="es">r &lt; 0,15 no es una ley: sobre un fotograma de 36×24 son 3,2 mm
-        desde el centro, algo más ceñido que el campo de medida de 8 mm del M5, que cae en r = 0,185. Cámbialo y el veredicto se recalcula.</p>
+        desde el centro, algo más ceñido que el campo de medida de 8 mm del M5, que cae en r = 0,185. Cámbialo y el veredicto se recalcula.
+        «Remuestreos» gobierna las pruebas de contraste entre grupos; el veredicto de encuadre se queda en 2 000 por mucho que lo subas, porque remuestrea la selección entera y no parejas de grupos.</p>
       <p class="note" style="margin-top:8px" data-lang="en">r &lt; 0.15 is not a law: on a 36×24 frame it is 3.2 mm from the
-        centre, slightly tighter than the M5's 8 mm metering field, which falls at r = 0.185. Change it and the verdict is recomputed.</p>
+        centre, slightly tighter than the M5's 8 mm metering field, which falls at r = 0.185. Change it and the verdict is recomputed.
+        “Resamples” governs the contrast tests between groups; the framing verdict stays at 2,000 however high you push it, because it resamples the whole selection rather than pairs of groups.</p>
     </fieldset>
   </aside>
 
@@ -3292,8 +3294,12 @@ function dirWords(deg,compass){
 }
 /* Los tres remuestreos del veredicto son lo mas caro del refresco. Se cachean
    mientras no cambien ni la seleccion ni el numero de iteraciones, de modo que
-   mover un deslizante de umbral repinte sin volver a remuestrear, y respetan
-   el #iters del panel Criterio en vez de un 2000 escondido. */
+   mover un deslizante de umbral repinte sin volver a remuestrear.
+   El #iters del panel Criterio manda mientras baje de VE_ITERS: el contraste
+   remuestrea PAREJAS de grupos y el veredicto la seleccion ENTERA, asi que
+   subirlo por encima de este tope congelaria el panel en archivos grandes
+   (medido: 591 fotogramas, 166 ms a 2000 iteraciones y 833 ms a 10000). */
+const VE_ITERS=2000;
 function veBoot(rv,xv,yv,iters,sig){
   if(VE_CACHE&&VE_CACHE.sig===sig) return VE_CACHE.v;
   const v={rci:bootstrapCI(rv,iters,11),
@@ -3306,7 +3312,8 @@ function drawVerdictEnc(rows){
   const box=$("#vEncuadre"), head=$("#vAxisEnc");
   const thr=parseFloat($("#thr").value)||0.15;
   const mth=parseFloat($("#mThr").value)||0.10;
-  const iters=Math.max(1000,Math.min(50000,parseInt($("#iters").value)||10000));
+  const iters=Math.min(VE_ITERS,
+    Math.max(1000,Math.min(50000,parseInt($("#iters").value)||10000)));
   if(head) head.textContent=`${rows.length} ${t("frames")} · ASP ${S.aspect.toFixed(2)}`;
   if(rows.length<20){ box.innerHTML=`<p class="note">${esc(t("veNeed"))}</p>`; return; }
   let html="";

@@ -913,13 +913,14 @@ es:{
   sc_clip:"El disco se sale del lienzo, que abarca 1,00 mm del sensor: lo que ve está recortado por arriba.",
   sc_mfd:"Sujeto por debajo de la distancia mínima ({mfd} m): ajustado a ella.",
   sc_fondo:"El fondo estaba por delante del sujeto o pegado a él: llevado a {db} m.",
-  sc_tope:"Fuera del intervalo del campo: acotado a {v} m.",
+  sc_topeS:"Sujeto fuera del intervalo del campo: acotado a {v} m.",
+  sc_topeF:"Fondo fuera del intervalo del campo: acotado a {v} m.",
   /* --- monta, mide y encuadra --- */
   mo_ok:"monta en digital", mo_meter:"tapa el fotómetro", mo_nodig:"no montar en digital",
   mo_ref:"referencia · no montable",
   mo_marco:"levanta el marco de {m}", mo_visor:"sin marco propio · visor externo",
   mo_rf:"enfoca hasta {d} m · por debajo del suelo de 0,70 m del telémetro",
-  mo_rfok:"enfoca hasta {d} m · por encima del suelo de 0,70 m del telémetro",
+  mo_rfok:"enfoca hasta {d} m · no baja del suelo de 0,70 m del telémetro",
   /* --- consulta por intención --- */
   iqTit:"Quiero", iqFocal:"Focal", iqApert:"Apertura mínima", iqMasa:"Masa máxima",
   iqNada:"Ningún objetivo del catálogo pasa esos filtros.",
@@ -1128,13 +1129,14 @@ en:{
   sc_clip:"The disc runs off the canvas, which spans 1.00 mm of sensor: what you see is clipped.",
   sc_mfd:"Subject closer than the minimum focusing distance ({mfd} m): set to it.",
   sc_fondo:"The background was in front of the subject or right on it: moved to {db} m.",
-  sc_tope:"Outside the range of the field: clamped to {v} m.",
+  sc_topeS:"Subject outside the range of the field: clamped to {v} m.",
+  sc_topeF:"Background outside the range of the field: clamped to {v} m.",
   /* --- mounts, meters and frames --- */
   mo_ok:"mounts on digital", mo_meter:"blocks the meter", mo_nodig:"do not mount on digital",
   mo_ref:"reference · not mountable",
   mo_marco:"brings up the {m} frame", mo_visor:"no frame line · external finder",
   mo_rf:"focuses to {d} m · below the 0.70 m rangefinder floor",
-  mo_rfok:"focuses to {d} m · above the 0.70 m rangefinder floor",
+  mo_rfok:"focuses to {d} m · does not go below the 0.70 m rangefinder floor",
   /* --- query by intent --- */
   iqTit:"I want", iqFocal:"Focal length", iqApert:"Minimum aperture", iqMasa:"Maximum mass",
   iqNada:"No lens in the catalogue passes those filters.",
@@ -2330,18 +2332,41 @@ function pintarFicha(L){
   drawMTF($("mtf"),L,Nopt); pintarContraste(L); drawVig($("vig"),L); drawCurv($("curv"),L);
   pintarMetricaFicha(L); pintarParecidos(L); sincroAdd();
   $("s-N").value=0;
-  $("s-ds").value=fmt(sim.ds,1); $("s-db").value=fmt(sim.db,1);
-  actualizarSim();
+  escribirEscena(); actualizarSim(); escribirEscena();
 }
-/* Lee los dos campos de escena, acota el sujeto a la distancia mínima de
-   enfoque y obliga al fondo a quedar por detrás. Devuelve metros.          */
+/* Los dos campos son <input type="number">: su valor tiene que ir en formato
+   de máquina. fmt() da "2,0" en español, el navegador descarta ese valor y
+   deja el campo vacío, así que aquí nunca se usa fmt().                     */
+function escribirEscena(){
+  $("s-ds").value=String(Math.round(sim.ds*100)/100);
+  $("s-db").value=String(Math.round(sim.db*100)/100);
+}
+/* Límites de los dos campos, los mismos que declara el marcado: el atributo
+   max no lo aplica el navegador cuando el valor se lee desde JS.            */
+const ESC_LIM={ds:[0.2,60], db:[0.3,400]};
+/* Lee los dos campos de escena, los acota a esos límites, sube el sujeto a la
+   distancia mínima de enfoque y obliga al fondo a quedar por detrás. Devuelve
+   metros y qué se ha tocado, para poder decirlo en vez de callarlo.         */
 function leerEscena(L){
-  let ds=parseFloat(($("s-ds").value+"").replace(",",".")), db=parseFloat(($("s-db").value+"").replace(",","."));
+  const dsMin=ESC_LIM.ds[0], dsMax=ESC_LIM.ds[1], dbMax=ESC_LIM.db[1];
+  let ds=parseFloat($("s-ds").value), db=parseFloat($("s-db").value);
   if(!isFinite(ds)||ds<=0) ds=2; if(!isFinite(db)||db<=0) db=6;
+  let topeS=0, topeF=0;
+  if(ds>dsMax){ ds=dsMax; topeS=dsMax; } else if(ds<dsMin){ ds=dsMin; topeS=dsMin; }
+  if(db>dbMax){ db=dbMax; topeF=dbMax; }
   const corto = ds<L.mfd;
   ds=Math.max(ds,L.mfd);
-  if(db<=ds*1.02) db=ds*1.02;
-  return {ds,db,corto};
+  /* El fondo va por detrás del sujeto, y con separación suficiente para que la
+     línea no acabe imprimiendo dos veces la misma cifra redondeada.         */
+  const minDb=Math.round(Math.min(Math.max(ds*1.02, ds+0.1), dbMax)*100)/100;
+  const lejos = db<minDb;
+  if(lejos) db=minDb;
+  /* Un acotado solo se anuncia si su valor es el que de verdad se usa: si
+     después lo ha movido la distancia mínima o la regla del fondo, el aviso
+     que toca es el otro y este sobra.                                      */
+  if(topeS && ds!==topeS) topeS=0;
+  if(topeF && db!==topeF) topeF=0;
+  return {ds,db,corto,lejos,topeS,topeF};
 }
 function actualizarSim(){
   const L=cur; if(!L) return;
@@ -2365,6 +2390,9 @@ function actualizarSim(){
   if(B.p>0) d1+=tf("sc_px",{px:fmt(c*1000/B.p),body:bodyShort(B),pc:fmt(100*c/24,1)});
   const extra=[];
   if(es.corto) extra.push(tf("sc_mfd",{mfd:fmt(L.mfd,2)}));
+  if(es.lejos) extra.push(tf("sc_fondo",{db:fmt(es.db,2)}));
+  if(es.topeS) extra.push(tf("sc_topeS",{v:fmt(es.topeS,es.topeS<10?2:0)}));
+  if(es.topeF) extra.push(tf("sc_topeF",{v:fmt(es.topeF,es.topeF<10?2:0)}));
   if(sim.side==="fg") extra.push(tf("sc_fg",{dn:fmt(planoIgual(L,sim.N,es.ds,c),2)}));
   /* El disco real se hincha sobre el radio paraxial por el término bρ³, así
      que el aviso de recorte tiene que contar con esa cola.                */
@@ -2772,7 +2800,8 @@ function init(){
   const simRapido=()=>{ sim.fast=true; actualizarSim();
     clearTimeout(fino); fino=setTimeout(()=>{ sim.fast=false; actualizarSim(); },160); };
   ["s-N","s-field","s-exp"].forEach(id=>$(id).oninput=thr(simRapido));
-  ["s-ds","s-db"].forEach(id=>{ $(id).oninput=thr(simRapido); $(id).onchange=()=>actualizarSim(); });
+  ["s-ds","s-db"].forEach(id=>{ $(id).oninput=thr(simRapido);
+    $(id).onchange=()=>{ actualizarSim(); escribirEscena(); }; });
   $("t-side").querySelectorAll("button").forEach(b=>b.onclick=()=>{
     $("t-side").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed","false"));
     b.setAttribute("aria-pressed","true"); sim.side=b.dataset.v; actualizarSim(); });
