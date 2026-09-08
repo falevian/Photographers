@@ -1778,13 +1778,21 @@ html[lang="en"] [data-lang="es"]{display:none!important}
       <dl class="row"><dt>Método</dt><dd>se generan <i>B</i> remuestras con reemplazo del
         mismo tamaño que la muestra original, se calcula la mediana de cada una y el
         intervalo de confianza del 95&nbsp;% son los percentiles 2,5 y 97,5 de esas
-        <i>B</i> medianas (<i>B</i>&nbsp;=&nbsp;2000 a 4000 según el contexto). Es el
+        <i>B</i> medianas (<i>B</i>&nbsp;=&nbsp;1200 a 2000 según el contexto: 2000 en la
+        tabla por grupo y en los intervalos del contraste entre dos grupos, 1200 en la
+        diferencia entre el primer y el último tercio de una serie, y el campo
+        «remuestreos» del panel Criterio acotado a 2000 en el veredicto de encuadre). Es el
         método del percentil, el más simple de los bootstrap de Efron; no aplica la
         corrección de sesgo y aceleración (BC<sub>a</sub>), por lo que puede ser
         ligeramente anticonservador con distribuciones muy asimétricas.</dd></dl>
       <dl class="row"><dt>Condición mínima</dt><dd>con menos de 6 observaciones el
         intervalo no se calcula y se muestra vacío en vez de un rango sin significado
         estadístico.</dd></dl>
+      <dl class="row"><dt>Variante de la media</dt><dd><code>bootstrapMeanCI()</code> repite
+        el mismo procedimiento sobre la media en lugar de la mediana. La usa el veredicto de
+        encuadre de la sección&nbsp;2.5 para el sesgo direccional: <i>x<sub>norm</sub></i> e
+        <i>y<sub>norm</sub></i> llevan signo y se cancelan entre sí, de modo que lo que hay
+        que acotar es su media, no su mediana.</dd></dl>
     </div>
   </div>
   <div class="card" data-lang="en">
@@ -1793,13 +1801,21 @@ html[lang="en"] [data-lang="es"]{display:none!important}
       <dl class="row"><dt>Method</dt><dd><i>B</i> resamples with replacement of the
         same size as the original sample are generated, the median of each is computed and the
         95&nbsp;% confidence interval is given by the 2.5th and 97.5th percentiles of those
-        <i>B</i> medians (<i>B</i>&nbsp;=&nbsp;2000 to 4000 according to context). This is the
+        <i>B</i> medians (<i>B</i>&nbsp;=&nbsp;1200 to 2000 according to context: 2000 in the
+        per-group table and in the intervals of the contrast between two groups, 1200 in the
+        difference between the first and the last third of a series, and the “resamples”
+        field of the Criterion panel capped at 2000 in the framing verdict). This is the
         percentile method, the simplest of Efron's bootstraps; it does not apply the
         bias-corrected and accelerated adjustment (BC<sub>a</sub>), and so it can be
         slightly anticonservative with strongly skewed distributions.</dd></dl>
       <dl class="row"><dt>Minimum condition</dt><dd>with fewer than 6 observations the
         interval is not computed and is shown empty rather than as a range without statistical
         meaning.</dd></dl>
+      <dl class="row"><dt>Mean variant</dt><dd><code>bootstrapMeanCI()</code> repeats
+        the same procedure on the mean rather than the median. The framing verdict of
+        section&nbsp;2.5 uses it for the directional bias: <i>x<sub>norm</sub></i> and
+        <i>y<sub>norm</sub></i> are signed and cancel one another, so what has to be
+        bounded is their mean, not their median.</dd></dl>
     </div>
   </div>
 
@@ -1810,9 +1826,12 @@ html[lang="en"] [data-lang="es"]{display:none!important}
     <tbody>
       <tr><td class="mono">permTest()</td>
         <td>diferencia de medianas observada; se mezclan las dos muestras y se recalcula
-        la diferencia 20&nbsp;000 veces con la etiqueta de grupo permutada al azar; el
-        valor p es la fracción de permutaciones cuya diferencia absoluta iguala o supera
-        a la observada, más una corrección de continuidad +1/(<i>B</i>+1).</td>
+        la diferencia <i>B</i> veces con la etiqueta de grupo permutada al azar, siendo
+        <i>B</i> el campo «remuestreos» del panel Criterio (10&nbsp;000 por defecto,
+        acotado a [1000, 50&nbsp;000]); el valor p es (<i>b</i>+1)/(<i>B</i>+1), con
+        <i>b</i> el número de permutaciones cuya diferencia absoluta iguala o supera a la
+        observada. El +1 en el numerador y en el denominador es la corrección de
+        continuidad que impide informar p&nbsp;=&nbsp;0.</td>
         <td>no asume normalidad ni varianzas iguales; válido con cualquier forma de
         distribución.</td></tr>
       <tr><td class="mono">mannWhitney()</td>
@@ -1842,9 +1861,12 @@ html[lang="en"] [data-lang="es"]{display:none!important}
     <tbody>
       <tr><td class="mono">permTest()</td>
         <td>the observed difference of medians; the two samples are pooled and
-        the difference is recomputed 20&nbsp;000 times with the group label permuted at random; the
-        p-value is the fraction of permutations whose absolute difference equals or exceeds
-        the observed one, plus a continuity correction of +1/(<i>B</i>+1).</td>
+        the difference is recomputed <i>B</i> times with the group label permuted at random,
+        <i>B</i> being the “resamples” field of the Criterion panel (10,000 by default,
+        clamped to [1000, 50,000]); the p-value is (<i>b</i>+1)/(<i>B</i>+1), with
+        <i>b</i> the number of permutations whose absolute difference equals or exceeds
+        the observed one. The +1 in numerator and denominator is the continuity
+        correction that prevents reporting p&nbsp;=&nbsp;0.</td>
         <td>it assumes neither normality nor equal variances; valid for any shape of
         distribution.</td></tr>
       <tr><td class="mono">mannWhitney()</td>
@@ -2180,9 +2202,10 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
         <div class="eqn small">q<sub>(k)</sub> = min<sub>j&ge;k</sub> min(1, <span class="frac"><span>p<sub>(j)</sub>&middot;m</span><span>j</span></span>)</div>
         el mínimo acumulado desde el extremo de mayor p, que garantiza que la secuencia de
         q sea monótona no decreciente.</dd></dl>
-      <dl class="row"><dt>Por qué hace falta</dt><dd>con 31 descriptores contrastados a
-        &alpha;&nbsp;=&nbsp;0,05 cada uno, la probabilidad de al menos un falso positivo por
-        puro azar es 1&minus;0,95&sup3;&sup9;&nbsp;&asymp;&nbsp;83&nbsp;%, no el 5&nbsp;% que
+      <dl class="row"><dt>Por qué hace falta</dt><dd>con los 32 descriptores del
+        catálogo <code>SENTIDO</code> contrastados a &alpha;&nbsp;=&nbsp;0,05 cada uno, la
+        probabilidad de al menos un falso positivo por puro azar es
+        1&minus;0,95&sup3;&sup2;&nbsp;&asymp;&nbsp;81&nbsp;%, no el 5&nbsp;% que
         parece a primera vista. El procedimiento de Benjamini&#8209;Hochberg controla la
         proporción <i>esperada</i> de falsos hallazgos entre los declarados, no la
         probabilidad de cometer al menos uno, lo que permite seguir declarando varios
@@ -2198,9 +2221,10 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
         <div class="eqn small">q<sub>(k)</sub> = min<sub>j&ge;k</sub> min(1, <span class="frac"><span>p<sub>(j)</sub>&middot;m</span><span>j</span></span>)</div>
         the running minimum from the large-p end, which guarantees that the sequence of
         q-values is monotonically non-decreasing.</dd></dl>
-      <dl class="row"><dt>Why it is needed</dt><dd>with 31 descriptors each tested at
-        &alpha;&nbsp;=&nbsp;0.05, the probability of at least one false positive by
-        pure chance is 1&minus;0.95&sup3;&sup9;&nbsp;&asymp;&nbsp;83&nbsp;%, not the 5&nbsp;% that
+      <dl class="row"><dt>Why it is needed</dt><dd>with the 32 descriptors of the
+        <code>SENTIDO</code> catalogue each tested at &alpha;&nbsp;=&nbsp;0.05, the
+        probability of at least one false positive by pure chance is
+        1&minus;0.95&sup3;&sup2;&nbsp;&asymp;&nbsp;81&nbsp;%, not the 5&nbsp;% that
         it appears to be at first sight. The Benjamini&#8209;Hochberg procedure controls the
         <i>expected</i> proportion of false findings among those declared, not the
         probability of committing at least one, which makes it possible to go on declaring several
@@ -2846,7 +2870,7 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
         Mathematical Statistics</i>, 18(1), 50&#8211;60. §8.3.</td></tr>
       <tr><td class="mono">Mardia, K. V. (1972)</td>
         <td>&mdash; <i>Statistics of Directional Data</i>. Academic Press. Estadística
-        circular, §4.4.</td></tr>
+        circular, §4.4 y §2.5.</td></tr>
       <tr><td class="mono">McCamy, C. S. (1992)</td>
         <td>&mdash; Correlated color temperature as an explicit function of chromaticity
         coordinates. <i>Color Research &amp; Application</i>, 17(2), 142&#8211;144. §4.3.</td></tr>
@@ -2918,7 +2942,7 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
         Mathematical Statistics</i>, 18(1), 50&#8211;60. §8.3.</td></tr>
       <tr><td class="mono">Mardia, K. V. (1972)</td>
         <td>&mdash; <i>Statistics of Directional Data</i>. Academic Press. Circular
-        statistics, §4.4.</td></tr>
+        statistics, §4.4 and §2.5.</td></tr>
       <tr><td class="mono">McCamy, C. S. (1992)</td>
         <td>&mdash; Correlated color temperature as an explicit function of chromaticity
         coordinates. <i>Color Research &amp; Application</i>, 17(2), 142&#8211;144. §4.3.</td></tr>

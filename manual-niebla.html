@@ -126,6 +126,7 @@
   <table><tr><th>Control</th><th>Función</th></tr>
   <tr><td>Latitud, Longitud</td><td>Punto para el que se pide la previsión. Se puede escribir a mano (formato decimal, longitud oeste negativa) o rellenar con “Usar mi posición”.</td></tr>
   <tr><td>Entorno</td><td><b>Costero</b> activa el término de niebla de advección y descarga la temperatura superficial del mar (SST). <b>Interior</b> lo desactiva y ahorra una petición.</td></tr>
+  <tr><td>Acimut hacia el mar</td><td>Solo aparece en modo <b>Costero</b>. Rumbo en grados desde el punto hacia el mar abierto. No entra en el índice: sirve para que la ficha etiquete cada hora con viento “del mar” o “de tierra”, contando como del mar la dirección que cae a menos de 60° del acimut. Déjalo vacío si no lo sabes.</td></tr>
   <tr><td>ES / EN</td><td>Cambia el idioma de la interfaz y del manual. La elección se recuerda.</td></tr>
   <tr><td>Manual</td><td>Abre este documento.</td></tr></table>
 
@@ -134,12 +135,27 @@
   <p>“Mejor disponible” deja que Open‑Meteo elija el modelo de mayor resolución para el punto (en Europa occidental suele ser ICON‑EU o AROME). Los demás fuerzan un modelo concreto; útil para comparar.</p>
   <h3>Tarjetas</h3>
   <p><b>Próximas 6 horas</b>: máximo del índice en ese intervalo y a qué hora. <b>Amanecer</b>: máximo en la ventana de 2.5 h antes a 1.5 h después de la salida del sol, que es cuando la niebla de radiación alcanza su desarrollo y cuando interesa estar en el sitio. <b>Mínima depresión del punto de rocío</b>: el valor de ΔT = T − Td más bajo previsto esta noche, con T, Td, viento, nubes, SST y presión en ese instante. Es el dato físico más directo: si no baja de 1 °C, difícilmente habrá niebla de radiación.</p>
+  <h3>Ventana fotográfica</h3>
+  <p>Dentro de la tarjeta del amanecer, la línea “Ventana fotográfica” contesta a la pregunta práctica: de qué hora a qué hora hay algo que fotografiar. Busca el máximo del índice entre el amanecer −4 h y +6 h y recorta el tramo continuo que se mantiene por encima de 50 puntos, interpolando entre horas en los dos bordes, así que devuelve un intervalo con minutos y una duración. Si el pico llega a 75 la etiqueta es “niebla plena”; entre 50 y 74, “solo bruma”; si no se pasa de 50 en ninguna hora, no hay niebla que defender. Avisa además cuando el tramo dura menos de una hora y cuando el máximo cae más de media hora después del amanecer. La misma tarjeta da la dirección del viento (y si es del mar o de tierra, cuando has puesto el acimut), enlaza con la ficha de luz natural para la hora dorada y recuerda que el tramo posterior al amanecer descansa sobre el factor heurístico 0.85, la parte menos firme del cálculo.</p>
+
+  <h3>Comparar con otro sitio (A o B)</h3>
+  <p>El botón “Comparar con otro sitio” abre un segundo juego de latitud, longitud y entorno, y descarga el sitio B con el mismo modelo y la misma tubería que el A. La sección “A o B” pone las dos tarjetas del próximo amanecer una junto a otra, dibuja las dos curvas del índice y da un veredicto: ve a A, ve a B, o empate práctico si la diferencia es menor de 8 puntos, en cuyo caso deciden el acceso, la composición y la hora de salida. La comparación vive solo en esta pestaña: la fusión bayesiana y el registro de observaciones siguen siendo de un único emplazamiento, el de las coordenadas de arriba, porque mezclar dos sitios estropearía el aprendizaje.</p>
+
+  <h3>Próximas mañanas</h3>
+  <p>Una fila por amanecer, hasta siete días, con el máximo del índice dentro de la ventana −2.5 h/+1.5 h, el veredicto, la mínima depresión del punto de rocío de esa noche y el viento, las nubes medias y altas y la visibilidad de la hora del máximo. La última columna es la confianza según el plazo: los dos primeros amaneceres son la previsión de verdad, el tercero y el cuarto son orientativos y del quinto en adelante es una tendencia, no una previsión. Debajo, una frase dice cuál es la mejor mañana de la semana o que ninguna pasa de 50. Es la única vista que llega a siete días; la banda, las gráficas y la tabla horaria siguen cubriendo 48 horas.</p>
+
   <h3>Banda horaria</h3>
-  <p>Una barra por hora, 48 horas. Altura = índice. Fondo gris = noche. Hora en rojo = amanecer. Color ámbar = bruma posible (50 a 74), rojizo = niebla probable (≥ 75). Al pasar el ratón se ven las señales activas.</p>
+  <p>Una barra por hora, 48 horas. Altura = índice. Fondo gris = noche. Hora en rojo = amanecer. Color ámbar = bruma posible (50 a 74), rojizo = niebla probable (≥ 75). Al pasar el ratón se ven las señales activas. Las horas que caen dentro de la ventana fotográfica quedan recuadradas en ámbar.</p>
+  <h3>De qué se compone el índice</h3>
+  <p>Una barra apilada por hora con los puntos que aporta cada término, en el mismo orden en que se calculan; la lluvia se dibuja hacia abajo porque resta. La marca negra corta al valor final del índice, ya con el factor diurno aplicado y saturado a 100, y una marca gris en lo alto señala las horas en que la suma bruta se pasaba de 100. Sirve para ver qué término limita cada hora: si la barra se queda corta por el segmento de nubes, el freno es la nubosidad media y alta y no la humedad; si el segmento de ΔT es alto y el total sigue bajo, el freno es el viento. El recuadro ámbar marca la ventana fotográfica.</p>
+
   <h3>Gráfica de convergencia</h3>
-  <p>T y Td en °C sobre el eje izquierdo; viento en km/h sobre el derecho. Las franjas rosadas marcan las horas con ΔT &lt; 2 °C (más intensas si &lt; 1 °C). La línea discontinua roja es el amanecer. La imagen que buscas: T y Td acercándose durante la noche, viento por debajo de 10 km/h y fondo gris sin nubes.</p>
+  <p>T y Td en °C sobre el eje izquierdo; viento en km/h sobre el derecho. Las franjas rosadas marcan las horas con ΔT &lt; 2 °C (más intensas si &lt; 1 °C). La línea discontinua roja es el amanecer. La imagen que buscas: T y Td acercándose durante la noche, viento por debajo de 10 km/h y fondo gris sin nubes. Al pie, una barra morada marca las horas con visibilidad prevista por debajo de 2 km, más saturada por debajo de 1 km.</p>
+  <h3>Qué vas a ver: contraste, distancia y focal</h3>
+  <p>Una calculadora de contraste por visibilidad, para saber qué encuadre aguanta la niebla que se espera. Por la ley de Koschmieder, un objeto oscuro sobre el fondo del cielo conserva un contraste <code>C/C₀ = exp(−3.912·d/V)</code>, de donde el 20 % de contraste queda a 0.41·V y el 5 % a 0.77·V. Los dos deslizadores recorren la visibilidad de 0.2 a 10 km y la distancia al sujeto de 20 m a 3 km, y el selector cubre de 28 a 135 mm. Las tarjetas dan el contraste residual con su lectura (volumen y textura, plano, apenas insinuado, desaparecido) y el campo horizontal, <code>36·d/f</code> en formato 24×36: a 200 m un 43 mm abarca 167 m y un 135 mm, 53 m. Debajo, la curva completa y una tabla a 50, 150, 500 y 1000 m. La visibilidad arranca en la que el modelo da para el máximo del amanecer, o en un escenario supuesto a partir del índice si ese modelo no publica visibilidad; “Volver a la previsión” deshace los ajustes a mano.</p>
+
   <h3>Tabla horaria</h3>
-  <p>Todas las variables usadas más dirección del viento, nubes bajas, SST y presión. La columna “Vis km” es la visibilidad que pronostica el propio modelo; cuando baja de 3 km es la señal más fiable de todas.</p>
+  <p>Todas las variables usadas más dirección del viento (con la etiqueta del mar o de tierra si has puesto el acimut), nubes bajas, SST y presión. La columna “Vis km” es la visibilidad que pronostica el propio modelo: es su diagnóstico más directo de niebla, pero también la variable menos fiable de Open‑Meteo, así que léela como un escenario y no como una medida. Por debajo de 3 km apoya al resto de señales; por sí sola no decide, y de ahí que pese como mucho 20 puntos frente a los 40 de ΔT.</p>
   <h3>Fórmula del índice</h3>
   <table><tr><th>Término</th><th>Puntos</th><th>Justificación</th></tr>
   <tr><td>ΔT = T − Td</td><td>40 si ≤ 0.5 °C; lineal a 0 en 4 °C</td><td>Saturación. Condición necesaria.</td></tr>
@@ -164,11 +180,11 @@
   <h3>Recalibración automática</h3>
   <p>Con 12 o más noches registradas, la aplicación ajusta una corrección de Platt <code>q = σ(a·logit P + b)</code> sobre los pares (posterior congelado, resultado observado), con prior a ≈ 1, b ≈ 0 para que pocas noches no la distorsionen. Corrige el sesgo sistemático del posterior; cuando está activa, la línea de estado muestra "recalibrado (n, a, b)".</p>
   <h3>Tarjetas</h3>
-  <p>Posterior para las próximas 6 horas y para la ventana del amanecer, con el rango mínimo a máximo entre modelos y la probabilidad individual de cada uno. La tercera tarjeta da la desviación típica entre modelos en el amanecer: acuerdo alto (&lt; 10 pp), moderado o desacuerdo. Un posterior del 40 % con acuerdo alto es una previsión más útil que un 55 % con desacuerdo.</p>
+  <p>Posterior para las próximas 6 horas y para la ventana del amanecer, con el rango mínimo a máximo entre modelos y la probabilidad individual de cada uno. La tercera tarjeta da la desviación típica entre modelos en el amanecer: acuerdo alto (&lt; 10 pp), moderado o desacuerdo. Un posterior del 40 % con acuerdo alto es una previsión más útil que un 55 % con desacuerdo. La tarjeta del amanecer trae además su propia ventana fotográfica, medida sobre el posterior con umbral del 25 % (“niebla plena” a partir del 50 %), y, para las fuentes de conjunto, la banda p10–p90 y cuántos miembros dan niebla.</p>
   <h3>Gráfica</h3>
   <p>Una línea fina por modelo, banda gris con el rango y línea gruesa negra con el posterior. Eje vertical en %.</p>
   <h3>Tablas</h3>
-  <p>“Estado del amanecer por modelo” muestra, para cada modelo, su probabilidad máxima en la ventana y el estado físico previsto en esa hora. “Pesos bayesianos y prior” muestra w_m, su log‑verosimilitud acumulada y el prior Beta actual.</p>
+  <p>“Estado del amanecer por modelo” muestra, para cada modelo, su probabilidad máxima en la ventana y el estado físico previsto en esa hora. “Pesos bayesianos y prior” muestra w_m, el Brier, el porcentaje de aciertos (con el número de noches congeladas entre paréntesis), la log‑verosimilitud acumulada y el prior Beta actual. La log‑verosimilitud es lo que fija el peso; Brier y aciertos son la misma información en unidades legibles.</p>
 
   <h2 id="es-5">6. Entrenamiento: registro de observaciones</h2>
   <p>El aprendizaje consiste en comparar lo que cada modelo predijo con lo que tú viste. Para que la comparación sea honesta, la predicción tiene que quedar fijada antes de conocer el resultado. La herramienta lo hace sola:</p>
@@ -177,6 +193,7 @@
   <p><b>Si esa noche no calculaste.</b> No hay previsión congelada para esa fecha. La observación se guarda igualmente (aparece como “pendiente” en la columna posterior) y actualiza el prior climatológico, que solo necesita saber si hubo niebla o no; pero no modifica los pesos de los modelos, porque no hay predicción con la que compararla. Si más tarde ese mismo día calculas antes de que el amanecer cambie de fecha, la fila se completa automáticamente.</p>
   <div class="box ok">Rutina mínima: por la tarde o noche, abrir la página y pulsar Calcular en la pestaña 2 (dos segundos). Por la mañana, elegir lo observado y Guardar. Nada más.</div>
   <p>Con cada observación ocurren dos cosas. El prior Beta se actualiza (a += y, b += 1 − y, con y = 1, 0.5 o 0), de modo que la tasa base deja de ser el 12 % genérico y pasa a ser tu frecuencia local. Y la log‑verosimilitud de cada modelo acumula log P_m(y): un modelo que daba 80 % y hubo niebla suma log 0.8; uno que daba 10 % suma log 0.1. Los pesos w_m se recalculan como exp(0.7 · log‑verosimilitud) normalizado.</p>
+  <p>Debajo de la tabla del registro, “Lecciones de tu registro” resume tus umbrales locales a partir de las noches con rasgos congelados: con qué ΔT y qué viento previstos ha llegado a haber niebla o bruma en tu sitio, con cuánta nubosidad media y con qué visibilidad prevista, y cuál fue la noche sin nada con menor ΔT. Es la parte del registro que más deprisa cambia lo que haces en el campo.</p>
   <p>Orientación sobre cantidad: con 10 noches los pesos ya empiezan a separarse; con 40 o 50 tienen significado; con más de 100 merece la pena pasar a una regresión logística sobre las variables crudas.</p>
 
   <h2 id="es-6">7. Datos y privacidad: dónde se guarda el registro</h2>
@@ -187,24 +204,25 @@
   <tr><td>Abrir el archivo en local (<code>file://</code>) y también desde Pages (<code>https://</code>)</td><td>Son orígenes distintos; cada uno tiene su propio registro. Exporta de uno e importa en el otro.</td></tr>
   <tr><td>Borrar datos de navegación o “datos de sitios”</td><td>Se pierde. Exporta el JSON de vez en cuando y guárdalo en el propio repositorio, por ejemplo.</td></tr>
   <tr><td>Modo incógnito</td><td>Se borra al cerrar la ventana.</td></tr>
-  <tr><td>Otras páginas en el mismo origen (<code>usuario.github.io</code>)</td><td>Comparten el espacio de localStorage; las claves usadas aquí empiezan por <code>niebla_</code> para no colisionar.</td></tr></table>
+  <tr><td>Otras páginas en el mismo origen (<code>usuario.github.io</code>)</td><td>Comparten el espacio de localStorage; las claves de datos usadas aquí empiezan por <code>niebla_</code> (<code>niebla_bayes</code>, <code>niebla_models</code>, <code>niebla_lang</code>) para no colisionar. La única excepción es <code>pn-lang</code>, la preferencia de idioma compartida a propósito con las demás páginas del sitio.</td></tr></table>
   <div class="box ok">Recomendación: tras cada sesión de anotaciones, pulsa “Exportar JSON” y sube el archivo al repositorio. Así el historial queda versionado y reimportable en cualquier dispositivo.</div>
 
   <h2 id="es-7">8. Interpretación y buenas prácticas</h2>
-  <p>Señal fuerte de niebla de radiación: ΔT previsto por debajo de 1 °C a partir de medianoche, viento entre 2 y 8 km/h, nubes por debajo del 25 %, presión alta y en ascenso, y visibilidad modelada menor de 3 km. Si además varios modelos coinciden (desacuerdo &lt; 10 pp), la probabilidad es alta.</p>
+  <p>Señal fuerte de niebla de radiación: ΔT previsto por debajo de 1 °C a partir de medianoche, viento entre 2 y 8 km/h, nubes por debajo del 25 %, presión alta y en ascenso, y visibilidad modelada menor de 3 km (esta última, la variable menos fiable del lote: apoya, no arbitra). Si además varios modelos coinciden (desacuerdo &lt; 10 pp), la probabilidad es alta.</p>
   <p>Señal de niebla de advección (costa): punto de rocío del aire uno o dos grados por encima de la SST, viento moderado del mar, humedad alta. Puede darse con cielo nublado y viento de 15 o 20 km/h; en esos casos la pestaña 1 en modo interior la infravalora.</p>
   <p>Cuándo desconfiar: valles estrechos, zonas con suelo muy húmedo tras lluvia reciente o embalses y ríos, donde la niebla local se forma con ΔT previsto de 2 o 3 °C. Los modelos no resuelven esa escala; tu registro sí la captura, de ahí la importancia del prior local.</p>
   <p>Calibración: la pestaña 2 dibuja ahora este diagrama de fiabilidad por ti, en la sección «Calibración» junto a la tabla de pesos: agrupa las filas del registro por posterior congelado (0–25 %, 25–50 %, 50–75 %, 75–100 %) y pinta cada grupo como un punto (posterior medio, frecuencia real de niebla) sobre la diagonal de calibración perfecta, con área proporcional al número de noches. La lectura sigue siendo la misma que harías a mano: si las frecuencias reales son sistemáticamente más extremas que el posterior, sube γ; si son menos extremas, bájalo; si los puntos se pegan a la diagonal, deja γ como está. La herramienta orienta a partir de unas 10 noches; la lectura es fiable a partir de 30.</p>
 
   <h2 id="es-8">9. Ajustes avanzados (editar el HTML)</h2>
   <p>Todas las constantes están al principio de la sección de la pestaña 2 en <code>niebla.html</code>:</p>
-  <pre>const A0=1.2, B0=8.8   // prior Beta inicial (media 0.12)
-const LAMBDA=0.7 // tempering de los pesos
-const TH=70, KAP=11    // logística p = σ((s − TH)/KAP)
-const RECAL_N=12       // noches mínimas para la recalibración de Platt
-const TIMEOUT=12000    // ms por modelo (los ensembles usan +8 s)</pre>
+  <pre>const PI0=0.12, A0=1.2, B0=8.8  // prior Beta inicial (media 0.12)
+const LAMBDA=0.7                // tempering de los pesos
+const TH=70, KAP=11             // logística p = σ((s − TH)/KAP)
+const RECAL_N=12, RECAL_TAU=6   // noches mínimas y anchura del prior de Platt
+const TIMEOUT=12000             // ms por modelo (los ensembles usan +8 s)</pre>
+  <p>En el archivo van todas en una sola línea <code>const</code>; aquí se abren para poder comentarlas.</p>
   <p>El parámetro γ se cambia desde la propia interfaz. Los pesos w_m y el consenso se calculan en <code>run2()</code>; la contracción hacia la climatología es la línea <code>logit P = logit π + γ·(logit p̄ − logit π)</code>.</p>
-  <p>Los pesos del índice están en la función <code>score()</code>, común a ambas pestañas. Para añadir un modelo, amplía el array <code>MODELS</code> con el identificador de Open‑Meteo (por ejemplo <code>jma_seamless</code>). Las coordenadas por defecto están en los atributos <code>value</code> de los campos de latitud y longitud.</p>
+  <p>Los pesos del índice están en la función <code>score()</code>, común a ambas pestañas. Para añadir un modelo, amplía el array <code>MODELS</code> con el identificador de Open‑Meteo (por ejemplo <code>jma_seamless</code>). Las coordenadas por defecto están en los atributos <code>value</code> de los campos de latitud y longitud, y de latitud B y longitud B para el sitio de comparación. La ventana fotográfica se recorta en <code>winRange()</code> y sus umbrales viajan en las llamadas a <code>winTxt()</code> (50 y 75 en la pestaña 1; 0.25 y 0.5 en la pestaña 2). La tabla de próximas mañanas está en <code>morn()</code>, el desglose en <code>brk1()</code> y la calculadora de contraste en <code>renderK()</code>.</p>
 
   <h2 id="es-9">10. Problemas frecuentes</h2>
   <table><tr><th>Síntoma</th><th>Causa y solución</th></tr>
@@ -237,6 +255,7 @@ const TIMEOUT=12000    // ms por modelo (los ensembles usan +8 s)</pre>
   <table><tr><th>Control</th><th>Function</th></tr>
   <tr><td>Latitude, Longitude</td><td>Point for which the forecast is requested. Type them (decimal, west negative) or fill them with “Use my location”.</td></tr>
   <tr><td>Setting</td><td><b>Coastal</b> enables the advection fog term and downloads sea surface temperature (SST). <b>Inland</b> disables it and saves one request.</td></tr>
+  <tr><td>Azimuth towards the sea</td><td>Shown only in <b>Coastal</b> mode. Bearing in degrees from the point towards open sea. It does not enter the index: it lets the tool label each hour as “onshore” or “offshore” wind, counting as onshore any direction within 60° of the azimuth. Leave it empty if you do not know it.</td></tr>
   <tr><td>ES / EN</td><td>Switches the interface and manual language. The choice is remembered.</td></tr>
   <tr><td>Manual</td><td>Opens this document.</td></tr></table>
 
@@ -245,12 +264,27 @@ const TIMEOUT=12000    // ms por modelo (los ensembles usan +8 s)</pre>
   <p>“Best available” lets Open‑Meteo pick the highest‑resolution model for the point (in western Europe usually ICON‑EU or AROME). The others force a specific model; useful for comparison.</p>
   <h3>Cards</h3>
   <p><b>Next 6 hours</b>: maximum index in that interval and when. <b>Sunrise</b>: maximum in the window from 2.5 h before to 1.5 h after sunrise, when radiation fog is fully developed and when you want to be on site. <b>Minimum dew point depression</b>: the lowest forecast ΔT = T − Td tonight, with T, Td, wind, clouds, SST and pressure at that hour. It is the most direct physical datum: if it does not drop below 1 °C, radiation fog is unlikely.</p>
+  <h3>Photographic window</h3>
+  <p>Inside the sunrise card, the “Photographic window” line answers the practical question: from what time to what time is there anything to photograph. It finds the index peak between sunrise −4 h and +6 h and clips the continuous stretch that stays above 50 points, interpolating between hours at both edges, so it returns an interval with minutes and a duration. If the peak reaches 75 the label is “full fog”; between 50 and 74, “mist only”; if no hour clears 50, there is no fog to chase. It also warns when the stretch lasts under an hour and when the peak falls more than half an hour after sunrise. The same card gives wind direction (and onshore or offshore, once you set the azimuth), links to the natural-light page for the golden hour, and reminds you that the stretch after sunrise rests on the heuristic 0.85 factor, the least firm part of the calculation.</p>
+
+  <h3>Comparing two sites (A or B)</h3>
+  <p>The “Compare with another site” button opens a second set of latitude, longitude and setting, and downloads site B with the same model and the same pipeline as A. The “A or B” section puts both next-sunrise cards side by side, draws both index curves and gives a verdict: go to A, go to B, or a practical tie when the difference is under 8 points, in which case access, composition and departure time decide. The comparison lives only in this tab: the Bayesian fusion and the observation log still belong to a single site, the coordinates at the top, because mixing two sites would spoil the learning.</p>
+
+  <h3>Next mornings</h3>
+  <p>One row per sunrise, up to seven days, with the peak index inside the −2.5 h/+1.5 h window, the verdict, the minimum dew point depression of that night, and the wind, mid and high cloud and visibility of the peak hour. The last column is confidence by lead time: the first two sunrises are the actual forecast, the third and fourth are indicative and from the fifth on it is a trend, not a forecast. Below it, one sentence names the best morning of the week, or says none clears 50. It is the only view that reaches seven days; the strip, the charts and the hourly table still cover 48 hours.</p>
+
   <h3>Hourly strip</h3>
-  <p>One bar per hour, 48 hours. Height = index. Grey background = night. Red hour = sunrise. Amber = mist possible (50 to 74), reddish = fog likely (≥ 75). Hover to see the active signals.</p>
+  <p>One bar per hour, 48 hours. Height = index. Grey background = night. Red hour = sunrise. Amber = mist possible (50 to 74), reddish = fog likely (≥ 75). Hover to see the active signals. The hours falling inside the photographic window are outlined in amber.</p>
+  <h3>What the index is made of</h3>
+  <p>One stacked bar per hour with the points each term contributes, in the order they are computed; rain is drawn downwards because it subtracts. The black tick marks the final index, with the daytime factor already applied and saturated at 100, and a grey mark on top flags the hours whose raw sum exceeded 100. It shows which term limits each hour: if the bar falls short because of the cloud segment, the brake is mid and high cloud, not humidity; if the ΔT segment is tall and the total still low, the brake is the wind. The amber outline marks the photographic window.</p>
+
   <h3>Convergence chart</h3>
-  <p>T and Td in °C on the left axis; wind in km/h on the right. Pink bands mark hours with ΔT &lt; 2 °C (stronger below 1 °C). The dashed red line is sunrise. The picture you are looking for: T and Td converging overnight, wind below 10 km/h and a cloud‑free grey background.</p>
+  <p>T and Td in °C on the left axis; wind in km/h on the right. Pink bands mark hours with ΔT &lt; 2 °C (stronger below 1 °C). The dashed red line is sunrise. The picture you are looking for: T and Td converging overnight, wind below 10 km/h and a cloud‑free grey background. A purple bar along the bottom marks the hours with forecast visibility under 2 km, more saturated below 1 km.</p>
+  <h3>What you will see: contrast, distance and focal length</h3>
+  <p>A contrast-by-visibility calculator, to know which framing survives the fog you expect. By the Koschmieder law a dark object against the sky keeps a contrast <code>C/C₀ = exp(−3.912·d/V)</code>, so 20 % contrast sits at 0.41·V and 5 % at 0.77·V. The two sliders sweep visibility from 0.2 to 10 km and subject distance from 20 m to 3 km, and the selector covers 28 to 135 mm. The cards give the residual contrast with its reading (volume and texture, flat, barely hinted, gone) and the horizontal field, <code>36·d/f</code> on 24×36: at 200 m a 43 mm covers 167 m and a 135 mm covers 53 m. Below them, the full curve and a table at 50, 150, 500 and 1000 m. Visibility starts at whatever the model gives for the sunrise peak, or at a scenario assumed from the index when that model publishes none; “Back to the forecast” undoes any manual tweak.</p>
+
   <h3>Hourly table</h3>
-  <p>All variables used plus wind direction, low clouds, SST and pressure. “Vis km” is the visibility forecast by the model itself; below 3 km it is the most reliable signal of all.</p>
+  <p>All variables used plus wind direction (labelled onshore or offshore once you set the azimuth), low clouds, SST and pressure. “Vis km” is the visibility forecast by the model itself: it is its most direct fog diagnostic, but also the least reliable variable in Open‑Meteo, so read it as a scenario rather than a measurement. Below 3 km it backs the other signals; on its own it does not decide, which is why it is worth at most 20 points against the 40 of ΔT.</p>
   <h3>Index formula</h3>
   <table><tr><th>Term</th><th>Points</th><th>Rationale</th></tr>
   <tr><td>ΔT = T − Td</td><td>40 if ≤ 0.5 °C; linear to 0 at 4 °C</td><td>Saturation. Necessary condition.</td></tr>
@@ -275,11 +309,11 @@ const TIMEOUT=12000    // ms por modelo (los ensembles usan +8 s)</pre>
   <h3>Automatic recalibration</h3>
   <p>With 12 or more logged nights, the app fits a Platt correction <code>q = σ(a·logit P + b)</code> on (frozen posterior, observed outcome) pairs, with prior a ≈ 1, b ≈ 0 so few nights cannot distort it. It corrects systematic posterior bias; when active, the status line shows "recalibrated (n, a, b)".</p>
   <h3>Cards</h3>
-  <p>Posterior for the next 6 hours and for the sunrise window, with the min to max range across models and each model’s individual probability. The third card gives the standard deviation across models at sunrise: high agreement (&lt; 10 pp), moderate, or disagreement. A 40 % posterior with high agreement is a more useful forecast than 55 % with disagreement.</p>
+  <p>Posterior for the next 6 hours and for the sunrise window, with the min to max range across models and each model’s individual probability. The third card gives the standard deviation across models at sunrise: high agreement (&lt; 10 pp), moderate, or disagreement. A 40 % posterior with high agreement is a more useful forecast than 55 % with disagreement. The sunrise card also carries its own photographic window, measured on the posterior with a 25 % threshold (“full fog” from 50 %), and, for ensemble sources, the p10–p90 band and how many members give fog.</p>
   <h3>Chart</h3>
   <p>One thin line per model, a grey band for the range and a thick black line for the posterior. Vertical axis in %.</p>
   <h3>Tables</h3>
-  <p>“Sunrise state per model” shows, for each model, its maximum probability in the window and the forecast physical state at that hour. “Bayesian weights and prior” shows w_m, its cumulative log‑likelihood and the current Beta prior.</p>
+  <p>“Sunrise state per model” shows, for each model, its maximum probability in the window and the forecast physical state at that hour. “Bayesian weights and prior” shows w_m, the Brier score, the hit rate (with the number of frozen nights in brackets), the cumulative log‑likelihood and the current Beta prior. The log‑likelihood is what sets the weight; Brier and hits are the same information in readable units.</p>
 
   <h2 id="en-5">6. Training: the observation log</h2>
   <p>Learning means comparing what each model predicted with what you saw. For the comparison to be honest, the prediction must be fixed before the outcome is known. The tool does that by itself:</p>
@@ -288,6 +322,7 @@ const TIMEOUT=12000    // ms por modelo (los ensembles usan +8 s)</pre>
   <p><b>If you did not compute that night.</b> There is no frozen forecast for that date. The observation is saved anyway (shown as “pending” in the posterior column) and updates the climatological prior, which only needs to know whether fog occurred; but it does not change the model weights, since there is no prediction to compare against. If later the same day you compute before the sunrise date rolls over, the row is completed automatically.</p>
   <div class="box ok">Minimal routine: in the evening, open the page and press Compute in tab 2 (two seconds). In the morning, choose what you observed and Save. Nothing else.</div>
   <p>Each observation does two things. The Beta prior is updated (a += y, b += 1 − y, with y = 1, 0.5 or 0), so the base rate stops being the generic 12 % and becomes your local frequency. And each model’s log‑likelihood accumulates log P_m(y): a model that gave 80 % when fog occurred adds log 0.8; one that gave 10 % adds log 0.1. Weights w_m are recomputed as normalized exp(0.7 · log‑likelihood).</p>
+  <p>Under the log table, “Lessons from your log” summarises your local thresholds from the nights with frozen features: with what forecast ΔT and wind fog or mist has actually shown up at your site, with how much mid cloud and what forecast visibility, and which fog-free night had the lowest ΔT. It is the part of the log that changes what you do in the field the fastest.</p>
   <p>How many: with 10 nights the weights start to separate; with 40 or 50 they mean something; beyond 100 it is worth moving to a logistic regression on raw variables.</p>
 
   <h2 id="en-6">7. Data and privacy: where the log is stored</h2>
@@ -298,24 +333,25 @@ const TIMEOUT=12000    // ms por modelo (los ensembles usan +8 s)</pre>
   <tr><td>Opening the file locally (<code>file://</code>) and also from Pages (<code>https://</code>)</td><td>Different origins; each has its own log. Export from one and import into the other.</td></tr>
   <tr><td>Clearing browsing data or “site data”</td><td>Lost. Export the JSON from time to time and keep it in the repository itself, for instance.</td></tr>
   <tr><td>Private / incognito mode</td><td>Erased when the window closes.</td></tr>
-  <tr><td>Other pages on the same origin (<code>user.github.io</code>)</td><td>Share the localStorage space; the keys used here start with <code>niebla_</code> to avoid collisions.</td></tr></table>
+  <tr><td>Other pages on the same origin (<code>user.github.io</code>)</td><td>Share the localStorage space; the data keys used here start with <code>niebla_</code> (<code>niebla_bayes</code>, <code>niebla_models</code>, <code>niebla_lang</code>) to avoid collisions. The one exception is <code>pn-lang</code>, the language preference deliberately shared with the rest of the site.</td></tr></table>
   <div class="box ok">Recommendation: after each logging session press “Export JSON” and commit the file to the repository. The history stays versioned and can be re‑imported on any device.</div>
 
   <h2 id="en-7">8. Interpretation and good practice</h2>
-  <p>Strong radiation‑fog signal: forecast ΔT below 1 °C from midnight on, wind between 2 and 8 km/h, clouds under 25 %, high and rising pressure, model visibility under 3 km. If several models agree (spread &lt; 10 pp), probability is high.</p>
+  <p>Strong radiation‑fog signal: forecast ΔT below 1 °C from midnight on, wind between 2 and 8 km/h, clouds under 25 %, high and rising pressure, model visibility under 3 km (that last one being the least reliable variable of the set: it backs the others, it does not arbitrate). If several models agree (spread &lt; 10 pp), probability is high.</p>
   <p>Advection‑fog signal (coast): air dew point one or two degrees above SST, moderate onshore wind, high humidity. It can occur with overcast skies and 15 to 20 km/h wind; in such cases tab 1 in inland mode underestimates it.</p>
   <p>When to be sceptical: narrow valleys, very wet soils after recent rain, reservoirs and rivers, where local fog forms with a forecast ΔT of 2 or 3 °C. Models do not resolve that scale; your log does, hence the importance of the local prior.</p>
   <p>Calibration: tab 2 now draws this reliability diagram for you, in the “Calibration” section next to the weights table: it groups the log rows by frozen posterior (0–25 %, 25–50 %, 50–75 %, 75–100 %) and plots each group as a point (mean posterior, actual fog frequency) against the perfect-calibration diagonal, with area proportional to the number of nights. The reading is still the one you would do by hand: if actual frequencies are systematically more extreme than the posterior, raise γ; if less extreme, lower it; if the points hug the diagonal, leave γ as it is. The tool gives guidance from about 10 nights; the reading is reliable from 30.</p>
 
   <h2 id="en-8">9. Advanced settings (edit the HTML)</h2>
   <p>All constants sit at the top of the tab‑2 section in <code>niebla.html</code>:</p>
-  <pre>const A0=1.2, B0=8.8   // initial Beta prior (mean 0.12)
-const LAMBDA=0.7 // weight tempering
-const TH=70, KAP=11    // logistic p = σ((s − TH)/KAP)
-const RECAL_N=12       // minimum nights for Platt recalibration
-const TIMEOUT=12000    // ms per model (ensembles use +8 s)</pre>
+  <pre>const PI0=0.12, A0=1.2, B0=8.8  // initial Beta prior (mean 0.12)
+const LAMBDA=0.7                // weight tempering
+const TH=70, KAP=11             // logistic p = σ((s − TH)/KAP)
+const RECAL_N=12, RECAL_TAU=6   // minimum nights and width of the Platt prior
+const TIMEOUT=12000             // ms per model (ensembles use +8 s)</pre>
+  <p>In the file they all sit on a single <code>const</code> line; they are split here so each can be commented.</p>
   <p>γ is changed from the interface itself. Weights w_m and the consensus are computed in <code>run2()</code>; the shrinkage towards climatology is the line <code>logit P = logit π + γ·(logit p̄ − logit π)</code>.</p>
-  <p>Index weights live in <code>score()</code>, shared by both tabs. To add a model, extend the <code>MODELS</code> array with the Open‑Meteo identifier (e.g. <code>jma_seamless</code>). Default coordinates are the <code>value</code> attributes of the latitude and longitude fields.</p>
+  <p>Index weights live in <code>score()</code>, shared by both tabs. To add a model, extend the <code>MODELS</code> array with the Open‑Meteo identifier (e.g. <code>jma_seamless</code>). Default coordinates are the <code>value</code> attributes of the latitude and longitude fields, and of latitude B and longitude B for the comparison site. The photographic window is clipped in <code>winRange()</code> and its thresholds travel in the calls to <code>winTxt()</code> (50 and 75 in tab 1; 0.25 and 0.5 in tab 2). The next-mornings table is in <code>morn()</code>, the breakdown in <code>brk1()</code> and the contrast calculator in <code>renderK()</code>.</p>
 
   <h2 id="en-9">10. Troubleshooting</h2>
   <table><tr><th>Symptom</th><th>Cause and fix</th></tr>
