@@ -332,7 +332,11 @@ const DICT={
   sDetail:'Detalle · borde delantero · ventana de 1200 px',
   sShakeBox:(px)=>'Tu temblor, misma ventana y escala · '+px+' px',
   sCap:(w)=>'El recuadro grande es el fotograma completo, '+w+' px de ancho. El sujeto va dibujado al tamaño que tiene en el sensor y barrido a lo largo de su arrastre: la opacidad de cada píxel es la fracción de la exposición durante la que el sujeto lo cubrió, así que cuanto más se mueve más tenue queda. Esa caída es la física real, y es por lo que la gente desaparece. El contorno punteado marca dónde estaba; las marcas ½ y ×2 son la mitad y el doble de tu tiempo.',
-  sCapPan:(e,b)=>'En el barrido sigues al sujeto: él solo se arrastra el error de seguimiento, '+e+' px, y son las farolas grises del fondo las que se arrastran los '+b+' px buscados, en sentido contrario. Las marcas y la segunda caja de detalle miden ese fondo.',
+  sCapPan:(e,b)=>'En el barrido el sujeto se mueve y la cámara lo sigue: en la foto él solo se arrastra el error de seguimiento, '+e+' px, y su avance queda impreso en el fondo, que se arrastra los mismos '+b+' px en sentido contrario. El contorno punteado marca dónde estaba respecto a la escena al abrirse el obturador; las marcas y la segunda caja miden ese fondo.',
+  sCapStatic:(b)=>'En «sujeto quieto, escena en movimiento» tu sujeto, la persona ámbar, no se mueve: son los grises los que pasan por delante y dejan la traza de '+b+' px. Las marcas y la caja superior miden esa traza; la inferior, tu temblor sobre el sujeto quieto.',
+  sCapFlash:'Con el flash, el destello congela al sujeto al final del recorrido (segunda cortinilla) y la luz ambiente deja detrás la estela tenue del barrido.',
+  sMovBox:(px)=>'Lo que pasa por delante, misma ventana y escala · '+px+' px',
+  sPass:(n,h,w)=>'pasa por delante: '+n+', '+h+' px de alto · '+w+' px de largo',
   sBgBox:(px)=>'El fondo arrastrado, misma ventana y escala · '+px+' px',
   sOut:'Alguna estela se sale del fotograma.',
   fixedFocal:(f)=>'focal fija de '+f+' mm',
@@ -391,7 +395,11 @@ const DICT={
   sDetail:'Detail \u00b7 leading edge \u00b7 1,200 px window',
   sShakeBox:(px)=>'Your tremor, same window and scale \u00b7 '+px+' px',
   sCap:(w)=>'The large rectangle is the whole frame, '+w+' px wide. The subject is drawn at the size it has on the sensor and swept along its blur: each pixel\u2019s opacity is the fraction of the exposure during which the subject covered it, so the more it moves the fainter it gets. That fade is the real physics, and it is why people vanish. The dotted outline marks where it stood; the \u00bd and \u00d72 marks are half and double your time.',
-  sCapPan:(e,b)=>'In panning you follow the subject: it only smears by the tracking error, '+e+' px, and it is the grey lamp posts of the background that smear the '+b+' px you are after, in the opposite direction. The marks and the second detail box measure that background.',
+  sCapPan:(e,b)=>'In panning the subject moves and the camera follows it: in the picture it only smears by the tracking error, '+e+' px, and its advance is printed on the background, which smears the same '+b+' px in the opposite direction. The dotted outline marks where it stood relative to the scene when the shutter opened; the marks and the second box measure that background.',
+  sCapStatic:(b)=>'In \u201cstatic subject, moving scene\u201d your subject, the amber person, does not move: the grey ones pass in front and leave the '+b+' px trace. The marks and the top box measure that trace; the bottom one, your tremor on the still subject.',
+  sCapFlash:'With flash, the burst freezes the subject at the end of its path (rear curtain) and the ambient light leaves the faint sweep trail behind it.',
+  sMovBox:(px)=>'What passes in front, same window and scale \u00b7 '+px+' px',
+  sPass:(n,h,w)=>'passing in front: '+n+', '+h+' px tall \u00b7 '+w+' px long',
   sBgBox:(px)=>'The swept background, same window and scale \u00b7 '+px+' px',
   sOut:'Some streak runs off the frame.',
   fixedFocal:(f)=>'fixed '+f+' mm lens',
@@ -760,16 +768,19 @@ function barrido(ctx,clip,draw,b,dir,rgb,floor,dpr){
   ctx.drawImage(off, clip.x, clip.y, clip.w, clip.h);
 }
 function escena(ctx,clip,win,S,o){
-  /* la escena en píxeles de sensor: suelo, farolas del fondo (si las hay) y el sujeto,
-     vista a través de la ventana win = {x0,y0,sc}: pantalla = clip + (sensor − origen)·sc */
-  const sc=win.sc, X=v=>clip.x+(v-win.x0)*sc, Y=v=>clip.y+(v-win.y0)*sc;
+  /* la escena en píxeles de sensor vista por la ventana win = {x0,y0,sc}: suelo, lo que se
+     mueve alrededor (gris: farolas del fondo en el barrido, transeúntes en «sujeto quieto»)
+     y tu sujeto (ámbar). pantalla = clip + (sensor − origen)·sc */
+  const sc=win.sc, X=v=>clip.x+(v-win.x0)*sc, Y=v=>clip.y+(v-win.y0)*sc, yb=Y(S.ys)-clip.y;
   ctx.save(); ctx.beginPath(); ctx.rect(clip.x,clip.y,clip.w,clip.h); ctx.clip();
   ctx.strokeStyle="rgba(255,255,255,.07)"; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(clip.x,Y(S.ys)+.5); ctx.lineTo(clip.x+clip.w,Y(S.ys)+.5); ctx.stroke();
-  if(S.posts.length)                                                                     // el fondo corre al revés que el sujeto
-    barrido(ctx,clip,c=>{ for(const xp of S.posts) c.fill(shapePath(X(xp)-clip.x, Y(S.ys)-clip.y, S.hPost*sc, S.wPost*sc, 'post')); }, o.bBg*sc, -1, o.bg, o.floor, o.dpr);
-  barrido(ctx,clip,c=>{ c.fill(shapePath(X(S.xs)-clip.x, Y(S.ys)-clip.y, S.hSen*sc, S.wSen*sc, S.kind)); }, o.bSub*sc, 1, o.color, o.floor, o.dpr);
-  ctx.strokeStyle=o.ref; ctx.setLineDash([3,3]); ctx.lineWidth=1;                      // referencia: dónde estaba quieto
-  ctx.strokeRect(X(S.xs)-.5, Y(S.ys)-S.hSen*sc-.5, Math.max(2,S.wSen*sc)+1, S.hSen*sc+1); ctx.setLineDash([]);
+  if(o.movers && S.movers.length)
+    barrido(ctx,clip,c=>{ for(const xm of S.movers) c.fill(shapePath(X(xm)-clip.x, yb, S.mH*sc, S.mW*sc, S.mKind)); }, S.bMov*sc, S.dirMov, o.grey, o.floor, o.dpr);
+  barrido(ctx,clip,c=>{ c.fill(shapePath(X(S.xs)-clip.x, yb, S.hSen*sc, S.wSen*sc, S.kind)); }, o.bSub*sc, 1, o.color, o.floor, o.dpr);
+  if(o.flash && S.flashAt!==null){                                                     // el destello congela al final del recorrido
+    ctx.fillStyle=`rgba(${o.color[0]},${o.color[1]},${o.color[2]},.96)`; ctx.translate(clip.x,clip.y); ctx.fill(shapePath(X(S.flashAt)-clip.x, yb, S.hSen*sc, S.wSen*sc, S.kind)); ctx.translate(-clip.x,-clip.y); }
+  ctx.strokeStyle=o.ref; ctx.setLineDash([3,3]); ctx.lineWidth=1;                      // referencia: dónde estaba al abrirse el obturador
+  ctx.strokeRect(X(S.ref)-.5, Y(S.ys)-S.hSen*sc-.5, Math.max(2,S.wSen*sc)+1, S.hSen*sc+1); ctx.setLineDash([]);
   ctx.restore();
 }
 function franja(s,t){
@@ -780,38 +791,48 @@ function franja(s,t){
   ctx.fillStyle="#07090d"; ctx.fillRect(0,0,W,H);
   ctx.font="12px 'IBM Plex Mono', monospace"; ctx.textBaseline="middle";
   const AMB=[232,176,75], CYN=[94,200,216], GRY=[128,140,154], FLOOR=0.08;
-  const pan = !!(s.tec && s.tec.id==='tPan');
+  const tec = s.tec ? s.tec.id : 'tFree';
+  const mode = tec==='tPan' ? 'pan' : tec==='tStatic' ? 'static' : tec==='tFlash' ? 'flash' : 'free';
 
-  /* --- la escena, en píxeles de sensor --- */
+  /* --- la escena, en píxeles de sensor: quién se mueve depende de la técnica --- */
   const camW=s.cam.w, camH=camW*2/3;
   const pxPorM=s.f/(s.d*s.cam.p*1e-3);                 // px de sensor por metro en el plano del sujeto
-  const kind=s.shapeId||'person', sh=s.shape||SHAPES.person;
+  const kind=s.shapeId||'person', sh=SHAPES[kind]||SHAPES.person;
   const bNow=blurPx(s.f,s.v,t,s.d,s.cam.p);            // el arrastre buscado
-  const bSub = pan ? bNow*TRACK : bNow;                // lo que se arrastra el sujeto
-  const bBg  = pan ? bNow : 0;                         // lo que se arrastra el fondo
-  const S={ kind, xs:camW*0.12, ys:camH*0.82, hSen:sh.H*pxPorM, wSen:sh.W*pxPorM,
-            posts: pan ? [0.2,0.45,0.7,0.95].map(k=>k*camW) : [], hPost:3*pxPorM, wPost:0.15*pxPorM };
-  let xRef=S.xs+S.wSen;                                // de dónde nacen las marcas: el borde delantero del sujeto…
-  if(pan){ const c=S.posts.filter(x=>x>S.xs+S.wSen+0.03*camW); xRef=c.length?c[0]:S.posts[S.posts.length-1]; }   // …o la farola de referencia
   const shk = s.st>=99 ? 0 : shakePx(s.f,t,s.st,s.cam.p);
+  const subKind = mode==='static' ? 'person' : kind, subSh=SHAPES[subKind];   // en «sujeto quieto» tu sujeto es una persona parada
+  const S={ xs:camW*0.12, ys:camH*0.82, kind:subKind, hSen:subSh.H*pxPorM, wSen:subSh.W*pxPorM,
+            bSub: mode==='pan' ? bNow*TRACK : mode==='static' ? 0 : bNow,      // lo que se arrastra tu sujeto en la foto
+            movers:[], mKind:null, mH:0, mW:0, bMov:0, dirMov:1, ref:camW*0.12, flashAt:null };
+  let xMark=S.xs+S.wSen, dirMark=1;                    // extremo de la traza que manda, para bs: xMark + dirMark·bs
+  if(mode==='pan'){                                    // la cámara sigue al sujeto: el fondo corre al revés lo que él avanza
+    S.movers=[0.2,0.45,0.7,0.95].map(k=>k*camW); S.mKind='post'; S.mH=3*pxPorM; S.mW=0.15*pxPorM; S.bMov=bNow; S.dirMov=-1;
+    S.ref=S.xs-bNow;                                   // dónde estaba respecto a la escena al abrirse el obturador
+    const c=S.movers.filter(x=>x>S.xs+S.wSen+0.03*camW); xMark=c.length?c[0]:S.movers[S.movers.length-1]; dirMark=-1;
+  } else if(mode==='static'){                          // tu sujeto no se mueve: pasan por delante los del preset
+    S.mKind=kind; S.mH=sh.H*pxPorM; S.mW=sh.W*pxPorM; S.bMov=bNow; S.dirMov=1;
+    for(let x=0.34*camW,k=0; x<camW&&k<4; x+=S.mW+bNow+0.05*camW,k++) S.movers.push(x);
+    xMark=S.movers[0]+S.mW; dirMark=1;
+  } else if(mode==='flash'){ S.flashAt=S.xs+bNow; }
 
   /* --- el fotograma --- */
   const fx=18, fy=34, fw=720, fh=480, esc=fw/camW;
   const X=v=>fx+v*esc, Y=v=>fy+v*esc;
+  const base={color:AMB,grey:GRY,ref:"rgba(255,217,138,.9)",floor:FLOOR,dpr};
   ctx.fillStyle="#0b0d11"; ctx.fillRect(fx,fy,fw,fh);
-  escena(ctx,{x:fx,y:fy,w:fw,h:fh},{x0:0,y0:0,sc:esc},S,{bSub,bBg,color:AMB,bg:GRY,ref:"rgba(255,217,138,.9)",floor:FLOOR,dpr});
-  /* marcas de ½, tu tiempo y ×2 sobre la traza que manda (la del sujeto, o la del fondo en el barrido) */
-  const yTop=Math.max(fy+52, Y(S.ys-S.hSen));
+  escena(ctx,{x:fx,y:fy,w:fw,h:fh},{x0:0,y0:0,sc:esc},S,Object.assign({bSub:S.bSub,movers:true,flash:true},base));
+  /* marcas de ½, tu tiempo y ×2 sobre la traza que manda */
+  const yTop=Math.max(fy+52, Y(S.ys-Math.max(S.hSen, S.movers.length?S.mH:0)));
   ctx.save(); ctx.beginPath(); ctx.rect(fx,fy,fw,fh); ctx.clip();
-  const marca=(bs,lab,alpha,fila)=>{ const xe = pan ? X(xRef-bs) : X(xRef+bs); if(xe>fx+fw-2||xe<fx+2) return;
+  const marca=(bs,lab,alpha,fila)=>{ const xe=X(xMark+dirMark*bs); if(xe>fx+fw-2||xe<fx+2) return;
     const yl=yTop-10-fila*14;
     ctx.strokeStyle=`rgba(232,176,75,${alpha})`; ctx.setLineDash([2,3]); ctx.beginPath(); ctx.moveTo(xe,yl+7); ctx.lineTo(xe,Y(S.ys)+6); ctx.stroke(); ctx.setLineDash([]);
-    ctx.fillStyle=`rgba(232,176,75,${Math.min(1,alpha+0.3)})`; ctx.textAlign=pan?"right":"left"; ctx.fillText(lab, pan?xe-4:xe+4, yl); };
+    ctx.fillStyle=`rgba(232,176,75,${Math.min(1,alpha+0.3)})`; ctx.textAlign=dirMark<0?"right":"left"; ctx.fillText(lab, dirMark<0?xe-4:xe+4, yl); };
   marca(bNow*2, LBL('sTick','×2',Math.round(bNow*2)), .45, 0);
   marca(bNow,   LBL('sTick',fmtT(t),Math.round(bNow)), .95, 1);
   marca(bNow/2, LBL('sTick','½',Math.round(bNow/2)), .45, 2);
   ctx.restore(); ctx.textAlign="left";
-  const sale = !pan && S.xs+S.wSen+bSub > camW;
+  const sale = (mode==='free'||mode==='flash') && S.xs+S.wSen+bNow > camW;
   if(sale){ ctx.fillStyle="#e2705f"; ctx.fillRect(fx+fw-3, Y(S.ys-S.hSen)-10, 3, Math.min(S.hSen*esc+16, fh)); }
   /* regla de 1 m en el plano del sujeto */
   const m1=pxPorM*esc;
@@ -820,28 +841,33 @@ function franja(s,t){
   /* ventanas de aumento: lo que amplían las cajas de detalle */
   const dx=760, dy=fy, dw=W-dx-18, dh=214, escD=dw/1200, winH=dh/escD;   // 1200 px de sensor de ancho
   const cy=S.ys-S.hSen/2;
-  const winA={x0:S.xs+S.wSen-600, y0:cy-winH/2, sc:escD};               // borde delantero del sujeto
-  const winB= pan ? {x0:xRef-600, y0:cy-winH/2, sc:escD} : winA;        // la farola de referencia, en el barrido
+  const winSub={x0:S.xs+S.wSen-600, y0:cy-winH/2, sc:escD};             // el borde delantero de tu sujeto
+  const winMov={x0:xMark-600, y0:cy-winH/2, sc:escD};                   // la traza de lo que se mueve alrededor
   const ventana=(w,col)=>{ ctx.strokeStyle=col; ctx.setLineDash([4,3]); ctx.lineWidth=1; ctx.strokeRect(X(w.x0), Y(w.y0), 1200*esc, winH*esc); ctx.setLineDash([]); };
-  ventana(winA,"rgba(255,217,138,.5)"); if(pan) ventana(winB,"rgba(160,172,186,.55)");
+  ventana(winSub,"rgba(255,217,138,.5)"); if(S.movers.length) ventana(winMov,"rgba(160,172,186,.55)");
   ctx.strokeStyle="#3a4552"; ctx.lineWidth=1; ctx.strokeRect(fx+.5,fy+.5,fw-1,fh-1);
   ctx.fillStyle="#98a3b0"; ctx.fillText(LBL('sFrame',nf(camW,0)), fx, 18);
-  ctx.fillStyle="#6b7684"; ctx.fillText(LBL('sSubj',LBL('sh'+kind.charAt(0).toUpperCase()+kind.slice(1)),nf(S.hSen,0),nf(S.wSen,0)), fx, fy+fh+16);
+  const nom=k=>LBL('sh'+k.charAt(0).toUpperCase()+k.slice(1));
+  ctx.fillStyle="#6b7684"; ctx.fillText(LBL('sSubj',nom(subKind),nf(S.hSen,0),nf(S.wSen,0))+(mode==='static'?' · '+LBL('sPass',nom(kind),nf(S.mH,0),nf(S.mW,0)):''), fx, fy+fh+16);
 
   /* --- cajas de detalle: la misma escena por una ventana de 1200 px --- */
   const caja=(y,label,win,o)=>{
     ctx.fillStyle="#0b0d11"; ctx.fillRect(dx,y,dw,dh);
     escena(ctx,{x:dx,y:y,w:dw,h:dh},win,S,o);
-    if(!pan && (S.xs+S.wSen+o.bSub-win.x0)*escD>dw){ ctx.fillStyle="#e2705f"; ctx.fillRect(dx+dw-3,y,3,dh); }
+    if(o.red && (S.xs+S.wSen+o.bSub-win.x0)*escD>dw){ ctx.fillStyle="#e2705f"; ctx.fillRect(dx+dw-3,y,3,dh); }
     ctx.strokeStyle="#3a4552"; ctx.lineWidth=1; ctx.strokeRect(dx+.5,y+.5,dw-1,dh-1);
     ctx.fillStyle="#98a3b0"; ctx.font="12.5px 'IBM Plex Mono', monospace"; ctx.fillText(label, dx, y-14); ctx.font="12px 'IBM Plex Mono', monospace";
   };
-  caja(dy, LBL('sDetail'), winA, {bSub,bBg,color:AMB,bg:GRY,ref:"rgba(232,176,75,.9)",floor:FLOOR,dpr});
-  if(pan) caja(dy+dh+34, LBL('sBgBox',nf(bNow,0)), winB, {bSub,bBg,color:AMB,bg:GRY,ref:"rgba(232,176,75,.9)",floor:FLOOR,dpr});
-  else    caja(dy+dh+34, LBL('sShakeBox',nf(shk,0)), winA, {bSub:shk,bBg:0,color:CYN,bg:GRY,ref:"rgba(94,200,216,.9)",floor:FLOOR,dpr});
+  const oSub=Object.assign({bSub:S.bSub,movers:true,flash:true,red:mode==='free'||mode==='flash'},base,{ref:"rgba(232,176,75,.9)"});
+  const oShk=Object.assign({bSub:shk,movers:false,flash:false},base,{color:CYN,ref:"rgba(94,200,216,.9)"});
+  if(mode==='pan'){        caja(dy, LBL('sDetail'), winSub, oSub);            caja(dy+dh+34, LBL('sBgBox',nf(bNow,0)), winMov, oSub); }
+  else if(mode==='static'){ caja(dy, LBL('sMovBox',nf(bNow,0)), winMov, oSub); caja(dy+dh+34, LBL('sShakeBox',nf(shk,0)), winSub, oShk); }
+  else {                   caja(dy, LBL('sDetail'), winSub, oSub);            caja(dy+dh+34, LBL('sShakeBox',nf(shk,0)), winSub, oShk); }
 
   $('striplg').innerHTML = `<span>${LBL('sCap',nf(camW,0))}</span>`+
-    (pan?`<span>${LBL('sCapPan',nf(bSub,0),nf(bNow,0))}</span>`:"")+
+    (mode==='pan'?`<span>${LBL('sCapPan',nf(S.bSub,0),nf(bNow,0))}</span>`:"")+
+    (mode==='static'?`<span>${LBL('sCapStatic',nf(bNow,0))}</span>`:"")+
+    (mode==='flash'?`<span>${LBL('sCapFlash')}</span>`:"")+
     (sale?`<span style="color:#e2705f">${LBL('sOut')}</span>`:"");
 }
 
