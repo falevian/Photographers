@@ -206,8 +206,8 @@ footer{border-top:1px solid var(--line);margin-top:52px;padding-top:18px;font-si
 <svg class="chart" id="chart" viewBox="0 0 900 340" role="img" data-aria-es="Arrastre y trepidación frente al tiempo de obturación" data-aria-en="Blur and shake against shutter time" aria-label="Arrastre y trepidación frente al tiempo de obturación"></svg>
 <div class="legend" id="chartlg"></div>
 
-<h2 data-lang="es">Las seis técnicas, con tu escena</h2>
-<h2 data-lang="en">The six techniques, with your scene</h2>
+<h2 data-lang="es">Las seis técnicas de la chuleta, y una más, con tu escena</h2>
+<h2 data-lang="en">The cheat sheet's six techniques, and one more, with your scene</h2>
 <p data-lang="es">Cada técnica pide una cantidad de arrastre distinta. Estas son las que salen con la velocidad, la distancia y la focal que tienes puestas, no las de la receta. La columna del apoyo dice si ese tiempo se sostiene con lo que llevas.</p>
 <p data-lang="en">Each technique asks for a different amount of blur. These are the times that come out with the speed, distance and focal length you have set, not the ones from the recipe. The support column says whether that time is holdable with what you are carrying.</p>
 <div class="scroll"><table><thead id="tecHead"></thead><tbody id="tecBody"></tbody></table></div>
@@ -321,7 +321,7 @@ const DICT={
   m11:'Leica M11 · 60 Mpx', q3:'Leica Q3 43 · 60 Mpx', sl3s:'Leica SL3-S · 24 Mpx', sl96:'Leica SL3-S · multishot 96 Mpx',
   /* técnicas */
   tPan:'1 · Barrido: sigues al sujeto', tFlash:'2 · Congelado con flash', tStatic:'3 · Sujeto quieto, escena en movimiento',
-  tTrail:'4 · Estelas de luz', tZoom:'5 · Zoom burst', tGhost:'6 · Ciudad desierta', tFree:'Libre: elige tú el arrastre',
+  tTrail:'4 · Estelas de luz', tZoom:'5 · Zoom burst', tGhost:'6 · Ciudad desierta', tTrace:'7 · Cámara quieta: el sujeto deja traza', tFree:'Libre: elige tú el arrastre',
   /* apoyos */
   sHand:'a pulso, brazos sueltos', sElbow:'codos pegados al cuerpo', sStrap:'correa tensada contra el cuello',
   sLean:'apoyado en un muro o barandilla', sTri:'trípode',
@@ -371,6 +371,7 @@ const DICT={
   vPanNo:'Por encima de veinte píxeles: el sujeto también sale movido. Acórtalo con más práctica, con una focal más corta o siguiendo al sujeto desde más lejos.',
   vPan:(sub,fondo)=>'En el barrido el fondo se lleva <b>'+fondo+' px</b> de raya y el sujeto solo <b>'+sub+' px</b> de error de seguimiento. Esa diferencia es el efecto; si el sujeto pasa de veinte píxeles, el barrido ha fallado.',
   vGhost:(seg,tapa,px)=>'Alguien andando a esa velocidad solo tapa un punto del encuadre durante <b>'+tapa+'</b>, el tiempo que tarda en recorrer su propio ancho. Para que su rastro baje unos cinco pasos y deje de verse hace falta <b>'+seg+'</b>, unas cuarenta veces más. No depende de la focal ni de la distancia: por eso la receta de treinta segundos vale en cualquier plaza. Su rastro medirá '+px+' px, casi siempre más de lo que cabe en el encuadre.',
+  vTrace:(k,w,px)=>'Un sujeto que refleja luz no deja una raya como un faro: reparte su brillo a lo largo del recorrido. Con una traza de <b>'+nf(k,1)+' anchos</b> ('+w+' px de ancho, '+px+' px de traza) el centro de la silueta conserva el <b>'+Math.round(100/k)+' %</b> del brillo y los bordes se funden: se ve que se mueve y aún se reconoce. Con 3 anchos queda al 33 %, fantasmal; con 40, desaparece (ciudad desierta). No es lo mismo que las estelas de luz: un faro es tanto más brillante que la escena que su rastro sigue viéndose por largo que sea.',
   vFlash:'El destello congela el sujeto dentro del arrastre. El reparto entre ambiente y flash, la sincronía de cada cuerpo y el recorte del pulso se calculan en <a href="simulador-flash.html">el banco óptico de flash</a>; aquí solo sale el arrastre del ambiente.',
   vZoom:'El zoom burst no mide velocidad de sujeto: la raya es radial y su longitud depende de cuánto cambies la focal. Con trípode, la primera parte de la exposición fija la imagen y el resto la estira hacia fuera.',
   /* tablas */
@@ -378,7 +379,7 @@ const DICT={
   thCam:['Cuerpo','Paso','Arrastre del sujeto','Trepidación','Máximo a pulso','Veredicto'],
   thSup:['Apoyo','Pasos','ω (rad/s)','Máximo a 28 mm','a 35 mm','a 50 mm','a 90 mm'],
   needPan:'fondo rayado, sujeto limpio', needFlash:'ambiente movido, sujeto congelado', needStatic:'escena rayada, sujeto quieto',
-  needTrail:'estela continua', needZoom:'raya radial', needGhost:'la gente desaparece', needFree:'el que elijas',
+  needTrail:'estela continua', needZoom:'raya radial', needGhost:'la gente desaparece', needTrace:'traza de 1,5 anchos, aún se reconoce', needFree:'el que elijas',
   /* gráfica */
   gx:'tiempo de obturación', gy:'arrastre (px)', gSubj:'arrastre del sujeto', gShake:'trepidación con este apoyo',
   gInv:'invisible', gSoft:'sujeto movido', gStreak:'raya deliberada', gYour:'tu tiempo',
@@ -387,7 +388,7 @@ const DICT={
  en:{
   m11:'Leica M11 · 60 Mpx', q3:'Leica Q3 43 · 60 Mpx', sl3s:'Leica SL3-S · 24 Mpx', sl96:'Leica SL3-S · 96 Mpx multishot',
   tPan:'1 · Panning: you follow the subject', tFlash:'2 · Flash freeze', tStatic:'3 · Static subject, moving scene',
-  tTrail:'4 · Light trails', tZoom:'5 · Zoom burst', tGhost:'6 · Ghost town', tFree:'Free: pick the blur yourself',
+  tTrail:'4 · Light trails', tZoom:'5 · Zoom burst', tGhost:'6 · Ghost town', tTrace:'7 · Still camera: the subject leaves a trace', tFree:'Free: pick the blur yourself',
   sHand:'handheld, arms loose', sElbow:'elbows tucked in', sStrap:'strap tensioned against the neck',
   sLean:'leaning on a wall or railing', sTri:'tripod',
   stabNone:'this body has none', stabOis:'lens OIS, 2 stops', stabIbis:'IBIS, 4 stops',
@@ -433,13 +434,14 @@ const DICT={
   vPanNo:'Above twenty pixels: the subject comes out blurred too. Shorten it with practice, with a shorter focal length, or by following the subject from further away.',
   vPan:(sub,fondo)=>'In panning the background takes <b>'+fondo+' px</b> of streak and the subject only <b>'+sub+' px</b> of tracking error. That difference is the effect; if the subject passes twenty pixels, the pan has failed.',
   vGhost:(seg,tapa,px)=>'Someone walking at that speed only covers a given point of the frame for <b>'+tapa+'</b>, the time it takes them to cross their own width. For their trace to drop some five stops and stop showing you need <b>'+seg+'</b>, about forty times longer. It does not depend on focal length or distance: that is why the thirty-second recipe works in any square. Their trail will measure '+px+' px, almost always more than fits in the frame.',
+  vTrace:(k,w,px)=>'A subject that reflects light does not draw a line like a headlight: it spreads its brightness along its path. With a trace of <b>'+nf(k,1)+' widths</b> ('+w+' px wide, '+px+' px of trace) the centre of the silhouette keeps <b>'+Math.round(100/k)+' %</b> of its brightness and the edges melt: you can see it moves and still recognise it. At 3 widths it drops to 33 %, ghostly; at 40 it vanishes (ghost town). Not the same as light trails: a headlight is so much brighter than the scene that its trail stays visible however long it gets.',
   vFlash:'The flash freezes the subject inside the blur. The split between ambient and flash, each body’s sync speed and the pulse clipping are computed in <a href="simulador-flash.html">the flash optical bench</a>; here only the ambient blur comes out.',
   vZoom:'Zoom burst does not measure subject speed: the streak is radial and its length depends on how much you change the focal length. On a tripod, the first part of the exposure fixes the image and the rest stretches it outwards.',
   thTec:['Technique','Blur it asks for','Time','In pixels','Support'],
   thCam:['Body','Pitch','Subject blur','Shake','Longest handheld','Verdict'],
   thSup:['Support','Stops','ω (rad/s)','Longest at 28 mm','at 35 mm','at 50 mm','at 90 mm'],
   needPan:'streaked background, clean subject', needFlash:'blurred ambient, frozen subject', needStatic:'streaked scene, still subject',
-  needTrail:'continuous trail', needZoom:'radial streak', needGhost:'people disappear', needFree:'whatever you choose',
+  needTrail:'continuous trail', needZoom:'radial streak', needGhost:'people disappear', needTrace:'1.5-width trace, still recognisable', needFree:'whatever you choose',
   gx:'shutter time', gy:'blur (px)', gSubj:'subject blur', gShake:'shake with this support',
   gInv:'invisible', gSoft:'blurred subject', gStreak:'deliberate streak', gYour:'your time',
   sRef:'reference: no movement', sHalf:'half the time', sDouble:'twice the time', sNow:'your time'
@@ -474,6 +476,7 @@ const TECS=[
   {id:'tTrail',  need:'needTrail',  px:500},
   {id:'tZoom',   need:'needZoom',   px:600, tripod:true},
   {id:'tGhost',  need:'needGhost',  ghost:true, K:40},
+  {id:'tTrace',  need:'needTrace',  trace:true, K:1.5},
   {id:'tFree',   need:'needFree',   px:110, free:true}
 ];
 /* Cada caso de uso trae la distancia típica a la que se fotografía: un peatón
@@ -536,8 +539,10 @@ const ANCHO_PERSONA=0.5;                 // m, ancho aparente de alguien de pie
    cinco pasos y medio y deja de verse. No depende de la focal ni de la distancia,
    que es justo por lo que la receta de treinta segundos vale en cualquier plaza. */
 function tGhost(s){ return s.tec.K*ANCHO_PERSONA/Math.max(0.2,s.v); }
+function anchoSujeto(s){ return (SHAPES[SHAPE]||SHAPES.person).W*s.f/(s.d*s.cam.p*1e-3); }   // px de sensor
 function pideBlur(s){
   if(s.tec.ghost) return blurPx(s.f,s.v,tGhost(s),s.d,s.cam.p);
+  if(s.tec.trace) return s.tec.K*anchoSujeto(s);      // la traza se mide en anchos del propio sujeto
   return s.tec.px*(s.cam.p===2.97?2:1)*(s.cam.w/9528);
 }
 function tPedida(s){
@@ -606,6 +611,7 @@ function update(){
   if(s.tec.id==='tGhost'){ h+=`<p>${LBL('vGhost',fmtT(t),fmtT(ANCHO_PERSONA/Math.max(0.2,s.v)),nf(need,0))}</p>`; }
   if(s.tec.id==='tFlash'){ h+=`<p>${LBL('vFlash')}</p>`; }
   if(s.tec.id==='tZoom'){ h+=`<p>${LBL('vZoom')}</p>`; }
+  if(s.tec.id==='tTrace'){ h+=`<p>${LBL('vTrace',s.tec.K,nf(anchoSujeto(s),0),nf(need,0))}</p>`; }
   h+=`<h4>${LANG()==='en'?'Can you hold it':'Se sostiene'}</h4>`;
   if(s.tec.id==='tPan'){
     const res=bpx*TRACK;
