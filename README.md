@@ -300,3 +300,22 @@ python3 -m http.server 8000
 ---
 
 Rafael Vida
+
+---
+
+## Paseo fotográfico · sección aparte
+
+Fuera de «Fotografía para científicos», con su propia portada en
+[`paseos/`](paseos/index.html) ([falevian.github.io/Photographers/paseos/](https://falevian.github.io/Photographers/paseos/)):
+las fichas del paseo fotográfico de la comunidad Foto, preparadas por La Foto Rota. Un tema por salida,
+con autores de referencia, la física que hay debajo y ejercicios para el día. Solo en español, sin conmutador
+de idioma: tienen otro objetivo y otro diseño (negro y blanco puros, Bodoni Moda y Atkinson Hyperlegible
+incrustadas, ningún recurso externo).
+
+| Ficha | Tema | Contenido | Tamaño |
+|---|---|---|---|
+| [`paseos/contraste.html`](paseos/contraste.html) | 1 · Contraste | Nueve autores (Fan Ho, Metzker, Giacomelli, Moriyama, Leiter, Webb, Abbott, Titarenko, Cameron) con obra de referencia, análisis, física y ejercicio; laboratorio de luz interactivo; tres reglas para el día. | 211 KB |
+
+Para añadir una ficha: guardar el archivo en `paseos/` y copiar el bloque de ficha comentado en `paseos/index.html`.
+
+*A separate section, in Spanish only: the photo-walk sheets of the Foto community, prepared by La Foto Rota, with their own cover at `paseos/`.*
