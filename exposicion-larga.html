@@ -331,7 +331,9 @@ const DICT={
   sFrame:(w)=>'El fotograma entero · '+w+' px de ancho · el sujeto y su traza a escala real',
   sDetail:'Detalle · borde delantero · ventana de 1200 px',
   sShakeBox:(px)=>'Tu temblor, misma ventana y escala · '+px+' px',
-  sCap:(w)=>'El recuadro grande es el fotograma completo, '+w+' px de ancho. El sujeto va dibujado al tamaño que tiene en el sensor y barrido a lo largo de su arrastre: su luz se reparte por el barrido, así que cuanto más se mueve más tenue queda. Esa caída es la física real, y es por lo que la gente desaparece. El contorno punteado marca dónde estaba; las marcas ½ y ×2 son la mitad y el doble de tu tiempo.',
+  sCap:(w)=>'El recuadro grande es el fotograma completo, '+w+' px de ancho. El sujeto va dibujado al tamaño que tiene en el sensor y barrido a lo largo de su arrastre: la opacidad de cada píxel es la fracción de la exposición durante la que el sujeto lo cubrió, así que cuanto más se mueve más tenue queda. Esa caída es la física real, y es por lo que la gente desaparece. El contorno punteado marca dónde estaba; las marcas ½ y ×2 son la mitad y el doble de tu tiempo.',
+  sCapPan:(e,b)=>'En el barrido sigues al sujeto: él solo se arrastra el error de seguimiento, '+e+' px, y son las farolas grises del fondo las que se arrastran los '+b+' px buscados, en sentido contrario. Las marcas y la segunda caja de detalle miden ese fondo.',
+  sBgBox:(px)=>'El fondo arrastrado, misma ventana y escala · '+px+' px',
   sOut:'Alguna estela se sale del fotograma.',
   fixedFocal:(f)=>'focal fija de '+f+' mm',
   vStab:(n,tipo,tsin,tcon)=>'La estabilización del cuerpo ('+tipo+') suma '+n+' pasos a tu apoyo: el máximo pasa de <b>'+tsin+'</b> a <b>'+tcon+'</b>. Corrige tu movimiento, nunca el del sujeto.',
@@ -388,7 +390,9 @@ const DICT={
   sFrame:(w)=>'The whole frame \u00b7 '+w+' px wide \u00b7 subject and trace at true scale',
   sDetail:'Detail \u00b7 leading edge \u00b7 1,200 px window',
   sShakeBox:(px)=>'Your tremor, same window and scale \u00b7 '+px+' px',
-  sCap:(w)=>'The large rectangle is the whole frame, '+w+' px wide. The subject is drawn at the size it has on the sensor and swept along its blur: its light spreads over the sweep, so the more it moves the fainter it gets. That fade is the real physics, and it is why people vanish. The dotted outline marks where it stood; the \u00bd and \u00d72 marks are half and double your time.',
+  sCap:(w)=>'The large rectangle is the whole frame, '+w+' px wide. The subject is drawn at the size it has on the sensor and swept along its blur: each pixel\u2019s opacity is the fraction of the exposure during which the subject covered it, so the more it moves the fainter it gets. That fade is the real physics, and it is why people vanish. The dotted outline marks where it stood; the \u00bd and \u00d72 marks are half and double your time.',
+  sCapPan:(e,b)=>'In panning you follow the subject: it only smears by the tracking error, '+e+' px, and it is the grey lamp posts of the background that smear the '+b+' px you are after, in the opposite direction. The marks and the second detail box measure that background.',
+  sBgBox:(px)=>'The swept background, same window and scale \u00b7 '+px+' px',
   sOut:'Some streak runs off the frame.',
   fixedFocal:(f)=>'fixed '+f+' mm lens',
   vStab:(n,tipo,tsin,tcon)=>'The body stabilisation ('+tipo+') adds '+n+' stops to your support: the longest time goes from <b>'+tsin+'</b> to <b>'+tcon+'</b>. It corrects your movement, never the subject\u2019s.',
@@ -696,14 +700,18 @@ function grafica(s,t,th){
 
 /* ---------- el fotograma: el sujeto a tamaño real y la traza que deja ----------
    El recuadro grande ES el fotograma, en la proporción 3:2 del formato. El sujeto
-   se dibuja a la escala que de verdad tiene en el sensor (una persona de 1,70 m,
-   un coche de 4,5 m…) y se barre a lo largo de su arrastre: el brillo se reparte
-   a lo largo del barrido, así que la silueta se desvanece cuanto más se mueve. Esa
-   caída es la física real y es el mecanismo por el que la gente desaparece. */
-function drawShape(ctx,x,yb,h,w,kind){
-  /* pictograma a escala: x = borde izquierdo, yb = línea de suelo, h alto, w largo (px pantalla) */
-  const rr=(x0,y0,ww,hh,r)=>{ctx.beginPath(); if(ctx.roundRect) ctx.roundRect(x0,y0,ww,hh,Math.min(r,ww/2,hh/2)); else ctx.rect(x0,y0,ww,hh); ctx.fill();};
-  const circ=(cx,cy,r)=>{ctx.beginPath(); ctx.arc(cx,cy,Math.max(0.6,r),0,6.283); ctx.fill();};
+   se dibuja a la escala que de verdad tiene en el sensor y se barre a lo largo de
+   su arrastre con la integración exacta de un movimiento uniforme: la opacidad de
+   cada píxel es la fracción del tiempo de exposición durante la que el sujeto lo
+   cubrió (un filtro de caja a lo largo del recorrido). En el barrido se sigue al
+   sujeto: él solo se arrastra el error de seguimiento y es el fondo el que corre. */
+function shapePath(x,yb,h,w,kind){
+  /* pictograma a escala como un único trazado: unión por regla nonzero, ventanas como huecos
+     x = borde izquierdo, yb = línea de suelo, h alto, w largo (px) */
+  const p=new Path2D();
+  const rr=(x0,y0,ww,hh,r)=>{ if(p.roundRect) p.roundRect(x0,y0,ww,hh,Math.max(0,Math.min(r,ww/2,hh/2))); else p.rect(x0,y0,ww,hh); };
+  const circ=(cx,cy,r)=>{ r=Math.max(0.6,r); p.moveTo(cx+r,cy); p.arc(cx,cy,r,0,6.2832); };
+  const hole=(x0,y0,ww,hh)=>{ p.moveTo(x0,y0); p.lineTo(x0,y0+hh); p.lineTo(x0+ww,y0+hh); p.lineTo(x0+ww,y0); p.closePath(); };
   if(kind==='person'){
     const r=h*0.085; circ(x+w/2, yb-h+r, r);
     rr(x+w*0.12, yb-h+2.2*r, w*0.76, h*0.46, w*0.3);          // torso
@@ -711,27 +719,58 @@ function drawShape(ctx,x,yb,h,w,kind){
     rr(x+w*0.55, yb-h*0.42, w*0.27, h*0.42, w*0.1);
   } else if(kind==='bike'){
     const rw=h*0.2; circ(x+rw, yb-rw, rw); circ(x+w-rw, yb-rw, rw);
-    ctx.fillRect(x+rw, yb-rw-h*0.03, w-2*rw, h*0.06);            // cuadro
-    const pw=w*0.22, px=x+w*0.42; const ph=h*0.78; const r=ph*0.11;
+    p.rect(x+rw, yb-rw-h*0.03, w-2*rw, h*0.06);                  // cuadro
+    const pw=w*0.22, px=x+w*0.42, ph=h*0.78, r=ph*0.11;
     circ(px+pw/2, yb-h+r, r); rr(px, yb-h+2.1*r, pw, ph*0.5, pw*0.3); rr(px+pw*0.2, yb-h*0.5, pw*0.6, h*0.3, pw*0.1);
   } else if(kind==='car'){
     rr(x, yb-h*0.55, w, h*0.42, h*0.12);                          // carrocería
     rr(x+w*0.22, yb-h, w*0.5, h*0.5, h*0.14);                     // habitáculo
     const rw=h*0.17; circ(x+w*0.22, yb-rw, rw); circ(x+w*0.78, yb-rw, rw);
+  } else if(kind==='post'){                                       // farola del fondo
+    rr(x, yb-h, w, h, w/2); rr(x-w, yb-h-w*1.2, w*3, w*2, w*0.6);
   } else {                                                       // train
     rr(x, yb-h*0.9, w, h*0.75, h*0.12);
     rr(x+w*0.02, yb-h, w*0.96, h*0.25, h*0.1);
-    const n=Math.max(2,Math.floor(w/(h*0.9))); const vw=w/n*0.55;
-    for(let k=0;k<n;k++){ ctx.save(); ctx.globalAlpha*=0.35; ctx.fillStyle="#0b0d11"; rr(x+(k+0.22)*w/n, yb-h*0.8, vw, h*0.3, h*0.04); ctx.restore(); }
+    const n=Math.max(2,Math.floor(w/(h*0.9))), vw=w/n*0.55;
+    for(let k=0;k<n;k++) hole(x+(k+0.22)*w/n, yb-h*0.8, vw, h*0.3);
   }
+  return p;
 }
-function sweep(ctx,x,yb,h,w,kind,b,color){
-  /* la silueta barrida b píxeles: N copias con la opacidad repartida, para que el
-     brillo total sea el de un sujeto que reparte su luz a lo largo del barrido */
-  if(b<0.5){ ctx.fillStyle=color(0.95); drawShape(ctx,x,yb,h,w,kind); return; }
-  const N=Math.max(3,Math.min(400,Math.round(b/2)));
-  const a=Math.max(0.012,Math.min(0.9,1.6/N));   // suelo de opacidad: la traza casi extinguida sigue insinuándose
-  for(let k=0;k<N;k++){ ctx.fillStyle=color(a); drawShape(ctx,x+b*k/(N-1),yb,h,w,kind); }
+const _offs={};
+function barrido(ctx,clip,draw,b,dir,rgb,floor,dpr){
+  /* dibuja la máscara en un lienzo auxiliar y la barre b px (pantalla) en la dirección dir con
+     una suma móvil por filas: cada píxel queda con la fracción del tiempo que estuvo cubierto */
+  const w=Math.ceil(clip.w*dpr), h=Math.ceil(clip.h*dpr), key=w+'x'+h;
+  const off=_offs[key]||(_offs[key]=document.createElement('canvas'));
+  if(off.width!==w||off.height!==h){ off.width=w; off.height=h; }
+  const c=off.getContext('2d'); c.setTransform(dpr,0,0,dpr,0,0); c.clearRect(0,0,clip.w,clip.h); c.fillStyle="#fff"; draw(c);
+  const img=c.getImageData(0,0,w,h), d=img.data, bi=Math.round(b*dpr);
+  if(bi>=2){
+    const row=new Float32Array(w);
+    for(let y=0;y<h;y++){
+      const o=y*w*4; for(let x=0;x<w;x++) row[x]=d[o+x*4+3];
+      let acc=0;
+      if(dir>0){ for(let x=0;x<w;x++){ acc+=row[x]; if(x>=bi) acc-=row[x-bi]; d[o+x*4+3]=acc/bi; } }
+      else     { for(let x=w-1;x>=0;x--){ acc+=row[x]; if(x+bi<w) acc-=row[x+bi]; d[o+x*4+3]=acc/bi; } }
+    }
+  }
+  const fl=Math.round(255*floor);
+  for(let i=0;i<d.length;i+=4){ const a=d[i+3]; if(a){ d[i]=rgb[0]; d[i+1]=rgb[1]; d[i+2]=rgb[2]; if(a<fl) d[i+3]=fl; } }
+  c.putImageData(img,0,0);
+  ctx.drawImage(off, clip.x, clip.y, clip.w, clip.h);
+}
+function escena(ctx,clip,win,S,o){
+  /* la escena en píxeles de sensor: suelo, farolas del fondo (si las hay) y el sujeto,
+     vista a través de la ventana win = {x0,y0,sc}: pantalla = clip + (sensor − origen)·sc */
+  const sc=win.sc, X=v=>clip.x+(v-win.x0)*sc, Y=v=>clip.y+(v-win.y0)*sc;
+  ctx.save(); ctx.beginPath(); ctx.rect(clip.x,clip.y,clip.w,clip.h); ctx.clip();
+  ctx.strokeStyle="rgba(255,255,255,.07)"; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(clip.x,Y(S.ys)+.5); ctx.lineTo(clip.x+clip.w,Y(S.ys)+.5); ctx.stroke();
+  if(S.posts.length)                                                                     // el fondo corre al revés que el sujeto
+    barrido(ctx,clip,c=>{ for(const xp of S.posts) c.fill(shapePath(X(xp)-clip.x, Y(S.ys)-clip.y, S.hPost*sc, S.wPost*sc, 'post')); }, o.bBg*sc, -1, o.bg, o.floor, o.dpr);
+  barrido(ctx,clip,c=>{ c.fill(shapePath(X(S.xs)-clip.x, Y(S.ys)-clip.y, S.hSen*sc, S.wSen*sc, S.kind)); }, o.bSub*sc, 1, o.color, o.floor, o.dpr);
+  ctx.strokeStyle=o.ref; ctx.setLineDash([3,3]); ctx.lineWidth=1;                      // referencia: dónde estaba quieto
+  ctx.strokeRect(X(S.xs)-.5, Y(S.ys)-S.hSen*sc-.5, Math.max(2,S.wSen*sc)+1, S.hSen*sc+1); ctx.setLineDash([]);
+  ctx.restore();
 }
 function franja(s,t){
   const cv=$('strip'), dpr=Math.min(2,window.devicePixelRatio||1);
@@ -740,73 +779,69 @@ function franja(s,t){
   const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.fillStyle="#07090d"; ctx.fillRect(0,0,W,H);
   ctx.font="12px 'IBM Plex Mono', monospace"; ctx.textBaseline="middle";
-  const amber=a=>`rgba(232,176,75,${a})`, cyan=a=>`rgba(94,200,216,${a})`;
+  const AMB=[232,176,75], CYN=[94,200,216], GRY=[128,140,154], FLOOR=0.08;
+  const pan = !!(s.tec && s.tec.id==='tPan');
 
-  /* --- geometría: fotograma 3:2 y sujeto a escala --- */
-  const fx=18, fy=34, fw=720, fh=480, esc=fw/s.cam.w;
-  const kind=s.shapeId||'person', sh=s.shape||SHAPES.person;
+  /* --- la escena, en píxeles de sensor --- */
+  const camW=s.cam.w, camH=camW*2/3;
   const pxPorM=s.f/(s.d*s.cam.p*1e-3);                 // px de sensor por metro en el plano del sujeto
-  const hSen=sh.H*pxPorM, wSen=sh.W*pxPorM;            // sujeto en px de sensor
-  const bNow=blurPx(s.f,s.v,t,s.d,s.cam.p), bHalf=bNow/2, bDbl=bNow*2;   // px de sensor
-  const x0=fx+fw*0.12, yb=fy+fh*0.82;                  // borde izquierdo y línea de suelo
-  const hS=hSen*esc, wS=wSen*esc;
+  const kind=s.shapeId||'person', sh=s.shape||SHAPES.person;
+  const bNow=blurPx(s.f,s.v,t,s.d,s.cam.p);            // el arrastre buscado
+  const bSub = pan ? bNow*TRACK : bNow;                // lo que se arrastra el sujeto
+  const bBg  = pan ? bNow : 0;                         // lo que se arrastra el fondo
+  const S={ kind, xs:camW*0.12, ys:camH*0.82, hSen:sh.H*pxPorM, wSen:sh.W*pxPorM,
+            posts: pan ? [0.2,0.45,0.7,0.95].map(k=>k*camW) : [], hPost:3*pxPorM, wPost:0.15*pxPorM };
+  let xRef=S.xs+S.wSen;                                // de dónde nacen las marcas: el borde delantero del sujeto…
+  if(pan){ const c=S.posts.filter(x=>x>S.xs+S.wSen+0.03*camW); xRef=c.length?c[0]:S.posts[S.posts.length-1]; }   // …o la farola de referencia
+  const shk = s.st>=99 ? 0 : shakePx(s.f,t,s.st,s.cam.p);
 
+  /* --- el fotograma --- */
+  const fx=18, fy=34, fw=720, fh=480, esc=fw/camW;
+  const X=v=>fx+v*esc, Y=v=>fy+v*esc;
   ctx.fillStyle="#0b0d11"; ctx.fillRect(fx,fy,fw,fh);
+  escena(ctx,{x:fx,y:fy,w:fw,h:fh},{x0:0,y0:0,sc:esc},S,{bSub,bBg,color:AMB,bg:GRY,ref:"rgba(255,217,138,.9)",floor:FLOOR,dpr});
+  /* marcas de ½, tu tiempo y ×2 sobre la traza que manda (la del sujeto, o la del fondo en el barrido) */
+  const yTop=Math.max(fy+52, Y(S.ys-S.hSen));
   ctx.save(); ctx.beginPath(); ctx.rect(fx,fy,fw,fh); ctx.clip();
-  ctx.strokeStyle="rgba(255,255,255,.07)"; ctx.beginPath(); ctx.moveTo(fx,yb+.5); ctx.lineTo(fx+fw,yb+.5); ctx.stroke();   // suelo
-  sweep(ctx,x0,yb,hS,wS,kind,bNow*esc,amber);          // la traza real
-  ctx.strokeStyle="rgba(255,217,138,.9)"; ctx.lineWidth=1;                                                             // referencia: dónde estaba
-  ctx.save(); ctx.globalAlpha=1; ctx.fillStyle="rgba(0,0,0,0)"; ctx.restore();
-  ctx.setLineDash([3,3]); ctx.strokeRect(x0-.5, yb-hS-.5, Math.max(2,wS)+1, hS+1); ctx.setLineDash([]);
-  /* marcas de ½ y ×2 del tiempo, para ver la sensibilidad sin apilar tres sujetos */
-  const yTop=Math.max(fy+52, yb-hS);                    // si el sujeto llena el alto, los rótulos van dentro del cuadro
-  const marca=(bs,lab,alpha,fila)=>{ const xe=x0+wS+bs*esc; if(xe>fx+fw-2) return false;
+  const marca=(bs,lab,alpha,fila)=>{ const xe = pan ? X(xRef-bs) : X(xRef+bs); if(xe>fx+fw-2||xe<fx+2) return;
     const yl=yTop-10-fila*14;
-    ctx.strokeStyle=`rgba(232,176,75,${alpha})`; ctx.setLineDash([2,3]); ctx.beginPath(); ctx.moveTo(xe,yl+7); ctx.lineTo(xe,yb+6); ctx.stroke(); ctx.setLineDash([]);
-    ctx.fillStyle=`rgba(232,176,75,${Math.min(1,alpha+0.3)})`; ctx.textAlign="left"; ctx.fillText(lab, xe+4, yl); return true; };
-  marca(bDbl, LBL('sTick','×2',Math.round(bDbl)), .45, 0);
-  marca(bNow, LBL('sTick',fmtT(t),Math.round(bNow)), .95, 1);
-  marca(bHalf, LBL('sTick','½',Math.round(bHalf)), .45, 2);
-  ctx.restore();
-  let sale = x0+wS+bNow*esc > fx+fw-2;
-  if(sale){ ctx.fillStyle="#e2705f"; ctx.fillRect(fx+fw-3, yb-hS-10, 3, Math.min(hS+16, fh)); }
+    ctx.strokeStyle=`rgba(232,176,75,${alpha})`; ctx.setLineDash([2,3]); ctx.beginPath(); ctx.moveTo(xe,yl+7); ctx.lineTo(xe,Y(S.ys)+6); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle=`rgba(232,176,75,${Math.min(1,alpha+0.3)})`; ctx.textAlign=pan?"right":"left"; ctx.fillText(lab, pan?xe-4:xe+4, yl); };
+  marca(bNow*2, LBL('sTick','×2',Math.round(bNow*2)), .45, 0);
+  marca(bNow,   LBL('sTick',fmtT(t),Math.round(bNow)), .95, 1);
+  marca(bNow/2, LBL('sTick','½',Math.round(bNow/2)), .45, 2);
+  ctx.restore(); ctx.textAlign="left";
+  const sale = !pan && S.xs+S.wSen+bSub > camW;
+  if(sale){ ctx.fillStyle="#e2705f"; ctx.fillRect(fx+fw-3, Y(S.ys-S.hSen)-10, 3, Math.min(S.hSen*esc+16, fh)); }
   /* regla de 1 m en el plano del sujeto */
   const m1=pxPorM*esc;
   if(m1>6 && m1<fw*0.6){ ctx.strokeStyle="#6b7684"; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(fx+14,fy+fh-16); ctx.lineTo(fx+14+m1,fy+fh-16); ctx.stroke();
-    ctx.fillStyle="#6b7684"; ctx.textAlign="left"; ctx.fillText("1 m", fx+18+m1, fy+fh-16); }
-  /* ventana de aumento: lo que amplía la caja de detalle */
-  const dx=760, dy=fy, dw=W-dx-18, dh=214, escD=dw/1200, winH=dh/escD;   // ventana de 1200 px de ancho en el sensor
-  const cxS=x0+wS, cyS=yb-hS/2;                                         // borde delantero del sujeto, a media altura (pantalla)
-  ctx.strokeStyle="rgba(255,217,138,.5)"; ctx.setLineDash([4,3]); ctx.lineWidth=1;
-  ctx.strokeRect(cxS-600*esc, cyS-winH*esc/2, 1200*esc, winH*esc); ctx.setLineDash([]);
+    ctx.fillStyle="#6b7684"; ctx.fillText("1 m", fx+18+m1, fy+fh-16); }
+  /* ventanas de aumento: lo que amplían las cajas de detalle */
+  const dx=760, dy=fy, dw=W-dx-18, dh=214, escD=dw/1200, winH=dh/escD;   // 1200 px de sensor de ancho
+  const cy=S.ys-S.hSen/2;
+  const winA={x0:S.xs+S.wSen-600, y0:cy-winH/2, sc:escD};               // borde delantero del sujeto
+  const winB= pan ? {x0:xRef-600, y0:cy-winH/2, sc:escD} : winA;        // la farola de referencia, en el barrido
+  const ventana=(w,col)=>{ ctx.strokeStyle=col; ctx.setLineDash([4,3]); ctx.lineWidth=1; ctx.strokeRect(X(w.x0), Y(w.y0), 1200*esc, winH*esc); ctx.setLineDash([]); };
+  ventana(winA,"rgba(255,217,138,.5)"); if(pan) ventana(winB,"rgba(160,172,186,.55)");
   ctx.strokeStyle="#3a4552"; ctx.lineWidth=1; ctx.strokeRect(fx+.5,fy+.5,fw-1,fh-1);
-  ctx.fillStyle="#98a3b0"; ctx.textAlign="left";
-  ctx.fillText(LBL('sFrame',nf(s.cam.w,0)), fx, 18);
-  ctx.fillStyle="#6b7684";
-  ctx.fillText(LBL('sSubj',LBL('sh'+kind.charAt(0).toUpperCase()+kind.slice(1)),nf(hSen,0),nf(wSen,0)), fx, fy+fh+16);
+  ctx.fillStyle="#98a3b0"; ctx.fillText(LBL('sFrame',nf(camW,0)), fx, 18);
+  ctx.fillStyle="#6b7684"; ctx.fillText(LBL('sSubj',LBL('sh'+kind.charAt(0).toUpperCase()+kind.slice(1)),nf(S.hSen,0),nf(S.wSen,0)), fx, fy+fh+16);
 
-  /* --- detalle: la misma ventana de 1200 px, ampliada --- */
-  const caja=(y,label,b,color)=>{
+  /* --- cajas de detalle: la misma escena por una ventana de 1200 px --- */
+  const caja=(y,label,win,o)=>{
     ctx.fillStyle="#0b0d11"; ctx.fillRect(dx,y,dw,dh);
-    ctx.save(); ctx.beginPath(); ctx.rect(dx,y,dw,dh); ctx.clip();
-    /* origen de la ventana en px de sensor: centrada en el sujeto */
-    const oxS=(cxS-fx)/esc-600, oyS=(cyS-fy)/esc-winH/2;
-    const X=v=>dx+(v-oxS)*escD, Y=v=>y+(v-oyS)*escD;
-    const xs=(x0-fx)/esc, ybs=(yb-fy)/esc;
-    ctx.strokeStyle="rgba(255,255,255,.07)"; ctx.beginPath(); ctx.moveTo(dx,Y(ybs)+.5); ctx.lineTo(dx+dw,Y(ybs)+.5); ctx.stroke();
-    sweep(ctx,X(xs),Y(ybs),hSen*escD,wSen*escD,kind,b*escD,color);
-    ctx.strokeStyle=color(.9); ctx.setLineDash([3,3]); ctx.strokeRect(X(xs)-.5,Y(ybs)-hSen*escD-.5,Math.max(2,wSen*escD)+1,hSen*escD+1); ctx.setLineDash([]);
-    if(X(xs)+wSen*escD+b*escD>dx+dw){ ctx.fillStyle="#e2705f"; ctx.fillRect(dx+dw-3,y,3,dh); }
-    ctx.restore();
-    ctx.strokeStyle="#3a4552"; ctx.strokeRect(dx+.5,y+.5,dw-1,dh-1);
-    ctx.fillStyle="#98a3b0"; ctx.textAlign="left"; ctx.font="12.5px 'IBM Plex Mono', monospace";
-    ctx.fillText(label, dx, y-14); ctx.font="12px 'IBM Plex Mono', monospace";
+    escena(ctx,{x:dx,y:y,w:dw,h:dh},win,S,o);
+    if(!pan && (S.xs+S.wSen+o.bSub-win.x0)*escD>dw){ ctx.fillStyle="#e2705f"; ctx.fillRect(dx+dw-3,y,3,dh); }
+    ctx.strokeStyle="#3a4552"; ctx.lineWidth=1; ctx.strokeRect(dx+.5,y+.5,dw-1,dh-1);
+    ctx.fillStyle="#98a3b0"; ctx.font="12.5px 'IBM Plex Mono', monospace"; ctx.fillText(label, dx, y-14); ctx.font="12px 'IBM Plex Mono', monospace";
   };
-  caja(dy, LBL('sDetail'), bNow, amber);
-  const shk = s.st>=99 ? 0 : shakePx(s.f,t,s.st,s.cam.p);
-  caja(dy+dh+34, LBL('sShakeBox', nf(shk,0)), shk, cyan);
+  caja(dy, LBL('sDetail'), winA, {bSub,bBg,color:AMB,bg:GRY,ref:"rgba(232,176,75,.9)",floor:FLOOR,dpr});
+  if(pan) caja(dy+dh+34, LBL('sBgBox',nf(bNow,0)), winB, {bSub,bBg,color:AMB,bg:GRY,ref:"rgba(232,176,75,.9)",floor:FLOOR,dpr});
+  else    caja(dy+dh+34, LBL('sShakeBox',nf(shk,0)), winA, {bSub:shk,bBg:0,color:CYN,bg:GRY,ref:"rgba(94,200,216,.9)",floor:FLOOR,dpr});
 
-  $('striplg').innerHTML = `<span>${LBL('sCap',nf(s.cam.w,0))}</span>`+
+  $('striplg').innerHTML = `<span>${LBL('sCap',nf(camW,0))}</span>`+
+    (pan?`<span>${LBL('sCapPan',nf(bSub,0),nf(bNow,0))}</span>`:"")+
     (sale?`<span style="color:#e2705f">${LBL('sOut')}</span>`:"");
 }
 
