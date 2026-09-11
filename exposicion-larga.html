@@ -100,6 +100,9 @@ tr.sel td{background:rgba(232,176,75,.09)}
 dl{margin:0 0 14px;max-width:74ch}dt{font-weight:600;margin-top:12px;color:var(--fg)}dd{color:var(--fg2);margin-top:3px}
 footer{border-top:1px solid var(--line);margin-top:52px;padding-top:18px;font-size:12.5px;color:var(--fg3)}
 @media(max-width:620px){table{font-size:12px}th,td{padding:6px 7px}}
+  .f .chk{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);padding:7px 0}
+  .f .chk input{width:16px;height:16px;accent-color:var(--gold);flex:0 0 auto}
+  .f input:disabled{opacity:.5;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -133,6 +136,7 @@ footer{border-top:1px solid var(--line);margin-top:52px;padding-top:18px;font-si
     <div class="f"><label for="vel"><span data-lang="es">Velocidad del sujeto: </span><span data-lang="en">Subject speed: </span><span class="v" id="velV">5,0 m/s</span></label><input id="vel" type="range" min="0" max="40" step="0.1" value="5">
       <div class="chips" id="velpre"></div></div>
     <div class="f"><label for="sup"><span data-lang="es">Apoyo</span><span data-lang="en">Support</span></label><select id="sup"></select></div>
+    <div class="f"><label for="stab"><span data-lang="es">Estabilización del cuerpo</span><span data-lang="en">Body stabilisation</span></label><label class="chk"><input id="stab" type="checkbox" checked><span id="stabTxt"></span></label></div>
     <div class="f"><label for="ev"><span data-lang="es">Luz de la escena: </span><span data-lang="en">Scene light: </span><span class="v" id="evV">EV 12</span></label><input id="ev" type="range" min="-2" max="16" step="1" value="12">
       <div class="chips" id="evpre"></div></div>
     <div class="f"><label for="ap"><span data-lang="es">Diafragma</span><span data-lang="en">Aperture</span></label><select id="ap"></select></div>
@@ -152,9 +156,9 @@ footer{border-top:1px solid var(--line);margin-top:52px;padding-top:18px;font-si
 
 <h2 data-lang="es">Lo que vas a ver</h2>
 <h2 data-lang="en">What you are going to see</h2>
-<p data-lang="es">Una franja del sensor de 1200 píxeles de ancho, con el sujeto y su rastro a la escala que de verdad va a tener. Arriba, lo que deja el tiempo elegido; abajo, lo que dejaría el doble y la mitad. Si la raya no se ve, el tiempo es corto para el efecto; si se sale del recuadro, el sujeto cruza el encuadre y se pierde.</p>
-<p data-lang="en">A 1200-pixel-wide strip of the sensor, with the subject and its trail at the scale it will actually have. On top, what the chosen time leaves; below, what twice and half that time would leave. If the streak cannot be seen, the time is short for the effect; if it runs off the box, the subject crosses the frame and is lost.</p>
-<canvas class="strip" id="strip" width="1200" height="270"></canvas>
+<p data-lang="es">El recuadro grande es <b>el fotograma entero</b>, con la proporción del formato, y las estelas van dentro a escala real: así se ve cuánto encuadre cruza el rastro. Cuatro filas, de sin movimiento al doble de tu tiempo, cada una con su longitud en píxeles y en porcentaje del ancho. A la derecha, dos detalles de 1200 píxeles del sensor: tu estela ampliada y, debajo, tu propio temblor al mismo tiempo y escala. Si la raya no se ve, el tiempo es corto para el efecto; si se sale del fotograma, el sujeto lo cruza entero y se pierde.</p>
+<p data-lang="en">The large rectangle is <b>the whole frame</b>, in the format’s proportion, and the streaks are drawn inside at true scale: that shows how much of the frame the trail crosses. Four rows, from no movement to twice your time, each with its length in pixels and as a percentage of the width. On the right, two 1,200-pixel details of the sensor: your streak enlarged and, below it, your own tremor at the same time and scale. If the streak cannot be seen, the time is short for the effect; if it runs off the frame, the subject crosses it entirely and is lost.</p>
+<canvas class="strip" id="strip" width="1200" height="600"></canvas>
 <div class="legend" id="striplg"></div>
 
 <h2 data-lang="es">Arrastre frente a tiempo</h2>
@@ -181,6 +185,7 @@ footer{border-top:1px solid var(--line);margin-top:52px;padding-top:18px;font-si
 <p data-lang="es">La escalera de apoyos, de menos a más. Cada peldaño divide la velocidad angular del temblor por dos, es decir, dobla el tiempo que aguantas. Los cuatro primeros no cuestan nada y son los de la chuleta: apoyarse en un muro, tensar la correa del cuello contra el pecho, cerrar los codos. La estabilización multiplica lo anterior, no lo sustituye.</p>
 <p data-lang="en">The ladder of supports, from least to most. Each rung halves the angular speed of your tremor, that is, doubles the time you can hold. The first four cost nothing and are the ones from the cheat sheet: leaning on a wall, tensioning the neck strap against your chest, tucking your elbows in. Stabilisation multiplies all of that, it does not replace it.</p>
 <div class="scroll"><table><thead id="supHead"></thead><tbody id="supBody"></tbody></table></div>
+<p class="note" id="supNote"></p>
 <p class="note" data-lang="es">Y el truco que no es un apoyo: <b>disparar en ráfaga</b>. El temblor es aleatorio, así que de ocho fotogramas hay uno en el que la mano estaba casi quieta. No alarga el tiempo medio, mejora la cola: con ocho intentos, la probabilidad de que al menos uno salga dentro del criterio pasa de un tercio a más de nueve de cada diez. No sirve cuando el arrastre que buscas es el del sujeto, porque entonces cada fotograma es una foto distinta.</p>
 <p class="note" data-lang="en">And the trick that is not a support: <b>shooting a burst</b>. Tremor is random, so out of eight frames there is one in which the hand was nearly still. It does not lengthen the average time, it improves the tail: with eight attempts, the chance that at least one lands within the criterion goes from a third to better than nine in ten. It is no use when the blur you want is the subject's, because then every frame is a different photograph.</p>
 
@@ -281,7 +286,18 @@ const DICT={
   tTrail:'4 · Estelas de luz', tZoom:'5 · Zoom burst', tGhost:'6 · Ciudad desierta', tFree:'Libre: elige tú el arrastre',
   /* apoyos */
   sHand:'a pulso, brazos sueltos', sElbow:'codos pegados al cuerpo', sStrap:'correa tensada contra el cuello',
-  sLean:'apoyado en un muro o barandilla', sOis:'+ OIS del Q3 43 (2 pasos)', sIbis:'+ IBIS del SL3-S (4 pasos)', sTri:'trípode',
+  sLean:'apoyado en un muro o barandilla', sTri:'trípode',
+  stabNone:'este cuerpo no la tiene', stabOis:'OIS del objetivo, 2 pasos', stabIbis:'IBIS, 4 pasos',
+  supWith:(n,tipo)=>'Los tiempos de la tabla ya incluyen los '+n+' pasos de la estabilización del cuerpo ('+tipo+'), por eso la columna de pasos empieza en '+n+' y no en cero. Apágala arriba para ver la escalera desnuda.',
+  supWithout:'Los tiempos son los de tus manos solas. Si tu cuerpo tiene estabilización, enciéndela arriba y toda la tabla se corre hacia tiempos más largos.',
+  sFrame:(w)=>'El fotograma entero · '+w+' px de ancho · las estelas a escala real',
+  sDetail:'Detalle · 1200 px del sensor',
+  sShakeBox:(px)=>'Tu temblor al mismo tiempo y escala · '+px+' px',
+  sCap:(w)=>'El recuadro grande es el fotograma completo, '+w+' px de ancho, y las estelas van a escala real dentro de él. La geometría está a escala; el brillo no: el rastro real se apaga como 1/n, que es justo por lo que la gente desaparece.',
+  sOut:'Alguna estela se sale del fotograma.',
+  fixedFocal:(f)=>'focal fija de '+f+' mm',
+  vStab:(n,tipo,tsin,tcon)=>'La estabilización del cuerpo ('+tipo+') suma '+n+' pasos a tu apoyo: el máximo pasa de <b>'+tsin+'</b> a <b>'+tcon+'</b>. Corrige tu movimiento, nunca el del sujeto.',
+  vStabOff:(tipo)=>'Este cuerpo tiene '+tipo+' y la tienes desactivada. Enciéndela y el tiempo que aguantas se multiplica.',
   /* presets */
   pPed:'peatón 1,4', pRun:'corriendo 3', pBike:'bici 5', pCity:'coche ciudad 14', pRoad:'carretera 25', pTrain:'tren 40',
   eNight:'noche urbana', eBlue:'hora azul', eShade:'sombra', eCloud:'nublado', eSun:'sol',
@@ -324,7 +340,18 @@ const DICT={
   tPan:'1 · Panning the subject', tFlash:'2 · Flash freeze', tStatic:'3 · Static subject, moving scene',
   tTrail:'4 · Light trails', tZoom:'5 · Zoom burst', tGhost:'6 · Ghost town', tFree:'Free: pick the blur yourself',
   sHand:'handheld, arms loose', sElbow:'elbows tucked in', sStrap:'strap tensioned against the neck',
-  sLean:'leaning on a wall or railing', sOis:'+ Q3 43 OIS (2 stops)', sIbis:'+ SL3-S IBIS (4 stops)', sTri:'tripod',
+  sLean:'leaning on a wall or railing', sTri:'tripod',
+  stabNone:'this body has none', stabOis:'lens OIS, 2 stops', stabIbis:'IBIS, 4 stops',
+  supWith:(n,tipo)=>'The times in the table already include the '+n+' stops of the body stabilisation ('+tipo+'), which is why the stops column starts at '+n+' and not at zero. Switch it off above to see the bare ladder.',
+  supWithout:'The times are those of your hands alone. If your body has stabilisation, switch it on above and the whole table shifts towards longer times.',
+  sFrame:(w)=>'The whole frame \u00b7 '+w+' px wide \u00b7 streaks at true scale',
+  sDetail:'Detail \u00b7 1,200 px of the sensor',
+  sShakeBox:(px)=>'Your tremor at the same time and scale \u00b7 '+px+' px',
+  sCap:(w)=>'The large rectangle is the whole frame, '+w+' px wide, and the streaks are drawn inside it at true scale. Geometry is to scale; brightness is not: the real trace fades as 1/n, which is why people vanish.',
+  sOut:'Some streak runs off the frame.',
+  fixedFocal:(f)=>'fixed '+f+' mm lens',
+  vStab:(n,tipo,tsin,tcon)=>'The body stabilisation ('+tipo+') adds '+n+' stops to your support: the longest time goes from <b>'+tsin+'</b> to <b>'+tcon+'</b>. It corrects your movement, never the subject\u2019s.',
+  vStabOff:(tipo)=>'This body has '+tipo+' and you have it switched off. Turn it on and the time you can hold multiplies.',
   pPed:'pedestrian 1.4', pRun:'running 3', pBike:'bike 5', pCity:'city car 14', pRoad:'road 25', pTrain:'train 40',
   eNight:'city night', eBlue:'blue hour', eShade:'shade', eCloud:'overcast', eSun:'sun',
   px:'px', frames:'widths', stops:'stops', noFilter:'no filter', bulb:'bulb (beyond 30 s)',
@@ -367,15 +394,14 @@ const nf=(x,d)=>Number.isFinite(x)?x.toLocaleString(LOC(),{minimumFractionDigits
 /* ---------- datos ---------- */
 const CAMS=[
   {id:'m11',  p:3.76, w:9528, stab:0, color:'#6fbf73'},
-  {id:'q3',   p:3.76, w:9520, stab:2, color:'#e8b04b'},
+  {id:'q3',   p:3.76, w:9520, stab:2, fixed:43, color:'#e8b04b'},
   {id:'sl3s', p:5.94, w:6000, stab:4, color:'#5ec8d8'},
   {id:'sl96', p:2.97, w:12000, stab:4, color:'#a98cd8'}
 ];
 /* Escalera de apoyo. Cada peldaño divide ω por dos. Los cuatro primeros son
    los trucos de la chuleta; los dos siguientes son estabilización del cuerpo. */
 const SUPS=[
-  {id:'sHand', st:0}, {id:'sElbow', st:1}, {id:'sStrap', st:2}, {id:'sLean', st:3},
-  {id:'sOis', st:2, add:true}, {id:'sIbis', st:4, add:true}, {id:'sTri', st:99}
+  {id:'sHand', st:0}, {id:'sElbow', st:1}, {id:'sStrap', st:2}, {id:'sLean', st:3}, {id:'sTri', st:99}
 ];
 const W0=0.03;                       // rad/s de temblor a pulso limpio
 const CRIT=2;                        // px de arrastre que se considera nítido
@@ -390,7 +416,9 @@ const TECS=[
   {id:'tGhost',  need:'needGhost',  ghost:true, K:40},
   {id:'tFree',   need:'needFree',   px:110, free:true}
 ];
-const VPRE=[['pPed',1.4],['pRun',3],['pBike',5],['pCity',14],['pRoad',25],['pTrain',40]];
+/* Cada caso de uso trae la distancia típica a la que se fotografía: un peatón
+   se retrata de cerca y un tren desde el andén de enfrente. Se puede cambiar. */
+const VPRE=[['pPed',1.4,6],['pRun',3,8],['pBike',5,10],['pCity',14,15],['pRoad',25,30],['pTrain',40,35]];
 const EVPRE=[['eNight',5],['eBlue',8],['eShade',11],['eCloud',13],['eSun',15]];
 const APS=[1.4,2,2.8,4,5.6,8,11,16,22];
 const NDS=[[1,'ND2'],[2,'ND4'],[3,'ND8'],[6,'ND64'],[10,'ND1000'],[13,'ND8000'],[16,'ND64000']];
@@ -408,7 +436,11 @@ function fmtT(t){
   if(t>=1) return nf(t,t<10?1:0)+" s";
   return "1/"+Math.round(1/t);
 }
-function supStops(sup,cam){ return sup.st===99?99:(sup.add? (SUPS[3].st + (sup.id==='sOis'?2:4)) : sup.st); }
+/* La estabilización es del CUERPO, no un peldaño de apoyo: se suma a lo que
+   hagas con las manos. El Q3 43 declara dos pasos de OIS y el SL3-S cuatro de
+   IBIS; la M11 no tiene. Corrigen tu movimiento, nunca el del sujeto. */
+function stabOn(){ const c=$('stab'); return !!(c && !c.disabled && c.checked); }
+function supStops(sup,cam){ return sup.st===99 ? 99 : sup.st + (stabOn()&&cam.stab?cam.stab:0); }
 
 /* ---------- estado ---------- */
 function rellenar(){
@@ -419,10 +451,11 @@ function rellenar(){
   sup.innerHTML=SUPS.map((x,i)=>`<option value="${i}">${LBL(x.id)}</option>`).join('');
   ap.innerHTML=APS.map(x=>`<option value="${x}">f/${x}</option>`).join('');
   tec.value=keep[0]||'tPan'; cam.value=keep[1]||'m11'; sup.value=keep[2]||'1'; ap.value=keep[3]||'5.6';
-  $('velpre').innerHTML=VPRE.map(([k,v])=>`<button type="button" data-v="${v}">${LBL(k)}</button>`).join('');
+  $('velpre').innerHTML=VPRE.map(([k,v,d])=>`<button type="button" data-v="${v}" data-d="${d}">${LBL(k)}</button>`).join('');
   $('evpre').innerHTML=EVPRE.map(([k,v])=>`<button type="button" data-ev="${v}">${LBL(k)}</button>`).join('');
-  [].forEach.call($('velpre').children,b=>b.onclick=()=>{$('vel').value=b.dataset.v; update();});
+  [].forEach.call($('velpre').children,b=>b.onclick=()=>{$('vel').value=b.dataset.v; $('dist').value=b.dataset.d; update();});
   [].forEach.call($('evpre').children,b=>b.onclick=()=>{$('ev').value=b.dataset.ev; update();});
+  const ck=$('stab'); if(ck && !ck.dataset.w){ ck.addEventListener('change',function(){ ck.dataset.pref = ck.checked?'1':'0'; update(); }); ck.dataset.w='1'; }
 }
 function lee(){
   const tec=TECS.find(x=>x.id===$('tec').value)||TECS[0];
@@ -449,7 +482,31 @@ function tPedida(s){
   return tForBlur(s.f,s.v,pideBlur(s),s.d,s.cam.p);
 }
 
+/* El cuerpo manda sobre dos controles: el Q3 43 tiene focal fija, y la
+   estabilización solo se ofrece si el cuerpo la lleva. */
+function sincronizaCuerpo(){
+  const cam=CAMS.find(x=>x.id===$('cam').value)||CAMS[0];
+  const foc=$('focal'), chk=$('stab'), txt=$('stabTxt');
+  if(cam.fixed){
+    if(!foc.disabled) foc.dataset.prev=foc.value;      // guarda la focal del usuario
+    foc.value=cam.fixed; foc.disabled=true; foc.title=LBL('fixedFocal',cam.fixed);
+  } else {
+    if(foc.disabled && foc.dataset.prev) foc.value=foc.dataset.prev;   // y la devuelve
+    foc.disabled=false; foc.removeAttribute('title');
+  }
+  /* La preferencia del usuario se guarda aparte: pasar por un cuerpo sin
+     estabilización no debe apagarla para siempre en los que sí la tienen. */
+  if(chk.dataset.pref===undefined) chk.dataset.pref = chk.checked ? '1' : '0';
+  if(cam.stab){
+    chk.disabled=false; chk.checked = chk.dataset.pref==='1';
+    txt.textContent=LBL(cam.stab>=4?'stabIbis':'stabOis');
+  } else {
+    chk.disabled=true; chk.checked=false; txt.textContent=LBL('stabNone');
+  }
+}
+
 function update(){
+  sincronizaCuerpo();
   const s=lee();
   $('velV').textContent=nf(s.v,1)+" m/s";
   $('evV').textContent="EV "+s.ev;
@@ -491,6 +548,11 @@ function update(){
     h+=`<p>${LBL('vHoldNo',fmtT(th),LBL(s.sup.id),falta)}</p><p>${LBL('vShake',nf(sh,0))}</p>`;
     const q=Math.min(0.95,Math.exp(-Math.pow(t/th,2)/2));
     h+=`<p>${LBL('vBurst',8,nf(100*(1-Math.pow(1-q,8)),0))}</p>`;
+  }
+  if(s.cam.stab && s.st<99){
+    const tipo=LBL(s.cam.stab>=4?'stabIbis':'stabOis');
+    if(stabOn()) h+=`<p>${LBL('vStab',s.cam.stab,tipo,fmtT(tHold(s.f,s.sup.st,s.cam.p,CRIT)),fmtT(th))}</p>`;
+    else h+=`<p>${LBL('vStabOff',tipo)}</p>`;
   }
   h+=`<h4>${LANG()==='en'?'Getting there':'Cómo llegar'}</h4>`;
   if(stopsNd<=0.3) h+=`<p>${LBL('vNdNo')}</p>`;
@@ -534,12 +596,16 @@ function tablaApoyos(s){
   const th=LBL('thSup');
   $('supHead').innerHTML="<tr>"+th.map((x,i)=>`<th class="${i>0?'num':''}">${x}</th>`).join("")+"</tr>";
   $('supBody').innerHTML=SUPS.map((x,i)=>{
-    const st = x.add ? (SUPS[3].st + (x.id==='sOis'?2:4)) : x.st;
+    const st = x.st===99 ? 99 : x.st + (stabOn()&&s.cam.stab?s.cam.stab:0);
     const w = st>=99 ? 0 : omega(st);
     const cel = [28,35,50,90].map(f=>st>=99?"—":fmtT(tHold(f,st,s.cam.p,CRIT)));
     return `<tr class="${i===+$('sup').value?'sel':''}"><td>${LBL(x.id)}</td><td class="num">${st>=99?'∞':st}</td><td class="num">${st>=99?'0':nf(w,4)}</td>`+
            cel.map(c=>`<td class="num">${c}</td>`).join("")+"</tr>";
   }).join("");
+  const nota=$('supNote');
+  if(nota) nota.innerHTML = (s.cam.stab && stabOn())
+    ? LBL('supWith', s.cam.stab, LBL(s.cam.stab>=4?'stabIbis':'stabOis'))
+    : LBL('supWithout');
 }
 
 /* ---------- gráfica: arrastre y trepidación frente al tiempo ---------- */
@@ -573,50 +639,105 @@ function grafica(s,t,th){
     `<span><i style="border-color:#dfe4ea"></i>${LBL('gYour')} ${fmtT(t)}</span>`;
 }
 
-/* ---------- franja: el rastro a escala real ---------- */
+/* ---------- el fotograma: las estelas dentro del rectángulo del sensor ----------
+   El recuadro grande ES el fotograma completo, con la proporción 3:2 del formato
+   de 36 × 24 mm, y las estelas van dibujadas dentro a escala real. Así se ve de
+   una vez cuánto fotograma cruza el rastro, que es la pregunta que importa. A la
+   derecha, un detalle de 1200 px del sensor para los arrastres pequeños, que a
+   escala de fotograma completo serían un punto. */
 function franja(s,t){
   const cv=$('strip'), dpr=Math.min(2,window.devicePixelRatio||1);
-  const W=1200,H=270, filas=[[LBL('sRef'),0],[LBL('sNow'),t],[LBL('sHalf'),t/2],[LBL('sDouble'),t*2]];
+  const W=1200,H=600;
   cv.width=W*dpr; cv.height=H*dpr; cv.style.aspectRatio=W+" / "+H;
   const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
-  ctx.fillStyle="#000"; ctx.fillRect(0,0,W,H);
-  ctx.font="11px 'IBM Plex Mono', monospace"; ctx.textBaseline="middle";
-  const alto=52, hueco=8, x0=170, ancho=W-x0-20;
-  /* el sujeto: un disco de 30 px de diámetro sobre el sensor, escalado al ancho de la franja */
-  const escala=ancho/1200;
+  ctx.fillStyle="#07090d"; ctx.fillRect(0,0,W,H);
+  ctx.font="12px 'IBM Plex Mono', monospace"; ctx.textBaseline="middle";
+
+  /* --- fotograma: 3:2, a escala real sobre el ancho en píxeles del cuerpo --- */
+  const fx=18, fy=34, fw=780, fh=fw*2/3;            // 780 × 520
+  const esc=fw/s.cam.w;                              // px de pantalla por px de sensor
+  ctx.fillStyle="#0b0d11"; ctx.fillRect(fx,fy,fw,fh);
+  /* guías de tercios, muy tenues */
+  ctx.strokeStyle="rgba(255,255,255,.06)"; ctx.lineWidth=1; ctx.beginPath();
+  for(let k=1;k<3;k++){ ctx.moveTo(fx+fw*k/3,fy); ctx.lineTo(fx+fw*k/3,fy+fh);
+                        ctx.moveTo(fx,fy+fh*k/3); ctx.lineTo(fx+fw,fy+fh*k/3); }
+  ctx.stroke();
+
+  const filas=[[LBL('sRef'),0],[LBL('sHalf'),t/2],[LBL('sNow'),t],[LBL('sDouble'),t*2]];
+  const dia=Math.max(3,30*esc);                      // el sujeto, 30 px de sensor
+  const x0=fx+fw*0.10;
+  let algunaSale=false;
   filas.forEach((fila,i)=>{
-    const y=14+i*(alto+hueco);
-    ctx.fillStyle="#0b0d11"; ctx.fillRect(x0,y,ancho,alto);
-    const b=blurPx(s.f,s.v,fila[1],s.d,s.cam.p)*escala;
-    const dia=30*escala, cx=x0+ancho*0.22, cy=y+alto/2;
-    /* El rastro se dibuja como una cápsula de opacidad fija: lo que se compara
-       aquí es la GEOMETRÍA, cuánto se estira el sujeto. El brillo real cae como
-       1/n y a partir de unas decenas de píxeles no se vería nada, que es
-       precisamente por lo que la gente desaparece en la ciudad desierta. */
-    const fin=Math.min(cx+b, x0+ancho-dia/2);
-    ctx.save(); ctx.beginPath(); ctx.rect(x0,y,ancho,alto); ctx.clip();
+    const cy=fy+fh*(0.22+i*0.19);
+    const bSensor=blurPx(s.f,s.v,fila[1],s.d,s.cam.p);
+    const b=bSensor*esc;
+    const fin=Math.min(x0+b, fx+fw-2);
+    ctx.save(); ctx.beginPath(); ctx.rect(fx,fy,fw,fh); ctx.clip();
+    const actual = fila[0]===LBL('sNow');
     if(b>1){
-      const g=ctx.createLinearGradient(cx,0,fin,0);
-      g.addColorStop(0,"rgba(232,176,75,.85)"); g.addColorStop(1,"rgba(232,176,75,.35)");
+      const g=ctx.createLinearGradient(x0,0,Math.max(fin,x0+1),0);
+      g.addColorStop(0,actual?"rgba(232,176,75,.95)":"rgba(232,176,75,.5)");
+      g.addColorStop(1,actual?"rgba(232,176,75,.35)":"rgba(232,176,75,.18)");
       ctx.fillStyle=g; ctx.beginPath();
-      if(ctx.roundRect) ctx.roundRect(cx-dia/2,cy-dia/2,Math.max(dia,fin-cx+dia),dia,dia/2);
-      else ctx.rect(cx-dia/2,cy-dia/2,Math.max(dia,fin-cx+dia),dia);
+      const w=Math.max(dia,fin-x0+dia);
+      if(ctx.roundRect) ctx.roundRect(x0-dia/2,cy-dia/2,w,dia,dia/2);
+      else ctx.rect(x0-dia/2,cy-dia/2,w,dia);
       ctx.fill();
     }
-    ctx.fillStyle= b>1 ? "rgba(232,176,75,1)" : "#e8b04b";
-    ctx.beginPath(); ctx.arc(cx,cy,dia/2,0,6.283); ctx.fill();
-    if(cx+b>x0+ancho){ ctx.fillStyle="#e2705f"; ctx.fillRect(x0+ancho-3,y,3,alto); }
+    ctx.fillStyle=actual?"#ffd98a":"rgba(232,176,75,.65)";
+    ctx.beginPath(); ctx.arc(x0,cy,dia/2,0,6.283); ctx.fill();
     ctx.restore();
-    ctx.strokeStyle="#242c36"; ctx.strokeRect(x0+.5,y+.5,ancho-1,alto-1);
-    ctx.fillStyle="#98a3b0"; ctx.textAlign="left";
-    ctx.fillText(fila[0],10,cy-7);
+    if(x0+b>fx+fw-2){ algunaSale=true; ctx.fillStyle="#e2705f"; ctx.fillRect(fx+fw-3,cy-dia/2-4,3,dia+8); }
+    /* rótulo dentro del fotograma, a la izquierda del sujeto */
+    ctx.textAlign="left"; ctx.fillStyle=actual?"#dfe4ea":"#6b7684";
+    ctx.fillText(fila[0]+(fila[1]?"  "+fmtT(fila[1]):""), fx+8, cy-dia/2-9);
     ctx.fillStyle="#6b7684";
-    ctx.fillText(fila[1]?fmtT(fila[1])+" · "+Math.round(b/escala)+" px":"—",10,cy+8);
+    ctx.fillText(fila[1]?Math.round(bSensor)+" px · "+nf(100*bSensor/s.cam.w,1)+" %":"—", fx+8, cy+dia/2+9);
   });
-  const anchoCam=nf(CAMS.find(c=>c.id===s.cam.id).w,0);
-  $('striplg').innerHTML = LANG()==='en'
-    ? `<span>Strip 1,200 px wide out of the ${anchoCam} px of the frame. Geometry is to scale; brightness is not: the real trace fades as 1/n, which is why people vanish.</span><span style="color:#e2705f">the red edge means the subject leaves the strip</span>`
-    : `<span>Franja de 1200 px de los ${anchoCam} px del fotograma. La geometría está a escala; el brillo no: el rastro real se apaga como 1/n, que es justo por lo que la gente desaparece.</span><span style="color:#e2705f">el borde rojo avisa de que el sujeto se sale de la franja</span>`;
+  ctx.strokeStyle="#3a4552"; ctx.lineWidth=1; ctx.strokeRect(fx+.5,fy+.5,fw-1,fh-1);
+  ctx.fillStyle="#98a3b0"; ctx.textAlign="left";
+  ctx.fillText(LBL('sFrame',nf(s.cam.w,0)), fx, 18);
+
+  /* --- detalle: 1200 px del sensor, para los arrastres que a escala no se ven --- */
+  const dx=822, dy=fy, dw=W-dx-18, dh=150, escD=dw/1200;
+  ctx.fillStyle="#0b0d11"; ctx.fillRect(dx,dy,dw,dh);
+  const bD=blurPx(s.f,s.v,t,s.d,s.cam.p)*escD, diaD=Math.max(4,30*escD), xd=dx+dw*0.14, cyd=dy+dh/2;
+  ctx.save(); ctx.beginPath(); ctx.rect(dx,dy,dw,dh); ctx.clip();
+  if(bD>1){
+    const g=ctx.createLinearGradient(xd,0,xd+bD,0);
+    g.addColorStop(0,"rgba(232,176,75,.95)"); g.addColorStop(1,"rgba(232,176,75,.35)");
+    ctx.fillStyle=g; ctx.beginPath();
+    const w=Math.max(diaD,bD+diaD);
+    if(ctx.roundRect) ctx.roundRect(xd-diaD/2,cyd-diaD/2,w,diaD,diaD/2); else ctx.rect(xd-diaD/2,cyd-diaD/2,w,diaD);
+    ctx.fill();
+  }
+  ctx.fillStyle="#ffd98a"; ctx.beginPath(); ctx.arc(xd,cyd,diaD/2,0,6.283); ctx.fill();
+  ctx.restore();
+  if(xd+bD>dx+dw){ ctx.fillStyle="#e2705f"; ctx.fillRect(dx+dw-3,dy,3,dh); }
+  ctx.strokeStyle="#3a4552"; ctx.strokeRect(dx+.5,dy+.5,dw-1,dh-1);
+  ctx.fillStyle="#98a3b0"; ctx.fillText(LBL('sDetail'), dx, 18);
+
+  /* --- la trepidación, en el mismo detalle y a la misma escala --- */
+  const ty=dy+dh+26;
+  ctx.fillStyle="#0b0d11"; ctx.fillRect(dx,ty,dw,dh);
+  const shk=(s.st>=99?0:shakePx(s.f,t,s.st,s.cam.p))*escD;
+  ctx.save(); ctx.beginPath(); ctx.rect(dx,ty,dw,dh); ctx.clip();
+  const cyt=ty+dh/2;
+  if(shk>1){
+    const g=ctx.createLinearGradient(xd,0,xd+shk,0);
+    g.addColorStop(0,"rgba(94,200,216,.9)"); g.addColorStop(1,"rgba(94,200,216,.3)");
+    ctx.fillStyle=g; ctx.beginPath();
+    const w=Math.max(diaD,shk+diaD);
+    if(ctx.roundRect) ctx.roundRect(xd-diaD/2,cyt-diaD/2,w,diaD,diaD/2); else ctx.rect(xd-diaD/2,cyt-diaD/2,w,diaD);
+    ctx.fill();
+  }
+  ctx.fillStyle="#8fe2ee"; ctx.beginPath(); ctx.arc(xd,cyt,diaD/2,0,6.283); ctx.fill();
+  ctx.restore();
+  ctx.strokeStyle="#3a4552"; ctx.strokeRect(dx+.5,ty+.5,dw-1,dh-1);
+  ctx.fillStyle="#98a3b0"; ctx.fillText(LBL('sShakeBox',s.st>=99?"0":nf(shakePx(s.f,t,s.st,s.cam.p),0)), dx, ty-14);
+
+  $('striplg').innerHTML = `<span>${LBL('sCap',nf(s.cam.w,0))}</span>`+
+    (algunaSale?`<span style="color:#e2705f">${LBL('sOut')}</span>`:"");
 }
 
 /* ---------- arranque ---------- */
