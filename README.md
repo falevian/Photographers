@@ -315,6 +315,7 @@ incrustadas, ningún recurso externo).
 | Ficha | Tema | Contenido | Tamaño |
 |---|---|---|---|
 | [`paseos/contraste.html`](paseos/contraste.html) | 1 · Contraste | Nueve autores (Fan Ho, Metzker, Giacomelli, Moriyama, Leiter, Webb, Abbott, Titarenko, Cameron) con obra de referencia, análisis, física y ejercicio; laboratorio de luz interactivo; tres reglas para el día. | 211 KB |
+| [`paseos/medir-la-luz.html`](paseos/medir-la-luz.html) | 2 · Medir la luz | Qué mide el fotómetro, los modos de medición, medir-bloquear-recomponer en cámara y en móvil, el sistema de zonas, el histograma y las referencias de bolsillo; laboratorio para medir una calle tocando la imagen. | 200 KB |
 
 Para añadir una ficha: guardar el archivo en `paseos/` y copiar el bloque de ficha comentado en `paseos/index.html`.
 

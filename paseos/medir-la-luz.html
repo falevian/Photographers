@@ -3,24 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Paseo fotográfico · Fichas</title>
-<meta name="description" content="Fichas del paseo fotográfico de la comunidad Foto, preparadas por La Foto Rota: un tema por salida, con autores de referencia, la física que hay debajo y ejercicios para hacer ese día con la cámara.">
+<title>Medir la luz. Ficha 2 del paseo fotográfico Foto</title>
+<meta name="description" content="Qué mide el fotómetro, modos de medición, bloqueo de exposición en cámara y móvil, sistema de zonas e histograma, con un laboratorio para medir una calle tocando la imagen.">
 <meta name="theme-color" content="#000000">
 <meta name="referrer" content="no-referrer">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Crect%20width%3D%2764%27%20height%3D%2764%27%20fill%3D%27%23000%27%2F%3E%3Ccircle%20cx%3D%2732%27%20cy%3D%2732%27%20r%3D%2726%27%20fill%3D%27none%27%20stroke%3D%27%23767676%27%20stroke-width%3D%271.5%27%2F%3E%3Cpath%20d%3D%27M32%206A26%2026%200%200%201%2032%2058A12.2%2026%200%200%201%2032%206Z%27%20fill%3D%27%23fff%27%2F%3E%3Cpath%20d%3D%27M32%2058A12.2%2026%200%200%201%2032%206%27%20fill%3D%27none%27%20stroke%3D%27%23d9574e%27%20stroke-width%3D%272%27%2F%3E%3C%2Fsvg%3E">
 <link rel="apple-touch-icon" href="../icons/paseos-180.png">
 <script>document.documentElement.classList.add("js")</script>
-<meta property="og:type" content="website">
+<meta property="og:type" content="article">
 <meta property="og:locale" content="es_ES">
-<meta property="og:title" content="Paseo fotográfico · Fichas">
-<meta property="og:description" content="Un tema por salida: autores de referencia, la física que hay debajo y ejercicios para hacer ese día con la cámara.">
-<meta property="og:url" content="https://falevian.github.io/Photographers/paseos/">
+<meta property="og:title" content="Medir la luz. Ficha 2 del paseo fotográfico Foto">
+<meta property="og:description" content="Dónde medir, cómo bloquear la exposición y en qué zona colocar cada tono, con la cámara o con el móvil.">
+<meta property="og:url" content="https://falevian.github.io/Photographers/paseos/medir-la-luz.html">
 <meta property="og:image" content="https://falevian.github.io/Photographers/og/paseos.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <style>
-/* Tipografías incrustadas, las mismas que en las fichas.
+/* Tipografías incrustadas.
    Bodoni Moda: Copyright 2020 The Bodoni Moda Project Authors.
    Atkinson Hyperlegible: Copyright 2020 Braille Institute of America, Inc.
    Ambas bajo SIL Open Font License 1.1 (https://openfontlicense.org). Subconjuntos latinos. */
@@ -55,46 +55,122 @@ body{margin:0;background:var(--papel);color:var(--tinta);font-family:var(--sans)
 :focus-visible{outline:2px solid var(--acento);outline-offset:3px}
 a{color:inherit;text-decoration-thickness:1px;text-underline-offset:.22em}
 cite{font-style:italic}
+.nw{white-space:nowrap}
 
 .band{background:var(--bg);color:var(--fg);padding:clamp(2.75rem,8vw,4.5rem) var(--pad)}
 .inner{max-width:var(--medida);margin:0 auto}
 .neg{--fg:var(--papel);--bg:var(--tinta);--acento:var(--sello-claro)}
 
-/* Portada: la esfera a medio iluminar, quieta, como emblema de la serie */
+/* Portada: escala de zonas */
 .hero{--fg:var(--papel);--bg:var(--tinta);--acento:var(--sello-claro);background:var(--tinta);color:var(--papel);min-height:100vh;min-height:100svh;display:flex;align-items:center;padding:1.25rem var(--pad) 2.25rem}
 .hero .inner{max-width:40rem;width:100%}
-.hero-top{display:flex;justify-content:space-between;gap:1rem;margin:0 0 1.5rem;color:var(--gris);font-size:.9375rem}
-.emblem{display:block;width:clamp(6.5rem,22vw,9rem);height:auto;margin:0 0 1.25rem}
-.hero h1{font-family:var(--serif);font-weight:500;font-size:clamp(3rem,12vw,5.5rem);line-height:.98;letter-spacing:-.02em;margin:0 0 1rem}
-.hero-lead{font-family:var(--serif);font-weight:400;font-size:clamp(1.3125rem,5vw,1.625rem);line-height:1.3;margin:.5rem 0 .6rem;max-width:32rem}
-.hero-hint{margin:0;color:var(--gris);font-size:.9375rem;max-width:32rem}
+.hero-top{display:flex;justify-content:space-between;gap:1rem;margin:0 0 .5rem;color:var(--gris);font-size:.9375rem}
+.hero-title{font-family:var(--serif);font-weight:500;font-size:clamp(3.25rem,14vw,6.5rem);line-height:.95;letter-spacing:-.02em;margin:0 0 1.5rem}
+.zscale{position:relative;touch-action:pan-y;cursor:ew-resize;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;padding:.25rem 0;margin:0 0 .5rem}
+.zscale:focus-visible{outline:2px solid var(--acento);outline-offset:6px}
+.zrow{position:relative;height:1.95rem}
+.zrow::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:#2b2b2b}
+.zdot{position:absolute;top:50%;width:15px;height:15px;margin:-7.5px 0 0 -7.5px;border-radius:50%;border:1.5px solid var(--papel);background:#777}
+.zdot.off{background:var(--sello-claro);border-color:var(--sello-claro)}
+.zlab{position:absolute;top:50%;transform:translateY(-50%);white-space:nowrap;font-size:.875rem;line-height:1}
+.zlab b{font-weight:700;margin-left:.35em}
+.zpatches{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));margin-top:.6rem;border:1px solid var(--gris)}
+.zpatches span{display:flex;align-items:flex-end;justify-content:center;height:2.9rem;padding-bottom:.25rem;font-family:var(--serif);font-size:clamp(.6875rem,3vw,1rem);font-weight:500;letter-spacing:-.02em;overflow:hidden}
+.hero-lead{font-family:var(--serif);font-weight:400;font-size:clamp(1.3125rem,5vw,1.625rem);line-height:1.3;margin:1.25rem 0 .6rem;max-width:32rem}
+.hero-hint{margin:0;color:var(--gris);font-size:.9375rem}
 
-/* Presentación */
+/* Presentación y filtros */
 .intro p{margin:0 0 1rem}
 .note{color:var(--gris);font-size:.9375rem}
+.controls{margin-top:1.75rem}
+.controls-label{font-size:.9375rem;margin:0 0 .5rem}
+.chips{display:flex;gap:.5rem;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:2px;margin:0 -2px}
+.chips::-webkit-scrollbar{display:none}
+.chip,.btn,.toggle{font:inherit;font-size:.9375rem;line-height:1.2;color:inherit;background:transparent;border:1px solid currentColor;border-radius:0;padding:.6rem .85rem;min-height:44px;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"],.toggle[aria-pressed="true"],.btn[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+@media (hover:hover){.chip:hover,.btn:hover,.toggle:hover{background:var(--fg);color:var(--bg)}}
+.toggle-row{display:flex;flex-wrap:wrap;align-items:center;gap:.75rem 1rem;margin-top:.9rem}
+.count{color:var(--gris);font-size:.9375rem}
 
-/* Las fichas: bandas en positivo y negativo, una por ficha */
+/* Fichas: bandas en positivo y negativo */
 .entry{border-top:1px solid var(--tinta)}
-.entry-meta{margin:0 0 .4rem;color:var(--gris);font-size:.9375rem}
 .entry-name{font-family:var(--serif);font-weight:500;font-size:clamp(2.25rem,9.5vw,3.75rem);line-height:1.02;letter-spacing:-.015em;margin:0 0 .6rem}
-.entry-name a{text-decoration:none}
-.entry-name a:hover,.entry-name a:focus-visible{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:.12em}
+.entry-meta{margin:0;color:var(--gris);font-size:.9375rem}
 .entry-kind{margin:.2rem 0 1.4rem;color:var(--acento);font-weight:700;font-size:.9375rem}
 .entry-work{margin:0 0 1.5rem}
 .entry-work b{font-weight:700}
+.tabs{display:flex;border:1px solid currentColor;margin:0 0 1.1rem}
+.tab{flex:1 1 0;font:inherit;font-size:.9375rem;color:inherit;background:transparent;border:0;border-left:1px solid currentColor;border-radius:0;padding:.6rem .4rem;min-height:44px;cursor:pointer}
+.tab:first-child{border-left:0}
+.tab[aria-selected="true"]{background:var(--fg);color:var(--bg)}
+.panel p{margin:0 0 1rem}
+.panel p:last-child{margin-bottom:0}
+.math{font-style:italic;white-space:nowrap}
 .actions{display:flex;flex-wrap:wrap;align-items:center;gap:.9rem 1.25rem;margin-top:1.5rem;font-size:.9375rem}
-.btn{font:inherit;font-size:.9375rem;line-height:1.2;color:inherit;background:transparent;border:1px solid currentColor;border-radius:0;padding:.6rem .85rem;min-height:44px;cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center}
-@media (hover:hover){.btn:hover{background:var(--fg);color:var(--bg)}}
-.count{color:var(--gris);font-size:.9375rem}
-.pending{border-top:1px solid var(--tinta)}
-.pending p{margin:0;color:var(--gris)}
+body.solo-ejercicios .entry{--fg:var(--tinta);--bg:var(--papel);--acento:var(--sello);padding-top:2rem;padding-bottom:2rem}
+body.solo-ejercicios .tabs,body.solo-ejercicios .actions{display:none}
+body.solo-ejercicios .entry-name{font-size:clamp(1.75rem,6.5vw,2.5rem)}
 
-/* Qué hay en cada ficha */
-.como .inner{max-width:62rem}
+/* Laboratorio */
+.lab{border-top:1px solid var(--tinta)}
+.lab .inner{max-width:66rem}
 .section-title{font-family:var(--serif);font-weight:500;font-size:clamp(2.25rem,8vw,3.5rem);line-height:1.05;letter-spacing:-.015em;margin:0 0 1rem}
-.como-intro{max-width:var(--medida);margin:0 0 1.5rem}
+.section-title:focus{outline:none}
+.lab-intro{max-width:var(--medida);margin:0 0 1.75rem}
+.lab-intro p{margin:0 0 1rem}
+/* En móvil el render queda fijo arriba mientras se mueven los controles. */
+.lab-grid{display:block}
+.lab-figure{display:contents}
+.lab-view{position:sticky;top:0;z-index:2;background:var(--bg);padding:.5rem 0}
+.lab-data{margin-bottom:2rem}
+@media (min-width:60rem){
+  .lab-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:2.5rem;align-items:start}
+  .lab-figure{display:block}
+  .lab-view{position:static;padding:0}
+  .lab-data{margin-bottom:0}
+}
+@media (min-width:60rem) and (min-height:52rem){.lab-figure{position:sticky;top:1rem}}
+#lab-canvas{display:block;width:100%;height:auto;aspect-ratio:600/384;background:#777;box-shadow:0 0 0 1px var(--tinta)}
+#hist{display:block;width:100%;height:76px;margin-top:.6rem}
+.hist-scale{display:flex;justify-content:space-between;color:var(--gris);font-size:.8125rem;margin-top:.2rem}
+.hist-note{color:var(--gris);font-size:.8125rem;margin:.35rem 0 0}
+.readouts{display:grid;grid-template-columns:1fr auto;gap:.3rem 1rem;margin:1.1rem 0 0;font-size:.9375rem}
+.readouts dt{color:var(--gris)}
+.readouts dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
+.lab-caption{min-height:3.2em;margin:1rem 0 0;font-size:.9375rem}
+fieldset{border:0;margin:0 0 1.4rem;padding:0;min-width:0}
+legend{font-family:var(--serif);font-size:1.625rem;font-weight:500;padding:0;margin:0 0 .5rem}
+.ctl{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:0 .75rem;margin:0 0 .8rem}
+.ctl label{font-size:.9375rem}
+.ctl output{font-size:.9375rem;font-variant-numeric:tabular-nums}
+.ctl input{grid-column:1/-1}
+.hint{grid-column:1/-1;display:flex;justify-content:space-between;margin:0;color:var(--gris);font-size:.8125rem;line-height:1.3}
+.meter{display:block;margin-bottom:1.1rem}
+.meter-label{display:block;font-size:.9375rem;margin:0 0 .4rem}
+.seg{display:flex;border:1px solid currentColor;position:relative}
+.seg input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.seg label{flex:1 1 0;display:flex;align-items:center;justify-content:center;text-align:center;min-height:44px;padding:.5rem .5rem;font-size:.9375rem;line-height:1.2;cursor:pointer;border-left:1px solid currentColor}
+.seg label:first-of-type{border-left:0}
+.seg input:checked+label{background:var(--fg);color:var(--bg)}
+.seg input:focus-visible+label{outline:2px solid var(--acento);outline-offset:2px}
+.presets{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:0 0 1rem}
+.presets-label{width:100%;font-size:.9375rem;color:var(--gris);margin:0}
+.model{margin-top:1.25rem;font-size:.9375rem}
+.model summary{cursor:pointer;min-height:44px;display:flex;align-items:center}
+.model p{margin:.5rem 0 0}
+
+/* Deslizadores: el tirador es una esfera a medio iluminar */
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:34px;margin:0;background:transparent;color:inherit;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:2px;background:currentColor}
+input[type=range]::-moz-range-track{height:2px;background:currentColor}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;margin-top:-11px;border-radius:50%;background:linear-gradient(90deg,#000 50%,#fff 50%);border:1.5px solid #000;box-shadow:0 0 0 1.5px #fff}
+input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:linear-gradient(90deg,#000 50%,#fff 50%);border:1.5px solid #000;box-shadow:0 0 0 1.5px #fff}
+input[type=range]:focus-visible{outline:2px solid var(--acento);outline-offset:2px}
+
+/* Para hoy */
+.hoy .inner{max-width:62rem}
 .rules{display:grid;gap:1.75rem;margin-top:.5rem}
-@media (min-width:48rem){.rules{grid-template-columns:repeat(2,minmax(0,1fr));gap:2rem 2.5rem}}
+@media (min-width:48rem){.rules{grid-template-columns:repeat(3,minmax(0,1fr));gap:2.5rem}}
 .rule h3{font-family:var(--serif);font-weight:500;font-size:1.75rem;line-height:1.1;margin:0 0 .5rem}
 .rule p{margin:0}
 
@@ -106,86 +182,188 @@ cite{font-style:italic}
 .foot p{margin:0 0 .9rem}
 .foot .small{color:var(--gris)}
 .share-row{display:flex;flex-wrap:wrap;gap:.75rem 1rem;align-items:center;margin-top:1.5rem}
-html:not(.js) .share-row{display:none}
+
+/* Sin JavaScript: se muestran las tres partes de cada ficha y se ocultan los controles que no funcionarían. */
+html:not(.js) .tabs,html:not(.js) .controls,html:not(.js) .lab,html:not(.js) .hero-hint,html:not(.js) .actions .btn,html:not(.js) .hero-hint,html:not(.js) .share-row{display:none}
+html:not(.js) .panel[hidden]{display:block!important}
+html:not(.js) .panel::before{content:attr(data-label);display:block;font-weight:700;margin:1.25rem 0 .35rem}
+
+/* Tabla de zonas */
+.ztable{margin:0 0 1.1rem;display:grid;gap:.3rem}
+.ztable div{display:grid;grid-template-columns:2.75rem 1fr;gap:.8rem;align-items:center}
+.ztable dt{font-family:var(--serif);font-weight:500;font-size:1.05rem;height:2.1rem;display:flex;align-items:center;justify-content:center;border:1px solid var(--gris)}
+.ztable dd{margin:0;font-size:.9375rem;line-height:1.35}
+
+/* Laboratorio de medición */
+#scene{display:block;width:100%;height:auto;aspect-ratio:600/420;background:#777;box-shadow:0 0 0 1px var(--tinta);cursor:crosshair;touch-action:manipulation}
+.scene-hint{color:var(--gris);font-size:.8125rem;margin:.4rem 0 0}
+.lab select{font:inherit;font-size:.9375rem;color:inherit;background:var(--bg);border:1px solid currentColor;border-radius:0;padding:.55rem .6rem;min-height:44px;width:100%}
+.lab select:disabled{opacity:.45}
+.field{margin:0 0 1rem}
+.field>label,.field>.meter-label{display:block;font-size:.9375rem;margin:0 0 .4rem}
+.checks{display:grid;gap:.25rem;margin:0 0 1rem}
+.check{display:flex;gap:.65rem;align-items:center;min-height:44px;font-size:.9375rem;cursor:pointer}
+.check input{width:22px;height:22px;margin:0;accent-color:#000;flex:none}
+.ev{font-family:var(--serif);font-size:2rem;font-weight:500;line-height:1.1;margin:1rem 0 .15rem}
+.ev-pairs{margin:0 0 .5rem;font-size:.9375rem}
+.zlist{display:grid;grid-template-columns:1fr auto;gap:.3rem 1rem;margin:1rem 0 0;font-size:.9375rem}
+.zlist dt{color:var(--gris)}
+.zlist dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
+.zlist dd.clip{color:var(--acento);font-weight:700}
+.series{margin-top:1.25rem}
+
 </style>
 </head>
 <body>
-<a class="skip" href="#fichas">Ir a las fichas</a>
+<a class="skip" href="#bloques">Ir a los bloques</a>
 
 <header class="hero">
 <div class="inner">
-<p class="hero-top"><span>La Foto Rota · comunidad Foto</span><span>Fichas del paseo</span></p>
-<svg class="emblem" viewBox="0 0 1000 1000" aria-hidden="true" focusable="false">
-<circle cx="500" cy="500" r="400" fill="none" stroke="#767676" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
-<path fill="#fff" d="M500 100A400 400 0 0 1 500 900A187.79 400 0 0 1 500 100Z"/>
-<path fill="none" stroke="#d9574e" stroke-width="1.5" vector-effect="non-scaling-stroke" d="M500 900A187.79 400 0 0 1 500 100"/>
-</svg>
-<h1>Paseo fotográfico</h1>
-<p class="hero-lead">Un tema por salida. Cada ficha reúne a los autores que lo trabajaron, la física que hay debajo y ejercicios para hacer ese día con la cámara.</p>
-<p class="hero-hint">Cada ficha es una página de un solo archivo: se abre en el móvil, funciona sin conexión una vez cargada y no carga nada de fuera.</p>
+<p class="hero-top"><a href="./">Paseo fotográfico Foto</a><span>Ficha 2</span></p>
+<h1 class="hero-title">Medir la luz</h1>
+<div class="zscale" id="zscale" role="slider" tabindex="0" aria-label="Desplazamiento de la exposición sobre la escala de zonas" aria-orientation="horizontal" aria-valuemin="-6" aria-valuemax="6" aria-valuenow="0" aria-valuetext="Desplazamiento de la exposición: 0 EV">
+<div class="zrows" aria-hidden="true"><div class="zrow" data-l="2e+06"><span class="zdot off" style="left:100.00%;"></span><span class="zlab" style="right:calc(0.00% + 14px)">reflejo del sol<b class="zz">más allá de X</b></span></div><div class="zrow" data-l="18845"><span class="zdot" style="left:70.66%;background:rgb(178,178,178);"></span><span class="zlab" style="right:calc(29.34% + 14px)">pared al sol<b class="zz">VII</b></span></div><div class="zrow" data-l="7800"><span class="zdot" style="left:59.09%;background:rgb(145,145,145);"></span><span class="zlab" style="right:calc(40.91% + 14px)">piel al sol<b class="zz">VI</b></span></div><div class="zrow" data-l="2515"><span class="zdot" style="left:44.25%;background:rgb(103,103,103);"></span><span class="zlab" style="left:calc(44.25% + 14px)">asfalto al sol<b class="zz">IV</b></span></div><div class="zrow" data-l="780"><span class="zdot" style="left:28.89%;background:rgb(63,63,63);"></span><span class="zlab" style="left:calc(28.89% + 14px)">piel en sombra<b class="zz">III</b></span></div><div class="zrow" data-l="24"><span class="zdot off" style="left:0.00%;"></span><span class="zlab" style="left:calc(0.00% + 14px)">interior del portal<b class="zz">por debajo de 0</b></span></div></div>
+<div class="zpatches" aria-hidden="true"><span style="background:rgb(0,0,0);color:#fff">0</span><span style="background:rgb(27,27,27);color:#fff">I</span><span style="background:rgb(48,48,48);color:#fff">II</span><span style="background:rgb(71,71,71);color:#fff">III</span><span style="background:rgb(94,94,94);color:#fff">IV</span><span style="background:rgb(119,119,119);color:#000">V</span><span style="background:rgb(145,145,145);color:#000">VI</span><span style="background:rgb(171,171,171);color:#000">VII</span><span style="background:rgb(198,198,198);color:#000">VIII</span><span style="background:rgb(226,226,226);color:#000">IX</span><span style="background:rgb(255,255,255);color:#000">X</span></div>
+</div>
+<p class="hero-lead">Qué mide el fotómetro, dónde medir y en qué zona colocar cada tono, con la cámara o con el móvil.</p>
+<p class="hero-hint">Arrastra sobre la escala: todos los tonos se desplazan juntos, una zona por cada EV. Con la piel al sol en la zona VI, la pared encalada al sol queda en la VII y el interior de un portal, por debajo de la 0.</p>
 </div>
 </header>
 
 <main>
 <section class="band intro" aria-label="Presentación">
 <div class="inner">
-<p>Antes de cada paseo se prepara una ficha con el tema del día. Se lee en unos minutos, se lleva en el bolsillo y se consulta sobre la marcha: de cada autor, una obra de referencia, un análisis, la física que explica lo que se ve y un ejercicio concreto. Al final, unas pocas reglas para ese día.</p>
-<p class="note">Las fotografías no se reproducen en las fichas: cada una enlaza al museo o al archivo oficial donde verlas.</p>
+<p>Con el tema del contraste, la exposición decide qué parte de la escena conserva detalle y cuál se va al negro o al blanco. Un fotómetro no sabe qué está mirando: mide la luminancia de lo que encuadra y propone la exposición que la convertiría en un gris medio. Medir bien consiste en elegir qué superficie mides y cuánto la separas de ese gris.</p>
+<p>Seis bloques con la idea, la física y un ejercicio para el paseo. Al final, un laboratorio con una calle en la que puedes medir tocando la imagen.</p>
+<div class="toggle-row"><button class="toggle" id="solo-ejercicios" type="button" aria-pressed="false">Ver solo los ejercicios</button></div>
 </div>
 </section>
 
-<section id="fichas" aria-label="Fichas del paseo">
+<section id="bloques" aria-label="Bloques de la ficha">
 
-<article class="entry band neg" id="contraste" aria-labelledby="contraste-name">
+<article class="entry band neg" id="gris" aria-labelledby="gris-name">
 <div class="inner">
-<p class="entry-meta">Ficha 1</p>
-<h2 class="entry-name" id="contraste-name"><a href="contraste.html">Contraste</a></h2>
-<p class="entry-kind">Luz y sombra · forma y textura · color · antiguo y nuevo · movimiento y quietud · retrato</p>
-<p class="entry-work"><b>Nueve fotógrafas y fotógrafos</b> que trabajan con el contraste: Fan Ho, Ray K. Metzker, Mario Giacomelli, Daido Moriyama, Saul Leiter, Alex Webb, Berenice Abbott, Alexey Titarenko y Julia Margaret Cameron. De cada uno, la obra de referencia, el análisis, la física y un ejercicio para el paseo. Con un <b>laboratorio de luz</b> interactivo, una esfera sobre un pavimento en la que se mueven el sol, el cielo, la medición y la curva, y tres reglas para el día.</p>
-<div class="actions"><a class="btn" href="contraste.html">Abrir la ficha</a><span class="count">Un solo archivo · 211 KB</span></div>
+<h2 class="entry-name" id="gris-name">El fotómetro busca el gris</h2>
+<p class="entry-kind">Qué mide</p>
+<p class="entry-work"><b>En una línea.</b> El fotómetro propone la exposición que convierte en gris medio lo que mide, sea nieve o carbón.</p>
+<div class="tabs" role="tablist" aria-label="El fotómetro busca el gris"><button class="tab" role="tab" type="button" id="gris-t-idea" aria-controls="gris-p-idea" aria-selected="true" tabindex="0" data-kind="idea">Idea</button><button class="tab" role="tab" type="button" id="gris-t-fisica" aria-controls="gris-p-fisica" aria-selected="false" tabindex="-1" data-kind="fisica">Física</button><button class="tab" role="tab" type="button" id="gris-t-ejercicio" aria-controls="gris-p-ejercicio" aria-selected="false" tabindex="-1" data-kind="ejercicio">Ejercicio</button></div>
+<div class="panel" role="tabpanel" id="gris-p-idea" aria-labelledby="gris-t-idea" data-label="Idea" tabindex="0"><p>Un fotómetro de luz reflejada, como el de la cámara o el del móvil, mide la luminancia: la luz que le llega desde lo que encuadra. No sabe si mira nieve o carbón, así que propone la exposición que convertiría esa luminancia en un gris medio. La nieve sale gris y un abrigo negro, también.</p><p>Por eso la exposición correcta depende de dos cosas: de la luz y de qué superficie mides. Medir es elegir esa superficie y decidir cuánto debe separarse del gris.</p></div><div class="panel" role="tabpanel" id="gris-p-fisica" aria-labelledby="gris-t-fisica" data-label="Física" tabindex="0" hidden><p>La ecuación del fotómetro de luz reflejada (norma ISO 2720) es <span class="math">N²/t = L·S/K</span>, con <span class="math">N</span> el número f, <span class="math">t</span> el tiempo en segundos, <span class="math">L</span> la luminancia en cd/m², <span class="math">S</span> la sensibilidad ISO y <span class="math">K</span> una constante de calibración. La norma admite <span class="math">K</span> entre 10,6 y 13,4; Canon, Nikon y Sekonic usan 12,5, y Pentax y Kenko, 14, una diferencia de 1/6 EV. El valor de exposición es <span class="math">EV = log<sub>2</sub>(N²/t)</span>.</p><p>El gris de referencia refleja el 18 %: es la luminancia relativa para la que la claridad CIE <span class="math">L*</span> vale 50, porque <span class="math">L* = 116·(Y/Y<sub>n</sub>)<sup>1/3</sup> − 16</span> da <span class="math">Y/Y<sub>n</sub> = 0,184</span>. La calibración habitual de los fotómetros corresponde a una reflectancia algo menor, en torno al 12 o 13 %, aunque el valor exacto depende de cómo se defina. Por eso Kodak recomendaba añadir medio paso a la lectura tomada sobre su tarjeta gris.</p></div><div class="panel" role="tabpanel" id="gris-p-ejercicio" aria-labelledby="gris-t-ejercicio" data-label="Ejercicio" tabindex="0" hidden><p>Encuadra una pared blanca al sol hasta llenar la pantalla y dispara sin tocar nada: saldrá gris. Repite con el asfalto en sombra: también gris. Después compensa, unos +2 EV para la pared y entre −1 y −2 EV para el asfalto, y compara las cuatro fotos.</p></div>
+<div class="actions"><button class="btn" type="button" data-lab="pared">Probar en el laboratorio</button></div>
 </div>
 </article>
-
-<article class="entry band" id="medir-la-luz" aria-labelledby="medir-name">
+<article class="entry band" id="modos" aria-labelledby="modos-name">
 <div class="inner">
-<p class="entry-meta">Ficha 2</p>
-<h2 class="entry-name" id="medir-name"><a href="medir-la-luz.html">Medir la luz</a></h2>
-<p class="entry-kind">Qué mide · modos de medición · bloqueo de exposición · sistema de zonas · histograma · sin fotómetro</p>
-<p class="entry-work"><b>Seis bloques</b> sobre la decisión que sostiene al contraste: qué mide de verdad el fotómetro, dónde mide la cámara según el modo, cómo medir, bloquear y recomponer con cámara o con móvil, en qué zona colocar cada tono, qué dice el histograma y qué hacer cuando no hay fotómetro a mano. Con un <b>laboratorio</b> para medir una calle tocando la imagen, y tres reglas para el día.</p>
-<div class="actions"><a class="btn" href="medir-la-luz.html">Abrir la ficha</a><span class="count">Un solo archivo · 200 KB</span></div>
+<h2 class="entry-name" id="modos-name">Dónde mide la cámara</h2>
+<p class="entry-kind">Modos de medición</p>
+<p class="entry-work"><b>En una línea.</b> La medición promedio favorece las zonas claras; la puntual mide solo lo que tú eliges.</p>
+<div class="tabs" role="tablist" aria-label="Dónde mide la cámara"><button class="tab" role="tab" type="button" id="modos-t-idea" aria-controls="modos-p-idea" aria-selected="true" tabindex="0" data-kind="idea">Idea</button><button class="tab" role="tab" type="button" id="modos-t-fisica" aria-controls="modos-p-fisica" aria-selected="false" tabindex="-1" data-kind="fisica">Física</button><button class="tab" role="tab" type="button" id="modos-t-ejercicio" aria-controls="modos-p-ejercicio" aria-selected="false" tabindex="-1" data-kind="ejercicio">Ejercicio</button></div>
+<div class="panel" role="tabpanel" id="modos-p-idea" aria-labelledby="modos-t-idea" data-label="Idea" tabindex="0"><p>La medición evaluativa o matricial divide el encuadre en segmentos y un algoritmo interpreta el patrón de luminancias. Nikon la introdujo en 1983 con la FA, que usaba cinco segmentos. La ponderada al centro da más peso a la parte central: en las Nikon clásicas, un 60 % en el círculo central y un 40 % en el resto. La puntual mide solo un círculo pequeño.</p><p>En el móvil, al tocar la pantalla eliges el punto donde se mide y se enfoca. Si no tocas nada, el iPhone equilibra la exposición entre las caras que detecta.</p></div><div class="panel" role="tabpanel" id="modos-p-fisica" aria-labelledby="modos-t-fisica" data-label="Física" tabindex="0" hidden><p>La medición promedio es un promedio lineal de luminancias, y por eso la dominan las zonas claras. Si un cielo 3 EV más luminoso que el resto ocupa una cuarta parte del encuadre, la media vale <span class="math">0,25·8 + 0,75·1 = 2,75</span> veces la luminancia del resto: la cámara reduce la exposición <span class="math">log<sub>2</sub> 2,75 ≈ 1,5</span> EV y el sujeto se oscurece en la misma cantidad.</p><p>La puntual evita ese sesgo, pero tiene otro: pone en gris medio lo que mide, sea claro u oscuro. Por eso casi siempre pide compensación, salvo que midas algo cercano al gris medio.</p></div><div class="panel" role="tabpanel" id="modos-p-ejercicio" aria-labelledby="modos-t-ejercicio" data-label="Ejercicio" tabindex="0" hidden><p>Con el móvil, encuadra una calle con cielo y una fachada en sombra. Toca el cielo y después la fachada, y fíjate en cuánto cambia la imagen. Si tu cámara muestra la velocidad o el EV, anota las dos lecturas: su diferencia es el rango entre esas dos superficies.</p></div>
+<div class="actions"><button class="btn" type="button" data-lab="promedio">Probar en el laboratorio</button></div>
 </div>
 </article>
-
-<!-- Para añadir una ficha: copia este bloque detrás de la anterior. Las bandas alternan
-     blanco y negro solas (el script de abajo reparte la clase «neg»); pon el número en
-     entry-meta, el tema en entry-name, las categorías en entry-kind y el archivo en los dos href.
-<article class="entry band" id="tema" aria-labelledby="tema-name">
+<article class="entry band neg" id="bloqueo" aria-labelledby="bloqueo-name">
 <div class="inner">
-<p class="entry-meta">Ficha 2</p>
-<h2 class="entry-name" id="tema-name"><a href="tema.html">Tema</a></h2>
-<p class="entry-kind">Categorías del tema, separadas por puntos medios</p>
-<p class="entry-work"><b>Quiénes.</b> Qué hay en la ficha, en tres o cuatro líneas.</p>
-<div class="actions"><a class="btn" href="tema.html">Abrir la ficha</a><span class="count">Un solo archivo · NNN KB</span></div>
+<h2 class="entry-name" id="bloqueo-name">Mide, bloquea y recompón</h2>
+<p class="entry-kind">Bloqueo de exposición</p>
+<p class="entry-work"><b>En una línea.</b> Mide sobre lo importante, bloquea la exposición y después encuadra.</p>
+<div class="tabs" role="tablist" aria-label="Mide, bloquea y recompón"><button class="tab" role="tab" type="button" id="bloqueo-t-idea" aria-controls="bloqueo-p-idea" aria-selected="true" tabindex="0" data-kind="idea">Idea</button><button class="tab" role="tab" type="button" id="bloqueo-t-movil" aria-controls="bloqueo-p-movil" aria-selected="false" tabindex="-1" data-kind="movil">Móvil</button><button class="tab" role="tab" type="button" id="bloqueo-t-ejercicio" aria-controls="bloqueo-p-ejercicio" aria-selected="false" tabindex="-1" data-kind="ejercicio">Ejercicio</button></div>
+<div class="panel" role="tabpanel" id="bloqueo-p-idea" aria-labelledby="bloqueo-t-idea" data-label="Idea" tabindex="0"><p>La exposición automática se recalcula de forma continua: si mueves el encuadre hacia una zona más clara, la imagen se oscurece. Para evitarlo, mide sobre el tono que te importa, bloquea la exposición y después encuadra. En una cámara, el botón AE-L, o el disparador pulsado a medias según la configuración, mantiene la lectura mientras recompones.</p><p>Bloquear fija la exposición, no la luz. Si el sujeto pasa del sol a la sombra, hay que volver a medir.</p></div><div class="panel" role="tabpanel" id="bloqueo-p-movil" aria-labelledby="bloqueo-t-movil" data-label="Móvil" tabindex="0" hidden><p><b>iPhone.</b> Toca el sujeto para medir y enfocar en ese punto, y desliza hacia arriba o hacia abajo el icono del sol que aparece junto al recuadro para compensar. Para bloquear, mantén el dedo sobre el recuadro hasta que aparezca Bloqueo AE/AF; se libera tocando otra parte de la pantalla. En los modelos con Control de Cámara, una pulsación ligera mantenida también bloquea si activas Bloquear enfoque y exposición en <span class="nw">Ajustes &gt; Cámara &gt; Control de cámara</span>.</p><p><b>Android.</b> Depende del fabricante. En los Pixel, al tocar el sujeto aparece un círculo que lo sigue y un botón de candado que bloquea enfoque y exposición; el brillo está en los controles de la cámara. En los Samsung Galaxy, mantén pulsado sobre el sujeto hasta que aparezca el candado del bloqueo AF/AE y ajusta después la barra de exposición.</p></div><div class="panel" role="tabpanel" id="bloqueo-p-ejercicio" aria-labelledby="bloqueo-t-ejercicio" data-label="Ejercicio" tabindex="0" hidden><p>Retrato a contraluz: coloca a la persona con el sol detrás. Toca su cara, bloquea y recompón hasta que entre el cielo. Sin bloqueo, la cara se oscurece al entrar el cielo; con bloqueo, la cara se mantiene y el cielo se quema. Elige cuál de las dos pérdidas prefieres y dispara las dos versiones.</p></div>
+<div class="actions"><button class="btn" type="button" data-lab="cara">Probar en el laboratorio</button></div>
 </div>
 </article>
--->
+<article class="entry band" id="zonas" aria-labelledby="zonas-name">
+<div class="inner">
+<h2 class="entry-name" id="zonas-name">El sistema de zonas</h2>
+<p class="entry-kind">Colocar y dejar caer</p>
+<p class="entry-work"><b>En una línea.</b> Para colocar una superficie en la zona Z, mídela en puntual y compensa (Z − 5) EV.</p>
+<div class="tabs" role="tablist" aria-label="El sistema de zonas"><button class="tab" role="tab" type="button" id="zonas-t-idea" aria-controls="zonas-p-idea" aria-selected="true" tabindex="0" data-kind="idea">Idea</button><button class="tab" role="tab" type="button" id="zonas-t-tabla" aria-controls="zonas-p-tabla" aria-selected="false" tabindex="-1" data-kind="tabla">Zonas</button><button class="tab" role="tab" type="button" id="zonas-t-ejercicio" aria-controls="zonas-p-ejercicio" aria-selected="false" tabindex="-1" data-kind="ejercicio">Ejercicio</button></div>
+<div class="panel" role="tabpanel" id="zonas-p-idea" aria-labelledby="zonas-t-idea" data-label="Idea" tabindex="0"><p>Ansel Adams y Fred Archer lo formularon en la Art Center School de Los Ángeles hacia 1939 y 1940, a partir de la sensitometría de Hurter y Driffield. Divide la escala tonal en once zonas, de 0 (negro) a X (blanco), con números romanos para no confundirlas con otras cantidades. Cada zona recibe el doble de exposición que la anterior: una zona equivale a 1 EV, y la V es la que propone el fotómetro.</p><p>El método tiene dos pasos. Eliges una superficie y decides en qué zona debe quedar: la colocas. Las demás caen donde les corresponde según su diferencia de luminancia con ella. Para colocar en la zona <span class="math">Z</span> una superficie medida en puntual, compensa <span class="math">(Z − 5)</span> EV: +1 para la piel clara al sol en la VI, −2 para una sombra con detalle en la III.</p></div><div class="panel" role="tabpanel" id="zonas-p-tabla" aria-labelledby="zonas-t-tabla" data-label="Zonas" tabindex="0" hidden><dl class="ztable"><div><dt style="background:rgb(0,0,0);color:#fff">0</dt><dd>Negro puro, sin textura.</dd></div><div><dt style="background:rgb(27,27,27);color:#fff">I</dt><dd>Casi negro: se intuye un tono, sin textura.</dd></div><div><dt style="background:rgb(48,48,48);color:#fff">II</dt><dd>Primera textura en las sombras profundas.</dd></div><div><dt style="background:rgb(71,71,71);color:#fff">III</dt><dd>Sombras con detalle y materiales oscuros.</dd></div><div><dt style="background:rgb(94,94,94);color:#fff">IV</dt><dd>Tonos medios oscuros: follaje oscuro, piedra oscura.</dd></div><div><dt style="background:rgb(119,119,119);color:#000">V</dt><dd>Gris medio: la tarjeta del 18 %.</dd></div><div><dt style="background:rgb(145,145,145);color:#000">VI</dt><dd>Piel clara al sol.</dd></div><div><dt style="background:rgb(171,171,171);color:#000">VII</dt><dd>Piel muy clara y superficies claras con textura.</dd></div><div><dt style="background:rgb(198,198,198);color:#000">VIII</dt><dd>Blancos con textura: el último tono con detalle.</dd></div><div><dt style="background:rgb(226,226,226);color:#000">IX</dt><dd>Blanco sin textura.</dd></div><div><dt style="background:rgb(255,255,255);color:#000">X</dt><dd>Blanco puro: fuentes de luz y reflejos especulares.</dd></div></dl><p>En digital la escala no es simétrica. Con la sensibilidad definida por saturación (ISO 12232), una tarjeta del 18 % expuesta según el fotómetro queda al 12,7 % de la saturación del sensor, unos 3 EV por debajo del recorte. El sensor recorta hacia la zona VIII: por encima no quedan zonas, solo blanco.</p></div><div class="panel" role="tabpanel" id="zonas-p-ejercicio" aria-labelledby="zonas-t-ejercicio" data-label="Ejercicio" tabindex="0" hidden><p>Paseo de las zonas: busca en la calle una superficie para cada zona de la II a la VIII. Mide cada una en puntual, compensa (Z − 5) EV y dispara. Al final tendrás una escala de grises hecha con materiales de la ciudad.</p></div>
+<div class="actions"><button class="btn" type="button" data-lab="zonas">Probar en el laboratorio</button></div>
+</div>
+</article>
+<article class="entry band neg" id="histograma" aria-labelledby="histograma-name">
+<div class="inner">
+<h2 class="entry-name" id="histograma-name">Leer el histograma</h2>
+<p class="entry-kind">Los extremos importan</p>
+<p class="entry-work"><b>En una línea.</b> No hay histograma correcto: mira si los bordes están llenos.</p>
+<div class="tabs" role="tablist" aria-label="Leer el histograma"><button class="tab" role="tab" type="button" id="histograma-t-idea" aria-controls="histograma-p-idea" aria-selected="true" tabindex="0" data-kind="idea">Idea</button><button class="tab" role="tab" type="button" id="histograma-t-fisica" aria-controls="histograma-p-fisica" aria-selected="false" tabindex="-1" data-kind="fisica">Física</button><button class="tab" role="tab" type="button" id="histograma-t-ejercicio" aria-controls="histograma-p-ejercicio" aria-selected="false" tabindex="-1" data-kind="ejercicio">Ejercicio</button></div>
+<div class="panel" role="tabpanel" id="histograma-p-idea" aria-labelledby="histograma-t-idea" data-label="Idea" tabindex="0"><p>El histograma cuenta píxeles por nivel de brillo: negro a la izquierda, blanco a la derecha. No hay una forma correcta. Una calle nevada se acumula a la derecha y una calle de noche, a la izquierda, y las dos pueden estar bien expuestas. Lo que importa son los bordes: una torre pegada al borde derecho indica luces recortadas, sin información que recuperar.</p><p>El histograma de la cámara se calcula sobre la vista previa JPEG, con su curva y su balance de blancos, no sobre el RAW. Suele marcar el recorte antes de que ocurra en el RAW: si el JPEG no recorta, el RAW casi seguro tampoco. Lo contrario no se cumple.</p></div><div class="panel" role="tabpanel" id="histograma-p-fisica" aria-labelledby="histograma-t-fisica" data-label="Física" tabindex="0" hidden><p>El sensor es lineal: la carga de cada fotodiodo es proporcional a la luz recibida. En un RAW de 12 bits, con 4096 niveles, el EV más luminoso ocupa 2048 niveles, el siguiente 1024 y el siguiente 512. De ahí salió en 2003 la recomendación de exponer a la derecha, que Michael Reichmann publicó tras una conversación con Thomas Knoll.</p><p>El argumento de fondo es el ruido de fotones: con <span class="math">N</span> fotones la relación señal/ruido vale <span class="math">√N</span>, así que cada EV adicional la multiplica por <span class="math">√2 ≈ 1,41</span>. Los móviles aplican la misma física de otra forma. HDR+, descrito por Google en 2016, dispara ráfagas con una exposición constante, lo bastante baja para no quemar las luces, y las alinea y combina; promediar <span class="math">n</span> tomas reduce el ruido en un factor <span class="math">√n</span>.</p></div><div class="panel" role="tabpanel" id="histograma-p-ejercicio" aria-labelledby="histograma-t-ejercicio" data-label="Ejercicio" tabindex="0" hidden><p>Activa el histograma y el aviso de altas luces (parpadeo o cebras) en la cámara. Fotografía una calle con cielo: si el borde derecho se llena, baja la exposición hasta que el aviso desaparezca de lo que quieres conservar. En el móvil, algunos modos profesionales y apps con controles manuales muestran histograma.</p></div>
+<div class="actions"><button class="btn" type="button" data-lab="recortes">Probar en el laboratorio</button></div>
+</div>
+</article>
+<article class="entry band" id="referencias" aria-labelledby="referencias-name">
+<div class="inner">
+<h2 class="entry-name" id="referencias-name">Referencias de bolsillo</h2>
+<p class="entry-kind">Sin fotómetro</p>
+<p class="entry-work"><b>En una línea.</b> Con sol, f/16 a 1/ISO. La palma de la mano, +1 EV.</p>
+<div class="tabs" role="tablist" aria-label="Referencias de bolsillo"><button class="tab" role="tab" type="button" id="referencias-t-idea" aria-controls="referencias-p-idea" aria-selected="true" tabindex="0" data-kind="idea">Idea</button><button class="tab" role="tab" type="button" id="referencias-t-fisica" aria-controls="referencias-p-fisica" aria-selected="false" tabindex="-1" data-kind="fisica">Física</button><button class="tab" role="tab" type="button" id="referencias-t-ejercicio" aria-controls="referencias-p-ejercicio" aria-selected="false" tabindex="-1" data-kind="ejercicio">Ejercicio</button></div>
+<div class="panel" role="tabpanel" id="referencias-p-idea" aria-labelledby="referencias-t-idea" data-label="Idea" tabindex="0"><p>La regla del sol 16: con sol directo, f/16 y un tiempo igual al inverso del ISO. A ISO 100, f/16 a 1/100 s o cualquier combinación equivalente, como f/8 a 1/400 s. Cuando la luz baja se abre un diafragma por paso: f/11 con nubes finas, f/8 con cielo cubierto, f/5,6 con cubierto denso y f/4 en sombra abierta o al atardecer. Con nieve o arena, f/22.</p><p>La mano sirve de tarjeta gris: mide la palma a la misma luz que el sujeto y abre 1 EV. Mejor aún, calíbrala una vez contra una tarjeta gris; la diferencia suele estar entre 2/3 y 1 EV. El asfalto envejecido, con una reflectancia solar de entre el 10 y el 18 %, anda cerca del gris del fotómetro; el recién puesto refleja en torno al 5 %.</p></div><div class="panel" role="tabpanel" id="referencias-p-fisica" aria-labelledby="referencias-t-fisica" data-label="Física" tabindex="0" hidden><p>Una tarjeta del 18 % bajo 100 000 lux tiene una luminancia <span class="math">L = R·E/π ≈ 5700</span> cd/m², con <span class="math">R</span> la reflectancia. Con <span class="math">K = 12,5</span> e ISO 100, el fotómetro propone <span class="math">EV = log<sub>2</sub>(L·S/K) ≈ 15,5</span>. La regla del sol 16 da EV 15 (f/16 a 1/125 s). La diferencia, medio paso, es la misma que Kodak recomendaba añadir a la lectura sobre su tarjeta gris.</p><p>La sombra abierta de la regla, f/4, está 4 EV por debajo del sol directo: un factor 16 en iluminancia.</p></div><div class="panel" role="tabpanel" id="referencias-p-ejercicio" aria-labelledby="referencias-t-ejercicio" data-label="Ejercicio" tabindex="0" hidden><p>Adivina antes de medir. Con sol, f/16 a 1/ISO; en sombra abierta, 4 EV más. Escribe tu estimación, mide después con la cámara y anota la diferencia. Repite en varias calles y lleva la cuenta del error medio.</p></div>
+<div class="actions"><button class="btn" type="button" data-lab="sol16">Probar en el laboratorio</button></div>
+</div>
+</article>
+</section>
 
-<div class="pending band" aria-label="Próximas fichas">
-<div class="inner"><p>Las siguientes fichas se añaden aquí a medida que se preparan los paseos.</p></div>
+<section class="band lab" id="laboratorio" aria-labelledby="lab-title">
+<div class="inner">
+<h2 class="section-title" id="lab-title" tabindex="-1">Laboratorio: medir una calle</h2>
+<div class="lab-intro">
+<p>Una calle con sol a media tarde. A la izquierda, una fachada encalada al sol con un reflejo del sol en una ventana; a la derecha, la misma fachada en sombra, un portal y una persona. Entre la pared al sol y el interior del portal hay 9,6 EV.</p>
+<p>Toca la imagen para medir en puntual en ese punto, como harías con el móvil, o cambia el modo de medición. Las lecturas dan la exposición que propondría la cámara a ISO 100 y la zona en la que cae cada superficie.</p>
+</div>
+<div class="lab-grid">
+<div class="lab-figure">
+<div class="lab-view"><canvas id="scene" width="600" height="420" role="img" aria-label="Calle con sol"></canvas></div>
+<div class="lab-data">
+<p class="scene-hint">Toca la imagen para medir en ese punto. El círculo blanco marca la zona medida.</p>
+<canvas id="hist" aria-hidden="true"></canvas>
+<p class="hist-note">Histograma de la imagen. Las marcas indican dónde cae cada zona con la curva de esta cámara: el blanco puro llega en la VIII.</p>
+<p class="ev" id="r-ev">EV</p>
+<p class="ev-pairs" id="r-pairs">Exposición propuesta a ISO 100.</p>
+<dl class="readouts">
+<dt>Píxeles con luces recortadas</dt><dd id="r-clip"></dd>
+<dt>Píxeles en negro puro</dt><dd id="r-black"></dd>
+</dl>
+<dl class="zlist">
+<dt>Reflejo en la ventana</dt><dd data-r="5"></dd>
+<dt>Pared encalada al sol</dt><dd data-r="1"></dd>
+<dt>Acera al sol</dt><dd data-r="7"></dd>
+<dt>Cielo</dt><dd data-r="0"></dd>
+<dt>Asfalto al sol</dt><dd data-r="9"></dd>
+<dt>Pared en sombra</dt><dd data-r="2"></dd>
+<dt>Cara, en sombra</dt><dd data-r="11"></dd>
+<dt>Abrigo negro</dt><dd data-r="13"></dd>
+<dt>Interior del portal</dt><dd data-r="6"></dd>
+</dl>
+<p class="lab-caption" id="lab-caption" aria-live="polite"></p>
+</div>
+</div>
+<div class="lab-controls">
+<div class="presets" role="group" aria-labelledby="pl-sit"><p class="presets-label" id="pl-sit">Situaciones</p><button class="btn preset" type="button" data-preset="promedio" aria-pressed="false" data-cap="Medición promedio: la pared al sol, la acera y el cielo dominan la media. La pared encalada queda en la zona VI, gris claro; la cara, en la II, y el abrigo y el portal se van al negro.">Promedio</button><button class="btn preset" type="button" data-preset="pared" aria-pressed="false" data-cap="Medición puntual sobre la pared encalada al sol, sin compensar: la pared queda en gris medio, zona V, y la cara cae a la zona 0. Para devolverle a la pared su blanco hay que compensar unos +2 EV.">Toca la pared</button><button class="btn preset" type="button" data-preset="cara" aria-pressed="false" data-cap="Medición puntual sobre la cara, sin compensar: la cara queda en la zona V, algo oscura para una piel clara. La pared y la acera al sol pasan de la zona VIII y se recortan: un 41 % de la imagen.">Toca la cara</button><button class="btn preset" type="button" data-preset="zonas" aria-pressed="false" data-cap="Cara colocada en la zona VI, 1 EV sobre la lectura puntual. La pared en sombra sube a la VII y el portal a la I, pero la pared, la acera y el cielo se recortan. Entre la cara en sombra y la pared al sol hay 4,6 EV: no caben a la vez por debajo del recorte.">Cara en la zona VI</button><button class="btn preset" type="button" data-preset="recortes" aria-pressed="false" data-cap="Las cebras marcan lo recortado con la cara en la zona VI: la mitad de la imagen. En la cámara, las cebras o el parpadeo de altas luces permiten decidirlo antes de disparar.">Luces recortadas</button><button class="btn preset" type="button" data-preset="sol16" aria-pressed="false" data-cap="Medición puntual sobre el asfalto al sol, de reflectancia 0,10: EV 14,3, f/16 a 1/80 s. La regla del sol 16 da f/16 a 1/100 s, un tercio de paso menos de exposición.">Sol 16</button><button class="btn preset" type="button" data-preset="cubierto" aria-pressed="false" data-cap="Cielo cubierto y medición promedio: las sombras casi desaparecen y entre la pared y la cara quedan 1,5 EV. El cielo pasa a ser lo más luminoso de la escena.">Cubierto</button></div>
+<fieldset><legend>Medición</legend>
+<div class="field"><span class="meter-label" id="mode-label">Modo</span><div class="seg" role="radiogroup" aria-labelledby="mode-label"><input type="radio" name="mode" id="m-avg" value="avg" checked><label for="m-avg">Promedio</label><input type="radio" name="mode" id="m-ctr" value="ctr"><label for="m-ctr">Ponderada al centro</label><input type="radio" name="mode" id="m-spot" value="spot"><label for="m-spot">Puntual</label></div></div>
+<div class="field"><label for="spot-pt">Punto de la medición puntual</label><select id="spot-pt"><option value="cara">Cara</option><option value="pared-sol">Pared al sol</option><option value="pared-sombra">Pared en sombra</option><option value="cielo">Cielo</option><option value="asfalto-sol">Asfalto al sol</option><option value="portal">Interior del portal</option></select></div>
+<div class="ctl"><label for="c-comp">Compensación de exposición</label><output id="o-comp" for="c-comp">0&nbsp;EV</output><input type="range" id="c-comp" min="-9" max="9" step="1" value="0"><p class="hint" aria-hidden="true"><span>−3 EV</span><span>+3 EV</span></p></div>
+</fieldset>
+<fieldset><legend>Escena</legend>
+<div class="field"><span class="meter-label" id="light-label">Luz</span><div class="seg" role="radiogroup" aria-labelledby="light-label"><input type="radio" name="light" id="l-sol" value="sol" checked><label for="l-sol">Sol</label><input type="radio" name="light" id="l-cub" value="cubierto"><label for="l-cub">Cielo cubierto</label></div></div>
+<div class="checks"><label class="check"><input type="checkbox" id="t-clip">Marcar luces recortadas</label><label class="check"><input type="checkbox" id="t-zmap">Mostrar el mapa de zonas</label></div>
+</fieldset>
+<details class="model"><summary>Cómo está calculado</summary>
+<p>La luminancia de cada superficie mate es <span class="math">L = R·E/π</span>, con <span class="math">R</span> la reflectancia y <span class="math">E</span> la iluminancia. Valores del modelo con sol: 74 000 lux sobre la fachada iluminada y 7000 lux sobre la fachada en sombra; 79 000 y 9000 lux sobre el suelo; 250 lux dentro del portal; cielo de 6000 cd/m². Reflectancias: pared encalada 0,80, acera 0,30, asfalto 0,10, piel 0,35, abrigo 0,05. Con cielo cubierto, unos 12 000 lux horizontales y un cielo de 3800 cd/m². El reflejo del sol en el cristal supera en varios órdenes de magnitud a todo lo demás.</p>
+<p>El fotómetro calcula la luminancia media de toda la imagen (promedio), la media ponderada con una gaussiana centrada (ponderada al centro) o la media en un círculo del 0,3 % del encuadre (puntual), y propone <span class="math">EV = log<sub>2</sub>(L·S/K)</span> con <span class="math">K = 12,5</span> e ISO 100. La curva de salida recorta 3 EV por encima del gris medio, como la sensibilidad por saturación, y lleva a negro puro lo que queda por debajo de la zona 0. Las texturas añaden una variación de pocos por ciento sobre cada superficie.</p>
+</details>
+</div>
+</div>
 </div>
 </section>
 
-<section class="band como" id="como" aria-labelledby="como-title">
+<section class="band neg hoy" id="para-hoy" aria-labelledby="hoy-title">
 <div class="inner">
-<h2 class="section-title" id="como-title">Qué hay en cada ficha</h2>
-<div class="como-intro"><p>Todas siguen el mismo orden, para que en el segundo paseo ya se sepa dónde mirar.</p></div>
+<h2 class="section-title" id="hoy-title">Para hoy</h2>
 <div class="rules">
-<div class="rule"><h3>Obra de referencia</h3><p>Una fotografía concreta de cada autor, con fecha y lugar donde verla: la ficha describe y enlaza, no reproduce.</p></div>
-<div class="rule"><h3>Análisis</h3><p>Qué decisión toma el autor y en qué momento: al elegir la luz, al encuadrar o al positivar.</p></div>
-<div class="rule"><h3>Física</h3><p>Lo que hay debajo de esa decisión, con las cifras que se pueden usar en la calle: EV, reflectancias, ángulos, fotones.</p></div>
-<div class="rule"><h3>Ejercicio</h3><p>Qué buscar hoy, dónde ponerse, cómo medir y cuándo disparar. Con «ver solo los ejercicios», la ficha se queda en eso.</p></div>
-<div class="rule"><h3>Laboratorio</h3><p>Cuando el tema lo permite, un simulador para ver el mecanismo con las manos antes de salir a buscarlo.</p></div>
-<div class="rule"><h3>Para hoy</h3><p>Tres reglas que caben en la memoria, para llevarlas puestas durante el paseo.</p></div>
+<div class="rule"><h3>Toca lo importante</h3><p>En el móvil, el dedo es el fotómetro puntual. Toca la superficie que debe quedar bien expuesta, no la que está en el centro.</p></div>
+<div class="rule"><h3>Protege las luces</h3><p>En digital, lo recortado no se recupera. Si algo tiene que perderse, que sean sombras sin interés.</p></div>
+<div class="rule"><h3>Coloca antes de disparar</h3><p>Decide en qué zona va el tono principal, mide sobre él y compensa (Z − 5) EV.</p></div>
 </div>
 </div>
 </section>
@@ -193,43 +371,539 @@ html:not(.js) .share-row{display:none}
 
 <footer class="band foot">
 <div class="inner">
-<div class="sign"><img src="data:image/png;base64,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" alt="Sello de La Foto Rota" width="52" height="52"><p>Fichas preparadas por La Foto Rota para el paseo fotográfico de la comunidad Foto.</p></div>
-<p>Las obras citadas en las fichas pertenecen a sus autores y archivos. Se describen y se enlazan; no se reproducen.</p>
-<p class="small">Las páginas usan negro y blanco puros, con una relación de contraste de 21:1, la máxima en sRGB, y un gris de reflectancia 18 % (#767676) para los textos secundarios. Tipografías Bodoni Moda y Atkinson Hyperlegible, con licencia SIL Open Font License, incrustadas en cada archivo: ninguna página carga recursos externos ni usa cookies.</p>
-<div class="share-row"><button class="btn" id="share" type="button">Compartir esta portada</button><span id="share-msg" class="small" aria-live="polite"></span></div>
+<div class="sign"><img src="data:image/png;base64,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" alt="Sello de La Foto Rota" width="52" height="52"><p>Ficha preparada por La Foto Rota para el paseo fotográfico de la comunidad Foto.</p></div>
+<p>Ficha anterior: <a href="contraste.html">Contraste, nueve autores</a>.</p>
+<p>Fuentes consultadas: resúmenes de las normas ISO 2720 (fotómetros) e ISO 12232 (sensibilidad de las cámaras digitales); la descripción del sistema de zonas de Adams y Archer; la documentación de soporte de Apple, Google y Samsung; el ensayo “Expose Right” de Michael Reichmann (2003); el artículo de Hasinoff y colaboradores sobre HDR+ (SIGGRAPH Asia 2016); los datos de reflectancia de pavimentos del Lawrence Berkeley National Laboratory y la recomendación de Kodak para su tarjeta gris.</p>
+<p>Los gestos del móvil pueden cambiar con cada actualización del sistema o de la app de cámara.</p>
+<p class="small">La página usa negro y blanco puros, con una relación de contraste de 21:1, la máxima en sRGB, y un gris de reflectancia 18 % (#767676) para los textos secundarios. Tipografías Bodoni Moda y Atkinson Hyperlegible, con licencia SIL Open Font License, incrustadas en el propio archivo: la página no carga recursos externos ni usa cookies.</p>
+<p><a href="./">Todas las fichas del paseo</a></p>
+<div class="share-row"><button class="btn" id="share" type="button">Compartir la ficha</button><span id="share-msg" class="small" aria-live="polite"></span></div>
 </div>
 </footer>
 
 <script>
 (function () {
   'use strict';
-  /* Reparte las bandas: la primera ficha en negativo, la siguiente en positivo, y así;
-     la banda de «próximas fichas» toma el color contrario a la última. */
-  var entries = Array.prototype.slice.call(document.querySelectorAll('.entry'));
-  entries.forEach(function (el, i) { el.classList.toggle('neg', i % 2 === 0); });
-  var pending = document.querySelector('.pending');
-  if (pending) pending.classList.toggle('neg', entries.length % 2 === 0);
+  var reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var MINUS = '\u2212', NBSP = '\u00A0';
+  var ROM = ['0', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+  var log2 = Math.log2 || function (x) { return Math.log(x) / Math.LN2; };
 
-  /* Compartir */
-  var btn = document.getElementById('share'), msg = document.getElementById('share-msg');
-  if (!btn) return;
-  btn.addEventListener('click', function () {
-    var url = location.href.split('#')[0];
-    function copy() {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(url).then(function () { msg.textContent = 'Enlace copiado.'; },
-          function () { msg.textContent = 'Copia la dirección desde la barra del navegador.'; });
-      } else {
-        msg.textContent = 'Copia la dirección desde la barra del navegador.';
+  function fmt(x, d) {
+    if (d === undefined) d = 1;
+    var s = Math.abs(x).toFixed(d);
+    return (x < 0 && Number(s) !== 0 ? MINUS : '') + s.replace('.', ',');
+  }
+  function fmtSigned(x, d) {
+    var s = fmt(x, d);
+    return (x > 0 && Number(Math.abs(x).toFixed(d)) !== 0) ? '+' + s : s;
+  }
+  function $(id) { return document.getElementById(id); }
+
+  /* Gris de cada zona en la escala perceptual: L* = 10 por zona (la zona V queda en el 18,4 %). */
+  function zoneGray(z) {
+    var Ls = 10 * Math.max(0, Math.min(10, z));
+    var Y = Ls > 8 ? Math.pow((Ls + 16) / 116, 3) : Ls / 903.3;
+    var e = Y <= 0.0031308 ? 12.92 * Y : 1.055 * Math.pow(Y, 1 / 2.4) - 0.055;
+    return Math.round(e * 255);
+  }
+
+  /* Pestañas */
+  function selectTab(tab, focus) {
+    var tabs = tab.parentElement.querySelectorAll('[role="tab"]');
+    for (var i = 0; i < tabs.length; i++) {
+      var t = tabs[i], on = t === tab;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+      var panel = $(t.getAttribute('aria-controls'));
+      if (panel) panel.hidden = !on;
+    }
+    if (focus) tab.focus();
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[role="tablist"]'), function (list) {
+    list.addEventListener('click', function (e) {
+      var t = e.target.closest('[role="tab"]');
+      if (t) selectTab(t, false);
+    });
+    list.addEventListener('keydown', function (e) {
+      var tabs = Array.prototype.slice.call(list.querySelectorAll('[role="tab"]'));
+      var i = tabs.indexOf(document.activeElement);
+      if (i < 0) return;
+      var j = null;
+      if (e.key === 'ArrowRight') j = (i + 1) % tabs.length;
+      else if (e.key === 'ArrowLeft') j = (i - 1 + tabs.length) % tabs.length;
+      else if (e.key === 'Home') j = 0;
+      else if (e.key === 'End') j = tabs.length - 1;
+      if (j !== null) { e.preventDefault(); selectTab(tabs[j], true); }
+    });
+  });
+
+  /* Modo "Ver solo los ejercicios" */
+  var entries = Array.prototype.slice.call(document.querySelectorAll('.entry'));
+  var tipsToggle = $('solo-ejercicios'), prevTabs = [];
+  if (tipsToggle) tipsToggle.addEventListener('click', function () {
+    var on = tipsToggle.getAttribute('aria-pressed') !== 'true';
+    tipsToggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+    document.body.classList.toggle('solo-ejercicios', on);
+    entries.forEach(function (el, idx) {
+      var list = el.querySelector('[role="tablist"]');
+      if (!list) return;
+      if (on) {
+        prevTabs[idx] = list.querySelector('[aria-selected="true"]');
+        selectTab(list.querySelector('[data-kind="ejercicio"]'), false);
+      } else if (prevTabs[idx]) {
+        selectTab(prevTabs[idx], false);
+      }
+    });
+  });
+
+  /* Portada: escala de zonas. Arrastrar desplaza la exposición; todos los tonos se mueven juntos. */
+  (function hero() {
+    var box = $('zscale');
+    if (!box) return;
+    var rows = Array.prototype.slice.call(box.querySelectorAll('.zrow'));
+    var LREF = 3900; /* luminancia (cd/m²) que cae en la zona V con desplazamiento 0: la piel al sol queda en la VI */
+    var off = 0, raf = 0;
+
+    function draw(o) {
+      off = Math.max(-6, Math.min(6, o));
+      rows.forEach(function (r) {
+        var L = +r.getAttribute('data-l');
+        var z = 5 + log2(L / LREF) + off;
+        var dot = r.querySelector('.zdot'), lab = r.querySelector('.zlab'), zt = r.querySelector('.zz');
+        var pct, txt, out = false;
+        if (z > 10.5) { pct = 100; txt = 'más allá de X'; out = true; }
+        else if (z < -0.5) { pct = 0; txt = 'por debajo de 0'; out = true; }
+        else { pct = (z + 0.5) / 11 * 100; txt = ROM[Math.round(z)]; }
+        dot.style.left = pct + '%';
+        if (out) { dot.style.background = ''; }
+        else { var g = zoneGray(z); dot.style.background = 'rgb(' + g + ',' + g + ',' + g + ')'; }
+        dot.classList.toggle('off', out);
+        zt.textContent = txt;
+        if (pct < 58) { lab.style.left = 'calc(' + pct + '% + 14px)'; lab.style.right = 'auto'; }
+        else { lab.style.right = 'calc(' + (100 - pct) + '% + 14px)'; lab.style.left = 'auto'; }
+      });
+      box.setAttribute('aria-valuenow', off.toFixed(1));
+      box.setAttribute('aria-valuetext', 'Desplazamiento de la exposición: ' + fmtSigned(off, 1) + ' EV');
+    }
+    function stopAnim() { if (raf) cancelAnimationFrame(raf); raf = 0; }
+    function animate(from, to, ms) {
+      var t0 = null;
+      function step(now) {
+        if (t0 === null) t0 = now;
+        var t = Math.min(1, (now - t0) / ms), e = 1 - Math.pow(1 - t, 3);
+        draw(from + (to - from) * e);
+        raf = t < 1 ? requestAnimationFrame(step) : 0;
+      }
+      raf = requestAnimationFrame(step);
+    }
+    var down = false, dragging = false, x0 = 0, off0 = 0;
+    box.addEventListener('pointerdown', function (e) { down = true; dragging = false; x0 = e.clientX; off0 = off; stopAnim(); });
+    box.addEventListener('pointermove', function (e) {
+      if (!down) return;
+      var dx = e.clientX - x0;
+      if (!dragging && Math.abs(dx) > 4) { dragging = true; try { box.setPointerCapture(e.pointerId); } catch (err) {} }
+      if (dragging) draw(off0 + dx / (box.clientWidth / 11));
+    });
+    function end(e) { down = false; dragging = false; try { box.releasePointerCapture(e.pointerId); } catch (err) {} }
+    box.addEventListener('pointerup', end);
+    box.addEventListener('pointercancel', function () { down = false; dragging = false; });
+    box.addEventListener('keydown', function (e) {
+      var step = e.shiftKey ? 1 : 1 / 3;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { stopAnim(); draw(off + step); e.preventDefault(); }
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { stopAnim(); draw(off - step); e.preventDefault(); }
+      else if (e.key === 'Home') { stopAnim(); draw(0); e.preventDefault(); }
+    });
+    if (reduceMotion) { draw(0); return; }
+    draw(-3);
+    var ready = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+    ready.then(function () { setTimeout(function () { if (Math.abs(off + 3) < 0.01) animate(-3, 0, 1600); }, 250); });
+  })();
+
+  /* Laboratorio: una calle con sol, medida como lo haría la cámara */
+  (function laboratorio() {
+    var cv = $('scene');
+    if (!cv) return;
+    var W = cv.width, H = cv.height, N = W * H;
+    var ctx = cv.getContext('2d', { alpha: false });
+    var NREG = 14, SPOT_R = 16, K_CAL = 12.5, ISO = 100;
+    /* 0 cielo, 1 pared al sol, 2 pared en sombra, 3 ventana al sol, 4 ventana en sombra, 5 reflejo del sol,
+       6 portal, 7 acera al sol, 8 acera en sombra, 9 asfalto al sol, 10 asfalto en sombra, 11 cara, 12 pelo, 13 abrigo */
+    var LUM = {
+      sol:      [6000, 18845, 1783, 450, 300, 2e6, 24, 7544, 859, 2515, 286, 780, 134, 111],
+      cubierto: [3800, 1400, 1146, 250, 200, 1500, 12, 859, 764, 286, 255, 501, 86, 72]
+    };
+    var POINTS = {
+      'cara': [500, 205], 'pared-sol': [310, 150], 'pared-sombra': [425, 262], 'cielo': [300, 33],
+      'asfalto-sol': [200, 386], 'portal': [573, 300]
+    };
+    var ANCHORS = [[0, 300, 33], [1, 310, 150], [2, 425, 262], [3, 92, 150], [6, 573, 300], [7, 150, 335],
+                   [9, 200, 386], [10, 585, 386], [11, 500, 200], [13, 500, 300]];
+    var ready = false, started = false, pending = false;
+    var img, ids, logTex, outG;
+    var sumAvg = new Float64Array(NREG), sumCtr = new Float64Array(NREG), totCtr = 0;
+    var hist = new Uint32Array(256);
+
+    function xd(y) { return 330 + (y - 70) * 0.4; }
+    function inEll(x, y, cx, cy, rx, ry) { var a = (x - cx) / rx, b = (y - cy) / ry; return a * a + b * b <= 1; }
+    function hash2(x, y) {
+      var h = Math.imul(x | 0, 374761393) ^ Math.imul(y | 0, 668265263);
+      h = Math.imul(h ^ (h >>> 13), 1274126177);
+      h ^= h >>> 16;
+      return (h >>> 0) / 4294967296;
+    }
+    function vnoise(x, y, cell, seed) {
+      var gx = x / cell, gy = y / cell, ix = Math.floor(gx), iy = Math.floor(gy);
+      var fx = gx - ix, fy = gy - iy;
+      fx = fx * fx * (3 - 2 * fx); fy = fy * fy * (3 - 2 * fy);
+      var a = hash2(ix + seed, iy), b = hash2(ix + 1 + seed, iy), c = hash2(ix + seed, iy + 1), d = hash2(ix + 1 + seed, iy + 1);
+      var top = a + (b - a) * fx, bot = c + (d - c) * fx;
+      return top + (bot - top) * fy;
+    }
+    var WINDOWS = [[60, 100, 125, 185, 1], [190, 100, 255, 185, 1], [395, 100, 460, 185, 1], [60, 215, 255, 300, 2]];
+
+    /* Devuelve [región, factor de textura] para el centro del píxel (px, py). */
+    function classify(px, py) {
+      var x = px + 0.5, y = py + 0.5;
+      var n1 = vnoise(x, y, 22, 7) - 0.5, n2 = hash2(px * 3 + 11, py * 7 + 5) - 0.5;
+      if (inEll(x, y, 500, 196, 22, 27) || (x >= 491 && x <= 509 && y >= 219 && y <= 238)) {
+        var tf = 1.18 - 0.36 * (x - 478) / 44 - 0.1 * Math.max(0, (y - 205) / 30);
+        return [11, tf * (1 + 0.04 * n2)];
+      }
+      if (inEll(x, y, 500, 186, 25, 23) && y < 206) return [12, 1 + 0.25 * n2 + 0.2 * n1];
+      var hw = -1;
+      if (y >= 234 && y < 352) hw = y < 246 ? 36 * Math.sqrt(Math.max(0, 1 - Math.pow((246 - y) / 12, 2))) : 36 + (y - 246) * (12 / 106);
+      if (hw > 0 && Math.abs(x - 500) <= hw) {
+        var tc = 1.2 - 0.4 * (x - (500 - hw)) / (2 * hw);
+        return [13, tc * (1 + 0.08 * n2 + 0.1 * n1)];
+      }
+      if (y >= 352 && y < 404 && (Math.abs(x - 487) <= 10 || Math.abs(x - 513) <= 10)) return [13, 0.9 * (1 + 0.08 * n2)];
+      if (y >= 404 && y < 411 && (Math.abs(x - 485) <= 13 || Math.abs(x - 515) <= 13)) return [13, 0.7];
+      var shade = x > xd(y);
+      if (y < 66) return [0, (0.9 + 0.2 * y / 66) * (1 + 0.01 * n2)];
+      if (y >= 320) {
+        if (y < 350) {
+          var joint = (x % 60) < 2.2 ? 0.72 : 1, curb = y >= 345 ? 1.12 : 1;
+          return [shade ? 8 : 7, joint * curb * (1 + 0.12 * n2 + 0.08 * n1)];
+        }
+        return [shade ? 10 : 9, 1 + 0.2 * n2 + 0.08 * n1];
+      }
+      if (x >= 530 && x <= 596 && y >= 210 && (y >= 243 || (x - 563) * (x - 563) + (y - 243) * (y - 243) <= 33 * 33)) {
+        var tp = 0.6 + 0.9 * Math.max(0, (y - 270) / 50) + 0.25 * n1;
+        return [6, Math.max(0.2, tp) * (1 + 0.15 * n2)];
+      }
+      for (var w = 0; w < WINDOWS.length; w++) {
+        var Wd = WINDOWS[w];
+        if (x >= Wd[0] && x <= Wd[2] && y >= Wd[1] && y <= Wd[3]) {
+          if (x < Wd[0] + 5 || x > Wd[2] - 5 || y < Wd[1] + 5 || y > Wd[3] - 5) break;
+          var mw = (Wd[2] - Wd[0]) / (Wd[4] + 1), mull = false;
+          for (var m = 1; m <= Wd[4]; m++) if (Math.abs(x - (Wd[0] + m * mw)) < 2.5) mull = true;
+          if (mull) break;
+          if (w === 1 && inEll(x, y, 212, 128, 5, 4)) return [5, 1];
+          var gl = 0.65 + 0.7 * (((x - Wd[0]) / (Wd[2] - Wd[0])) * 0.3 + (1 - (y - Wd[1]) / (Wd[3] - Wd[1])) * 0.7);
+          return [shade ? 4 : 3, gl * (1 + 0.05 * n2)];
+        }
+      }
+      var tw = (y < 78 ? 0.78 : 1) * (1 + 0.07 * n2 + 0.09 * n1);
+      if (y > 300) tw *= 0.85;
+      return [shade ? 2 : 1, tw];
+    }
+
+    function init() {
+      if (ready) return;
+      img = ctx.createImageData(W, H);
+      ids = new Uint8Array(N); logTex = new Float32Array(N); outG = new Uint8Array(N);
+      var sig2 = 2 * 150 * 150;
+      for (var py = 0; py < H; py++) {
+        for (var px = 0; px < W; px++) {
+          var k = py * W + px, r = classify(px, py), t = Math.max(0.05, r[1]);
+          ids[k] = r[0]; logTex[k] = log2(t);
+          sumAvg[r[0]] += t;
+          var dx = px + 0.5 - 300, dy = py + 0.5 - 210, wgt = Math.exp(-(dx * dx + dy * dy) / sig2);
+          sumCtr[r[0]] += wgt * t; totCtr += wgt;
+        }
+      }
+      ready = true;
+    }
+
+    /* Curva de salida: hombro que recorta 3 EV por encima del gris medio (zona VIII) y pie que lleva el negro a la zona 0. */
+    var LOG_MIN = -12, LSTEPS = 256, LUTN = 13 * LSTEPS + 1, lut = new Uint8Array(LUTN), WP = 1.44, BLK = 0.0045;
+    function curve(v) {
+      var f = v >= WP ? 1 : v * (1 + v / (WP * WP)) / (1 + v);
+      var g = Math.max(0, (f - BLK) / (1 - BLK));
+      var e = g <= 0.0031308 ? 12.92 * g : 1.055 * Math.pow(g, 1 / 2.4) - 0.055;
+      return Math.max(0, Math.min(255, Math.round(e * 255)));
+    }
+    for (var li = 0; li < LUTN; li++) lut[li] = curve(Math.pow(2, LOG_MIN + li / LSTEPS));
+    var ZLEVEL = []; for (var zz = 0; zz <= 10; zz++) ZLEVEL.push(curve(0.18 * Math.pow(2, zz - 5)));
+
+    var P = { mode: 'avg', pt: 'cara', spot: [500, 205], comp: 0, light: 'sol', clip: false, zmap: false };
+
+    function meterLum(L) {
+      var i, s = 0;
+      if (P.mode === 'avg') { for (i = 0; i < NREG; i++) s += L[i] * sumAvg[i]; return s / N; }
+      if (P.mode === 'ctr') { for (i = 0; i < NREG; i++) s += L[i] * sumCtr[i]; return s / totCtr; }
+      var cx = P.spot[0], cy = P.spot[1], r = SPOT_R, n = 0;
+      for (var y = Math.max(0, Math.floor(cy - r)); y <= Math.min(H - 1, Math.ceil(cy + r)); y++) {
+        for (var x = Math.max(0, Math.floor(cx - r)); x <= Math.min(W - 1, Math.ceil(cx + r)); x++) {
+          var dx = x + 0.5 - cx, dy = y + 0.5 - cy;
+          if (dx * dx + dy * dy <= r * r) { var k = y * W + x; s += L[ids[k]] * Math.pow(2, logTex[k]); n++; }
+        }
+      }
+      return s / Math.max(1, n);
+    }
+
+    var SPEEDS = [[1 / 8000, '1/8000'], [1 / 6400, '1/6400'], [1 / 5000, '1/5000'], [1 / 4000, '1/4000'], [1 / 3200, '1/3200'],
+      [1 / 2500, '1/2500'], [1 / 2000, '1/2000'], [1 / 1600, '1/1600'], [1 / 1250, '1/1250'], [1 / 1000, '1/1000'], [1 / 800, '1/800'],
+      [1 / 640, '1/640'], [1 / 500, '1/500'], [1 / 400, '1/400'], [1 / 320, '1/320'], [1 / 250, '1/250'], [1 / 200, '1/200'],
+      [1 / 160, '1/160'], [1 / 125, '1/125'], [1 / 100, '1/100'], [1 / 80, '1/80'], [1 / 60, '1/60'], [1 / 50, '1/50'], [1 / 40, '1/40'],
+      [1 / 30, '1/30'], [1 / 25, '1/25'], [1 / 20, '1/20'], [1 / 15, '1/15'], [1 / 13, '1/13'], [1 / 10, '1/10'], [1 / 8, '1/8'],
+      [1 / 6, '1/6'], [1 / 5, '1/5'], [1 / 4, '1/4'], [0.3, '0,3'], [0.4, '0,4'], [0.5, '0,5'], [0.6, '0,6'], [0.8, '0,8'], [1, '1'],
+      [1.3, '1,3'], [1.6, '1,6'], [2, '2'], [2.5, '2,5'], [3.2, '3,2'], [4, '4'], [5, '5'], [6, '6'], [8, '8'], [10, '10'], [13, '13'],
+      [15, '15'], [20, '20'], [25, '25'], [30, '30']];
+    function speed(t) {
+      if (t < 1 / 9000) return 'menos de 1/8000' + NBSP + 's';
+      if (t > 34) return 'más de 30' + NBSP + 's';
+      var lt = log2(t), best = SPEEDS[0], bd = 1e9;
+      for (var i = 0; i < SPEEDS.length; i++) { var dd = Math.abs(log2(SPEEDS[i][0]) - lt); if (dd < bd) { bd = dd; best = SPEEDS[i]; } }
+      return best[1] + NBSP + 's';
+    }
+    function zoneText(z) {
+      if (z >= 7.97) return 'zona ' + (z > 10.5 ? 'X o más' : ROM[Math.min(10, Math.round(z))]) + ', recortado';
+      if (z < -0.5) return 'por debajo de 0, negro';
+      return 'zona ' + ROM[Math.round(z)];
+    }
+
+    var hc = $('hist');
+    function drawHist() {
+      var dpr = Math.min(2, window.devicePixelRatio || 1);
+      var w = hc.clientWidth || 300, h = hc.clientHeight || 76;
+      var W2 = Math.round(w * dpr), H2 = Math.round(h * dpr);
+      if (hc.width !== W2 || hc.height !== H2) { hc.width = W2; hc.height = H2; }
+      var g = hc.getContext('2d');
+      g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      g.clearRect(0, 0, w, h);
+      var hb = h - 16, bins = new Float64Array(128), i, max = 1;
+      for (i = 0; i < 256; i++) bins[i >> 1] += hist[i];
+      for (i = 1; i < 127; i++) if (bins[i] > max) max = bins[i];
+      var bw = w / 128;
+      g.fillStyle = '#000';
+      for (i = 0; i < 128; i++) {
+        var bh = Math.min(1, bins[i] / max) * (hb - 1);
+        if (bh > 0) g.fillRect(i * bw, hb - bh, Math.max(1, bw - 0.4), bh);
+      }
+      g.fillStyle = '#767676';
+      g.fillRect(0, hb, w, 1);
+      g.font = '11px ' + getComputedStyle(document.body).fontFamily;
+      g.textAlign = 'center';
+      g.textBaseline = 'top';
+      for (i = 0; i <= 8; i++) {
+        var xz = Math.min(w - 1, Math.max(1, ZLEVEL[i] / 255 * w));
+        g.fillStyle = '#767676';
+        g.fillRect(Math.round(xz), hb, 1, 4);
+        if (i === 0 || i === 2 || i === 4 || i === 5 || i === 6 || i === 7 || i === 8) {
+          g.fillStyle = i === 5 ? '#000' : '#767676';
+          var tx = Math.min(w - 12, Math.max(6, xz));
+          g.fillText(ROM[i], tx, hb + 4);
+        }
       }
     }
-    if (navigator.share) {
-      navigator.share({ title: document.title, url: url }).catch(function (e) { if (!e || e.name !== 'AbortError') copy(); });
-    } else {
-      copy();
+
+    function render() {
+      init();
+      var t0 = performance.now();
+      var L = LUM[P.light], i, k;
+      var Lm = meterLum(L);
+      var off = log2(0.18) - log2(Lm) + P.comp;
+      var base = new Float64Array(NREG), zreg = new Float64Array(NREG), gz = new Uint8Array(NREG);
+      for (i = 0; i < NREG; i++) {
+        base[i] = (off + log2(L[i]) - LOG_MIN) * LSTEPS;
+        zreg[i] = 5 + log2(L[i] / Lm) + P.comp;
+        var zr = Math.round(zreg[i]);
+        gz[i] = zreg[i] >= 7.97 ? 255 : zreg[i] < -0.5 ? 0 : ZLEVEL[Math.max(0, Math.min(8, zr))];
+      }
+      hist.fill(0);
+      var d = img.data, zm = P.zmap;
+      for (k = 0; k < N; k++) {
+        var idx = base[ids[k]] + logTex[k] * LSTEPS;
+        idx = idx < 0 ? 0 : idx >= LUTN - 1 ? LUTN - 1 : idx | 0;
+        var o = lut[idx];
+        hist[o]++;
+        outG[k] = o;
+      }
+      for (k = 0; k < N; k++) {
+        var p = k << 2, v = zm ? gz[ids[k]] : outG[k];
+        d[p] = v; d[p + 1] = v; d[p + 2] = v; d[p + 3] = 255;
+      }
+      if (P.clip) {
+        for (var y = 0; y < H; y++) {
+          for (var x = 0; x < W; x++) {
+            var kk = y * W + x;
+            if (outG[kk] >= 255 && ((x + y) >> 3) & 1) { var q = kk << 2; d[q] = 162; d[q + 1] = 59; d[q + 2] = 51; }
+          }
+        }
+      }
+      ctx.putImageData(img, 0, 0);
+      ctx.save();
+      if (P.mode === 'spot') {
+        ctx.beginPath(); ctx.arc(P.spot[0], P.spot[1], SPOT_R, 0, 2 * Math.PI);
+        ctx.lineWidth = 3; ctx.strokeStyle = '#000'; ctx.stroke();
+        ctx.lineWidth = 1.5; ctx.strokeStyle = '#fff'; ctx.stroke();
+      } else if (P.mode === 'ctr') {
+        ctx.setLineDash([6, 6]);
+        ctx.beginPath(); ctx.arc(300, 210, 150, 0, 2 * Math.PI);
+        ctx.lineWidth = 1.5; ctx.strokeStyle = '#fff'; ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      if (zm) {
+        ctx.font = '600 20px ' + getComputedStyle(document.body).fontFamily;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ANCHORS.forEach(function (a) {
+          var zv = zreg[a[0]], t = zv > 10.5 ? 'X+' : zv < -0.5 ? '<0' : ROM[Math.round(zv)];
+          var tw = ctx.measureText(t).width + 12;
+          ctx.fillStyle = '#fff'; ctx.fillRect(a[1] - tw / 2, a[2] - 13, tw, 26);
+          ctx.strokeStyle = '#000'; ctx.lineWidth = 1; ctx.strokeRect(a[1] - tw / 2 + 0.5, a[2] - 12.5, tw - 1, 25);
+          ctx.fillStyle = zv >= 7.97 ? '#a23b33' : '#000'; ctx.fillText(t, a[1], a[2] + 1);
+        });
+      }
+      ctx.restore();
+
+      var ev = log2(Lm * ISO / K_CAL) - P.comp;
+      $('r-ev').textContent = 'EV ' + fmt(ev, 1);
+      $('r-pairs').textContent = 'f/16 a ' + speed(256 / Math.pow(2, ev)) + ', f/8 a ' + speed(64 / Math.pow(2, ev)) + ' o f/4 a ' + speed(16 / Math.pow(2, ev));
+      function pctText(c) { var v = c / N * 100; return (v > 0 && v < 0.05) ? 'menos de 0,1' + NBSP + '%' : fmt(v, 1) + NBSP + '%'; }
+      $('r-clip').textContent = pctText(hist[255]);
+      $('r-black').textContent = pctText(hist[0]);
+      Array.prototype.forEach.call(document.querySelectorAll('.zlist dd[data-r]'), function (dd) {
+        var z = zreg[+dd.getAttribute('data-r')];
+        dd.textContent = zoneText(z);
+        dd.classList.toggle('clip', z >= 7.97);
+      });
+      cv.setAttribute('aria-label', 'Calle con sol. Exposición propuesta EV ' + fmt(ev, 1) + '. Cara en ' + zoneText(zreg[11]) +
+        '. Pared al sol en ' + zoneText(zreg[1]) + '.');
+      drawHist();
+      cv.setAttribute('data-ms', (performance.now() - t0).toFixed(1));
     }
-  });
+    function schedule() {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(function () { pending = false; render(); });
+    }
+
+    var modeRadios = Array.prototype.slice.call(document.querySelectorAll('input[name="mode"]'));
+    var lightRadios = Array.prototype.slice.call(document.querySelectorAll('input[name="light"]'));
+    var ptSel = $('spot-pt'), compEl = $('c-comp'), compOut = $('o-comp'), clipEl = $('t-clip'), zmapEl = $('t-zmap');
+    var caption = $('lab-caption');
+    var presetButtons = Array.prototype.slice.call(document.querySelectorAll('.preset'));
+    function markPreset(name) {
+      presetButtons.forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-preset') === name ? 'true' : 'false'); });
+    }
+    function syncUI() {
+      modeRadios.forEach(function (r) { r.checked = r.value === P.mode; });
+      lightRadios.forEach(function (r) { r.checked = r.value === P.light; });
+      ptSel.value = P.pt;
+      ptSel.disabled = P.mode !== 'spot';
+      compEl.value = Math.round(P.comp * 3);
+      compOut.textContent = fmtSigned(P.comp, 1) + NBSP + 'EV';
+      clipEl.checked = P.clip;
+      zmapEl.checked = P.zmap;
+    }
+    function userChange() { started = true; markPreset(''); caption.textContent = ''; syncUI(); schedule(); }
+    modeRadios.forEach(function (r) { r.addEventListener('change', function () { if (r.checked) { P.mode = r.value; userChange(); } }); });
+    lightRadios.forEach(function (r) { r.addEventListener('change', function () { if (r.checked) { P.light = r.value; userChange(); } }); });
+    ptSel.addEventListener('change', function () {
+      P.pt = ptSel.value;
+      if (POINTS[P.pt]) P.spot = POINTS[P.pt].slice();
+      userChange();
+    });
+    compEl.addEventListener('input', function () { P.comp = (+compEl.value) / 3; userChange(); });
+    clipEl.addEventListener('change', function () { P.clip = clipEl.checked; userChange(); });
+    zmapEl.addEventListener('change', function () { P.zmap = zmapEl.checked; userChange(); });
+    cv.addEventListener('click', function (e) {
+      var rect = cv.getBoundingClientRect();
+      P.spot = [(e.clientX - rect.left) / rect.width * W, (e.clientY - rect.top) / rect.height * H];
+      P.mode = 'spot';
+      if (!ptSel.querySelector('option[value="tap"]')) {
+        var opt = document.createElement('option');
+        opt.value = 'tap'; opt.textContent = 'Punto tocado en la imagen';
+        ptSel.appendChild(opt);
+      }
+      P.pt = 'tap';
+      userChange();
+    });
+
+    var PRESETS = {
+      promedio: { mode: 'avg', pt: 'cara', comp: 0, light: 'sol', clip: false, zmap: false, cap: '' },
+      pared:    { mode: 'spot', pt: 'pared-sol', comp: 0, light: 'sol', clip: false, zmap: false, cap: '' },
+      cara:     { mode: 'spot', pt: 'cara', comp: 0, light: 'sol', clip: false, zmap: false, cap: '' },
+      zonas:    { mode: 'spot', pt: 'cara', comp: 1, light: 'sol', clip: false, zmap: true, cap: '' },
+      recortes: { mode: 'spot', pt: 'cara', comp: 1, light: 'sol', clip: true, zmap: false, cap: '' },
+      sol16:    { mode: 'spot', pt: 'asfalto-sol', comp: 0, light: 'sol', clip: false, zmap: false, cap: '' },
+      cubierto: { mode: 'avg', pt: 'cara', comp: 0, light: 'cubierto', clip: false, zmap: false, cap: '' }
+    };
+    /* Los textos de cada situación se leen del HTML para mantenerlos junto al resto del contenido. */
+    presetButtons.forEach(function (b) {
+      var p = PRESETS[b.getAttribute('data-preset')];
+      if (p) p.cap = b.getAttribute('data-cap') || '';
+    });
+    function applyPreset(name) {
+      var p = PRESETS[name];
+      if (!p) return;
+      started = true;
+      P.mode = p.mode; P.pt = p.pt; P.spot = POINTS[p.pt].slice(); P.comp = p.comp; P.light = p.light; P.clip = p.clip; P.zmap = p.zmap;
+      syncUI();
+      markPreset(name);
+      caption.textContent = p.cap;
+      schedule();
+    }
+    presetButtons.forEach(function (b) { b.addEventListener('click', function () { applyPreset(b.getAttribute('data-preset')); }); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-lab]'), function (b) {
+      b.addEventListener('click', function () {
+        applyPreset(b.getAttribute('data-lab'));
+        var sec = $('laboratorio');
+        sec.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+        var h = $('lab-title');
+        if (h) h.focus({ preventScroll: true });
+      });
+    });
+
+    syncUI();
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (es) {
+        for (var i = 0; i < es.length; i++) {
+          if (es[i].isIntersecting) { io.disconnect(); if (!started) applyPreset('promedio'); break; }
+        }
+      }, { rootMargin: '900px 0px' });
+      io.observe(cv);
+    } else {
+      applyPreset('promedio');
+    }
+    window.addEventListener('resize', function () { if (ready) drawHist(); });
+  })();
+
+  /* Compartir */
+  (function share() {
+    var btn = $('share'), msg = $('share-msg');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var url = location.href.split('#')[0];
+      function copy() {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(function () { msg.textContent = 'Enlace copiado.'; },
+            function () { msg.textContent = 'Copia la dirección desde la barra del navegador.'; });
+        } else {
+          msg.textContent = 'Copia la dirección desde la barra del navegador.';
+        }
+      }
+      if (navigator.share) {
+        navigator.share({ title: document.title, url: url }).catch(function (e) { if (!e || e.name !== 'AbortError') copy(); });
+      } else {
+        copy();
+      }
+    });
+  })();
 })();
+
 </script>
 </body>
 </html>
