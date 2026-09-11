@@ -291,7 +291,7 @@ const DICT={
   supWith:(n,tipo)=>'Los tiempos de la tabla ya incluyen los '+n+' pasos de la estabilización del cuerpo ('+tipo+'), por eso la columna de pasos empieza en '+n+' y no en cero. Apágala arriba para ver la escalera desnuda.',
   supWithout:'Los tiempos son los de tus manos solas. Si tu cuerpo tiene estabilización, enciéndela arriba y toda la tabla se corre hacia tiempos más largos.',
   sFrame:(w)=>'El fotograma entero · '+w+' px de ancho · las estelas a escala real',
-  sDetail:'Detalle · 1200 px del sensor',
+  sDetail:'Detalle · los 1200 px marcados a la izquierda',
   sShakeBox:(px)=>'Tu temblor al mismo tiempo y escala · '+px+' px',
   sCap:(w)=>'El recuadro grande es el fotograma completo, '+w+' px de ancho, y las estelas van a escala real dentro de él. La geometría está a escala; el brillo no: el rastro real se apaga como 1/n, que es justo por lo que la gente desaparece.',
   sOut:'Alguna estela se sale del fotograma.',
@@ -345,7 +345,7 @@ const DICT={
   supWith:(n,tipo)=>'The times in the table already include the '+n+' stops of the body stabilisation ('+tipo+'), which is why the stops column starts at '+n+' and not at zero. Switch it off above to see the bare ladder.',
   supWithout:'The times are those of your hands alone. If your body has stabilisation, switch it on above and the whole table shifts towards longer times.',
   sFrame:(w)=>'The whole frame \u00b7 '+w+' px wide \u00b7 streaks at true scale',
-  sDetail:'Detail \u00b7 1,200 px of the sensor',
+  sDetail:'Detail \u00b7 the 1,200 px marked on the left',
   sShakeBox:(px)=>'Your tremor at the same time and scale \u00b7 '+px+' px',
   sCap:(w)=>'The large rectangle is the whole frame, '+w+' px wide, and the streaks are drawn inside it at true scale. Geometry is to scale; brightness is not: the real trace fades as 1/n, which is why people vanish.',
   sOut:'Some streak runs off the frame.',
@@ -657,11 +657,15 @@ function franja(s,t){
   const fx=18, fy=34, fw=780, fh=fw*2/3;            // 780 × 520
   const esc=fw/s.cam.w;                              // px de pantalla por px de sensor
   ctx.fillStyle="#0b0d11"; ctx.fillRect(fx,fy,fw,fh);
-  /* guías de tercios, muy tenues */
-  ctx.strokeStyle="rgba(255,255,255,.06)"; ctx.lineWidth=1; ctx.beginPath();
-  for(let k=1;k<3;k++){ ctx.moveTo(fx+fw*k/3,fy); ctx.lineTo(fx+fw*k/3,fy+fh);
-                        ctx.moveTo(fx,fy+fh*k/3); ctx.lineTo(fx+fw,fy+fh*k/3); }
+  /* Sin rejilla de tercios: aquí no se compone, se mide, y esas líneas hacían
+     leer el fotograma como una matriz de celdas vacías. En su lugar, una regla
+     de escala abajo, para que el hueco se entienda como lo que es: todo el
+     fotograma que la estela NO llega a cruzar. */
+  ctx.strokeStyle="rgba(255,255,255,.05)"; ctx.lineWidth=1; ctx.beginPath();
+  for(let k=1;k<10;k++){ const x=fx+fw*k/10; ctx.moveTo(x,fy+fh-9); ctx.lineTo(x,fy+fh-(k===5?16:12)); }
   ctx.stroke();
+  ctx.fillStyle="#4d5766"; ctx.textAlign="center";
+  ctx.fillText("50 %", fx+fw/2, fy+fh-24);
 
   const filas=[[LBL('sRef'),0],[LBL('sHalf'),t/2],[LBL('sNow'),t],[LBL('sDouble'),t*2]];
   const dia=Math.max(3,30*esc);                      // el sujeto, 30 px de sensor
@@ -694,6 +698,11 @@ function franja(s,t){
     ctx.fillStyle="#6b7684";
     ctx.fillText(fila[1]?Math.round(bSensor)+" px · "+nf(100*bSensor/s.cam.w,1)+" %":"—", fx+8, cy+dia/2+9);
   });
+  /* ventana de aumento: el trozo de fotograma que amplía la caja de detalle */
+  const cyNow=fy+fh*(0.22+2*0.19), wZoom=Math.max(6,1200*esc);
+  ctx.strokeStyle="rgba(255,217,138,.55)"; ctx.setLineDash([4,3]); ctx.lineWidth=1;
+  ctx.strokeRect(x0-wZoom*0.14, cyNow-Math.max(10,dia*1.6), wZoom, Math.max(20,dia*3.2));
+  ctx.setLineDash([]);
   ctx.strokeStyle="#3a4552"; ctx.lineWidth=1; ctx.strokeRect(fx+.5,fy+.5,fw-1,fh-1);
   ctx.fillStyle="#98a3b0"; ctx.textAlign="left";
   ctx.fillText(LBL('sFrame',nf(s.cam.w,0)), fx, 18);
