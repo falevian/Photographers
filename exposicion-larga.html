@@ -585,8 +585,9 @@ function tablaCuerpos(s,t){
   const th=LBL('thCam');
   $('camHead').innerHTML="<tr>"+th.map((x,i)=>`<th class="${i>0&&i<5?'num':''}">${x}</th>`).join("")+"</tr>";
   $('camBody').innerHTML=CAMS.map(c=>{
-    const st = s.sup.add ? (SUPS[3].st + (s.sup.id==='sOis'?2:4)) : s.sup.st;
-    const stc = s.sup.add ? (SUPS[3].st + (c.stab||0)) : st;
+    /* Cada fila lleva la estabilización DE SU cuerpo, que es lo que esta tabla
+       compara: el mismo apoyo de manos, y encima lo que cada cámara añade. */
+    const stc = s.sup.st>=99 ? 99 : s.sup.st + (stabOn() && c.stab ? c.stab : 0);
     const b=blurPx(s.f,s.v,t,s.d,c.p), sh=stc>=99?0:shakePx(s.f,t,stc,c.p), thold=tHold(s.f,stc,c.p,CRIT);
     const k = stc>=99||t<=thold ? 'ok':'bad';
     return `<tr class="${c.id===s.cam.id?'sel':''}"><td>${LBL(c.id)}</td><td class="num">${nf(c.p,2)} µm</td><td class="num">${nf(b,0)} px</td><td class="num">${nf(sh,0)} px</td><td class="num">${fmtT(thold)}</td><td><span class="tag ${k}">${k==='ok'?LBL('holdOk'):LBL('holdNo')}</span></td></tr>`;
