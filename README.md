@@ -13,7 +13,7 @@ Photography and light-physics tools that run entirely in the browser.
 
 ## Español
 
-Treinta y cinco documentos que resuelven cuestiones fotográficas con el modelo físico o estadístico
+Treinta y seis documentos que resuelven cuestiones fotográficas con el modelo físico o estadístico
 delante: simuladores, métricas, catálogos, scripts de procesado y su documentación.
 
 Todo el cálculo ocurre en el navegador. No hay servidor, ni cuenta, ni telemetría, y cada
@@ -96,6 +96,7 @@ la página es su manual; el código está en [`scripts/`](scripts/).
 | [`manual-tecnico-eclipse.html`](manual-tecnico-eclipse.html) | Geometría del encuadre, fotometría, extinción y difracción. Modelo, derivaciones y supuestos declarados. |
 | [`manual-caracter-optico.html`](manual-caracter-optico.html) | Manual ilustrado de la carta óptica, con capturas del propio documento y cinco recetas paso a paso. |
 | [`guia-simulador.html`](guia-simulador.html) | Guía del banco óptico de flash: qué hace cada control y en qué fórmulas se apoya. |
+| [`manual-exposicion-larga.html`](manual-exposicion-larga.html) | Manual de la herramienta de exposición larga: qué significa cada control, las tres cifras que hay que entender (arrastre, trepidación y el criterio de dos píxeles), por qué el barrido se juzga por el error de seguimiento y la ciudad desierta por tiempo, la escalera de apoyos con sus tiempos a 35 mm, y qué no calcula la página. | 47 KB |
 | [`manual-flash-ttl-q3.html`](manual-flash-ttl-q3.html) | Flash TTL con la Leica Q3 43: cómo mide, cómo sincroniza y por qué a potencia plena el pulso no cabe entero en la ventana de 1/2000 s. Con dos calculadoras. |
 | [`manual-telemetro-m11.html`](manual-telemetro-m11.html) | Manual del simulador de telémetro, con el modelo físico, la verificación numérica y un anexo ilustrado sobre el disco de Airy. Seis figuras incrustadas. |
 | [`manual-niebla.html`](manual-niebla.html) | Manual de la predicción de niebla: el índice horario, la fusión bayesiana de los cinco modelos, el registro de observaciones que la entrena, y dónde se guarda ese registro. |
@@ -155,7 +156,7 @@ python3 -m http.server 8000
 
 ## English
 
-Thirty-five documents that settle photographic questions with the physical or statistical
+Thirty-six documents that settle photographic questions with the physical or statistical
 model in plain sight: simulators, metrics, catalogues, processing scripts and their
 documentation.
 
@@ -240,6 +241,7 @@ the page is its manual; the code lives in [`scripts/`](scripts/).
 | [`manual-tecnico-eclipse.html`](manual-tecnico-eclipse.html) | Framing geometry, photometry, extinction and diffraction. Model, derivations and stated assumptions. |
 | [`manual-caracter-optico.html`](manual-caracter-optico.html) | Illustrated manual for the optical chart, with screenshots from the document itself and five step-by-step recipes. |
 | [`guia-simulador.html`](guia-simulador.html) | Guide to the flash optical bench: what each control does and which formulas it rests on. |
+| [`manual-exposicion-larga.html`](manual-exposicion-larga.html) | Manual of the long-exposure tool: what each control means, the three figures to understand (blur, shake and the two-pixel criterion), why panning is judged by tracking error and the ghost town by time, the ladder of supports with its times at 35 mm, and what the page does not compute. | 47 KB |
 | [`manual-flash-ttl-q3.html`](manual-flash-ttl-q3.html) | TTL flash with the Leica Q3 43: how it meters, how it syncs, and why at full power the pulse does not fit inside the 1/2000 s window. With two calculators. |
 | [`manual-telemetro-m11.html`](manual-telemetro-m11.html) | Manual for the rangefinder simulator, with the physical model, the numerical verification and an illustrated annex on the Airy disc. Six embedded figures. |
 | [`manual-niebla.html`](manual-niebla.html) | Manual for the fog forecast: the hourly index, the Bayesian fusion of the five models, the observation log that trains it, and where that log is kept. |

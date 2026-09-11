@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Crect%20width%3D%2764%27%20height%3D%2764%27%20rx%3D%2713%27%20fill%3D%27%2307070d%27%2F%3E%3Cg%20stroke%3D%27%23ffcf6b%27%20stroke-width%3D%273%27%20stroke-linecap%3D%27round%27%3E%3Cpath%20d%3D%27M12%2044h34%27%20opacity%3D%27.25%27%2F%3E%3Cpath%20d%3D%27M12%2036h26%27%20opacity%3D%27.5%27%2F%3E%3Cpath%20d%3D%27M12%2028h16%27%2F%3E%3C%2Fg%3E%3Ccircle%20cx%3D%2748%27%20cy%3D%2724%27%20r%3D%275.5%27%20fill%3D%27%23ffcf6b%27%2F%3E%3Crect%20x%3D%2712%27%20y%3D%2714%27%20width%3D%2740%27%20height%3D%2736%27%20rx%3D%274%27%20fill%3D%27none%27%20stroke%3D%27%23ffcf6b%27%20stroke-width%3D%271.6%27%20opacity%3D%27.35%27%2F%3E%3C%2Fsvg%3E">
+<link rel="apple-touch-icon" href="icons/manual-exposicion-larga-180.png">
+<meta name="theme-color" content="#07070d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Manual · Exposición larga">
+<title>Manual · Exposición larga · Rafael Vida</title>
+<meta name="author" content="Rafael Vida">
+<meta name="description" content="Manual de la herramienta de exposición larga: qué significa cada control, cómo se leen el arrastre en píxeles y la trepidación, por qué el barrido y la ciudad desierta se juzgan con criterios distintos, y qué no calcula la página.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Photographers">
+<meta property="og:title" content="Manual · Exposición larga · Rafael Vida">
+<meta property="og:description" content="Qué significa cada control, cómo se leen el arrastre y la trepidación, y por qué el barrido y la ciudad desierta se juzgan con criterios distintos.">
+<meta property="og:url" content="https://falevian.github.io/Photographers/manual-exposicion-larga.html">
+<meta property="og:image" content="https://falevian.github.io/Photographers/og/exposicion-larga.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="es_ES">
+<meta property="og:locale:alternate" content="en_GB">
+<meta name="twitter:card" content="summary_large_image">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#07070d; --panel:#10111c; --panel-2:#161827;
+    --line:rgba(255,255,255,0.08); --line-strong:rgba(255,255,255,0.16);
+    --text:#e7e9f2; --muted:#9398ac; --paper:#f6f2e6; --gold:#ffcf6b; --warn:#ff9f5b; --bad:#ff5b52; --ok:#7fd18c;
+    --display:"Space Grotesk",system-ui,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,monospace;
+    --body:"Inter",system-ui,sans-serif;
+  }
+  html[lang="es"] [data-lang="en"]{display:none!important}
+  html[lang="en"] [data-lang="es"]{display:none!important}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:radial-gradient(1100px 640px at 82% -12%, rgba(255,207,107,0.07), transparent 60%),var(--bg);
+    color:var(--text);font-family:var(--body);line-height:1.62;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:780px;margin:0 auto;padding:34px 22px 80px}
+  .langbar{position:fixed;top:10px;right:12px;display:flex;gap:6px;z-index:40;background:rgba(7,7,13,.85);border:1px solid var(--line-strong);border-radius:999px;padding:4px 6px;backdrop-filter:blur(6px)}
+  .langbar button,.langbar .home{font-family:var(--mono);font-size:11px;letter-spacing:.08em;background:none;border:0;color:var(--muted);cursor:pointer;padding:3px 7px;border-radius:999px;display:inline-flex;align-items:center}
+  .langbar button.on{background:var(--gold);color:#07070d}
+  .langbar .home svg{width:14px;height:14px}
+  header{display:flex;gap:16px;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap}
+  .glyph{flex:0 0 auto;width:50px;height:50px;margin-top:3px}
+  .eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(24px,4.4vw,36px);line-height:1.08;letter-spacing:-0.015em;margin:0}
+  .lede{color:var(--muted);font-size:15px;margin-top:10px;max-width:60ch}
+  .byline{margin-top:12px;font-family:var(--mono);font-size:12px;letter-spacing:0.04em;color:var(--gold)}
+  .byline::before{content:"";display:inline-block;width:18px;height:1px;background:var(--gold);vertical-align:middle;margin-right:9px;opacity:0.6}
+  .navrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+  .navlink{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--gold);font-family:var(--mono);font-size:12.5px;letter-spacing:0.03em;
+    border:1px solid rgba(255,207,107,0.35);border-radius:10px;padding:9px 14px;background:rgba(255,207,107,0.06)}
+  .navlink:hover{background:rgba(255,207,107,0.14)}
+  .navlink svg{width:15px;height:15px}
+  nav.toc{counter-reset:s;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:26px 0 6px;
+    display:grid;grid-template-columns:1fr 1fr;gap:2px 22px}
+  @media(max-width:620px){nav.toc{grid-template-columns:1fr}}
+  nav.toc li{counter-increment:s;list-style:none}
+  nav.toc ol{margin:0;padding:0}
+  nav.toc a{color:var(--text);text-decoration:none;font-size:14px;display:flex;gap:10px;align-items:baseline;padding:3px 0}
+  nav.toc a::before{content:counter(s,decimal-leading-zero);font-family:var(--mono);font-size:11px;color:var(--gold);flex:0 0 auto}
+  nav.toc a:hover{color:var(--gold)}
+  section{margin:40px 0;scroll-margin-top:18px}
+  .sec-head{display:flex;gap:12px;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:16px}
+  .sec-no{font-family:var(--mono);font-size:13px;color:var(--gold)}
+  h2{font-family:var(--display);font-weight:600;font-size:21px;letter-spacing:-0.01em;margin:0}
+  h3{font-family:var(--display);font-weight:600;font-size:15px;margin:22px 0 6px;color:var(--paper)}
+  p{margin:11px 0;max-width:64ch}
+  .muted{color:var(--muted)}
+  strong{font-weight:600;color:#fff}
+  code{font-family:var(--mono);font-size:0.9em;background:rgba(255,255,255,0.06);padding:1px 6px;border-radius:5px;color:var(--gold)}
+  .what{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+  .what span{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;color:var(--muted);border:1px solid var(--line-strong);border-radius:20px;padding:4px 12px}
+  ul.clean{margin:11px 0;padding:0;list-style:none;max-width:64ch}
+  ul.clean li{padding-left:18px;position:relative;margin:7px 0}
+  ul.clean li::before{content:"";position:absolute;left:2px;top:.68em;width:6px;height:6px;border-radius:50%;background:var(--gold);opacity:.75}
+  .tip{background:var(--panel);border:1px solid var(--line);border-left:2px solid var(--gold);border-radius:8px;padding:12px 15px;margin:16px 0;font-size:14.5px}
+  .tip .t{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:5px}
+  .eq{font-family:var(--mono);font-size:13.5px;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:12px 15px;margin:14px 0;overflow-x:auto;color:var(--paper)}
+  .eq .c{color:var(--muted)}
+  .scroll{overflow-x:auto;margin:14px 0}
+  table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:12.5px;white-space:nowrap}
+  th,td{text-align:left;padding:7px 11px;border-bottom:1px solid var(--line)}
+  th{color:var(--gold);font-weight:500;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+  td.num,th.num{text-align:right}
+  .step{display:grid;grid-template-columns:26px 1fr;gap:12px;margin:14px 0;align-items:start}
+  .step .n{font-family:var(--mono);font-size:12px;color:var(--gold);padding-top:3px}
+  .step .title{font-family:var(--display);font-weight:600;font-size:15px;color:var(--paper)}
+  footer{border-top:1px solid var(--line);margin-top:54px;padding-top:18px;font-size:12.5px;color:var(--muted)}
+  a{color:var(--gold)}
+</style>
+</head>
+<body>
+
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <a class="home" href="index.html" title="Portada / Home" aria-label="Portada / Home"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.5 8 2.5l5.5 5v6h-4v-4h-3v4h-4z"/></svg></a>
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <svg class="glyph" viewBox="0 0 100 100" aria-hidden="true">
+      <g stroke="#ffcf6b" stroke-width="5" stroke-linecap="round">
+        <path d="M14 70h56" opacity=".22"/><path d="M14 56h42" opacity=".45"/><path d="M14 42h26" opacity=".8"/>
+      </g>
+      <circle cx="74" cy="36" r="9" fill="#ffcf6b"/>
+      <rect x="10" y="16" width="80" height="68" rx="7" fill="none" stroke="#ffcf6b" stroke-width="2" opacity=".3"/>
+    </svg>
+    <div>
+      <div class="eyebrow" data-lang="es">Manual de uso</div>
+      <div class="eyebrow" data-lang="en">User manual</div>
+      <h1 data-lang="es">Cómo usar la herramienta de exposición larga</h1>
+      <h1 data-lang="en">How to use the long-exposure tool</h1>
+      <p class="lede" data-lang="es">Qué significa cada control, cómo se leen las cifras, por qué el barrido y la ciudad desierta se juzgan con criterios distintos, y qué no calcula la página. Con las fórmulas al descubierto, para que puedas discutirlas.</p>
+      <p class="lede" data-lang="en">What each control means, how to read the figures, why panning and the ghost town are judged by different criteria, and what the page does not compute. With the formulae in the open, so you can argue with them.</p>
+      <div class="byline" data-lang="es">Por Rafael Vida</div>
+      <div class="byline" data-lang="en">By Rafael Vida</div>
+      <div class="navrow">
+        <a class="navlink" href="exposicion-larga.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 15h10M7 11h6"/></svg><span data-lang="es">Abrir la herramienta</span><span data-lang="en">Open the tool</span></a>
+        <a class="navlink" href="programa-camara.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20 20 4M4 12h8M12 4v8"/></svg><span data-lang="es">El programa de la cámara</span><span data-lang="en">The camera's program</span></a>
+        <a class="navlink" href="simulador-flash.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg><span data-lang="es">Banco de flash</span><span data-lang="en">Flash bench</span></a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Índice / Contents">
+    <ol>
+      <li><a href="#s1"><span data-lang="es">Para qué sirve</span><span data-lang="en">What it is for</span></a></li>
+      <li><a href="#s2"><span data-lang="es">Las tres cifras</span><span data-lang="en">The three figures</span></a></li>
+      <li><a href="#s3"><span data-lang="es">Los controles</span><span data-lang="en">The controls</span></a></li>
+      <li><a href="#s4"><span data-lang="es">Las seis técnicas</span><span data-lang="en">The six techniques</span></a></li>
+      <li><a href="#s5"><span data-lang="es">El veredicto, línea a línea</span><span data-lang="en">The verdict, line by line</span></a></li>
+    </ol>
+    <ol start="6">
+      <li><a href="#s6"><span data-lang="es">La franja y la gráfica</span><span data-lang="en">The strip and the chart</span></a></li>
+      <li><a href="#s7"><span data-lang="es">La escalera de apoyos</span><span data-lang="en">The ladder of supports</span></a></li>
+      <li><a href="#s8"><span data-lang="es">Filtro, ISO y el límite</span><span data-lang="en">Filter, ISO and the limit</span></a></li>
+      <li><a href="#s9"><span data-lang="es">Qué no calcula</span><span data-lang="en">What it does not compute</span></a></li>
+      <li><a href="#s10"><span data-lang="es">Glosario</span><span data-lang="en">Glossary</span></a></li>
+    </ol>
+  </nav>
+
+  <section id="s1">
+    <div class="sec-head"><span class="sec-no">01</span><h2 data-lang="es">Para qué sirve</h2><h2 data-lang="en">What it is for</h2></div>
+    <p data-lang="es">Las chuletas de exposición larga dan tiempos fijos. La de Pit Haupert, de la que salen las seis técnicas de esta herramienta, dice 1/15 s para el barrido, un cuarto de segundo para las estelas y de treinta a sesenta segundos para vaciar una plaza. Son buenos puntos de partida, pero un tiempo fijo solo es correcto para una velocidad, una distancia y una focal concretas.</p>
+    <p data-lang="en">Long-exposure cheat sheets give fixed times. Pit Haupert's, the source of the six techniques in this tool, says 1/15 s for panning, a quarter of a second for light trails and thirty to sixty seconds to empty a square. They are good starting points, but a fixed time is only right for one particular speed, distance and focal length.</p>
+    <div class="tip">
+      <span class="t" data-lang="es">El problema, en una línea</span><span class="t" data-lang="en">The problem, in one line</span>
+      <p data-lang="es" style="margin:0">A 35 mm y diez metros, el mismo <strong>1/15 s</strong> deja <strong>87 px</strong> de arrastre con un peatón, <strong>310 px</strong> con un ciclista y <strong>869 px</strong> con un coche urbano. Es la misma receta y son tres fotos distintas.</p>
+      <p data-lang="en" style="margin:0">At 35 mm and ten metres, the same <strong>1/15 s</strong> leaves <strong>87 px</strong> of blur with a pedestrian, <strong>310 px</strong> with a cyclist and <strong>869 px</strong> with a city car. Same recipe, three different photographs.</p>
+    </div>
+    <p data-lang="es">La herramienta le da la vuelta a la receta: eliges el efecto, y ella devuelve el tiempo que hace falta <em>en tu escena</em>, cuántos píxeles va a medir esa raya, si lo sostienes con lo que llevas y qué filtro necesitas para llegar.</p>
+    <p data-lang="en">The tool turns the recipe round: you choose the effect, and it returns the time you need <em>in your scene</em>, how many pixels that streak will measure, whether you can hold it with what you are carrying, and what filter you need to get there.</p>
+    <div class="what">
+      <span data-lang="es">sin conexión</span><span data-lang="en">works offline</span>
+      <span data-lang="es">sin guardar nada</span><span data-lang="en">stores nothing</span>
+      <span data-lang="es">M11 · Q3 43 · SL3-S</span><span data-lang="en">M11 · Q3 43 · SL3-S</span>
+    </div>
+  </section>
+
+  <section id="s2">
+    <div class="sec-head"><span class="sec-no">02</span><h2 data-lang="es">Las tres cifras que hay que entender</h2><h2 data-lang="en">The three figures to understand</h2></div>
+
+    <h3 data-lang="es">1 · El arrastre del sujeto</h3>
+    <h3 data-lang="en">1 · The subject's blur</h3>
+    <p data-lang="es">Un sujeto a distancia <code>d</code> que se mueve a velocidad <code>v</code> cruzando el encuadre barre un ángulo <code>v/d</code> por segundo. Proyectado sobre el sensor y dividido por el paso de píxel, eso es la longitud de la raya que deja:</p>
+    <p data-lang="en">A subject at distance <code>d</code> moving at speed <code>v</code> across the frame sweeps an angle <code>v/d</code> per second. Projected on the sensor and divided by the pixel pitch, that is the length of the streak it leaves:</p>
+    <div class="eq">b = f · v · t / (d · p)<span class="c" data-lang="es">   [px]   ·   f focal (mm), v velocidad (m/s), t tiempo (s), d distancia (m), p paso de píxel (mm)</span><span class="c" data-lang="en">   [px]   ·   f focal length (mm), v speed (m/s), t time (s), d distance (m), p pixel pitch (mm)</span></div>
+    <p data-lang="es">Toda la página cuelga de esa fórmula. Fíjate en lo que dice: el arrastre crece con la focal y con la velocidad, y baja con la distancia. Alejarse tres metros o cambiar a un 28 mm tiene el mismo efecto que acortar el tiempo, y muchas veces es más fácil.</p>
+    <p data-lang="en">The whole page hangs from that formula. Notice what it says: blur grows with focal length and speed, and falls with distance. Stepping three metres back or switching to a 28 mm has the same effect as shortening the time, and is often easier.</p>
+
+    <h3 data-lang="es">2 · La trepidación</h3>
+    <h3 data-lang="en">2 · Shake</h3>
+    <p data-lang="es">Tus manos no están quietas: tiemblan con una velocidad angular residual que aquí se modela en <code>ω₀ = 0,03 rad/s</code> a pulso limpio. Cada peldaño de apoyo o cada paso de estabilización la divide por dos. El arrastre sale de la misma fórmula, con <code>ω</code> en lugar de <code>v/d</code>:</p>
+    <p data-lang="en">Your hands are not still: they tremble with a residual angular speed modelled here as <code>ω₀ = 0.03 rad/s</code> clean handheld. Each rung of support or each stop of stabilisation halves it. The blur comes from the same formula, with <code>ω</code> instead of <code>v/d</code>:</p>
+    <div class="eq">b_trep = f · ω · t / p<span class="c" data-lang="es">   ·   ω = ω₀ / 2^(pasos de apoyo)</span><span class="c" data-lang="en">   ·   ω = ω₀ / 2^(support stops)</span></div>
+    <p data-lang="es">Es el mismo modelo y la misma constante que usa <a href="programa-camara.html">el programa de la cámara</a>. No es casualidad: si dos fichas del sitio modelaran el temblor de forma distinta, se contradirían en cuanto las pusieras una al lado de la otra.</p>
+    <p data-lang="en">It is the same model and the same constant used by <a href="programa-camara.html">the camera's program</a>. Not by accident: if two sheets on this site modelled tremor differently, they would contradict each other the moment you put them side by side.</p>
+
+    <h3 data-lang="es">3 · El criterio de nitidez: dos píxeles</h3>
+    <h3 data-lang="en">3 · The sharpness criterion: two pixels</h3>
+    <p data-lang="es">Se considera nítido lo que se arrastra menos de dos píxeles, que es un par de líneas en el Nyquist del sensor. Es bastante más exigente que la regla clásica de <code>1/focal</code>: a 35 mm en la M11 da <strong>1/140 s</strong> en vez de 1/35 s. La regla de 1/focal se inventó para una copia de contacto; sesenta megapíxeles ven lo que ella se permitía ignorar.</p>
+    <p data-lang="en">Anything blurring less than two pixels is taken as sharp, which is one line pair at the sensor's Nyquist. It is a good deal stricter than the classic <code>1/focal</code> rule: at 35 mm on the M11 it gives <strong>1/140 s</strong> instead of 1/35 s. The 1/focal rule was invented for a contact print; sixty megapixels see what it could afford to ignore.</p>
+    <div class="tip">
+      <span class="t" data-lang="es">Cuándo relajarlo</span><span class="t" data-lang="en">When to relax it</span>
+      <p data-lang="es" style="margin:0">Si la foto va a una pantalla o a una copia pequeña, el criterio real es más blando y el tiempo se alarga en la misma proporción: cuatro píxeles doblan el tiempo, ocho lo cuadruplican. El tamaño al que se aprovecha de verdad cada archivo está en <a href="sensor-al-papel.html">del sensor al papel</a>.</p>
+      <p data-lang="en" style="margin:0">If the picture is headed for a screen or a small print, the real criterion is softer and the time lengthens in the same proportion: four pixels double the time, eight quadruple it. The size at which each file is actually used is in <a href="sensor-al-papel.html">from sensor to paper</a>.</p>
+    </div>
+  </section>
+
+  <section id="s3">
+    <div class="sec-head"><span class="sec-no">03</span><h2 data-lang="es">Los controles</h2><h2 data-lang="en">The controls</h2></div>
+
+    <div class="step"><div class="n">A</div><div>
+      <div class="title" data-lang="es">Técnica</div><div class="title" data-lang="en">Technique</div>
+      <p class="muted" data-lang="es" style="margin:4px 0">Elige cuánto arrastre quieres. Cada técnica pide una cantidad distinta, de los 60 px del congelado con flash a los 500 de las estelas. La opción <em>Libre</em> deja el objetivo en 110 px para que compares lo que quieras.</p>
+      <p class="muted" data-lang="en" style="margin:4px 0">Picks how much blur you want. Each technique asks for a different amount, from the 60 px of the flash freeze to the 500 of light trails. The <em>Free</em> option leaves the target at 110 px so you can compare whatever you like.</p>
+    </div></div>
+
+    <div class="step"><div class="n">B</div><div>
+      <div class="title" data-lang="es">Cuerpo</div><div class="title" data-lang="en">Body</div>
+      <p class="muted" data-lang="es" style="margin:4px 0">Cambia dos cosas a la vez: el paso de píxel, que convierte milímetros en píxeles, y la estabilización disponible. La M11 no tiene ninguna; el Q3 43 declara dos pasos de OIS y el SL3-S cuatro de IBIS. Esa es la diferencia práctica más grande entre ellos para esta clase de foto.</p>
+      <p class="muted" data-lang="en" style="margin:4px 0">Changes two things at once: the pixel pitch, which turns millimetres into pixels, and the stabilisation available. The M11 has none; the Q3 43 declares two stops of OIS and the SL3-S four of IBIS. That is the largest practical difference between them for this kind of picture.</p>
+    </div></div>
+
+    <div class="step"><div class="n">C</div><div>
+      <div class="title" data-lang="es">Focal y distancia</div><div class="title" data-lang="en">Focal length and distance</div>
+      <p class="muted" data-lang="es" style="margin:4px 0">Entran en la fórmula como un cociente, <code>f/d</code>, así que lo único que importa es cuánto llena el sujeto el encuadre. Doblar la focal y doblar la distancia se cancelan.</p>
+      <p class="muted" data-lang="en" style="margin:4px 0">They enter the formula as a ratio, <code>f/d</code>, so all that matters is how much of the frame the subject fills. Doubling the focal length and doubling the distance cancel out.</p>
+    </div></div>
+
+    <div class="step"><div class="n">D</div><div>
+      <div class="title" data-lang="es">Velocidad del sujeto</div><div class="title" data-lang="en">Subject speed</div>
+      <p class="muted" data-lang="es" style="margin:4px 0">Los presets van de peatón (1,4 m/s) a tren (40). Cuidado con una cosa: la fórmula supone el sujeto <strong>cruzando</strong> el encuadre. Si viene de frente el arrastre es mucho menor, y la página lo sobreestima; multiplica por el seno del ángulo respecto al eje.</p>
+      <p class="muted" data-lang="en" style="margin:4px 0">The presets run from pedestrian (1.4 m/s) to train (40). Mind one thing: the formula assumes the subject <strong>crossing</strong> the frame. If it comes head on the blur is far smaller and the page overestimates it; multiply by the sine of the angle to the axis.</p>
+    </div></div>
+
+    <div class="step"><div class="n">E</div><div>
+      <div class="title" data-lang="es">Apoyo</div><div class="title" data-lang="en">Support</div>
+      <p class="muted" data-lang="es" style="margin:4px 0">La escalera de la sección 07. Los cuatro primeros peldaños no cuestan dinero; los dos siguientes son la estabilización del cuerpo, que se suma a estar apoyado en vez de sustituirlo.</p>
+      <p class="muted" data-lang="en" style="margin:4px 0">The ladder of section 07. The first four rungs cost nothing; the next two are the body's stabilisation, which adds to being braced rather than replacing it.</p>
+    </div></div>
+
+    <div class="step"><div class="n">F</div><div>
+      <div class="title" data-lang="es">Luz y diafragma</div><div class="title" data-lang="en">Light and aperture</div>
+      <p class="muted" data-lang="es" style="margin:4px 0">Solo entran en la última cuenta, la del filtro. El EV es el de la escena a ISO 100: los presets van de noche urbana (EV 5) a sol (EV 15).</p>
+      <p class="muted" data-lang="en" style="margin:4px 0">They only enter the last sum, the filter one. The EV is the scene's at ISO 100: the presets run from city night (EV 5) to sun (EV 15).</p>
+    </div></div>
+  </section>
+
+  <section id="s4">
+    <div class="sec-head"><span class="sec-no">04</span><h2 data-lang="es">Las seis técnicas</h2><h2 data-lang="en">The six techniques</h2></div>
+    <p data-lang="es">Cuatro de las seis se resuelven igual: piden una longitud de raya y la herramienta despeja el tiempo. Dos no, y conviene saber por qué.</p>
+    <p data-lang="en">Four of the six are solved the same way: they ask for a streak length and the tool solves for time. Two are not, and it is worth knowing why.</p>
+
+    <h3 data-lang="es">Barrido: se juzga por el error de seguimiento</h3>
+    <h3 data-lang="en">Panning: judged by the tracking error</h3>
+    <p data-lang="es">En el barrido mueves la cámara a propósito, así que preguntarse si tu mano tiembla no tiene sentido: lo que decide es lo bien que acompañas al sujeto. Se estima un error de seguimiento del <strong>15 %</strong> del movimiento, así que el fondo se lleva la raya entera y el sujeto solo esa fracción. Con 110 px de fondo, el sujeto sale con 17: limpio.</p>
+    <p data-lang="en">In panning you move the camera on purpose, so asking whether your hand trembles makes no sense: what decides is how well you follow the subject. A tracking error of <strong>15 %</strong> of the movement is assumed, so the background takes the whole streak and the subject only that fraction. With 110 px of background, the subject comes out at 17: clean.</p>
+    <p data-lang="es">Eso explica también por qué el barrido falla con teleobjetivo. El porcentaje de error no cambia, pero el movimiento absoluto crece con la focal, así que el 15 % de mucho sigue siendo mucho. La herramienta avisa cuando el sujeto pasa de veinte píxeles.</p>
+    <p data-lang="en">That also explains why panning fails with a telephoto. The error percentage does not change, but the absolute movement grows with focal length, so 15 % of a lot is still a lot. The tool warns when the subject passes twenty pixels.</p>
+
+    <h3 data-lang="es">Ciudad desierta: se juzga por tiempo, no por arrastre</h3>
+    <h3 data-lang="en">Ghost town: judged by time, not by blur</h3>
+    <p data-lang="es">Esta es la única que no se decide por longitud de raya. Para que alguien desaparezca no basta con que se arrastre: hace falta que su luz se reparta tan fina que no destaque sobre el fondo. Una persona solo tapa un punto dado del encuadre mientras tarda en cruzar su propio ancho, <code>w/v</code>, así que su contraste sobre ese punto queda dividido por <code>t·v/w</code>.</p>
+    <p data-lang="en">This is the only one not decided by streak length. For someone to disappear it is not enough that they blur: their light has to spread so thin that it does not stand out against the background. A person only covers a given point of the frame while they take to cross their own width, <code>w/v</code>, so their contrast over that point is divided by <code>t·v/w</code>.</p>
+    <div class="eq">t = 40 · w / v<span class="c" data-lang="es">   ·   w ≈ 0,5 m de ancho aparente   ·   40× baja el rastro unos 5,3 pasos</span><span class="c" data-lang="en">   ·   w ≈ 0.5 m apparent width   ·   40× drops the trace by some 5.3 stops</span></div>
+    <p data-lang="es">La cuenta no lleva focal ni distancia, y por eso la receta de treinta segundos funciona en cualquier plaza. Con alguien paseando a 1,4 m/s salen catorce segundos; los treinta de la receta cubren además a quien se para a mirar un escaparate, que es lo que de verdad arruina la foto.</p>
+    <p data-lang="en">The sum carries neither focal length nor distance, and that is why the thirty-second recipe works in any square. With someone strolling at 1.4 m/s it comes to fourteen seconds; the recipe's thirty also cover whoever stops to look at a shop window, which is what really ruins the picture.</p>
+
+    <h3 data-lang="es">Congelado con flash y zoom burst</h3>
+    <h3 data-lang="en">Flash freeze and zoom burst</h3>
+    <p data-lang="es">De estas dos, la herramienta solo calcula la parte del ambiente. El reparto entre luz existente y destello, la sincronía de cada cuerpo y el recorte del pulso a velocidades altas se calculan en <a href="simulador-flash.html">el banco óptico de flash</a>. El zoom burst no mide velocidad de sujeto: la raya es radial y su longitud depende de cuánto muevas el zoom, así que la cifra que sale es orientativa y pide trípode en cualquier caso.</p>
+    <p data-lang="en">Of these two, the tool only computes the ambient part. The split between existing light and flash, each body's sync speed and the pulse clipping at high speeds are computed in <a href="simulador-flash.html">the flash optical bench</a>. Zoom burst does not measure subject speed: the streak is radial and its length depends on how far you move the zoom, so the figure that comes out is indicative and asks for a tripod in any case.</p>
+  </section>
+
+  <section id="s5">
+    <div class="sec-head"><span class="sec-no">05</span><h2 data-lang="es">El veredicto, línea a línea</h2><h2 data-lang="en">The verdict, line by line</h2></div>
+    <p data-lang="es">El bloque bajo los controles se lee de arriba abajo y tiene tres partes fijas.</p>
+    <p data-lang="en">The block below the controls reads top to bottom and has three fixed parts.</p>
+    <ul class="clean" data-lang="es">
+      <li><strong>El tiempo y la raya.</strong> Qué tiempo pide el efecto y cuántos píxeles mide, en absoluto y como porcentaje del ancho del fotograma. Por encima del 100 % el sujeto cruza el encuadre entero durante la exposición.</li>
+      <li><strong>Se sostiene.</strong> Compara ese tiempo con el máximo de tu apoyo. Si no llega, dice cuántos pasos te faltan y sugiere la ráfaga. En el barrido, esta línea habla del seguimiento en vez del temblor.</li>
+      <li><strong>Cómo llegar.</strong> Los pasos de filtro que faltan para que la exposición cuadre a ISO base, el filtro comercial más cercano y el ISO alternativo si no lo pones. Cuando ese ISO sale por debajo de 25, el filtro deja de ser opcional.</li>
+    </ul>
+    <ul class="clean" data-lang="en">
+      <li><strong>The time and the streak.</strong> What time the effect asks for and how many pixels it measures, in absolute terms and as a percentage of the frame width. Above 100 % the subject crosses the whole frame during the exposure.</li>
+      <li><strong>Can you hold it.</strong> Compares that time with your support's maximum. If it falls short, it says how many stops you are missing and suggests the burst. In panning, this line talks about tracking rather than tremor.</li>
+      <li><strong>Getting there.</strong> The filter stops missing for the exposure to balance at base ISO, the nearest commercial filter, and the alternative ISO if you skip it. When that ISO comes out below 25, the filter stops being optional.</li>
+    </ul>
+  </section>
+
+  <section id="s6">
+    <div class="sec-head"><span class="sec-no">06</span><h2 data-lang="es">La franja y la gráfica</h2><h2 data-lang="en">The strip and the chart</h2></div>
+    <h3 data-lang="es">La franja</h3>
+    <h3 data-lang="en">The strip</h3>
+    <p data-lang="es">Son 1200 píxeles del sensor, de los 9528 del fotograma en la M11. El sujeto se dibuja como un disco de treinta píxeles y su rastro a escala. Hay cuatro filas: sin movimiento, tu tiempo, la mitad y el doble, para que veas la sensibilidad del efecto. Un borde rojo avisa de que el rastro se sale de la franja.</p>
+    <p data-lang="en">These are 1,200 pixels of the sensor, out of the 9,528 of the frame on the M11. The subject is drawn as a thirty-pixel disc and its trail to scale. There are four rows: no movement, your time, half and double, so you can see how sensitive the effect is. A red edge warns that the trail runs off the strip.</p>
+    <div class="tip">
+      <span class="t" data-lang="es">Lo que la franja no dice</span><span class="t" data-lang="en">What the strip does not say</span>
+      <p data-lang="es" style="margin:0">La <strong>geometría</strong> está a escala, el <strong>brillo</strong> no. El rastro real se apaga como <code>1/n</code>, así que una raya de mil píxeles sería casi invisible. Dibujarla fiel dejaría la franja en negro, y precisamente esa caída del brillo es el mecanismo por el que la gente desaparece en la ciudad desierta.</p>
+      <p data-lang="en" style="margin:0"><strong>Geometry</strong> is to scale, <strong>brightness</strong> is not. The real trace fades as <code>1/n</code>, so a thousand-pixel streak would be nearly invisible. Drawing it faithfully would leave the strip black, and that very fade is the mechanism by which people vanish in the ghost town.</p>
+    </div>
+    <h3 data-lang="es">La gráfica</h3>
+    <h3 data-lang="en">The chart</h3>
+    <p data-lang="es">Dos curvas sobre el tiempo de obturación, ambas en escala logarítmica. La ámbar es el arrastre del sujeto; la azulada, tu temblor con el apoyo elegido. Donde la azulada cruza los dos píxeles está tu tiempo máximo a pulso, marcado con una vertical discontinua. Las bandas de fondo dicen qué significa cada altura: por debajo de dos píxeles no se ve, hasta veinte es un sujeto movido por descuido, a partir de cien es una raya que has decidido tú.</p>
+    <p data-lang="en">Two curves against shutter time, both on a log scale. The amber one is the subject's blur; the cyan one, your tremor with the chosen support. Where the cyan one crosses two pixels is your longest handheld time, marked with a dashed vertical. The background bands say what each height means: below two pixels it is invisible, up to twenty it is a carelessly blurred subject, from a hundred it is a streak you decided on.</p>
+    <p data-lang="es">Lo interesante es la distancia entre las dos curvas: es el margen que tienes para que el arrastre que se vea sea el del sujeto y no el tuyo. Si se tocan, la foto entera saldrá movida.</p>
+    <p data-lang="en">The interesting thing is the gap between the two curves: it is the margin you have for the blur that shows to be the subject's and not yours. If they touch, the whole picture will be blurred.</p>
+  </section>
+
+  <section id="s7">
+    <div class="sec-head"><span class="sec-no">07</span><h2 data-lang="es">La escalera de apoyos</h2><h2 data-lang="en">The ladder of supports</h2></div>
+    <p data-lang="es">Cada peldaño divide el temblor por dos, es decir, dobla el tiempo que aguantas. Los cuatro primeros son los trucos de la chuleta y no cuestan nada. Estos son los tiempos a 35 mm con el criterio de dos píxeles:</p>
+    <p data-lang="en">Each rung halves the tremor, that is, doubles the time you can hold. The first four are the cheat sheet's tricks and cost nothing. These are the times at 35 mm with the two-pixel criterion:</p>
+    <div class="scroll"><table>
+      <thead><tr data-lang="es"><th>Apoyo</th><th class="num">Pasos</th><th class="num">M11 · Q3 43</th><th class="num">SL3-S</th></tr>
+             <tr data-lang="en"><th>Support</th><th class="num">Stops</th><th class="num">M11 · Q3 43</th><th class="num">SL3-S</th></tr></thead>
+      <tbody>
+        <tr><td data-lang="es">a pulso, brazos sueltos</td><td data-lang="en">handheld, arms loose</td><td class="num">0</td><td class="num">1/140</td><td class="num">1/88</td></tr>
+        <tr><td data-lang="es">codos pegados al cuerpo</td><td data-lang="en">elbows tucked in</td><td class="num">1</td><td class="num">1/70</td><td class="num">1/44</td></tr>
+        <tr><td data-lang="es">correa tensada contra el cuello</td><td data-lang="en">strap tensioned against the neck</td><td class="num">2</td><td class="num">1/35</td><td class="num">1/22</td></tr>
+        <tr><td data-lang="es">apoyado en un muro o barandilla</td><td data-lang="en">leaning on a wall or railing</td><td class="num">3</td><td class="num">1/17</td><td class="num">1/11</td></tr>
+        <tr><td data-lang="es">apoyado + OIS del Q3 43</td><td data-lang="en">braced + Q3 43 OIS</td><td class="num">5</td><td class="num">1/4</td><td class="num">—</td></tr>
+        <tr><td data-lang="es">apoyado + IBIS del SL3-S</td><td data-lang="en">braced + SL3-S IBIS</td><td class="num">7</td><td class="num">—</td><td class="num">1 s</td></tr>
+      </tbody>
+    </table></div>
+    <p data-lang="es">La correa es el truco menos conocido y el que más rinde por lo que cuesta: se estira la cámara hasta que la correa queda tensa alrededor del cuello y se dispara con el brazo extendido. Esa tensión bloquea la cámara contra tres puntos, y vale casi lo mismo que apoyarse.</p>
+    <p data-lang="en">The strap is the least known trick and the one that pays best for what it costs: you push the camera out until the strap is taut around your neck and shoot with the arm extended. That tension locks the camera against three points, and is worth almost as much as bracing.</p>
+    <div class="tip">
+      <span class="t" data-lang="es">La ráfaga no es un apoyo</span><span class="t" data-lang="en">The burst is not a support</span>
+      <p data-lang="es" style="margin:0">El temblor es aleatorio, así que de ocho fotogramas hay uno en el que la mano estaba casi quieta. No alarga el tiempo medio: mejora la cola. Con ocho intentos, la probabilidad de que al menos uno entre en criterio pasa de un tercio a más de nueve de cada diez. No sirve cuando el arrastre que buscas es el del sujeto, porque entonces cada fotograma es una foto distinta y no una repetición.</p>
+      <p data-lang="en" style="margin:0">Tremor is random, so out of eight frames there is one in which the hand was nearly still. It does not lengthen the average time: it improves the tail. With eight attempts, the chance that at least one lands within the criterion goes from a third to better than nine in ten. It is no use when the blur you want is the subject's, because then every frame is a different photograph and not a repetition.</p>
+    </div>
+  </section>
+
+  <section id="s8">
+    <div class="sec-head"><span class="sec-no">08</span><h2 data-lang="es">Filtro, ISO y el límite de la cámara</h2><h2 data-lang="en">Filter, ISO and the camera's limit</h2></div>
+    <p data-lang="es">A ISO 100, el tiempo que la luz pide es <code>t = N² / 2^EV</code>. Si el efecto necesita más tiempo que ese, la diferencia en pasos es lo que tiene que absorber el filtro:</p>
+    <p data-lang="en">At ISO 100, the time the light asks for is <code>t = N² / 2^EV</code>. If the effect needs longer than that, the difference in stops is what the filter has to absorb:</p>
+    <div class="eq">pasos = log₂( t_efecto / t_correcto )<span class="c" data-lang="es">   ·   ejemplo: 14 s a EV 13 y f/11 → 9,9 pasos → ND1000</span><span class="c" data-lang="en">   ·   example: 14 s at EV 13 and f/11 → 9.9 stops → ND1000</span></div>
+    <p data-lang="es">La herramienta redondea al filtro comercial siguiente y también dice el ISO que necesitarías sin filtro. Cuando ese ISO cae por debajo de 25 el filtro deja de ser opcional, porque no hay cámara que llegue ahí.</p>
+    <p data-lang="en">The tool rounds up to the next commercial filter and also gives the ISO you would need without one. When that ISO falls below 25 the filter stops being optional, because no camera reaches there.</p>
+    <p data-lang="es">Dos cosas que la página no descuenta y conviene tener presentes. La primera: un ND de muchos pasos no es neutro, tiñe, y el coste cromático está calculado en <a href="filtro-sensor.html#nd">el filtro ND y la fuga infrarroja</a>. La segunda: por encima de treinta segundos hay que salir de la escala y usar bulb o el temporizador, con lo que eso implica de disparador y de deriva térmica.</p>
+    <p data-lang="en">Two things the page does not discount and that are worth keeping in mind. First: a deep ND is not neutral, it tints, and the colour cost is computed in <a href="filtro-sensor.html#nd">the ND filter and infrared leakage</a>. Second: beyond thirty seconds you leave the scale and have to use bulb or the timer, with what that implies in terms of a release and thermal drift.</p>
+  </section>
+
+  <section id="s9">
+    <div class="sec-head"><span class="sec-no">09</span><h2 data-lang="es">Qué no calcula</h2><h2 data-lang="en">What it does not compute</h2></div>
+    <ul class="clean" data-lang="es">
+      <li><strong>El movimiento en profundidad.</strong> La fórmula supone el sujeto cruzando. De frente, el arrastre es mucho menor y la página lo exagera.</li>
+      <li><strong>La difracción y el ruido.</strong> Deciden el diafragma y el ISO, y viven en <a href="sensor.html#difraccion">difracción y diafragma</a> y en <a href="sensor.html#datos">los datos del sensor</a>. Cerrar a f/16 para alargar el tiempo tiene un coste en detalle que allí está medido.</li>
+      <li><strong>El flash.</strong> Se nombra la técnica, pero el reparto entre ambiente y destello se calcula en <a href="simulador-flash.html">el banco óptico de flash</a>.</li>
+      <li><strong>El temblor como distribución.</strong> ω₀ = 0,03 rad/s es un valor típico de mano entrenada y respiración controlada. Con frío, con prisa o al final del día es peor. El tiempo máximo es una mediana, no una garantía.</li>
+      <li><strong>Los pasos de estabilización reales.</strong> Los cuatro del IBIS y los dos del OIS son cifra de fabricante, medida en condiciones favorables y a focal corta. En la práctica se obtienen uno o dos menos, y la estabilización no corrige el movimiento del sujeto: solo el tuyo.</li>
+    </ul>
+    <ul class="clean" data-lang="en">
+      <li><strong>Movement in depth.</strong> The formula assumes the subject crossing. Head on, the blur is far smaller and the page exaggerates it.</li>
+      <li><strong>Diffraction and noise.</strong> They decide the aperture and the ISO, and live in <a href="sensor.html#difraccion">diffraction and aperture</a> and in <a href="sensor.html#datos">the sensor data</a>. Stopping down to f/16 to lengthen the time has a cost in detail that is measured there.</li>
+      <li><strong>Flash.</strong> The technique is named, but the split between ambient and flash is computed in <a href="simulador-flash.html">the flash optical bench</a>.</li>
+      <li><strong>Tremor as a distribution.</strong> ω₀ = 0.03 rad/s is a typical value for a trained hand and controlled breathing. Cold, hurried or at the end of the day it is worse. The longest time is a median, not a guarantee.</li>
+      <li><strong>The real stabilisation stops.</strong> The four of IBIS and the two of OIS are the manufacturer's figure, measured in favourable conditions and at short focal lengths. In practice you get one or two less, and stabilisation does not correct the subject's movement: only yours.</li>
+    </ul>
+  </section>
+
+  <section id="s10">
+    <div class="sec-head"><span class="sec-no">10</span><h2 data-lang="es">Glosario</h2><h2 data-lang="en">Glossary</h2></div>
+    <div class="scroll"><table>
+      <thead><tr data-lang="es"><th>Término</th><th>Qué es</th></tr><tr data-lang="en"><th>Term</th><th>What it is</th></tr></thead>
+      <tbody>
+        <tr><td>arrastre · blur</td><td data-lang="es">La longitud de la raya que deja un punto que se mueve, medida en píxeles del sensor.</td><td data-lang="en">The length of the streak left by a moving point, measured in sensor pixels.</td></tr>
+        <tr><td>trepidación · shake</td><td data-lang="es">El arrastre que añaden tus manos, que afecta a toda la imagen y no solo al sujeto.</td><td data-lang="en">The blur your hands add, which affects the whole image and not only the subject.</td></tr>
+        <tr><td>paso de píxel · pitch</td><td data-lang="es">El lado de un fotodiodo: 3,76 µm en M11 y Q3 43, 5,94 en el SL3-S, 2,97 en su multishot.</td><td data-lang="en">The side of a photosite: 3.76 µm on the M11 and Q3 43, 5.94 on the SL3-S, 2.97 on its multishot.</td></tr>
+        <tr><td>EV</td><td data-lang="es">La luz de la escena en pasos, referida a ISO 100. Cada unidad es el doble de luz.</td><td data-lang="en">The scene's light in stops, referred to ISO 100. Each unit is twice the light.</td></tr>
+        <tr><td>ND</td><td data-lang="es">Filtro de densidad neutra. Un ND1000 son diez pasos: convierte 1/60 s en unos 17 s.</td><td data-lang="en">Neutral density filter. An ND1000 is ten stops: it turns 1/60 s into some 17 s.</td></tr>
+        <tr><td>IBIS · OIS</td><td data-lang="es">Estabilización en el cuerpo y en el objetivo. Corrigen tu movimiento, nunca el del sujeto.</td><td data-lang="en">In-body and in-lens stabilisation. They correct your movement, never the subject's.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <footer>
+    <p data-lang="es">Las seis técnicas y la escalera de trucos para sostener la cámara vienen de la <i>Long Exposure Cheat Sheet</i> de Pit Haupert (2025). El cálculo, las cifras por cuerpo y los veredictos son de <a href="exposicion-larga.html">la herramienta</a>. Relacionadas: <a href="programa-camara.html">el programa de la cámara</a>, <a href="simulador-flash.html">el banco óptico de flash</a>, <a href="filtro-sensor.html#nd">el filtro ND</a> y <a href="sensor-al-papel.html">del sensor al papel</a>.</p>
+    <p data-lang="en">The six techniques and the ladder of tricks for holding the camera come from Pit Haupert's <i>Long Exposure Cheat Sheet</i> (2025). The arithmetic, the per-body figures and the verdicts belong to <a href="exposicion-larga.html">the tool</a>. Related: <a href="programa-camara.html">the camera's program</a>, <a href="simulador-flash.html">the flash optical bench</a>, <a href="filtro-sensor.html#nd">the ND filter</a> and <a href="sensor-al-papel.html">from sensor to paper</a>.</p>
+  </footer>
+
+</div>
+
+<script>
+"use strict";
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{ title:"Manual · Exposición larga · Rafael Vida",
+         desc:"Manual de la herramienta de exposición larga: qué significa cada control, cómo se leen el arrastre en píxeles y la trepidación, y qué no calcula la página." },
+    en:{ title:"Manual · Long exposure · Rafael Vida",
+         desc:"Manual of the long-exposure tool: what each control means, how to read blur in pixels and shake, and what the page does not compute." }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    ["title","ph","alt","aria"].forEach(function(k){
+      [].forEach.call(document.querySelectorAll("[data-"+k+"-"+l+"]"),function(e){
+        var attr = k==="ph" ? "placeholder" : (k==="aria" ? "aria-label" : k);
+        e.setAttribute(attr, e.getAttribute("data-"+k+"-"+l));
+      });
+    });
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
+</script>
+</body>
+</html>
