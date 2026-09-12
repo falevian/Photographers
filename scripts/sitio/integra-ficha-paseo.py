@@ -10,7 +10,10 @@ FAV=('<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xm
      'A12.2%2026%200%200%201%2032%206Z%27%20fill%3D%27%23fff%27%2F%3E%3Cpath%20d%3D%27M32%2058A12.2%2026%200%200%201%20'
      '32%206%27%20fill%3D%27none%27%20stroke%3D%27%23d9574e%27%20stroke-width%3D%272%27%2F%3E%3C%2Fsvg%3E">\n'
      '<link rel="apple-touch-icon" href="../icons/paseos-180.png">')
-RENOMBRES={"contraste_ficha_1.html":"contraste.html","medir_la_luz_ficha_2.html":"medir-la-luz.html"}
+def nombre_en_la_seccion(href):
+    """El autor exporta «tema_ficha_N.html»; dentro de paseos/ la ficha se llama «tema-con-guiones.html»."""
+    m=re.match(r"^(.+?)_ficha_\d+\.html$",href)
+    return m.group(1).replace("_","-")+".html" if m else None
 
 def integra(src,dest):
     s=io.open(src,encoding="utf-8").read(); hechos=[]; ya=[]
@@ -28,9 +31,12 @@ def integra(src,dest):
     m=re.search(r'<p class="hero-top"><span>([^<]*)</span>',s)
     if m: s=s[:m.start()]+'<p class="hero-top"><a href="./">%s</a>'%m.group(1)+s[m.end():]; hechos.append("cabecera enlaza a la portada")
     else: ya.append("cabecera")
-    for viejo,nuevo in RENOMBRES.items():
-        if viejo!=base and 'href="%s"'%viejo in s:
-            s=s.replace('href="%s"'%viejo,'href="%s"'%nuevo); hechos.append("%s → %s"%(viejo,nuevo))
+    for viejo in sorted(set(re.findall(r'href="([^"/:#][^"]*_ficha_\d+\.html)"',s))):
+        nuevo=nombre_en_la_seccion(viejo)
+        if not nuevo or nuevo==base: continue
+        s=s.replace('href="%s"'%viejo,'href="%s"'%nuevo)
+        falta="" if os.path.exists(os.path.join(os.path.dirname(dest) or ".",nuevo)) else "  (¡ojo! esa ficha aún no está en la sección)"
+        hechos.append("%s → %s%s"%(viejo,nuevo,falta))
     if "Todas las fichas del paseo" not in s:
         a='<div class="share-row">'; assert s.count(a)==1,"no encuentro share-row"
         s=s.replace(a,'<p><a href="./">Todas las fichas del paseo</a></p>\n'+a); hechos.append("pie enlaza a la portada")
