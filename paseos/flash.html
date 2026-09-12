@@ -424,7 +424,7 @@ tr.sel td{font-weight:700}
 <div class="inner">
 <h2 class="section-title" id="lab-title" tabindex="-1">Banco de flash</h2>
 <div class="lab-intro">
-<p>Una esfera de 22 cm de radio a la altura de la cara, a 2,2 m de la cámara, en una habitación con suelo, techo a 2,7 m y una pared de fondo a distancia variable. El flash tiene número guía 36 a ISO 100 y se coloca por distancia, ángulo y altura.</p>
+<p>Una esfera de 22 cm de radio a la altura de la cara, a 2,2 m de la cámara, en una habitación con suelo, techo a 2,7 m y una pared de fondo a distancia variable. El flash se elige por su número guía a ISO 100, desde el integrado de la cámara hasta uno de estudio, y se coloca por distancia, ángulo y altura. El del catálogo suele medirse con el zumbador en posición de teleobjetivo; en gran angular el real es bastante menor.</p>
 <p>Cada mando toca lo suyo: el tiempo mueve solo el ambiente; la potencia, la distancia y el modificador mueven solo el flash; el diafragma y el ISO mueven los dos a la vez.</p>
 </div>
 <div class="lab-grid">
@@ -455,6 +455,7 @@ tr.sel td{font-weight:700}
 <div class="lab-controls">
 <div class="presets" role="group" aria-labelledby="pl-sit"><p class="presets-label" id="pl-sit">Ajustes de los autores y situaciones</p><button class="btn preset" type="button" data-preset="weegee" aria-pressed="false">Weegee</button><button class="btn preset" type="button" data-preset="gilden" aria-pressed="false">Gilden</button><button class="btn preset" type="button" data-preset="parr" aria-pressed="false">Parr</button><button class="btn preset" type="button" data-preset="dicorcia" aria-pressed="false">diCorcia</button><button class="btn preset" type="button" data-preset="goldin" aria-pressed="false">Goldin</button><button class="btn preset" type="button" data-preset="fink" aria-pressed="false">Fink</button><button class="btn preset" type="button" data-preset="rebote" aria-pressed="false">Rebote al techo</button><button class="btn preset" type="button" data-preset="relleno" aria-pressed="false">Relleno de día</button></div>
 <fieldset><legend>Flash</legend>
+<div class="field"><label for="c-gn">Número guía a ISO 100</label><select id="c-gn"><option value="12">GN 12 · flash integrado de la cámara</option><option value="20">GN 20 · zapata pequeño o de bolsillo</option><option value="28">GN 28 · zapata compacto</option><option value="36" selected>GN 36 · zapata de tamaño medio</option><option value="45">GN 45 · zapata de reportaje</option><option value="60">GN 60 · zapata potente o antorcha</option><option value="80">GN 80 · flash de estudio pequeño</option></select></div>
 <div class="ctl"><label for="c-pow">Potencia</label><output id="o-pow" for="c-pow">1/1</output><input type="range" id="c-pow" min="0" max="7" step="1" value="0"><p class="hint" aria-hidden="true"><span>plena</span><span>1/128</span></p></div>
 <div class="field"><label for="c-mod">Modificador</label><select id="c-mod"><option value="desnudo" selected>Flash desnudo, 6 cm</option><option value="difusor">Difusor, 14 cm</option><option value="softbox">Ventana de 60 cm</option><option value="paraguas">Paraguas de 1 m</option><option value="rebote">Rebote en el techo</option></select></div>
 <div class="ctl"><label for="c-L">Distancia al sujeto</label><output id="o-L" for="c-L">1,8&nbsp;m</output><input type="range" id="c-L" min="0" max="100" step="1" value="51"><p class="hint" aria-hidden="true"><span>0,5 m</span><span>6 m</span></p></div>
@@ -690,7 +691,6 @@ tr.sel td{font-weight:700}
 
     var SPH = { x: 0, y: 1.5, z: 2.2, r: 0.22 };     /* la esfera: una cabeza a 2,2 m de la cámara */
     var CEIL = 2.7, GROUND_A = 0.18, WALL_A = 0.55, SPH_A = 0.35, CEIL_A = 0.75;
-    var GN = 36;                                      /* número guía a ISO 100, en metros */
     var TSYNC = 1 / 200;
 
     var MODS = {
@@ -803,7 +803,7 @@ tr.sel td{font-weight:700}
       }
     }
 
-    var P = { pow: 0, L: 1.8, az: 35, h: 1.9, mod: 'desnudo', N: 5.6, t: 1 / 200, iso: 100, ev: 10, bg: 2 };
+    var P = { gn: 36, pow: 0, L: 1.8, az: 35, h: 1.9, mod: 'desnudo', N: 5.6, t: 1 / 200, iso: 100, ev: 10, bg: 2 };
 
     function flashPos() {
       var a = P.az * DEG;
@@ -820,7 +820,7 @@ tr.sel td{font-weight:700}
       var Rs = mod.d / 2;
       var trans = Math.pow(2, -mod.loss);
       var pot = Math.pow(2, -P.pow);
-      var GNef = GN * Math.sqrt(pot * trans) * Math.sqrt(P.iso / 100);
+      var GNef = P.gn * Math.sqrt(pot * trans) * Math.sqrt(P.iso / 100);
       var Lref = P.mod === 'rebote'
         ? Math.sqrt(Math.pow(S.y - SPH.y, 2) + Math.pow(S.z - SPH.z, 2)) + (CEIL - P.h)
         : P.L;
@@ -938,6 +938,7 @@ tr.sel td{font-weight:700}
     function readCtl(k) { P[k] = ctl[k].get(+ctl[k].el.value); ctl[k].out.textContent = ctl[k].show(P[k]); }
     function syncUI() {
       Object.keys(ctl).forEach(function (k) { ctl[k].el.value = ctl[k].to(P[k]); ctl[k].out.textContent = ctl[k].show(P[k]); });
+      $('c-gn').value = String(P.gn);
       $('c-mod').value = P.mod;
       $('c-ap').value = String(P.N);
       $('c-iso').value = String(P.iso);
@@ -964,26 +965,27 @@ tr.sel td{font-weight:700}
       started = true; markPreset(''); caption.textContent = '';
       schedule();
     });
+    $('c-gn').addEventListener('change', function () { P.gn = +$('c-gn').value; userChange(); });
     $('c-mod').addEventListener('change', function () { P.mod = $('c-mod').value; userChange(); });
     $('c-ap').addEventListener('change', function () { P.N = +$('c-ap').value; userChange(); });
     $('c-iso').addEventListener('change', function () { P.iso = +$('c-iso').value; userChange(); });
 
     var PRESETS = {
-      weegee:  { pow: 0, L: 3, az: 0, h: 1.75, mod: 'desnudo', N: 16, t: 1 / 200, iso: 100, ev: 6, bg: 3,
+      weegee:  { gn: 36, pow: 0, L: 3, az: 0, h: 1.75, mod: 'desnudo', N: 16, t: 1 / 200, iso: 100, ev: 6, bg: 3,
         cap: 'Weegee: flash desnudo desde la cámara, f/16 y 1/200 s a tres metros, con la noche detrás. A potencia plena un número guía 36 se queda a menos de un paso de la exposición correcta, así que sus bombillas daban más luz que un flash pequeño de hoy. El ambiente queda casi diez pasos por debajo: el fondo es negro por el tiempo, y lo que hay entre el sujeto y el fondo cae por la distancia.' },
-      gilden:  { pow: 5, L: 0.8, az: 25, h: 1.6, mod: 'desnudo', N: 11, t: 1 / 200, iso: 200, ev: 13, bg: 4,
+      gilden:  { gn: 36, pow: 5, L: 0.8, az: 25, h: 1.6, mod: 'desnudo', N: 11, t: 1 / 200, iso: 200, ev: 13, bg: 4,
         cap: 'Gilden: flash a un brazo de distancia en plena calle. A 0,8 m basta 1/32 de potencia, y el fondo, cuatro metros más allá, cae 5 EV: la persona se separa del mundo sin tocar el encuadre.' },
-      parr:    { pow: 2, L: 0.9, az: 10, h: 1.5, mod: 'difusor', N: 16, t: 1 / 200, iso: 100, ev: 15, bg: 2.5,
+      parr:    { gn: 36, pow: 2, L: 0.9, az: 10, h: 1.5, mod: 'difusor', N: 16, t: 1 / 200, iso: 100, ev: 15, bg: 2.5,
         cap: 'Parr: flash de día contra el sol de la playa. El ambiente está expuesto y el flash llega al mismo nivel: el color se satura y las sombras de la cara se rellenan, sin que la foto parezca nocturna.' },
-      dicorcia:{ pow: 0, L: 3.5, az: 55, h: 2.6, mod: 'desnudo', N: 11, t: 1 / 200, iso: 100, ev: 11, bg: 6,
+      dicorcia:{ gn: 60, pow: 0, L: 3.5, az: 55, h: 2.6, mod: 'desnudo', N: 11, t: 1 / 200, iso: 100, ev: 11, bg: 6,
         cap: 'diCorcia: flash potente y alejado, colocado arriba y a un lado, con el ambiente casi cuatro pasos por debajo. El transeúnte aparece iluminado y la calle detrás se va al negro.' },
-      goldin:  { pow: 7, L: 1.6, az: 5, h: 1.6, mod: 'desnudo', N: 4, t: 1 / 60, iso: 400, ev: 7, bg: 1.5,
+      goldin:  { gn: 20, pow: 7, L: 1.6, az: 5, h: 1.6, mod: 'desnudo', N: 4, t: 1 / 60, iso: 400, ev: 7, bg: 1.5,
         cap: 'Goldin: flash directo en un interior, ISO 400 y 1/60 s. Con el diafragma abierto hace falta muy poca potencia, y el ambiente queda a menos de un paso: la habitación sigue ahí detrás de la figura.' },
-      fink:    { pow: 6, L: 1.4, az: 70, h: 2.1, mod: 'desnudo', N: 5.6, t: 1 / 30, iso: 400, ev: 6, bg: 2.5,
+      fink:    { gn: 36, pow: 6, L: 1.4, az: 70, h: 2.1, mod: 'desnudo', N: 5.6, t: 1 / 30, iso: 400, ev: 6, bg: 2.5,
         cap: 'Fink: flash en la mano izquierda, arriba y muy lateral. La luz cruza la escena, modela el volumen y manda dos pasos sobre el ambiente; la sombra se va a un lado en vez de quedar detrás del sujeto.' },
-      rebote:  { pow: 3, L: 1.8, az: 20, h: 1.9, mod: 'rebote', N: 4, t: 1 / 60, iso: 400, ev: 7, bg: 2.5,
+      rebote:  { gn: 36, pow: 3, L: 1.8, az: 20, h: 1.9, mod: 'rebote', N: 4, t: 1 / 60, iso: 400, ev: 7, bg: 2.5,
         cap: 'Rebote en el techo: la fuente pasa a ser una mancha de 1,3 m sobre el sujeto, de 35° de tamaño angular. Las sombras se ablandan y bajan, a costa de casi tres pasos entre el recorrido y la reflectancia del techo.' },
-      relleno: { pow: 2, L: 2.2, az: 30, h: 1.8, mod: 'difusor', N: 11, t: 1 / 200, iso: 100, ev: 15, bg: 3,
+      relleno: { gn: 36, pow: 2, L: 2.2, az: 30, h: 1.8, mod: 'difusor', N: 11, t: 1 / 200, iso: 100, ev: 15, bg: 3,
         cap: 'Relleno a la luz del día: el ambiente manda y el flash queda un paso y medio por debajo. No cambia la exposición general, solo levanta las sombras de la cara. A f/11 y 1/200 s se está en el límite: para abrir más habría que bajar de la sincronización.' }
     };
     function applyPreset(name) {
