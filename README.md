@@ -316,7 +316,12 @@ incrustadas, ningún recurso externo).
 |---|---|---|---|
 | [`paseos/contraste.html`](paseos/contraste.html) | 1 · Contraste | Nueve autores (Fan Ho, Metzker, Giacomelli, Moriyama, Leiter, Webb, Abbott, Titarenko, Cameron) con obra de referencia, análisis, física y ejercicio; laboratorio de luz interactivo; tres reglas para el día. | 211 KB |
 | [`paseos/medir-la-luz.html`](paseos/medir-la-luz.html) | 2 · Medir la luz | Qué mide el fotómetro, los modos de medición, medir-bloquear-recomponer en cámara y en móvil, el sistema de zonas, el histograma y las referencias de bolsillo; ocho fotógrafos por su manera de exponer (clave alta, clave baja, movimiento, tiempo largo); laboratorio para medir una calle tocando la imagen. | 229 KB |
+| [`paseos/exposicion-larga.html`](paseos/exposicion-larga.html) | 3 · Exposición larga | El arrastre medido en píxeles, el temblor y la escalera de apoyos, el barrido, el tiempo para vaciar la calle, cómo llegar a él con diafragma, ISO y filtro, y el dibujo con luz; seis fotógrafos del tiempo abierto (Daguerre, Lartigue, Man Ray, Mili, Woodman, Wesely); laboratorio que pasa del arrastre al tiempo. | 230 KB |
 
-Para añadir una ficha: guardar el archivo en `paseos/` y copiar el bloque de ficha comentado en `paseos/index.html`.
+Para añadir una ficha: pasar el archivo del autor por
+`python3 scripts/sitio/integra-ficha-paseo.py <origen> paseos/<destino>.html` —que le pone los enlaces a la
+portada de la sección, el favicon, el icono táctil y las metas `og`, y reescribe los enlaces a las otras fichas
+con el nombre que tienen aquí— y copiar el bloque de ficha comentado en `paseos/index.html`. El script es
+idempotente: se le puede volver a pasar cada versión nueva de la misma ficha.
 
 *A separate section, in Spanish only: the photo-walk sheets of the Foto community, prepared by La Foto Rota, with their own cover at `paseos/`.*
