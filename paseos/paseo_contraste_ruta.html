@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Contraste. Ruta del paseo fotográfico por A Coruña</title>
+<meta name="description" content="Ruta del paseo fotográfico Contraste por A Coruña: mapa interactivo, hitos de reagrupamiento y un ejercicio por parada, tomado de la ficha de autores.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bodoni+Moda:opsz,wght@6..96,400;6..96,700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    --paper:#ffffff;
+    --ink:#000000;
+    --muted:#767676;
+    --faint:#e6e6e6;
+    --water:rgba(0,0,0,.055);
+    --red:#c40016;
+    --halo:rgba(196,0,22,.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#000000;
+      --ink:#ffffff;
+      --muted:#8f8f8f;
+      --faint:#2a2a2a;
+      --water:rgba(255,255,255,.09);
+      --red:#ff4b3e;
+      --halo:rgba(255,75,62,.22);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#000000;
+    --ink:#ffffff;
+    --muted:#8f8f8f;
+    --faint:#2a2a2a;
+    --water:rgba(255,255,255,.09);
+    --red:#ff4b3e;
+    --halo:rgba(255,75,62,.22);
+  }
+  html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+  *,*::before,*::after{box-sizing:inherit}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:1.0rem;
+    line-height:1.55;
+  }
+  .wrap{max-width:720px;margin:0 auto;padding:0 1.1rem 4rem}
+
+  header.mast{padding:2.2rem 0 1.4rem;border-bottom:1px solid var(--ink)}
+  .kicker{font-size:.85rem;color:var(--muted);margin:0 0 .2rem}
+  .kicker a{color:inherit}
+  h1{
+    font-family:"Bodoni Moda",Didot,"Bodoni MT",serif;
+    font-weight:700;font-size:clamp(2.6rem,9vw,4rem);
+    line-height:1.02;margin:.1rem 0 .6rem;letter-spacing:-.01em;
+  }
+  .lede{margin:0;max-width:60ch}
+  .datos{margin:.9rem 0 0;font-size:.9rem;color:var(--muted)}
+
+  section{margin-top:2.2rem}
+  h2{
+    font-family:"Bodoni Moda",Didot,serif;font-weight:700;
+    font-size:1.5rem;line-height:1.15;margin:0 0 .7rem;
+  }
+
+  /* Mapa */
+  .mapbox{position:relative;border:1px solid var(--ink);overflow:hidden;touch-action:none;background:var(--paper)}
+  .mapbox svg{display:block;width:100%;height:auto;user-select:none;-webkit-user-select:none}
+  .mapctl{position:absolute;top:.55rem;right:.55rem;display:flex;flex-direction:column;gap:.35rem}
+  .mapctl button{
+    width:2.2rem;height:2.2rem;border:1px solid var(--ink);background:var(--paper);color:var(--ink);
+    font-size:1.15rem;line-height:1;cursor:pointer;padding:0;font-family:inherit;
+  }
+  .mapctl button:focus-visible,.marker:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+  .leyenda{display:flex;flex-wrap:wrap;gap:1rem 1.6rem;font-size:.85rem;color:var(--muted);margin:.6rem 0 0;align-items:center}
+  .leyenda span{display:inline-flex;align-items:center;gap:.45rem}
+  .dot{width:.75rem;height:.75rem;border-radius:50%;display:inline-block}
+  .dot.h{background:var(--ink)}
+  .dot.p{border:1.6px solid var(--ink)}
+  .tramo-l{width:1.4rem;height:0;border-top:3px solid var(--red);display:inline-block}
+  .mapnota{font-size:.85rem;color:var(--muted);margin:.35rem 0 0}
+
+  .acciones{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.1rem}
+  .acciones a{
+    display:inline-block;padding:.6rem 1rem;border:1px solid var(--ink);
+    color:var(--ink);text-decoration:none;font-weight:700;font-size:.95rem;background:var(--paper);
+  }
+  .acciones a:hover{background:var(--ink);color:var(--paper)}
+
+  /* Paradas */
+  ol.paradas{list-style:none;margin:0;padding:0}
+  .card{border-top:1px solid var(--ink);padding:1.3rem 0 1.5rem;scroll-margin-top:calc(1rem + env(safe-area-inset-top,0px))}
+  .card:last-child{border-bottom:1px solid var(--ink)}
+  .card.active{box-shadow:inset 4px 0 0 var(--red);padding-left:1rem}
+  .chead{display:flex;align-items:baseline;gap:.9rem;cursor:pointer}
+  .hora{
+    font-family:"Bodoni Moda",Didot,serif;font-weight:700;
+    font-size:2rem;line-height:1;min-width:4.6rem;font-variant-numeric:tabular-nums;
+  }
+  .cnombre{font-weight:700;font-size:1.15rem;line-height:1.25}
+  .ctipo{display:block;font-weight:400;font-size:.83rem;color:var(--muted);margin-top:.15rem}
+  .card p{margin:.7rem 0 0;max-width:62ch}
+  .card p.nota{font-size:.88rem;color:var(--muted)}
+  .quien{font-weight:700}
+
+  .reglas p{max-width:62ch;margin:.5rem 0 0}
+  footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--ink);font-size:.85rem;color:var(--muted)}
+  footer a{color:inherit}
+
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+    *{transition:none !important}
+  }
+  @media print{
+    .mapctl,.acciones{display:none}
+    body{font-size:10.5pt}
+    .card{break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="mast">
+  <p class="kicker"><a href="https://falevian.github.io/Photographers/paseos/contraste.html">Paseo fotográfico Foto</a>, ficha de ruta</p>
+  <h1>Contraste</h1>
+  <p class="lede">Luz contra sombra por la Pescadería y la Ciudad Vieja de A Coruña. La ruta evita el frente marítimo y trabaja en calles estrechas e interiores, donde la oscuridad es la base y la luz es el accidente. Cada parada aplica la estrategia de un autor de la ficha.</p>
+  <p class="datos">Salida a las 10:00 desde el Obelisco. 2,6 km, unas 2 h 15 min, 12 personas. Cuatro hitos de recuento: nadie sale de un hito sin contar 12.</p>
+</header>
+
+<section>
+  <h2>La ruta</h2>
+  <div class="mapbox" id="mapbox">
+    <svg id="mapa" viewBox="0 0 760 560" role="img" aria-label="Mapa de la ruta con siete paradas entre el Obelisco y la Rúa Estrella"></svg>
+    <div class="mapctl">
+      <button id="zin" aria-label="Acercar">+</button>
+      <button id="zout" aria-label="Alejar">&minus;</button>
+      <button id="zreset" aria-label="Vista inicial">&#8962;</button>
+    </div>
+  </div>
+  <div class="leyenda">
+    <span><span class="dot h"></span>hito de recuento</span>
+    <span><span class="dot p"></span>parada fotográfica</span>
+    <span><span class="tramo-l"></span>ruta, 2,6 km</span>
+  </div>
+  <p class="mapnota">Toca un punto del mapa para ir a su ejercicio. Se puede arrastrar y ampliar.</p>
+  <div class="acciones">
+    <a href="https://www.google.com/maps/dir/?api=1&amp;origin=43.36867,-8.40220&amp;destination=43.36869,-8.40359&amp;waypoints=43.37212,-8.39798%7C43.37118,-8.39639%7C43.37081,-8.39267%7C43.37075,-8.39166%7C43.36962,-8.39405&amp;travelmode=walking">Abrir la ruta en Google Maps</a>
+    <a href="https://falevian.github.io/Photographers/paseos/contraste.html">Ficha de autores</a>
+  </div>
+</section>
+
+<section>
+  <h2>Paradas y ejercicios</h2>
+  <ol class="paradas">
+
+    <li class="card" id="card-1">
+      <div class="chead" data-n="1">
+        <span class="hora">10:00</span>
+        <span class="cnombre">Obelisco<span class="ctipo">Hito 1, salida y briefing</span></span>
+      </div>
+      <p>Diez minutos de briefing: el tema, el reparto de la ficha y las tres reglas del día. Mide la luz y no la escena. Busca la frontera. Deja trabajar al negro.</p>
+      <p><span class="quien">Calentamiento.</span> En el propio Cantón, localizar una frontera entre sol y sombra, medir sobre la parte iluminada y comprobar en pantalla cómo cae el resto. Es la foto de calibración del día.</p>
+      <p class="nota">En fechas próximas al equinoccio el sol sale del paseo a unos 18° de altura sobre el este sureste y termina cerca de 35°: empezamos en pleno “sol rasante” del laboratorio de la ficha.</p>
+    </li>
+
+    <li class="card" id="card-2">
+      <div class="chead" data-n="2">
+        <span class="hora">10:25</span>
+        <span class="cnombre">Mercado de San Agustín<span class="ctipo">Hito 2, recuento en la puerta a las 11:00</span></span>
+      </div>
+      <p><span class="quien">De camino, Fan Ho y Metzker.</span> Por la Rúa Estreita de San Andrés y la Rúa da Franxa la luz entra en ángulo en los cruces. Ejercicio de Fan Ho: plantarse en un haz y esperar a que una figura lo cruce; todo lo demás, a negro. Variante de Metzker: exponer para las luces y reducir a los peatones a silueta con contorno y peso.</p>
+      <p><span class="quien">Dentro, tres estrategias a elegir.</span> Cameron: retrato en claroscuro con la luz de los puestos, pidiendo permiso y conversando antes de disparar. Leiter: fotografiar entre puestos y a través de vitrinas, grandes masas oscuras y un acento pequeño de color, fruta, escamas, un mandil. Moriyama: subir ISO sin miedo, el grano y el movido son decisión, no defecto.</p>
+      <p class="nota">Abre de 8:30 a 15:00 y cierra los domingos. A esta hora está en plena actividad: es el bloque central del paseo, 30 minutos.</p>
+    </li>
+
+    <li class="card" id="card-3">
+      <div class="chead" data-n="3">
+        <span class="hora">11:00</span>
+        <span class="cnombre">Soportales de María Pita<span class="ctipo">Parada de paso, 5 minutos</span></span>
+      </div>
+      <p><span class="quien">Webb.</span> La plaza se cruza solo por debajo de los soportales, usados como pasaje de sombra. Exponer para la plaza al sol y dejar que el negro del soportal separe las capas: una escena en primer término, otra al fondo, y la sombra impidiendo que se mezclen.</p>
+    </li>
+
+    <li class="card" id="card-4">
+      <div class="chead" data-n="4">
+        <span class="hora">11:05</span>
+        <span class="cnombre">Colexiata de Santa María do Campo<span class="ctipo">Parada fotográfica</span></span>
+      </div>
+      <p><span class="quien">Medición puntual.</span> Interior románico en penumbra: el rango de la escena supera con mucho los 3 EV que separan sol y sombra en la calle. Medir sobre el haz de luz o las velas y dejar que el resto caiga donde debe. La sombra sin detalle es forma, no información perdida.</p>
+      <p class="nota">Entrar en grupos de tres o cuatro, en silencio y sin flash. Si hay culto, no se fotografía.</p>
+    </li>
+
+    <li class="card" id="card-5">
+      <div class="chead" data-n="5">
+        <span class="hora">11:25</span>
+        <span class="cnombre">Praza das Bárbaras<span class="ctipo">Hito 3, recuento</span></span>
+      </div>
+      <p><span class="quien">Giacomelli.</span> El rincón más recogido de la ciudad. El muro claro del convento hace de papel y las figuras hacen de tinta: desde el desnivel de la plaza, el punto de vista alto aplana la escena en dos tonos y convierte a las personas en signos.</p>
+      <p>Después, dispersión de quince minutos por la Rúa Sinagoga y los callejones adyacentes, con vuelta a la plaza para el recuento.</p>
+    </li>
+
+    <li class="card" id="card-6">
+      <div class="chead" data-n="6">
+        <span class="hora">11:50</span>
+        <span class="cnombre">Igrexa de Santiago y Praza de Azcárraga<span class="ctipo">Parada fotográfica</span></span>
+      </div>
+      <p><span class="quien">Abbott.</span> El pórtico románico y la ciudad del XIX en el mismo plano: el contraste temporal se construye con el encuadre, exagerando la diferencia de escala con el punto de vista.</p>
+      <p><span class="quien">Titarenko.</span> Bajo los plátanos de Azcárraga, cámara apoyada en un banco y exposición larga: lo que se mueve se promedia y pierde contraste, la arquitectura quieta se registra nítida.</p>
+      <p class="nota">Física de propina: cada hueco del follaje actúa como un estenopo, y las manchas de luz del suelo son imágenes reales del disco solar, de medio grado de diámetro aparente.</p>
+    </li>
+
+    <li class="card" id="card-7">
+      <div class="chead" data-n="7">
+        <span class="hora">12:15</span>
+        <span class="cnombre">A Taberna de Cunqueiro<span class="ctipo">Hito 4, final. Rúa Estrella 22</span></span>
+      </div>
+      <p><span class="quien">Revisión.</span> Vermú y puesta en común con la rúbrica de la ficha, tres preguntas por fotografía: dónde mediste, dónde está la frontera, qué hace el negro. Sin filtros ni adornos.</p>
+      <p class="nota">Mesa reservada para 12. Abre a las 12:00 todos los días.</p>
+    </li>
+
+  </ol>
+</section>
+
+<section class="reglas">
+  <h2>Reglas del paseo</h2>
+  <p>Los hitos de recuento son cuatro: Obelisco, puerta del mercado, Praza das Bárbaras y Cunqueiro. Entre hito e hito cada cual dispara por libre; en los hitos se cuenta hasta 12 antes de seguir. En interiores, discreción: silencio, sin flash y pidiendo permiso para los retratos. El teléfono es válido, la espera también: los ejercicios de este paseo consumen minutos por escena, no kilómetros.</p>
+</section>
+
+<footer>
+  <p>Ficha de ruta preparada para el paseo Contraste de La Foto Rota, A Coruña. Blanco y negro puros; la ruta, en rojo, es el terminador del día: la frontera entre la cara iluminada y la cara en sombra. Ficha de autores y laboratorio de luz en <a href="https://falevian.github.io/Photographers/paseos/contraste.html">la página del paseo</a>.</p>
+</footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STOPS=[
+    {n:1,tipo:"h",hora:"10:00",lat:43.3686692,lon:-8.4021958},
+    {n:2,tipo:"h",hora:"10:25",lat:43.3721164,lon:-8.3979817},
+    {n:3,tipo:"p",hora:"11:00",lat:43.3711813,lon:-8.3963928},
+    {n:4,tipo:"p",hora:"11:05",lat:43.3708115,lon:-8.3926652},
+    {n:5,tipo:"h",hora:"11:25",lat:43.3707550,lon:-8.3916550},
+    {n:6,tipo:"p",hora:"11:50",lat:43.3696152,lon:-8.3940514},
+    {n:7,tipo:"h",hora:"12:15",lat:43.3686881,lon:-8.4035865}
+  ];
+
+  var RUTA=[
+    [43.36867,-8.40220],[43.36925,-8.40155],[43.36970,-8.40100],[43.37040,-8.39990],
+    [43.37110,-8.39895],[43.37160,-8.39850],[43.37212,-8.39798],
+    [43.37190,-8.39740],[43.37155,-8.39680],[43.37118,-8.39639],
+    [43.37095,-8.39560],[43.37085,-8.39450],[43.37081,-8.39267],
+    [43.37075,-8.39166],
+    [43.37020,-8.39185],[43.36990,-8.39280],[43.36962,-8.39405],
+    [43.36940,-8.39560],[43.36920,-8.39750],[43.36900,-8.39950],
+    [43.36880,-8.40150],[43.36869,-8.40359]
+  ];
+
+  var COSTA=[
+    [43.36600,-8.40470],[43.36640,-8.40150],[43.36620,-8.39850],[43.36590,-8.39550],
+    [43.36590,-8.39280],[43.36640,-8.39050],[43.36780,-8.38920],[43.36960,-8.38880],
+    [43.37160,-8.38940]
+  ];
+
+  var W=760,H=560,PAD=56;
+  var lat0=43.3703,mLat=110574,mLon=111320*Math.cos(lat0*Math.PI/180);
+  function metros(p){return [ (p[1]-(-8.3975))*mLon, (p[0]-lat0)*mLat ];}
+
+  var todos=RUTA.concat(STOPS.map(function(s){return [s.lat,s.lon];}));
+  var xs=todos.map(function(p){return metros(p)[0];}),
+      ys=todos.map(function(p){return metros(p)[1];});
+  var minx=Math.min.apply(null,xs),maxx=Math.max.apply(null,xs),
+      miny=Math.min.apply(null,ys),maxy=Math.max.apply(null,ys);
+  var esc=Math.min((W-2*PAD)/(maxx-minx),(H-2*PAD)/(maxy-miny));
+  var cx=(minx+maxx)/2,cy=(miny+maxy)/2;
+  function xy(p){var m=metros(p);return [W/2+(m[0]-cx)*esc, H/2-(m[1]-cy)*esc];}
+
+  var svg=document.getElementById("mapa");
+  var NS="http://www.w3.org/2000/svg";
+  function el(tag,attrs,parent){
+    var e=document.createElementNS(NS,tag);
+    for(var k in attrs) e.setAttribute(k,attrs[k]);
+    (parent||svg).appendChild(e);return e;
+  }
+  var mundo=el("g",{id:"mundo"});
+
+  // Agua de la dársena, orientación
+  var d="M "+COSTA.map(function(p){var q=xy(p);return q[0].toFixed(1)+" "+q[1].toFixed(1);}).join(" L ");
+  d+=" L "+(W+60)+" "+(-60)+" L "+(W+60)+" "+(H+60)+" L -60 "+(H+60)+" Z";
+  el("path",{d:d,fill:"var(--water)",stroke:"none"},mundo);
+  var lagua=el("text",{x:xy([43.3663,-8.3965])[0],y:xy([43.3663,-8.3965])[1]+26,
+    "font-size":"13","font-style":"italic",fill:"var(--muted)","text-anchor":"middle"},mundo);
+  lagua.textContent="Dársena";
+
+  // Ruta: el terminador del día
+  var pr="M "+RUTA.map(function(p){var q=xy(p);return q[0].toFixed(1)+" "+q[1].toFixed(1);}).join(" L ");
+  el("path",{d:pr,fill:"none",stroke:"var(--red)","stroke-width":"3.5",
+    "stroke-linejoin":"round","stroke-linecap":"round"},mundo);
+
+  // Marcadores
+  var marcadores={};
+  STOPS.forEach(function(s){
+    var q=xy([s.lat,s.lon]);
+    var g=el("g",{"class":"marker",tabindex:"0",role:"button",
+      "aria-label":"Parada "+s.n+", "+s.hora,cursor:"pointer"},mundo);
+    var halo=el("circle",{cx:q[0],cy:q[1],r:"19",fill:"var(--halo)",opacity:"0"},g);
+    el("circle",{cx:q[0],cy:q[1],r:"12",
+      fill:(s.tipo==="h"?"var(--ink)":"var(--paper)"),
+      stroke:"var(--ink)","stroke-width":"1.8"},g);
+    var t=el("text",{x:q[0],y:q[1]+4.5,"text-anchor":"middle","font-size":"12.5",
+      "font-weight":"700",fill:(s.tipo==="h"?"var(--paper)":"var(--ink)")},g);
+    t.textContent=s.n;
+    var abajo=(s.n===1||s.n===7);
+    var h=el("text",{x:q[0]+(abajo?0:16), y:q[1]+(abajo?30:5),
+      "font-size":"11",fill:"var(--muted)","text-anchor":(abajo?"middle":"start")},g);
+    h.textContent=s.hora;
+    marcadores[s.n]={g:g,halo:halo};
+    function activar(){seleccionar(s.n,true);}
+    g.addEventListener("click",activar);
+    g.addEventListener("keydown",function(ev){
+      if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();activar();}
+    });
+  });
+
+  // Escala y norte
+  var m100=100*esc;
+  var sx=PAD*0.6, sy=H-26;
+  el("line",{x1:sx,y1:sy,x2:sx+m100,y2:sy,stroke:"var(--ink)","stroke-width":"2"});
+  el("line",{x1:sx,y1:sy-5,x2:sx,y2:sy+5,stroke:"var(--ink)","stroke-width":"2"});
+  el("line",{x1:sx+m100,y1:sy-5,x2:sx+m100,y2:sy+5,stroke:"var(--ink)","stroke-width":"2"});
+  var te=el("text",{x:sx+m100/2,y:sy-9,"font-size":"12",fill:"var(--muted)","text-anchor":"middle"});
+  te.textContent="100 m";
+  var nx=W-34,ny=34;
+  el("path",{d:"M "+nx+" "+(ny+10)+" L "+nx+" "+(ny-12)+" M "+(nx-6)+" "+(ny-4)+" L "+nx+" "+(ny-12)+" L "+(nx+6)+" "+(ny-4),
+    stroke:"var(--ink)","stroke-width":"2",fill:"none"});
+  var tn=el("text",{x:nx,y:ny+24,"font-size":"12",fill:"var(--muted)","text-anchor":"middle"});
+  tn.textContent="N";
+
+  // Selección de parada
+  var activo=null;
+  function seleccionar(n,scroll){
+    if(activo){
+      marcadores[activo].halo.setAttribute("opacity","0");
+      var c0=document.getElementById("card-"+activo);
+      if(c0)c0.classList.remove("active");
+    }
+    activo=n;
+    marcadores[n].halo.setAttribute("opacity","1");
+    var c=document.getElementById("card-"+n);
+    if(c){
+      c.classList.add("active");
+      if(scroll)c.scrollIntoView({behavior:"smooth",block:"start"});
+    }
+  }
+  document.querySelectorAll(".chead").forEach(function(hd){
+    hd.addEventListener("click",function(){seleccionar(hd.getAttribute("data-n"),false);});
+  });
+
+  // Pan y zoom
+  var vista={x:0,y:0,k:1};
+  function aplicar(){
+    mundo.setAttribute("transform",
+      "translate("+vista.x+","+vista.y+") scale("+vista.k+")");
+  }
+  function zoom(f,px,py){
+    var k2=Math.min(6,Math.max(.7,vista.k*f));
+    f=k2/vista.k;
+    vista.x=px-(px-vista.x)*f;
+    vista.y=py-(py-vista.y)*f;
+    vista.k=k2;aplicar();
+  }
+  document.getElementById("zin").addEventListener("click",function(){zoom(1.35,W/2,H/2);});
+  document.getElementById("zout").addEventListener("click",function(){zoom(1/1.35,W/2,H/2);});
+  document.getElementById("zreset").addEventListener("click",function(){vista={x:0,y:0,k:1};aplicar();});
+
+  var caja=document.getElementById("mapbox");
+  function pxSvg(ev){
+    var r=svg.getBoundingClientRect();
+    return [ (ev.clientX-r.left)*W/r.width, (ev.clientY-r.top)*H/r.height ];
+  }
+  var punteros={};
+  var arrastre=null,d0=null,k0=1;
+  caja.addEventListener("pointerdown",function(ev){
+    punteros[ev.pointerId]=pxSvg(ev);
+    caja.setPointerCapture(ev.pointerId);
+    var ids=Object.keys(punteros);
+    if(ids.length===1){arrastre={p:pxSvg(ev),x:vista.x,y:vista.y};}
+    else if(ids.length===2){
+      var a=punteros[ids[0]],b=punteros[ids[1]];
+      d0=Math.hypot(a[0]-b[0],a[1]-b[1]);k0=vista.k;arrastre=null;
+    }
+  });
+  caja.addEventListener("pointermove",function(ev){
+    if(!(ev.pointerId in punteros))return;
+    punteros[ev.pointerId]=pxSvg(ev);
+    var ids=Object.keys(punteros);
+    if(ids.length===1&&arrastre){
+      var p=punteros[ids[0]];
+      vista.x=arrastre.x+(p[0]-arrastre.p[0]);
+      vista.y=arrastre.y+(p[1]-arrastre.p[1]);
+      aplicar();
+    }else if(ids.length===2&&d0){
+      var a=punteros[ids[0]],b=punteros[ids[1]];
+      var d=Math.hypot(a[0]-b[0],a[1]-b[1]);
+      var cx2=(a[0]+b[0])/2,cy2=(a[1]+b[1])/2;
+      zoom((k0*d/d0)/vista.k,cx2,cy2);
+    }
+  });
+  function soltar(ev){
+    delete punteros[ev.pointerId];
+    arrastre=null;d0=null;
+  }
+  caja.addEventListener("pointerup",soltar);
+  caja.addEventListener("pointercancel",soltar);
+  caja.addEventListener("wheel",function(ev){
+    ev.preventDefault();
+    var p=pxSvg(ev);
+    zoom(ev.deltaY<0?1.15:1/1.15,p[0],p[1]);
+  },{passive:false});
+
+  aplicar();
+})();
+</script>
+</body>
+</html>
