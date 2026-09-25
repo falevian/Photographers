@@ -1,21 +1,49 @@
 #!/usr/bin/env python3
 """grano.py: grano fotografico fisicamente escalado y dependiente del tono.
 
-El sigma base sale de la granularidad rms del datasheet (apertura de 48 um a
-densidad 1.0), reescalado por la ley de Selwyn al tamano de pixel equivalente
-sobre un fotograma de 24x36. La dependencia con el tono usa el perfil
-sigma(densidad mostrada) calculado sobre el eje neutro del modelo espectral de
-cada pelicula: en las diapositivas la fluctuacion sigue la estadistica
-binomial de cobertura de colorante (crece con la densidad y decae al saturar
-cerca de Dmax); en los sistemas de negativo mas papel (pro400h, trix) el grano
-nace en el negativo y llega a la copia multiplicado por la pendiente local del
-papel, que lo anula en los blancos y en los negros: el grano vive en los
-medios, como en una copia real.
+Modelo, en cuatro pasos:
+
+1. Nitidez del material. Antes de nada, la imagen pasa por la MTF de la
+   pelicula (gaussiana con el 50 % en --mtf50 ciclos/mm, valor tipico de la
+   hoja tecnica de cada material): una diapositiva de 35 mm nunca es tan nitida
+   como un sensor de 60 Mpx, y el grano añadido sobre una imagen mas nitida
+   que la pelicula se lee como pegado. --mtf50 0 lo desactiva.
+
+2. Textura. El grano es una superposicion de conglomerados de plata (o de
+   nubes de colorante) de tamaño --grano-um, colocados al azar: un modelo
+   booleano de discos, cuyo espectro de Wiener es plano hasta ~1/(2d) y cae
+   despues, como el medido en pelicula real. Las nubes de colorante llevan el
+   borde difuminado (difusion del colorante al revelar); los conglomerados de
+   plata del B/N, no. --textura gauss reproduce la textura de la version
+   anterior (ruido gaussiano filtrado), mas blanda que la real.
+
+3. Amplitud. La granularidad rms de la hoja tecnica esta medida con apertura
+   de 48 um a densidad 1.0. La amplitud por pixel se calibra MIDIENDO sobre el
+   propio campo de ruido cuanto vale su rms al promediarlo en un disco de
+   48 um, y escalandolo para que coincida con la del datasheet. Esto es
+   exacto para cualquier textura y resolucion. (La version anterior aplicaba
+   la ley de Selwyn como si el ruido fuera blanco; con grano correlado a
+   10-14 um eso sobrestimaba la amplitud entre 3.8 y 4.7 veces.)
+
+4. Dependencia con el tono. --pelicula selecciona el perfil sigma(densidad
+   mostrada) calculado sobre el eje neutro del modelo espectral de cada
+   material (tabla embebida): en las diapositivas la fluctuacion sigue la
+   estadistica binomial de cobertura de colorante (crece con la densidad y
+   decae al saturar cerca de Dmax); en los sistemas de negativo mas papel
+   (pro400h, trix) el grano nace en el negativo y llega a la copia
+   multiplicado por la pendiente local del papel, que lo anula en los blancos
+   y en los negros: el grano vive en los medios, como en una copia real.
+
+El ruido se suma en el dominio de densidad, por capa, con correlacion parcial
+entre capas y la componente cromatica escalada aparte (--croma), y se vuelve
+a sRGB. Requiere numpy y Pillow.
 
 Uso:
     python3 grano.py entrada.jpg salida.jpg --pelicula trix
     python3 grano.py entrada.jpg salida.jpg --pelicula k64 --intensidad 1.3
     python3 grano.py entrada.jpg salida.jpg --rms 16          # ley generica
+    python3 grano.py recorte.jpg salida.jpg --pelicula k64 --ancho-mm 9.1
+        (un recorte: se indica cuanto mide sobre el fotograma su lado largo)
 """
 import argparse
 import base64
@@ -24,6 +52,7 @@ import sys
 import zlib
 
 import numpy as np
+from numpy.fft import rfft2, irfft2
 
 try:
     from PIL import Image
@@ -119,13 +148,19 @@ _PERFILES_B64 = (
 _P = np.load(io.BytesIO(zlib.decompress(base64.b64decode(_PERFILES_B64))))
 GD = _P['gD']
 
+# rms: granularidad difusa rms de la hoja tecnica (x1000, apertura 48 um, D=1.0)
+# grano_um: diametro caracteristico del conglomerado
+# textura: 'nube' (colorante, borde difuso) o 'disco' (plata, borde neto)
+# mtf50: frecuencia (ciclos/mm) a la que la MTF del material cae al 50 %, valor
+#        tipico de la hoja tecnica; se puede afinar con --mtf50
 PRESETS = {
-    'k64':      dict(rms=10, grano_um=11.0, corr=0.35, croma=0.45),
-    'k25':      dict(rms=9,  grano_um=10.0, corr=0.35, croma=0.45),
-    'velvia50': dict(rms=9,  grano_um=10.0, corr=0.35, croma=0.45),
-    'pro400h':  dict(rms=4,  grano_um=12.0, corr=0.35, croma=0.45),
-    'trix':     dict(rms=17, grano_um=14.0, corr=1.0, croma=1.0),
+    'k64':      dict(rms=10, grano_um=11.0, corr=0.35, croma=0.45, textura='nube',  mtf50=40.0),
+    'k25':      dict(rms=9,  grano_um=10.0, corr=0.35, croma=0.45, textura='nube',  mtf50=45.0),
+    'velvia50': dict(rms=9,  grano_um=10.0, corr=0.35, croma=0.45, textura='nube',  mtf50=50.0),
+    'pro400h':  dict(rms=4,  grano_um=12.0, corr=0.35, croma=0.45, textura='nube',  mtf50=30.0),
+    'trix':     dict(rms=17, grano_um=14.0, corr=1.0,  croma=1.0,  textura='disco', mtf50=40.0),
 }
+GENERICO = dict(rms=10, grano_um=11.0, corr=0.35, croma=0.45, textura='nube', mtf50=0.0)
 
 
 def srgb_eotf(v):
@@ -138,18 +173,93 @@ def srgb_oetf(v):
     return np.where(v <= 0.0031308, v * 12.92, 1.055 * v ** (1 / 2.4) - 0.055)
 
 
-def gauss_blur(x, sigma):
-    if sigma <= 0.01:
-        return x
-    h, w = x.shape
-    fy = np.fft.fftfreq(h)[:, None]
-    fx = np.fft.rfftfreq(w)[None, :]
-    H = np.exp(-2 * (np.pi * sigma) ** 2 * (fy ** 2 + fx ** 2))
-    return np.fft.irfft2(np.fft.rfft2(x) * H, s=(h, w))
+# ---------- nucleos de convolucion (por FFT, con envoltura circular) ----------
+
+def _nucleo_fft(shape, k):
+    h, w = shape
+    K = np.zeros((h, w))
+    kh, kw = k.shape
+    K[:kh, :kw] = k
+    K = np.roll(K, (-(kh // 2), -(kw // 2)), (0, 1))
+    return rfft2(K)
+
+
+def _disco(r_px):
+    """disco de radio r_px con bordes antialias (supermuestreo 4x4)"""
+    n = int(np.ceil(r_px)) * 2 + 3
+    c = n // 2
+    yy, xx = np.mgrid[:n, :n] - c
+    acc = np.zeros((n, n))
+    for dy in (-.375, -.125, .125, .375):
+        for dx in (-.375, -.125, .125, .375):
+            acc += ((xx + dx) ** 2 + (yy + dy) ** 2 <= r_px ** 2)
+    return acc / 16.0
+
+
+def _gauss(sigma_px):
+    n = int(np.ceil(3 * sigma_px)) * 2 + 1
+    c = n // 2
+    yy, xx = np.mgrid[:n, :n] - c
+    g = np.exp(-(xx ** 2 + yy ** 2) / (2 * sigma_px ** 2))
+    return g / g.sum()
+
+
+def _filtro_textura(shape, textura, grano_um, pitch_um):
+    """respuesta en frecuencia del filtro que da la correlacion espacial del grano"""
+    if textura == 'gauss':
+        return _nucleo_fft(shape, _gauss(max(0.35, (grano_um / pitch_um) / 2.355)))
+    r = max(0.6, 0.5 * grano_um / pitch_um)
+    H = _nucleo_fft(shape, _disco(r))
+    if textura == 'nube':            # nube de colorante: disco con el borde difundido
+        H = H * _nucleo_fft(shape, _gauss(max(0.35, r / 3.0)))
+    return H
+
+
+def campo(shape, H, rng):
+    """campo de ruido de varianza unidad por pixel con la correlacion de H"""
+    h, w = shape
+    f = irfft2(rfft2(rng.standard_normal((h, w))) * H, s=(h, w))
+    return f / max(f.std(), 1e-12)
+
+
+def rms_en_apertura(f, pitch_um, diametro_um=48.0):
+    """desviacion tipica del campo promediado en un disco de `diametro_um`"""
+    r = 0.5 * diametro_um / pitch_um
+    if r < 0.5:
+        return float(f.std()) * (2 * r)  # apertura menor que el pixel: Selwyn
+    K = _disco(r)
+    K /= K.sum()
+    return float(irfft2(rfft2(f) * _nucleo_fft(f.shape, K), s=f.shape).std())
+
+
+def escala_por_pixel(textura, grano_um, pitch_um, rms):
+    """sigma de densidad por pixel a D=1 que deja la rms de la hoja tecnica en 48 um.
+    Se mide sobre un campo de referencia con la misma textura y el mismo paso."""
+    shape = (768, 768)
+    H = _filtro_textura(shape, textura, grano_um, pitch_um)
+    f = campo(shape, H, np.random.default_rng(20240912))
+    s48 = rms_en_apertura(f, pitch_um)
+    return (rms / 1000.0) / max(s48, 1e-9), s48
+
+
+def desenfoque_mtf(lin, mtf50, pitch_um):
+    """MTF gaussiana con el 50 % en mtf50 ciclos/mm, aplicada en luz lineal"""
+    if not mtf50 or mtf50 <= 0:
+        return lin, 0.0
+    sigma_um = 1000.0 * np.sqrt(np.log(2) / 2.0) / (np.pi * mtf50)
+    sigma_px = sigma_um / pitch_um
+    if sigma_px < 0.25:
+        return lin, sigma_px
+    h, w, _ = lin.shape
+    H = _nucleo_fft((h, w), _gauss(sigma_px))
+    out = np.empty_like(lin)
+    for c in range(3):
+        out[..., c] = irfft2(rfft2(lin[..., c]) * H, s=(h, w))
+    return np.clip(out, 0, 1), sigma_px
 
 
 def main():
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
     ap.add_argument('entrada')
     ap.add_argument('salida')
     ap.add_argument('--pelicula', choices=list(PRESETS) + ['generico'],
@@ -158,7 +268,15 @@ def main():
     ap.add_argument('--rms', type=float, default=None,
                     help='granularidad rms del datasheet (anula el preset)')
     ap.add_argument('--grano-um', type=float, default=None,
-                    help='diametro caracteristico del grano en micras')
+                    help='diametro caracteristico del conglomerado en micras')
+    ap.add_argument('--textura', choices=['nube', 'disco', 'gauss'], default=None,
+                    help='nube = colorante (borde difuso), disco = plata, '
+                         'gauss = textura de la version anterior')
+    ap.add_argument('--mtf50', type=float, default=None,
+                    help='MTF del material: ciclos/mm al 50 %%; 0 la desactiva')
+    ap.add_argument('--ancho-mm', type=float, default=36.0,
+                    help='cuanto mide sobre la pelicula el lado largo de la '
+                         'imagen (36 = fotograma entero de 24x36)')
     ap.add_argument('--intensidad', type=float, default=1.0)
     ap.add_argument('--correlacion', type=float, default=None,
                     help='correlacion entre capas; 1.0 = monocroma')
@@ -170,36 +288,38 @@ def main():
     ap.add_argument('--dmax-vis', type=float, default=2.6)
     a = ap.parse_args()
 
-    pre = PRESETS.get(a.pelicula, dict(rms=10, grano_um=11.0, corr=0.35, croma=0.45))
+    pre = PRESETS.get(a.pelicula, GENERICO)
     rms = a.rms if a.rms is not None else pre['rms']
     gum = a.grano_um if a.grano_um is not None else pre['grano_um']
     corr = a.correlacion if a.correlacion is not None else pre['corr']
     croma = a.croma if a.croma is not None else pre['croma']
+    textura = a.textura or pre['textura']
+    mtf50 = a.mtf50 if a.mtf50 is not None else pre['mtf50']
 
     im = Image.open(a.entrada)
     arr = np.asarray(im.convert('RGB')).astype(np.float64)
     escala = 65535.0 if arr.max() > 255 else 255.0
     rgb = arr / escala
     h, w, _ = rgb.shape
+    pitch_um = 1000.0 * a.ancho_mm / max(h, w)
 
-    pitch_um = 36000.0 / max(h, w)
-    A48 = np.pi * 24.0 ** 2
-    sigma_D1 = (rms / 1000.0) * np.sqrt(A48 / pitch_um ** 2)
-
-    lin = srgb_eotf(rgb)
+    # 1. nitidez del material
+    lin, sigma_mtf = desenfoque_mtf(srgb_eotf(rgb), mtf50, pitch_um)
     D = -np.log10(np.clip(lin, 10 ** (-a.dmax_vis), 1.0))
 
+    # 2. textura y 3. amplitud calibrada en 48 um
+    sigma_D1, s48 = escala_por_pixel(textura, gum, pitch_um, rms)
     rng = np.random.default_rng(a.semilla)
-    comun = rng.standard_normal((h, w))
-    sigma_px = max(0.35, (gum / pitch_um) / 2.355)
+    H = _filtro_textura((h, w), textura, gum, pitch_um)
+    comun = campo((h, w), H, rng)
     campos = []
     for _ in range(3):
-        propio = rng.standard_normal((h, w))
+        propio = campo((h, w), H, rng)
         n = np.sqrt(corr) * comun + np.sqrt(max(0.0, 1 - corr)) * propio
-        n = gauss_blur(n, sigma_px)
         campos.append(n / max(n.std(), 1e-9))
     ruido = np.stack(campos, -1)
 
+    # 4. dependencia con el tono
     if a.pelicula != 'generico':
         T = _P[a.pelicula]
         rel = np.stack([np.interp(D[..., c], GD, T[:, c]) for c in range(3)], -1)
@@ -220,9 +340,12 @@ def main():
         np.uint16 if escala > 255 else np.uint8)
     Image.fromarray(res).save(
         a.salida, quality=95 if a.salida.lower().endswith(('.jpg', '.jpeg')) else None)
-    print('grano ' + a.pelicula + ': rms=' + str(rms) + '  pitch=' +
-          str(round(pitch_um, 2)) + ' um  sigma(D=1)=' +
-          str(round(sigma_D1 * a.intensidad, 4)) + '  grano=' + str(gum) + ' um  croma=' + str(croma))
+    print('grano %s: rms=%g  pitch=%.2f um  textura=%s  grano=%g um  '
+          'sigma por pixel (D=1)=%.4f  [rms medida a 48 um: %.1f]  '
+          'MTF50=%g c/mm (sigma %.2f px)  croma=%g'
+          % (a.pelicula, rms, pitch_um, textura, gum,
+             sigma_D1 * a.intensidad, 1000 * sigma_D1 * s48 * a.intensidad,
+             mtf50, sigma_mtf, croma))
 
 
 if __name__ == '__main__':

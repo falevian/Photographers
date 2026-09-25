@@ -2909,9 +2909,222 @@ FILMS = {
                  fuente='Kodak F-4017 e Ilford MG IV RC', rms=17),
 }
 
+# ---------- reparacion y suavizado de las curvas caracteristicas digitalizadas ----------
+# Las curvas D(logE) salen de rasterizar y seguir las graficas de las hojas tecnicas, y
+# arrastran tres defectos que una curva H&D real no tiene: (1) rizado periodico de la
+# cuadricula de pixeles (±0.1 en gamma con periodo ~0.05 logE); (2) tramos rellenados con
+# una recta entre puntos escasos (gamma exactamente constante durante 0.5-0.7 logE y un
+# escalon al final: en el K64 el escalon caia justo sobre el gris medio); (3) saltos y
+# bultos donde el trazador se confundio de curva (papel MG IV: gamma local 5.6 en un
+# grado 2). El tratamiento es el mismo para todas las curvas y solo usa numpy:
+#   a) los rellenos lineales se sustituyen por un puente en el que gamma varia linealmente
+#      entre las gammas medidas a cada lado, escalado para cerrar en los dos extremos reales;
+#   b) un primer ajuste fino da residuos con los que se rebaja el peso de los puntos
+#      aberrantes (biweight de Tukey, 4.5 MAD);
+#   c) se ajusta un B-spline cubico en el dominio logistico u = ln((D-Dmin)/(Dmax-D)), que
+#      hace asintoticos el talon y el hombro, con el paso de nudos mas fino (0.12..0.40 logE)
+#      que deja la curva monotona y su gamma localmente suave (< 12 % en 0.15 logE);
+#   d) se recorta al rango de los datos y se fuerza la monotonia (PAVA).
+# Dmin, Dmax y la colocacion de la exposicion no cambian. --curvas crudas usa las
+# digitalizaciones tal cual.
+
+CURVAS = 'suaves'
+
+
+def _bspline_basis(x, t, k=3):
+    x = np.asarray(x, float)
+    nb = len(t) - k - 1
+    B = np.zeros((len(x), len(t) - 1))
+    for j in range(len(t) - 1):
+        B[:, j] = ((x >= t[j]) & (x < t[j + 1])).astype(float)
+    last = np.where(np.diff(t) > 0)[0][-1]
+    B[x >= t[last + 1] - 1e-12, :] = 0
+    B[x >= t[last + 1] - 1e-12, last] = 1
+    for d in range(1, k + 1):
+        Bn = np.zeros((len(x), len(t) - d - 1))
+        for j in range(len(t) - d - 1):
+            den1 = t[j + d] - t[j]
+            den2 = t[j + d + 1] - t[j + 1]
+            a = (x - t[j]) / den1 * B[:, j] if den1 > 0 else 0
+            b = (t[j + d + 1] - x) / den2 * B[:, j + 1] if den2 > 0 else 0
+            Bn[:, j] = a + b
+        B = Bn
+    return B[:, :nb]
+
+
+def _tramos_rectos(x, y, minimo=0.12):
+    """interior de los tramos con segunda diferencia nula y pendiente no nula: rellenos
+    lineales de la digitalizacion (los dos extremos de cada tramo si son datos)"""
+    d2 = np.abs(np.diff(y, 2))
+    d1 = np.abs(np.diff(y))
+    recto = np.r_[False, d2 < 1e-7, False] & (np.r_[d1, 0] > 1e-6)
+    idx = np.zeros(len(y), bool)
+    i, n = 0, len(y)
+    while i < n:
+        if recto[i]:
+            j = i
+            while j + 1 < n and recto[j + 1]:
+                j += 1
+            if x[j] - x[i] >= minimo:
+                idx[i + 1:j] = True
+            i = j + 1
+        else:
+            i += 1
+    return idx
+
+
+def _puentea(x, y, borde=0.08):
+    """sustituye cada relleno lineal por un puente de gamma lineal entre las gammas
+    medidas fuera del tramo, escalado para cerrar exactamente en sus extremos"""
+    y = np.array(y, float)
+    rect = _tramos_rectos(x, y)
+    n = len(y)
+    k = max(2, int(round(borde / np.median(np.diff(x)))))
+    i = 0
+    while i < n:
+        if rect[i]:
+            j = i
+            while j + 1 < n and rect[j + 1]:
+                j += 1
+            a, b = i - 1, j + 1
+            g = np.gradient(y, x)
+            g0 = np.mean(g[max(0, a - k):a]) if a - k >= 0 else g[a]
+            g1 = np.mean(g[b + 1:min(n, b + 1 + k)]) if b + 1 < n else g[b]
+            xs = x[a:b + 1]
+            gl = g0 + (g1 - g0) * (xs - xs[0]) / (xs[-1] - xs[0])
+            Dl = y[a] + np.concatenate([[0], np.cumsum(0.5 * (gl[1:] + gl[:-1]) * np.diff(xs))])
+            esc = (y[b] - y[a]) / (Dl[-1] - y[a]) if abs(Dl[-1] - y[a]) > 1e-9 else 1.0
+            y[a:b + 1] = y[a] + (Dl - y[a]) * esc
+            i = j + 1
+        else:
+            i += 1
+    return y
+
+
+def _pava(y, creciente=True):
+    """regresion isotona (pool adjacent violators)"""
+    if not creciente:
+        return -_pava(-np.asarray(y, float), True)
+    v = list(np.asarray(y, float))
+    w = [1.0] * len(v)
+    idx = [[i] for i in range(len(v))]
+    i = 0
+    while i < len(v) - 1:
+        if v[i] > v[i + 1] + 1e-12:
+            tot = w[i] + w[i + 1]
+            v[i] = (v[i] * w[i] + v[i + 1] * w[i + 1]) / tot
+            w[i] = tot
+            idx[i] += idx[i + 1]
+            del v[i + 1], w[i + 1], idx[i + 1]
+            if i > 0:
+                i -= 1
+        else:
+            i += 1
+    out = np.empty(len(y))
+    for val, ids in zip(v, idx):
+        out[ids] = val
+    return out
+
+
+def _osc_gamma(x, yf, ventana=0.15):
+    """oscilacion relativa maxima de gamma respecto a su media movil, fuera de las mesetas"""
+    g = np.abs(np.gradient(yf, x))
+    k = max(3, int(round(ventana / np.median(np.diff(x)))) | 1)
+    gs = np.convolve(np.pad(g, k // 2, mode='edge'), np.ones(k) / k, mode='valid')
+    m = gs > 0.15 * gs.max()
+    return float(np.max(np.abs(g - gs)[m] / gs[m])) if m.any() else 0.0
+
+
+def _ajuste_logistico(xa, yc, w, paso, eps=0.004):
+    lo, hi = yc.min() - eps, yc.max() + eps
+    u = np.log((yc - lo) / (hi - yc))
+    wd = ((yc - lo) * (hi - yc) / (hi - lo)) ** 2      # metodo delta: minimos cuadrados en D
+    wd = wd / wd.max() * w
+    nk = max(4, int(np.ceil((xa[-1] - xa[0]) / paso)))
+    inner = np.linspace(xa[0], xa[-1], nk + 1)
+    t = np.r_[[xa[0]] * 3, inner, [xa[-1]] * 3]
+    B = _bspline_basis(xa, t)
+    D2 = np.diff(np.eye(B.shape[1]), 2, axis=0)
+    BtW = B.T * wd
+    uf = B @ np.linalg.solve(BtW @ B + 1e-3 * (D2.T @ D2), BtW @ u)
+    return np.clip(lo + (hi - lo) / (1 + np.exp(-uf)), yc.min(), yc.max())
+
+
+def suaviza_curva(x, y, osc_max=0.12):
+    """curva(s) caracteristica(s) digitalizada(s) -> version reparada y suave; y puede ser
+    (n,) o (n, canales); el paso de nudos es comun a los canales de una misma curva"""
+    x = np.asarray(x, float)
+    Y = np.asarray(y, float)
+    uni = Y.ndim == 1
+    if uni:
+        Y = Y[:, None]
+    nc = Y.shape[1]
+    Yp = np.stack([_puentea(x, Y[:, c]) for c in range(nc)], 1)
+    out = Yp.copy()
+    act = np.zeros(len(x), bool)
+    for c in range(nc):
+        yc = Yp[:, c]
+        act |= (yc > yc.min() + 0.003) & (yc < yc.max() - 0.003)
+    ext = int(round(0.25 / np.median(np.diff(x))))
+    i0 = max(0, int(np.argmax(act)) - ext)
+    i1 = min(len(x), len(x) - int(np.argmax(act[::-1])) + ext)
+    xa = x[i0:i1]
+    W = []
+    for c in range(nc):
+        yc = Yp[i0:i1, c]
+        r = yc - _ajuste_logistico(xa, yc, np.ones(len(xa)), 0.12)
+        mad = np.median(np.abs(r - np.median(r))) * 1.4826 + 1e-4
+        z = np.abs(r) / (4.5 * mad)
+        W.append(np.where(z < 1, (1 - z ** 2) ** 2, 0.0))
+
+    def bien(yf):
+        dy = np.gradient(yf, xa)
+        sg = np.sign(dy[np.abs(dy) > 0.02 * np.abs(dy).max()])
+        return (len(sg) == 0 or np.all(sg == sg[0])) and _osc_gamma(xa, yf) <= osc_max
+
+    pasos = (0.12, 0.15, 0.2, 0.25, 0.3, 0.4)
+    elegido = pasos[-1]
+    for paso in pasos:
+        if all(bien(_ajuste_logistico(xa, Yp[i0:i1, c], W[c], paso)) for c in range(nc)):
+            elegido = paso
+            break
+    for c in range(nc):
+        yc = Y[:, c]
+        out[i0:i1, c] = _pava(_ajuste_logistico(xa, Yp[i0:i1, c], W[c], elegido), yc[-1] > yc[0])
+    return out[:, 0] if uni else out
+
+
+def _prepara_curvas(m):
+    """aplica suaviza_curva a las curvas del modulo cargado (diapositiva, negativo+papel
+    o B/N); las funciones del modelo leen estas variables globales, asi que basta con
+    sustituirlas"""
+    if CURVAS != 'suaves':
+        return
+    if hasattr(m, 'CC'):
+        m.CC = suaviza_curva(m.LH, m.CC)
+    if hasattr(m, 'CCN'):
+        m.CCN = suaviza_curva(m.LHN, m.CCN)
+        m.CCP = suaviza_curva(m.LEP, m.CCP)
+    if hasattr(m, 'CN'):
+        m.CN = suaviza_curva(m.LHN, m.CN)
+        m.CPAP = suaviza_curva(m.LEP, m.CPAP)
+
+
 def cargar(pel):
     F = FILMS[pel]
-    return _mod('film_' + pel, F['src'], {'_EMBEDDED_NPZ': _B(F['npz'])})
+    m = _mod('film_' + pel, F['src'], {'_EMBEDDED_NPZ': _B(F['npz'])})
+    _prepara_curvas(m)
+    return m
+
+
+# ---------- entorno de vision de la diapositiva ----------
+# Una diapositiva esta pensada para verse proyectada en sala oscura; su gamma alta es la
+# compensacion de ese entorno (Bartleson y Breneman: el contraste percibido baja en
+# entorno oscuro). El perfil reproduce por defecto la colorimetria de la proyeccion. Si el
+# resultado va a mirarse en un monitor en penumbra o con luz, la apariencia equivalente
+# pide bajar el contraste de luminancia con el cociente de las gammas de entorno
+# (1.5 oscuro, 1.25 penumbra, 1.0 iluminado; Fairchild, Color Appearance Models).
+SALAS = {'oscura': 1.0, 'tenue': 1.25 / 1.5, 'media': 1.0 / 1.5}
 
 
 GAMMA_IN = 1.8
@@ -2978,6 +3191,20 @@ def _etiqueta(src):
         os.path.basename(src.path))[0]
 
 
+def _resumen_tonal(mod, a, g_sala=1.0):
+    """L* de la diapositiva o de la copia para blanco, gris y sombras, y pendiente
+    local en el gris: la curva de tono resultante, en una linea"""
+    refl = np.array([1.0, 0.18 * 2 ** 0.5, 0.18, 0.18 * 2 ** -0.5, 0.18 / 8, 0.18 / 32])
+    out = mod.cat(mod.film(refl[:, None] * mod.W_D55[None], exposure_stops=a.ev,
+                           dye_gain=(a.gain,) * 3), mod.XYZ_SCREEN, mod.SRGB_W)
+    rel = out / max(out[0, 1], 1e-9)
+    if g_sala != 1.0:
+        rel = rel * (np.clip(rel[:, 1], 1e-9, None) ** (g_sala - 1.0))[:, None]
+    L = mod.XYZ_to_Lab(mod.cat(rel, mod.SRGB_W, mod.XYZ_D50))[:, 0]
+    print('tonos (L*): blanco 100%% %.0f  gris 18%% %.1f  -3 EV %.1f  -5 EV %.1f  |  '
+          'pendiente en el gris %.1f L*/EV' % (L[0], L[2], L[4], L[5], L[1] - L[3]))
+
+
 def _escribir(src, a):
     n = a.n
     g = np.linspace(0, 1, n)
@@ -2991,7 +3218,12 @@ def _escribir(src, a):
     out = k64.cat(out, k64.XYZ_SCREEN, k64.SRGB_W)
     w = k64.cat(k64.film(k64.W_D55[None], exposure_stops=a.ev,
                          dye_gain=(a.gain,) * 3), k64.XYZ_SCREEN, k64.SRGB_W)[0]
-    Lab = k64.XYZ_to_Lab(k64.cat(out / w[1], k64.SRGB_W, k64.XYZ_D50))
+    rel = out / w[1]
+    g_sala = SALAS.get(a.sala, 1.0) if hasattr(k64, 'PROJ') else 1.0
+    if g_sala != 1.0:
+        Y = np.clip(rel[:, 1], 1e-9, None)
+        rel = rel * (Y ** (g_sala - 1.0))[:, None]
+    Lab = k64.XYZ_to_Lab(k64.cat(rel, k64.SRGB_W, k64.XYZ_D50))
 
     L = np.clip(Lab[:, 0], 0, 100) * 65280.0 / 100.0
     ab = (np.clip(Lab[:, 1:], -128, 127.996) + 128.0) * 256.0
@@ -3006,6 +3238,10 @@ def _escribir(src, a):
         sufijo = ' ev%+g c%+g' % (a.ev, a.copia)
     if a.pelicula == 'trix' and a.virado != 'neutro':
         sufijo = ' ' + a.virado
+    if g_sala != 1.0:
+        sufijo += ' sala ' + a.sala
+    if CURVAS != 'suaves':
+        sufijo += ' crudas'
     nombre = '%s (%s)%s' % (F['nombre'], _etiqueta(src), sufijo)
     tags = [(b'desc', I.desc(nombre[:60])),
             (b'cprt', I.text('Modelo espectral derivado de %s.' % F['fuente'])),
@@ -3016,8 +3252,10 @@ def _escribir(src, a):
     dest = a.salida or (F['icc'] + '_'
                         + _etiqueta(src).replace(' ', '_').replace('.', '_') + '.icc')
     open(dest, 'wb').write(blob)
-    print('\nescrito %s  (%.1f MB, CLUT %d^3, EV %+0.2f, ganancia %.2f)'
-          % (dest, len(blob) / 1e6, n, a.ev, a.gain))
+    print('\nescrito %s  (%.1f MB, CLUT %d^3, EV %+0.2f, ganancia %.2f, curvas %s%s)'
+          % (dest, len(blob) / 1e6, n, a.ev, a.gain, CURVAS,
+             '' if g_sala == 1.0 else ', sala ' + a.sala))
+    _resumen_tonal(k64, a, g_sala)
     if a.instalar:
         _instalar(dest, nombre)
     else:
@@ -3055,8 +3293,17 @@ def main():
     ap.add_argument('--instalar', action='store_true',
                     help='copia el perfil a ~/Library/ColorSync/Profiles y crea el '
                          'estilo en la carpeta Styles de Capture One')
+    ap.add_argument('--curvas', choices=['suaves', 'crudas'], default='suaves',
+                    help='suaves (por defecto): curvas caracteristicas reparadas y '
+                         'suavizadas; crudas: las digitalizaciones tal cual')
+    ap.add_argument('--sala', choices=list(SALAS), default='oscura',
+                    help='solo diapositivas: entorno en el que se vera el resultado; '
+                         'oscura = colorimetria de la proyeccion (por defecto), tenue = '
+                         'monitor en penumbra, media = habitacion iluminada')
     ap.add_argument('-o', '--salida', default=None)
     a = ap.parse_args()
+    global CURVAS
+    CURVAS = a.curvas
 
     if a.listar is not None:
         c = buscar(a.listar)
@@ -3070,6 +3317,8 @@ def main():
 
     global k64
     k64 = cargar(a.pelicula)
+    if a.sala != 'oscura' and not hasattr(k64, 'PROJ'):
+        print('aviso: --sala solo aplica a las diapositivas; ignorado')
     if hasattr(k64, 'PRINT_STOPS'):
         k64.PRINT_STOPS = a.copia
     elif a.copia:

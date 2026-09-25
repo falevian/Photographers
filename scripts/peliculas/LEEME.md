@@ -53,6 +53,8 @@ cometer con estos perfiles.
 | `--gain X` | ganancia de colorante; menor que 1 rebaja contraste y croma a la vez |
 | `--copia X` | `pro400h` y `trix`: aclarado de la copia respecto al balance de laboratorio |
 | `--virado {neutro,frio,calido,sepia,selenio}` | solo `trix`: virado de la copia |
+| `--curvas {suaves,crudas}` | por defecto `suaves`: curvas características reparadas y suavizadas (sección 4); `crudas` usa las digitalizaciones tal cual |
+| `--sala {oscura,tenue,media}` | solo diapositivas: entorno en el que se verá el resultado; `oscura` (por defecto) es la colorimetría de la proyección, `tenue` y `media` compensan la apariencia para monitor en penumbra o habitación iluminada (exponentes 0,83 y 0,67 sobre la luminancia relativa) |
 | `--n {33,45}` | lado del CLUT del ICC |
 | `--generico` | perfil sin cámara, supone primarios Rec.709 a la entrada |
 | `--info`, `--listar [patrón]`, `--instalar`, `-o salida.icc` | utilidades |
@@ -163,80 +165,78 @@ python3 grano.py exportada.jpg salida.jpg --pelicula trix --intensidad 1.2
 
 ### Algoritmo, paso a paso
 
-1. **Amplitud base (ley de Selwyn).** La granularidad rms difusa del
-   datasheet está medida con apertura de 48 µm a densidad 1.0. La desviación
-   en otra apertura escala con la raíz del cociente de áreas, así que
-   σ(D=1) = (rms/1000) · √(A₄₈/A_píxel), con el píxel equivalente calculado
-   suponiendo que el lado largo de la imagen es un fotograma de 36 mm. Esto
-   hace que el resultado sea invariante con la resolución: a resolución
-   completa del M11 (3.8 µm por píxel) el σ por píxel es alto, pero al
-   reducir al tamaño de visionado la varianza promedia exactamente lo que
-   promediaría la película. Mirar el grano al 100% en pantalla equivale a
-   mirar la diapositiva con lupa de 25 aumentos.
+1. **Nitidez del material.** Antes de nada, la imagen pasa por la MTF de la
+   película: una gaussiana con el 50 % en `--mtf50` ciclos/mm (K64 40, K25 45,
+   Velvia 50, PRO 400H 30, Tri-X 40; valores del orden de los de las hojas
+   técnicas, sustituibles). Una diapositiva de 35 mm no resuelve lo que un
+   sensor de 60 Mpx, y el grano añadido sobre una imagen más nítida que la
+   película se lee como pegado encima. `--mtf50 0` lo desactiva.
 
-2. **Dependencia con el tono.** No es una ley única: `--pelicula` selecciona
+2. **Textura.** El grano es una superposición de conglomerados de plata o de
+   nubes de colorante de tamaño `--grano-um` colocados al azar: un modelo
+   booleano de discos, cuyo espectro de Wiener es plano hasta ~1/(2d) y cae
+   después, como el medido en película. Las nubes de colorante llevan el borde
+   difuminado (el colorante difunde al revelar); los conglomerados de plata del
+   blanco y negro, no. `--textura gauss` recupera la textura de la versión
+   anterior (ruido gaussiano filtrado), más blanda que la real.
+
+3. **Amplitud, medida en 48 µm.** La granularidad rms del datasheet está
+   medida con apertura de 48 µm a densidad 1.0. La amplitud por píxel se
+   calibra midiendo sobre el propio campo de ruido cuánto vale su rms al
+   promediarlo en un disco de 48 µm y escalándolo para que coincida con la del
+   datasheet; el programa imprime la comprobación. Es exacto para cualquier
+   textura y resolución. La versión anterior aplicaba la ley de Selwyn como si
+   el ruido fuera blanco, y con grano correlado a 10-14 µm eso lo sobrestimaba
+   3.8 veces en K64 y 4.7 en Tri-X (σ por píxel a 3.8 µm: 0.11 D frente a
+   0.038 en K64; 0.19 frente a 0.058 en Tri-X). `--intensidad 4` recupera
+   aproximadamente aquel aspecto.
+
+4. **Dependencia con el tono.** No es una ley única: `--pelicula` selecciona
    un perfil σ(densidad mostrada) precalculado sobre el eje neutro del modelo
    espectral de cada material, embebido en el script como tabla por canal.
 
    * Diapositivas (k64, k25, velvia50): la fluctuación por capa sigue la
      estadística binomial de cobertura de colorante, σ ∝ √(a·(1−a/a_sat)).
      Crece con la densidad, alcanza el máximo hacia D ≈ 1.5 y decae al
-     saturar cerca de Dmax (perfil del K64: 0.37 en luces, 1.09 en el
-     máximo, 0.91 en el negro profundo; Velvia decae menos porque su Dmax
-     de 3.7 queda más lejos).
+     saturar cerca de Dmax.
    * Sistemas de negativo más papel (pro400h, trix): el grano nace en el
      negativo, donde crece con la densidad, y llega a la copia multiplicado
      por la pendiente local de la curva del papel, que se anula en ambos
      extremos. El grano vive en los medios y desaparece en blancos y negros,
-     como en una copia real. El perfil del Tri-X impreso: 0.14 junto al
-     blanco del papel, máximo de 1.8 en los medios oscuros, cero en el negro
-     del hombro. Medido sobre imagen frente a la ley genérica: σ en luces de
-     4.1 a 2.7, en medios oscuros de 4.4 a 7.6.
+     como en una copia real.
 
    Sin `--pelicula` se aplica la ley genérica σ ∝ √D (para otros materiales;
    Kodachrome 200: `--rms 16`).
 
-3. **Textura.** Tres campos gaussianos por capa con correlación parcial
-   (`--correlacion`, 0.35 en color, 1.0 en trix porque solo hay una imagen
-   de plata), tamaño de grano dado por filtrado gaussiano (`--grano-um`,
-   con FWHM igual al diámetro característico) y varianza renormalizada tras
-   el filtrado para no alterar la calibración.
-
-4. **Separación luminancia/croma.** La rms del datasheet es granularidad de
+5. **Separación luminancia/croma.** La rms del datasheet es granularidad de
    densidad **visual**: mide la componente de luminancia de la fluctuación.
-   El ruido de densidad se descompone por tanto en componente de luminancia,
-   que conserva íntegra la calibración del paso 1, y componente cromática,
-   que existe porque las tres capas son emulsiones estadísticamente
-   independientes pero se escala con su propia ganancia `--croma` (0.45 por
-   defecto en color). Con independencia total el croma superaría a la
-   luminancia (relación 1.27), que el ojo lee como ruido digital; con 0.45
-   queda subordinado (0.76), como en un escaneo real. Verificación: al
-   variar `--croma`, el σ de luminancia no cambia (0.84 en el degradado de
-   prueba para 1.0, 0.45 y 0.0) y solo se mueve el cromático (1.07, 0.64,
-   0.37). `--croma 0` da grano acromático; `--croma 1`, la independencia
-   plena, el aspecto de un escaneo de tambor a 5000 ppp mirado de cerca. En
-   las copias viradas del trix el grano sale coloreado por la vía correcta:
-   la fluctuación es de una sola imagen de plata y el virado la mapea a
-   densidad espectral, así que el grano de un sepia es pardo por
-   construcción (σ de croma 0.002 en la copia neutra, 4.0 en la sepia, con
-   el mismo campo de ruido).
+   El ruido de densidad se descompone en componente de luminancia, que
+   conserva íntegra la calibración, y componente cromática, que existe porque
+   las tres capas son emulsiones estadísticamente independientes pero se
+   escala con su propia ganancia `--croma` (0.45 por defecto en color; 0 da
+   grano acromático, 1 la independencia plena). En las copias viradas del trix
+   el grano sale coloreado por la vía correcta: la fluctuación es de una sola
+   imagen de plata y el virado la mapea a densidad espectral.
 
-5. **Aplicación.** El ruido se suma en el dominio de densidad por canal,
+6. **Aplicación.** El ruido se suma en el dominio de densidad por canal,
    D′ = D + n·σ(D), y se vuelve a sRGB. `--dmax-vis` fija la densidad máxima
-   representable (2.6 por defecto).
+   representable (2.6 por defecto). El paso de píxel sale de suponer que el
+   lado largo mide 36 mm sobre la película; para un recorte, `--ancho-mm`
+   indica cuánto mide de verdad.
 
 ### Presets
 
-| `--pelicula` | rms | grano (µm) | correlación | croma |
-|---|---|---|---|---|
-| `k64` | 10 | 11 | 0.35 | 0.45 |
-| `k25` | 9 | 10 | 0.35 | 0.45 |
-| `velvia50` | 9 | 10 | 0.35 | 0.45 |
-| `pro400h` | 4 | 12 | 0.35 | 0.45 |
-| `trix` | 17 | 14 | 1.0 | 1.0 |
+| `--pelicula` | rms | grano (µm) | textura | MTF 50 % (c/mm) | correlación | croma |
+|---|---|---|---|---|---|---|
+| `k64` | 10 | 11 | nube | 40 | 0.35 | 0.45 |
+| `k25` | 9 | 10 | nube | 45 | 0.35 | 0.45 |
+| `velvia50` | 9 | 10 | nube | 50 | 0.35 | 0.45 |
+| `pro400h` | 4 | 12 | nube | 30 | 0.35 | 0.45 |
+| `trix` | 17 | 14 | disco | 40 | 1.0 | 1.0 |
 
-Todo es anulable por línea de órdenes (`--rms`, `--grano-um`,
-`--correlacion`, `--croma`, `--intensidad`, `--semilla`, `--dmax-vis`). La
+Todo es anulable por línea de órdenes (`--rms`, `--grano-um`, `--textura`,
+`--mtf50`, `--ancho-mm`, `--correlacion`, `--croma`, `--intensidad`,
+`--semilla`, `--dmax-vis`). La
 alternativa rápida sin salir de Capture One es su herramienta Film Grain, que
 no modela la dependencia con el tono ni la separación luminancia/croma.
 
@@ -251,6 +251,30 @@ asignación excluyente, con permutación de colas en los cruces detectada por
 identidad física. Controles de cierre donde el documento los permite: en K64,
 |N − (Y+M+C)| máximo 0.016 y densidad visual del neutro 1.001 frente al 1.000
 nominal; en K25, cierre con error máximo 0.036.
+
+**Reparación de las curvas digitalizadas.** Las curvas D(logE) así
+obtenidas arrastraban tres defectos que una curva H&D real no tiene, y que se
+veían en el tono: rizado periódico de la cuadrícula de píxeles (±0.1 en gamma
+con periodo ~0.05 logE); tramos rellenados con una recta entre puntos escasos,
+con gamma exactamente constante y un escalón al final (K64: gamma 0.82 durante
+0.5 logE y salto a 1.39 justo por encima del gris medio; K25: 0.98 durante
+0.7 logE y salto a 2.0, que dejaba la gamma del gris en 0.98 y hacía al K25
+falsamente «contenido»); y saltos y bultos donde el trazador se confundió de
+curva (Multigrade grado 2: picos de gamma local 4.4 y 5.6 con un valle de 0.95
+en medio). Desde esta versión las curvas se reparan al cargarlas, con el mismo
+tratamiento para todas y solo numpy: los rellenos lineales se sustituyen por un
+puente de gamma lineal entre las gammas medidas a cada lado, escalado para
+cerrar en los dos extremos reales; un primer ajuste fino rebaja el peso de los
+puntos aberrantes (biweight de Tukey, 4.5 MAD); se ajusta un B-spline cúbico en
+el dominio logístico u = ln((D − Dmin)/(Dmax − D)), asintótico en talón y
+hombro, con el paso de nudos más fino (0.12 a 0.40 logE) que deja la curva
+monótona y su gamma localmente suave; y se recorta al rango de los datos
+forzando la monotonía. Dmin, Dmax y la colocación de la exposición no cambian.
+Resultado: en el K64 desaparece el escalón de contraste entre gris y blanco
+(pendiente en L*: de 24 → 20 → 17 → 19 → 21 L*/EV a 24 → 22 → 20 → 19 → 17);
+en el K25 la gamma del gris sube de 0.98 a 1.27 (15.5 → 19.8 L*/EV); en el
+MG2 la gamma máxima baja de 5.6 a 4.0 con la ISO(R) intacta (108).
+`--curvas crudas` recupera las digitalizaciones originales.
 
 **Cadena de diapositiva** (k64, k25, velvia50): matriz 3×3 XYZ→exposición de
 capa ajustada sobre 924 reflectancias (24 ColorChecker con peso 12 más 900
@@ -294,7 +318,14 @@ gris oscuro, ruido de medida).
    para el grado 2. La curva del negativo y el resto del papel son
    digitalización directa. El virado es una parametrización colorimétrica
    declarada, no un dato de fabricante.
-6. El perfil genérico supone primarios Rec.709 a la entrada. Para máxima
+6. El canal amarillo del papel Endura tiene en la digitalización un salto de
+   0.2 D cerca de Dmax; la reparación lo puentea, pero la forma del hombro
+   amarillo entre D 2.0 y 2.4 es una estimación (afecta a los negros más
+   profundos de la copia).
+7. Las MTF de `grano.py` son valores típicos, no digitalizaciones; los efectos
+   de adyacencia del D-76 (MTF por encima del 100 % a baja frecuencia) no se
+   modelan.
+8. El perfil genérico supone primarios Rec.709 a la entrada. Para máxima
    fidelidad, componer sobre el perfil de cámara.
 
 ---
