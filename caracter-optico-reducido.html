@@ -147,7 +147,7 @@ footer{border-top:1px solid var(--hair);margin-top:44px;padding-top:16px;font-fa
 <header class="top">
   <div class="kicker"><a href="index.html">Photographers</a> / <a href="caracter-optico-leica-m.html">carta completa</a> / carta reducida</div>
   <h1>Siete ejes bastan<br>para el <em>rendering</em></h1>
-  <p class="thesis">La carta completa maneja 32 descriptores y once generadores. Para lo que un objetivo hace con la imagen sobran la mayoría: el carácter visible queda determinado por siete causas casi independientes, y lo demás (cremosidad, glow, nerviosismo, deriva de foco) son consecuencias. Esta página compara los mismos objetivos en ese subespacio, con tres índices estéticos cuya fórmula se imprime junto al resultado.</p>
+  <p class="thesis">La carta completa maneja 32 descriptores y once generadores. Para lo que un objetivo hace con la imagen sobran la mayoría: el carácter visible queda determinado por siete causas casi independientes, y lo demás (cremosidad, glow, nerviosismo, deriva de foco) son consecuencias. Esta página compara los mismos objetivos en ese subespacio, con cuatro índices estéticos cuya fórmula se imprime junto al resultado.</p>
   <p id="count"></p>
 </header>
 
@@ -220,7 +220,7 @@ footer{border-top:1px solid var(--hair);margin-top:44px;padding-top:16px;font-fa
   <h2>Método y límites</h2>
   <p><b>Procedencia.</b> Los siete ejes se toman tal cual de los índices ordinales de la <a href="caracter-optico-leica-m.html">carta completa</a>: escala 0 a 100 construida a partir de curvas MTF publicadas, secciones de diseño y coincidencia sostenida entre observadores, salvo el viñeteo, que va en EV y se normaliza al rango del catálogo para entrar en los índices. No son medidas de laboratorio.</p>
   <p><b>Qué se ha quitado y por qué.</b> Cremosidad, glow, nerviosismo y deriva de foco son funciones de la esfericidad y salen del espacio como generadores. Resolución central y de borde apenas predicen el carácter del desenfoque. Curvatura, distorsión, coma y cromatismo lateral afectan a la geometría y a los bordes extremos más que al rendering a los tamaños de visión habituales; quedan en la carta completa para quien los necesite.</p>
-  <p><b>Los tres índices</b> son combinaciones lineales declaradas, impresas junto al resultado. Son una convención razonable derivada de la física del disco y de las curvas, no un juicio validado con observadores: la misma cautela que la métrica de la carta completa.</p>
+  <p><b>Los índices</b> son combinaciones lineales declaradas de los ejes, más la pupila de entrada en el caso del onírico, impresas junto al resultado. Son una convención razonable derivada de la física del disco y de las curvas, no un juicio validado con observadores: la misma cautela que la métrica de la carta completa.</p>
   <p><b>Par enfrentado y vecinos.</b> La descomposición del par reparte d² por generador, igual que un frente de onda en coeficientes. El disco se reconstruye con el mismo modelo de la carta completa, r(ρ) = aρ + bρ³ más cromatismo por canal, recorte de pupila calibrado en transmitancia, rizado asférico y pedestal de velo, a radio constante: compara estructura, no cantidad de desenfoque. La tabla de vecinos ordena el catálogo por la misma distancia; con el filtro de otro fabricante responde a qué objetivo de otra marca ocupa el lugar de la referencia.</p>
   <p><b>La fila del Q3 43</b> se mantiene como referencia no montable, con anillo hueco en el mapa; puede ser referencia de vecinos pero no candidata.</p>
 </section>
@@ -403,7 +403,14 @@ const IDX = [
    formula:"0,55·S′ + 0,25·(100−rizado) + 0,20·(100−LoCA), con S′ = (100−SA)/2"},
   {k:"eleg",  label:"Elegancia",
    f:L => 0.25*Math.max(0,100-1.8*Math.abs(L.micro-62)) + 0.25*(100-L.loca) + 0.20*sPrime(L) + 0.15*(100-L.onion) + 0.15*(100-L.mech),
-   formula:"0,25·Eμ + 0,25·(100−LoCA) + 0,20·S′ + 0,15·(100−rizado) + 0,15·(100−recorte), con Eμ = max(0, 100 − 1,8·|micro−62|)"}
+   formula:"0,25·Eμ + 0,25·(100−LoCA) + 0,20·S′ + 0,15·(100−rizado) + 0,15·(100−recorte), con Eμ = max(0, 100 − 1,8·|micro−62|)"},
+  {k:"onir",  label:"Onírico",
+   f:L => {
+     const D = Math.max(0, Math.min(100, (Math.log2(L.focal/L.fmax) - 2) / 4 * 100));
+     const Sl = Math.max(0, 100 - 1.8*Math.max(0, Math.abs(L.sa+27) - 18));
+     return 0.25*Sl + 0.20*D + 0.20*(100-L.loca) + 0.15*(100-L.velo) + 0.10*L.vigN + 0.10*(100-L.onion);
+   },
+   formula:"0,25·Sλ + 0,20·D + 0,20·(100−LoCA) + 0,15·(100−velo) + 0,10·viñeteo + 0,10·(100−rizado); Sλ vale 100 con SA entre −45 y −9 y cae 1,8 puntos por unidad fuera; D es la pupila de entrada focal/f en escala logarítmica de 4 a 64 mm"}
 ];
 LENSES.forEach(L=>{ IDX.forEach(d=>{ L[d.k]=d.f(L); }); });
 
