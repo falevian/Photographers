@@ -211,7 +211,7 @@ footer{border-top:1px solid var(--hair);margin-top:44px;padding-top:16px;font-fa
 
 <section id="mapa">
   <h2>Mapa</h2>
-  <p class="lead">Cada punto es un objetivo, coloreado por marca; los seleccionados llevan anillo. Los ejes admiten los siete generadores y los tres índices. Con esfericidad frente a microcontraste se dibuja sola la frontera entre el diseño clásico y el asférico.</p>
+  <p class="lead">Cada punto es un objetivo, coloreado por marca; los seleccionados llevan anillo y se dibujan siempre. El mapa obedece los filtros de marca y focal de la sección anterior y reescala sus ejes al subconjunto visible. Los ejes admiten los siete generadores y los tres índices. Con esfericidad frente a microcontraste se dibuja sola la frontera entre el diseño clásico y el asférico.</p>
   <div class="mapctl">
     <label>eje X <select id="mx"></select></label>
     <label>eje Y <select id="my"></select></label>
@@ -469,12 +469,13 @@ function paintBrandChips(){
     c.style.borderColor = on ? bcol(c.dataset.b) : "";
   });
 }
+function baseFilter(L){
+  const f=$("#fFocal").value;
+  return (!brandSel.size || brandSel.has(L.brand)) && (!f || L.focal===parseFloat(f));
+}
 function visible(){
-  const q=$("#fText").value.trim().toLowerCase(), f=$("#fFocal").value;
-  return LENSES.filter(L=>
-    (!q || L.name.toLowerCase().includes(q)) &&
-    (!brandSel.size || brandSel.has(L.brand)) &&
-    (!f || L.focal===parseFloat(f)));
+  const q=$("#fText").value.trim().toLowerCase();
+  return LENSES.filter(L=> baseFilter(L) && (!q || L.name.toLowerCase().includes(q)));
 }
 function renderList(){
   const V=visible();
@@ -749,7 +750,12 @@ function drawMap(){
   g.clearRect(0,0,W,H);
   const xk=$("#mx").value, yk=$("#my").value;
   const qx=QTY.find(q=>q.k===xk), qy=QTY.find(q=>q.k===yk);
-  const xs=LENSES.map(L=>L[xk]), ys=LENSES.map(L=>L[yk]);
+  const drawn=new Set(LENSES.filter(baseFilter).map(L=>L.i));
+  sel.forEach(i=>drawn.add(i));
+  const DR=LENSES.filter(L=>drawn.has(L.i));
+  cv._map=null;
+  if(!DR.length){ $("#mapCap").textContent="Ningún objetivo cumple los filtros."; return; }
+  const xs=DR.map(L=>L[xk]), ys=DR.map(L=>L[yk]);
   let x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
   const px=(x1-x0)*0.06||1, py=(y1-y0)*0.06||1; x0-=px;x1+=px;y0-=py;y1+=py;
   const ml=52,mr=14,mt=12,mb=34;
@@ -765,18 +771,18 @@ function drawMap(){
   if(xk==="sa"&&x0<0&&x1>0){g.strokeStyle=cMut;g.beginPath();g.moveTo(X(0),mt);g.lineTo(X(0),H-mb);g.stroke();}
   g.fillStyle=cMut; g.textAlign="center"; g.fillText(qx.label,ml+(W-ml-mr)/2,H-6);
   g.save(); g.translate(12,mt+(H-mt-mb)/2); g.rotate(-Math.PI/2); g.fillText(qy.label,0,0); g.restore();
-  LENSES.forEach(L=>{
+  DR.forEach(L=>{
     const x=X(L[xk]),y=Y(L[yk]);
     g.beginPath(); g.arc(x,y,3.4,0,7);
     if(L.ref){ g.strokeStyle=bcol(L.brand); g.stroke(); }
     else { g.fillStyle=bcol(L.brand); g.globalAlpha=0.85; g.fill(); g.globalAlpha=1; }
   });
   sel.forEach((i,k)=>{const L=LENSES[i];g.beginPath();g.arc(X(L[xk]),Y(L[yk]),6.5,0,7);g.strokeStyle=SLOT[k];g.lineWidth=2;g.stroke();g.lineWidth=1;});
-  if(hover>=0){const L=LENSES[hover];g.beginPath();g.arc(X(L[xk]),Y(L[yk]),5.5,0,7);g.strokeStyle=cInk;g.stroke();}
-  cv._map={X,Y,xk,yk};
-  const cap = hover>=0
+  if(hover>=0 && drawn.has(hover)){const L=LENSES[hover];g.beginPath();g.arc(X(L[xk]),Y(L[yk]),5.5,0,7);g.strokeStyle=cInk;g.stroke();}
+  cv._map={X,Y,xk,yk,DR};
+  const cap = (hover>=0 && drawn.has(hover))
     ? `${LENSES[hover].name}: ${qx.label} ${qx.fmt(LENSES[hover][xk])}, ${qy.label} ${qy.fmt(LENSES[hover][yk])}`
-    : "Pase por un punto para identificarlo; pulse para añadirlo a la comparación.";
+    : `${fmt(DR.length)} ${DR.length===1?"objetivo":"objetivos"} a la vista. Pase por un punto para identificarlo; pulse para añadirlo a la comparación.`;
   $("#mapCap").textContent=cap;
 }
 function nearPoint(ev){
@@ -784,7 +790,7 @@ function nearPoint(ev){
   if(!M) return -1;
   const mx=ev.clientX-r.left, my=ev.clientY-r.top;
   let best=-1,bd=12*12;
-  LENSES.forEach(L=>{const dx=M.X(L[M.xk])-mx,dy=M.Y(L[M.yk])-my,d=dx*dx+dy*dy;if(d<bd){bd=d;best=L.i;}});
+  M.DR.forEach(L=>{const dx=M.X(L[M.xk])-mx,dy=M.Y(L[M.yk])-my,d=dx*dx+dy*dy;if(d<bd){bd=d;best=L.i;}});
   return best;
 }
 
@@ -805,15 +811,15 @@ function boot(){
   });
   ["input","change"].forEach(e=>{
     $("#fText").addEventListener(e,renderList);
-    $("#fFocal").addEventListener(e,renderList);
+    $("#fFocal").addEventListener(e,()=>{renderList();drawMap();});
   });
   $("#fBrand").addEventListener("click",ev=>{
     const c=ev.target.closest(".bchip"); if(!c) return;
     const b=c.dataset.b;
     if(brandSel.has(b)) brandSel.delete(b); else brandSel.add(b);
-    paintBrandChips(); renderList();
+    paintBrandChips(); renderList(); drawMap();
   });
-  $("#fReset").addEventListener("click",()=>{$("#fText").value="";$("#fFocal").value="";brandSel.clear();paintBrandChips();renderList();});
+  $("#fReset").addEventListener("click",()=>{$("#fText").value="";$("#fFocal").value="";brandSel.clear();paintBrandChips();renderList();drawMap();});
   $("#list").addEventListener("click",ev=>{
     const b=ev.target.closest("[data-i]"); if(!b) return;
     toggle(parseInt(b.dataset.i,10));
