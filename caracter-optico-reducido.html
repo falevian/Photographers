@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="Rafael Vida">
+<meta name="description" content="Carta reducida de rendering para montura Leica M: siete ejes causales, tres índices declarados y una distancia sobre ellos. Todo el cálculo ocurre en el navegador.">
+<meta name="theme-color" content="#04060a">
+<title>Carta reducida de rendering · montura Leica M</title>
+<style>
+:root{
+  --bg:#05070b; --panel:#0c1119; --panel2:#101724; --hair:#1d2635;
+  --ink:#e9e5da; --muted:#949dad; --gold:#E8B33C;
+  --serif:Charter,"Bitstream Charter","Iowan Old Style",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--serif)}
+a{color:var(--gold);text-decoration:none}
+a:hover,a:focus-visible{text-decoration:underline}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.wrap{max-width:1020px;margin:0 auto;padding:0 20px 64px}
+header.top{padding:44px 0 8px}
+header.top .kicker{font-family:var(--sans);font-size:13px;color:var(--muted)}
+h1{font-size:clamp(28px,4.4vw,40px);line-height:1.12;margin:10px 0 14px;font-weight:600}
+h1 em{font-style:normal;color:var(--gold)}
+.thesis{max-width:64ch;color:var(--ink)}
+#count{font-family:var(--sans);font-size:13px;color:var(--muted);margin-top:10px}
+h2{font-size:21px;margin:44px 0 6px;font-weight:600}
+h2+.lead{margin:0 0 16px;color:var(--muted);max-width:70ch}
+section{border-top:1px solid var(--hair);margin-top:34px}
+
+/* legend of axes */
+.axes-legend{display:grid;grid-template-columns:1fr;gap:0;font-family:var(--sans);font-size:14px}
+.axes-legend .lrow{display:grid;grid-template-columns:190px 1fr;gap:14px;padding:9px 0;border-bottom:1px solid var(--hair)}
+.axes-legend .lrow:last-child{border-bottom:0}
+.axes-legend b{font-weight:600}
+.axes-legend .cause{color:var(--muted)}
+
+/* filters + list */
+.filters{display:flex;flex-wrap:wrap;gap:10px;font-family:var(--sans);font-size:14px;margin-bottom:12px}
+.filters input[type=text],.filters select{background:var(--panel);color:var(--ink);border:1px solid var(--hair);border-radius:6px;padding:7px 10px;font:inherit}
+.filters input[type=text]{flex:1;min-width:180px}
+.filters button{background:none;border:0;color:var(--muted);font:inherit;cursor:pointer;padding:7px 4px}
+.filters button:hover{color:var(--ink)}
+#listCount{font-family:var(--sans);font-size:13px;color:var(--muted);margin:0 0 6px}
+#list{max-height:310px;overflow:auto;border:1px solid var(--hair);border-radius:8px;background:var(--panel);font-family:var(--sans);font-size:14px}
+#list .row{display:flex;align-items:center;gap:10px;padding:6px 10px;border-bottom:1px solid var(--hair)}
+#list .row:last-child{border-bottom:0}
+#list .row.on{background:var(--panel2)}
+#list .pick{width:26px;height:26px;flex:0 0 26px;border-radius:6px;border:1px solid var(--hair);background:var(--panel2);color:var(--ink);font:16px/1 var(--sans);cursor:pointer}
+#list .row.on .pick{border-color:var(--gold);color:var(--gold)}
+#list .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#list .meta,.meta{color:var(--muted);font-size:12.5px}
+.dot{width:9px;height:9px;border-radius:50%;flex:0 0 9px}
+.selbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0 4px;min-height:34px}
+.chip{display:inline-flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--hair);border-radius:999px;color:var(--ink);font:13px var(--sans);padding:5px 10px;cursor:pointer}
+.chip .x{color:var(--muted)}
+.chip:hover .x{color:var(--ink)}
+.sw{display:inline-block;width:9px;height:9px;border-radius:50%}
+#clearBtn{background:none;border:0;color:var(--muted);font:13px var(--sans);cursor:pointer}
+#clearBtn:hover{color:var(--ink)}
+
+/* profiles */
+#profiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:14px}
+.card{background:var(--panel);border:1px solid var(--hair);border-top:3px solid var(--gold);border-radius:10px;padding:14px 16px 12px}
+.card h3{font-size:16.5px;margin:0 0 2px;font-weight:600}
+.card .sub{font-family:var(--sans);font-size:12.5px;color:var(--muted);margin:0 0 12px}
+.ax,.ix{display:grid;grid-template-columns:1fr;gap:2px;margin-bottom:9px;font-family:var(--sans)}
+.al,.il{font-size:12.5px;color:var(--muted)}
+.il{color:var(--ink)}
+.av{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.track{position:relative;height:7px;background:var(--panel2);border-radius:4px;overflow:hidden}
+.track .fill{position:absolute;top:0;height:100%;border-radius:4px}
+.track.sat .zero{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--muted)}
+.idx{border-top:1px solid var(--hair);padding-top:11px;margin-top:4px}
+.card .nota{font-size:13.5px;line-height:1.5;color:var(--muted);margin:8px 0 0}
+#formulas{font-family:var(--sans);font-size:12.5px;color:var(--muted);margin-top:16px;line-height:1.8}
+#formulas .fl{color:var(--ink)}
+#pairs{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:14px;font-family:var(--sans);font-size:13.5px}
+.pair .sw{margin-right:2px}
+.empty{color:var(--muted);font-family:var(--sans);font-size:14px;padding:18px 4px}
+
+/* pair */
+#pairBox h2{margin-top:38px}
+.pairhead{font-family:var(--sans);font-size:14.5px;margin:6px 0 14px}
+.pairhead .sw{margin-right:3px}
+#decomp{max-width:760px}
+.drow{display:grid;grid-template-columns:172px 74px 1fr 74px 44px;gap:10px;align-items:center;padding:5px 0;font-family:var(--sans);font-size:13px}
+.drow .dl{color:var(--muted)}
+.drow .dv{font-variant-numeric:tabular-nums;text-align:right}
+.drow .dv:last-of-type{text-align:left}
+.drow .ds{color:var(--muted);font-variant-numeric:tabular-nums;text-align:right}
+#discs{display:flex;flex-direction:column;gap:12px;margin-top:18px}
+.discrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.discname{font-family:var(--sans);font-size:13.5px;border-left:3px solid var(--gold);padding-left:10px;min-width:210px;flex:1}
+.discrow figure{margin:0;text-align:center}
+.discrow figcaption{font-family:var(--sans);font-size:12px;color:var(--muted);margin-top:4px}
+canvas.disc{background:#000;border:1px solid var(--hair);border-radius:8px;display:block}
+
+/* neighbours */
+.chk{cursor:pointer}
+.chk input{accent-color:var(--gold)}
+.nbt{border:1px solid var(--hair);border-radius:8px;background:var(--panel);font-family:var(--sans);font-size:14px}
+.nbrow{display:flex;align-items:center;gap:10px;padding:6px 10px;border-bottom:1px solid var(--hair)}
+.nbrow:last-child{border-bottom:0}
+.nbrank{width:18px;color:var(--muted);font-size:12.5px;text-align:right;font-variant-numeric:tabular-nums}
+.nbrow .pick{width:26px;height:26px;flex:0 0 26px;border-radius:6px;border:1px solid var(--hair);background:var(--panel2);color:var(--ink);font:16px/1 var(--sans);cursor:pointer}
+.nbrow .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nbd{font-variant-numeric:tabular-nums}
+@media (max-width:640px){
+  .drow{grid-template-columns:1fr 60px 60px;grid-template-areas:"l a b" "t t t";row-gap:2px}
+  .drow .dl{grid-area:l}.drow .track{grid-area:t}.drow .ds{display:none}
+  .drow .dv:nth-of-type(1){grid-area:a}.drow .dv:nth-of-type(2){grid-area:b;text-align:left}
+  .nbp{display:none}
+}
+
+/* map */
+.mapctl{display:flex;flex-wrap:wrap;gap:10px;font-family:var(--sans);font-size:14px;margin:4px 0 10px}
+.mapctl label{display:flex;align-items:center;gap:8px;color:var(--muted)}
+.mapctl select{background:var(--panel);color:var(--ink);border:1px solid var(--hair);border-radius:6px;padding:6px 9px;font:inherit}
+.mapwrap{border:1px solid var(--hair);border-radius:10px;background:var(--panel);padding:8px}
+#map{display:block;width:100%;cursor:crosshair}
+#mapCap{font-family:var(--sans);font-size:13px;color:var(--muted);margin-top:8px;min-height:1.4em}
+
+/* method */
+.method p{max-width:74ch;color:var(--muted);font-size:15px}
+.method b{color:var(--ink);font-weight:600}
+footer{border-top:1px solid var(--hair);margin-top:44px;padding-top:16px;font-family:var(--sans);font-size:13px;color:var(--muted)}
+
+@media (max-width:640px){
+  .axes-legend .lrow{grid-template-columns:1fr;gap:2px}
+  header.top{padding-top:30px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .track .fill{transition:width .25s ease}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div class="kicker"><a href="index.html">Photographers</a> / <a href="caracter-optico-leica-m.html">carta completa</a> / carta reducida</div>
+  <h1>Siete ejes bastan<br>para el <em>rendering</em></h1>
+  <p class="thesis">La carta completa maneja 32 descriptores y once generadores. Para lo que un objetivo hace con la imagen sobran la mayoría: el carácter visible queda determinado por siete causas casi independientes, y lo demás (cremosidad, glow, nerviosismo, deriva de foco) son consecuencias. Esta página compara los mismos objetivos en ese subespacio, con tres índices estéticos cuya fórmula se imprime junto al resultado.</p>
+  <p id="count"></p>
+</header>
+
+<section id="ejes">
+  <h2>Los siete ejes</h2>
+  <p class="lead">Cada eje es una aberración residual con efecto visual propio. La dirección deseable depende de lo que quiera la foto, no del eje.</p>
+  <div class="axes-legend">
+    <div class="lrow"><b>Esfericidad residual (SA)</b><span class="cause">Con signo: negativa subcorregida, positiva sobrecorregida. Gobierna el perfil del disco de desenfoque, del núcleo cremoso al anillo nervioso, el glow y la deriva de foco. El fondo y el primer plano reciben el efecto con signo opuesto.</span></div>
+    <div class="lrow"><b>Cromatismo longitudinal</b><span class="cause">Ribetes magenta delante y verdes detrás del plano de foco. Ensucia la transición donde el sujeto se separa del fondo: es el principal enemigo del pop.</span></div>
+    <div class="lrow"><b>Microcontraste</b><span class="cause">Contraste a 40 pl/mm. Alto produce textura clínica; moderado, dibujo amable. El relieve no vive aquí sino en las frecuencias bajas.</span></div>
+    <div class="lrow"><b>Velo</b><span class="cause">Luz dispersada por reflexiones internas que eleva el nivel de negro y comprime la curva tonal. Depende sobre todo de los recubrimientos.</span></div>
+    <div class="lrow"><b>Viñeteo</b><span class="cause">Caída total de iluminación a plena apertura, en EV. Jerarquía luminosa: concentra la mirada en el centro.</span></div>
+    <div class="lrow"><b>Recorte de pupila</b><span class="cause">Viñeteo mecánico fuera del eje: discos en ojo de gato y, cuando es intenso, remolino en las esquinas.</span></div>
+    <div class="lrow"><b>Rizado asférico</b><span class="cause">Ondulaciones del mecanizado de las superficies asféricas impresas como anillos concéntricos en los discos de desenfoque.</span></div>
+  </div>
+</section>
+
+<section id="comparar">
+  <h2>Selección y perfiles</h2>
+  <p class="lead">Hasta cuatro objetivos. Las barras usan los mismos índices ordinales de la carta completa; la distancia entre perfiles es euclídea sobre los siete ejes normalizados por su dispersión en el catálogo.</p>
+  <div class="filters">
+    <input id="fText" type="text" placeholder="buscar por nombre" aria-label="Buscar por nombre">
+    <select id="fBrand" aria-label="Filtrar por marca"></select>
+    <select id="fFocal" aria-label="Filtrar por focal"></select>
+    <button id="fReset" type="button">restablecer</button>
+  </div>
+  <p id="listCount"></p>
+  <div id="list" aria-label="Catálogo de objetivos"></div>
+  <div class="selbar"><span id="chips"></span><button id="clearBtn" type="button" hidden>vaciar selección</button></div>
+  <div id="profiles"></div>
+  <div id="pairs"></div>
+  <div id="formulas"></div>
+
+  <div id="pairBox" hidden>
+    <h2>Par enfrentado</h2>
+    <p class="lead">La distancia del par, descompuesta eje a eje: cada barra es la fracción de d² que aporta ese eje, con los valores de ambos objetivos a los lados. Debajo, el disco de desenfoque reconstruido con el mismo modelo de la carta completa: plena apertura, lado del fondo, en el centro y al 75 % del campo, a radio constante para comparar estructura.</p>
+    <div class="mapctl">
+      <label>A <select id="pairA"></select></label>
+      <label>B <select id="pairB"></select></label>
+    </div>
+    <p id="pairHead" class="pairhead"></p>
+    <div id="decomp"></div>
+    <div id="discs"></div>
+  </div>
+</section>
+
+<section id="vecinos">
+  <h2>Vecinos</h2>
+  <p class="lead">Los diez objetivos más próximos a la referencia en el subespacio de siete ejes. El botón + los añade a la comparación.</p>
+  <div class="mapctl">
+    <label>referencia <select id="nbRef"></select></label>
+    <label class="chk"><input type="checkbox" id="nbOther"> solo otros fabricantes</label>
+    <label class="chk"><input type="checkbox" id="nbFocal"> la misma focal</label>
+  </div>
+  <div id="nbOut"></div>
+</section>
+
+<section id="mapa">
+  <h2>Mapa</h2>
+  <p class="lead">Cada punto es un objetivo, coloreado por marca; los seleccionados llevan anillo. Los ejes admiten los siete generadores y los tres índices. Con esfericidad frente a microcontraste se dibuja sola la frontera entre el diseño clásico y el asférico.</p>
+  <div class="mapctl">
+    <label>eje X <select id="mx"></select></label>
+    <label>eje Y <select id="my"></select></label>
+  </div>
+  <div class="mapwrap"><canvas id="map" height="420"></canvas></div>
+  <p id="mapCap"></p>
+</section>
+
+<section id="metodo" class="method">
+  <h2>Método y límites</h2>
+  <p><b>Procedencia.</b> Los siete ejes se toman tal cual de los índices ordinales de la <a href="caracter-optico-leica-m.html">carta completa</a>: escala 0 a 100 construida a partir de curvas MTF publicadas, secciones de diseño y coincidencia sostenida entre observadores, salvo el viñeteo, que va en EV y se normaliza al rango del catálogo para entrar en los índices. No son medidas de laboratorio.</p>
+  <p><b>Qué se ha quitado y por qué.</b> Cremosidad, glow, nerviosismo y deriva de foco son funciones de la esfericidad y salen del espacio como generadores. Resolución central y de borde apenas predicen el carácter del desenfoque. Curvatura, distorsión, coma y cromatismo lateral afectan a la geometría y a los bordes extremos más que al rendering a los tamaños de visión habituales; quedan en la carta completa para quien los necesite.</p>
+  <p><b>Los tres índices</b> son combinaciones lineales declaradas, impresas junto al resultado. Son una convención razonable derivada de la física del disco y de las curvas, no un juicio validado con observadores: la misma cautela que la métrica de la carta completa.</p>
+  <p><b>Par enfrentado y vecinos.</b> La descomposición del par reparte d² por generador, igual que un frente de onda en coeficientes. El disco se reconstruye con el mismo modelo de la carta completa, r(ρ) = aρ + bρ³ más cromatismo por canal, recorte de pupila calibrado en transmitancia, rizado asférico y pedestal de velo, a radio constante: compara estructura, no cantidad de desenfoque. La tabla de vecinos ordena el catálogo por la misma distancia; con el filtro de otro fabricante responde a qué objetivo de otra marca ocupa el lugar de la referencia.</p>
+  <p><b>La fila del Q3 43</b> se mantiene como referencia no montable, con anillo hueco en el mapa; puede ser referencia de vecinos pero no candidata.</p>
+</section>
+
+<footer>Cálculo íntegro en el navegador, sin dependencias externas. Los índices ordinales son interpretativos. <a href="caracter-optico-leica-m.html">Carta completa</a> · <a href="manual-caracter-optico.html">manual</a>.</footer>
+
+</div>
+<script>
+"use strict";
+/* Carta reducida de rendering, montura M.
+   Siete ejes causales y tres índices declarados.
+   Datos: mismos índices ordinales de la carta completa. */
+
+/* ==== 1. Datos ==== */
+const RAW = `
+Super-Angulon-M 21 f/4|Leica|21|4|1958|Biogon simétrico|9|4|0|10|0.4|39|300|mono|52|-18|22|58|54|60|48|32|38|30|0.05|-0.5|3.3|28|0|10|32|Simetría casi perfecta: distorsión mínima y caída de luz muy acusada. El contraste queda limitado por el tratamiento monocapa.
+Super-Angulon-M 21 f/3.4|Leica|21|3.4|1963|Biogon simétrico|8|4|0|10|0.4|48|310|mono|55|-12|18|50|66|74|63|28|32|26|0.04|-0.4|3.1|26|0|8|30|Referencia histórica de nitidez en gran angular simétrico. El bloque posterior invade el cuerpo y bloquea el fotómetro de varios modelos.
+Elmarit-M 21 f/2.8|Leica|21|2.8|1980|Retrofoco|8|6|0|8|0.7|60|290|multi|58|-15|20|42|70|76|62|30|38|34|0.09|-1.2|2.4|30|0|10|34|El retrofoco libera el espacio interior del cuerpo a cambio de más distorsión y curvatura que el Super-Angulon.
+Elmarit-M 21 f/2.8 ASPH|Leica|21|2.8|1997|Retrofoco asférico|9|7|1|8|0.7|55|300|multi|56|-8|14|34|80|85|74|22|26|24|0.05|-0.9|2.2|30|18|8|38|La superficie asférica corrige el astigmatismo de borde. El desenfoque sale algo más estructurado que en la versión esférica.
+Super-Elmar-M 21 f/3.4 ASPH|Leica|21|3.4|2011|Retrofoco asférico|8|7|1|10|0.7|46|280|multi+|58|-5|10|24|86|90|82|14|16|16|0.03|-0.7|2.0|24|20|5|40|Corrección casi plana en todo el campo y muy poco cromatismo lateral. Carácter deliberadamente neutro.
+Summilux-M 21 f/1.4 ASPH|Leica|21|1.4|2008|Retrofoco asférico|10|8|2|9|0.7|72|580|multi+|72|-18|22|30|82|86|74|26|22|30|0.07|-1.4|3.4|46|24|12|42|Apertura extrema en gran angular. El viñeteo mecánico recorta los discos en las esquinas y produce arrastre lateral.
+Elmarit-M 24 f/2.8 ASPH|Leica|24|2.8|1996|Retrofoco asférico|7|5|1|10|0.7|55|290|multi|58|-10|14|32|82|86|76|22|24|22|0.06|-1.0|2.1|28|18|8|38|Compacto y muy corregido. Rinde plano desde f/4 con poco cromatismo lateral para su ángulo.
+Summilux-M 24 f/1.4 ASPH|Leica|24|1.4|2008|Retrofoco asférico|10|8|2|9|0.7|72|500|multi+|74|-16|20|30|83|87|75|24|20|28|0.07|-1.3|3.2|44|24|12|42|Mismo planteamiento que el 21 f/1.4 con menos exigencia angular. Desenfoque amplio y pupila muy deformada fuera del eje.
+Super-Elmar-M 24 f/3.8 ASPH|Leica|24|3.8|2008|Retrofoco asférico|8|7|1|10|0.7|46|260|multi+|56|-6|10|24|85|89|81|15|17|17|0.03|-0.8|1.9|22|20|5|40|La opción sobria de 24 mm: pequeño, muy plano y con dominante cromática mínima.
+Hektor 2,8cm f/6.3|Leica|28|6.3|1935|Triplete|5|3|0|10|1.0|0|100|sin|44|-45|58|86|22|30|18|48|55|60|0.30|-1.8|2.6|40|0|22|55|Triplete sin tratar de la era de rosca. Velo generalizado, halo abundante y esquinas que nunca cierran. Rinde una imagen de bajo contraste característica.
+Summaron 28 f/5.6|Leica|28|5.6|1955|Doble Gauss|6|4|0|10|1.0|0|180|mono|50|-25|30|62|48|56|40|38|42|38|0.16|-1.0|2.3|32|0|14|38|Diseño simétrico compacto, contraste moderado y esquinas blandas hasta f/8. Tono cálido de los vidrios de la época.
+Elmarit 28 f/2.8 (1ª serie)|Leica|28|2.8|1965|Retrofoco|9|6|0|10|0.7|48|225|mono|56|-28|32|54|58|66|46|36|40|40|0.14|-1.5|2.5|34|0|16|36|Nueve elementos y bloque posterior profundo, incompatible con varios cuerpos digitales. Firma clásica de medio contraste.
+Elmarit-M 28 f/2.8 (4ª serie)|Leica|28|2.8|1993|Retrofoco|8|7|0|8|0.7|46|250|multi|58|-14|18|34|76|82|70|26|28|28|0.08|-1.3|2.2|30|0|10|36|La última versión esférica: contraste ya moderno sin el nervio del asférico posterior.
+Elmarit-M 28 f/2.8 ASPH|Leica|28|2.8|2006|Retrofoco asférico|8|6|1|10|0.7|39|180|multi+|56|-6|10|26|86|90|82|16|18|18|0.04|-1.1|1.8|24|18|6|40|Uno de los objetivos M más compactos con esta corrección. Neutro, plano y sin dominantes.
+Summicron-M 28 f/2 ASPH|Leica|28|2|2000|Retrofoco asférico|9|6|1|10|0.7|46|270|multi+|64|-10|14|28|85|89|79|20|20|22|0.05|-1.2|2.1|32|20|8|40|Equilibrio entre apertura y tamaño. Transiciones más suaves que en el 28 f/2.8 asférico por su esfericidad ligeramente subcorregida.
+Summicron-M 28 f/2 ASPH (2ª serie)|Leica|28|2|2016|Retrofoco asférico|9|6|1|10|0.7|46|240|multi+|64|-8|12|24|88|91|82|17|18|20|0.04|-1.1|2.0|32|20|6|41|Rediseño mecánico más corto con óptica revisada. Rinde algo más plano que la primera serie.
+Summilux-M 28 f/1.4 ASPH|Leica|28|1.4|2015|Retrofoco asférico|10|8|2|9|0.7|49|440|multi+|78|-20|22|26|85|89|78|22|18|26|0.06|-1.3|2.9|46|22|10|40|Gran angular luminoso con desenfoque inusualmente suave para su tipo. Fuerte deformación de pupila en las esquinas.
+Summaron-M 28 f/5.6 (reedición)|Leica|28|5.6|2016|Doble Gauss|6|4|0|8|1.0|34|165|multi|52|-18|22|38|66|72|58|30|32|32|0.13|-0.9|2.0|30|0|10|36|Reedición del trazado de 1955 con tratamiento moderno: mismo dibujo, bastante menos velo.
+Summaron 35 f/3.5|Leica|35|3.5|1949|Doble Gauss|6|4|0|10|0.65|0|150|mono|52|-30|36|64|46|54|38|36|40|34|0.15|-0.9|1.9|28|0|16|34|Contraste bajo y halo apreciable a plena apertura. Escala tonal comprimida en las luces, muy reconocible en blanco y negro.
+Summaron 35 f/2.8|Leica|35|2.8|1958|Doble Gauss|6|4|0|10|0.65|39|215|mono|54|-24|28|52|58|66|48|32|34|32|0.12|-0.8|1.8|30|0|14|34|Versión con vidrios de tierras raras: sube el contraste sin perder la suavidad del dibujo original.
+Summilux 35 f/1.4 (1ª serie)|Leica|35|1.4|1961|Doble Gauss|7|5|0|10|1.0|41|245|mono|84|-58|66|72|46|56|34|48|38|44|0.22|-1.0|2.6|46|0|48|26|El primer Summilux de 35 mm. Velo esférico dominante a f/1,4 que se cierra hacia f/2,8. Base del culto al Steel Rim.
+Summilux 35 f/1.4 pre-ASPH|Leica|35|1.4|1966|Doble Gauss|7|5|0|10|1.0|43|245|mono|86|-55|62|66|50|60|36|46|36|42|0.20|-1.0|2.5|46|0|45|26|Casi tres décadas en catálogo con el mismo trazado. Halo cálido a plena apertura y transición al desenfoque muy progresiva.
+Summilux-M 35 f/1.4 Aspherical|Leica|35|1.4|1990|Gauss asférico|9|5|2|10|1.0|46|300|multi|70|-22|24|34|84|88|74|24|22|24|0.07|-0.6|2.3|42|34|14|48|Dos asféricas pulidas a mano en serie muy corta. Salto de contraste sin precedentes en su momento, con rizado visible en los altos desenfocados.
+Summilux-M 35 f/1.4 ASPH|Leica|35|1.4|1994|Gauss asférico|9|5|1|10|0.7|46|250|multi|62|18|16|32|86|89|76|22|20|22|0.09|-0.6|2.4|42|30|18|62|La versión que dividió opiniones: contraste alto y desenfoque estructurado por esfericidad ligeramente sobrecorregida.
+Summilux-M 35 f/1.4 ASPH FLE|Leica|35|1.4|2010|Gauss asférico|9|5|1|9|0.7|46|320|multi+|72|-6|12|26|90|93|84|16|16|18|0.04|-0.5|2.2|42|26|6|46|El elemento flotante corrige la caída a corta distancia y elimina casi por completo la deriva de foco. Referencia moderna del formato.
+Summilux-M 35 f/1.4 ASPH FLE II|Leica|35|1.4|2022|Gauss asférico|10|5|1|11|0.4|39|310|multi+|76|-6|12|22|91|94|86|13|14|16|0.03|-0.5|2.1|42|22|5|42|Enfoque hasta 0,40 m y once palas. Discos más redondos al diafragmar y transición ligeramente más suave que el FLE original.
+Summicron 35 f/2 (ocho elementos)|Leica|35|2|1958|Doble Gauss|8|6|0|10|0.65|39|205|mono|76|-38|42|56|62|70|52|36|30|32|0.13|-0.7|2.0|34|0|26|28|Ocho elementos para una apertura modesta. Reputación construida sobre la gradación tonal y un desenfoque sin bordes marcados.
+Summicron 35 f/2 (seis elementos)|Leica|35|2|1969|Doble Gauss|6|4|0|10|0.65|39|160|multi|78|-30|34|44|70|76|58|32|28|30|0.12|-0.7|1.9|34|0|22|26|Simplificación de Mandler: menos superficies, más contraste y el dibujo suave que caracteriza a toda la serie esférica.
+Summicron-M 35 f/2 (4ª serie)|Leica|35|2|1979|Doble Gauss|6|4|0|8|0.7|39|160|multi|90|-26|28|38|74|80|62|30|26|28|0.11|-0.7|1.8|34|0|18|22|Conocido por la calidad del desenfoque. La subcorrección residual mantiene el núcleo del disco brillante y el borde desvanecido.
+Summicron-M 35 f/2 ASPH|Leica|35|2|1996|Gauss asférico|7|5|1|8|0.7|39|255|multi+|58|22|12|26|90|93|84|17|17|18|0.05|-0.5|1.7|32|28|10|64|Muy plano y de contraste alto. La sobrecorrección esférica produce contornos definidos en los altos desenfocados.
+APO-Summicron-M 35 f/2 ASPH|Leica|35|2|2021|Apocromático asférico|10|5|2|11|0.3|39|350|multi+|68|-4|8|18|96|97|92|8|9|12|0.02|-0.4|1.6|32|20|4|44|Corrección apocromática con enfoque a 0,30 m. Prácticamente sin cromatismo longitudinal, con desenfoque limpio y sin dominante de color.
+Summarit-M 35 f/2.5|Leica|35|2.5|2007|Doble Gauss|6|4|0|8|0.8|39|220|multi+|58|-8|12|26|84|88|78|20|20|20|0.06|-0.6|1.5|26|0|8|40|Serie económica con corrección moderna y apertura contenida. Neutro y sin rasgos marcados.
+Summarit-M 35 f/2.4 ASPH|Leica|35|2.4|2011|Gauss asférico|6|4|1|8|0.8|39|200|multi+|58|-6|10|24|86|89|80|18|18|19|0.05|-0.5|1.5|26|16|7|42|Actualización del Summarit con una asférica. Rendimiento cercano al Summicron asférico a menor coste.
+Noctilux-M 35 f/1.2 ASPH|Leica|35|1.2|2026|Gauss asférico PGM|10|5|3|11|0.5|49|415|multi+|84|-12|16|18|92|95|86|10|12|18|0.03|-0.6|2.6|48|10|4|38|Tres asféricas por moldeo de precisión y elemento flotante. Combina control apocromático del cromatismo con la transición amplia propia de la serie Noctilux.
+Elmar 50 f/3.5|Leica|50|3.5|1930|Tessar|4|3|0|15|1.0|0|110|sin|60|-35|44|78|34|46|30|38|30|24|0.10|0.2|1.6|20|0|18|30|Cuatro elementos, tres grupos, sin tratar. Poco velo lateral por su escaso número de superficies, pero brillo general elevado en contraluz.
+Summar 50 f/2|Leica|50|2|1933|Doble Gauss|6|4|0|10|1.0|0|170|sin|80|-78|82|92|28|40|18|58|44|56|0.34|0.4|2.4|66|0|58|30|El caso extremo del carácter clásico: esfericidad muy subcorregida, remolino en las esquinas por viñeteo mecánico y velo abundante. Frente blando propenso al rayado.
+Xenon 50 f/1.5|Leica|50|1.5|1936|Doble Gauss|7|5|0|10|1.0|0|350|sin|84|-80|84|90|30|44|22|56|40|52|0.30|0.4|2.7|62|0|56|28|Diseño de Schneider bajo licencia Taylor Hobson. Halo intenso a plena apertura que se disuelve al cerrar dos pasos.
+Summarit 50 f/1.5|Leica|50|1.5|1949|Doble Gauss|7|5|0|10|1.0|41|320|mono|86|-82|86|84|34|48|24|54|38|50|0.28|0.4|2.6|60|0|54|26|Xenon con tratamiento. Mismo velo esférico con algo menos de dispersión interna. Muy buscado por el halo en las luces especulares.
+Summicron 50 f/2 (colapsable)|Leica|50|2|1953|Doble Gauss|7|6|0|10|1.0|39|220|mono|76|-38|40|54|58|68|48|40|30|32|0.14|0.3|1.9|38|0|26|26|Primer Summicron, con vidrio de tierras raras. Contraste medio y gradación amplia en las luces.
+Summicron 50 f/2 rígido y DR|Leica|50|2|1956|Doble Gauss|7|6|0|10|0.9|39|285|mono|80|-32|34|46|66|76|58|36|28|30|0.12|0.3|1.8|36|0|22|24|El rígido y su versión de enfoque próximo. Micro contraste alto para su época con un desenfoque muy ordenado.
+Summicron-M 50 f/2 (3ª serie)|Leica|50|2|1969|Doble Gauss|6|4|0|10|0.7|39|200|multi|76|-24|26|38|76|84|66|32|24|26|0.10|0.3|1.7|34|0|16|26|Reducción a seis elementos con vidrios nuevos. Base de todos los Summicron de 50 posteriores.
+Summicron-M 50 f/2 (4ª serie)|Leica|50|2|1979|Doble Gauss|6|4|0|8|0.7|39|195|multi|78|-20|22|32|80|87|70|30|22|24|0.09|0.3|1.7|34|0|14|26|El estándar de referencia durante décadas. Neutro, con ligera subcorrección que suaviza los fondos.
+Summicron-M 50 f/2 (5ª serie)|Leica|50|2|1994|Doble Gauss|6|4|0|8|0.7|39|240|multi+|76|-16|18|26|84|90|76|26|20|22|0.08|0.3|1.6|34|0|12|28|Tratamientos actualizados y montura revisada sobre el mismo trazado. Más contraste en contraluz.
+APO-Summicron-M 50 f/2 ASPH|Leica|50|2|2012|Apocromático asférico|8|5|1|11|0.7|39|300|multi+|62|-3|6|16|97|98|93|6|8|10|0.02|0.2|1.5|32|18|3|46|Corrección apocromática completa. Resolución y microcontraste máximos del catálogo M, con desenfoque limpio y neutro más que cremoso.
+Summilux 50 f/1.4 (1ª serie)|Leica|50|1.4|1959|Doble Gauss|7|5|0|10|1.0|43|290|mono|84|-62|68|70|48|58|38|48|34|42|0.22|0.4|2.5|52|0|50|26|Primera generación, muy próxima al Summarit en carácter. Velo esférico marcado y bokeh amplio.
+Summilux 50 f/1.4 pre-ASPH E43|Leica|50|1.4|1961|Doble Gauss|7|5|0|10|1.0|43|275|mono|88|-55|60|62|54|64|42|44|32|38|0.20|0.4|2.4|52|0|46|24|El trazado de Mandler que definió el aspecto del 50 luminoso durante treinta años. Transición al desenfoque sin discontinuidades.
+Summilux-M 50 f/1.4 pre-ASPH E46|Leica|50|1.4|1992|Doble Gauss|7|5|0|10|0.7|46|275|multi|88|-52|56|52|58|68|46|42|30|36|0.18|0.4|2.3|52|0|44|24|Última serie esférica, con tratamiento moderno. Mismo dibujo con menos velo en contraluz.
+Summilux-M 50 f/1.4 ASPH|Leica|50|1.4|2004|Gauss asférico|8|5|1|9|0.7|46|335|multi+|70|8|14|24|89|93|82|20|16|18|0.05|0.3|2.2|44|24|10|56|Corrección alta manteniendo cierta firma. La leve sobrecorrección da contornos definidos en los altos a distancias medias.
+Summilux-M 50 f/1.4 Classic|Leica|50|1.4|2025|Doble Gauss|7|5|0|10|0.7|46|280|multi+|88|-50|54|46|60|70|48|40|28|34|0.17|0.4|2.3|52|0|42|24|Reedición del trazado pre-asférico con tratamiento actual. Devuelve el velo esférico de la serie E43 con menos dispersión interna.
+Noctilux 50 f/1.2 ASPH (1966)|Leica|50|1.2|1966|Gauss asférico|6|4|2|10|1.0|48|500|mono|92|-52|58|62|52|62|38|48|34|46|0.24|0.5|2.9|68|42|38|30|Las primeras asféricas de serie de Leica, pulidas a mano. Rendimiento irregular y desenfoque de una amplitud que ningún otro 50 igualaba.
+Noctilux-M 50 f/1.2 ASPH (reedición)|Leica|50|1.2|2021|Gauss asférico|6|4|2|11|0.8|49|470|multi+|92|-44|48|38|62|72|48|36|26|38|0.20|0.5|2.8|66|30|30|28|Reproducción del trazado de 1966 con tratamiento moderno. Conserva el velo y el remolino y añade contraste base.
+Noctilux-M 50 f/1|Leica|50|1|1976|Doble Gauss|7|6|0|11|1.0|60|630|multi|96|-46|52|48|60|70|44|42|28|40|0.22|0.5|3.1|72|0|32|22|Sin asféricas y con vidrios de índice muy alto. Plano focal estrechísimo y la transición más progresiva de todo el catálogo.
+Noctilux-M 50 f/0.95 ASPH|Leica|50|0.95|2008|Gauss asférico|8|5|2|11|1.0|60|700|multi+|88|-22|26|24|82|88|68|28|18|30|0.10|0.5|3.0|70|26|12|40|Corrección muy superior al f/1 con la misma profundidad de campo mínima. Discos ligeramente perfilados y viñeteo mecánico severo fuera del eje.
+Elmar-M 50 f/2.8|Leica|50|2.8|1994|Tessar|4|3|0|10|0.7|39|205|multi+|64|-14|16|26|82|88|76|24|20|18|0.07|0.3|1.3|22|0|10|30|Tessar moderno, colapsable y de solo cuatro elementos. Contraste alto por el escaso número de superficies.
+Summarit-M 50 f/2.5|Leica|50|2.5|2007|Doble Gauss|6|4|0|8|0.8|39|230|multi+|62|-10|12|24|85|90|80|22|18|18|0.06|0.3|1.3|24|0|8|34|Alternativa contenida al Summicron. Neutro, plano y sin carácter marcado.
+Summarit-M 50 f/2.4|Leica|50|2.4|2011|Doble Gauss|6|4|0|8|0.8|46|220|multi+|62|-8|10|22|86|91|81|20|17|17|0.05|0.3|1.3|24|0|7|34|Revisión menor de la serie Summarit con montura más larga y misma sobriedad óptica.
+Tri-Elmar-M 28-35-50 f/4 ASPH|Leica|28|4|1998|Zoom escalonado asférico|8|6|1|8|1.0|55|340|multi+|56|-8|12|30|82|86|74|22|22|24|0.08|-1.0|2.0|28|18|8|38|Tres focales fijas en un solo barril. Corrección homogénea y firma óptica deliberadamente uniforme entre posiciones.
+Tri-Elmar-M 16-18-21 f/4 ASPH|Leica|18|4|2006|Zoom escalonado asférico|10|7|2|10|0.5|67|335|multi+|54|-6|10|26|84|88|76|18|20|20|0.04|-1.6|3.0|30|20|6|40|Ultra gran angular de tres posiciones. Distorsión bien contenida para su ángulo y caída de luz muy visible sin filtro corrector.
+Summilux-M 75 f/1.4|Leica|75|1.4|1980|Doble Gauss|7|5|0|10|0.75|60|560|multi|94|-42|46|46|66|76|52|40|22|30|0.14|0.3|2.2|58|0|30|22|Plano focal muy fino y desenfoque de gran amplitud. Corrección modesta a plena apertura que se resuelve en f/2,8.
+APO-Summicron-M 75 f/2 ASPH|Leica|75|2|2005|Apocromático asférico|7|5|1|9|0.7|49|430|multi+|72|-4|8|18|95|97|91|7|10|12|0.03|0.2|1.6|38|18|4|44|Corrección apocromática con enfoque útil a 0,70 m. Separa el sujeto sin residuo cromático en los contornos.
+Noctilux-M 75 f/1.25 ASPH|Leica|75|1.25|2017|Gauss asférico|9|6|1|11|0.85|67|1055|multi+|95|-18|22|20|86|91|76|20|14|24|0.07|0.3|2.4|64|22|8|36|Máxima separación de planos del catálogo. Corrección alta y transición extraordinariamente progresiva pese al control asférico.
+Summarit-M 75 f/2.4|Leica|75|2.4|2011|Doble Gauss|6|4|0|8|0.9|46|345|multi+|68|-8|10|20|88|92|84|18|16|16|0.05|0.2|1.2|30|0|6|32|Teleobjetivo corto sobrio y ligero, sin rasgos de carácter destacados.
+Thambar 90 f/2.2|Leica|90|2.2|1935|Foco suave|4|3|0|20|1.0|48|500|sin|98|-100|100|96|8|18|10|60|20|30|0.20|0.3|1.8|34|0|70|10|Objetivo de foco suave con disco central de densidad neutra extraíble. La esfericidad se deja sin corregir por diseño para producir halo controlado en las luces.
+Thambar-M 90 f/2.2|Leica|90|2.2|2017|Foco suave|4|3|0|20|1.0|48|500|multi|98|-100|98|82|10|20|12|58|20|30|0.20|0.3|1.7|34|0|70|10|Reedición del trazado de 1935. Con el disco central puesto el halo domina; retirado, la imagen gana contraste sin llegar a ser nítida.
+Elmarit 90 f/2.8|Leica|90|2.8|1959|Doble Gauss|5|3|0|15|1.0|39|590|mono|76|-28|32|44|66|76|64|34|18|20|0.09|0.2|1.4|28|0|18|24|Teleobjetivo de retrato clásico. Gradación amplia y desenfoque ordenado con quince palas que mantienen el disco redondo.
+Tele-Elmarit 90 f/2.8 (1ª serie)|Leica|90|2.8|1964|Telefoto|5|3|0|12|1.0|39|500|mono|78|-24|28|40|70|78|66|32|18|18|0.08|0.2|1.4|28|0|16|24|Trazado telefoto más corto que el Elmarit. Contraste medio y bokeh muy limpio.
+Tele-Elmarit-M 90 f/2.8 (2ª serie)|Leica|90|2.8|1974|Telefoto|5|4|0|12|1.0|39|340|multi|80|-20|22|34|76|84|72|28|16|16|0.07|0.2|1.3|26|0|14|24|La versión ligera y compacta. Muy buena relación entre masa y rendimiento, con desenfoque suave.
+Elmarit-M 90 f/2.8|Leica|90|2.8|1990|Doble Gauss|4|4|0|8|1.0|46|410|multi+|74|-12|14|24|86|91|84|22|14|14|0.05|0.2|1.2|24|0|8|30|Cuatro elementos en cuatro grupos y contraste alto. Sobrio, sin dominantes y muy corregido para su coste.
+Summicron-M 90 f/2|Leica|90|2|1980|Doble Gauss|5|4|0|10|1.0|48|475|multi|82|-22|26|32|78|86|74|30|16|18|0.07|0.2|1.5|32|0|16|24|Versión esférica del 90 luminoso. Cromatismo longitudinal visible en los contornos desenfocados de alto contraste.
+APO-Summicron-M 90 f/2 ASPH|Leica|90|2|1998|Apocromático asférico|5|5|1|9|1.0|46|500|multi+|78|-4|8|16|95|97|92|6|8|10|0.03|0.2|1.2|32|16|3|42|Uno de los teleobjetivos de retrato mejor corregidos que existen. Nitidez inmediata a plena apertura sin residuo cromático.
+Summarit-M 90 f/2.4|Leica|90|2.4|2011|Doble Gauss|5|4|0|8|1.0|46|360|multi+|72|-8|10|18|89|93|87|16|14|13|0.04|0.2|1.1|28|0|6|32|Alternativa ligera al APO con corrección alta y carácter neutro.
+Tele-Elmar-M 135 f/4|Leica|135|4|1965|Telefoto|5|3|0|10|1.5|39|550|multi|72|-14|16|26|86|92|86|20|12|12|0.05|0.1|1.0|22|0|8|28|Uno de los diseños más nítidos de toda la montura M. Corrección muy alta con muy poco cromatismo lateral.
+Elmarit-M 135 f/2.8|Leica|135|2.8|1963|Telefoto con lupa|5|4|0|15|1.5|39|730|multi|76|-20|24|32|76|84|76|30|14|14|0.07|0.1|1.3|26|0|12|26|Lleva anteojos que amplían la base telemétrica. Enfoque exigente y desenfoque muy amplio para el formato.
+APO-Telyt-M 135 f/3.4|Leica|135|3.4|1998|Apocromático|5|4|0|8|1.5|46|450|multi+|74|-4|8|14|94|97|93|5|6|8|0.02|0.1|0.9|22|0|3|38|Apocromático sin asféricas. Corrección cromática casi perfecta y el objetivo M que más exige del telémetro.
+Distagon T* 15 f/2.8 ZM|Zeiss|15|2.8|2009|Retrofoco|15|11|0|10|0.3|72|730|multi+|58|-8|12|24|86|90|80|18|22|20|0.05|-2.2|2.6|30|0|6|40|Retrofoco de quince elementos con distorsión residual notable pero corrección de campo excelente. Muy resistente al velo.
+Distagon T* 18 f/4 ZM|Zeiss|18|4|2008|Retrofoco|10|8|0|10|0.5|58|350|multi+|56|-8|12|26|84|88|76|20|26|22|0.05|-2.6|2.3|28|0|6|40|Distorsión en barril claramente visible en líneas rectas, compensable por software. Contraste alto en todo el campo.
+Biogon T* 21 f/2.8 ZM|Zeiss|21|2.8|2004|Biogon simétrico|9|7|0|10|0.5|46|300|multi+|56|-8|12|22|89|92|84|16|18|18|0.02|-0.3|2.8|28|0|6|42|Simétrico casi sin distorsión y de contraste muy alto. Fuerte caída de luz y ángulo de incidencia extremo en el borde del sensor.
+Biogon T* 25 f/2.8 ZM|Zeiss|25|2.8|2005|Biogon simétrico|9|7|0|10|0.5|46|260|multi+|56|-8|12|22|89|92|85|16|16|18|0.02|-0.3|2.4|26|0|6|42|La misma receta simétrica con menos exigencia angular. Muy plano y libre de distorsión perceptible.
+Biogon T* 28 f/2.8 ZM|Zeiss|28|2.8|2005|Biogon simétrico|8|6|0|10|0.5|46|250|multi+|58|-8|12|22|90|93|86|15|15|17|0.02|-0.3|2.2|26|0|6|42|Contraste elevado y geometría limpia. Referencia de nitidez en 28 mm por encima de su precio.
+Distagon T* 35 f/1.4 ZM|Zeiss|35|1.4|2015|Retrofoco asférico|11|9|1|10|0.7|49|380|multi+|80|-24|26|22|88|92|82|22|16|20|0.06|-0.7|2.4|46|18|14|34|Retrofoco luminoso con transición amplia y bokeh muy limpio. Sube el contraste sin eliminar el volumen del desenfoque.
+Biogon T* 35 f/2 ZM|Zeiss|35|2|2005|Biogon simétrico|9|6|0|10|0.7|43|240|multi+|60|-8|12|20|91|94|87|14|14|16|0.02|-0.3|1.8|28|0|6|44|Distorsión y curvatura prácticamente nulas. Muy alto microcontraste con desenfoque algo perfilado.
+C-Biogon T* 35 f/2.8 ZM|Zeiss|35|2.8|2007|Biogon simétrico|7|5|0|10|0.7|43|200|multi+|60|-8|12|20|90|93|86|14|14|16|0.02|-0.3|1.7|26|0|6|44|Compacto y quirúrgicamente corregido en geometría. Pensado para reproducción y arquitectura.
+C-Sonnar T* 50 f/1.5 ZM|Zeiss|50|1.5|2006|Sonnar|6|4|0|10|0.9|46|230|multi+|90|-70|72|38|60|70|44|46|26|38|0.26|0.5|2.4|52|0|85|20|Sonnar de seis elementos con esfericidad deliberadamente subcorregida. Deriva de foco pronunciada entre f/1,5 y f/2,8, calibrable por el usuario. El desenfoque más envolvente de los ZM.
+Planar T* 50 f/2 ZM|Zeiss|50|2|2005|Doble Gauss|6|4|0|10|0.7|43|210|multi+|70|-12|14|20|91|94|86|20|16|18|0.05|0.3|1.6|32|0|8|32|Doble Gauss simétrico y muy corregido. Neutro, con desenfoque más limpio que suave.
+Tele-Tessar T* 85 f/4 ZM|Zeiss|85|4|2005|Tessar|5|4|0|10|0.9|43|300|multi+|70|-8|10|16|92|95|90|12|10|10|0.03|0.2|1.0|22|0|4|34|Teleobjetivo corto de contraste alto y masa reducida. Corrección sobresaliente para su precio.
+Hyper Wide Heliar 10 f/5.6|Voigtländer|10|5.6|2015|Retrofoco|13|10|1|10|0.5|0|340|multi+|52|-8|12|28|82|86|72|20|30|24|0.06|-3.0|3.4|30|14|6|40|Ángulo de 130 grados con distorsión rectilínea sorprendentemente contenida. Caída de luz muy fuerte en digital.
+Ultra Wide Heliar 12 f/5.6 III|Voigtländer|12|5.6|2016|Retrofoco|10|8|1|10|0.5|0|230|multi+|52|-8|12|28|82|86|72|20|28|24|0.05|-2.4|3.2|30|14|6|40|Tercera versión con codificación de montura. Geometría muy limpia para su ángulo.
+Super Wide Heliar 15 f/4.5 III|Voigtländer|15|4.5|2014|Retrofoco|11|9|1|10|0.5|58|228|multi+|54|-8|12|26|84|88|76|18|24|22|0.04|-1.6|2.8|28|14|6|40|El rediseño retrofoco reduce el ángulo de incidencia y con él la deriva de color en los bordes del sensor.
+Color-Skopar 21 f/3.5|Voigtländer|21|3.5|2015|Retrofoco|8|7|1|10|0.5|39|136|multi+|54|-8|12|26|85|89|78|18|20|20|0.04|-0.9|2.4|26|14|6|40|Muy compacto para su focal y bien corregido. Sin rasgos de carácter marcados.
+Nokton 21 f/1.4|Voigtländer|21|1.4|2019|Retrofoco asférico|13|11|2|12|0.5|62|560|multi+|74|-16|20|24|85|89|76|22|18|24|0.05|-1.2|3.0|46|18|10|40|Gran angular muy luminoso con corrección notable. Doce palas mantienen el disco redondo al diafragmar.
+Ultron 28 f/2|Voigtländer|28|2|2016|Retrofoco asférico|10|8|1|10|0.5|46|250|multi+|66|-14|18|26|85|89|78|22|20|22|0.06|-1.2|2.2|32|18|8|40|Equilibrado y compacto, con transición al desenfoque más suave que la mayoría de asféricos modernos.
+Nokton 28 f/1.5|Voigtländer|28|1.5|2018|Retrofoco asférico|12|10|2|12|0.5|58|470|multi+|74|-18|22|26|84|88|76|24|20|24|0.06|-1.3|2.8|44|18|10|40|Apertura extrema en 28 mm con corrección alta. Fuerte deformación de pupila en las esquinas a plena apertura.
+Nokton 35 f/1.2 III|Voigtländer|35|1.2|2020|Gauss asférico|9|7|1|12|0.5|46|340|multi+|82|-24|28|26|85|89|76|26|18|26|0.07|-0.7|2.7|48|20|14|34|Tercera versión, mucho más compacta. Rinde con volumen a f/1,2 y se vuelve neutro a partir de f/2.
+Nokton Classic 35 f/1.4 II MC|Voigtländer|35|1.4|2019|Doble Gauss|8|6|0|10|0.58|43|262|multi|86|-46|50|46|62|72|52|38|26|34|0.18|-0.8|2.5|46|0|36|24|Reinterpretación del Summilux esférico. Curvatura de campo apreciable y transición al desenfoque muy progresiva.
+Nokton Classic 35 f/1.4 II SC|Voigtländer|35|1.4|2019|Doble Gauss|8|6|0|10|0.58|43|262|mono|86|-46|56|60|56|68|50|38|26|34|0.18|-0.8|2.5|46|0|36|24|Idéntico trazado con tratamiento monocapa. Más velo en contraluz y luces altas más abiertas.
+Ultron 35 f/1.7 Asf.|Voigtländer|35|1.7|2019|Gauss asférico|8|6|1|10|0.58|43|258|multi+|68|-14|18|26|86|90|80|22|18|20|0.06|-0.6|1.9|34|18|8|40|Compacto y bien corregido, con dibujo intermedio entre el Nokton Classic y el asférico moderno.
+APO-Lanthar 35 f/2 Asf.|Voigtländer|35|2|2021|Apocromático asférico|11|9|2|12|0.5|39|352|multi+|68|-6|8|18|94|96|90|7|8|12|0.03|-0.5|1.8|32|16|4|42|Corrección apocromática a precio muy inferior al de las alternativas alemanas. Contornos desenfocados sin residuo de color.
+Nokton 40 f/1.2 Asf.|Voigtländer|40|1.2|2016|Gauss asférico|9|7|1|10|0.5|52|420|multi+|84|-26|30|28|82|87|72|28|18|26|0.09|-0.5|2.7|50|20|16|32|Desenfoque de gran amplitud con corrección razonable. Halo apreciable en luces especulares a plena apertura.
+Nokton Classic 40 f/1.4|Voigtländer|40|1.4|2004|Doble Gauss|7|6|0|10|0.7|43|175|multi|86|-44|48|48|64|72|54|36|24|34|0.17|-0.6|2.3|46|0|34|24|Muy pequeño y con marcado carácter clásico. Disponible en versión monocapa con más velo intencionado.
+Nokton 50 f/1 Asf.|Voigtländer|50|1|2021|Gauss asférico|9|7|2|12|0.9|58|470|multi+|90|-24|28|24|84|89|72|26|16|28|0.09|0.4|2.9|66|18|12|36|Apertura f/1 con corrección muy superior a la del Noctilux esférico original. Doce palas y viñeteo mecánico intenso fuera del eje.
+Nokton 50 f/1.2 Asf.|Voigtländer|50|1.2|2019|Gauss asférico|8|6|1|12|0.7|52|350|multi+|86|-22|26|24|85|90|76|24|16|24|0.08|0.4|2.6|58|18|10|36|Compacto para su apertura, con desenfoque amplio y corrección moderna. Muy usado como alternativa al Summilux asférico.
+Nokton 50 f/1.5 Asf. II|Voigtländer|50|1.5|2020|Gauss asférico|8|6|1|12|0.7|49|255|multi+|80|-18|22|24|86|91|80|22|16|20|0.07|0.4|2.2|48|18|8|38|Segunda versión con enfoque más próximo. Equilibrio entre tamaño, apertura y corrección.
+APO-Lanthar 50 f/2 Asf.|Voigtländer|50|2|2020|Apocromático asférico|8|6|1|12|0.45|39|364|multi+|70|-5|8|16|93|96|90|6|8|10|0.03|0.3|1.6|34|16|4|42|Apocromático real con enfoque a 0,45 m. Uno de los mejores rendimientos por unidad de coste de toda la montura.
+Heliar Classic 50 f/3.5|Voigtländer|50|3.5|2016|Heliar|5|3|0|10|1.0|34|150|multi|76|-30|34|40|68|76|64|30|20|20|0.12|0.3|1.6|24|0|18|26|Trazado Heliar de tres grupos, colapsable. Gradación amplia y dibujo suave sin caer en el velo generalizado.
+Nokton 75 f/1.5 Asf.|Voigtländer|75|1.5|2018|Gauss asférico|7|6|1|12|0.7|58|418|multi+|88|-24|28|24|85|90|78|24|14|24|0.08|0.3|2.2|56|18|10|34|Teleobjetivo corto luminoso con desenfoque amplio y limpio. Enfoque a 0,70 m poco habitual en la montura.
+APO-Skopar 90 f/2.8|Voigtländer|90|2.8|2022|Apocromático|5|4|0|12|0.9|39|322|multi+|74|-6|8|16|93|96|91|7|8|10|0.03|0.2|1.1|26|0|4|38|Apocromático compacto de contraste alto. Contornos desenfocados sin franja de color.
+Canon 50 f/0.95|Canon|50|0.95|1961|Doble Gauss|7|5|0|12|1.0|72|600|mono|94|-72|76|66|42|54|28|54|32|48|0.28|0.5|3.2|72|0|52|22|Concebido para la Canon 7 con montura de bayoneta propia; requiere conversión a M. Velo esférico dominante y remolino intenso en las esquinas.
+Canon 50 f/1.2 LTM|Canon|50|1.2|1956|Doble Gauss|7|5|0|10|1.0|55|320|mono|88|-66|70|72|40|52|28|50|32|46|0.26|0.5|2.9|64|0|48|24|Rosca Leica adaptable directamente. Halo abundante a plena apertura que se cierra pronto.
+Canon 35 f/2 LTM|Canon|35|2|1962|Doble Gauss|8|6|0|10|1.0|40|250|mono|80|-34|38|54|62|72|54|34|28|32|0.14|-0.8|2.1|36|0|24|26|Uno de los mejores 35 de rosca de su década. Contraste medio con desenfoque muy ordenado.
+Nikkor-S.C 5cm f/1.4|Nikon|50|1.4|1950|Sonnar-Gauss|7|5|0|10|0.9|43|240|mono|86|-60|64|68|48|60|38|46|32|42|0.24|0.4|2.6|56|0|48|24|Rosca Leica de los años cincuenta. Rendición cálida con halo marcado y esquinas blandas a plena apertura.
+Nikkor K 55 f/1.2 pre-AI|Nikon|55|1.2|1974|Doble Gauss|7|5|0|9|0.6|52|420|multi|84|-55|60|48|52|62|34|46|30|56|0.22|-0.4|2.8|60|0|42|32|Montura Nikon F, montable en M mediante anillo sin acoplamiento telemétrico. Velo esférico y coma sagital intensos a plena apertura que se cierran hacia f/2,8; el tratamiento multicapa NIC mantiene el contraste base por encima de sus contemporáneos monocapa.
+Jupiter-3 50 f/1.5|KMZ|50|1.5|1950|Sonnar|7|3|0|11|1.0|40|235|mono|88|-72|76|70|44|58|32|48|30|44|0.28|0.5|2.4|54|0|60|20|Copia soviética del Sonnar de Zeiss. Paso de rosca y base de enfoque distintos del estándar Leica, lo que exige recalibrado. Velo esférico muy alto.
+Jupiter-9 85 f/2|KMZ|85|2|1955|Sonnar|7|3|0|15|0.8|49|400|mono|92|-60|64|64|46|58|38|44|24|36|0.22|0.3|2.0|48|0|46|18|Sonnar de retrato con quince palas. Desenfoque muy suave y contraste bajo a plena apertura.
+Konica M-Hexanon 35 f/2|Konica|35|2|1999|Doble Gauss|7|5|0|10|0.7|46|240|multi+|76|-18|22|30|88|92|82|24|20|22|0.08|-0.7|1.8|34|0|12|32|Serie discontinuada de calidad mecánica y óptica muy alta. Compromiso poco común entre contraste y suavidad.
+Konica M-Hexanon 50 f/2|Konica|50|2|1999|Doble Gauss|6|5|0|10|0.7|46|235|multi+|76|-14|18|24|89|93|84|22|18|20|0.07|0.3|1.6|32|0|10|30|Rendimiento equiparable al Summicron de quinta serie con carácter ligeramente más cálido.
+Konica M-Hexanon 90 f/2.8|Konica|90|2.8|1999|Doble Gauss|5|4|0|10|1.0|46|380|multi+|76|-12|14|22|89|93|86|20|14|14|0.05|0.2|1.2|26|0|8|30|Teleobjetivo corto muy corregido y de precio contenido en el mercado de segunda mano.
+Minolta M-Rokkor 40 f/2|Minolta|40|2|1973|Doble Gauss|6|4|0|10|0.8|40|185|multi|80|-22|26|36|80|86|72|28|20|22|0.10|-0.5|1.8|32|0|14|28|Diseñado para la Leitz Minolta CL. Muy compacto, con dibujo suave y contraste correcto. Propenso a la corrosión del tratamiento interno.
+Minolta M-Rokkor 90 f/4|Minolta|90|4|1973|Tessar|4|4|0|10|1.0|40|340|multi|74|-14|16|26|85|91|85|22|12|12|0.05|0.2|1.0|22|0|8|30|Tele corto de cuatro elementos, ligero y nítido desde plena apertura.
+Light Lens Lab 35 f/2 (ocho elementos)|Light Lens Lab|35|2|2019|Doble Gauss|8|6|0|10|0.7|39|235|mono|78|-36|40|52|64|72|54|34|28|30|0.13|-0.7|2.0|34|0|24|28|Reproducción del trazado Summicron de 1958, incluida la tolerancia del tratamiento. Reproduce la gradación tonal del original.
+Light Lens Lab 50 f/2 (rígido)|Light Lens Lab|50|2|2021|Doble Gauss|7|6|0|10|0.9|39|280|mono|80|-32|34|46|66|76|58|36|28|30|0.12|0.3|1.8|36|0|22|24|Copia del Summicron rígido con vidrio equivalente al original. Firma clásica sin las incertidumbres de una unidad de sesenta años.
+Light Lens Lab 50 f/1.5 Z21|Light Lens Lab|50|1.5|2025|Doble Gauss|6|4|0|10|0.7|52|313|multi|88|-50|54|44|62|70|48|40|30|32|0.33|-1.2|2.4|50|0|40|24|Homenaje al Angénieux S21 de 50 mm con vidrio de lantano de alto índice y diafragma preselector. Cubre hasta 44x33 mm. La curvatura de campo y la distorsión están leídas de las curvas publicadas por el fabricante.
+Light Lens Lab 50 f/1.2 (Noctilux)|Light Lens Lab|50|1.2|2022|Gauss asférico|6|4|2|10|1.0|48|500|mono|92|-50|56|58|54|64|40|46|32|44|0.24|0.5|2.9|68|38|36|30|Reproducción del Noctilux asférico de 1966. Recupera el velo y el remolino del original, incluido su rendimiento irregular en el borde.
+MS Optics Sonnetar 50 f/1.1|MS Optics|50|1.1|2012|Sonnar|6|4|0|12|0.8|46|230|multi|90|-68|72|58|50|62|34|48|28|42|0.28|0.5|2.7|62|0|72|20|Diseño artesanal de Miyazaki con corrector de esfericidad ajustable por el usuario. Deriva de foco intensa y desenfoque muy envolvente.
+7Artisans 50 f/1.1|7Artisans|50|1.1|2017|Doble Gauss|7|4|0|13|0.7|49|380|multi|86|-60|66|70|42|54|30|48|34|46|0.26|0.5|2.8|64|0|54|24|Objetivo de coste muy bajo con carácter clásico exagerado. Velo alto y esquinas irresueltas a plena apertura.
+TTArtisan 50 f/0.95|TTArtisan|50|0.95|2020|Doble Gauss|8|6|0|14|0.7|58|640|multi|88|-50|56|56|54|66|38|44|28|42|0.22|0.5|3.1|70|0|42|26|Réplica funcional del planteamiento Noctilux a una fracción del precio. Catorce palas y desenfoque muy amplio.
+TTArtisan 90 f/1.25|TTArtisan|90|1.25|2020|Doble Gauss|8|6|0|14|0.9|67|920|multi|92|-40|44|46|64|74|48|38|20|32|0.14|0.3|2.6|66|0|30|24|Retrato de apertura extrema. Enfoque muy crítico con el telémetro y desenfoque de gran magnitud.
+Thypoch Simera 35 f/1.4|Thypoch|35|1.4|2023|Gauss asférico|9|7|2|14|0.5|46|350|multi+|76|-14|18|24|88|92|82|20|16|20|0.06|-0.6|2.3|42|18|8|38|Fabricante reciente con acabado mecánico notable. Catorce palas con muescas de apertura que mantienen el disco casi circular.
+Thypoch Simera 28 f/1.4|Thypoch|28|1.4|2023|Retrofoco asférico|11|8|2|14|0.5|46|380|multi+|74|-16|20|26|86|90|78|22|18|24|0.06|-1.2|2.8|46|18|10|38|Mismo planteamiento en gran angular luminoso. Corrección alta con transición al desenfoque más amable que la media asférica.
+Funleader Caps 18 f/8|Funleader|18|8|2020|Triplete|3|3|0|0|0.6|0|30|multi|48|-30|34|48|56|64|44|30|32|26|0.14|-2.0|2.6|20|0|10|30|Tapa objetivo de tres elementos y diafragma fijo. Curiosidad óptica de rendimiento modesto y masa despreciable.
+APO-Summicron-ASPH 43 f/2 (Q3 43)|Leica|43|2|2023|Apocromático asférico|8|6|1|9|0.27|49|290|multi+|66|-5|8|18|94|96|90|9|10|14|0.03|-0.5|1.8|30|18|5|46|Fila de referencia, no de catálogo M: es el objetivo fijo del Q3 43 y no se puede montar en una M. Los índices se han valorado con el mismo criterio que el resto, no medido; la masa es una estimación, porque Leica no publica la del bloque óptico por separado. Está aquí para que cualquier objetivo del catálogo se pueda comparar con el que ya se lleva encima.
+`;
+
+const COLS = ["name","brand","focal","fmax","year","family","el","gr","asph","blades","mfd","filter","weight","coat",
+  "crema","sa","glow","velo","micro","resC","resB","loca","laca","coma","curv","dist","vig","mech","onion","shift","nerv","nota"];
+const NUM = new Set(["focal","fmax","year","el","gr","asph","blades","mfd","filter","weight",
+  "crema","sa","glow","velo","micro","resC","resB","loca","laca","coma","curv","dist","vig","mech","onion","shift","nerv"]);
+const REFNAME = "APO-Summicron-ASPH 43 f/2 (Q3 43)";
+
+const LENSES = RAW.trim().split("\n").filter(s=>s.trim()).map((line,i)=>{
+  const p=line.split("|"), o={i};
+  COLS.forEach((c,k)=>{ o[c] = NUM.has(c) ? parseFloat(p[k]) : p[k]; });
+  o.ref = (o.name===REFNAME);
+  o.vigN = Math.max(0, Math.min(100, (o.vig-0.9)/2.5*100));
+  return o;
+});
+
+/* ==== 2. Ejes y fórmulas ==== */
+const AXES = [
+  {k:"sa",    label:"Esfericidad residual", fmt:v=>fmt(v,0),        note:"−100 subcorregida, +100 sobrecorregida"},
+  {k:"loca",  label:"Cromatismo longitudinal", fmt:v=>fmt(v,0),     note:"0 puro, 100 ribetes intensos"},
+  {k:"micro", label:"Microcontraste", fmt:v=>fmt(v,0),              note:"MTF a 40 pl/mm"},
+  {k:"velo",  label:"Velo", fmt:v=>fmt(v,0),                        note:"nivel de negro"},
+  {k:"vig",   label:"Viñeteo", fmt:v=>fmt(v,1)+" EV",               note:"caída total a plena apertura"},
+  {k:"mech",  label:"Recorte de pupila", fmt:v=>fmt(v,0),           note:"ojo de gato, remolino"},
+  {k:"onion", label:"Rizado asférico", fmt:v=>fmt(v,0),             note:"anillos en el disco"}
+];
+
+const sPrime = L => (100 - L.sa)/2;
+const IDX = [
+  {k:"pop",   label:"Pop 3D",
+   f:L => 0.30*(100-L.velo) + 0.25*(100-L.loca) + 0.20*L.micro + 0.15*L.vigN + 0.10*(100-Math.abs(L.sa)),
+   formula:"0,30·(100−velo) + 0,25·(100−LoCA) + 0,20·micro + 0,15·viñeteo + 0,10·(100−|SA|)"},
+  {k:"crema", label:"Cremosidad",
+   f:L => 0.55*sPrime(L) + 0.25*(100-L.onion) + 0.20*(100-L.loca),
+   formula:"0,55·S′ + 0,25·(100−rizado) + 0,20·(100−LoCA), con S′ = (100−SA)/2"},
+  {k:"eleg",  label:"Elegancia",
+   f:L => 0.25*Math.max(0,100-1.8*Math.abs(L.micro-62)) + 0.25*(100-L.loca) + 0.20*sPrime(L) + 0.15*(100-L.onion) + 0.15*(100-L.mech),
+   formula:"0,25·Eμ + 0,25·(100−LoCA) + 0,20·S′ + 0,15·(100−rizado) + 0,15·(100−recorte), con Eμ = max(0, 100 − 1,8·|micro−62|)"}
+];
+LENSES.forEach(L=>{ IDX.forEach(d=>{ L[d.k]=d.f(L); }); });
+
+/* ==== 3. Métrica ==== */
+const AXK = AXES.map(a=>a.k);
+const STAT = {};
+AXK.forEach(k=>{
+  const v = LENSES.map(L=>L[k]);
+  const m = v.reduce((s,x)=>s+x,0)/v.length;
+  const s = Math.sqrt(v.reduce((q,x)=>q+(x-m)*(x-m),0)/v.length);
+  STAT[k]={m,s:s||1};
+});
+const dist=(A,B)=>Math.sqrt(AXK.reduce((q,k)=>{const d=(A[k]-B[k])/STAT[k].s;return q+d*d;},0)/AXK.length);
+const ALLD=[];
+for(let a=0;a<LENSES.length;a++) for(let b=a+1;b<LENSES.length;b++) ALLD.push(dist(LENSES[a],LENSES[b]));
+ALLD.sort((x,y)=>x-y);
+const pct = d => {
+  let lo=0,hi=ALLD.length;
+  while(lo<hi){const m=(lo+hi)>>1; if(ALLD[m]<d) lo=m+1; else hi=m;}
+  return Math.round(100*lo/ALLD.length);
+};
+
+/* ==== 4. Utilidades ==== */
+const $  = s=>document.querySelector(s);
+const $$ = s=>Array.from(document.querySelectorAll(s));
+const fmt=(v,d=0)=>v.toLocaleString("es-ES",{minimumFractionDigits:d,maximumFractionDigits:d,useGrouping:false});
+const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const BRANDCOL={"Leica":"#E8B33C","Zeiss":"#35B7E6","Voigtländer":"#4FBF95","Canon":"#DB4A3E","Nikon":"#8A6BE0",
+  "Konica":"#D9A0C8","Minolta":"#7FB4E8","Light Lens Lab":"#C9CDD6","KMZ":"#B08968","MS Optics":"#9AA98F",
+  "7Artisans":"#8C9AAE","TTArtisan":"#8C9AAE","Thypoch":"#6FC7B4","Funleader":"#8C9AAE"};
+const bcol=b=>BRANDCOL[b]||"#8C9AAE";
+const SLOT=["#E8B33C","#35B7E6","#8A6BE0","#4FBF95"];
+
+/* ==== 5. Estado ==== */
+let sel=[];               /* índices de LENSES, máx. 4 */
+const MAXSEL=4;
+
+/* ==== 6. Filtros y lista ==== */
+function fillFilters(){
+  const brands=[...new Set(LENSES.map(L=>L.brand))].sort((a,b)=>a.localeCompare(b,"es"));
+  $("#fBrand").innerHTML = `<option value="">todas las marcas</option>` + brands.map(b=>`<option>${esc(b)}</option>`).join("");
+  const focs=[...new Set(LENSES.map(L=>L.focal))].sort((a,b)=>a-b);
+  $("#fFocal").innerHTML = `<option value="">todas las focales</option>` + focs.map(f=>`<option value="${f}">${f} mm</option>`).join("");
+}
+function visible(){
+  const q=$("#fText").value.trim().toLowerCase(), b=$("#fBrand").value, f=$("#fFocal").value;
+  return LENSES.filter(L=>
+    (!q || L.name.toLowerCase().includes(q)) &&
+    (!b || L.brand===b) &&
+    (!f || L.focal===parseFloat(f)));
+}
+function renderList(){
+  const V=visible();
+  $("#listCount").textContent = fmt(V.length) + (V.length===1?" objetivo":" objetivos");
+  $("#list").innerHTML = V.map(L=>{
+    const on=sel.includes(L.i);
+    return `<div class="row${on?" on":""}" data-i="${L.i}">
+      <button type="button" class="pick" data-i="${L.i}" aria-label="${on?"Quitar":"Añadir"} ${esc(L.name)}">${on?"–":"+"}</button>
+      <span class="dot" style="background:${bcol(L.brand)}"></span>
+      <span class="nm">${esc(L.name)}</span>
+      <span class="meta">${L.year}${L.ref?", referencia":""}</span>
+    </div>`;
+  }).join("") || `<div class="empty">Ningún objetivo cumple el filtro.</div>`;
+}
+function toggle(i){
+  const p=sel.indexOf(i);
+  if(p>=0) sel.splice(p,1);
+  else { if(sel.length>=MAXSEL) sel.shift(); sel.push(i); }
+  renderList(); renderSel(); renderProfiles(); renderPair(); drawMap();
+}
+
+/* ==== 7. Selección y perfiles ==== */
+function renderSel(){
+  $("#chips").innerHTML = sel.map((i,k)=>{
+    const L=LENSES[i];
+    return `<button type="button" class="chip" data-i="${i}" style="border-color:${SLOT[k]}" aria-label="Quitar ${esc(L.name)}">
+      <span class="sw" style="background:${SLOT[k]}"></span>${esc(L.name)}<span class="x">×</span></button>`;
+  }).join("");
+  $("#clearBtn").hidden = sel.length===0;
+}
+function bar(val,max,color){
+  const w=Math.max(0,Math.min(100,100*val/max));
+  return `<div class="track"><div class="fill" style="width:${w}%;background:${color}"></div></div>`;
+}
+function saBar(sa,color){
+  const w=Math.min(50,Math.abs(sa)/2);
+  const side = sa<0 ? `right:50%;` : `left:50%;`;
+  return `<div class="track sat"><span class="zero"></span><div class="fill" style="${side}width:${w}%;background:${color}"></div></div>`;
+}
+function renderProfiles(){
+  const box=$("#profiles");
+  if(!sel.length){ box.innerHTML=`<div class="empty">Sin selección. Elija hasta cuatro objetivos en la lista o pulse puntos del mapa.</div>`; $("#pairs").innerHTML=""; return; }
+  box.innerHTML = sel.map((i,k)=>{
+    const L=LENSES[i], c=SLOT[k];
+    const axes = AXES.map(a=>{
+      const v=L[a.k];
+      const b = a.k==="sa" ? saBar(v,c)
+              : a.k==="vig" ? bar(L.vigN,100,c)
+              : bar(v,100,c);
+      return `<div class="ax"><span class="al">${a.label}</span>${b}<span class="av">${a.fmt(v)}</span></div>`;
+    }).join("");
+    const idx = IDX.map(d=>`<div class="ix"><span class="il">${d.label}</span>${bar(L[d.k],100,c)}<span class="av">${fmt(L[d.k],0)}</span></div>`).join("");
+    return `<article class="card" style="border-top-color:${c}">
+      <h3>${esc(L.name)}</h3>
+      <p class="sub">${esc(L.brand)}, ${L.year}, ${esc(L.family)}. ${L.el} el/${L.gr} gr, ${L.asph} asf, ${L.blades} palas, ${fmt(L.mfd,L.mfd<1?2:1)} m, ${fmt(L.weight)} g.</p>
+      <div class="axes">${axes}</div>
+      <div class="idx">${idx}</div>
+      <p class="nota">${esc(L.nota)}</p>
+    </article>`;
+  }).join("");
+  const P=[];
+  for(let a=0;a<sel.length;a++) for(let b=a+1;b<sel.length;b++){
+    const A=LENSES[sel[a]],B=LENSES[sel[b]],d=dist(A,B);
+    P.push(`<span class="pair"><span class="sw" style="background:${SLOT[a]}"></span><span class="sw" style="background:${SLOT[b]}"></span> d = ${fmt(d,2)} <span class="meta">(percentil ${pct(d)} % de los pares del catálogo)</span></span>`);
+  }
+  $("#pairs").innerHTML = P.join("");
+}
+
+/* ==== 7b. Modelo del disco (idéntico al de la carta completa) ==== */
+function insidePoly(x,y,nb,p){
+  if(nb<3||p<=0) return Math.hypot(x,y)<=1;
+  const r = Math.hypot(x,y); if(r<1e-9) return true;
+  const seg = 2*Math.PI/nb;
+  let a = Math.atan2(y,x)+Math.PI/2;
+  a = a - seg*Math.floor(a/seg) - seg/2;
+  const rp = Math.cos(Math.PI/nb)/Math.cos(a);
+  return r <= (1-p) + rp*p;
+}
+const RV=1.15;
+function fracTrans(d){
+  if(d<=0) return 1;
+  let n=0,t=0,M=56;
+  for(let i=0;i<M;i++){ const x=(i+0.5)/M*2-1;
+    for(let j=0;j<M;j++){ const y=(j+0.5)/M*2-1;
+      if(x*x+y*y>1) continue; t++;
+      if((x-d)*(x-d)+y*y<=RV*RV && (x+d)*(x+d)+y*y<=RV*RV) n++; } }
+  return t?n/t:1;
+}
+const MEMO=new Map();
+function mechDisp(evLoss){
+  if(evLoss<=0.005) return 0;
+  const key=Math.round(evLoss*200);
+  if(MEMO.has(key)) return MEMO.get(key);
+  const tgt=Math.pow(2,-evLoss);
+  let lo=0,hi=RV;
+  for(let k=0;k<16;k++){ const d=(lo+hi)/2; if(fracTrans(d)>tgt) lo=d; else hi=d; }
+  const d=(lo+hi)/2; MEMO.set(key,d); return d;
+}
+function blur3(A,W,H){
+  const T=new Float32Array(A.length);
+  for(let y=0;y<H;y++){const o=y*W;
+    for(let x=0;x<W;x++){const l=x>0?A[o+x-1]:A[o+x], r=x<W-1?A[o+x+1]:A[o+x]; T[o+x]=(l+2*A[o+x]+r)*0.25;}}
+  for(let x=0;x<W;x++)for(let y=0;y<H;y++){
+    const u=y>0?T[(y-1)*W+x]:T[y*W+x], d=y<H-1?T[(y+1)*W+x]:T[y*W+x]; A[y*W+x]=(u+2*T[y*W+x]+d)*0.25;}
+}
+function renderDisc(cv, L, o){
+  const W=cv.width, H=cv.height, cx=W/2, cy=H/2;
+  const ctx=cv.getContext("2d");
+  const st = Math.max(0, 2*Math.log2(o.N/L.fmax));
+  const poly = Math.min(1, st/1.1);
+  const bl = o.blur===undefined ? 1 : o.blur;
+  const rel = o.rel!==undefined ? o.rel : (L.fmax/o.N);
+  const R0 = 0.415*Math.min(W,H)*bl*rel;
+  const sgn = o.side==="fg" ? -1 : 1;
+  const a  = sgn*R0;
+  const b  = -(L.sa/100)*0.95*R0;
+  const dG = 0.13*R0*(L.loca/100);
+  const dR = -0.75*dG, dB = -1.0*dG;
+  const off = [dR,dG,dB];
+  const lac = (L.laca/100)*0.055*o.field;
+  const lsc = [1+lac,1,1-lac];
+  const evMech = 2.7*(L.mech/100)*Math.pow(o.field,1.7)*Math.max(0,1-st/2.6);
+  const mech = mechDisp(evMech);
+  const onA = 0.38*(L.onion/100), onK = 9.5;
+  const veil = 0.20*(L.velo/100)+0.30*(L.glow/100)*Math.max(0,1-st/2.2);
+  const RV2=RV*RV;
+  const acc=[new Float32Array(W*H),new Float32Array(W*H),new Float32Array(W*H)];
+  const NR = o.fast?170:(W>200?300:220), NT = o.fast?560:(W>200?1000:760);
+  for(let ir=0; ir<NR; ir++){
+    const rho = Math.sqrt((ir+0.5)/NR);
+    const nt = Math.max(10, Math.round(NT*rho));
+    const w0 = 1/(NR*nt);
+    const jit = Math.random()*2*Math.PI/nt;
+    const rip = 1 + onA*Math.cos(2*Math.PI*onK*rho);
+    for(let it=0; it<nt; it++){
+      const th = it*2*Math.PI/nt + jit;
+      const px = rho*Math.cos(th), py = rho*Math.sin(th);
+      if(!insidePoly(px,py,L.blades,poly)) continue;
+      if(mech>0 && ((px-mech)*(px-mech)+py*py>RV2 || (px+mech)*(px+mech)+py*py>RV2)) continue;
+      const w = w0*rip;
+      const base = a*rho + b*rho*rho*rho;
+      const ct=Math.cos(th), sn=Math.sin(th);
+      for(let c=0;c<3;c++){
+        const r = (base + sgn*off[c]*rho)*lsc[c];
+        const X = cx + r*ct, Y = cy + r*sn;
+        const xi=X|0, yi=Y|0;
+        if(xi<0||yi<0||xi>=W-1||yi>=H-1) continue;
+        const fx=X-xi, fy=Y-yi, k=yi*W+xi, A=acc[c];
+        A[k]+=w*(1-fx)*(1-fy); A[k+1]+=w*fx*(1-fy);
+        A[k+W]+=w*(1-fx)*fy;   A[k+W+1]+=w*fx*fy;
+      }
+    }
+  }
+  if(veil>0){
+    const Rv=R0*1.9, tot=veil*0.30;
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+      const d=Math.hypot(x-cx,y-cy); if(d>Rv) continue;
+      const v=tot/(1+Math.pow(d/(R0*0.30),2))/(NR*40);
+      const k=y*W+x; acc[0][k]+=v*1.02; acc[1][k]+=v; acc[2][k]+=v*0.94;
+    }
+  }
+  for(let c=0;c<3;c++) blur3(acc[c],W,H);
+  let mx=0; for(let c=0;c<3;c++){const A=acc[c]; for(let k=0;k<A.length;k++) if(A[k]>mx) mx=A[k];}
+  if(mx<=0) mx=1;
+  const gain = 2.05/mx;
+  const img = ctx.createImageData(W,H), D=img.data;
+  for(let k=0,j=0;k<W*H;k++,j+=4){
+    for(let c=0;c<3;c++) D[j+c] = 255*Math.pow(1-Math.exp(-acc[c][k]*gain),1/2.2);
+    D[j+3]=255;
+  }
+  ctx.putImageData(img,0,0);
+}
+
+/* ==== 7c. Par enfrentado ==== */
+function pairOptions(){
+  const opts=k=>sel.map((i,s)=>`<option value="${i}">${esc(LENSES[i].name)}</option>`).join("");
+  const a=$("#pairA"), b=$("#pairB");
+  const va=a.value, vb=b.value;
+  a.innerHTML=opts(); b.innerHTML=opts();
+  const has=v=>sel.includes(parseInt(v,10));
+  a.value = has(va)?va:String(sel[0]);
+  b.value = (has(vb)&&vb!==a.value)?vb:String(sel.find(i=>String(i)!==a.value) ?? sel[0]);
+}
+function renderPair(){
+  const box=$("#pairBox");
+  if(sel.length<2){ box.hidden=true; return; }
+  box.hidden=false;
+  pairOptions();
+  const A=LENSES[parseInt($("#pairA").value,10)], B=LENSES[parseInt($("#pairB").value,10)];
+  const kA=sel.indexOf(A.i), kB=sel.indexOf(B.i);
+  const cA=SLOT[kA]||SLOT[0], cB=SLOT[kB]||SLOT[1];
+  const d=dist(A,B), d2=d*d||1e-9;
+  const rows=AXES.map(ax=>{
+    const za=(A[ax.k]-B[ax.k])/STAT[ax.k].s;
+    const share=100*(za*za/AXK.length)/d2;
+    return {ax,share,va:A[ax.k],vb:B[ax.k]};
+  }).sort((x,y)=>y.share-x.share);
+  $("#pairHead").innerHTML =
+    `<span class="sw" style="background:${cA}"></span> ${esc(A.name)} frente a <span class="sw" style="background:${cB}"></span> ${esc(B.name)}: d = ${fmt(d,2)} <span class="meta">(percentil ${pct(d)} % del catálogo)</span>`;
+  $("#decomp").innerHTML = rows.map(r=>`
+    <div class="drow">
+      <span class="dl">${r.ax.label}</span>
+      <span class="dv" style="color:${cA}">${r.ax.fmt(r.va)}</span>
+      <div class="track"><div class="fill" style="width:${Math.min(100,r.share)}%;background:var(--muted)"></div></div>
+      <span class="dv" style="color:${cB}">${r.ax.fmt(r.vb)}</span>
+      <span class="ds">${fmt(r.share,0)} %</span>
+    </div>`).join("");
+  $("#discs").innerHTML = [A,B].map((L,q)=>{
+    const c=q?cB:cA;
+    return `<div class="discrow">
+      <span class="discname" style="border-left-color:${c}">${esc(L.name)}</span>
+      <figure><canvas class="disc" data-i="${L.i}" data-field="0"></canvas><figcaption>campo 0 %</figcaption></figure>
+      <figure><canvas class="disc" data-i="${L.i}" data-field="0.75"></canvas><figcaption>campo 75 %</figcaption></figure>
+    </div>`;
+  }).join("");
+  requestAnimationFrame(()=>{
+    $$("#discs canvas.disc").forEach(cv=>{
+      const L=LENSES[parseInt(cv.dataset.i,10)];
+      const s=Math.min(2,window.devicePixelRatio||1), px=Math.round(150*s);
+      cv.width=px; cv.height=px; cv.style.width="150px"; cv.style.height="150px";
+      renderDisc(cv,L,{N:L.fmax, field:parseFloat(cv.dataset.field), side:"bg", rel:1});
+    });
+  });
+}
+
+/* ==== 7d. Vecinos ==== */
+function fillNb(){
+  const brands={};
+  LENSES.filter(L=>!L.ref).forEach(L=>{ (brands[L.brand]=brands[L.brand]||[]).push(L); });
+  const g=Object.keys(brands).sort((a,b)=>a.localeCompare(b,"es")).map(b=>
+    `<optgroup label="${esc(b)}">`+brands[b].sort((x,y)=>x.focal-y.focal||x.year-y.year)
+      .map(L=>`<option value="${L.i}">${esc(L.name)}</option>`).join("")+`</optgroup>`).join("");
+  $("#nbRef").innerHTML = `<option value="">elija una referencia</option>` + g +
+    `<optgroup label="Referencia no montable"><option value="${LENSES.find(L=>L.ref).i}">${esc(REFNAME)}</option></optgroup>`;
+}
+function renderNb(){
+  const v=$("#nbRef").value;
+  if(v===""){ $("#nbOut").innerHTML=`<div class="empty">Con una referencia elegida, la tabla muestra los diez objetivos más próximos en los siete ejes. Con el filtro de otro fabricante responde a qué objetivo de otra marca ocupa el lugar de este.</div>`; return; }
+  const R=LENSES[parseInt(v,10)];
+  const other=$("#nbOther").checked, same=$("#nbFocal").checked;
+  const C=LENSES.filter(L=>L.i!==R.i && !L.ref
+      && (!other || L.brand!==R.brand)
+      && (!same || L.focal===R.focal))
+    .map(L=>({L,d:dist(R,L)})).sort((a,b)=>a.d-b.d).slice(0,10);
+  $("#nbOut").innerHTML = C.length ? `<div class="nbt">`+C.map((r,k)=>`
+    <div class="nbrow">
+      <span class="nbrank">${k+1}</span>
+      <button type="button" class="pick" data-i="${r.L.i}" aria-label="Añadir ${esc(r.L.name)} a la comparación">+</button>
+      <span class="dot" style="background:${bcol(r.L.brand)}"></span>
+      <span class="nm">${esc(r.L.name)}</span>
+      <span class="meta">${r.L.year}</span>
+      <span class="nbd">d = ${fmt(r.d,2)}</span>
+      <span class="meta nbp">pct ${pct(r.d)} %</span>
+    </div>`).join("")+`</div>`
+    : `<div class="empty">Ningún candidato cumple los filtros.</div>`;
+}
+
+/* ==== 8. Mapa ==== */
+const QTY = AXES.map(a=>({k:a.k,label:a.label,fmt:a.fmt})).concat(IDX.map(d=>({k:d.k,label:d.label+" (índice)",fmt:v=>fmt(v,0)})));
+function fillMapSel(){
+  const opts=QTY.map(q=>`<option value="${q.k}">${q.label}</option>`).join("");
+  $("#mx").innerHTML=opts; $("#my").innerHTML=opts;
+  $("#mx").value="sa"; $("#my").value="micro";
+}
+let hover=-1;
+function drawMap(){
+  const cv=$("#map"), wrap=cv.parentElement;
+  const dpr=window.devicePixelRatio||1;
+  const W=wrap.clientWidth, H=Math.max(360,Math.min(480,Math.round(W*0.5)));
+  cv.width=W*dpr; cv.height=H*dpr; cv.style.height=H+"px";
+  const g=cv.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0);
+  g.clearRect(0,0,W,H);
+  const xk=$("#mx").value, yk=$("#my").value;
+  const qx=QTY.find(q=>q.k===xk), qy=QTY.find(q=>q.k===yk);
+  const xs=LENSES.map(L=>L[xk]), ys=LENSES.map(L=>L[yk]);
+  let x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+  const px=(x1-x0)*0.06||1, py=(y1-y0)*0.06||1; x0-=px;x1+=px;y0-=py;y1+=py;
+  const ml=52,mr=14,mt=12,mb=34;
+  const X=v=>ml+(v-x0)/(x1-x0)*(W-ml-mr);
+  const Y=v=>H-mb-(v-y0)/(y1-y0)*(H-mt-mb);
+  const cs=getComputedStyle(document.documentElement);
+  const cGrid=cs.getPropertyValue("--hair").trim(), cMut=cs.getPropertyValue("--muted").trim(), cInk=cs.getPropertyValue("--ink").trim();
+  g.font="11px system-ui, sans-serif"; g.lineWidth=1;
+  const ticks=(a,b)=>{const s=(b-a)/5;return [0,1,2,3,4,5].map(i=>a+i*s);};
+  g.strokeStyle=cGrid; g.fillStyle=cMut;
+  ticks(x0,x1).forEach(v=>{const x=X(v);g.beginPath();g.moveTo(x,mt);g.lineTo(x,H-mb);g.stroke();g.textAlign="center";g.fillText(fmt(v,(x1-x0)<8?1:0),x,H-mb+16);});
+  ticks(y0,y1).forEach(v=>{const y=Y(v);g.beginPath();g.moveTo(ml,y);g.lineTo(W-mr,y);g.stroke();g.textAlign="right";g.fillText(fmt(v,(y1-y0)<8?1:0),ml-8,y+3);});
+  if(xk==="sa"&&x0<0&&x1>0){g.strokeStyle=cMut;g.beginPath();g.moveTo(X(0),mt);g.lineTo(X(0),H-mb);g.stroke();}
+  g.fillStyle=cMut; g.textAlign="center"; g.fillText(qx.label,ml+(W-ml-mr)/2,H-6);
+  g.save(); g.translate(12,mt+(H-mt-mb)/2); g.rotate(-Math.PI/2); g.fillText(qy.label,0,0); g.restore();
+  LENSES.forEach(L=>{
+    const x=X(L[xk]),y=Y(L[yk]);
+    g.beginPath(); g.arc(x,y,3.4,0,7);
+    if(L.ref){ g.strokeStyle=bcol(L.brand); g.stroke(); }
+    else { g.fillStyle=bcol(L.brand); g.globalAlpha=0.85; g.fill(); g.globalAlpha=1; }
+  });
+  sel.forEach((i,k)=>{const L=LENSES[i];g.beginPath();g.arc(X(L[xk]),Y(L[yk]),6.5,0,7);g.strokeStyle=SLOT[k];g.lineWidth=2;g.stroke();g.lineWidth=1;});
+  if(hover>=0){const L=LENSES[hover];g.beginPath();g.arc(X(L[xk]),Y(L[yk]),5.5,0,7);g.strokeStyle=cInk;g.stroke();}
+  cv._map={X,Y,xk,yk};
+  const cap = hover>=0
+    ? `${LENSES[hover].name}: ${qx.label} ${qx.fmt(LENSES[hover][xk])}, ${qy.label} ${qy.fmt(LENSES[hover][yk])}`
+    : "Pase por un punto para identificarlo; pulse para añadirlo a la comparación.";
+  $("#mapCap").textContent=cap;
+}
+function nearPoint(ev){
+  const cv=$("#map"), r=cv.getBoundingClientRect(), M=cv._map;
+  if(!M) return -1;
+  const mx=ev.clientX-r.left, my=ev.clientY-r.top;
+  let best=-1,bd=12*12;
+  LENSES.forEach(L=>{const dx=M.X(L[M.xk])-mx,dy=M.Y(L[M.yk])-my,d=dx*dx+dy*dy;if(d<bd){bd=d;best=L.i;}});
+  return best;
+}
+
+/* ==== 9. Arranque ==== */
+function boot(){
+  $("#count").textContent = `${fmt(LENSES.length-1)} objetivos de montura M más la fila de referencia del Q3 43, ${fmt(AXES.length)} ejes, ${fmt(IDX.length)} índices declarados.`;
+  $("#formulas").innerHTML = IDX.map(d=>`<div><span class="fl">${d.label}</span> = ${d.formula}</div>`).join("");
+  fillFilters(); fillMapSel(); fillNb();
+  renderList(); renderSel(); renderProfiles(); renderPair(); renderNb(); drawMap();
+  $("#pairA").addEventListener("change",renderPair);
+  $("#pairB").addEventListener("change",renderPair);
+  $("#nbRef").addEventListener("change",renderNb);
+  $("#nbOther").addEventListener("change",renderNb);
+  $("#nbFocal").addEventListener("change",renderNb);
+  $("#nbOut").addEventListener("click",ev=>{
+    const b=ev.target.closest(".pick"); if(!b) return;
+    toggle(parseInt(b.dataset.i,10));
+  });
+  ["input","change"].forEach(e=>{
+    $("#fText").addEventListener(e,renderList);
+    $("#fBrand").addEventListener(e,renderList);
+    $("#fFocal").addEventListener(e,renderList);
+  });
+  $("#fReset").addEventListener("click",()=>{$("#fText").value="";$("#fBrand").value="";$("#fFocal").value="";renderList();});
+  $("#list").addEventListener("click",ev=>{
+    const b=ev.target.closest("[data-i]"); if(!b) return;
+    toggle(parseInt(b.dataset.i,10));
+  });
+  $("#chips").addEventListener("click",ev=>{
+    const c=ev.target.closest(".chip"); if(!c) return;
+    toggle(parseInt(c.dataset.i,10));
+  });
+  $("#clearBtn").addEventListener("click",()=>{sel=[];renderList();renderSel();renderProfiles();renderPair();drawMap();});
+  $("#mx").addEventListener("change",drawMap);
+  $("#my").addEventListener("change",drawMap);
+  const cv=$("#map");
+  cv.addEventListener("mousemove",ev=>{const n=nearPoint(ev); if(n!==hover){hover=n;drawMap();}});
+  cv.addEventListener("mouseleave",()=>{hover=-1;drawMap();});
+  cv.addEventListener("click",ev=>{const n=nearPoint(ev); if(n>=0) toggle(n);});
+  window.addEventListener("resize",drawMap);
+}
+document.addEventListener("DOMContentLoaded",boot);
+
+</script>
+</body>
+</html>
