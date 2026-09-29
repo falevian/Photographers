@@ -48,6 +48,10 @@ section{border-top:1px solid var(--hair);margin-top:34px}
 .filters button{background:none;border:0;color:var(--muted);font:inherit;cursor:pointer;padding:7px 4px}
 .filters button:hover{color:var(--ink)}
 #listCount{font-family:var(--sans);font-size:13px;color:var(--muted);margin:0 0 6px}
+.brandchips{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 12px}
+.bchip{display:inline-flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--hair);border-radius:999px;color:var(--muted);font:13px var(--sans);padding:4px 11px;cursor:pointer}
+.bchip:hover{color:var(--ink)}
+.bchip.on{color:var(--ink);background:var(--panel2)}
 #list{max-height:310px;overflow:auto;border:1px solid var(--hair);border-radius:8px;background:var(--panel);font-family:var(--sans);font-size:14px}
 #list .row{display:flex;align-items:center;gap:10px;padding:6px 10px;border-bottom:1px solid var(--hair)}
 #list .row:last-child{border-bottom:0}
@@ -170,10 +174,10 @@ footer{border-top:1px solid var(--hair);margin-top:44px;padding-top:16px;font-fa
   <p class="lead">Hasta cuatro objetivos. Las barras usan los mismos índices ordinales de la carta completa; la distancia entre perfiles es euclídea sobre los siete ejes normalizados por su dispersión en el catálogo.</p>
   <div class="filters">
     <input id="fText" type="text" placeholder="buscar por nombre" aria-label="Buscar por nombre">
-    <select id="fBrand" aria-label="Filtrar por marca"></select>
     <select id="fFocal" aria-label="Filtrar por focal"></select>
     <button id="fReset" type="button">restablecer</button>
   </div>
+  <div id="fBrand" class="brandchips" role="group" aria-label="Filtrar por marcas"></div>
   <p id="listCount"></p>
   <div id="list" aria-label="Catálogo de objetivos"></div>
   <div class="selbar"><span id="chips"></span><button id="clearBtn" type="button" hidden>vaciar selección</button></div>
@@ -449,17 +453,27 @@ let sel=[];               /* índices de LENSES, máx. 4 */
 const MAXSEL=4;
 
 /* ==== 6. Filtros y lista ==== */
+const brandSel = new Set();
 function fillFilters(){
   const brands=[...new Set(LENSES.map(L=>L.brand))].sort((a,b)=>a.localeCompare(b,"es"));
-  $("#fBrand").innerHTML = `<option value="">todas las marcas</option>` + brands.map(b=>`<option>${esc(b)}</option>`).join("");
+  $("#fBrand").innerHTML = brands.map(b=>
+    `<button type="button" class="bchip" data-b="${esc(b)}" aria-pressed="false"><span class="dot" style="background:${bcol(b)}"></span>${esc(b)}</button>`).join("");
   const focs=[...new Set(LENSES.map(L=>L.focal))].sort((a,b)=>a-b);
   $("#fFocal").innerHTML = `<option value="">todas las focales</option>` + focs.map(f=>`<option value="${f}">${f} mm</option>`).join("");
 }
+function paintBrandChips(){
+  $$("#fBrand .bchip").forEach(c=>{
+    const on=brandSel.has(c.dataset.b);
+    c.classList.toggle("on",on);
+    c.setAttribute("aria-pressed",on?"true":"false");
+    c.style.borderColor = on ? bcol(c.dataset.b) : "";
+  });
+}
 function visible(){
-  const q=$("#fText").value.trim().toLowerCase(), b=$("#fBrand").value, f=$("#fFocal").value;
+  const q=$("#fText").value.trim().toLowerCase(), f=$("#fFocal").value;
   return LENSES.filter(L=>
     (!q || L.name.toLowerCase().includes(q)) &&
-    (!b || L.brand===b) &&
+    (!brandSel.size || brandSel.has(L.brand)) &&
     (!f || L.focal===parseFloat(f)));
 }
 function renderList(){
@@ -791,10 +805,15 @@ function boot(){
   });
   ["input","change"].forEach(e=>{
     $("#fText").addEventListener(e,renderList);
-    $("#fBrand").addEventListener(e,renderList);
     $("#fFocal").addEventListener(e,renderList);
   });
-  $("#fReset").addEventListener("click",()=>{$("#fText").value="";$("#fBrand").value="";$("#fFocal").value="";renderList();});
+  $("#fBrand").addEventListener("click",ev=>{
+    const c=ev.target.closest(".bchip"); if(!c) return;
+    const b=c.dataset.b;
+    if(brandSel.has(b)) brandSel.delete(b); else brandSel.add(b);
+    paintBrandChips(); renderList();
+  });
+  $("#fReset").addEventListener("click",()=>{$("#fText").value="";$("#fFocal").value="";brandSel.clear();paintBrandChips();renderList();});
   $("#list").addEventListener("click",ev=>{
     const b=ev.target.closest("[data-i]"); if(!b) return;
     toggle(parseInt(b.dataset.i,10));
