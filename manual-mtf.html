@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="Rafael Vida">
+<meta name="description" content="Manual de lectura de curvas MTF: anatomía de la ficha, firmas de cada aberración con gráficas ilustrativas, y la traducción de la curva al rendering: pop, cremosidad, glow, bokeh.">
+<meta name="theme-color" content="#04060a">
+<title>Manual de lectura MTF · del gráfico al rendering</title>
+<style>
+:root{
+  --bg:#05070b; --panel:#0c1119; --panel2:#101724; --hair:#1d2635;
+  --ink:#e9e5da; --muted:#949dad; --gold:#E8B33C; --teal:#35B7E6; --coral:#F0997B;
+  --serif:Charter,"Bitstream Charter","Iowan Old Style",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 var(--serif)}
+a{color:var(--gold);text-decoration:none}
+a:hover,a:focus-visible{text-decoration:underline}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.wrap{max-width:900px;margin:0 auto;padding:0 20px 64px}
+header.top{padding:44px 0 6px}
+.kicker{font-family:var(--sans);font-size:13px;color:var(--muted)}
+h1{font-size:clamp(28px,4.4vw,40px);line-height:1.12;margin:10px 0 14px;font-weight:600}
+h1 em{font-style:normal;color:var(--gold)}
+.thesis{max-width:64ch}
+h2{font-size:22px;margin:46px 0 10px;font-weight:600}
+h3{font-size:17px;margin:30px 0 6px;font-weight:600}
+p{max-width:70ch}
+p.note{color:var(--muted);font-size:14.5px}
+section{border-top:1px solid var(--hair);margin-top:36px}
+ol.proto{max-width:70ch;padding-left:22px}
+ol.proto li{margin:7px 0}
+table{border-collapse:collapse;font-family:var(--sans);font-size:13.5px;margin:14px 0;width:100%}
+th,td{border:1px solid var(--hair);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:var(--panel);font-weight:600}
+td{color:var(--muted)}
+td:first-child{color:var(--ink)}
+figure{margin:18px 0;background:var(--panel);border:1px solid var(--hair);border-radius:10px;padding:12px 12px 8px}
+figure svg{display:block;width:100%;height:auto}
+figcaption{font-family:var(--sans);font-size:13px;color:var(--muted);padding:8px 4px 4px;line-height:1.5}
+.figrow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:640px){.figrow{grid-template-columns:1fr}}
+footer{border-top:1px solid var(--hair);margin-top:48px;padding-top:16px;font-family:var(--sans);font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div class="kicker"><a href="index.html">Photographers</a> / <a href="caracter-optico-leica-m.html">carta completa</a> / <a href="caracter-optico-reducido.html">carta reducida</a> / manual MTF</div>
+  <h1>Leer una MTF:<br>del gráfico al <em>rendering</em></h1>
+  <p class="thesis">Una ficha MTF es un informe de aberraciones cifrado. Este manual lo descifra en las dos direcciones: de la forma de la curva al defecto que la produce, y de la cualidad que buscas (pop, cremosidad, glow) a lo que debes exigirle a la gráfica. Cada firma va con su gráfica ilustrativa, generada aquí mismo.</p>
+</header>
+
+<section>
+<h2>1. Qué es y qué no es</h2>
+<p>La MTF mide la fracción de contraste de una mira sinusoidal que sobrevive al objetivo, en función de la frecuencia espacial (pares de líneas por mm) y de la altura de imagen Y (mm desde el centro del fotograma; 21,6 mm es la esquina del paso universal). Tres cautelas previas: las fichas de fabricante suelen ser calculadas desde el diseño, sin tolerancias de fabricación ni recubrimientos; se trazan a foco óptimo y casi siempre a infinito, y el retrato se hace a dos metros; y son policromáticas, lo que diluye el cromatismo longitudinal hasta hacerlo casi invisible.</p>
+</section>
+
+<section>
+<h2>2. Anatomía de la ficha</h2>
+<p>El formato Leica/Zeiss dibuja cuatro frecuencias (5, 10, 20 y 40 pl/mm, de arriba abajo) con dos curvas cada una: tangencial (T, trazo continuo, estructuras perpendiculares al radio) y sagital (S, discontinuo, estructuras a lo largo del radio), y repite la familia a plena apertura y a f/5.6. Qué cuenta cada banda: 5 y 10 pl/mm es el contraste de las masas grandes, el relieve y la profundidad (la banda que según Heynacher y Nasse domina el juicio subjetivo); 20 pl/mm es la nitidez percibida a distancia normal; 40 pl/mm es el microcontraste, la frontera entre clínico y amable. Regla de oro: compara siempre T con S de la misma frecuencia, nunca curvas adyacentes.</p>
+<figure><div id="fig-anatomia"></div><figcaption>Ficha tipo a plena apertura de un diseño moderno equilibrado. Las cuatro frecuencias apiladas, T continua y S discontinua. La flecha marca la lectura fundamental: separación vertical T/S a una misma altura Y.</figcaption></figure>
+</section>
+
+<section>
+<h2>3. Protocolo de lectura en diez pasos</h2>
+<ol class="proto">
+<li>Lee los cuatro valores en Y = 0 a plena apertura: el de 10 pl/mm predice el relieve, el de 40 el carácter clínico o suave.</li>
+<li>Mide el hueco entre la familia de plena apertura y la de f/5.6 en el centro: grande, mucha esférica; casi nulo, diseño apocromático.</li>
+<li>Busca separaciones T/S a cada altura.</li>
+<li>Sigue la monotonía de cada curva: valles y remontadas con T y S en fase delatan curvatura de campo.</li>
+<li>Mira la esquina a 5 pl/mm: dice si las masas llegan al borde.</li>
+<li>Compara tangenciales y sagitales en el último tercio también a f/5.6: T persistentemente peor es cromatismo lateral.</li>
+<li>Anota a qué altura empieza la degradación: ahí acaba el territorio del sujeto.</li>
+<li>Clasifica cada defecto como curable al diafragmar (esférica, coma) o estructural (astigmatismo, curvatura, LaCA).</li>
+<li>Abre la hoja de viñeteo y distorsión del mismo documento: no están en la MTF y cambian la lectura estética.</li>
+<li>Recuerda lo que no has visto: velo, signo de la esférica, LoCA, estructura del disco (sección 6).</li>
+</ol>
+</section>
+
+<section>
+<h2>4. Firmas de las aberraciones</h2>
+<table>
+<tr><th>Aberración</th><th>Firma en la MTF</th><th>Prueba de confirmación</th></tr>
+<tr><td>Esférica (SA)</td><td>Depresión también en Y = 0 a plena apertura</td><td>Se cura espectacularmente a f/5.6</td></tr>
+<tr><td>Glow (SA alta)</td><td>5 y 10 pl/mm hundidas en eje, 40 con cola digna</td><td>Contraste bajo con resolución alta</td></tr>
+<tr><td>Coma</td><td>T/S separadas y hundidas en el tercio exterior</td><td>Desaparece a f/4 o f/5.6</td></tr>
+<tr><td>Astigmatismo</td><td>Separación T/S a igual Y</td><td>Persiste al diafragmar</td></tr>
+<tr><td>Curvatura de campo</td><td>Oscilación no monótona de T y S en fase</td><td>Persiste; el valle se desplaza</td></tr>
+<tr><td>Cromatismo lateral</td><td>T bajo S en el borde del campo</td><td>Inmune al diafragma</td></tr>
+<tr><td>Cromatismo longitudinal</td><td>Casi invisible: pérdida pequeña y uniforme</td><td>Curvas por longitud de onda o imagen real</td></tr>
+</table>
+
+<h3>Esférica residual</h3>
+<p>Única aberración monocromática activa en el eje: deprime el contraste en Y = 0 a plena apertura y el hueco respecto a f/5.6 mide su cantidad. Límite esencial: la MTF a foco óptimo es ciega al signo. Subcorregida y sobrecorregida con igual módulo dan curvas casi idénticas; el signo, que decide si el bokeh es cremoso o nervioso, solo aparece en el through-focus, en la deriva de foco al diafragmar o en los discos reales.</p>
+<figure><div id="fig-esferica"></div><figcaption>La firma: la misma curva de 20 pl/mm a plena apertura y a f/5.6. El hueco en el eje es esférica residual; al cerrar, los rayos marginales dejan de participar y la curva se recupera.</figcaption></figure>
+
+<h3>Glow</h3>
+<p>Esférica muy alta más dispersión: PSF de núcleo nítido rodeado de halo. El halo roba contraste a las masas sin destruir el detalle: frecuencias bajas anormalmente hundidas con la de 40 conservando cola. Contraste global bajo con resolución sorprendentemente alta es la firma del velo esférico.</p>
+<figure><div id="fig-glow"></div><figcaption>Familia comprimida por arriba: la curva de 5 pl/mm, que en un objetivo normal rozaría 1, arranca en 0,78. La distancia entre 5 y 40 se ha estrechado: eso es el halo.</figcaption></figure>
+
+<h3>Coma frente a astigmatismo</h3>
+<p>Ambos separan T de S en el campo; la biografía los distingue. El coma muere al diafragmar; el astigmatismo sobrevive. Separación que se cierra a f/4: coma. Separación que persiste: astigmatismo (o curvatura, si T y S oscilan juntas).</p>
+<div class="figrow">
+<figure><div id="fig-coma14"></div><figcaption>Coma a plena apertura: el tercio exterior se abre y se hunde.</figcaption></figure>
+<figure><div id="fig-coma56"></div><figcaption>El mismo objetivo a f/5.6: la separación se ha cerrado. Era coma.</figcaption></figure>
+</div>
+<div class="figrow">
+<figure><div id="fig-astig14"></div><figcaption>Astigmatismo a plena apertura: T y S divergen desde media altura.</figcaption></figure>
+<figure><div id="fig-astig56"></div><figcaption>A f/5.6 todo sube, pero el hueco T/S sigue ahí. Estructural.</figcaption></figure>
+</div>
+
+<h3>Curvatura de campo</h3>
+<p>La superficie nítida es un casquete que corta al sensor en anillos: las curvas caen, hacen valle en la zona media y remontan hacia la esquina, moviendo T y S en fase. Si oscilan por separado, hay además astigmatismo: las superficies T y S son dos casquetes distintos.</p>
+<figure><div id="fig-curvatura"></div><figcaption>La oscilación no monótona: valle hacia Y = 12 y remontada hacia la esquina. El casquete de foco se aleja del sensor y vuelve a cortarlo.</figcaption></figure>
+
+<h3>Cromatismo lateral</h3>
+<p>El aumento depende de la longitud de onda: el punto se estira radialmente en un pequeño arcoíris que emborrona las estructuras tangenciales del borde. Firma: tangenciales persistentemente por debajo de las sagitales en el último tercio, insensible al diafragma. Se corrige bien por software.</p>
+<figure><div id="fig-laca"></div><figcaption>T cayendo bajo S solo en el borde del campo. Repite la lectura a f/5.6: si no cambia, es LaCA.</figcaption></figure>
+
+<h3>Cromatismo longitudinal, el punto ciego</h3>
+<p>En una MTF policromática la LoCA queda diluida como una pérdida pequeña y uniforme, indistinguible de otras causas; en fichas calculadas, ni eso. Se detecta en imagen (ribetes magenta delante y verdes detrás del foco) o con curvas monocromáticas que casi nadie publica.</p>
+<figure><div id="fig-loca"></div><figcaption>Dos objetivos, uno con LoCA marcada y otro sin ella: sus curvas policromáticas son casi indistinguibles. La aberración que más daña el bokeh es invisible aquí.</figcaption></figure>
+</section>
+
+<section>
+<h2>5. De la cualidad a la curva</h2>
+
+<h3>Pop 3D</h3>
+<p>Curvas de 5 y 10 pl/mm altas y planas en el tercio central a plena apertura (0,9 o más), hueco moderado respecto a f/5.6, y en la hoja adyacente 1 a 2 EV de viñeteo. Lo que la MTF no garantiza: LoCA baja y negros profundos, que dependen de los recubrimientos. Nasse: entre dos objetivos de igual resolución límite, el que gana a 10 y 20 pl/mm parece más tridimensional.</p>
+
+<h3>Cremosidad y doble línea: el perfil del disco</h3>
+<p>La ficha solo da la condición necesaria (hueco grande entre familias: esférica abundante); el signo decide el resultado y hay que buscarlo fuera. Subcorregida: disco con núcleo brillante y borde que se desvanece, fondos que se funden como acuarela, deriva de foco hacia atrás al diafragmar. Sobrecorregida: anillo brillante en el borde del disco que, solapado a lo largo de una rama desenfocada, duplica la línea; deriva hacia delante. El error clásico es atribuir la doble línea al astigmatismo: no, es esférica con el signo equivocado.</p>
+<figure><div id="fig-discos"></div><figcaption>Perfil de intensidad del disco de desenfoque según el estado de corrección. El mismo módulo de esférica con signos opuestos produce la acuarela o la doble línea; la MTF en foco no los distingue.</figcaption></figure>
+
+<h3>Glow onírico</h3>
+<p>La firma de la sección 4, con dos exigencias añadidas: que a f/2.8 el glow se apague (quieres poder elegirlo) y un velo moderado que lo alimente.</p>
+
+<h3>Remolino</h3>
+<p>Astigmatismo fuerte en el tercio exterior (visible: hueco T/S grande y persistente) más recorte mecánico de pupila, que la MTF no muestra: búscalo en la hoja de viñeteo, donde una caída brusca superior a 2 EV sugiere pupila muy recortada.</p>
+
+<h3>Clínico frente a elegante</h3>
+<p>Clínico: la curva de 40 pegada a la de 20 en todo el campo y hueco casi nulo entre aperturas. Elegancia clásica: 10 y 20 altas con la de 40 deliberadamente descolgada a 0,6 o 0,7: macro sin micro, dibujo amable sin sacrificar relieve.</p>
+<div class="figrow">
+<figure><div id="fig-clinico"></div><figcaption>Perfil clínico: 20 y 40 pl/mm casi pegadas. Textura dura.</figcaption></figure>
+<figure><div id="fig-elegante"></div><figcaption>Perfil clásico: mismo macro, la de 40 descolgada. Dibujo amable.</figcaption></figure>
+</div>
+
+<h3>Esquinas que se funden</h3>
+<p>Caída fuerte de todas las frecuencias en el último tercio con la de 5 pl/mm aguantando: las masas llegan, el detalle no. Periferia expresiva sin destrucción geométrica.</p>
+</section>
+
+<section>
+<h2>6. Los puntos ciegos</h2>
+<table>
+<tr><th>Cualidad</th><th>Por qué no está en la MTF</th><th>Dónde mirarla</th></tr>
+<tr><td>Velo, nivel de negro</td><td>MTF normalizada a 1 en frecuencia cero; el cálculo ignora recubrimientos</td><td>Contraluces reales, generación del tratamiento</td></tr>
+<tr><td>Signo de la esférica</td><td>Simetría de la MTF a foco óptimo</td><td>Through-focus, deriva de foco, discos</td></tr>
+<tr><td>LoCA</td><td>Diluida en la integración policromática</td><td>Bordes fuera de foco en imagen</td></tr>
+<tr><td>Rizado asférico</td><td>Estructura fina del disco</td><td>Discos de altas luces ampliados</td></tr>
+<tr><td>Ojo de gato, recorte</td><td>Propiedad de la pupila fuera de eje</td><td>Hoja de viñeteo, discos en esquina</td></tr>
+<tr><td>Viñeteo y distorsión</td><td>Hojas aparte</td><td>Ficha de iluminación relativa</td></tr>
+<tr><td>Deriva de foco</td><td>Fenómeno entre aperturas</td><td>Series de enfoque diafragmando</td></tr>
+<tr><td>Bokeh en general</td><td>Requiere la PSF 3D, no su corte en foco</td><td>Imágenes; modelo r(ρ) = aρ + bρ³</td></tr>
+</table>
+<p class="note">Corolario: dos objetivos con fichas idénticas pueden renderizar distinto. Es el caso Summilux-M 50 ASPH 11891 frente a 11728: curvas iguales, diferencias reales solo mecánicas y, si acaso, de recubrimiento.</p>
+</section>
+
+<section>
+<h2>7. Ejemplos leídos</h2>
+<p>Cinco fichas analizadas con el protocolo, cuatro de ellas de objetivos célebres. Las gráficas son redibujos aproximados a partir de las hojas de datos y mediciones publicadas, hechos para ilustrar la lectura; no sustituyen a la ficha original de cada fabricante.</p>
+
+<h3>Un moderno con sabor clásico (tipo Simera 28 a f/1.4)</h3>
+<p>Centro con macro excelente y micro no clínico, primer tercio sin astigmatismo, colapso sagital en zona media con valle y remontada (astigmatismo severo sobre curvatura de campo) y esquina donde las masas aún llegan. Pendiente de la familia f/5.6 para medir la esférica, y de imagen real para signo, LoCA y velo.</p>
+<figure><div id="fig-simera"></div><figcaption>Las tres lecturas clave anotadas: el hueco T/S a 40 pl/mm en Y = 12,6 (astigmatismo), el valle con remontada de las sagitales (curvatura) y la curva de 5 pl/mm llegando a la esquina con 0,72.</figcaption></figure>
+
+<h3>Summilux-M 50 f/1.4 ASPH, el moderno con secreto (f/1.4)</h3>
+<p>Centro en 0,97 / 0,93 / 0,85 / 0,68: macro de referencia y micro alto que se queda deliberadamente a un paso de lo clínico. Caída monótona y suave, astigmatismo moderado que crece desde Y = 8 sin dramatismo, nada estructural grave: una ficha casi aburrida de buena. El giro está en lo que no aparece: su punto débil célebre es la LoCA, bien visible en los bordes del bokeh, y una esférica ligeramente sobrecorregida con deriva de foco leve. La ficha impecable esconde el defecto real, y es el mismo objetivo del caso 11891/11728: curvas idénticas entre versiones.</p>
+<figure><div id="fig-lux50"></div><figcaption>El perfil del Summilux 50 ASPH a plena apertura: alto, monótono, con separaciones T/S contenidas. Su LoCA, el rasgo que más condiciona su bokeh, es invisible aquí.</figcaption></figure>
+
+<h3>Summicron-M 50 f/2 (diseño Mandler, 1979), el patrón de medida (f/2)</h3>
+<p>Seis elementos y vidrios económicos, optimización de coste llevada a arte: 0,96 / 0,92 / 0,82 / 0,62 en el centro a plena apertura. El 0,62 a 40 pl/mm es exactamente la zona elegante: macro alto con micro moderado, dibujo amable sin sacrificar relieve. Ligera curvatura en zona media que aplana las sagitales sin llegar a valle, astigmatismo contenido, y a f/5.6 roza el comportamiento apocromático. Durante décadas fue el patrón contra el que se midió todo lo demás, y la ficha explica por qué.</p>
+<figure><div id="fig-cron50"></div><figcaption>El Summicron 50 a f/2: la de 40 descolgada en la zona del compromiso clásico, sagitales que se aplanan en zona media por curvatura leve.</figcaption></figure>
+
+<h3>Summilux-M 75 f/1.4 (Mandler, 1980), el glow de catálogo (f/1.4)</h3>
+<p>La firma de la esférica masiva en estado puro: toda la familia deprimida también en Y = 0, con la de 40 en 0,38. La curva teal muestra la prueba diagnóstica: la de 20 pl/mm salta de 0,55 a 0,90 al cerrar a f/5.6. Defecto curable, es decir, conmutable: a plena apertura núcleo nítido envuelto en halo, dos pasos cerrado un objetivo serio. Subcorregida, con deriva de foco hacia atrás y fondo de acuarela: el onírico clásico de la casa, y la razón de que en los foros el Mandler sea sinónimo de un rendering y no de un diseñador.</p>
+<figure><div id="fig-lux75"></div><figcaption>Summilux 75 a f/1.4 con la curva de 20 pl/mm a f/5.6 superpuesta: el hueco vertical en el eje es la esférica, y su cierre al diafragmar la confirma como curable.</figcaption></figure>
+
+<h3>Light Lens Lab Z21, la fotografía de 1932 (f/1.5)</h3>
+<p>Réplica del Sonnar 5cm f/1.5 original, así que la ficha es un documento de época: micro bajo (0,36 en el centro), sagitales con valle hacia Y = 13 y remontada clara (el casquete de curvatura del Sonnar), separaciones T/S grandes y persistentes, y sin embargo la de 5 pl/mm aguantando con dignidad: las masas brillan, que es el encanto Sonnar. Lo que la ficha no cuenta: la réplica monta recubrimientos modernos, así que el velo es menor que el del original, y hereda la deriva de foco legendaria del diseño (la esférica subcorregida que a la vez le da el fondo fundido).</p>
+<figure><div id="fig-z21"></div><figcaption>El Z21 a f/1.5: la ficha de un diseño de 1932. Valle y remontada sagital, micro bajo, masas dignas. Compárese con el Summilux 50 ASPH: noventa años de corrección en una mirada.</figcaption></figure>
+</section>
+
+<section>
+<h2>8. Errores comunes</h2>
+<ol class="proto">
+<li>Comparar una curva T con la S de la frecuencia vecina.</li>
+<li>Juzgar por la resolución límite en vez de por 10 y 20 pl/mm.</li>
+<li>Leer una ficha calculada como si incluyera recubrimientos y tolerancias.</li>
+<li>Atribuir al astigmatismo el bokeh de doble línea (es esférica sobrecorregida).</li>
+<li>Concluir el signo de la esférica desde una sola familia de curvas.</li>
+<li>Olvidar que la ficha es a infinito y el retrato se hace a dos metros.</li>
+<li>Tratar el viñeteo como defecto a restar en vez de como parámetro estético.</li>
+<li>Esperar que MTF idéntica implique rendering idéntico.</li>
+</ol>
+</section>
+
+<footer>Gráficas ilustrativas generadas en el navegador, sin dependencias. Referencias: H. H. Nasse, “How to Read MTF Curves” I y II, Carl Zeiss; E. Heynacher, Zeiss; hojas de datos de Leica Camera AG. <a href="caracter-optico-reducido.html">Carta reducida</a> · <a href="caracter-optico-leica-m.html">carta completa</a>.</footer>
+
+</div>
+<script>
+"use strict";
+/* Gráficas ilustrativas del manual MTF. SVG generado en el navegador. */
+
+const NS="http://www.w3.org/2000/svg";
+const INK="#d8d2c4", MUT="#8a93a3", HAIR="#1d2635", GOLD="#E8B33C", TEAL="#35B7E6", CORAL="#F0997B";
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+function interp(pts){
+  return y=>{
+    if(y<=pts[0][0]) return pts[0][1];
+    for(let i=1;i<pts.length;i++){
+      if(y<=pts[i][0]){
+        const [x0,v0]=pts[i-1],[x1,v1]=pts[i];
+        const t=(y-x0)/(x1-x0), s=0.5-0.5*Math.cos(Math.PI*t);
+        return v0+(v1-v0)*s;
+      }
+    }
+    return pts[pts.length-1][1];
+  };
+}
+
+function el(tag,attrs,parent){
+  const e=document.createElementNS(NS,tag);
+  for(const k in attrs) e.setAttribute(k,attrs[k]);
+  if(parent) parent.appendChild(e);
+  return e;
+}
+function txt(parent,x,y,s,attrs){
+  const t=el("text",Object.assign({x,y,fill:MUT,"font-family":"system-ui,sans-serif","font-size":"11"},attrs||{}),parent);
+  t.textContent=s; return t;
+}
+
+function drawChart(id,cfg){
+  const host=document.getElementById(id); if(!host) return;
+  const W=460, H=cfg.h||250;
+  const ml=36, mr=cfg.mr!==undefined?cfg.mr:34, mt=14, mb=34;
+  const x0=cfg.x0!==undefined?cfg.x0:0, x1=cfg.x1!==undefined?cfg.x1:21.6;
+  const X=v=>ml+(v-x0)/(x1-x0)*(W-ml-mr);
+  const Y=v=>H-mb-v*(H-mt-mb);
+  const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,role:"img","aria-label":cfg.alt||"Gráfica MTF ilustrativa"});
+  host.appendChild(svg);
+  for(let v=0;v<=1.001;v+=0.2){
+    el("line",{x1:ml,y1:Y(v),x2:W-mr,y2:Y(v),stroke:HAIR,"stroke-width":1},svg);
+    txt(svg,ml-6,Y(v)+3.5,v.toFixed(1).replace(".",","),{"text-anchor":"end"});
+  }
+  const xt=cfg.xticks||[0,5,10,15,20];
+  xt.forEach(v=>{
+    el("line",{x1:X(v),y1:mt,x2:X(v),y2:H-mb,stroke:HAIR,"stroke-width":1},svg);
+    txt(svg,X(v),H-mb+14,String(v).replace(".",","),{"text-anchor":"middle"});
+  });
+  el("line",{x1:ml,y1:H-mb,x2:W-mr,y2:H-mb,stroke:MUT,"stroke-width":0.8},svg);
+  el("line",{x1:ml,y1:mt,x2:ml,y2:H-mb,stroke:MUT,"stroke-width":0.8},svg);
+  txt(svg,W-mr,H-mb+28,cfg.xlab||"Y (mm)",{"text-anchor":"end"});
+  cfg.curves.forEach(c=>{
+    let d="";
+    const n=120;
+    for(let i=0;i<=n;i++){
+      const y=x0+(x1-x0)*i/n, v=clamp(c.fn(y),0,1.02);
+      d+=(i?"L":"M")+X(y).toFixed(1)+" "+Y(v).toFixed(1);
+    }
+    const p=el("path",{d,fill:"none",stroke:c.color||INK,"stroke-width":c.w||1.6},svg);
+    if(c.dash) p.setAttribute("stroke-dasharray","5 4");
+    if(c.op) p.setAttribute("stroke-opacity",c.op);
+    if(c.end) txt(svg,W-mr+4,Y(clamp(c.fn(x1),0,1))+3.5,c.end,{fill:c.color||MUT});
+  });
+  (cfg.ann||[]).forEach(a=>{
+    if(a.t==="varr"){
+      const g=el("g",{stroke:a.c||GOLD,"stroke-width":1.4},svg);
+      el("line",{x1:X(a.x),y1:Y(a.y1),x2:X(a.x),y2:Y(a.y2)},g);
+      [[a.y1,1],[a.y2,-1]].forEach(([yy,s])=>{
+        el("path",{d:`M${X(a.x)-3.5} ${Y(yy)+5*s}L${X(a.x)} ${Y(yy)}L${X(a.x)+3.5} ${Y(yy)+5*s}`,fill:"none"},g);
+      });
+      if(a.lab) txt(svg,X(a.x)+(a.dx!==undefined?a.dx:7),Y((a.y1+a.y2)/2)+3.5,a.lab,{fill:a.c||GOLD,"text-anchor":a.dx<0?"end":"start"});
+    }
+    if(a.t==="note"){
+      if(a.lx!==undefined) el("line",{x1:X(a.x),y1:Y(a.y),x2:X(a.lx),y2:Y(a.ly),stroke:MUT,"stroke-width":0.6,"stroke-dasharray":"3 3"},svg);
+      txt(svg,X(a.lx!==undefined?a.lx:a.x)+(a.dx||0),Y(a.ly!==undefined?a.ly:a.y)+(a.dy||0),a.lab,{fill:a.c||GOLD,"text-anchor":a.anchor||"start"});
+    }
+  });
+  if(cfg.legend){
+    let lx=ml+10;
+    cfg.legend.forEach(L=>{
+      const ly=mt+8;
+      const ln=el("line",{x1:lx,y1:ly,x2:lx+20,y2:ly,stroke:L.color||INK,"stroke-width":1.6},svg);
+      if(L.dash) ln.setAttribute("stroke-dasharray","5 4");
+      const t=txt(svg,lx+25,ly+3.5,L.lab,{fill:L.color&&L.c!==false?L.color:MUT});
+      lx+=25+L.lab.length*5.6+16;
+    });
+  }
+}
+
+/* perfiles suaves */
+const fall=(y,c0,c1,p)=>c0+(c1-c0)*Math.pow(y/21.6,p);
+const sep=(y,from,amp,p)=>y<=from?0:amp*Math.pow((y-from)/(21.6-from),p);
+
+const TS=[{lab:"T",color:INK},{lab:"S",dash:1,color:INK}];
+
+const FIGS={
+"fig-anatomia":{h:270,legend:TS,alt:"Ficha MTF tipo con cuatro frecuencias y curvas T y S",curves:[
+  {fn:y=>fall(y,0.98,0.88,1.8),end:"5"},
+  {fn:y=>fall(y,0.97,0.83,1.6),dash:1},
+  {fn:y=>fall(y,0.95,0.77,1.6),end:"10"},
+  {fn:y=>fall(y,0.94,0.70,1.5),dash:1},
+  {fn:y=>fall(y,0.88,0.58,1.4),end:"20"},
+  {fn:y=>fall(y,0.86,0.46,1.3),dash:1},
+  {fn:y=>fall(y,0.72,0.34,1.3),end:"40"},
+  {fn:y=>fall(y,0.70,0.22,1.2),dash:1}],
+ ann:[{t:"varr",x:14,y1:fall(14,0.70,0.22,1.2)+0.012,y2:fall(14,0.72,0.34,1.3)-0.012,lab:"T/S a igual Y",dx:8}]},
+
+"fig-esferica":{h:240,mr:60,alt:"Curva de 20 pl/mm a plena apertura y a f/5.6",curves:[
+  {fn:y=>fall(y,0.90,0.74,1.6),color:TEAL,end:"f/5.6"},
+  {fn:y=>fall(y,0.62,0.40,1.4),color:GOLD,end:"f/1.4"}],
+ ann:[{t:"varr",x:1.2,y1:0.63,y2:0.885,lab:"esférica residual",dx:8,c:GOLD}]},
+
+"fig-glow":{h:240,legend:TS,alt:"Familia comprimida por el halo del glow",curves:[
+  {fn:y=>fall(y,0.78,0.58,1.6),end:"5"},
+  {fn:y=>fall(y,0.76,0.54,1.5),dash:1},
+  {fn:y=>fall(y,0.70,0.48,1.5),end:"10"},
+  {fn:y=>fall(y,0.68,0.44,1.4),dash:1},
+  {fn:y=>fall(y,0.58,0.34,1.4),end:"20"},
+  {fn:y=>fall(y,0.56,0.28,1.3),dash:1},
+  {fn:y=>fall(y,0.46,0.20,1.3),end:"40"},
+  {fn:y=>fall(y,0.44,0.15,1.2),dash:1}],
+ ann:[{t:"varr",x:0.9,y1:0.47,y2:0.775,lab:"banda estrechada: halo",dx:8}]},
+
+"fig-coma14":{h:220,legend:TS,alt:"Coma a plena apertura",curves:[
+  {fn:y=>fall(y,0.85,0.60,1.5)},
+  {fn:y=>fall(y,0.85,0.60,1.5)-sep(y,7,0.40,1.6),dash:1}],
+ ann:[{t:"note",x:17.5,y:0.30,lx:12,ly:0.18,lab:"se abre al borde",anchor:"end",dx:-4}]},
+
+"fig-coma56":{h:220,legend:TS,alt:"El coma desaparece a f/5.6",curves:[
+  {fn:y=>fall(y,0.93,0.78,1.6)},
+  {fn:y=>fall(y,0.93,0.78,1.6)-sep(y,7,0.05,1.6),dash:1}],
+ ann:[{t:"note",x:15,y:0.86,lx:10,ly:0.60,lab:"cerrada: era coma",anchor:"start",dx:-30,c:TEAL}]},
+
+"fig-astig14":{h:220,legend:TS,alt:"Astigmatismo a plena apertura",curves:[
+  {fn:y=>fall(y,0.84,0.52,1.4)},
+  {fn:y=>fall(y,0.84,0.52,1.4)-sep(y,5,0.42,1.3),dash:1}],
+ ann:[{t:"varr",x:13,y1:fall(13,0.84,0.52,1.4)-sep(13,5,0.42,1.3)+0.012,y2:fall(13,0.84,0.52,1.4)-0.012,dx:7,lab:""}]},
+
+"fig-astig56":{h:220,legend:TS,alt:"El astigmatismo persiste a f/5.6",curves:[
+  {fn:y=>fall(y,0.93,0.72,1.5)},
+  {fn:y=>fall(y,0.93,0.72,1.5)-sep(y,5,0.34,1.3),dash:1}],
+ ann:[{t:"varr",x:13,y1:fall(13,0.93,0.72,1.5)-sep(13,5,0.34,1.3)+0.012,y2:fall(13,0.93,0.72,1.5)-0.012,dx:7,lab:"persiste",c:GOLD}]},
+
+"fig-curvatura":{h:230,legend:TS,alt:"Curvatura de campo: valle y remontada en fase",curves:[
+  {fn:y=>clamp(fall(y,0.86,0.44,1.1)-0.16*Math.exp(-Math.pow(y-12,2)/9)+0.10*Math.exp(-Math.pow(y-19,2)/8),0,1)},
+  {fn:y=>clamp(fall(y,0.82,0.40,1.1)-0.16*Math.exp(-Math.pow(y-12,2)/9)+0.10*Math.exp(-Math.pow(y-19,2)/8),0,1),dash:1}],
+ ann:[{t:"note",x:12,y:0.33,lx:8.5,ly:0.16,lab:"valle",anchor:"end",dx:-4},
+      {t:"note",x:19,y:0.52,lx:16.2,ly:0.70,lab:"remontada en fase",anchor:"end",dx:-4}]},
+
+"fig-laca":{h:230,legend:TS,alt:"Cromatismo lateral: tangencial bajo sagital en el borde",curves:[
+  {fn:y=>fall(y,0.84,0.58,1.8)-sep(y,13,0.26,1.5)},
+  {fn:y=>fall(y,0.84,0.62,1.6),dash:1}],
+ ann:[{t:"varr",x:19.5,y1:fall(19.5,0.84,0.58,1.8)-sep(19.5,13,0.26,1.5)+0.012,y2:fall(19.5,0.84,0.62,1.6)-0.012,dx:-7,lab:"T bajo S"}]},
+
+"fig-loca":{h:220,mr:96,alt:"La LoCA es casi invisible en la MTF policromática",curves:[
+  {fn:y=>fall(y,0.88,0.62,1.4),color:TEAL,end:"sin LoCA"},
+  {fn:y=>fall(y,0.85,0.59,1.4),color:GOLD,end:"con LoCA"}],
+ ann:[{t:"note",x:7,y:0.80,lx:7,ly:0.80,lab:"casi coincidentes",dx:10,dy:-26}]},
+
+"fig-discos":{h:260,x0:-1.25,x1:1.25,xticks:[-1,-0.5,0,0.5,1],mr:20,xlab:"radio del disco",alt:"Perfil de intensidad del disco según la corrección esférica",
+ legend:[{lab:"subcorregida: acuarela",color:TEAL},{lab:"corregida",color:MUT},{lab:"sobrecorregida: doble línea",color:CORAL}],
+ curves:[
+  {fn:r=>0.95*Math.exp(-Math.pow(r/0.52,2)),color:TEAL,w:1.8},
+  {fn:r=>0.62/(1+Math.pow(Math.abs(r)/0.93,18)),color:MUT,w:1.6},
+  {fn:r=>(0.42+0.56*Math.exp(-Math.pow(Math.abs(r)-0.86,2)/0.011))/(1+Math.pow(Math.abs(r)/0.99,40)),color:CORAL,w:1.8}],
+ ann:[{t:"note",x:0.86,y:0.98,lx:0.55,ly:1.0,lab:"anillo brillante",c:CORAL,anchor:"end",dx:-4},
+      {t:"note",x:0,y:0.97,lx:-0.45,ly:0.9,lab:"núcleo que se funde",c:TEAL,anchor:"end",dx:-4}]},
+
+"fig-clinico":{h:220,alt:"Perfil clínico: 20 y 40 casi pegadas",curves:[
+  {fn:y=>fall(y,0.90,0.68,1.5),end:"20"},
+  {fn:y=>fall(y,0.85,0.60,1.4),end:"40"}],
+ ann:[{t:"varr",x:9,y1:fall(9,0.85,0.60,1.4)+0.012,y2:fall(9,0.90,0.68,1.5)-0.012,dx:7,lab:"pegadas"}]},
+
+"fig-elegante":{h:220,alt:"Perfil clásico: la de 40 descolgada",curves:[
+  {fn:y=>fall(y,0.90,0.66,1.5),end:"20"},
+  {fn:y=>fall(y,0.64,0.38,1.3),end:"40"}],
+ ann:[{t:"varr",x:9,y1:fall(9,0.64,0.38,1.3)+0.012,y2:fall(9,0.90,0.66,1.5)-0.012,dx:7,lab:"macro sin micro",c:TEAL}]},
+
+"fig-lux50":{h:300,legend:TS,alt:"Summilux 50 ASPH a f/1.4, redibujo aproximado",curves:[
+  {fn:interp([[0,0.97],[8,0.96],[12,0.94],[18,0.88],[21.6,0.82]]),end:"5"},
+  {fn:interp([[0,0.97],[8,0.94],[12,0.90],[18,0.82],[21.6,0.72]]),dash:1},
+  {fn:interp([[0,0.93],[8,0.91],[12,0.87],[18,0.76],[21.6,0.66]]),end:"10"},
+  {fn:interp([[0,0.93],[8,0.88],[12,0.80],[18,0.66],[21.6,0.55]]),dash:1},
+  {fn:interp([[0,0.85],[6,0.83],[10,0.78],[14,0.68],[18,0.55],[21.6,0.44]]),end:"20"},
+  {fn:interp([[0,0.85],[6,0.78],[10,0.66],[14,0.52],[18,0.42],[21.6,0.34]]),dash:1},
+  {fn:interp([[0,0.68],[6,0.64],[10,0.56],[14,0.45],[18,0.33],[21.6,0.24]]),end:"40"},
+  {fn:interp([[0,0.68],[6,0.58],[10,0.44],[14,0.30],[18,0.22],[21.6,0.18]]),dash:1}],
+ ann:[{t:"note",x:0.6,y:0.68,lx:4.5,ly:0.52,lab:"micro alto, no clínico",dx:4},
+      {t:"note",x:14,y:0.30,lx:16.5,ly:0.16,lab:"T/S moderada y tardía",anchor:"end",dx:24}]},
+
+"fig-cron50":{h:300,legend:TS,alt:"Summicron 50 diseño Mandler a f/2, redibujo aproximado",curves:[
+  {fn:interp([[0,0.96],[8,0.93],[14,0.88],[21.6,0.80]]),end:"5"},
+  {fn:interp([[0,0.95],[8,0.90],[14,0.82],[21.6,0.70]]),dash:1},
+  {fn:interp([[0,0.92],[8,0.86],[14,0.76],[21.6,0.60]]),end:"10"},
+  {fn:interp([[0,0.90],[8,0.80],[14,0.66],[21.6,0.52]]),dash:1},
+  {fn:interp([[0,0.82],[8,0.76],[12,0.68],[16,0.58],[21.6,0.46]]),end:"20"},
+  {fn:interp([[0,0.82],[6,0.72],[10,0.58],[13,0.50],[16,0.48],[19,0.44],[21.6,0.38]]),dash:1},
+  {fn:interp([[0,0.62],[8,0.52],[12,0.42],[16,0.33],[21.6,0.24]]),end:"40"},
+  {fn:interp([[0,0.62],[6,0.48],[10,0.34],[13,0.26],[16,0.25],[19,0.23],[21.6,0.20]]),dash:1}],
+ ann:[{t:"varr",x:2,y1:0.635,y2:0.805,lab:"la zona elegante",dx:8},
+      {t:"note",x:14.5,y:0.49,lx:15.5,ly:0.66,lab:"S se aplana: curvatura leve",c:TEAL,dx:4,anchor:"end"}]},
+
+"fig-lux75":{h:300,mr:66,legend:TS,alt:"Summilux 75 Mandler a f/1.4 con la curva de 20 a f/5.6 superpuesta",curves:[
+  {fn:interp([[0,0.82],[10,0.78],[16,0.70],[21.6,0.60]]),end:"5"},
+  {fn:interp([[0,0.82],[10,0.74],[16,0.62],[21.6,0.50]]),dash:1},
+  {fn:interp([[0,0.72],[10,0.66],[16,0.55],[21.6,0.44]]),end:"10"},
+  {fn:interp([[0,0.72],[10,0.60],[16,0.46],[21.6,0.34]]),dash:1},
+  {fn:interp([[0,0.55],[10,0.48],[16,0.38],[21.6,0.28]]),end:"20"},
+  {fn:interp([[0,0.55],[8,0.44],[13,0.33],[17,0.27],[21.6,0.22]]),dash:1},
+  {fn:interp([[0,0.38],[10,0.30],[16,0.22],[21.6,0.15]]),end:"40"},
+  {fn:interp([[0,0.38],[8,0.28],[13,0.18],[17,0.13],[21.6,0.10]]),dash:1},
+  {fn:interp([[0,0.90],[10,0.82],[16,0.72],[21.6,0.60]]),color:TEAL,end:"20 a f/5.6"}],
+ ann:[{t:"varr",x:1.2,y1:0.565,y2:0.885,lab:"esférica: se cura al cerrar",dx:8}]},
+
+"fig-z21":{h:300,legend:TS,alt:"Light Lens Lab Z21 a f/1.5, redibujo aproximado",curves:[
+  {fn:interp([[0,0.88],[8,0.82],[14,0.72],[21.6,0.58]]),end:"5"},
+  {fn:interp([[0,0.87],[8,0.78],[14,0.66],[21.6,0.52]]),dash:1},
+  {fn:interp([[0,0.76],[8,0.68],[14,0.56],[21.6,0.40]]),end:"10"},
+  {fn:interp([[0,0.76],[6,0.64],[11,0.50],[15,0.44],[18,0.46],[21.6,0.40]]),dash:1},
+  {fn:interp([[0,0.58],[8,0.48],[14,0.36],[21.6,0.24]]),end:"20"},
+  {fn:interp([[0,0.58],[5,0.44],[10,0.30],[13.5,0.24],[17,0.27],[21.6,0.24]]),dash:1},
+  {fn:interp([[0,0.36],[8,0.26],[14,0.18],[21.6,0.10]]),end:"40"},
+  {fn:interp([[0,0.36],[5,0.24],[10,0.13],[14,0.08],[18,0.10],[21.6,0.09]]),dash:1}],
+ ann:[{t:"note",x:13.5,y:0.24,lx:16,ly:0.40,lab:"valle y remontada: el casquete Sonnar",c:TEAL,dx:4},
+      {t:"note",x:0.6,y:0.36,lx:4,ly:0.22,lab:"micro de 1932",dx:4}]},
+
+"fig-simera":{h:320,legend:TS,alt:"Ficha anotada con astigmatismo, curvatura y esquina",curves:[
+  {fn:interp([[0,0.99],[6,0.975],[12,0.95],[16,0.92],[19,0.84],[21.6,0.72]]),end:"5"},
+  {fn:interp([[0,0.96],[5,0.945],[10,0.91],[14,0.86],[18,0.77],[21.6,0.61]]),dash:1},
+  {fn:interp([[0,0.96],[5,0.90],[9,0.84],[13,0.74],[17,0.62],[21.6,0.45]]),end:"10"},
+  {fn:interp([[0,0.955],[4,0.90],[8,0.78],[12,0.64],[16,0.57],[19,0.50],[21.6,0.61]]),dash:1},
+  {fn:interp([[0,0.87],[6,0.80],[9,0.72],[12.6,0.60],[15,0.50],[18,0.43],[21.6,0.38]]),end:"20"},
+  {fn:interp([[0,0.86],[5,0.72],[8,0.58],[11,0.42],[12.6,0.38],[15,0.43],[16.8,0.44],[19,0.41],[21.6,0.38]]),dash:1},
+  {fn:interp([[0,0.69],[6,0.60],[10,0.51],[12.6,0.45],[16,0.35],[19,0.28],[21.6,0.25]]),end:"40"},
+  {fn:interp([[0,0.69],[4,0.52],[8,0.30],[11,0.12],[12.6,0.07],[15,0.08],[18,0.10],[21.6,0.19]]),dash:1}],
+ ann:[
+  {t:"varr",x:12.6,y1:0.085,y2:0.435,lab:"astigmatismo",dx:8},
+  {t:"note",x:12.6,y:0.38,lx:16.5,ly:0.56,lab:"valle y remontada: curvatura",c:TEAL,dx:4},
+  {t:"note",x:21.3,y:0.72,lx:17.5,ly:0.86,lab:"las masas llegan: 0,72",anchor:"end",dx:-4}]}
+};
+
+document.addEventListener("DOMContentLoaded",()=>{
+  for(const id in FIGS) drawChart(id,FIGS[id]);
+});
+
+</script>
+</body>
+</html>
