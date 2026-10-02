@@ -175,7 +175,7 @@ footer{border-top:1px solid var(--hair);margin-top:48px;padding-top:16px;font-fa
 
 <section>
 <h2>7. Ejemplos leídos</h2>
-<p>Cinco fichas analizadas con el protocolo, cuatro de ellas de objetivos célebres. Las gráficas son redibujos aproximados a partir de las hojas de datos y mediciones publicadas, hechos para ilustrar la lectura; no sustituyen a la ficha original de cada fabricante.</p>
+<p>Seis fichas analizadas con el protocolo: cuatro de objetivos célebres, una ficha tipo de diseño moderno con sabor clásico, y un ejemplo en formato Sigma para aprender a leer fichas que no siguen el convenio Leica/Zeiss. Las gráficas son redibujos aproximados a partir de las hojas de datos y mediciones publicadas, hechos para ilustrar la lectura; no sustituyen a la ficha original de cada fabricante.</p>
 
 <h3>Un moderno con sabor clásico (tipo Simera 28 a f/1.4)</h3>
 <p>Centro con macro excelente y micro no clínico, primer tercio sin astigmatismo, colapso sagital en zona media con valle y remontada (astigmatismo severo sobre curvatura de campo) y esquina donde las masas aún llegan. Pendiente de la familia f/5.6 para medir la esférica, y de imagen real para signo, LoCA y velo.</p>
@@ -196,6 +196,15 @@ footer{border-top:1px solid var(--hair);margin-top:48px;padding-top:16px;font-fa
 <h3>Light Lens Lab Z21, la fotografía de 1932 (f/1.5)</h3>
 <p>Réplica del Sonnar 5cm f/1.5 original, así que la ficha es un documento de época: micro bajo (0,36 en el centro), sagitales con valle hacia Y = 13 y remontada clara (el casquete de curvatura del Sonnar), separaciones T/S grandes y persistentes, y sin embargo la de 5 pl/mm aguantando con dignidad: las masas brillan, que es el encanto Sonnar. Lo que la ficha no cuenta: la réplica monta recubrimientos modernos, así que el velo es menor que el del original, y hereda la deriva de foco legendaria del diseño (la esférica subcorregida que a la vez le da el fondo fundido).</p>
 <figure><div id="fig-z21"></div><figcaption>El Z21 a f/1.5: la ficha de un diseño de 1932. Valle y remontada sagital, micro bajo, masas dignas. Compárese con el Summilux 50 ASPH: noventa años de corrección en una mirada.</figcaption></figure>
+
+<h3>El formato Sigma: leer con otro convenio (un 35 mm Art a plena apertura)</h3>
+<p>Antes de leer valores hay que recalibrar tres convenciones. Solo dos frecuencias: rojo 10 pl/mm (masas, relieve) y azul 30 pl/mm, a medio camino entre el 20 y el 40 de Leica. El convenio de trazos está invertido: aquí la continua es la sagital (S) y la discontinua la meridional (M, la tangencial de Leica). Y no hay familia a f/5.6; a cambio Sigma publica dos paneles del mismo objetivo a plena apertura: la MTF por difracción (cálculo ondulatorio completo, la realista) y la geométrica (solo trazado de rayos), que por construcción va siempre igual o más alta.</p>
+<div class="figrow">
+<figure><div id="fig-sigma-dif"></div><figcaption>Panel por difracción: la ficha realista. Planicie hasta 15 mm, astigmatismo solo en la esquina.</figcaption></figure>
+<figure><div id="fig-sigma-geo"></div><figcaption>Panel geométrico: sin difracción. Apenas por encima del otro: lo que falta hasta 1 es aberración real.</figcaption></figure>
+</div>
+<p>Lectura: centro en 0,97 a 10 pl/mm y 0,84 a 30, territorio apocromático a plena apertura, con micro extrapolado hacia 0,75 a 40 pl/mm, lado clínico de la escala. Las cuatro curvas se mantienen casi horizontales hasta 15 mm: dos tercios del campo útiles para el sujeto. El vaivén del azul entre 7 y 14 mm, donde M baja, cruza y queda sobre S, es una diferencia leve de curvatura entre las dos superficies focales, de amplitud trivial. Del 15 en adelante, astigmatismo moderado de esquina con la meridional aguantando mejor; las masas llegan al borde en 0,84.</p>
+<p>El diagnóstico propio de este formato está en comparar paneles, que sustituye en parte a la familia diafragmada ausente: la geométrica va solo marginalmente por encima de la de difracción (0,87 contra 0,84 en el centro a 30 pl/mm). A plena apertura de un luminoso la difracción es despreciable, así que esa distancia corta dice que lo poco que falta hasta 1 lo ponen aberraciones residuales reales, y pocas. Un clásico tendría la geométrica muy por encima allí donde sus aberraciones dominan. Traducción al rendering: candidato a pop por la banda de 10 alta y plana, micro alto tirando a clínico, nada estructural; el carácter, si lo tiene, vive íntegramente en los puntos ciegos de la sección 6.</p>
 </section>
 
 <section>
@@ -443,6 +452,25 @@ const FIGS={
   {fn:interp([[0,0.36],[5,0.24],[10,0.13],[14,0.08],[18,0.10],[21.6,0.09]]),dash:1}],
  ann:[{t:"note",x:13.5,y:0.24,lx:16,ly:0.40,lab:"valle y remontada: el casquete Sonnar",c:TEAL,dx:4},
       {t:"note",x:0.6,y:0.36,lx:4,ly:0.22,lab:"micro de 1932",dx:4}]},
+
+"fig-sigma-dif":{h:260,mr:40,alt:"Formato Sigma, panel por difracción: 10 y 30 pl/mm, S continua y M discontinua",
+ legend:[{lab:"S",color:"#C96A4A"},{lab:"M",dash:1,color:"#C96A4A",c:false}],
+ curves:[
+  {fn:interp([[0,0.965],[5,0.955],[10,0.95],[14,0.945],[15,0.94],[18,0.90],[21.6,0.84]]),color:"#C96A4A",end:"10"},
+  {fn:interp([[0,0.965],[10,0.95],[15,0.945],[18,0.925],[21.6,0.895]]),color:"#C96A4A",dash:1},
+  {fn:interp([[0,0.84],[5,0.80],[8,0.77],[10,0.735],[12,0.72],[14,0.72],[15,0.71],[17,0.66],[20,0.59],[21.6,0.545]]),color:"#5B8FD6",end:"30"},
+  {fn:interp([[0,0.84],[3,0.79],[6,0.76],[9,0.74],[11,0.73],[13,0.73],[15,0.725],[18,0.67],[20,0.645],[21.6,0.57]]),color:"#5B8FD6",dash:1}],
+ ann:[{t:"note",x:11,y:0.73,lx:9,ly:0.56,lab:"vaivén S/M: curvatura leve",c:"#5B8FD6",anchor:"middle",dx:10},
+      {t:"note",x:20,y:0.90,lx:14.5,ly:0.99,lab:"astigmatismo solo en la esquina",c:"#C96A4A",anchor:"start",dx:-36}]},
+
+"fig-sigma-geo":{h:260,mr:40,alt:"Formato Sigma, panel geométrico: solo trazado de rayos, sin difracción",
+ legend:[{lab:"S",color:"#C96A4A"},{lab:"M",dash:1,color:"#C96A4A",c:false}],
+ curves:[
+  {fn:interp([[0,0.975],[10,0.965],[15,0.955],[18,0.92],[21.6,0.845]]),color:"#C96A4A",end:"10"},
+  {fn:interp([[0,0.975],[10,0.962],[15,0.957],[21.6,0.94]]),color:"#C96A4A",dash:1},
+  {fn:interp([[0,0.87],[5,0.815],[8,0.785],[10,0.765],[12,0.75],[14,0.74],[15,0.735],[17,0.68],[20,0.60],[21.6,0.555]]),color:"#5B8FD6",end:"30"},
+  {fn:interp([[0,0.865],[2,0.835],[5,0.80],[7,0.775],[9,0.77],[12,0.775],[14,0.78],[15,0.775],[17,0.74],[19,0.70],[21.6,0.60]]),color:"#5B8FD6",dash:1}],
+ ann:[{t:"varr",x:0.8,y1:0.885,y2:0.995,lab:"lo que falta: aberración real",dx:8,c:"#5B8FD6"}]},
 
 "fig-simera":{h:320,legend:TS,alt:"Ficha anotada con astigmatismo, curvatura y esquina",curves:[
   {fn:interp([[0,0.99],[6,0.975],[12,0.95],[16,0.92],[19,0.84],[21.6,0.72]]),end:"5"},
