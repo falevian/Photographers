@@ -189,9 +189,12 @@ python3 grano.py exportada.jpg salida.jpg --pelicula trix --intensidad 1.2
 4. **Ganancia de copia.** En los sistemas negativo + papel la rms del
    datasheet es la del negativo (Kodak: densidad bruta 1.0; Fuji: densidad
    neta 1.0 sobre Dmin) y la copia la multiplica por la pendiente local del
-   papel. Con las curvas reparadas el factor vale 3.1 en el Tri-X sobre
-   Multigrade grado 2 y 3.2-3.3 por canal en el PRO 400H sobre Endura, en la
-   densidad mostrada 1.0; se aplica y se imprime. `--intensidad` lo escala.
+   papel. Con las curvas reparadas y la gamma del papel acotada a 3.0 (la
+   curva digitalizada del Multigrade llega a 4.0 y un grado 2 real ronda 3) el
+   factor vale 2.7 en el Tri-X sobre Multigrade y 2.4 por canal en el PRO 400H
+   sobre Endura, en la densidad mostrada 1.0; se aplica y se imprime.
+   `--intensidad` lo escala: 0.75 equivale a gamma 2.3 y 0.5 a gamma 1.5;
+   0.37 recupera la amplitud sin ganancia de copia.
 
 5. **Dependencia con el tono.** `--pelicula` selecciona un perfil σ(densidad
    mostrada) calculado sobre el eje neutro del modelo de cada material y
@@ -335,9 +338,9 @@ gris oscuro, ruido de medida).
    profundos de la copia).
 7. Las MTF de `grano.py` son valores típicos, no digitalizaciones; los efectos
    de adyacencia del D-76 (MTF por encima del 100 % a baja frecuencia) no se
-   modelan. La ganancia de copia del grano depende de la gamma máxima del
-   papel (4.0 en el Multigrade reparado; en un grado 2 real quizá 3): el 3.1
-   del Tri-X puede estar algo alto; `--intensidad` lo corrige.
+   modelan. La ganancia de copia del grano depende de la gamma del papel, acotada
+   a 3.0 (la curva digitalizada llega a 4.0; un grado 2 real ronda 3): el 2.7
+   del Tri-X sigue siendo una estimación; `--intensidad` lo escala.
 8. El perfil genérico supone primarios Rec.709 a la entrada. Para máxima
    fidelidad, componer sobre el perfil de cámara.
 
