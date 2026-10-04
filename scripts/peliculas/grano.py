@@ -10,12 +10,15 @@ Modelo, en cuatro pasos:
    que la pelicula se lee como pegado. --mtf50 0 lo desactiva.
 
 2. Textura. El grano es una superposicion de conglomerados de plata (o de
-   nubes de colorante) de tamaño --grano-um, colocados al azar: un modelo
-   booleano de discos, cuyo espectro de Wiener es plano hasta ~1/(2d) y cae
-   despues, como el medido en pelicula real. Las nubes de colorante llevan el
-   borde difuminado (difusion del colorante al revelar); los conglomerados de
-   plata del B/N, no. --textura gauss reproduce la textura de la version
-   anterior (ruido gaussiano filtrado), mas blanda que la real.
+   nubes de colorante) colocados al azar: un modelo booleano de discos. Los
+   tamaños no son todos iguales: siguen una distribucion log-normal de
+   mediana --grano-um y anchura --poli (0.35 por defecto; 0 = un solo
+   tamaño). Cada poblacion es independiente, asi que sus espectros de
+   potencia se suman (teorema de Campbell) y el espectro resultante decae sin
+   los anillos del disco unico, como el espectro de Wiener medido en pelicula.
+   Las nubes de colorante llevan el borde difuminado (difusion del colorante
+   al revelar); los conglomerados de plata del B/N, no. --textura gauss
+   reproduce la textura de la primera version (ruido gaussiano filtrado).
 
 3. Amplitud. La granularidad rms de la hoja tecnica esta medida con apertura
    de 48 um a densidad 1.0. La amplitud por pixel se calibra MIDIENDO sobre el
@@ -38,12 +41,23 @@ El ruido se suma en el dominio de densidad, por capa, con correlacion parcial
 entre capas y la componente cromatica escalada aparte (--croma), y se vuelve
 a sRGB. Requiere numpy y Pillow.
 
+Como mirarlo. El grano esta escalado a la pelicula: a la resolucion del M11
+cada pixel son 3.8 um, y un pixel de 3.8 um se juzga al 100 %. Reducir la
+imagen con un filtro pobre (muchos visores a "ajustar a ventana") o
+recomprimirla en JPEG a calidad media convierte el grano fino en manchas.
+Para una version reducida, o se aplica el grano directamente a la imagen ya
+reducida (la calibracion vale para cualquier paso de pixel) o se usa
+--ancho-salida, que reduce con filtro Lanczos despues de añadir el grano. El
+script guarda los JPEG a calidad 95 sin submuestreo de croma.
+
 Uso:
     python3 grano.py entrada.jpg salida.jpg --pelicula trix
     python3 grano.py entrada.jpg salida.jpg --pelicula k64 --intensidad 1.3
     python3 grano.py entrada.jpg salida.jpg --rms 16          # ley generica
     python3 grano.py recorte.jpg salida.jpg --pelicula k64 --ancho-mm 9.1
         (un recorte: se indica cuanto mide sobre el fotograma su lado largo)
+    python3 grano.py entrada.jpg web.jpg --pelicula trix --ancho-salida 2000
+        (grano a resolucion completa y reduccion con filtro para la web)
 """
 import argparse
 import base64
@@ -60,107 +74,112 @@ except ImportError:
     sys.exit('Falta Pillow:  pip install pillow')
 
 _PERFILES_B64 = (
-    "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"
-    "yKzlymoBAukmGc2WRkwon/2wJE2CgLv2GT2NXRyUrI6f7a3BQPrWisjsFKrdr75UIk+1kSbJ916JTBv5WaOtaoIxBx9TMu8p"
-    "irMxFDdh3rMJ3fBY8se4XQ1snK1Nza+tovaf88HjR4W6QGSfd61YzsZm2XUlgmBhtFd32dfKTrilh8dOiWYhsDXMc/xuJjS4"
-    "24wOb6ZU03X4ucRHJvTpE6fNj2LAVsDKusG+HYLC+Z6P5zDxgqF15FJMz2+qszChKv+n6oymVMfXb6emhobnf7ro/Bz6MxeK"
-    "Fzptxp92cRmtotUIDW20lLasgtOJjDXrjSuxv86/0Sm1Ds6fzc7oyNWBLLaNqQyuhUPqyeiYlY1Il1bgmri+h9bd7SW2NxqQ"
-    "o3rkoGRdM5TkLvtoTG7GUMKuPw0lPyDLakOa6dtWnEygLT0e0IrKm5MbMqgW6MPcwDcta6hFHjy778ZwG6z2yU35U64NpM9g"
-    "e395B1w2yo2p3tmBCU71ZjpUCeOx/Yx8yYxOvG1Z4DeligYNyeAhz4EOrF5r+yJjIh3pvTO3l5V2QkesSPKzZCe6jg0JxUt3"
-    "IeP5580Lquhg1nwWe9PZiSXqiR3BFt0483JljPiXLlwqZuXZf6BDL39R7UTtHgxP/5Rty6BEaHp8WJpMN5iCqp+DrzCwSdUw"
-    "JMeKgSmnxwaMlHKLa9tEmvtZ0EiOq5EvZ6GzOt8ufwMDfzhPzHkzyEHwOLXvo0o4OBUTyrl+hgXV6GVXblMlXMzO1lcCxgQs"
-    "qgYXZh7mgLZnbc1TKwK1A4VaZVSpbGo9M3fjnwQKH0vfc9anSvyvz44sVyaw1d4yuPIPgtrUxWprVagka3bVoWUMleRTd9Cv"
-    "Ueh//8J6X2kCk48OztvL4mBYqnz+DZIDt8vltxop7JlYtTrwCQfsB5su76DOa59Lc9n0ZxwsLZ1FL43hYIb+OV/xJA46K5Je"
-    "HoumSm01r/1ujhwIGzbZE9Qm3WElJnPZjoMJQbt3r5xHzb/khF+0EQeuCgqWxTM5SF//2tm1jw2Dyg+cY5SIWS2TOWHFYkOi"
-    "+lPm6SfUZp6cGTHYwUaaUdotPGAj61H5hlmRbOyfeTds+V1qE4cUG29JY8NokVOJSgobE7ke0rkhbCw5m5GgQ7DxpXDzyTRq"
-    "vnzSJynXmo2wP8T3KFBJgRGndPP7IiqJ6M02atnORnnTjCOx8zn4o9PsZHMvG1uiRVd43GejIltm3vl4NtZdE3RabciG5GRO"
-    "udIgG0s3TSsMf8hC9Ob+/gADFkRzZpQavGYju3zvnQeVTOQePOMvZ8pE9XrF68PL2HArFN20VpkBRbWErMGtPZi+zLkzsJQJ"
-    "6SO0R3jeBcdl3ubyY7sw/rJRyPKhDsguah0scevEuhORt5X1abgtkdn/aW4NdjDEYiTlO7EjeukNpSmNsAp+/LHPpg9RTdKu"
-    "kTWd+C50/eQrq0pMfVSMsxXCBk3d91Jq3ehYnCfIzptRCTVkexktFzVIjp9DZ8nT0O/91sLEsALvjY+2xDwTMog0TLLWX9gK"
-    "kcdyCZPtShARRpspKChgcFbI19XWsRGRc/arZeoVoD2wzMlq3iDabzk+k/Z8j2wnlVNJUenQOO658/ILDiweqY1Pffvu580P"
-    "gaqC+3/tnJuDTxFu2Qs1/mn/OVo4n6uEjjXw2R09AqYh6xmf/eHtDLm3wmV89v8fP8avomP/NK39p+iIU6Lj7+e19z9Vcdq5"
-    "TLsAs3v4nyJj1fOLE98/40O32Ffr+xTL+fDpumcuhHwdH/putz9fEtLEh09q+3MOubXy4ZSM+uBDQR18mHVQ6NC0o3Q+zJ8Z"
-    "OfFrWA8fJrktdazyY/Ghqn5V0VmFdj5M2XdG+g7VDvyO9hKJ98VoXD68ZVZk8bTsEz9qwT/x5DAffnas3youJGzwO76ewvmm"
-    "t0qID+1lovb1GQzid3TzjflWKNfEhz9v1/6O+1Kuyy82EjD4HQvHbsy9sE6ED10zCXVja36kP+k/CrogH35o9de7OHsIv2PB"
-    "utnzJ6t+5UNzvxnHQ+Z+48OTQeYCvaJDfOhofO+zzU5+LPKXWl0hw49H30nNHhj8yodBaQvydm3+wode78M5NlcH+HAw6kZw"
-    "H7ePD/2gvdid/YkPtXxmuZAaXD6s1ozY8YmqHH5Hxw3DSmLyXXzYm09fXKNaxYf/n3v/ryqOoJCa8K8PuIw8wjLyEvsX3kHB"
-    "kf8/Hnf53WfkoYMRHRp5jfrF5zI1C+8RhN+dRm4c/fdOMhICP28j/e408uPfT6cxvzgdkhL45afA3z1HGrifnqN/8RyQE/jX"
-    "du53xxER/uko/ovj9qkCf0uypZnoP1ZLjPpbTS1Vs/LIu/8C6kzgzg==")
+    "eNrtenk8Vf3X9jFmDIXmkgZNopAKXRKVWUJJmiRDKmlQqdxKJYVIMxqoKNEsRJMyVIYylfEYjzPufVRo4Nnuju47533e9/c+v3/u"
+    "5/k83z66Pmeda33PXuesva619t52lmLimrSfayxN48pdkR7BkqQp0zxMp2/23S1CU6R5iv7k9OFJG0drO2cR2k5agMZ6921ufhpz"
+    "1TQMN8zWmKamsWGL33a/tZtXb/Fb795rX7jWZ5s7Zd/mudbXnXo9adaMaZOnqe1T+68vGcEh086f611J+Inp0NXpXS8Er/Pxk1Us"
+    "sL+Hx4beVS54/wPevuld1QJevcBOF/AbBe83CfxaBDyGgNcm4LEEPLaAxxXwCIGdEPBJwft8gV+7gPdJwPsk4H0W8L4IeB0CXqeA"
+    "1yngdQl4XwW8bwLedwHvu4D3Q8DrFvB6BDya8U87zfgnn2b859s6IsY//USMf9JEBTxRAU/U+Oc+YgKemIAnLuCJC3jiAp6EgCch"
+    "4EkKeJICnqSAN0DAGyDgSRnb/ZafZ0V3fe3LzwFUfm6cpduXoLMlf5L68N9NUDWdfytFZWyNuwImjvFF6q2vN+e4boG8qVteZsBa"
+    "aJ+db343mUrIro7xNwaU4CLLwS/rfQk+JOTPyJhYgXElOZy9ZRWYbO7YOFerEiFttp2+Q6vRrB4vzSSrYTn4XFycUg2SAqO2BYyo"
+    "R9TkU4++RNej/bDJsLq79RDLMDrdU0/HO1vdmIb1DWg8Z7RQNaIBclVHEq/4NsJm1PzC0h+NmB0vPrtzZhNeRNdJfStrwhNNqUgZ"
+    "n2bkj8zTs77ZjJryr1ybYS2I8v9SH5rWgsJVxWbetFYcdWaubUcrnjWMliaaWyEf3mk1fDYDi5dEP9ezZuDGmXjfXV8ZeHL1Te0p"
+    "pzbcDprM9VrQBvHsmLc53DY4mBw65bWSiYKqWUW7JzKhezUsc+57Ju5G7L8YZsmCj9+47Ts7mdix5tJ+91ssKHhn51pNYqPMQ3yD"
+    "WwYLS1d0PX26iw2r+cceDPjCRmZahWiHDxuvZw1L2azHQaSUgv3U+xwouk5hn1bkYHbsscqEJg5KLb5sOe3OhWLUYZWSaxwEZbRf"
+    "H3mEiypG8/CXsjwUWBXk+mlx0aKi6ZM2iofb4Z53a67ykOhqW297k4t9ozM+Sybx4JRJDkgYTuDbGfsAtxE87Gkuoe9WJhBSGLym"
+    "1JVAlmNxrEUgDyE351no2xLYcXr4zRUxBExTnHKvVfCQm395XUswgZ3B3V+VywmU/nDcETqIwKIjwZ7nHhDYfnasVbIsiUCtjNVd"
+    "OgQSPaSwmU7gnm4ZOceIRFhXuJmuHYGehtTi3VIkHoVVqjttJFEonm0w3INAhFOrdtsUEpPdY5h1p0gkhwYp3d9FoMI70ZexmIT1"
+    "dGez3Y9JJBalPGFQx5FeM5bvsI6E2hqPYdZ1JNY8Dz125xiByqbwoRv9SYyPHtst2U2ikt/0h0QYgUlyU8wdQ0gsusO/1DiUD+7o"
+    "Ail2CGUv2ztYnfq8gRvvbN+vxUcI/TKxLJDAkq51t6/Fkhjq2NllbELZvxTFzfMlMLB6UHvzZRI7onUzVy/h4+iuoJpYFwKHtrKq"
+    "R10h0f1FvXnvSj5sUmXfes0nkKFwZgRJ7WPmrvhj1no+rk3tkNkzloDPVg/P/dTnPg6Neknz5GP92bkDrn3hIa1BfnUddZwX9KrG"
+    "rafsG8au9/aI42HukR+GQVRcG7UiUr9R+0xJYJIic3mQkI5p+LaWxNWym5cGr+JjnjXrZmceFw+WxKefXkQixD4scOlSPrxuDKtL"
+    "sOAiMDSEcX4SCcPIqlsyZnzEP78Q+jKbgxEXCo8+EifxTtxQvHQmHwfCrcYmj+fgkcyPvOQq6nesmmTHGMnHq+U1Nh4BbMww7Ql9"
+    "douAo/GbqBpRPqpvBOSkP2PBQa5yNms3gTRR11OdTSQiKwwC9lLnhenxEQqxxgR4p+eN2PqchMLng9uiRzLx1myt6T4RAly5cwES"
+    "MSTuqR0JNNJqQ5HkYq8gfx42OQSG+fqSaLK/e2/DdAbCr27NdKzj4iM71ybYmMoX4sD+V6qtSE/cmVg5m4vPNeaG5lQergpqfxxN"
+    "b0ZI9cUdPgc4cH5Mz9IoIUAUOCQFHKKEcX3pQE4mGzvzRo2MjSRwY+nQDhuyAd4fraNmNbCwXaFQ2tmawPG944zzVeiIOp/S2dPO"
+    "hKpe+Dx/UQLt2xKOuR6vgeaBjI2SvDa8lqgatc2Nh7A4xx4V/w9Y/Nw4SqKEgZyZZ5w7HnB/2S1j7Id/Ot2KaSnXw4u+cX7Zpdih"
+    "dxcZtiA7Z6R3se5f9jp/eu3h7CYYuUgpybmyf9krI1LHlQ5qxLGcnFG2O1j4XXCcvfw+/SY4M/X+qYLT1xGtCSvMZA3fgKIFBnU6"
+    "QdrzBkx+4EfGFSOllrvPoKMYIn5RQaYfijGqUFlKzK4CFUY36srfV2DVkc+ZsccrkHnSTJy9qhphJxnOUe3VGPrm/ej0vGqkXb6b"
+    "sMusHnpr+EYFp+rxbQskykProard6Zui0ICA6BXzgzY0wESrxEjcrQFXDmWfMotvhK7KAhE5WhMsjPKNzUWbcEEsO/KIXDMK6wZq"
+    "NmxuRvyc85pLdjZj2rxdF8vtW3Dz05AxqpktWDlMXmTFqxaYjdi690VAK044DPGazGyFqdXYWxZdrUjLIRB4jAGDLtcpLrQ2RCYY"
+    "2gcPagNL40Q2GdyGhptW4udpTMQmvblfoMJE97VzG3S9mfg46YWDP4eJRS5i9y0kWJiovTFbw4gF2aKELw/zWMj1H9St0MiCGOP2"
+    "M6ceFlZe+sgSi2bjfvNQsdzbbBj4XfRovcOG9RVx22N2HMgoRkw7vIUDMw+ZlmJHDgpEyFlePRxYuWYrPVTj4nRi5I1gDgcXnA/u"
+    "DrjMhf0fto3lOVw8Kkya82QXF8rEKW9LXR60IsYnvnThodz1VOjCDi6uGh67vuoRDwvD7Iy1mnmIFZu/XMmLB725N6oshhHoXqC3"
+    "a9pMAupnRlhVvOFhM3NmKmcpgZIL+s9TNxIoVjEZVq5EgDkk/PTLUKqQmChtTbpIoCNgtOIefQI1qy/Hv3tMwD5qT8eNQgKWzjuK"
+    "LywjYG6Y1d3RRsDg6flhyV0ElMfZ5ez0I9C2dpqNxSASRctDkgzGUoWEzx3ffIRAaLvpCaVZJFZkf7hmakbim2ZZZ8MZim8l//20"
+    "I4lpQWxpZ3cSdslG7WevUIVc5ZxhAFWIRG8jsyuIKlTz7i38dp0SHNFHn/SPkPiucrho0wUSwVkREVKJBE4sMM9KpTrnzbtXm3Jv"
+    "k3ht80T6NbVPe3qZ1KvrlAAaPHZ8TBXCOIMIuQlnCWyc4KHBv0PiZKHk+cklJPL8VjNUKYGam0GX3J/WW7A197+uIrHlXkSRNxWX"
+    "Ztkynlo6ibKzj/Z1NZCYs/S9shH1PcitzxSb/5CExMhhVvotJHJaTHydZxG4o3Gg1iKVxPaSE0llzSRoEt4zHypQBU55zk56POXv"
+    "Og3hdBI72T/oK17xEPPD86xaNCUgU7ds9vpAIqZ8mMTMtTz8IRMw+lsgCZ15qePmvSXR+IZ+7h6Xi+2BXTIaHiT2Gd70UMyihMR7"
+    "SmanDxc9kz4vbDen9pVcQC9JJHEtLmjroY8cuFMZG61B4pAe6eFwggR7d3uQ7BwOtladv36ORsJ/X3OU7zYSS152JrQcZsPEIpqV"
+    "VEo1HNn+WuPtSaohkvMY95QFqUMiA0/GE2gWe12vM43EkcQdK2Y2MzHZ8rpd7CYCC5R1dBjUfnrpn+LwqY363tcajqby78WKNc2R"
+    "lCAsLacXaLAY6Jxh/NKXzsNY9V1eG2MJKBxM2l+a24qAj1r5y+x5aD2Ql3NrHdUADKyLlzpCnd90wuBCGhcXr5iEqVOCPvTN6YkD"
+    "JzZDyjhv8mkFLuJin1WW3OGhzXlkV2lcI5qsculdyzkgW0/OXarMQ+Gix9IdbXTcNhjapXCSDfZKlt5ULy4mZurVT5aox5511QGi"
+    "j1l4pnzMwSGVg6tiZhUny6og9r7jvXsJEyHHmJ3bmtlIdPJdaHX5A468iXp1qqQNxUU3wmSl/7LbP1gxUz+dgUK9Z8s2DWf9smtd"
+    "adsedbAVVS70tqKhzF/2Pzy71R01WxD33YxbL9r2y/415Hnr4WRKiIqHVKiVt/YTHDe3A819giNHCc5Od5+dXmv1tP/pqqNyo/bh"
+    "6I/rAHPrKDfLVTjWbbHqnOQ7bJtzZ6VJeyHMpQpWup8tRuIrxVFrrT8gl1PiqZJdhtFTvNULbCqQ5/JSfs2TWpzWnn3AacdHLF6X"
+    "9dpiRTUi90UoDouhft0l6yY8XlELdthDmrZJPRw3B37WONIIk+XnwvdU1eOVfBlPUr4Ba1VVvVX1m+EYtMV88fIGNKVvNL52pRFn"
+    "7vjqDH7UAveOrzu4txrxSpcMUR/YjEF31m/Yr8yAyGUGqd/chIK3nbkHl7dA9dYj9R92bVBKOW9iItoCh67DvL2HW7H6wkCFAD8m"
+    "Glc3MrSkW6F3/Xnz9hgG2l32q9vtZaF4BYNd8r0VhEV4lldsG9bOWMmbuJWN+DzVexvrGNjxmhiad4waf8bLPE+zp9qpVWKBTnfb"
+    "MFZNI+ODJwtBuzq2SI2j2ssBJ6yO+jMh/WYwW1SfjZsVsksMGrkIWK0y/IUWCzfy6JV51PiTaKMcWRPNw4UpnJQ91ZSK2UT21Cdx"
+    "sKdnWc7UkVQ7vSvhj6/72IiydBc5Z8dF1h4fN2NqTGBoK5JDVTjoTt764T2Li5MJ9WeQTKBJ6/Cae1c48NJKXLBpLw83xvp9msui"
+    "qrzy2MmdE7lQcvjxZTHVZlrVTfE9NZ6quhv8n0Zf4aKW/rTqD1BV4GKGz+HlVLVRGVjEVuEh1F0sXolqY5/Vec4xoKq7z1PHS0uD"
+    "eLjVeNV/QgoBl5WKo0qoqv4q3C1dhFK595N8rMtrCazS/1i+t4xEwOI3IslqBHKk/FWWUe2o3dGRtYs/k5jpuC51tiWB/SnHY+J1"
+    "qH0NVT/oK/LxZcjNrilUVdeLfsOsW0ZVSYe3l69N5CNiia106SkCFidPXTbaRaJ16lam/2w+htRWjJj0kMCmCyZTMqkq/dilTDKX"
+    "aue/vTD11H9PYPbBFl/nWyROsGJbgmz4WOzxZLsuh8C1HcozllOqo/ZUNCzdno9zy5dwysRIZKU9rDv6nlKZQ7fP36Ps4zK0GDuG"
+    "kFCdv8agvp5SvcX2hXRrPuSbacqK1Pig2fNIpZJJfe4HzRy2KR9zvi+5HqlHIqL7XGIGQWL+MDdXdX0+Dq+YDVWqTfcOypiwop3E"
+    "meBZ16Qn8DFw6oLMK9R40r1Txr6FpMajDkcZ+YF8TNVN2yZnRWL//FZ9EQ6JFwmGmpf4JAwes52eWpNYnWbd0NNIqZJNhFjMO5Ia"
+    "PxpeTqD483ZpKm6uIGHy7EtMIBW37sbJ0unU/rRLlemKuSRuR6Z5bjlIonPfrVBD6ngGaFy+n32XxIzg1qP6DiSYKWceJFDHT6xb"
+    "89D+PIm0A3nFd8aQqI6bFjeRijf/dLNzyT4SGxaW8FVbCDgkXbc3oL6fq4/qZ1i6kjBXUi/Yfo2Al2TCB2/q+zRn+WasnE3FtTdS"
+    "4cYaKm+H51AiRiAmeY9o/UASF+kp4+uo8fsO/+Uh2XeUCkvFhRhS47Kr5UbxmEM8PB6q52p6n0BrMq9nGZVvPjptsxa846Lg/RW2"
+    "60lKnfTrva7vJKC4O9XUSpELO5GKoWWbCcRHdhozDKjuyWnr83wjDkL2yY8eQI1dByzrLy+iEUg2v1VnZ8qG+tmaOUnSBNz1zxhq"
+    "b+Uhb1H0RG9tFpI3FB+7l0CN++8v5qlSY6R5/P188VG9lzUa3g1ezENtQsp9NSkufkQNnvpscBs85owZuLWSi7NliZll76jzb80f"
+    "Rw6JMkDcO+9WPJ+LlcpL8kTAgaxXW+G3khasTw6JHBHOwU56kOegbWxo831MD66kVNOt54V0LRtGrUNGTQtjwZlm71Dp0ggRsUzP"
+    "rElsvGTpBV+MYPZTHdVcxcF9qiNLqY6v3xZdbW3Pf6roWKpVFhWue4MohrKCok4RNqtYVB0dko3+9rOG4vZxVa+hy/Zw+3qkHNPH"
+    "bTo5xKICdfmTX+5RLEPd4yELJvCqkXe0NE1TswZchVs0Kf1q+J2UbJirQKdE6Olpp+/1mOvq8uD0MjoOfXkt7aXXiOnNY1YyJRvx"
+    "VmkKo2ZOE0QXqJa/lm3G5xHH1Zivm7DFntO2+3ULsl77tH2Ka8FYA+1TZrYtsL6Zm3KXGlE86awJV761UklX8EA1oRXJrXKmvKEs"
+    "yFvonfk+vQ1pT/k72soZ6PhsHplYw8aJSPOI0YZMZGid+nKqug0H2WOfmCznwuvDMiPvKSxYHxDdlZLPxAlZ/zClYzwkGV+abfuN"
+    "BVNOjZV1PAv0zmjXUBMCGvtehEx/yAZ9YqUC04ONodsL3hymWrTNl8MCI1ZyEFCz12jKSA5ycy4E7a0mMKX63CJbanShbTRUiszg"
+    "wHKjccSSbmq0aDJ/r7SNi09Rxn6HLbgYOWpcSYQo1bKPbdpxvIWLN5lD5LZTJ1lyVOTaJiaBe4NNr0XZ8bAkmSW7w5QHnasuchce"
+    "Eag6O75uRCoPFiXRG44k8mCjSw5x8SZ+XTzvj7fv6H69OY7AerKHV0Rh8FV+YshXLqrIycEd8wnIxL0+Kk+JUGGtzruMpxxMl8sY"
+    "tmcFgUd+N57q2lMtr05CtocLGw8VAlttvQjM9H7glU61+mlR6ofWFTGxYpH/6jXU6NRtm3e+yJyAt+2j7DCdNjQ+Tb9psJqA//HI"
+    "6RKTCEoETioXhVEjaJ1by3IzAuMGW5bQ63mIDpU286prxrLEpWKyYwhI0L48H2VLjWa1r3TfzWpC3cvAVkYlD8ED6OknznMxQu+j"
+    "bObpBowZo6i5xIkHNcbq+J1ZHDhZsrdVd9Vjb94ytdgHlGhvnz2kJI0N1ptBrbUfa3EiP3Zy2XcO2r1qRG8fp0TfNZVvzazCC+Py"
+    "GtnpHHy8e+ZtLpgQHRTuP1HnA44lw30SVay6B5a9WlnCwNFMrYfFt8uRxZj1uBYsuC7222uHVhTOX2vRs6EUG9aG5smpMzHc5u6l"
+    "ZcHNSOA8s/V2eYeQEm8yjccAS9TnXfj9RtQ8SQt5ur0YlqMuhbNutiLlrnfol0I6YmJe769f9BZhBZZza8xbkNzjIGu2uw6Bsg8U"
+    "mi7nIzmJHTTmbRPkHE7pGU2rgnTKhC71Ay/BrMDjo0aNKBxvmhOVW47QYN4rt1dPkTrCZrTYJToaw4f7y854h28iDxN94h4iT6l2"
+    "v1R+HeInWdjk9xT8sov9cKxLnlENTHzwlnX2Wd/NDhqpOTMi62AlbsQ0GYwvvfPLnueZdDQ/sVTIDlUnl+U3in+97ltKysk+OvPz"
+    "heyTNh3ILP3+VMgut3pJ4bUft/9l+//U9bvo7Ld7Oa1PdKQo0dnu57Xrn6o4IXeyuTPi8tAfaeWktntKsRD2DN31eZF/qRCOdVpZ"
+    "M+FdhRBebPh2KVu9SgidrR5sGelXK4QlxYuur6yrF8Lx0ku1j+5vEMLg1AVrzso0CaFT+MycR4eahXC8U/MBaV6LEPLD5ceUz2YI"
+    "IbLmuSS7twnhBz35hu6dTCGcfB0R2t4sIZRTy5JInckWQn3p1dsmfBRGZx+zTusgjhDeHnbCbd1CrhAeVApv0B7NE8L/THEWmTtL"
+    "pHkJY8yA0bpGr4RxxQureYvkSCGcz+QujZsrjF5FEkxHc2FMrj8wZuFMYcz8PPj5wnZCCGP9NzxbdUAYd0fkZC1P5wmhGGvxqoOd"
+    "HCF8bC7eqPWKJYTypU/GpEu0CeHUIfbrTl5pFkITLzt9biBdCF9dZj+RJiuFcL7XiVH6ZO6/jLT/Xf+7/r8VR4tv+qhPcWR67+as"
+    "/rvmnBXw+vDf0hydf/cJFzWZNk8lHfFYKeP++HtMt5gSR/pikv8zpn7D2z8trPS0jMgWdRlj+aSjoyekyRh/iM+0VcyW7hdW6sJo"
+    "j76wpP8M62/PevzTQvrP1OP/GdJfdxP/+4c08M+Q+l+v/u8Tl4ioptjvT8L1PuvW+yf5t4Lyh0jv/z+fi+vv0/t0Um/D2vs34Def"
+    "S9Qugvzt79R7h/n/7KQkTeu739zfqfcuQZ+T3G9OBxRov90z6O/Ze6Wnz1P2N89OFdrfr/v0d+zt1vscpX5z3DSS9qt37+/VW3HP"
+    "Cn5+md+86tRpf6u//f16q1qfn/xvfvfG0X6vcf1de3Oyz1X6N9fQ8bS/6si/7uY6gfbXufp/cxv4m5v2RFq/88HOUuLPVJKl/q2n"
+    "MkJKo/fVfwDrLu/b")
 _P = np.load(io.BytesIO(zlib.decompress(base64.b64decode(_PERFILES_B64))))
 GD = _P['gD']
+# ganancia de copia: en los sistemas negativo+papel la rms del datasheet es la del
+# NEGATIVO, y la copia la multiplica por la pendiente local del papel; k es ese factor
+# en la densidad mostrada 1.0 (por canal), calculado con las curvas reparadas
+K_COPIA = {k[2:]: np.asarray(_P[k], float) for k in _P.files if k.startswith('k_')}
 
 # rms: granularidad difusa rms de la hoja tecnica (x1000, apertura 48 um, D=1.0)
 # grano_um: diametro caracteristico del conglomerado
 # textura: 'nube' (colorante, borde difuso) o 'disco' (plata, borde neto)
 # mtf50: frecuencia (ciclos/mm) a la que la MTF del material cae al 50 %, valor
 #        tipico de la hoja tecnica; se puede afinar con --mtf50
+# poli: anchura (sigma del logaritmo) de la distribucion de tamaños de los
+#        conglomerados; 0 = todos del mismo tamaño
 PRESETS = {
-    'k64':      dict(rms=10, grano_um=11.0, corr=0.35, croma=0.45, textura='nube',  mtf50=40.0),
-    'k25':      dict(rms=9,  grano_um=10.0, corr=0.35, croma=0.45, textura='nube',  mtf50=45.0),
-    'velvia50': dict(rms=9,  grano_um=10.0, corr=0.35, croma=0.45, textura='nube',  mtf50=50.0),
-    'pro400h':  dict(rms=4,  grano_um=12.0, corr=0.35, croma=0.45, textura='nube',  mtf50=30.0),
-    'trix':     dict(rms=17, grano_um=14.0, corr=1.0,  croma=1.0,  textura='disco', mtf50=40.0),
+    'k64':      dict(rms=10, grano_um=11.0, corr=0.35, croma=0.45, textura='nube',  mtf50=40.0, poli=0.35),
+    'k25':      dict(rms=9,  grano_um=10.0, corr=0.35, croma=0.45, textura='nube',  mtf50=45.0, poli=0.35),
+    'velvia50': dict(rms=9,  grano_um=10.0, corr=0.35, croma=0.45, textura='nube',  mtf50=50.0, poli=0.35),
+    'pro400h':  dict(rms=4,  grano_um=12.0, corr=0.35, croma=0.45, textura='nube',  mtf50=30.0, poli=0.35),
+    'trix':     dict(rms=17, grano_um=14.0, corr=1.0,  croma=1.0,  textura='disco', mtf50=40.0, poli=0.35),
 }
-GENERICO = dict(rms=10, grano_um=11.0, corr=0.35, croma=0.45, textura='nube', mtf50=0.0)
+GENERICO = dict(rms=10, grano_um=11.0, corr=0.35, croma=0.45, textura='nube', mtf50=0.0, poli=0.35)
 
 
 def srgb_eotf(v):
@@ -204,15 +223,28 @@ def _gauss(sigma_px):
     return g / g.sum()
 
 
-def _filtro_textura(shape, textura, grano_um, pitch_um):
-    """respuesta en frecuencia del filtro que da la correlacion espacial del grano"""
+def _filtro_textura(shape, textura, grano_um, pitch_um, poli=0.35):
+    """respuesta en frecuencia del filtro que da la correlacion espacial del grano.
+    Con poli > 0 los conglomerados tienen tamaños log-normales (mediana grano_um,
+    sigma del logaritmo poli); como las poblaciones son independientes, se suman
+    sus espectros de potencia (Campbell) y se devuelve la raiz, un filtro de fase
+    cero con el espectro de la mezcla."""
     if textura == 'gauss':
         return _nucleo_fft(shape, _gauss(max(0.35, (grano_um / pitch_um) / 2.355)))
-    r = max(0.6, 0.5 * grano_um / pitch_um)
-    H = _nucleo_fft(shape, _disco(r))
-    if textura == 'nube':            # nube de colorante: disco con el borde difundido
-        H = H * _nucleo_fft(shape, _gauss(max(0.35, r / 3.0)))
-    return H
+    if poli > 0:
+        s = np.linspace(-2.5 * poli, 2.5 * poli, 9)
+        w = np.exp(-0.5 * (s / poli) ** 2)
+        w /= w.sum()
+    else:
+        s, w = np.array([0.0]), np.array([1.0])
+    P = 0.0
+    for sk, wk in zip(s, w):
+        r = max(0.6, 0.5 * grano_um * np.exp(sk) / pitch_um)
+        Hk = _nucleo_fft(shape, _disco(r))
+        if textura == 'nube':        # nube de colorante: disco con el borde difundido
+            Hk = Hk * _nucleo_fft(shape, _gauss(max(0.35, r / 3.0)))
+        P = P + wk * np.abs(Hk) ** 2
+    return np.sqrt(P)
 
 
 def campo(shape, H, rng):
@@ -232,11 +264,11 @@ def rms_en_apertura(f, pitch_um, diametro_um=48.0):
     return float(irfft2(rfft2(f) * _nucleo_fft(f.shape, K), s=f.shape).std())
 
 
-def escala_por_pixel(textura, grano_um, pitch_um, rms):
+def escala_por_pixel(textura, grano_um, pitch_um, rms, poli=0.35):
     """sigma de densidad por pixel a D=1 que deja la rms de la hoja tecnica en 48 um.
     Se mide sobre un campo de referencia con la misma textura y el mismo paso."""
     shape = (768, 768)
-    H = _filtro_textura(shape, textura, grano_um, pitch_um)
+    H = _filtro_textura(shape, textura, grano_um, pitch_um, poli)
     f = campo(shape, H, np.random.default_rng(20240912))
     s48 = rms_en_apertura(f, pitch_um)
     return (rms / 1000.0) / max(s48, 1e-9), s48
@@ -274,6 +306,12 @@ def main():
                          'gauss = textura de la version anterior')
     ap.add_argument('--mtf50', type=float, default=None,
                     help='MTF del material: ciclos/mm al 50 %%; 0 la desactiva')
+    ap.add_argument('--poli', type=float, default=None,
+                    help='anchura de la distribucion de tamaños de conglomerado '
+                         '(sigma del logaritmo); 0 = un solo tamaño; 0.35 por defecto')
+    ap.add_argument('--ancho-salida', type=int, default=0,
+                    help='si se indica, reduce el resultado a este ancho en px con '
+                         'filtro Lanczos (para la web); 0 = tamaño original')
     ap.add_argument('--ancho-mm', type=float, default=36.0,
                     help='cuanto mide sobre la pelicula el lado largo de la '
                          'imagen (36 = fotograma entero de 24x36)')
@@ -295,6 +333,7 @@ def main():
     croma = a.croma if a.croma is not None else pre['croma']
     textura = a.textura or pre['textura']
     mtf50 = a.mtf50 if a.mtf50 is not None else pre['mtf50']
+    poli = a.poli if a.poli is not None else pre.get('poli', 0.35)
 
     im = Image.open(a.entrada)
     arr = np.asarray(im.convert('RGB')).astype(np.float64)
@@ -308,9 +347,16 @@ def main():
     D = -np.log10(np.clip(lin, 10 ** (-a.dmax_vis), 1.0))
 
     # 2. textura y 3. amplitud calibrada en 48 um
-    sigma_D1, s48 = escala_por_pixel(textura, gum, pitch_um, rms)
+    sigma_D1, s48 = escala_por_pixel(textura, gum, pitch_um, rms, poli)
+    k_copia = K_COPIA.get(a.pelicula, np.ones(3))
+    # la rms de la hoja tecnica es granularidad de densidad VISUAL (luminancia); con
+    # capas solo parcialmente correladas, la luminancia de tres capas de sigma s vale
+    # s*f_lum (0.845 para corr 0.35), asi que la sigma por capa se escala con 1/f_lum
+    WV = np.array([0.2126, 0.7152, 0.0722])
+    f_lum = np.sqrt((WV ** 2).sum() + 2 * corr * (WV[0] * WV[1] + WV[0] * WV[2] + WV[1] * WV[2]))
+    sigma_D1 = sigma_D1 / f_lum
     rng = np.random.default_rng(a.semilla)
-    H = _filtro_textura((h, w), textura, gum, pitch_um)
+    H = _filtro_textura((h, w), textura, gum, pitch_um, poli)
     comun = campo((h, w), H, rng)
     campos = []
     for _ in range(3):
@@ -325,27 +371,45 @@ def main():
         rel = np.stack([np.interp(D[..., c], GD, T[:, c]) for c in range(3)], -1)
     else:
         rel = np.sqrt(np.clip(D, 0.0, None))
-    sig = sigma_D1 * rel * a.intensidad
+    sig = sigma_D1 * k_copia[None, None, :] * rel * a.intensidad
 
     # descomponer el ruido de densidad en luminancia y croma: la calibracion
     # rms del datasheet es de densidad visual, asi que se conserva integra en
     # la componente de luminancia y el croma se escala aparte
     dn = ruido * sig
-    WV = np.array([0.2126, 0.7152, 0.0722])
     lum = (dn * WV).sum(-1, keepdims=True)
     dn = lum + croma * (dn - lum)
-    Dg = np.clip(D + dn, 0.0, a.dmax_vis)
+    # la densidad macroscopica de la hoja tecnica esta definida sobre la
+    # transmitancia MEDIA: un ruido de media cero en densidad aclararia la zona
+    # granulada en exp((sigma ln10)^2/2) (1-3 %); se compensa con el sesgo
+    # log-normal, calculado con la sigma efectiva de cada canal tras el reparto
+    var_lum = ((WV * sig) ** 2).sum(-1, keepdims=True) + 2 * corr * (
+        WV[0] * WV[1] * sig[..., 0:1] * sig[..., 1:2] + WV[0] * WV[2] * sig[..., 0:1] * sig[..., 2:3]
+        + WV[1] * WV[2] * sig[..., 1:2] * sig[..., 2:3])
+    var_ef = np.clip(var_lum + croma ** 2 * (sig ** 2 - var_lum), 0, None)
+    sesgo = 0.5 * np.log(10.0) * var_ef
+    Dg = np.clip(D + dn + sesgo, 0.0, a.dmax_vis)
     out = srgb_oetf(10.0 ** (-Dg))
     res = np.clip(out * escala + 0.5, 0, escala).astype(
         np.uint16 if escala > 255 else np.uint8)
-    Image.fromarray(res).save(
-        a.salida, quality=95 if a.salida.lower().endswith(('.jpg', '.jpeg')) else None)
-    print('grano %s: rms=%g  pitch=%.2f um  textura=%s  grano=%g um  '
-          'sigma por pixel (D=1)=%.4f  [rms medida a 48 um: %.1f]  '
-          'MTF50=%g c/mm (sigma %.2f px)  croma=%g'
-          % (a.pelicula, rms, pitch_um, textura, gum,
-             sigma_D1 * a.intensidad, 1000 * sigma_D1 * s48 * a.intensidad,
-             mtf50, sigma_mtf, croma))
+    im_out = Image.fromarray(res)
+    if a.ancho_salida and a.ancho_salida < w:
+        im_out = im_out.resize((a.ancho_salida, max(1, round(h * a.ancho_salida / w))),
+                               Image.LANCZOS)
+    if a.salida.lower().endswith(('.jpg', '.jpeg')):
+        im_out.save(a.salida, quality=95, subsampling=0)
+    else:
+        im_out.save(a.salida)
+    kv = float(np.dot(WV, k_copia))
+    print('grano %s: rms=%g  pitch=%.2f um  textura=%s  grano=%g um (poli %g)  '
+          'sigma por pixel (D=1)=%.4f%s  [rms medida a 48 um: %.1f]  '
+          'MTF50=%g c/mm (sigma %.2f px)  croma=%g%s'
+          % (a.pelicula, rms, pitch_um, textura, gum, poli,
+             sigma_D1 * kv * a.intensidad,
+             '' if abs(kv - 1) < 1e-6 else '  (ganancia de copia x%.2f)' % kv,
+             1000 * sigma_D1 * s48 * a.intensidad,
+             mtf50, sigma_mtf, croma,
+             '  salida reducida a %d px' % im_out.width if a.ancho_salida else ''))
 
 
 if __name__ == '__main__':

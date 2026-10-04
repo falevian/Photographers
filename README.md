@@ -13,7 +13,7 @@ Photography and light-physics tools that run entirely in the browser.
 
 ## Español
 
-Treinta y seis documentos que resuelven cuestiones fotográficas con el modelo físico o estadístico
+Treinta y ocho documentos que resuelven cuestiones fotográficas con el modelo físico o estadístico
 delante: simuladores, métricas, catálogos, scripts de procesado y su documentación.
 
 Todo el cálculo ocurre en el navegador. No hay servidor, ni cuenta, ni telemetría, y cada
@@ -48,6 +48,7 @@ ojo aciertan a ponerlo donde uno cree, y qué le hace al objetivo el vidrio del 
 | Documento | Qué hace | Peso |
 |---|---|---:|
 | [`caracter-optico-leica-m.html`](caracter-optico-leica-m.html) | 128 objetivos de montura Leica M, de 1925 a 2026, con 32 descriptores cada uno. Reconstruye el disco de desenfoque por trazado geométrico, mide la distancia de carácter entre dos objetivos y devuelve sus vecinos más próximos. | 217 KB |
+| [`caracter-optico-reducido.html`](caracter-optico-reducido.html) | Carta reducida de *rendering*: los mismos objetivos en los siete ejes que deciden el carácter visible (esfericidad residual, cromatismo longitudinal, microcontraste, velo, viñeteo, recorte de pupila, rizado asférico), cuatro índices estéticos con su fórmula impresa, par enfrentado, vecinos y mapa. Solo en español. | 72 KB |
 | [`telemetro-m11.html`](telemetro-m11.html) | Qué ve el ojo por el visor de la M11 y qué queda de ello en el sensor. Seis lienzos que van del parche del telémetro a la rejilla de fotositos, con el error de coseno al recomponer y una tasa de acierto por Montecarlo. | 133 KB |
 | [`sensor.html`](sensor.html) | El sensor en cuatro pestañas: datos medidos de M11, Q3 y SL3-S (ruido de lectura, ganancia dual, PDR, calculadora SNR), el multishot del SL3-S (Bayer animado, √N, Nyquist, deriva sidérea, software de apilado, asistente de decisión), la Triple Resolution de la M11 y la pestaña de difracción y diafragma, con el disco de Airy como techo físico (objetivo perfecto): techo práctico y límite duro de megapíxeles por formato y diafragma (≈1 865/N² y ≈11 400/N² en 24×36), y para cada sensor o modo (M11 L/M/S-DNG, SL3-S 24/48/96 MP, otros formatos, paso a medida) hasta dónde cerrar, qué modo o archivo basta, cuándo aporta el multishot y qué pueden y qué no los tres apilados (enfoque, con número de tomas; promedio; dither); con comparador A/B de dos diafragmas, el disco de Airy dibujado sobre la retícula de cada sensor, carta de resolución simulada, MTF frente a frecuencia, mapa de calor cámaras × diafragmas y la curva de la escena (detalle en los extremos frente a diafragma, con el apilado como alternativa). Fusiona las antiguas leica-sensores, multishot-sl3s y binning-m11, que redirigen aquí. La pestaña de datos carga Chart.js desde CDN. | 315 KB |
 | [`filtro-sensor.html`](filtro-sensor.html) | El filtro del sensor y el ND en dos pestañas: la fuga infrarroja del ND (tecnologías, filtro del propio sensor, dominante por escena, deriva de esquinas, cómo medirla) y el stack óptico con trazado de rayos, MTF y simulación de esquina. Fusiona las antiguas filtro-nd-infrarrojo y stack-sensor, que redirigen aquí. Manual: [`manual-stack-sensor.html`](manual-stack-sensor.html). | 1,9 MB |
@@ -95,6 +96,7 @@ la página es su manual; el código está en [`scripts/`](scripts/).
 | [`manual-simulador-eclipse.html`](manual-simulador-eclipse.html) | Manual de uso del simulador del eclipse. Sin fórmulas. |
 | [`manual-tecnico-eclipse.html`](manual-tecnico-eclipse.html) | Geometría del encuadre, fotometría, extinción y difracción. Modelo, derivaciones y supuestos declarados. |
 | [`manual-caracter-optico.html`](manual-caracter-optico.html) | Manual ilustrado de la carta óptica, con capturas del propio documento y cinco recetas paso a paso. |
+| [`manual-mtf.html`](manual-mtf.html) | Manual de lectura de curvas MTF, del gráfico al *rendering*: anatomía de la ficha Leica/Zeiss, protocolo de lectura en diez pasos, firmas de cada aberración con gráficas generadas en la página, de la cualidad (pop, cremosidad, glow) a la curva, puntos ciegos y errores comunes. Solo en español. | 52 KB |
 | [`guia-simulador.html`](guia-simulador.html) | Guía del banco óptico de flash: qué hace cada control y en qué fórmulas se apoya. |
 | [`manual-exposicion-larga.html`](manual-exposicion-larga.html) | Manual de la herramienta de exposición larga: qué significa cada control, las tres cifras que hay que entender (arrastre, trepidación y el criterio de dos píxeles), por qué el barrido se juzga por el error de seguimiento y la ciudad desierta por tiempo, la escalera de apoyos con sus tiempos a 35 mm, y qué no calcula la página. | 60 KB |
 | [`manual-flash-ttl-q3.html`](manual-flash-ttl-q3.html) | Flash TTL con la Leica Q3 43: cómo mide, cómo sincroniza y por qué a potencia plena el pulso no cabe entero en la ventana de 1/2000 s. Con dos calculadoras. |
@@ -156,7 +158,7 @@ python3 -m http.server 8000
 
 ## English
 
-Thirty-six documents that settle photographic questions with the physical or statistical
+Thirty-eight documents that settle photographic questions with the physical or statistical
 model in plain sight: simulators, metrics, catalogues, processing scripts and their
 documentation.
 
@@ -193,6 +195,7 @@ and the eye manage to put it where you think, and what the sensor's glass does t
 | Document | What it does | Size |
 |---|---|---:|
 | [`caracter-optico-leica-m.html`](caracter-optico-leica-m.html) | 128 Leica M-mount lenses, from 1925 to 2026, with 32 descriptors each. Reconstructs the defocus disc by geometric tracing, measures the character distance between two lenses and returns their nearest neighbours. | 169 KB |
+| [`caracter-optico-reducido.html`](caracter-optico-reducido.html) | Reduced rendering chart: the same lenses on the seven axes that decide the visible character (residual spherical aberration, longitudinal chromatism, microcontrast, veiling flare, vignetting, pupil clipping, aspheric ripple), four aesthetic indices with their formula printed, head-to-head pair, neighbours and map. In Spanish only. | 72 KB |
 | [`telemetro-m11.html`](telemetro-m11.html) | What the eye sees through the M11 viewfinder and what survives of it on the sensor. Six canvases running from the rangefinder patch to the grid of photosites, with the cosine error from recomposing and a Monte Carlo hit rate. | 92 KB |
 | [`sensor.html`](sensor.html) | The sensor in four tabs: measured data of the M11, Q3 and SL3-S (read noise, dual gain, PDR, SNR calculator), the SL3-S multishot (animated Bayer, √N, Nyquist, sidereal drift, stacking software, decision assistant), the M11 Triple Resolution and a shared diffraction and optimum-aperture calculator. Merges the former leica-sensores, multishot-sl3s and binning-m11, which redirect here. The data tab loads Chart.js from a CDN. | 175 KB |
 | [`filtro-sensor.html`](filtro-sensor.html) | The sensor filter and the ND in two tabs: the ND's infrared leakage (technologies, the sensor's own filter, cast by scene, corner drift, how to measure it) and the optical stack with ray tracing, MTF and corner simulation. Merges the former filtro-nd-infrarrojo and stack-sensor, which redirect here. Manual: [`manual-stack-sensor.html`](manual-stack-sensor.html). | 148 KB |
@@ -240,6 +243,7 @@ the page is its manual; the code lives in [`scripts/`](scripts/).
 | [`manual-simulador-eclipse.html`](manual-simulador-eclipse.html) | User manual for the eclipse simulator. No formulas. |
 | [`manual-tecnico-eclipse.html`](manual-tecnico-eclipse.html) | Framing geometry, photometry, extinction and diffraction. Model, derivations and stated assumptions. |
 | [`manual-caracter-optico.html`](manual-caracter-optico.html) | Illustrated manual for the optical chart, with screenshots from the document itself and five step-by-step recipes. |
+| [`manual-mtf.html`](manual-mtf.html) | Manual for reading MTF curves, from the graph to the rendering: anatomy of the Leica/Zeiss sheet, a ten-step reading protocol, the signature of each aberration with graphs generated on the page, from quality (pop, creaminess, glow) to curve, blind spots and common mistakes. In Spanish only. | 52 KB |
 | [`guia-simulador.html`](guia-simulador.html) | Guide to the flash optical bench: what each control does and which formulas it rests on. |
 | [`manual-exposicion-larga.html`](manual-exposicion-larga.html) | Manual of the long-exposure tool: what each control means, the three figures to understand (blur, shake and the two-pixel criterion), why panning is judged by tracking error and the ghost town by time, the ladder of supports with its times at 35 mm, and what the page does not compute. | 60 KB |
 | [`manual-flash-ttl-q3.html`](manual-flash-ttl-q3.html) | TTL flash with the Leica Q3 43: how it meters, how it syncs, and why at full power the pulse does not fit inside the 1/2000 s window. With two calculators. |
