@@ -47,7 +47,8 @@
   .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin:18px 0 14px}
   label{font-size:12px;color:var(--ink2);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em}
   input[type=number],select,input[type=date]{font-family:var(--mono);font-size:14px;padding:7px 9px;border:1px solid var(--line);border-radius:5px;background:#fff;color:var(--ink);width:130px}
-  select{width:auto}
+  select{width:auto;max-width:100%}
+  .controls>div{min-width:0;max-width:100%}
   button{font-family:var(--sans);font-size:14px;font-weight:500;padding:8px 14px;border-radius:5px;border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer}
   button.ghost{background:transparent;color:var(--ink)}
   button.small{padding:4px 9px;font-size:12px}
@@ -89,8 +90,9 @@
   .hour.night{background:#e3e8ec;border-radius:3px}
   .hour.sun .t{color:var(--bad);font-weight:600}
   .wbar{height:8px;background:var(--ok);border-radius:2px;display:inline-block;vertical-align:middle}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  @media (max-width:800px){.grid2{grid-template-columns:1fr}}
+  .grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+  .grid2>*{min-width:0}
+  @media (max-width:800px){.grid2{grid-template-columns:minmax(0,1fr)}}
   .obs-row{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
   .mlist{display:flex;flex-wrap:wrap;gap:8px;font-family:var(--mono);font-size:12px}
   .mlist label{display:inline-flex;align-items:center;gap:4px;text-transform:none;letter-spacing:0;font-size:12px;color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:3px 7px;background:#fff;margin:0}
@@ -100,6 +102,9 @@
   .rv{font-family:var(--mono);font-size:12px;color:var(--ink);margin-top:4px}
   .hour.win{outline:2px solid var(--warn);outline-offset:-2px;border-radius:3px}
   tr.best td{background:#e7eef3;font-weight:600}
+  tr.dim td{color:#9aa5ad}
+  #tsrc td.l,#tsrc th.l{text-align:left}
+  #tsrc td.rd{text-align:left;white-space:normal;min-width:230px}
   .swatch{display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:-1px;margin:0 4px 0 10px}
   .card a{color:var(--ok)}
   .note p{margin:0 0 10px}.note p:last-child{margin-bottom:0}
@@ -130,9 +135,10 @@
     <div class="panel controls" style="margin-top:0">
       <div><label for="model" data-i18n="model">Modelo</label>
         <select id="model">
-          <option value="best_match" data-i18n="best">Mejor disponible</option>
-          <option value="icon_seamless">ICON (DWD)</option><option value="gfs_seamless">GFS (NOAA)</option>
-          <option value="meteofrance_seamless">AROME/ARPEGE</option><option value="ecmwf_ifs025">ECMWF IFS 0.25°</option><option value="ukmo_seamless">UKMO</option>
+          <option value="auto" data-i18n="auto">Automático: la fuente de menor escala efectiva aquí</option>
+          <option value="meteofrance_seamless">AROME/ARPEGE</option><option value="dmi_seamless">HARMONIE DMI 2 km + IFS</option><option value="knmi_seamless">HARMONIE KNMI 5.5 km + IFS</option>
+          <option value="icon_seamless">ICON (DWD)</option><option value="ecmwf_ifs">ECMWF IFS 9 km</option><option value="ukmo_seamless">UKMO</option><option value="gfs_seamless">GFS (NOAA)</option>
+          <option value="best_match" data-i18n="best">Selección de Open‑Meteo (best match)</option>
         </select></div>
       <button id="go1" type="button" data-i18n="compute">Calcular</button>
       <button id="abtog" class="ghost" type="button">Comparar con otro sitio</button>
@@ -184,6 +190,7 @@
       <div><h2 data-i18n="h_sun">Estado del amanecer por modelo</h2><div class="wrap"><table id="tsun"></table></div></div>
       <div><h2 data-i18n="h_w">Pesos bayesianos y prior</h2><div class="wrap"><table id="tw"></table></div><p class="note" id="priorinfo"></p></div>
     </section>
+    <section><h2 data-i18n="h_src">Fuentes en este punto</h2><div class="wrap"><table id="tsrc"></table></div><p class="note" id="srcread"></p><p class="note" data-i18n="src_note"></p></section>
     <section><h2 data-i18n="h_cal"></h2><div id="calib" style="max-width:560px"></div><p class="note" id="calread"></p></section>
     <section><h2 data-i18n="h_obs">Registro de observaciones (aprendizaje)</h2>
       <div class="panel">
@@ -207,28 +214,33 @@
 (function(){
   const I18N={
   es:{portada:'Portada',guia:'Guía rápida',astro_link:'Astrofotografía',manual:'Manual',title:'Niebla para fotografía',subtitle:'Pestaña 1: índice físico de niebla con un modelo. Pestaña 2: fusión bayesiana de varios modelos con aprendizaje a partir de tus observaciones. Datos de Open‑Meteo, sin clave.',
-    lat:'Latitud',lon:'Longitud',env:'Entorno',env_coast:'Costero (advección)',env_inland:'Interior',geo:'Usar mi posición',tab1:'Índice de niebla',tab2:'Fusión bayesiana',model:'Modelo',best:'Mejor disponible',compute:'Calcular',
+    lat:'Latitud',lon:'Longitud',env:'Entorno',env_coast:'Costero (advección)',env_inland:'Interior',geo:'Usar mi posición',tab1:'Índice de niebla',tab2:'Fusión bayesiana',model:'Modelo',best:'Selección de Open‑Meteo (best match)',auto:'Automático: la fuente de menor escala efectiva aquí',compute:'Calcular',
     h_strip:'Índice horario (48 h)',strip_legend:'Barra: índice 0 a 100. Fondo gris: noche. Hora en rojo: amanecer. Ámbar (50 a 74): bruma posible. Rojizo (≥ 75): niebla probable.',
-    h_conv:'Convergencia de temperatura y punto de rocío',leg1:'<i style="background:#1c262e"></i>T (°C) <i style="background:#3e6d8a"></i>Td (°C) <i style="background:#b8862b"></i>viento (km/h, eje derecho) <i style="background:#d9a0a0"></i>T − Td &lt; 2 °C <i style="background:#7a5ea8;height:6px"></i>visibilidad prevista &lt; 2 km (barra inferior)',
+    h_conv:'Convergencia de temperatura y punto de rocío',leg1:'<i style="background:#1c262e"></i>T (°C) <i style="background:#3e6d8a"></i>Td (°C) <i style="background:#b8862b"></i>viento (km/h, eje derecho) <i style="background:#d9a0a0"></i>T − Td &lt; 2 °C <i style="background:#7a5ea8;height:6px"></i>visibilidad prevista o estimada &lt; 2 km (barra inferior)',
     h_table:'Tabla horaria',h_how:'Cómo se calcula',
-    how1:'El índice suma contribuciones y se satura en 100. <code>ΔT = T − Td</code>: 40 puntos si ΔT ≤ 0.5 °C, decreciendo linealmente hasta 0 en 4 °C. Viento a 10 m: 2 a 8 km/h (20), calma (14), 8 a 15 (8), 15 a 20 (3), &gt; 20 (0). Nubosidad por encima de la capa de niebla, es decir medias y altas (las bajas de un modelo pueden ser la propia niebla y no penalizan salvo que la visibilidad prevista sea buena, señal de estratos): &lt; 25 % (20), 25 a 60 % (8), más (0). Visibilidad modelada: &lt; 1 km (20), &lt; 3 km (10), &lt; 6 km (4); sin dato, 5. HR ≥ 97 %: +10. Lluvia &gt; 0.5 mm: −15. Persistencia: +2 por cada hora nocturna previa consecutiva con ΔT &lt; 1.5 °C y viento &lt; 12 km/h, hasta +8. En modo costero, advección: Td del aire por encima de la SST con viento de 8 a 30 km/h, hasta +30. De día se multiplica por 0.65, salvo en las dos horas siguientes al amanecer (0.85), cuando la niebla aún persiste. Umbrales: ≥ 75 niebla probable, 50 a 74 bruma posible.',
+    how1:'El índice suma contribuciones y se satura en 100. <code>ΔT = T − Td</code>: 40 puntos si ΔT ≤ 0.5 °C, decreciendo linealmente hasta 0 en 4 °C. Viento a 10 m: 2 a 8 km/h (20), calma (14), 8 a 15 (8), 15 a 20 (3), &gt; 20 (0). Nubosidad por encima de la capa de niebla, es decir medias y altas (las bajas de un modelo pueden ser la propia niebla y no penalizan salvo que la visibilidad, prevista o estimada, supere 5 km: eso indica estratos sobre una superficie sin saturar): &lt; 25 % (20), 25 a 60 % (8), más (0). Si la fuente no desglosa la nubosidad por capas, como los ensembles, solo se conoce la total: por debajo del 25 % puntúa 20 y en otro caso 8, valor neutro, porque una cobertura total alta puede ser la propia niebla. Visibilidad del modelo: &lt; 1 km (20), &lt; 3 km (10), &lt; 6 km (4). Si la fuente no la publica (AROME, ARPEGE, ensembles ICON), se estima con el diagnóstico FSL <code>V = 6000·(T − Td)/HR^1.75</code> (en millas), se marca con ~ y puntúa al 60 %, porque no confirma nada que ΔT y HR no digan ya. HR ≥ 97 %: +10. Lluvia &gt; 0.5 mm: −15. Persistencia: +2 por cada hora nocturna previa consecutiva con ΔT &lt; 1.5 °C y viento &lt; 12 km/h, hasta +8. En modo costero, advección: Td del aire por encima de la SST con viento de 8 a 30 km/h, hasta +30. De día se multiplica por 0.65, salvo en las dos horas siguientes al amanecer (0.85), cuando la niebla aún persiste. Umbrales: ≥ 75 niebla probable, 50 a 74 bruma posible.',
     models_lbl:'Modelos y ensembles (descarga en paralelo; EPS/ENS son conjuntos de 30 a 50 miembros y tardan algo más)',alpha:'γ (peso de los modelos frente a la climatología, 0.1 a 1)',h_prob:'Probabilidad horaria por modelo y posterior',h_sun:'Estado del amanecer por modelo',h_w:'Pesos bayesianos y prior',h_obs:'Registro de observaciones (aprendizaje)',
     night_of:'Noche del',observed:'Observado al amanecer',o_fog:'Niebla (vis < 1 km)',o_mist:'Bruma o neblina',o_none:'Nada',save_obs:'Guardar observación',export:'Exportar JSON',import:'Importar JSON',clear:'Borrar registro',
     obs_note:'Cada vez que calculas, la previsión para el próximo amanecer queda congelada automáticamente, asociada a la fecha de esa noche. Por la mañana basta con elegir la noche recién terminada, indicar lo observado y guardar: la observación se empareja con la previsión que se congeló la víspera, nunca con una posterior. Si esa noche no llegaste a calcular, la observación solo actualiza el prior climatológico, no los pesos. El registro se guarda en este navegador; exporta el JSON si cambias de equipo.',
     snap_info:'Previsión congelada para la noche del {d} ({n} modelos, {h}).',no_snap:'No hay previsión congelada para la noche del {d}; la observación actualiza solo el prior.',obs_saved:'Observación guardada para la noche del {d}.',pending:'pendiente',
-    h_method:'Método',method:'Cada modelo determinista da un índice s por hora (misma heurística de la pestaña 1) que se convierte en probabilidad con <code>p_m = σ((s − 70)/11)</code>. Las fuentes EPS/ENS son ensembles: se calcula el índice para cada miembro y p_m es la media de las probabilidades de los miembros, una probabilidad genuina que refleja la dispersión del propio modelo. Con 12 o más noches registradas se ajusta además una recalibración de Platt <code>q = σ(a·logit P + b)</code> sobre pares (posterior, observado), con prior a≈1, b≈0. Prior climatológico π ~ Beta(a, b), inicial Beta(1.2, 8.8), actualizado con cada noche observada (a += y, b += 1 − y). Consenso de modelos por media ponderada en log‑odds: <code>logit p̄ = Σ w_m · logit p_m / Σ w_m</code>, que garantiza min p_m ≤ p̄ ≤ max p_m. Posterior por contracción hacia la climatología: <code>logit P = logit π + γ · (logit p̄ − logit π)</code>, con γ entre 0.1 y 1: P queda siempre entre la tasa climatológica π y el consenso p̄, nunca fuera de la envolvente de los modelos. γ = 1 se fía por completo del consenso; valores menores lo moderan hacia tu frecuencia local, lo razonable mientras la calibración de p_m no esté contrastada. Pesos <code>w_m ∝ exp(0.7 · Σ log P_m(y_obs))</code>: probabilidad a posteriori de que m sea el mejor modelo, con prior uniforme y tempering. Sin observaciones, pesos uniformes.',
+    h_method:'Método',method:'Cada modelo determinista da un índice s por hora (misma heurística de la pestaña 1) que se convierte en probabilidad con <code>p_m = σ((s − 70)/11)</code>. Las fuentes EPS/ENS son ensembles: se calcula el índice para cada miembro y p_m es la media de las probabilidades de los miembros, una probabilidad genuina que refleja la dispersión del propio modelo. Con 12 o más noches registradas se ajusta además una recalibración de Platt <code>q = σ(a·logit P + b)</code> sobre pares (posterior, observado), con prior a≈1, b≈0. Prior climatológico π ~ Beta(a, b), inicial Beta(1.2, 8.8), actualizado con cada noche observada (a += y, b += 1 − y). Consenso de modelos por media ponderada en log‑odds: <code>logit p̄ = Σ w_m · logit p_m / Σ w_m</code>, que garantiza min p_m ≤ p̄ ≤ max p_m. Posterior por contracción hacia la climatología: <code>logit P = logit π + γ · (logit p̄ − logit π)</code>, con γ entre 0.1 y 1: P queda siempre entre la tasa climatológica π y el consenso p̄, nunca fuera de la envolvente de los modelos. γ = 1 se fía por completo del consenso; valores menores lo moderan hacia tu frecuencia local, lo razonable mientras la calibración de p_m no esté contrastada. Pesos <code>w_m ∝ Δ_m^(−0.5) · exp(0.7 · Σ log P_m(y_obs))</code>: probabilidad a posteriori de que m sea el mejor modelo, con tempering y un prior estructural que depende de la escala efectiva Δ_m de la fuente en el punto (paso de malla, degradado hacia la escala del modelo anfitrión a menos de 200 km del borde de un dominio limitado, y nunca menor que la distancia a la celda que devuelve la API). Sin observaciones los pesos son ese prior: una fuente con Δ de 2 km pesa 2.1 veces más que una de 9 km y 3.7 veces más que una de 28 km. En las noches en que una fuente no tiene previsión congelada se le imputa la log‑verosimilitud media de las demás, de modo que una fuente recién añadida entra con peso neutro y no con ventaja.',
     dl:'Descargando previsión…',dl_n:'Descargando {n} modelos en paralelo…',err:'Error: ',nopos:'Sin posición: ',geo_wait:'Obteniendo posición… (acepta el permiso si el navegador lo pide)',geo_denied:'Permiso de ubicación denegado. Actívalo en el candado de la barra de direcciones, o escribe las coordenadas a mano.',geo_denied_app:'Permiso de ubicación denegado para la app de pantalla de inicio. En iPhone: Ajustes → Privacidad y seguridad → Localización activada, y en "Sitios web de Safari" elige "Al usar la app". Si sigue fallando, elimina el icono del escritorio y vuelve a añadirlo para que pida permiso de nuevo.',geo_timeout:'La posición tardó demasiado. Reintenta, o escribe las coordenadas a mano.',geo_unavail:'Posición no disponible en este dispositivo. Escribe las coordenadas a mano.',geo_insecure:'La geolocalización solo funciona con HTTPS (por ejemplo en GitHub Pages) o en localhost; abierta como archivo local el navegador la bloquea. Escribe las coordenadas a mano.',geo_unsupported:'Este navegador no ofrece geolocalización. Escribe las coordenadas a mano.',nossT:' · sin SST, advección desactivada',elev:'elevación',
     next6:'Próximas 6 horas',max_at:'máximo a las',sunrise:'Amanecer',window:'ventana −2.5 h a +1.5 h, máximo a las',mindt:'Mínima depresión del punto de rocío esta noche',at:'a las',wind:'viento',clouds:'nubes',pressure:'presión',
     fog:'Niebla probable',mist:'Bruma o neblina posible',unlikely:'Improbable',range:'rango',disp:'Dispersión entre modelos (amanecer)',agree_h:'Acuerdo alto',agree_m:'Acuerdo moderado',agree_l:'Desacuerdo',mean:'media',disp_note:'Desviación típica de las probabilidades de los modelos: incertidumbre epistémica.',
     th1:['Hora','Índice','T','Td','ΔT','HR','Viento','Dir','Nubes','Bajas','Medias','Altas','Vis km','SST','P hPa'],thsun:['Modelo','P máx','hora','ΔT','HR','viento','nubes','vis km','señales'],thw:['Modelo','peso w','Brier','aciertos','log‑veros.'],thobs:['Noche','y'],posterior:'posterior',del:'eliminar',
     post_leg:'posterior',range_leg:'rango',prior_info:'Prior: Beta({a}, {b}), media {pi} % sobre {n} noches registradas. Calibración p = σ((s − 70)/11).',
-    sel1:'Selecciona al menos un modelo.',none:'Ningún modelo respondió a tiempo. Reintenta o reduce la selección.',fused:'{k} modelos fusionados',failed:', {f} sin respuesta',first:'Calcula primero.',badjson:'JSON no válido',confirm:'¿Borrar todo el registro de observaciones?',
+    sel1:'Selecciona al menos un modelo.',none:'Ningún modelo respondió a tiempo. Reintenta o reduce la selección.',fused:'{k} modelos fusionados',failed:', {f} sin respuesta',nocov_n:', {c} sin cobertura',nocov:'sin cobertura',nodata:'sin datos',
+    cell:'celda a {d} km',edge:'borde del dominio a {d} km',fill_from:'desde {h}, {m}',prim_fail:'{m} sin datos aquí',then_ifs:'IFS 9 km a partir de unas +{h} h',fill_fail:'{m} no respondió: sin relleno',none_cov:'Ninguna de las fuentes marcadas cubre este punto.',
+    h_src:'Fuentes en este punto',thsrc:['Fuente','Modelo efectivo aquí','Malla km','Celda a km','Borde km','Δ km','Visibilidad','Capas de nubes','Prior','Lectura'],yes:'sí',no:'no',est:'estimada',
+    s_fine:'resuelve costa y relieve',s_mid:'malla intermedia',s_coarse:'malla gruesa: no resuelve rías ni valles',s_edge:'cerca del borde del dominio',s_far:'celda desplazada respecto al punto',s_novis:'no publica visibilidad',s_nolay:'no desglosa capas de nubes',s_nocov:'sin cobertura en este punto',s_legacy:'sustituida por IFS 9 km; solo para leer el registro antiguo',s_dup:'probablemente la misma integración que HARMONIE DMI (dominio común UWC‑West) remuestreada: no marques las dos',
+    src_read:'Menor escala efectiva entre las fuentes fusionadas: {a}, Δ = {km} km. {n} de las {k} tienen Δ de 10 km o más.',
+    src_note:'Muchos identificadores de Open‑Meteo son mezclas de modelos, y cuál de ellos responde depende del punto. La tabla resuelve la mezcla para estas coordenadas: modelo efectivo y paso de malla (de las definiciones de rejilla de Open‑Meteo), distancia entre el punto y la celda que devuelve la API, distancia al borde del dominio en los modelos de área limitada y si la fuente publica visibilidad y nubosidad por capas. Δ es la escala efectiva de la fuente en el punto: su paso de malla, salvo a menos de 200 km del borde de un dominio limitado, donde se interpola linealmente hacia la escala del modelo que lo alimenta (ARPEGE para AROME, IFS para HARMONIE, ICON‑EU para ICON‑D2) porque ahí la solución es en buena parte la heredada; si la celda devuelta queda más lejos que eso, manda esa distancia. El prior es el peso de partida, proporcional a Δ^(−0.5); el registro de observaciones lo corrige noche a noche. El borde oeste de AROME es una estimación (±50 km): Météo‑France solo publica el recorte en latitud y longitud. Las filas atenuadas son fuentes desmarcadas o sin respuesta. Fuera de Europa el catálogo es aproximado.',first:'Calcula primero.',badjson:'JSON no válido',confirm:'¿Borrar todo el registro de observaciones?',
     h_cal:'Calibración (diagrama de fiabilidad)',cal_empty:'Se dibuja cuando el registro tenga noches con previsión congelada.',cal_few:'Aún hay pocas noches para leer la calibración (n={n}; orientativo a partir de 10, fiable a partir de 30).',cal_thin:'Los grupos extremos (0–25 % y 75–100 %) tienen pocas noches (n={n}); todavía no hay señal clara sobre γ.',cal_mixed:'Los grupos se contradicen entre sí: sin señal clara sobre γ; déjalo como está y sigue registrando.',cal_up:'Las frecuencias reales son más extremas que el posterior: sube γ (más confianza en los modelos).',cal_down:'Las frecuencias reales son menos extremas que el posterior: baja γ.',cal_ok:'La calibración es razonable: deja γ como está.',cal_diag:'calibración perfecta',cal_x:'posterior predicho (%)',cal_y:'frecuencia real de niebla (%)',w_dT:'ΔT',w_vis:'vis',w_rain:'lluvia',w_adv:'advección',w_wind:'viento',w_cloud:'nubes',w_pers:'saturación',timeout:'timeout',error:'error',recal:'recalibrado (n={n}, a={a}, b={b})',
     seaaz:'Acimut hacia el mar',rose:['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSO','SO','OSO','O','ONO','NO','NNO'],w_sea:'del mar',w_land:'de tierra',w_rh:'HR',
     win_lbl:'Ventana fotográfica',win_span:'de {a} a {b} · {dur}',win_none:'El índice no llega a {thr} en ninguna hora de la ventana: no hay niebla que defender.',win_full:'niebla plena, pico {s} a las {h}',win_mist:'solo bruma, pico {s} a las {h}',win_short:'Fugaz: menos de una hora por encima del umbral, no compensa el desplazamiento.',win_late:'El máximo cae después del amanecer: en la hora azul habrá poco que fotografiar y la luz ya estará alta cuando la niebla cuaje.',win_heur:'El tramo posterior al amanecer usa el factor heurístico 0.85 (la niebla tarda de una a dos horas en levantar): la hora de disipación es la parte menos firme del cálculo.',sun_link:'Sol, hora dorada y acimut de ese amanecer',
     h_morn:'Próximas mañanas',thmorn:['Mañana','Amanecer','Índice','Veredicto','ΔT mín','Viento','Nubes M/A','Vis km','Confianza'],conf_h:'alta',conf_m:'orientativa',conf_l:'tendencia',
     morn_best:'La mejor mañana de la semana es la del {d}, con índice {s}; la de mañana se queda en {s2}.',morn_best_first:'La mejor mañana de la semana es justo la de mañana ({s}): ninguna otra la supera.',morn_none:'Ninguna mañana de la semana pasa de 50: no hay salida que planificar todavía; la mejor es la del {d} con {s}.',
-    morn_note:'Un amanecer por fila, con el máximo del índice dentro de la ventana −2.5 h/+1.5 h y la mínima depresión del punto de rocío de esa noche. Viento, nubes y visibilidad son los de la hora del máximo. La pericia de los modelos cae con el plazo: los dos primeros días son la previsión de verdad, el tercero y el cuarto son orientativos y del quinto en adelante es una tendencia, no una previsión.',
+    morn_note:'Un amanecer por fila, con el máximo del índice dentro de la ventana −2.5 h/+1.5 h y la mínima depresión del punto de rocío de esa noche. Viento, nubes y visibilidad son los de la hora del máximo. La pericia de los modelos cae con el plazo: los dos primeros días son la previsión de verdad, el tercero y el cuarto son orientativos y del quinto en adelante es una tendencia, no una previsión. Si el modelo elegido tiene horizonte corto (AROME llega a 48 h, HARMONIE a 60 h), las mañanas posteriores se calculan con IFS 9 km y la columna de confianza lo indica; con HARMONIE el cambio lo hace el servidor y la marca es aproximada.',
     h_brk:'De qué se compone el índice, hora a hora',brk_sat:'saturado a 100',
     brk_note:'Cada barra desglosa los puntos que aporta cada término en esa hora, en el mismo orden en que se calculan; la lluvia se dibuja hacia abajo porque resta. La marca negra corta al valor final del índice, ya con el factor diurno aplicado y saturado a 100. Sirve para ver qué término limita cada hora: si la barra se queda corta por el segmento de nubes, lo que falla es la nubosidad media y alta, no la humedad; si el segmento de ΔT es alto y el total sigue bajo, el freno es el viento.',
     h_kos:'Qué vas a ver: contraste, distancia y focal',k_vis:'Visibilidad',k_dist:'Distancia al sujeto',k_foc:'Focal',k_reset:'Volver a la previsión',k_c:'Contraste residual del sujeto',
@@ -243,33 +255,38 @@
     h_ab:'A o B: comparación de dos emplazamientos',latB:'Latitud B',lonB:'Longitud B',envB:'Entorno B',ab_toggle:'Comparar con otro sitio',ab_hide:'Ocultar la comparación',ab_compute:'Calcular B',ab_err:'Sitio B: ',ab_a:'Sitio A',ab_b:'Sitio B',
     ab_read:'Próximo amanecer: A {a} · B {b}. {v}',ab_goA:'Ve a A.',ab_goB:'Ve a B.',ab_tie:'Empate práctico, menos de 8 puntos: decide por acceso, composición y hora de salida.',
     ab_note:'Los dos sitios se calculan con el mismo modelo y la misma tubería, y la comparación vive solo en esta pestaña: la fusión bayesiana y el registro de observaciones siguen siendo de un único emplazamiento, el de las coordenadas de arriba. Mezclar dos sitios en el registro estropearía el aprendizaje.',
-    w_note:'Brier: media de (p − y)², donde 0 es perfecto y 0.25 es lo que da predecir siempre 50 %. Aciertos: porcentaje de noches en que el modelo cayó del lado correcto del 50 % y, entre paréntesis, cuántas noches tenía congeladas. La log‑verosimilitud es lo que fija el peso; Brier y aciertos son la misma información en unidades legibles.',
+    w_note:'Brier: media de (p − y)², donde 0 es perfecto y 0.25 es lo que da predecir siempre 50 %. Aciertos: porcentaje de noches en que el modelo cayó del lado correcto del 50 % y, entre paréntesis, cuántas noches tenía congeladas. La log‑verosimilitud es lo que fija el peso; Brier y aciertos son la misma información en unidades legibles. En las noches en que un modelo no tenía previsión congelada, su log‑verosimilitud suma la media de los demás: las fuentes con menos noches registradas no salen favorecidas.',
     les_head:'Lecciones de tu registro:',les_none:'Todavía no hay noches con rasgos congelados. Cada vez que calculas en esta pestaña, la ficha guarda además el ΔT, el viento, las nubes y la visibilidad previstos para el amanecer de esa noche; en cuanto tengas una noche observada con esos rasgos, aquí aparecerán tus umbrales locales.',
     les_fog:'En tu sitio ha habido niebla o bruma con ΔT previsto de hasta {dt} °C y viento de hasta {w} km/h ({n} noches).',les_cloud:'La mayor nubosidad media prevista con la que llegó a haberla fue del {c} %.',les_vis:'La visibilidad prevista más alta con la que llegó a haberla fue de {v} km.',les_nofog:'La noche sin nada con menor ΔT previsto tuvo {dt} °C ({n} noches sin nada).',les_tail:'Rasgos del modelo de mayor peso, sobre {n} noches con previsión congelada.',
     ens_band:'p10–p90 {a}–{b} %',ens_frac:'{k} de {n} miembros con niebla',},
   en:{portada:'Home',guia:'Quick guide',astro_link:'Astrophotography',manual:'Manual',title:'Fog for photography',subtitle:'Tab 1: physical fog index from one model. Tab 2: Bayesian fusion of several models that learns from your observations. Open‑Meteo data, no API key.',
-    lat:'Latitude',lon:'Longitude',env:'Setting',env_coast:'Coastal (advection)',env_inland:'Inland',geo:'Use my location',tab1:'Fog index',tab2:'Bayesian fusion',model:'Model',best:'Best available',compute:'Compute',
+    lat:'Latitude',lon:'Longitude',env:'Setting',env_coast:'Coastal (advection)',env_inland:'Inland',geo:'Use my location',tab1:'Fog index',tab2:'Bayesian fusion',model:'Model',best:'Open‑Meteo selection (best match)',auto:'Automatic: the source with the smallest effective scale here',compute:'Compute',
     h_strip:'Hourly index (48 h)',strip_legend:'Bar: index 0 to 100. Grey background: night. Red hour: sunrise. Amber (50 to 74): mist possible. Reddish (≥ 75): fog likely.',
-    h_conv:'Temperature and dew point convergence',leg1:'<i style="background:#1c262e"></i>T (°C) <i style="background:#3e6d8a"></i>Td (°C) <i style="background:#b8862b"></i>wind (km/h, right axis) <i style="background:#d9a0a0"></i>T − Td &lt; 2 °C <i style="background:#7a5ea8;height:6px"></i>forecast visibility &lt; 2 km (bottom bar)',
+    h_conv:'Temperature and dew point convergence',leg1:'<i style="background:#1c262e"></i>T (°C) <i style="background:#3e6d8a"></i>Td (°C) <i style="background:#b8862b"></i>wind (km/h, right axis) <i style="background:#d9a0a0"></i>T − Td &lt; 2 °C <i style="background:#7a5ea8;height:6px"></i>forecast or estimated visibility &lt; 2 km (bottom bar)',
     h_table:'Hourly table',h_how:'How it is computed',
-    how1:'The index adds independent contributions and saturates at 100. <code>ΔT = T − Td</code>: 40 points if ΔT ≤ 0.5 °C, decreasing linearly to 0 at 4 °C. 10 m wind: 2 to 8 km/h (20), calm (14), 8 to 15 (8), 15 to 20 (3), &gt; 20 (0). Cloud above the fog layer, i.e. mid and high (a model&#8217;s low cloud may be the fog itself and does not penalise unless forecast visibility is good, a sign of stratus): &lt; 25 % (20), 25 to 60 % (8), more (0). Model visibility: &lt; 1 km (20), &lt; 3 km (10), &lt; 6 km (4); missing, 5. RH ≥ 97 %: +10. Rain &gt; 0.5 mm: −15. Persistence: +2 for each preceding consecutive night hour with ΔT &lt; 1.5 °C and wind &lt; 12 km/h, up to +8. In coastal mode, advection: air dew point above SST with wind 8 to 30 km/h, up to +30. Daytime values are multiplied by 0.65, except the two hours after sunrise (0.85), when fog still lingers. Thresholds: ≥ 75 fog likely, 50 to 74 mist possible.',
+    how1:'The index adds independent contributions and saturates at 100. <code>ΔT = T − Td</code>: 40 points if ΔT ≤ 0.5 °C, decreasing linearly to 0 at 4 °C. 10 m wind: 2 to 8 km/h (20), calm (14), 8 to 15 (8), 15 to 20 (3), &gt; 20 (0). Cloud above the fog layer, i.e. mid and high (a model&#8217;s low cloud may be the fog itself and does not penalise unless visibility, forecast or estimated, exceeds 5 km: that indicates stratus over an unsaturated surface): &lt; 25 % (20), 25 to 60 % (8), more (0). If the source does not split cloud by layer, as with ensembles, only total cover is known: below 25 % it scores 20 and otherwise 8, a neutral value, because high total cover may be the fog itself. Model visibility: &lt; 1 km (20), &lt; 3 km (10), &lt; 6 km (4). If the source does not publish it (AROME, ARPEGE, ICON ensembles), it is estimated with the FSL diagnostic <code>V = 6000·(T − Td)/RH^1.75</code> (in miles), flagged with ~ and scored at 60 %, because it confirms nothing that ΔT and RH do not already say. RH ≥ 97 %: +10. Rain &gt; 0.5 mm: −15. Persistence: +2 for each preceding consecutive night hour with ΔT &lt; 1.5 °C and wind &lt; 12 km/h, up to +8. In coastal mode, advection: air dew point above SST with wind 8 to 30 km/h, up to +30. Daytime values are multiplied by 0.65, except the two hours after sunrise (0.85), when fog still lingers. Thresholds: ≥ 75 fog likely, 50 to 74 mist possible.',
     models_lbl:'Models and ensembles (parallel download; EPS/ENS are 30 to 50 member ensembles and take a bit longer)',alpha:'γ (weight of models vs climatology, 0.1 to 1)',h_prob:'Hourly probability per model and posterior',h_sun:'Sunrise state per model',h_w:'Bayesian weights and prior',h_obs:'Observation log (learning)',
     night_of:'Night of',observed:'Observed at sunrise',o_fog:'Fog (vis < 1 km)',o_mist:'Mist or haze',o_none:'Nothing',save_obs:'Save observation',export:'Export JSON',import:'Import JSON',clear:'Clear log',
     obs_note:'Every time you compute, the forecast for the next sunrise is frozen automatically and attached to the date of that night. In the morning just pick the night that has just ended, choose what you observed and save: the observation is paired with the forecast frozen the evening before, never with a later one. If you did not compute that night, the observation only updates the climatological prior, not the weights. The log lives in this browser; export the JSON if you change device.',
     snap_info:'Forecast frozen for the night of {d} ({n} models, {h}).',no_snap:'No frozen forecast for the night of {d}; the observation only updates the prior.',obs_saved:'Observation saved for the night of {d}.',pending:'pending',
-    h_method:'Method',method:'Each deterministic model yields an hourly index s (same heuristic as tab 1), mapped to a probability with <code>p_m = σ((s − 70)/11)</code>. EPS/ENS sources are ensembles: the index is computed for every member and p_m is the mean of member probabilities, a genuine probability reflecting the model&#8217;s own spread. With 12 or more logged nights a Platt recalibration <code>q = σ(a·logit P + b)</code> is also fitted on (posterior, observed) pairs, with prior a≈1, b≈0. Climatological prior π ~ Beta(a, b), initially Beta(1.2, 8.8), updated with every observed night (a += y, b += 1 − y). Model consensus as a weighted mean in log‑odds: <code>logit p̄ = Σ w_m · logit p_m / Σ w_m</code>, which guarantees min p_m ≤ p̄ ≤ max p_m. Posterior by shrinkage towards climatology: <code>logit P = logit π + γ · (logit p̄ − logit π)</code>, with γ between 0.1 and 1: P always lies between the climatological rate π and the consensus p̄, never outside the model envelope. γ = 1 fully trusts the consensus; smaller values moderate it towards your local frequency, sensible while the calibration of p_m is untested. Weights <code>w_m ∝ exp(0.7 · Σ log P_m(y_obs))</code>: posterior probability that m is the best model, uniform prior, tempered. With no observations, uniform weights.',
+    h_method:'Method',method:'Each deterministic model yields an hourly index s (same heuristic as tab 1), mapped to a probability with <code>p_m = σ((s − 70)/11)</code>. EPS/ENS sources are ensembles: the index is computed for every member and p_m is the mean of member probabilities, a genuine probability reflecting the model&#8217;s own spread. With 12 or more logged nights a Platt recalibration <code>q = σ(a·logit P + b)</code> is also fitted on (posterior, observed) pairs, with prior a≈1, b≈0. Climatological prior π ~ Beta(a, b), initially Beta(1.2, 8.8), updated with every observed night (a += y, b += 1 − y). Model consensus as a weighted mean in log‑odds: <code>logit p̄ = Σ w_m · logit p_m / Σ w_m</code>, which guarantees min p_m ≤ p̄ ≤ max p_m. Posterior by shrinkage towards climatology: <code>logit P = logit π + γ · (logit p̄ − logit π)</code>, with γ between 0.1 and 1: P always lies between the climatological rate π and the consensus p̄, never outside the model envelope. γ = 1 fully trusts the consensus; smaller values moderate it towards your local frequency, sensible while the calibration of p_m is untested. Weights <code>w_m ∝ Δ_m^(−0.5) · exp(0.7 · Σ log P_m(y_obs))</code>: posterior probability that m is the best model, tempered, with a structural prior that depends on the effective scale Δ_m of the source at the point (grid spacing, degraded towards the scale of the host model within 200 km of the edge of a limited domain, and never smaller than the distance to the cell the API returns). With no observations the weights are that prior: a source with Δ of 2 km weighs 2.1 times a 9 km one and 3.7 times a 28 km one. On nights when a source has no frozen forecast it is assigned the mean log‑likelihood of the others, so a newly added source enters with neutral weight rather than an advantage.',
     dl:'Downloading forecast…',dl_n:'Downloading {n} models in parallel…',err:'Error: ',nopos:'No position: ',geo_wait:'Getting position… (accept the permission prompt if shown)',geo_denied:'Location permission denied. Enable it from the padlock in the address bar, or type the coordinates.',geo_denied_app:'Location permission denied for the home-screen app. On iPhone: Settings → Privacy & Security → Location Services on, and under "Safari Websites" choose "While Using the App". If it still fails, remove the home-screen icon and add it again so the prompt reappears.',geo_timeout:'Position took too long. Retry, or type the coordinates.',geo_unavail:'Position unavailable on this device. Type the coordinates.',geo_insecure:'Geolocation only works over HTTPS (e.g. GitHub Pages) or on localhost; browsers block it for local files. Type the coordinates.',geo_unsupported:'This browser does not offer geolocation. Type the coordinates.',nossT:' · no SST, advection disabled',elev:'elevation',
     next6:'Next 6 hours',max_at:'peak at',sunrise:'Sunrise',window:'window −2.5 h to +1.5 h, peak at',mindt:'Minimum dew point depression tonight',at:'at',wind:'wind',clouds:'clouds',pressure:'pressure',
     fog:'Fog likely',mist:'Mist or haze possible',unlikely:'Unlikely',range:'range',disp:'Spread between models (sunrise)',agree_h:'High agreement',agree_m:'Moderate agreement',agree_l:'Disagreement',mean:'mean',disp_note:'Standard deviation of model probabilities: epistemic uncertainty.',
     th1:['Time','Index','T','Td','ΔT','RH','Wind','Dir','Clouds','Low','Mid','High','Vis km','SST','P hPa'],thsun:['Model','P max','time','ΔT','RH','wind','clouds','vis km','signals'],thw:['Model','weight w','Brier','hits','log‑lik.'],thobs:['Night','y'],posterior:'posterior',del:'delete',
     post_leg:'posterior',range_leg:'range',prior_info:'Prior: Beta({a}, {b}), mean {pi} % over {n} logged nights. Calibration p = σ((s − 70)/11).',
-    sel1:'Select at least one model.',none:'No model answered in time. Retry or reduce the selection.',fused:'{k} models fused',failed:', {f} without response',first:'Compute first.',badjson:'Invalid JSON',confirm:'Delete the whole observation log?',
+    sel1:'Select at least one model.',none:'No model answered in time. Retry or reduce the selection.',fused:'{k} models fused',failed:', {f} without response',nocov_n:', {c} without coverage',nocov:'no coverage',nodata:'no data',
+    cell:'cell {d} km away',edge:'domain edge {d} km away',fill_from:'from {h}, {m}',prim_fail:'{m} has no data here',then_ifs:'IFS 9 km from about +{h} h',fill_fail:'{m} did not answer: no fill',none_cov:'None of the ticked sources covers this point.',
+    h_src:'Sources at this point',thsrc:['Source','Effective model here','Mesh km','Cell at km','Edge km','Δ km','Visibility','Cloud layers','Prior','Reading'],yes:'yes',no:'no',est:'estimated',
+    s_fine:'resolves coast and relief',s_mid:'intermediate mesh',s_coarse:'coarse mesh: does not resolve inlets or valleys',s_edge:'close to the domain edge',s_far:'cell displaced from the point',s_novis:'publishes no visibility',s_nolay:'no cloud layers',s_nocov:'no coverage at this point',s_legacy:'replaced by IFS 9 km; kept only to read the old log',s_dup:'probably the same run as HARMONIE DMI (common UWC‑West domain), resampled: do not tick both',
+    src_read:'Smallest effective scale among the fused sources: {a}, Δ = {km} km. {n} of the {k} have Δ of 10 km or more.',
+    src_note:'Many Open‑Meteo identifiers are blends of models, and which one answers depends on the point. The table resolves the blend for these coordinates: effective model and grid spacing (from Open‑Meteo grid definitions), distance between the point and the cell the API returns, distance to the domain edge for limited‑area models and whether the source publishes visibility and cloud by layer. Δ is the effective scale of the source at the point: its grid spacing, except within 200 km of the edge of a limited domain, where it is interpolated linearly towards the scale of the model feeding it (ARPEGE for AROME, IFS for HARMONIE, ICON‑EU for ICON‑D2) because there the solution is largely inherited; if the returned cell lies farther than that, the cell distance prevails. The prior is the starting weight, proportional to Δ^(−0.5); the observation log corrects it night by night. The western AROME edge is an estimate (±50 km): Météo‑France only publishes the latitude‑longitude crop. Dimmed rows are unticked or unresponsive sources. Outside Europe the catalogue is approximate.',first:'Compute first.',badjson:'Invalid JSON',confirm:'Delete the whole observation log?',
     h_cal:'Calibration (reliability diagram)',cal_empty:'Drawn once the log has nights with a frozen forecast.',cal_few:'Too few nights yet to read calibration (n={n}; indicative from 10, reliable from 30).',cal_thin:'The extreme groups (0–25 % and 75–100 %) hold few nights (n={n}); no clear signal on γ yet.',cal_mixed:'The groups contradict each other: no clear signal on γ; leave it as it is and keep logging.',cal_up:'Actual frequencies are more extreme than the posterior: raise γ (more trust in the models).',cal_down:'Actual frequencies are less extreme than the posterior: lower γ.',cal_ok:'Calibration is reasonable: leave γ as it is.',cal_diag:'perfect calibration',cal_x:'predicted posterior (%)',cal_y:'actual fog frequency (%)',w_dT:'ΔT',w_vis:'vis',w_rain:'rain',w_adv:'advection',w_wind:'wind',w_cloud:'clouds',w_pers:'saturation',timeout:'timeout',error:'error',recal:'recalibrated (n={n}, a={a}, b={b})',
     seaaz:'Azimuth towards the sea',rose:['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'],w_sea:'onshore',w_land:'offshore',w_rh:'RH',
     win_lbl:'Photographic window',win_span:'from {a} to {b} · {dur}',win_none:'The index never reaches {thr} anywhere in the window: there is no fog to chase.',win_full:'full fog, peak {s} at {h}',win_mist:'mist only, peak {s} at {h}',win_short:'Fleeting: under an hour above the threshold, not worth the drive.',win_late:'The peak falls after sunrise: the blue hour will have little to photograph and the light will already be high by the time the fog sets in.',win_heur:'The stretch after sunrise uses the heuristic factor 0.85 (fog takes one to two hours to lift): the dissipation time is the least firm part of the calculation.',sun_link:'Sun, golden hour and azimuth for that sunrise',
     h_morn:'Next mornings',thmorn:['Morning','Sunrise','Index','Verdict','Min ΔT','Wind','Cloud M/H','Vis km','Confidence'],conf_h:'high',conf_m:'indicative',conf_l:'trend',
     morn_best:'The best morning of the week is {d}, index {s}; tomorrow only gets to {s2}.',morn_best_first:'The best morning of the week is tomorrow itself ({s}): nothing later beats it.',morn_none:'No morning this week gets past 50: nothing to plan yet; the best is {d} with {s}.',
-    morn_note:'One sunrise per row, with the peak index inside the −2.5 h/+1.5 h window and the minimum dew point depression of that night. Wind, cloud and visibility are those of the peak hour. Model skill drops with lead time: the first two days are the actual forecast, the third and fourth are indicative and from the fifth on it is a trend, not a forecast.',
+    morn_note:'One sunrise per row, with the peak index inside the −2.5 h/+1.5 h window and the minimum dew point depression of that night. Wind, cloud and visibility are those of the peak hour. Model skill drops with lead time: the first two days are the actual forecast, the third and fourth are indicative and from the fifth on it is a trend, not a forecast. If the chosen model has a short horizon (AROME reaches 48 h, HARMONIE 60 h), later mornings are computed with IFS 9 km and the confidence column says so; with HARMONIE the switch is made by the server and the mark is approximate.',
     h_brk:'What the index is made of, hour by hour',brk_sat:'saturated at 100',
     brk_note:'Each bar breaks down the points every term contributes in that hour, in the order they are computed; rain is drawn downwards because it subtracts. The black tick marks the final index, with the daytime factor already applied and saturated at 100. It shows which term limits each hour: if the bar falls short because of the cloud segment, what fails is mid and high cloud, not humidity; if the ΔT segment is tall and the total still low, the brake is the wind.',
     h_kos:'What you will see: contrast, distance and focal length',k_vis:'Visibility',k_dist:'Distance to subject',k_foc:'Focal length',k_reset:'Back to the forecast',k_c:'Residual contrast of the subject',
@@ -284,7 +301,7 @@
     h_ab:'A or B: comparing two sites',latB:'Latitude B',lonB:'Longitude B',envB:'Setting B',ab_toggle:'Compare with another site',ab_hide:'Hide the comparison',ab_compute:'Compute B',ab_err:'Site B: ',ab_a:'Site A',ab_b:'Site B',
     ab_read:'Next sunrise: A {a} · B {b}. {v}',ab_goA:'Go to A.',ab_goB:'Go to B.',ab_tie:'A practical tie, under 8 points: decide on access, composition and departure time.',
     ab_note:'Both sites are computed with the same model and the same pipeline, and the comparison lives only in this tab: the Bayesian fusion and the observation log still belong to a single site, the one in the coordinates above. Mixing two sites in the log would wreck the learning.',
-    w_note:'Brier: mean of (p − y)², where 0 is perfect and 0.25 is what always predicting 50 % gives. Hits: percentage of nights the model fell on the right side of 50 %, with the number of frozen nights in brackets. The log-likelihood is what sets the weight; Brier and hits are the same information in readable units.',
+    w_note:'Brier: mean of (p − y)², where 0 is perfect and 0.25 is what always predicting 50 % gives. Hits: percentage of nights the model fell on the right side of 50 %, with the number of frozen nights in brackets. The log-likelihood is what sets the weight; Brier and hits are the same information in readable units. On nights when a model had no frozen forecast, its log‑likelihood adds the mean of the others: sources with fewer logged nights are not favoured.',
     les_head:'Lessons from your log:',les_none:'No nights with frozen features yet. Every time you compute in this tab the page also stores the ΔT, wind, cloud and visibility forecast for that night at sunrise; as soon as one observed night carries those features, your local thresholds will appear here.',
     les_fog:'At your site there has been fog or mist with a forecast ΔT of up to {dt} °C and wind up to {w} km/h ({n} nights).',les_cloud:'The highest forecast mid cloud it ever appeared with was {c} %.',les_vis:'The highest forecast visibility it ever appeared with was {v} km.',les_nofog:'The blank night with the lowest forecast ΔT had {dt} °C ({n} blank nights).',les_tail:'Features from the highest-weight model, over {n} nights with a frozen forecast.',
     ens_band:'p10–p90 {a}–{b} %',ens_frac:'{k} of {n} members with fog',}
@@ -318,6 +335,69 @@
   const HOURLY='temperature_2m,relative_humidity_2m,dew_point_2m,wind_speed_10m,wind_direction_10m,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,visibility,precipitation,surface_pressure';
   const coords=()=>({lat:+$('#lat').value,lon:+$('#lon').value,costero:$('#costa').value==='costa'});
   function fetchJSON(url,ms){const c=new AbortController();const tm=setTimeout(()=>c.abort(),ms);return fetch(url,{signal:c.signal}).then(r=>r.json()).finally(()=>clearTimeout(tm));}
+  /* ===== catálogo de fuentes: qué modelo sirve realmente cada identificador de Open-Meteo en un punto =====
+     Pasos de malla y dominios tomados de las definiciones de rejilla del código de Open-Meteo (github.com/open-meteo/open-meteo).
+     Cada entrada devuelve {n: modelo efectivo, km: paso de malla, e: distancia en km al borde del dominio distribuido (null si es global)}
+     o null si el punto queda fuera de un modelo de área limitada. Fuera de Europa el catálogo es aproximado. */
+  const RT=6371.229, rad=x=>x*Math.PI/180;
+  const hav=(a1,o1,a2,o2)=>{const q=Math.sin(rad(a2-a1)/2)**2+Math.cos(rad(a1))*Math.cos(rad(a2))*Math.sin(rad(o2-o1)/2)**2; return 2*RT*Math.asin(Math.min(1,Math.sqrt(q)));};
+  const boxEdge=(la,lo,b)=>!(la>=b[0]&&la<=b[1]&&lo>=b[2]&&lo<=b[3])?null:111.2*Math.min(la-b[0],b[1]-la,(lo-b[2])*Math.cos(rad(la)),(b[3]-lo)*Math.cos(rad(la)));
+  const inRect=(dx,dy,W,H)=>(dx>=0&&dy>=0&&dx<=W&&dy<=H)?Math.min(dx,dy,W-dx,H-dy):null;
+  const BOX={arome:[37.5,55.4,-12,16],icond2:[43.18,58.08,-3.94,20.34],iconeu:[29.5,70.5,-23.5,62.5],arpeu:[20,72,-32,42],knminl:[49,56.002,0,11.281]};
+  // cónica conforme de Lambert tangente en φ0 con meridiano central λ0: coordenadas planas en km respecto al punto (φ0, λ0)
+  const lcc=(f0,l0)=>{const n=Math.sin(rad(f0)), F=Math.cos(rad(f0))*Math.tan(Math.PI/4+rad(f0)/2)**n/n, rho=x=>RT*F/Math.tan(Math.PI/4+rad(x)/2)**n;
+    return (a,o)=>{const th=n*rad(o-l0); return [rho(a)*Math.sin(th),rho(f0)-rho(a)*Math.cos(th)];};};
+  // DMI HARMONIE-AROME (DINI): Lambert con λ0 = −8°, φ0 = 55.5°, 1906 × 1606 puntos de 2 km, esquina SO en 39.671 N, 25.422 O
+  const dmiXY=lcc(55.5,-8), dmi0=dmiXY(39.671,-25.421997);
+  const dmiEdge=(la,lo)=>{const p=dmiXY(la,lo); return inRect(p[0]-dmi0[0],p[1]-dmi0[1],3810,3210);};
+  // AROME-France: la malla nativa es Lambert, 1440 × 1536 puntos de 1.3 km; Open-Meteo la sirve recortada a lat-lon (37.5 a 55.4 N, 12 O a 16 E) y fuera
+  // del dominio nativo no hay dato. Centro (46.45 N, 2 E) deducido de ese recorte, cuya altura coincide con 1536 × 1.3 km. Los bordes norte y sur quedan
+  // bien fijados; los bordes este y oeste dependen del meridiano central supuesto y son una estimación con unos ±50 km de incertidumbre.
+  const aroXY=lcc(46.45,2);
+  const aromeEdge=(la,lo)=>{const b=boxEdge(la,lo,BOX.arome); if(b==null) return null; const p=aroXY(la,lo), e=inRect(p[0]+936,p[1]+998.4,1872,1996.8); return e==null?null:Math.min(e,b);};
+  // escala efectiva de una fuente en el punto. En un modelo de área limitada, cerca del borde lateral la solución es la del modelo que lo alimenta:
+  // a menos de EDGE_KM del borde la escala se interpola linealmente entre su paso de malla (km) y la escala de ese modelo anfitrión (h), que es
+  // también lo que el mismo identificador sirve justo fuera del dominio, de modo que Δ no salta al cruzar el borde.
+  const EDGE_KM=200;
+  const effKm=i=>(i.e!=null&&i.h>i.km)?i.km+(i.h-i.km)*Math.max(0,1-i.e/EDGE_KM):i.km;
+  // KNMI HARMONIE-AROME Europa: lat-lon rotada con polo sur en (−35°, −8°), 676 × 564 puntos de 0.05°
+  const knmiEdge=(la,lo)=>{const t0=rad(55), a=rad(la), o=rad(lo+8), x=Math.cos(a)*Math.cos(o), y=Math.cos(a)*Math.sin(o), z=Math.sin(a);
+    const rl=Math.asin(clamp(-Math.sin(t0)*x+Math.cos(t0)*z,-1,1))*180/Math.PI, ro=Math.atan2(y,Math.cos(t0)*x+Math.sin(t0)*z)*180/Math.PI, k=111.2*Math.cos(rad(rl));
+    return inRect((ro+13.5)*k,(rl+13.6)*111.2,33.75*k,28.15*111.2);};
+  // UKV: azimutal equivalente de Lambert centrada en (54.9 N, 2.5 O), 1042 × 970 puntos de 2 km
+  const ukvEdge=(la,lo)=>{const p1=rad(54.9), a=rad(la), dl=rad(lo+2.5), kk=Math.sqrt(2/(1+Math.sin(p1)*Math.sin(a)+Math.cos(p1)*Math.cos(a)*Math.cos(dl)));
+    return inRect(RT*kk*Math.cos(a)*Math.sin(dl)+1158,RT*kk*(Math.cos(p1)*Math.sin(a)-Math.sin(p1)*Math.cos(a)*Math.cos(dl))+1036,2082,1938);};
+  const SRC={
+    icon_seamless:(la,lo)=>{let e=boxEdge(la,lo,BOX.icond2); if(e!=null) return {n:'ICON‑D2',km:2.2,e,h:7}; e=boxEdge(la,lo,BOX.iconeu); return e!=null?{n:'ICON‑EU',km:7,e,h:13}:{n:'ICON global',km:13,e:null};},
+    gfs_seamless:(la,lo)=>(la>22&&la<52&&lo>-133&&lo<-61)?{n:'HRRR',km:3,e:null}:{n:'GFS 0.11°',km:13,e:null},
+    meteofrance_seamless:(la,lo)=>{const e=aromeEdge(la,lo); if(e!=null) return {n:'AROME HD',km:1.3,e,h:11}; return boxEdge(la,lo,BOX.arpeu)!=null?{n:'ARPEGE Europe',km:11,e:null}:{n:'ARPEGE global',km:28,e:null};},
+    meteofrance_arome_seamless:(la,lo)=>{const e=aromeEdge(la,lo); return e!=null?{n:'AROME HD',km:1.3,e,h:11}:null;},
+    ecmwf_ifs:()=>({n:'IFS HRES',km:9,e:null}),
+    ecmwf_ifs025:()=>({n:'IFS 0.25°',km:28,e:null}),
+    ukmo_seamless:(la,lo)=>{const e=ukvEdge(la,lo); return e!=null?{n:'UKV',km:2,e,h:10}:{n:'UKMO global',km:10,e:null};},
+    dmi:(la,lo)=>{const e=dmiEdge(la,lo); return e!=null?{n:'HARMONIE‑AROME DMI',km:2,e,h:9}:null;},
+    // knmi: mezcla "seamless" de la pestaña 1 (malla de Países Bajos y, fuera de ella, la europea); knmi_eu: el modelo europeo puro que pide la pestaña 2
+    knmi:(la,lo)=>{let e=boxEdge(la,lo,BOX.knminl); if(e!=null) return {n:'HARMONIE‑AROME NL',km:2,e,h:5.5}; e=knmiEdge(la,lo); return e!=null?{n:'HARMONIE‑AROME KNMI',km:5.5,e,h:9}:null;},
+    knmi_eu:(la,lo)=>{const e=knmiEdge(la,lo); return e!=null?{n:'HARMONIE‑AROME KNMI',km:5.5,e,h:9,dup:true}:null;},
+    gem_seamless:(la,lo)=>(la>25&&lo>-170&&lo<-50)?{n:'GEM regional',km:10,e:null}:{n:'GEM global',km:15,e:null},
+    ens_icon:(la,lo)=>{const e=boxEdge(la,lo,BOX.iconeu); return e!=null?{n:'ICON‑EU‑EPS',km:13,e,h:26}:{n:'ICON‑EPS',km:26,e:null};},
+    ens_gfs:()=>({n:'GEFS 0.25°',km:25,e:null}),
+    ens_ecmwf:()=>({n:'IFS ENS 0.25°',km:28,e:null})
+  };
+  const srcInfo=(key,la,lo)=>SRC[key]?SRC[key](la,lo):{n:key,km:10,e:null}; // fuente añadida a MODELS sin entrada en el catálogo: se pide igual y se le suponen 10 km
+  // pestaña 1: 'auto' elige la fuente de menor escala efectiva en el punto (malla fina y lejos del borde de su dominio);
+  // FILL prolonga con IFS 9 km los modelos de horizonte corto (AROME llega a 48 h, ARPEGE a 4 días)
+  const T1={meteofrance_arome_seamless:'meteofrance_arome_seamless',meteofrance_seamless:'meteofrance_seamless',dmi_seamless:'dmi',knmi_seamless:'knmi',icon_seamless:'icon_seamless',ukmo_seamless:'ukmo_seamless',ecmwf_ifs:'ecmwf_ifs',gfs_seamless:'gfs_seamless'};
+  const FILL={meteofrance_arome_seamless:'ecmwf_ifs',meteofrance_seamless:'ecmwf_ifs'}, IFS9={n:'IFS HRES',km:9,e:null}, T1N={meteofrance_arome_seamless:'AROME HD',dmi_seamless:'HARMONIE DMI',knmi_seamless:'HARMONIE KNMI'}, TAIL_H=54;
+  function planFor(model,lat,lon){
+    if(model==='auto'){
+      const c=['meteofrance_arome_seamless','dmi_seamless','icon_seamless','ukmo_seamless','gfs_seamless','ecmwf_ifs'].map(k=>({k,i:srcInfo(T1[k],lat,lon)})).filter(x=>x.i);
+      model=c.reduce((a,b)=>effKm(b.i)<effKm(a.i)?b:a).k;
+    }
+    let info=T1[model]?srcInfo(T1[model],lat,lon):null, tail=false;
+    if(model==='dmi_seamless'||model==='knmi_seamless'){ if(info) tail=true; else info=IFS9; } // estas mezclas las prolonga el servidor con IFS; fuera del dominio son solo IFS
+    return {key:model,fill:FILL[model]||null,info,tail};
+  }
   let sstCache={key:null,data:null};
   async function getSST(lat,lon){const key=lat+','+lon; if(sstCache.key===key) return sstCache.data; let m=null;
     const murl=n=>`https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=sea_surface_temperature&timezone=auto&forecast_days=${n}`;
@@ -325,17 +405,25 @@
     if(!m){ try{m=await fetchJSON(murl(3),10000); if(m.error) m=null;}catch(e){m=null;} } // degradar al horizonte corto si el largo no está publicado
     sstCache={key,data:m}; return m;}
   const sstAt=(m,iso)=>{if(!m||!m.hourly) return null; const j=m.hourly.time.indexOf(iso); return j>=0?m.hourly.sea_surface_temperature[j]:null;};
+  // HR a partir de T y Td (Magnus) cuando la fuente no la da; visibilidad diagnóstica FSL (Doran et al., 1999): V[millas] = 6000·(T − Td)/HR^1.75
+  const rhOf=(tt,td)=>100*Math.exp(17.625*td/(243.04+td)-17.625*tt/(243.04+tt));
+  const visFSL=(dT,rh)=>clamp(1609.34*6000*Math.max(dT,0)/Math.pow(Math.max(rh,1),1.75),50,30000);
+  const VIS_EST=0.6; // crédito de la visibilidad estimada frente a la que publica el propio modelo
+  const visTxt=r=>r.visU!=null?(r.visE?'~':'')+(r.visU/1000).toFixed(1):'–';
   function score(h,costero){
     const dT=h.t-h.td; let s=0, why=[]; const P={dT:0,wind:0,cloud:0,vis:0,rh:0,rain:0,adv:0,pers:0};
+    const rh=h.rh!=null?h.rh:rhOf(h.t,h.td), visE=h.vis==null, vis=visE?visFSL(dT,rh):h.vis, lay=(h.cloudM!=null||h.cloudH!=null);
     P.dT= dT<=0.5?40:lin(dT,0.5,40,4,0); s+=P.dT; why.push(['w_dT',dT.toFixed(1)]);
     const w=h.wind; P.wind= w<2?14 : w<=8?20 : w<=15?8 : w<=20?3:0; s+=P.wind;
     // enfriamiento radiativo: lo que importa es la nubosidad POR ENCIMA de la capa de niebla (medias y altas);
     // la nubosidad baja de un modelo puede ser la propia niebla, y no debe penalizar.
-    let above=(h.cloudM!=null||h.cloudH!=null)?Math.max(h.cloudM||0,0.6*(h.cloudH||0)):h.cloud;
-    if(h.cloudL!=null&&h.cloudL>70&&h.vis!=null&&h.vis>5000) above=Math.max(above,h.cloudL); // estratos con buena visibilidad: sí bloquean el enfriamiento
-    let sC= above<25?20 : above<=60?8:0; if(!h.night) sC*=.5; s+=sC; P.cloud=sC;
-    if(h.vis!=null){ P.vis= h.vis<1000?20 : h.vis<3000?10 : h.vis<6000?4:0; s+=P.vis; if(h.vis<3000) why.push(['w_vis',(h.vis/1000).toFixed(1)+' km']); } else { s+=5; P.vis=5; } // sin visibilidad: valor neutro
-    if(h.rh>=97){ s+=10; P.rh=10; }
+    let above=lay?Math.max(h.cloudM||0,0.6*(h.cloudH||0)):(h.cloud||0);
+    if(h.cloudL!=null&&h.cloudL>70&&vis>5000) above=Math.max(above,h.cloudL); // estratos con buena visibilidad: sí bloquean el enfriamiento
+    // sin desglose por capas (ensembles) una nubosidad total alta puede ser la propia niebla: valor neutro en lugar de cero
+    let sC= above<25?20 : (above<=60||!lay)?8:0; if(!h.night) sC*=.5; s+=sC; P.cloud=sC;
+    // visibilidad: la del modelo si la publica; si no, la diagnóstica, que puntúa al 60 % porque no confirma nada que ΔT y HR no digan ya
+    P.vis=(visE?VIS_EST:1)*(vis<1000?20 : vis<3000?10 : vis<6000?4:0); s+=P.vis; if(vis<3000) why.push(['w_vis',(visE?'~':'')+(vis/1000).toFixed(1)+' km']);
+    if(rh>=97){ s+=10; P.rh=10; }
     if(h.precip>0.5){ s-=15; P.rain=-15; why.push(['w_rain','']); }
     if(costero&&h.sst!=null){ const ex=h.td-h.sst; if(ex>0&&w>=8&&w<=30){ P.adv=lin(ex,0,8,2,30); s+=P.adv; why.push(['w_adv','+'+ex.toFixed(1)]);} }
     if(h.pers>=3) why.push(['w_pers',h.pers+' h']); P.pers=Math.min(h.pers||0,4)*2; s+=P.pers; // persistencia de la saturación
@@ -343,8 +431,8 @@
     if(!h.night){ fday=(h.sinceSun!=null&&h.sinceSun<2)?0.85:0.65; s*=fday; } // tras el amanecer la niebla tarda 1 a 2 h en disiparse
     s=clamp(Math.round(s),0,100);
     if(fday!==1) Object.keys(P).forEach(k=>{P[k]*=fday;});
-    if(w>20) why.push(['w_wind',w.toFixed(0)]); if(above>60&&h.night) why.push(['w_cloud',Math.round(above)+'%']);
-    return {s,why,parts:P,fday};
+    if(w>20) why.push(['w_wind',w.toFixed(0)]); if(above>60&&h.night&&lay) why.push(['w_cloud',Math.round(above)+'%']);
+    return {s,why,parts:P,fday,vis,visE};
   }
   // racha de horas nocturnas previas con ΔT < 1.5 °C y viento < 12 km/h (la niebla necesita tiempo de enfriamiento)
   function persistence(seq){ let k=0; seq.forEach(h=>{ if(!h) {k=0; return;} h.pers=k; const sat=(h.t-h.td)<1.5&&h.wind<12&&(h.night||(h.sinceSun!=null&&h.sinceSun<2)); k=sat?Math.min(k+1,6):0; }); }
@@ -408,15 +496,32 @@
   let R1=null;
   // una sola tubería de descarga y puntuación, reutilizada por el sitio A y por el sitio B de la comparación
   async function loadSite(lat,lon,costero,model,days){
-    const d=await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=${HOURLY}&daily=sunrise,sunset&timezone=auto&forecast_days=${days}&models=${model}`,15000);
-    if(d.error) throw new Error(d.reason);
+    const plan=planFor(model,lat,lon);
+    const url=k=>`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=${HOURLY}&daily=sunrise,sunset&timezone=auto&forecast_days=${days}&models=${k}`;
+    const ok=r=>{const v=r.status==='fulfilled'?r.value:null, H=v&&!v.error&&v.hourly; // una respuesta sin ninguna hora utilizable cuenta como fallo
+      return (H&&H.time&&H.time.some((x,i)=>H.temperature_2m[i]!=null&&H.dew_point_2m[i]!=null&&H.wind_speed_10m[i]!=null))?v:null;};
+    const [ra,rf]=await Promise.allSettled([fetchJSON(url(plan.key),15000), plan.fill?fetchJSON(url(plan.fill),15000):Promise.resolve(null)]);
+    let d=ok(ra), f=ok(rf), primFail=false;
+    if(!d&&!f) throw new Error(ra.status==='fulfilled'?(ra.value&&ra.value.reason)||t('nodata'):(ra.reason&&ra.reason.message)||t('nodata'));
+    if(!d){ d=f; f=null; primFail=true; } // el modelo fino no respondió o no cubre el punto: queda solo el de relleno
     const m=costero?await getSST(lat,lon):null;
-    const H=d.hourly, now=Date.now(), {isNight,sinceSun,nextSunrise,sunrises}=dayInfo(d), all=[];
+    const H=d.hourly, F=f?f.hourly:null, fi=F?new Map(F.time.map((x,i)=>[x,i])):null, now=Date.now(), {isNight,sinceSun,nextSunrise,sunrises}=dayInfo(d), all=[];
+    let fillFrom=null;
     for(let i=0;i<H.time.length;i++){const ts=new Date(H.time[i]).getTime(); if(ts<now-3600e3) continue;
-      const r={time:H.time[i],ts,t:H.temperature_2m[i],td:H.dew_point_2m[i],rh:H.relative_humidity_2m[i],wind:H.wind_speed_10m[i],wdir:H.wind_direction_10m[i],cloud:H.cloud_cover[i],cloudL:H.cloud_cover_low?H.cloud_cover_low[i]:null,cloudM:H.cloud_cover_mid?H.cloud_cover_mid[i]:null,cloudH:H.cloud_cover_high?H.cloud_cover_high[i]:null,vis:H.visibility?H.visibility[i]:null,precip:H.precipitation[i],p:H.surface_pressure[i],night:isNight(ts),sinceSun:sinceSun(ts),sst:sstAt(m,H.time[i]),sun:ts<=nextSunrise&&nextSunrise<ts+3600e3};
-      if(r.t==null||r.td==null||r.wind==null) continue; all.push(r);}
-    persistence(all); all.forEach(r=>{const sc=score(r,costero); r.s=sc.s; r.why=sc.why; r.parts=sc.parts;});
-    return {all,rows:all.slice(0,48),nextSunrise,sunrises,model,elev:d.elevation,lat,lon,costero,nosst:costero&&!m};
+      let S=H, j=i, fill=false;
+      if((H.temperature_2m[i]==null||H.dew_point_2m[i]==null||H.wind_speed_10m[i]==null)&&F&&fi.has(H.time[i])){ S=F; j=fi.get(H.time[i]); fill=true; } // más allá del horizonte del modelo fino
+      const g=k=>S[k]?S[k][j]:null;
+      const r={time:H.time[i],ts,t:g('temperature_2m'),td:g('dew_point_2m'),rh:g('relative_humidity_2m'),wind:g('wind_speed_10m'),wdir:g('wind_direction_10m'),cloud:g('cloud_cover'),cloudL:g('cloud_cover_low'),cloudM:g('cloud_cover_mid'),cloudH:g('cloud_cover_high'),vis:g('visibility'),precip:g('precipitation'),p:g('surface_pressure'),night:isNight(ts),sinceSun:sinceSun(ts),sst:sstAt(m,H.time[i]),sun:ts<=nextSunrise&&nextSunrise<ts+3600e3,fill};
+      if(r.t==null||r.td==null||r.wind==null) continue;
+      if(fill&&fillFrom==null) fillFrom=ts;
+      all.push(r);}
+    if(!all.length) throw new Error(t('nodata'));
+    // DMI y KNMI: el servidor continúa con IFS al acabar el horizonte de HARMONIE (60 h desde la pasada, unas 54 h desde ahora); la respuesta no dice dónde, así que la marca es aproximada
+    if(plan.tail&&!primFail) all.forEach(r=>{ if(r.ts>now+TAIL_H*3600e3) r.fill=true; });
+    persistence(all); all.forEach(r=>{const sc=score(r,costero); r.s=sc.s; r.why=sc.why; r.parts=sc.parts; r.visU=sc.vis; r.visE=sc.visE;});
+    const info=primFail?IFS9:plan.info, cell=(d.latitude!=null&&d.longitude!=null)?hav(lat,lon,d.latitude,d.longitude):null;
+    return {all,rows:all.slice(0,48),nextSunrise,sunrises,model:primFail?plan.fill:plan.key,elev:d.elevation,lat,lon,costero,nosst:costero&&!m,
+      src:{info,cell,fillFrom,fillName:IFS9.n+' '+IFS9.km+' km',primFail:primFail?(plan.info?plan.info.n:(T1N[plan.key]||plan.key)):null,tail:plan.tail&&!primFail,fillFail:!!plan.fill&&!f&&!primFail}};
   }
   async function run1(){
     const {lat,lon,costero}=coords(), model=$('#model').value;
@@ -425,8 +530,17 @@
     R1=S; render1();
     if(AB.on) runB();
   }
+  // línea de estado: modelo efectivo en el punto, paso de malla, distancia a la celda usada y al borde del dominio
+  const srcTxt=S=>{const x=S.src, i=x.info; let a=i?`${i.n} ${i.km} km`:S.model;
+    if(x.cell!=null) a+=' · '+t('cell',{d:x.cell.toFixed(1)});
+    if(i&&i.e!=null) a+=' · '+t('edge',{d:Math.round(i.e)});
+    if(x.primFail) a+=' · '+t('prim_fail',{m:x.primFail});
+    if(x.fillFrom!=null) a+=' · '+t('fill_from',{h:fmtD(S.all.find(r=>r.fill).time),m:x.fillName});
+    if(x.tail) a+=' · '+t('then_ifs',{h:TAIL_H});
+    if(x.fillFail) a+=' · '+t('fill_fail',{m:x.fillName});
+    return a;};
   function render1(){const {rows,nextSunrise,model,elev,lat,lon,nosst}=R1;
-    $('#st1').textContent=`${model} · ${lat.toFixed(4)}, ${lon.toFixed(4)} · ${t('elev')} ${elev} m · ${new Date().toLocaleTimeString(LOC())}`+(nosst?t('nossT'):'');
+    $('#st1').textContent=`${srcTxt(R1)} · ${lat.toFixed(4)}, ${lon.toFixed(4)} · ${t('elev')} ${elev} m · ${new Date().toLocaleTimeString(LOC())}`+(nosst?t('nossT'):'');
     cards1(rows,nextSunrise); strip1(rows); brk1(rows); chart1(rows); morn(); table1(rows); renderK();
     if(AB.B) renderAB();}
   function cards1(rows,sunrise){
@@ -441,7 +555,7 @@
         +`<div class="why">${t('wind')} ${ms.wind.toFixed(0)} km/h ${rose(ms.wdir)}${on==null?'':' · '+t(on?'w_sea':'w_land')} · ${t('win_heur')}</div>`
         +`<div class="why"><a href="luz-natural.html?lang=${LANG}">${t('sun_link')} →</a></div>`;
       h+=card(sunLabel(sunrise),ms.s,t('window')+' '+fmtH(ms.time),whyTxt(ms.why),extra);}
-    if(md) h+=`<div class="card"><div class="eyebrow">${t('mindt')}</div><div class="big">${(md.t-md.td).toFixed(1)}<span style="font-size:18px"> °C</span></div><div class="verdict">T ${md.t.toFixed(1)} °C · Td ${md.td.toFixed(1)} °C</div><div class="when">${t('at')} ${fmtD(md.time)} · ${t('wind')} ${md.wind.toFixed(0)} km/h · ${t('clouds')} ${md.cloud}%</div><div class="why">${md.sst!=null?'SST '+md.sst.toFixed(1)+' °C · ':''}${t('pressure')} ${md.p.toFixed(0)} hPa</div></div>`;
+    if(md) h+=`<div class="card"><div class="eyebrow">${t('mindt')}</div><div class="big">${(md.t-md.td).toFixed(1)}<span style="font-size:18px"> °C</span></div><div class="verdict">T ${md.t.toFixed(1)} °C · Td ${md.td.toFixed(1)} °C</div><div class="when">${t('at')} ${fmtD(md.time)} · ${t('wind')} ${md.wind.toFixed(0)} km/h · ${t('clouds')} ${md.cloud!=null?md.cloud+'%':'–'}</div><div class="why">${md.sst!=null?'SST '+md.sst.toFixed(1)+' °C · ':''}${md.p!=null?t('pressure')+' '+md.p.toFixed(0)+' hPa':''}</div></div>`;
     $('#cards1').innerHTML=h;
   }
   function strip1(rows){const wr=R1.win;
@@ -479,7 +593,7 @@
     const top=out.reduce((a,b)=>b.best.s>a.best.s?b:a);
     let h='<tr>'+t('thmorn').map(x=>'<th>'+x+'</th>').join('')+'</tr>';
     out.forEach(o=>{const b=o.best, on=onshore(b);
-      h+=`<tr class="${o===top?'best':''}"><td>${new Date(o.sr).toLocaleDateString(LOC(),{weekday:'long',day:'2-digit',month:'2-digit'})}</td><td>${fmtT(o.sr)}</td><td><span class="tag ${clsS(b.s)}">${b.s}</span></td><td style="text-align:left">${verS(b.s)}</td><td>${(o.md.t-o.md.td).toFixed(1)}</td><td>${b.wind.toFixed(0)} ${rose(b.wdir)}${on==null?'':' · '+t(on?'w_sea':'w_land')}</td><td>${b.cloudM!=null?b.cloudM:'–'} / ${b.cloudH!=null?b.cloudH:'–'}</td><td>${b.vis!=null?(b.vis/1000).toFixed(1):'–'}</td><td>${t(o.conf)}</td></tr>`;});
+      h+=`<tr class="${o===top?'best':''}"><td>${new Date(o.sr).toLocaleDateString(LOC(),{weekday:'long',day:'2-digit',month:'2-digit'})}</td><td>${fmtT(o.sr)}</td><td><span class="tag ${clsS(b.s)}">${b.s}</span></td><td style="text-align:left">${verS(b.s)}</td><td>${(o.md.t-o.md.td).toFixed(1)}</td><td>${b.wind.toFixed(0)} ${rose(b.wdir)}${on==null?'':' · '+t(on?'w_sea':'w_land')}</td><td>${b.cloudM!=null?b.cloudM:'–'} / ${b.cloudH!=null?b.cloudH:'–'}</td><td>${visTxt(b)}</td><td>${t(o.conf)}${b.fill?' · '+R1.src.fillName:''}</td></tr>`;});
     $('#tmorn').innerHTML=h;
     const dn=x=>new Date(x).toLocaleDateString(LOC(),{weekday:'long',day:'2-digit'});
     $('#mornread').textContent = top.best.s<50 ? t('morn_none',{d:dn(top.sr),s:top.best.s})
@@ -534,8 +648,8 @@
     if(!R1) return;
     const lat=+$('#latB').value, lon=+$('#lonB').value, costero=$('#costaB').value==='costa';
     $('#stAB').textContent=t('dl'); let S;
-    try{S=await loadSite(lat,lon,costero,$('#model').value,7);}catch(e){$('#stAB').textContent=t('ab_err')+e.message;return;}
-    AB.B=S; $('#stAB').textContent=`${lat.toFixed(4)}, ${lon.toFixed(4)} · ${t('elev')} ${S.elev} m`+(S.nosst?t('nossT'):'');
+    try{S=await loadSite(lat,lon,costero,R1.model,7);}catch(e){$('#stAB').textContent=t('ab_err')+e.message;return;}
+    AB.B=S; $('#stAB').textContent=`${srcTxt(S)} · ${lat.toFixed(4)}, ${lon.toFixed(4)} · ${t('elev')} ${S.elev} m`+(S.nosst?t('nossT'):'');
     renderAB();
   }
   function renderAB(){
@@ -570,7 +684,7 @@
     const wmax=Math.max(20,Math.ceil(Math.max(...rows.map(r=>r.wind))/10)*10), yw=v=>pt+(Hh-pt-pb)*(1-v/wmax);
     const path=(k,f)=>rows.map((r,i)=>(i?'L':'M')+x(i).toFixed(1)+','+f(r[k]).toFixed(1)).join(' ');
     let g='';
-    rows.forEach((r,i)=>{const x0=x(Math.max(i-.5,0)),x1=x(Math.min(i+.5,n-1)); if(r.night) g+=`<rect x="${x0}" y="${pt}" width="${x1-x0}" height="${Hh-pt-pb}" fill="#e3e8ec"/>`; if(r.t-r.td<2) g+=`<rect x="${x0}" y="${pt}" width="${x1-x0}" height="${Hh-pt-pb}" fill="#d9a0a0" opacity="${r.t-r.td<1?.55:.3}"/>`; if(r.vis!=null&&r.vis<2000) g+=`<rect x="${x0}" y="${Hh-pb-7}" width="${x1-x0}" height="6" fill="#7a5ea8" opacity="${r.vis<1000?.9:.5}"/>`;});
+    rows.forEach((r,i)=>{const x0=x(Math.max(i-.5,0)),x1=x(Math.min(i+.5,n-1)); if(r.night) g+=`<rect x="${x0}" y="${pt}" width="${x1-x0}" height="${Hh-pt-pb}" fill="#e3e8ec"/>`; if(r.t-r.td<2) g+=`<rect x="${x0}" y="${pt}" width="${x1-x0}" height="${Hh-pt-pb}" fill="#d9a0a0" opacity="${r.t-r.td<1?.55:.3}"/>`; if(r.visU!=null&&r.visU<2000) g+=`<rect x="${x0}" y="${Hh-pb-7}" width="${x1-x0}" height="6" fill="#7a5ea8" opacity="${(r.visU<1000?.9:.5)*(r.visE?.55:1)}"/>`;});
     for(let v=ymin;v<=ymax;v+=Math.max(1,Math.round((ymax-ymin)/6))) g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}" stroke="#eceff2"/><text x="${pl-6}" y="${y(v)+4}" font-size="10" text-anchor="end" fill="#55636d" font-family="IBM Plex Mono">${v}</text>`;
     for(let v=0;v<=wmax;v+=10) g+=`<text x="${W-pr+6}" y="${yw(v)+4}" font-size="10" fill="#b8862b" font-family="IBM Plex Mono">${v}</text>`;
     rows.forEach((r,i)=>{if(i%6===0) g+=`<text x="${x(i)}" y="${Hh-10}" font-size="10" text-anchor="middle" fill="#55636d" font-family="IBM Plex Mono">${fmtH(r.time)}</text>`; if(r.sun) g+=`<line x1="${x(i)}" x2="${x(i)}" y1="${pt}" y2="${Hh-pb}" stroke="#8c4a3a" stroke-dasharray="3 3"/>`;});
@@ -578,7 +692,7 @@
   }
   function table1(rows){
     $('#tabla1').innerHTML='<tr>'+t('th1').map(h=>'<th>'+h+'</th>').join('')+'</tr>'+rows.map(r=>{const on=onshore(r);
-      return `<tr class="${r.sun?'sun':''}"><td>${fmtD(r.time)}${r.night?'':' ☼'}</td><td><span class="tag ${clsS(r.s)}">${r.s}</span></td><td>${r.t.toFixed(1)}</td><td>${r.td.toFixed(1)}</td><td>${(r.t-r.td).toFixed(1)}</td><td>${r.rh}%</td><td>${r.wind.toFixed(0)}</td><td>${r.wdir}° ${rose(r.wdir)}${on==null?'':' · '+t(on?'w_sea':'w_land')}</td><td>${r.cloud}%</td><td>${r.cloudL!=null?r.cloudL+'%':'–'}</td><td>${r.cloudM!=null?r.cloudM+'%':'–'}</td><td>${r.cloudH!=null?r.cloudH+'%':'–'}</td><td>${r.vis!=null?(r.vis/1000).toFixed(1):'–'}</td><td>${r.sst!=null?r.sst.toFixed(1):'–'}</td><td>${r.p!=null?r.p.toFixed(0):'–'}</td></tr>`;}).join('');
+      return `<tr class="${r.sun?'sun':''}"><td>${fmtD(r.time)}${r.night?'':' ☼'}${r.fill?' · IFS':''}</td><td><span class="tag ${clsS(r.s)}">${r.s}</span></td><td>${r.t.toFixed(1)}</td><td>${r.td.toFixed(1)}</td><td>${(r.t-r.td).toFixed(1)}</td><td>${r.rh!=null?r.rh+'%':'–'}</td><td>${r.wind.toFixed(0)}</td><td>${r.wdir!=null?r.wdir+'° '+rose(r.wdir):'–'}${on==null?'':' · '+t(on?'w_sea':'w_land')}</td><td>${r.cloud}%</td><td>${r.cloudL!=null?r.cloudL+'%':'–'}</td><td>${r.cloudM!=null?r.cloudM+'%':'–'}</td><td>${r.cloudH!=null?r.cloudH+'%':'–'}</td><td>${visTxt(r)}</td><td>${r.sst!=null?r.sst.toFixed(1):'–'}</td><td>${r.p!=null?r.p.toFixed(0):'–'}</td></tr>`;}).join('');
   }
   $('#kv').addEventListener('input',()=>{kTouch=true; renderK();});
   $('#kd').addEventListener('input',()=>renderK());
@@ -591,10 +705,16 @@
   $('#go1').addEventListener('click',run1);
 
   /* ===== pestaña 2 ===== */
-  const MODELS=[{id:'icon_seamless',name:'ICON',on:true},{id:'gfs_seamless',name:'GFS',on:true},{id:'meteofrance_seamless',name:'AROME/ARPEGE',on:true},{id:'ecmwf_ifs025',name:'ECMWF',on:true},{id:'ukmo_seamless',name:'UKMO',on:true},{id:'gem_seamless',name:'GEM',on:false},{id:'knmi_seamless',name:'KNMI',on:false},
-    {id:'ens_icon',name:'ICON EPS',ens:'icon_seamless',on:true},{id:'ens_gfs',name:'GFS ENS',ens:'gfs_seamless',on:false},{id:'ens_ecmwf',name:'ECMWF ENS',ens:'ecmwf_ifs025',on:false}];
-  const COL=['#1c262e','#3e6d8a','#b8862b','#6f8f3a','#8c4a3a','#7a5ea8','#2f9c8a','#d17f3a','#4a8f5c','#b04e8a'];
+  // id: clave del registro de observaciones (no cambiarla); api: identificador que se pide a Open-Meteo si difiere; cat: entrada del catálogo SRC; c: color.
+  // DMI y KNMI se piden como modelo regional puro: fuera de su dominio la mezcla "seamless" devolvería IFS y lo contaría dos veces.
+  // IFS 0.25° (25 km, paso de 3 h, sin visibilidad) queda sustituido por IFS HRES 9 km y se conserva solo para leer el registro antiguo.
+  const MODELS=[{id:'meteofrance_seamless',name:'AROME/ARPEGE',on:true,c:'#b8862b'},{id:'dmi_harmonie',api:'dmi_harmonie_arome_europe',cat:'dmi',name:'HARMONIE DMI',on:true,v:2,c:'#5b7fd1'},
+    {id:'icon_seamless',name:'ICON',on:true,c:'#1c262e'},{id:'ecmwf_ifs',name:'ECMWF IFS 9 km',on:true,v:2,c:'#6f8f3a'},{id:'ukmo_seamless',name:'UKMO',on:true,c:'#8c4a3a'},{id:'gfs_seamless',name:'GFS',on:true,c:'#3e6d8a'},
+    {id:'knmi_seamless',api:'knmi_harmonie_arome_europe',cat:'knmi_eu',name:'HARMONIE KNMI',on:false,c:'#2f9c8a'},{id:'gem_seamless',name:'GEM',on:false,c:'#7a5ea8'},{id:'ecmwf_ifs025',name:'ECMWF 0.25°',on:false,legacy:true,c:'#a9b38a'},
+    {id:'ens_icon',name:'ICON EPS',ens:'icon_seamless',on:true,c:'#d17f3a'},{id:'ens_gfs',name:'GFS ENS',ens:'gfs_seamless',on:false,c:'#4a8f5c'},{id:'ens_ecmwf',name:'ECMWF ENS',ens:'ecmwf_ifs025',on:false,c:'#b04e8a'}];
   const PI0=0.12,A0=1.2,B0=8.8,LAMBDA=0.7,TH=70,KAP=11,TIMEOUT=12000,RECAL_N=12,RECAL_TAU=6;
+  const RHO=0.5; // exponente del prior estructural w0 ∝ Δ^(−ρ); 0 devuelve pesos iniciales iguales
+  const IDX_V=2; // versión del índice con la que se congela cada previsión (2: visibilidad estimada, nubes sin capas, fuentes nuevas)
   function platt(){ // ajusta q=sigma(a*logit(p)+b) sobre el registro, con prior a~1, b~0
     const D=store.obs.filter(o=>o.post!=null); if(D.length<RECAL_N) return null;
     let a=1,b=0;
@@ -611,31 +731,49 @@
   const isoLocal=d=>{const z=new Date(d); z.setMinutes(z.getMinutes()-z.getTimezoneOffset()); return z.toISOString().slice(0,10);};
   const nightDate=sunrise=>isoLocal(sunrise-12*3600e3);
   const save=()=>{try{localStorage.setItem('niebla_bayes',JSON.stringify(store));}catch(e){}};
-  try{const sel=JSON.parse(localStorage.getItem('niebla_models')||'null'); if(sel) MODELS.forEach(m=>m.on=sel.includes(m.id));}catch(e){}
+  // selección guardada: el formato antiguo (lista de ids) se respeta, IFS 0.25° pasa a IFS 9 km y las fuentes nuevas conservan su valor por defecto
+  try{const sel=JSON.parse(localStorage.getItem('niebla_models')||'null');
+    if(Array.isArray(sel)){ MODELS.forEach(m=>{ if(m.v!==2) m.on=sel.includes(m.id); }); MODELS.find(m=>m.id==='ecmwf_ifs').on=sel.includes('ecmwf_ifs025'); MODELS.find(m=>m.id==='ecmwf_ifs025').on=false; }
+    else if(sel&&Array.isArray(sel.on)) MODELS.forEach(m=>m.on=sel.on.includes(m.id));}catch(e){}
   function mlist(){$('#mlist').innerHTML=MODELS.map(m=>`<label><input type="checkbox" data-id="${m.id}" ${m.on?'checked':''}> ${m.name} <span class="st" id="st_${m.id}"></span></label>`).join('');
-    document.querySelectorAll('#mlist input').forEach(c=>c.addEventListener('change',()=>{MODELS.find(m=>m.id===c.dataset.id).on=c.checked; try{localStorage.setItem('niebla_models',JSON.stringify(MODELS.filter(m=>m.on).map(m=>m.id)));}catch(e){}}));}
+    document.querySelectorAll('#mlist input').forEach(c=>c.addEventListener('change',()=>{MODELS.find(m=>m.id===c.dataset.id).on=c.checked; try{localStorage.setItem('niebla_models',JSON.stringify({v:2,on:MODELS.filter(m=>m.on).map(m=>m.id)}));}catch(e){}}));}
   mlist();
   const setSt=(id,txt,k)=>{const e=$('#st_'+id); if(e){e.textContent=txt;e.className='st '+(k||'');}};
-  function weights(){const ll={}; MODELS.forEach(m=>ll[m.id]=0);
-    store.obs.forEach(o=>MODELS.forEach(m=>{const p=o.p&&o.p[m.id]; if(p==null) return; ll[m.id]+=o.y*Math.log(p)+(1-o.y)*Math.log(1-p);}));
-    const mx=Math.max(...MODELS.map(m=>ll[m.id])); let w={},Z=0; MODELS.forEach(m=>{w[m.id]=Math.exp(LAMBDA*(ll[m.id]-mx));Z+=w[m.id];}); MODELS.forEach(m=>w[m.id]/=Z); return {w,ll};}
+  // prior estructural: Δ = máx(escala efectiva de la fuente en el punto, distancia a la celda que devuelve la API); peso inicial ∝ Δ^(−ρ)
+  const deltaOf=mt=>Math.max(effKm(mt),mt.cell||0);
+  // una fuente sin metadatos de la última fusión (desmarcada, sin respuesta o antigua) recibe el prior del catálogo para las coordenadas escritas
+  const priorW=(m,meta)=>{const mt=(meta&&meta[m.id])||srcInfo(m.cat||m.id,+$('#lat').value,+$('#lon').value); return (mt&&mt.km)?Math.pow(deltaOf(mt),-RHO):0;};
+  // log-verosimilitud por fuente. Si una noche una fuente no tiene previsión congelada (se añadió después, falló o estaba desmarcada)
+  // se le imputa la media de las demás en esa noche: no gana ni pierde peso por las noches en que no jugó.
+  function weights(meta){const ll={}; MODELS.forEach(m=>ll[m.id]=0);
+    store.obs.forEach(o=>{ if(!o.p||o.y==null) return; const l={}; let sum=0,k=0;
+      MODELS.forEach(m=>{const p=o.p[m.id]; if(p==null) return; const q=clamp(p,0.005,0.995); l[m.id]=o.y*Math.log(q)+(1-o.y)*Math.log(1-q); sum+=l[m.id]; k++;});
+      if(!k) return;
+      MODELS.forEach(m=>{ll[m.id]+=l[m.id]!=null?l[m.id]:sum/k;});});
+    const mx=Math.max(...MODELS.map(m=>ll[m.id])); let w={},Z=0; MODELS.forEach(m=>{w[m.id]=priorW(m,meta)*Math.exp(LAMBDA*(ll[m.id]-mx));Z+=w[m.id];}); MODELS.forEach(m=>w[m.id]/=Z); return {w,ll};}
   function prior(){let a=A0,b=B0; store.obs.forEach(o=>{a+=o.y;b+=1-o.y;}); return {a,b,pi:a/(a+b)};}
   async function run2(){
     const {lat,lon,costero}=coords(), alpha=clamp(+$('#alpha').value||0.7,0.05,1), sel=MODELS.filter(m=>m.on);
     if(!sel.length){$('#st2').textContent=t('sel1');return;}
-    B.ran=true; $('#st2').textContent=t('dl_n',{n:sel.length}); MODELS.forEach(m=>setSt(m.id,'')); sel.forEach(m=>setSt(m.id,'…'));
+    // una fuente regional cuyo dominio no cubre el punto no se pide: se marca "sin cobertura" y no cuenta como fallo
+    const info={}; sel.forEach(m=>{info[m.id]=srcInfo(m.cat||m.id,lat,lon);}); const req=sel.filter(m=>info[m.id]);
+    B.ran=true; MODELS.forEach(m=>setSt(m.id,'')); sel.forEach(m=>info[m.id]?setSt(m.id,'…'):setSt(m.id,t('nocov'),'ko'));
+    if(!req.length){$('#st2').textContent=t('none_cov');return;}
+    $('#st2').textContent=t('dl_n',{n:req.length});
     const t0=performance.now(), sstP=costero?getSST(lat,lon):Promise.resolve(null);
     const urlFor=m=>m.ens
       ?`https://ensemble-api.open-meteo.com/v1/ensemble?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,wind_speed_10m,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,visibility,precipitation&timezone=auto&forecast_days=2&models=${m.ens}`
-      :`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,wind_speed_10m,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,visibility,precipitation&daily=sunrise,sunset&timezone=auto&forecast_days=2&models=${m.id}`;
-    const results=await Promise.allSettled(sel.map(m=>fetchJSON(urlFor(m),m.ens?TIMEOUT+8000:TIMEOUT)
+      :`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,wind_speed_10m,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,visibility,precipitation&daily=sunrise,sunset&timezone=auto&forecast_days=2&models=${m.api||m.id}`;
+    const results=await Promise.allSettled(req.map(m=>fetchJSON(urlFor(m),m.ens?TIMEOUT+8000:TIMEOUT)
       .then(d=>{if(d.error) throw new Error(d.reason); setSt(m.id,((performance.now()-t0)/1000).toFixed(1)+' s','ok'); return d;})
       .catch(e=>{setSt(m.id,t(e.name==='AbortError'?'timeout':'error'),'ko'); throw e;})));
     const sstM=await sstP, data={}; let ref=null;
-    results.forEach((r,k)=>{if(r.status==='fulfilled'){data[sel[k].id]=r.value; if(!ref||(!ref.daily&&r.value.daily)) ref=r.value; else if(!ref) ref=r.value;}});
+    results.forEach((r,k)=>{if(r.status==='fulfilled'&&r.value&&r.value.hourly){data[req[k].id]=r.value; if(!ref||(!ref.daily&&r.value.daily)) ref=r.value;}});
     if(ref&&!ref.daily){ try{ref.daily=(await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=sunrise,sunset&timezone=auto&forecast_days=2`,8000)).daily;}catch(e){$('#st2').textContent=t('none');return;} }
-    const act=sel.filter(m=>data[m.id]);
+    let act=req.filter(m=>data[m.id]);
     if(!act.length){$('#st2').textContent=t('none');return;}
+    // metadatos por fuente: modelo efectivo y malla (catálogo), distancia a la celda devuelta, y si publica visibilidad y capas de nubes
+    const meta={}; act.forEach(mo=>{const d=data[mo.id]; meta[mo.id]={...info[mo.id],cell:(d.latitude!=null&&d.longitude!=null)?hav(lat,lon,d.latitude,d.longitude):null,vis:false,lay:false};});
     const {isNight,sinceSun,nextSunrise}=dayInfo(ref), now=Date.now(), rows=[], times=ref.hourly.time;
     act.forEach(mo=>{mo.sufs=null;});
     for(let i=0;i<times.length;i++){const ts=new Date(times[i]).getTime(); if(ts<now-3600e3) continue; if(rows.length>=36) break;
@@ -645,12 +783,14 @@
           const L=v=>H[v]?H[v][j]:null;
           const h={t:L('temperature_2m'),td:L('dew_point_2m'),rh:L('relative_humidity_2m'),wind:L('wind_speed_10m'),cloud:L('cloud_cover'),cloudL:L('cloud_cover_low'),cloudM:L('cloud_cover_mid'),cloudH:L('cloud_cover_high'),vis:L('visibility'),precip:L('precipitation'),night:r.night,sinceSun:r.sinceSun,sst:r.sst};
           if(h.t==null||h.td==null||h.wind==null||h.cloud==null) return; r.per[mo.id]=h;
+          if(h.vis!=null) meta[mo.id].vis=true; if(h.cloudM!=null||h.cloudH!=null) meta[mo.id].lay=true;
         } else {
           if(!mo.sufs){ mo.sufs=['']; Object.keys(H).forEach(k=>{const m2=k.match(/^temperature_2m(_member\d+)$/); if(m2) mo.sufs.push(m2[1]);}); }
           const ss=[],pp=[]; let ctrl=null;
           mo.sufs.forEach(suf=>{ const g=v=>{const a=H[v+suf]||H[v]; return a?a[j]:null;};
             const h={t:g('temperature_2m'),td:g('dew_point_2m'),rh:g('relative_humidity_2m'),wind:g('wind_speed_10m'),cloud:g('cloud_cover'),cloudL:g('cloud_cover_low'),cloudM:g('cloud_cover_mid'),cloudH:g('cloud_cover_high'),vis:g('visibility'),precip:g('precipitation'),night:r.night,sinceSun:r.sinceSun,sst:r.sst};
             if(h.t==null||h.td==null||h.wind==null||h.cloud==null) return;
+            if(h.vis!=null) meta[mo.id].vis=true; if(h.cloudM!=null||h.cloudH!=null) meta[mo.id].lay=true;
             ss.push(h); if(suf==='') ctrl=h; });
           if(!ss.length) return;
           const base=ctrl||ss[0]; r.per[mo.id]={...base,members:ss,isEns:true};
@@ -658,24 +798,28 @@
       rows.push(r);}
     act.forEach(mo=>{ const seq=rows.map(r=>r.per[mo.id]||null); persistence(seq);
       rows.forEach(r=>{const q=r.per[mo.id]; if(!q) return;
-        if(!q.isEns){ const sc=score(q,costero); q.s=sc.s; q.why=sc.why; q.p=p_of(sc.s); }
+        if(!q.isEns){ const sc=score(q,costero); q.s=sc.s; q.why=sc.why; q.p=p_of(sc.s); q.visU=sc.vis; q.visE=sc.visE; }
         else { const ss=[],pp=[]; q.members.forEach(h=>{h.pers=q.pers; const sc=score(h,costero); ss.push(sc.s); pp.push(p_of(sc.s));});
           q.nfog=ss.filter(x=>x>=75).length; ss.sort((a,b)=>a-b); const sp=pp.slice().sort((a,b)=>a-b), qt=u=>sp[clamp(Math.round(u*(sp.length-1)),0,sp.length-1)];
           q.p10=qt(.1); q.p90=qt(.9); q.frac=q.nfog/ss.length;
-          q.s=ss[Math.floor(ss.length/2)]; q.p=clamp(pp.reduce((a,b)=>a+b,0)/pp.length,0.005,0.995); q.nm=pp.length; q.why=score(q,costero).why; delete q.members; }
+          q.s=ss[Math.floor(ss.length/2)]; q.p=clamp(pp.reduce((a,b)=>a+b,0)/pp.length,0.005,0.995); q.nm=pp.length; const sb=score(q,costero); q.why=sb.why; q.visU=sb.vis; q.visE=sb.visE; delete q.members; }
       });});
-    const {w,ll}=weights(), pr=prior(), Zw=act.reduce((a,mo)=>a+w[mo.id],0), wa={}; act.forEach(mo=>wa[mo.id]=w[mo.id]/Zw);
+    act.forEach(mo=>{ if(!rows.some(r=>r.per[mo.id])) setSt(mo.id,t('nodata'),'ko'); });
+    act=act.filter(mo=>rows.some(r=>r.per[mo.id])); // una fuente que responde solo con nulos no entra en la fusión
+    if(!act.length){$('#st2').textContent=t('none');return;}
+    const {w,ll}=weights(meta), pr=prior(), Zw=act.reduce((a,mo)=>a+w[mo.id],0), wa={}; act.forEach(mo=>wa[mo.id]=w[mo.id]/Zw);
+    const Zp=act.reduce((a,mo)=>a+priorW(mo,meta),0); act.forEach(mo=>{meta[mo.id].w0=priorW(mo,meta)/Zp;});
     const rc=platt();
     rows.forEach(r=>{let num=0,den=0,ps=[]; act.forEach(mo=>{const q=r.per[mo.id]; if(!q) return; num+=wa[mo.id]*logit(q.p); den+=wa[mo.id]; ps.push(q.p);}); const zpool=den>0?num/den:logit(pr.pi); const z=logit(pr.pi)+alpha*(zpool-logit(pr.pi)); r.postRaw=sig(z); r.post=rc?rc.apply(r.postRaw):r.postRaw; r.min=ps.length?Math.min(...ps):0; r.max=ps.length?Math.max(...ps):0;});
-    B.last={rows,act,wa,ll,pr,nextSunrise,alpha,lat,lon,rc,fail:sel.length-act.length,secs:((performance.now()-t0)/1000).toFixed(1),nosst:costero&&!sstM};
+    B.last={rows,act,wa,ll,pr,nextSunrise,alpha,lat,lon,rc,meta,fail:req.length-act.length,nocov:sel.length-req.length,secs:((performance.now()-t0)/1000).toFixed(1),nosst:costero&&!sstM};
     // congelar la previsión del próximo amanecer
     const win0=sunWin(); if(win0.length){ const p={}; act.forEach(mo=>{const c=win0.filter(r=>r.per[mo.id]); p[mo.id]=c.length?Math.max(...c.map(r=>r.per[mo.id].p)):null;});
       const feat={}; act.forEach(mo=>{const c=win0.filter(r=>r.per[mo.id]); if(!c.length) return; const q=c.reduce((x,y)=>y.per[mo.id].p>x.per[mo.id].p?y:x).per[mo.id]; if(q.t==null||q.td==null||q.wind==null) return; feat[mo.id]={dT:+(q.t-q.td).toFixed(2),w:+q.wind.toFixed(1),c:q.cloud,cm:q.cloudM,ch:q.cloudH,v:q.vis!=null?Math.round(q.vis):null,pers:q.pers||0,adv:(q.sst!=null&&q.td!=null)?+(q.td-q.sst).toFixed(2):null};});
-      const nd=nightDate(nextSunrise); store.snap[nd]={p,post:Math.max(...win0.map(r=>r.postRaw)),at:new Date().toISOString(),lat,lon,n:act.length,feat}; save();
-      const ex=store.obs.find(o=>o.date===nd&&!o.p); if(ex){ex.p=p; ex.post=store.snap[nd].post; save();} }
+      const nd=nightDate(nextSunrise); store.snap[nd]={p,post:Math.max(...win0.map(r=>r.postRaw)),at:new Date().toISOString(),lat,lon,n:act.length,feat,v:IDX_V}; save();
+      const ex=store.obs.find(o=>o.date===nd&&!o.p); if(ex){ex.p=p; ex.post=store.snap[nd].post; ex.v=IDX_V; save();} }
     render2(); calib();
   }
-  function render2(){const L=B.last, nd=nightDate(L.nextSunrise), sn=store.snap[nd]; $('#st2').textContent=t('fused',{k:L.act.length})+(L.fail?t('failed',{f:L.fail}):'')+` · ${L.secs} s · ${L.lat.toFixed(4)}, ${L.lon.toFixed(4)}`+(L.nosst?t('nossT'):'')+(L.rc?' · '+t('recal',{n:L.rc.n,a:L.rc.a.toFixed(2),b:L.rc.b.toFixed(2)}):'')+(sn?' · '+t('snap_info',{d:nd,n:sn.n,h:new Date(sn.at).toLocaleTimeString(LOC(),{hour:'2-digit',minute:'2-digit'})}):''); cards2(); chart2(); tsun(); tw(); tobs();}
+  function render2(){const L=B.last, nd=nightDate(L.nextSunrise), sn=store.snap[nd]; $('#st2').textContent=t('fused',{k:L.act.length})+(L.fail?t('failed',{f:L.fail}):'')+(L.nocov?t('nocov_n',{c:L.nocov}):'')+` · ${L.secs} s · ${L.lat.toFixed(4)}, ${L.lon.toFixed(4)}`+(L.nosst?t('nossT'):'')+(L.rc?' · '+t('recal',{n:L.rc.n,a:L.rc.a.toFixed(2),b:L.rc.b.toFixed(2)}):'')+(sn?' · '+t('snap_info',{d:nd,n:sn.n,h:new Date(sn.at).toLocaleTimeString(LOC(),{hour:'2-digit',minute:'2-digit'})}):''); cards2(); chart2(); tsun(); tw(); tsrc(); tobs();}
   const sunWin=()=>{const {rows,nextSunrise}=B.last; return rows.filter(r=>r.ts>=nextSunrise-2.5*3600e3&&r.ts<=nextSunrise+1.5*3600e3);};
   function cards2(){
     const {rows,nextSunrise,act,alpha}=B.last, n6=rows.slice(0,6), m6=n6.reduce((a,b)=>b.post>a.post?b:a,n6[0]), win=sunWin(), ms=win.length?win.reduce((a,b)=>b.post>a.post?b:a,win[0]):null;
@@ -698,17 +842,32 @@
     let up='',dn=''; rows.forEach((r,i)=>{up+=(i?'L':'M')+x(i).toFixed(1)+','+y(r.max).toFixed(1)+' ';}); for(let i=n-1;i>=0;i--) dn+='L'+x(i).toFixed(1)+','+y(rows[i].min).toFixed(1)+' ';
     g+=`<path d="${up}${dn}Z" fill="#9fb0bd" opacity=".25"/>`;
     for(let v=0;v<=1;v+=.25) g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}" stroke="#eceff2"/><text x="${pl-6}" y="${y(v)+4}" font-size="10" text-anchor="end" fill="#55636d" font-family="IBM Plex Mono">${100*v}</text>`;
-    act.forEach(mo=>{const c=COL[MODELS.indexOf(mo)%COL.length]; let d='',first=true; rows.forEach((r,i)=>{if(!r.per[mo.id]) return; d+=(first?'M':'L')+x(i).toFixed(1)+','+y(r.per[mo.id].p).toFixed(1)+' '; first=false;}); g+=`<path d="${d}" fill="none" stroke="${c}" stroke-width="1.2" opacity=".75"/>`;});
+    act.forEach(mo=>{const c=mo.c; let d='',first=true; rows.forEach((r,i)=>{if(!r.per[mo.id]) return; d+=(first?'M':'L')+x(i).toFixed(1)+','+y(r.per[mo.id].p).toFixed(1)+' '; first=false;}); g+=`<path d="${d}" fill="none" stroke="${c}" stroke-width="1.2" opacity=".75"/>`;});
     g+=`<path d="${rows.map((r,i)=>(i?'L':'M')+x(i).toFixed(1)+','+y(r.post).toFixed(1)).join(' ')}" fill="none" stroke="#1c262e" stroke-width="3"/>`;
     rows.forEach((r,i)=>{if(i%6===0) g+=`<text x="${x(i)}" y="${Hh-10}" font-size="10" text-anchor="middle" fill="#55636d" font-family="IBM Plex Mono">${fmtH(r.time)}</text>`; if(r.sun) g+=`<line x1="${x(i)}" x2="${x(i)}" y1="${pt}" y2="${Hh-pb}" stroke="#8c4a3a" stroke-dasharray="3 3"/>`;});
     $('#chart2').innerHTML=`<svg viewBox="0 0 ${W} ${Hh}" role="img">${g}</svg>`;
-    $('#legend2').innerHTML=`<i style="background:#1c262e;height:4px"></i>${t('post_leg')} <i style="background:#9fb0bd;height:8px;opacity:.5"></i>${t('range_leg')} `+act.map(mo=>`<i style="background:${COL[MODELS.indexOf(mo)%COL.length]}"></i>${mo.name} (w=${wa[mo.id].toFixed(2)})`).join('');
+    $('#legend2').innerHTML=`<i style="background:#1c262e;height:4px"></i>${t('post_leg')} <i style="background:#9fb0bd;height:8px;opacity:.5"></i>${t('range_leg')} `+act.map(mo=>`<i style="background:${mo.c}"></i>${mo.name} (w=${wa[mo.id].toFixed(2)})`).join('');
   }
   function tsun(){const {act}=B.last, win=sunWin(); if(!win.length){$('#tsun').innerHTML='';return;}
     let h='<tr>'+t('thsun').map(x=>'<th>'+x+'</th>').join('')+'</tr>';
     act.forEach(mo=>{const c=win.filter(r=>r.per[mo.id]); if(!c.length) return; const best=c.reduce((a,b)=>b.per[mo.id].p>a.per[mo.id].p?b:a), q=best.per[mo.id];
-      h+=`<tr><td>${mo.name}</td><td><span class="tag ${clsP(q.p)}">${(100*q.p).toFixed(0)}%</span></td><td>${fmtH(best.time)}</td><td>${(q.t-q.td).toFixed(1)}</td><td>${q.rh}%</td><td>${q.wind.toFixed(0)}</td><td>${q.cloud}%</td><td>${q.vis!=null?(q.vis/1000).toFixed(1):'–'}</td><td style="text-align:left">${whyTxt(q.why)}${(mo.ens&&q.nm)?' · '+t('ens_band',{a:(100*q.p10).toFixed(0),b:(100*q.p90).toFixed(0)})+' · '+t('ens_frac',{k:q.nfog,n:q.nm}):''}</td></tr>`;});
+      h+=`<tr><td>${mo.name}</td><td><span class="tag ${clsP(q.p)}">${(100*q.p).toFixed(0)}%</span></td><td>${fmtH(best.time)}</td><td>${(q.t-q.td).toFixed(1)}</td><td>${q.rh!=null?q.rh+'%':'–'}</td><td>${q.wind.toFixed(0)}</td><td>${q.cloud}%</td><td>${visTxt(q)}</td><td style="text-align:left">${whyTxt(q.why)}${(mo.ens&&q.nm)?' · '+t('ens_band',{a:(100*q.p10).toFixed(0),b:(100*q.p90).toFixed(0)})+' · '+t('ens_frac',{k:q.nfog,n:q.nm}):''}</td></tr>`;});
     $('#tsun').innerHTML=h;}
+  // fuentes en este punto: qué modelo hay detrás de cada identificador, con qué malla, a qué distancia queda su celda y qué variables publica
+  function tsrc(){
+    const el=$('#tsrc'); if(!el||!B.last) return; const L=B.last, th=t('thsrc');
+    let h='<tr>'+th.map((x,i)=>`<th${(i===1||i===th.length-1)?' class="l"':''}>${x}</th>`).join('')+'</tr>';
+    MODELS.forEach(m=>{const i=srcInfo(m.cat||m.id,L.lat,L.lon), on=L.act.includes(m), mt=on?L.meta[m.id]:null, nt=[];
+      if(!i) nt.push(t('s_nocov'));
+      else { nt.push(t(i.km<=3?'s_fine':i.km<10?'s_mid':'s_coarse')); if(i.e!=null&&i.e<EDGE_KM) nt.push(t('s_edge'));
+        if(mt){ if(mt.cell!=null&&mt.cell>Math.max(i.km,3)) nt.push(t('s_far')); if(!mt.vis) nt.push(t('s_novis')); if(!mt.lay) nt.push(t('s_nolay')); } }
+      if(i&&i.dup) nt.push(t('s_dup')); if(m.legacy) nt.push(t('s_legacy'));
+      h+=`<tr class="${on?'':'dim'}"><td>${m.name}</td><td class="l">${i?i.n:'–'}</td><td>${i?i.km:'–'}</td><td>${mt&&mt.cell!=null?mt.cell.toFixed(1):'–'}</td><td>${i?(i.e!=null?Math.round(i.e):'–'):'–'}</td><td>${i?(mt?deltaOf(mt):effKm(i)).toFixed(1):'–'}</td><td>${mt?t(mt.vis?'yes':'est'):'–'}</td><td>${mt?t(mt.lay?'yes':'no'):'–'}</td><td>${mt&&mt.w0!=null?mt.w0.toFixed(2):'–'}</td><td class="rd">${nt.join(' · ')}</td></tr>`;});
+    el.innerHTML=h;
+    const a=L.act.filter(m=>L.meta[m.id]&&L.meta[m.id].km); if(!a.length){$('#srcread').textContent='';return;}
+    const best=a.reduce((x,y)=>deltaOf(L.meta[y.id])<deltaOf(L.meta[x.id])?y:x), mb=L.meta[best.id];
+    $('#srcread').textContent=t('src_read',{a:mb.n,km:deltaOf(mb).toFixed(1),n:a.filter(m=>deltaOf(L.meta[m.id])>=10).length,k:a.length});
+  }
   // Brier y aciertos al 50 % por modelo: la misma información que la log-verosimilitud, en unidades legibles
   function modelStats(){const st={}; MODELS.forEach(m=>{let n=0,br=0,hit=0;
       store.obs.forEach(o=>{const p=o.p&&o.p[m.id]; if(p==null||o.y==null) return; n++; br+=(p-o.y)*(p-o.y); if((p>=0.5)===(o.y>=0.5)) hit++;});
@@ -726,7 +885,7 @@
   // lectura pura de store.snap[fecha].feat cruzada con store.obs: los umbrales locales que el registro ya contiene
   function lessons(){
     const el=$('#lessons'); if(!el) return;
-    const w=weights().w, rec=[];
+    const w=weights(B.last&&B.last.meta).w, rec=[];
     store.obs.forEach(o=>{const sn=store.snap[o.date]; if(!sn||!sn.feat||o.y==null) return;
       const ids=Object.keys(sn.feat).filter(id=>sn.feat[id]&&sn.feat[id].dT!=null); if(!ids.length) return;
       rec.push({y:o.y,f:sn.feat[ids.reduce((a,b)=>(w[b]||0)>(w[a]||0)?b:a)]});});
@@ -790,8 +949,8 @@
   $('#saveobs').addEventListener('click',()=>{
     const date=$('#odate').value; if(!date) return; const y=+$('#oval').value, sn=store.snap[date];
     const ex=store.obs.findIndex(o=>o.date===date);
-    const rec={date,y,p:sn?sn.p:null,post:sn?sn.post:null,lat:sn?sn.lat:null,lon:sn?sn.lon:null};
-    if(ex>=0){ store.obs[ex].y=y; if(!store.obs[ex].p&&sn){store.obs[ex].p=sn.p;store.obs[ex].post=sn.post;} } else store.obs.push(rec);
+    const rec={date,y,p:sn?sn.p:null,post:sn?sn.post:null,lat:sn?sn.lat:null,lon:sn?sn.lon:null,v:sn?(sn.v||1):null};
+    if(ex>=0){ store.obs[ex].y=y; if(!store.obs[ex].p&&sn){store.obs[ex].p=sn.p;store.obs[ex].post=sn.post;store.obs[ex].v=sn.v||1;} } else store.obs.push(rec);
     save();
     const msg=sn?t('obs_saved',{d:date}):t('no_snap',{d:date});
     if(B.last){ render2(); calib(); $('#st2').textContent=msg+' · '+$('#st2').textContent; } else { $('#st2').textContent=msg; tobs(); }
