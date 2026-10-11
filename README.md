@@ -19,8 +19,8 @@ delante: simuladores, métricas, catálogos, scripts de procesado y su documenta
 Todo el cálculo ocurre en el navegador. No hay servidor, ni cuenta, ni telemetría, y cada
 página es **un solo archivo HTML** que funciona también sin conexión una vez cargado —
 con dos excepciones declaradas: la predicción de niebla y el índice de cielo consultan
-Open-Meteo (la niebla, además, los METAR del Iowa Environmental Mesonet) y sin red cargan pero no pueden predecir. Por lo demás, la única dependencia
-externa es d3, y solo en las páginas de red. Las herramientas de revelado y procesado son scripts de Python
+Open-Meteo (la niebla, además, los METAR del Iowa Environmental Mesonet) y sin red cargan pero no pueden predecir. Por lo demás, las páginas de red usan d3,
+que se sirve desde el propio repositorio (`vendor/`), no desde un servidor ajeno. Las herramientas de revelado y procesado son scripts de Python
 que se ejecutan en tu ordenador, no en el navegador; solo requieren numpy.
 
 Cada página tiene un conmutador **ES / EN** arriba a la derecha. La elección se recuerda de
@@ -165,8 +165,8 @@ documentation.
 Every calculation happens in the browser. There is no server, no account and no telemetry,
 and each page is **a single HTML file** that keeps working offline once loaded — with two
 declared exceptions: the fog forecast and the sky index query Open-Meteo (the fog page also reads METAR reports from the Iowa Environmental Mesonet) and, without a
-connection, load but cannot forecast. The only
-external dependency is d3, and only on the network pages. The developing and processing
+connection, load but cannot forecast. The network pages use d3,
+which is served from the repository itself (`vendor/`), not from a third-party server. The developing and processing
 tools are Python scripts that run on your own machine rather than in the browser; they
 require only numpy.
 
