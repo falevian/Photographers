@@ -136,7 +136,7 @@
       <div><label for="model" data-i18n="model">Modelo</label>
         <select id="model">
           <option value="auto" data-i18n="auto">Automático: la fuente de menor escala efectiva aquí</option>
-          <option value="meteofrance_seamless">AROME/ARPEGE</option><option value="dmi_seamless">HARMONIE DMI 2 km + IFS</option><option value="knmi_seamless">HARMONIE KNMI 5.5 km + IFS</option>
+          <option value="mg_wrf">WRF 1 km MeteoGalicia</option><option value="meteofrance_seamless">AROME/ARPEGE</option><option value="dmi_seamless">HARMONIE DMI 2 km + IFS</option><option value="knmi_seamless">HARMONIE KNMI 5.5 km + IFS</option>
           <option value="icon_seamless">ICON (DWD)</option><option value="ecmwf_ifs">ECMWF IFS 9 km</option><option value="ukmo_seamless">UKMO</option><option value="gfs_seamless">GFS (NOAA)</option>
           <option value="best_match" data-i18n="best">Selección de Open‑Meteo (best match)</option>
         </select></div>
@@ -213,7 +213,7 @@
 <script>
 (function(){
   const I18N={
-  es:{portada:'Portada',guia:'Guía rápida',astro_link:'Astrofotografía',manual:'Manual',title:'Niebla para fotografía',subtitle:'Pestaña 1: índice físico de niebla con un modelo. Pestaña 2: fusión bayesiana de varios modelos con aprendizaje a partir de tus observaciones. Datos de Open‑Meteo, sin clave.',
+  es:{portada:'Portada',guia:'Guía rápida',astro_link:'Astrofotografía',manual:'Manual',title:'Niebla para fotografía',subtitle:'Pestaña 1: índice físico de niebla con un modelo. Pestaña 2: fusión bayesiana de varios modelos con aprendizaje a partir de tus observaciones. Datos de Open‑Meteo y de MeteoGalicia, sin clave.',
     lat:'Latitud',lon:'Longitud',env:'Entorno',env_coast:'Costero (advección)',env_inland:'Interior',geo:'Usar mi posición',tab1:'Índice de niebla',tab2:'Fusión bayesiana',model:'Modelo',best:'Selección de Open‑Meteo (best match)',auto:'Automático: la fuente de menor escala efectiva aquí',compute:'Calcular',
     h_strip:'Índice horario (48 h)',strip_legend:'Barra: índice 0 a 100. Fondo gris: noche. Hora en rojo: amanecer. Ámbar (50 a 74): bruma posible. Rojizo (≥ 75): niebla probable.',
     h_conv:'Convergencia de temperatura y punto de rocío',leg1:'<i style="background:#1c262e"></i>T (°C) <i style="background:#3e6d8a"></i>Td (°C) <i style="background:#b8862b"></i>viento (km/h, eje derecho) <i style="background:#d9a0a0"></i>T − Td &lt; 2 °C <i style="background:#7a5ea8;height:6px"></i>visibilidad prevista o estimada &lt; 2 km (barra inferior)',
@@ -230,17 +230,17 @@
     th1:['Hora','Índice','T','Td','ΔT','HR','Viento','Dir','Nubes','Bajas','Medias','Altas','Vis km','SST','P hPa'],thsun:['Modelo','P máx','hora','ΔT','HR','viento','nubes','vis km','señales'],thw:['Modelo','peso w','Brier','aciertos','log‑veros.'],thobs:['Noche','y'],posterior:'posterior',del:'eliminar',
     post_leg:'posterior',range_leg:'rango',prior_info:'Prior: Beta({a}, {b}), media {pi} % sobre {n} noches registradas. Calibración p = σ((s − 70)/11).',
     sel1:'Selecciona al menos un modelo.',none:'Ningún modelo respondió a tiempo. Reintenta o reduce la selección.',fused:'{k} modelos fusionados',failed:', {f} sin respuesta',nocov_n:', {c} sin cobertura',nocov:'sin cobertura',nodata:'sin datos',
-    cell:'celda a {d} km',edge:'borde del dominio a {d} km',fill_from:'desde {h}, {m}',prim_fail:'{m} sin datos aquí',then_ifs:'IFS 9 km a partir de unas +{h} h',fill_fail:'{m} no respondió: sin relleno',none_cov:'Ninguna de las fuentes marcadas cubre este punto.',
+    cell:'celda a {d} km',edge:'borde del dominio a {d} km',fill_from:'desde {h}, {m}',prim_fail:'{m} sin datos aquí',then_ifs:'IFS 9 km a partir de unas +{h} h',fill_fail:'{m} no respondió: sin relleno',alt_fail:'{m} no disponible',none_cov:'Ninguna de las fuentes marcadas cubre este punto.',
     h_src:'Fuentes en este punto',thsrc:['Fuente','Modelo efectivo aquí','Malla km','Celda a km','Borde km','Δ km','Visibilidad','Capas de nubes','Prior','Lectura'],yes:'sí',no:'no',est:'estimada',
     s_fine:'resuelve costa y relieve',s_mid:'malla intermedia',s_coarse:'malla gruesa: no resuelve rías ni valles',s_edge:'cerca del borde del dominio',s_far:'celda desplazada respecto al punto',s_novis:'no publica visibilidad',s_nolay:'no desglosa capas de nubes',s_nocov:'sin cobertura en este punto',s_legacy:'sustituida por IFS 9 km; solo para leer el registro antiguo',s_dup:'probablemente la misma integración que HARMONIE DMI (dominio común UWC‑West) remuestreada: no marques las dos',
     src_read:'Menor escala efectiva entre las fuentes fusionadas: {a}, Δ = {km} km. {n} de las {k} tienen Δ de 10 km o más.',
-    src_note:'Muchos identificadores de Open‑Meteo son mezclas de modelos, y cuál de ellos responde depende del punto. La tabla resuelve la mezcla para estas coordenadas: modelo efectivo y paso de malla (de las definiciones de rejilla de Open‑Meteo), distancia entre el punto y la celda que devuelve la API, distancia al borde del dominio en los modelos de área limitada y si la fuente publica visibilidad y nubosidad por capas. Δ es la escala efectiva de la fuente en el punto: su paso de malla, salvo a menos de 200 km del borde de un dominio limitado, donde se interpola linealmente hacia la escala del modelo que lo alimenta (ARPEGE para AROME, IFS para HARMONIE, ICON‑EU para ICON‑D2) porque ahí la solución es en buena parte la heredada; si la celda devuelta queda más lejos que eso, manda esa distancia. El prior es el peso de partida, proporcional a Δ^(−0.5); el registro de observaciones lo corrige noche a noche. El borde oeste de AROME es una estimación (±50 km): Météo‑France solo publica el recorte en latitud y longitud. Las filas atenuadas son fuentes desmarcadas o sin respuesta. Fuera de Europa el catálogo es aproximado.',first:'Calcula primero.',badjson:'JSON no válido',confirm:'¿Borrar todo el registro de observaciones?',
+    src_note:'Muchos identificadores de Open‑Meteo son mezclas de modelos, y cuál de ellos responde depende del punto. La tabla resuelve la mezcla para estas coordenadas: modelo efectivo y paso de malla (de las definiciones de rejilla de Open‑Meteo), distancia entre el punto y la celda que devuelve la API, distancia al borde del dominio en los modelos de área limitada y si la fuente publica visibilidad y nubosidad por capas. Δ es la escala efectiva de la fuente en el punto: su paso de malla, salvo a menos de 200 km del borde de un dominio limitado, donde se interpola linealmente hacia la escala del modelo que lo alimenta (ARPEGE para AROME, IFS para HARMONIE, ICON‑EU para ICON‑D2) porque ahí la solución es en buena parte la heredada; si la celda devuelta queda más lejos que eso, manda esa distancia. El prior es el peso de partida, proporcional a Δ^(−0.5); el registro de observaciones lo corrige noche a noche. El borde oeste de AROME es una estimación (±50 km): Météo‑France solo publica el recorte en latitud y longitud. WRF MeteoGalicia no viene de Open‑Meteo: se lee del servidor THREDDS de MeteoGalicia (pasada de las 00Z, 96 h); su punto de rocío se deriva de T y HR y su nubosidad total es el máximo de las tres capas. Las filas atenuadas son fuentes desmarcadas o sin respuesta. Fuera de Europa el catálogo es aproximado.',first:'Calcula primero.',badjson:'JSON no válido',confirm:'¿Borrar todo el registro de observaciones?',
     h_cal:'Calibración (diagrama de fiabilidad)',cal_empty:'Se dibuja cuando el registro tenga noches con previsión congelada.',cal_few:'Aún hay pocas noches para leer la calibración (n={n}; orientativo a partir de 10, fiable a partir de 30).',cal_thin:'Los grupos extremos (0–25 % y 75–100 %) tienen pocas noches (n={n}); todavía no hay señal clara sobre γ.',cal_mixed:'Los grupos se contradicen entre sí: sin señal clara sobre γ; déjalo como está y sigue registrando.',cal_up:'Las frecuencias reales son más extremas que el posterior: sube γ (más confianza en los modelos).',cal_down:'Las frecuencias reales son menos extremas que el posterior: baja γ.',cal_ok:'La calibración es razonable: deja γ como está.',cal_diag:'calibración perfecta',cal_x:'posterior predicho (%)',cal_y:'frecuencia real de niebla (%)',w_dT:'ΔT',w_vis:'vis',w_rain:'lluvia',w_adv:'advección',w_wind:'viento',w_cloud:'nubes',w_pers:'saturación',timeout:'timeout',error:'error',recal:'recalibrado (n={n}, a={a}, b={b})',
     seaaz:'Acimut hacia el mar',rose:['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSO','SO','OSO','O','ONO','NO','NNO'],w_sea:'del mar',w_land:'de tierra',w_rh:'HR',
     win_lbl:'Ventana fotográfica',win_span:'de {a} a {b} · {dur}',win_none:'El índice no llega a {thr} en ninguna hora de la ventana: no hay niebla que defender.',win_full:'niebla plena, pico {s} a las {h}',win_mist:'solo bruma, pico {s} a las {h}',win_short:'Fugaz: menos de una hora por encima del umbral, no compensa el desplazamiento.',win_late:'El máximo cae después del amanecer: en la hora azul habrá poco que fotografiar y la luz ya estará alta cuando la niebla cuaje.',win_heur:'El tramo posterior al amanecer usa el factor heurístico 0.85 (la niebla tarda de una a dos horas en levantar): la hora de disipación es la parte menos firme del cálculo.',sun_link:'Sol, hora dorada y acimut de ese amanecer',
     h_morn:'Próximas mañanas',thmorn:['Mañana','Amanecer','Índice','Veredicto','ΔT mín','Viento','Nubes M/A','Vis km','Confianza'],conf_h:'alta',conf_m:'orientativa',conf_l:'tendencia',
     morn_best:'La mejor mañana de la semana es la del {d}, con índice {s}; la de mañana se queda en {s2}.',morn_best_first:'La mejor mañana de la semana es justo la de mañana ({s}): ninguna otra la supera.',morn_none:'Ninguna mañana de la semana pasa de 50: no hay salida que planificar todavía; la mejor es la del {d} con {s}.',
-    morn_note:'Un amanecer por fila, con el máximo del índice dentro de la ventana −2.5 h/+1.5 h y la mínima depresión del punto de rocío de esa noche. Viento, nubes y visibilidad son los de la hora del máximo. La pericia de los modelos cae con el plazo: los dos primeros días son la previsión de verdad, el tercero y el cuarto son orientativos y del quinto en adelante es una tendencia, no una previsión. Si el modelo elegido tiene horizonte corto (AROME llega a 48 h, HARMONIE a 60 h), las mañanas posteriores se calculan con IFS 9 km y la columna de confianza lo indica; con HARMONIE el cambio lo hace el servidor y la marca es aproximada.',
+    morn_note:'Un amanecer por fila, con el máximo del índice dentro de la ventana −2.5 h/+1.5 h y la mínima depresión del punto de rocío de esa noche. Viento, nubes y visibilidad son los de la hora del máximo. La pericia de los modelos cae con el plazo: los dos primeros días son la previsión de verdad, el tercero y el cuarto son orientativos y del quinto en adelante es una tendencia, no una previsión. Si el modelo elegido tiene horizonte corto (AROME llega a 48 h, HARMONIE a 60 h, el WRF de MeteoGalicia a 96 h), las mañanas posteriores se calculan con IFS 9 km y la columna de confianza lo indica; con HARMONIE el cambio lo hace el servidor y la marca es aproximada.',
     h_brk:'De qué se compone el índice, hora a hora',brk_sat:'saturado a 100',
     brk_note:'Cada barra desglosa los puntos que aporta cada término en esa hora, en el mismo orden en que se calculan; la lluvia se dibuja hacia abajo porque resta. La marca negra corta al valor final del índice, ya con el factor diurno aplicado y saturado a 100. Sirve para ver qué término limita cada hora: si la barra se queda corta por el segmento de nubes, lo que falla es la nubosidad media y alta, no la humedad; si el segmento de ΔT es alto y el total sigue bajo, el freno es el viento.',
     h_kos:'Qué vas a ver: contraste, distancia y focal',k_vis:'Visibilidad',k_dist:'Distancia al sujeto',k_foc:'Focal',k_reset:'Volver a la previsión',k_c:'Contraste residual del sujeto',
@@ -259,7 +259,7 @@
     les_head:'Lecciones de tu registro:',les_none:'Todavía no hay noches con rasgos congelados. Cada vez que calculas en esta pestaña, la ficha guarda además el ΔT, el viento, las nubes y la visibilidad previstos para el amanecer de esa noche; en cuanto tengas una noche observada con esos rasgos, aquí aparecerán tus umbrales locales.',
     les_fog:'En tu sitio ha habido niebla o bruma con ΔT previsto de hasta {dt} °C y viento de hasta {w} km/h ({n} noches).',les_cloud:'La mayor nubosidad media prevista con la que llegó a haberla fue del {c} %.',les_vis:'La visibilidad prevista más alta con la que llegó a haberla fue de {v} km.',les_nofog:'La noche sin nada con menor ΔT previsto tuvo {dt} °C ({n} noches sin nada).',les_tail:'Rasgos del modelo de mayor peso, sobre {n} noches con previsión congelada.',
     ens_band:'p10–p90 {a}–{b} %',ens_frac:'{k} de {n} miembros con niebla',},
-  en:{portada:'Home',guia:'Quick guide',astro_link:'Astrophotography',manual:'Manual',title:'Fog for photography',subtitle:'Tab 1: physical fog index from one model. Tab 2: Bayesian fusion of several models that learns from your observations. Open‑Meteo data, no API key.',
+  en:{portada:'Home',guia:'Quick guide',astro_link:'Astrophotography',manual:'Manual',title:'Fog for photography',subtitle:'Tab 1: physical fog index from one model. Tab 2: Bayesian fusion of several models that learns from your observations. Data from Open‑Meteo and MeteoGalicia, no API key.',
     lat:'Latitude',lon:'Longitude',env:'Setting',env_coast:'Coastal (advection)',env_inland:'Inland',geo:'Use my location',tab1:'Fog index',tab2:'Bayesian fusion',model:'Model',best:'Open‑Meteo selection (best match)',auto:'Automatic: the source with the smallest effective scale here',compute:'Compute',
     h_strip:'Hourly index (48 h)',strip_legend:'Bar: index 0 to 100. Grey background: night. Red hour: sunrise. Amber (50 to 74): mist possible. Reddish (≥ 75): fog likely.',
     h_conv:'Temperature and dew point convergence',leg1:'<i style="background:#1c262e"></i>T (°C) <i style="background:#3e6d8a"></i>Td (°C) <i style="background:#b8862b"></i>wind (km/h, right axis) <i style="background:#d9a0a0"></i>T − Td &lt; 2 °C <i style="background:#7a5ea8;height:6px"></i>forecast or estimated visibility &lt; 2 km (bottom bar)',
@@ -276,17 +276,17 @@
     th1:['Time','Index','T','Td','ΔT','RH','Wind','Dir','Clouds','Low','Mid','High','Vis km','SST','P hPa'],thsun:['Model','P max','time','ΔT','RH','wind','clouds','vis km','signals'],thw:['Model','weight w','Brier','hits','log‑lik.'],thobs:['Night','y'],posterior:'posterior',del:'delete',
     post_leg:'posterior',range_leg:'range',prior_info:'Prior: Beta({a}, {b}), mean {pi} % over {n} logged nights. Calibration p = σ((s − 70)/11).',
     sel1:'Select at least one model.',none:'No model answered in time. Retry or reduce the selection.',fused:'{k} models fused',failed:', {f} without response',nocov_n:', {c} without coverage',nocov:'no coverage',nodata:'no data',
-    cell:'cell {d} km away',edge:'domain edge {d} km away',fill_from:'from {h}, {m}',prim_fail:'{m} has no data here',then_ifs:'IFS 9 km from about +{h} h',fill_fail:'{m} did not answer: no fill',none_cov:'None of the ticked sources covers this point.',
+    cell:'cell {d} km away',edge:'domain edge {d} km away',fill_from:'from {h}, {m}',prim_fail:'{m} has no data here',then_ifs:'IFS 9 km from about +{h} h',fill_fail:'{m} did not answer: no fill',alt_fail:'{m} unavailable',none_cov:'None of the ticked sources covers this point.',
     h_src:'Sources at this point',thsrc:['Source','Effective model here','Mesh km','Cell at km','Edge km','Δ km','Visibility','Cloud layers','Prior','Reading'],yes:'yes',no:'no',est:'estimated',
     s_fine:'resolves coast and relief',s_mid:'intermediate mesh',s_coarse:'coarse mesh: does not resolve inlets or valleys',s_edge:'close to the domain edge',s_far:'cell displaced from the point',s_novis:'publishes no visibility',s_nolay:'no cloud layers',s_nocov:'no coverage at this point',s_legacy:'replaced by IFS 9 km; kept only to read the old log',s_dup:'probably the same run as HARMONIE DMI (common UWC‑West domain), resampled: do not tick both',
     src_read:'Smallest effective scale among the fused sources: {a}, Δ = {km} km. {n} of the {k} have Δ of 10 km or more.',
-    src_note:'Many Open‑Meteo identifiers are blends of models, and which one answers depends on the point. The table resolves the blend for these coordinates: effective model and grid spacing (from Open‑Meteo grid definitions), distance between the point and the cell the API returns, distance to the domain edge for limited‑area models and whether the source publishes visibility and cloud by layer. Δ is the effective scale of the source at the point: its grid spacing, except within 200 km of the edge of a limited domain, where it is interpolated linearly towards the scale of the model feeding it (ARPEGE for AROME, IFS for HARMONIE, ICON‑EU for ICON‑D2) because there the solution is largely inherited; if the returned cell lies farther than that, the cell distance prevails. The prior is the starting weight, proportional to Δ^(−0.5); the observation log corrects it night by night. The western AROME edge is an estimate (±50 km): Météo‑France only publishes the latitude‑longitude crop. Dimmed rows are unticked or unresponsive sources. Outside Europe the catalogue is approximate.',first:'Compute first.',badjson:'Invalid JSON',confirm:'Delete the whole observation log?',
+    src_note:'Many Open‑Meteo identifiers are blends of models, and which one answers depends on the point. The table resolves the blend for these coordinates: effective model and grid spacing (from Open‑Meteo grid definitions), distance between the point and the cell the API returns, distance to the domain edge for limited‑area models and whether the source publishes visibility and cloud by layer. Δ is the effective scale of the source at the point: its grid spacing, except within 200 km of the edge of a limited domain, where it is interpolated linearly towards the scale of the model feeding it (ARPEGE for AROME, IFS for HARMONIE, ICON‑EU for ICON‑D2) because there the solution is largely inherited; if the returned cell lies farther than that, the cell distance prevails. The prior is the starting weight, proportional to Δ^(−0.5); the observation log corrects it night by night. The western AROME edge is an estimate (±50 km): Météo‑France only publishes the latitude‑longitude crop. WRF MeteoGalicia does not come from Open‑Meteo: it is read from the MeteoGalicia THREDDS server (00Z run, 96 h); its dew point is derived from T and RH and its total cloud is the maximum of the three layers. Dimmed rows are unticked or unresponsive sources. Outside Europe the catalogue is approximate.',first:'Compute first.',badjson:'Invalid JSON',confirm:'Delete the whole observation log?',
     h_cal:'Calibration (reliability diagram)',cal_empty:'Drawn once the log has nights with a frozen forecast.',cal_few:'Too few nights yet to read calibration (n={n}; indicative from 10, reliable from 30).',cal_thin:'The extreme groups (0–25 % and 75–100 %) hold few nights (n={n}); no clear signal on γ yet.',cal_mixed:'The groups contradict each other: no clear signal on γ; leave it as it is and keep logging.',cal_up:'Actual frequencies are more extreme than the posterior: raise γ (more trust in the models).',cal_down:'Actual frequencies are less extreme than the posterior: lower γ.',cal_ok:'Calibration is reasonable: leave γ as it is.',cal_diag:'perfect calibration',cal_x:'predicted posterior (%)',cal_y:'actual fog frequency (%)',w_dT:'ΔT',w_vis:'vis',w_rain:'rain',w_adv:'advection',w_wind:'wind',w_cloud:'clouds',w_pers:'saturation',timeout:'timeout',error:'error',recal:'recalibrated (n={n}, a={a}, b={b})',
     seaaz:'Azimuth towards the sea',rose:['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'],w_sea:'onshore',w_land:'offshore',w_rh:'RH',
     win_lbl:'Photographic window',win_span:'from {a} to {b} · {dur}',win_none:'The index never reaches {thr} anywhere in the window: there is no fog to chase.',win_full:'full fog, peak {s} at {h}',win_mist:'mist only, peak {s} at {h}',win_short:'Fleeting: under an hour above the threshold, not worth the drive.',win_late:'The peak falls after sunrise: the blue hour will have little to photograph and the light will already be high by the time the fog sets in.',win_heur:'The stretch after sunrise uses the heuristic factor 0.85 (fog takes one to two hours to lift): the dissipation time is the least firm part of the calculation.',sun_link:'Sun, golden hour and azimuth for that sunrise',
     h_morn:'Next mornings',thmorn:['Morning','Sunrise','Index','Verdict','Min ΔT','Wind','Cloud M/H','Vis km','Confidence'],conf_h:'high',conf_m:'indicative',conf_l:'trend',
     morn_best:'The best morning of the week is {d}, index {s}; tomorrow only gets to {s2}.',morn_best_first:'The best morning of the week is tomorrow itself ({s}): nothing later beats it.',morn_none:'No morning this week gets past 50: nothing to plan yet; the best is {d} with {s}.',
-    morn_note:'One sunrise per row, with the peak index inside the −2.5 h/+1.5 h window and the minimum dew point depression of that night. Wind, cloud and visibility are those of the peak hour. Model skill drops with lead time: the first two days are the actual forecast, the third and fourth are indicative and from the fifth on it is a trend, not a forecast. If the chosen model has a short horizon (AROME reaches 48 h, HARMONIE 60 h), later mornings are computed with IFS 9 km and the confidence column says so; with HARMONIE the switch is made by the server and the mark is approximate.',
+    morn_note:'One sunrise per row, with the peak index inside the −2.5 h/+1.5 h window and the minimum dew point depression of that night. Wind, cloud and visibility are those of the peak hour. Model skill drops with lead time: the first two days are the actual forecast, the third and fourth are indicative and from the fifth on it is a trend, not a forecast. If the chosen model has a short horizon (AROME reaches 48 h, HARMONIE 60 h, the MeteoGalicia WRF 96 h), later mornings are computed with IFS 9 km and the confidence column says so; with HARMONIE the switch is made by the server and the mark is approximate.',
     h_brk:'What the index is made of, hour by hour',brk_sat:'saturated at 100',
     brk_note:'Each bar breaks down the points every term contributes in that hour, in the order they are computed; rain is drawn downwards because it subtracts. The black tick marks the final index, with the daytime factor already applied and saturated at 100. It shows which term limits each hour: if the bar falls short because of the cloud segment, what fails is mid and high cloud, not humidity; if the ΔT segment is tall and the total still low, the brake is the wind.',
     h_kos:'What you will see: contrast, distance and focal length',k_vis:'Visibility',k_dist:'Distance to subject',k_foc:'Focal length',k_reset:'Back to the forecast',k_c:'Residual contrast of the subject',
@@ -367,7 +367,46 @@
   // UKV: azimutal equivalente de Lambert centrada en (54.9 N, 2.5 O), 1042 × 970 puntos de 2 km
   const ukvEdge=(la,lo)=>{const p1=rad(54.9), a=rad(la), dl=rad(lo+2.5), kk=Math.sqrt(2/(1+Math.sin(p1)*Math.sin(a)+Math.cos(p1)*Math.cos(a)*Math.cos(dl)));
     return inRect(RT*kk*Math.cos(a)*Math.sin(dl)+1158,RT*kk*(Math.cos(p1)*Math.sin(a)-Math.sin(p1)*Math.cos(a)*Math.cos(dl))+1036,2082,1938);};
+  /* ===== MeteoGalicia: WRF de 1 km (dominio d02, toda Galicia), leído de su servidor THREDDS, no de Open-Meteo =====
+     Una pasada diaria a las 00Z con 96 h de alcance. El servicio NCSS devuelve la serie del punto en CSV y admite peticiones desde el navegador.
+     Unidades de origen: temp y sst en K, rh y nubes en tanto por uno, mod en m/s, visibility en m, prec en mm por hora, mslp en Pa. */
+  const MG={base:'https://thredds.meteogalicia.gal/thredds/ncss/grid/modelos/WRF_ARW_1KM_HIST',box:[41.3483,44.6358,-10.2928,-5.7485],
+    vars:['temp','rh','mod','dir','cfl','cfm','cfh','visibility','prec','mslp'],ms:15000};
+  function fetchText(url,ms){const c=new AbortController(), tm=setTimeout(()=>c.abort(),ms); return fetch(url,{signal:c.signal}).then(r=>{if(!r.ok) throw new Error('HTTP '+r.status); return r.text();}).finally(()=>clearTimeout(tm));}
+  function parseMG(txt){
+    const L=txt.trim().split(/\r?\n/), head=L[0].split(',').map(h=>h.replace(/\[.*$/,'').trim()), ix=k=>head.indexOf(k), o={mg:true,latitude:null,longitude:null,utc:[],v:{}};
+    MG.vars.forEach(v=>{o.v[v]=[];});
+    for(let i=1;i<L.length;i++){const c=L[i].split(','), ms=Date.parse(c[ix('time')]); if(!isFinite(ms)) continue;
+      if(o.latitude==null){o.latitude=parseFloat(c[ix('latitude')]); o.longitude=parseFloat(c[ix('longitude')]);}
+      o.utc.push(ms); MG.vars.forEach(v=>{const j=ix(v), x=j>=0?parseFloat(c[j]):NaN; o.v[v].push(isFinite(x)&&Math.abs(x)<1e30?x:null);});}
+    return o;
+  }
+  async function fetchMG(lat,lon){
+    let err=new Error('MeteoGalicia');
+    for(const back of [0,1]){ // pasada de las 00Z de hoy (UTC); si aún no está publicada, la de ayer, que sigue cubriendo tres días
+      const day=new Date(Date.now()-back*86400e3).toISOString().slice(0,10), ymd=day.replace(/-/g,''), t0=day+'T01:00:00Z', t1=new Date(Date.parse(t0)+95*3600e3).toISOString().slice(0,19)+'Z'; // de 01Z del día de la pasada a 00Z cuatro días después
+      const url=`${MG.base}/${ymd}/wrf_arw_det_history_d02_${ymd}_0000.nc4?${MG.vars.map(v=>'var='+v).join('&')}&latitude=${lat}&longitude=${lon}&time_start=${t0}&time_end=${t1}&accept=csv`;
+      try{ const o=parseMG(await fetchText(url,MG.ms)); if(o.utc.length){o.run=ymd; return o;} }catch(e){ err=e; if(e.name==='AbortError') break; }
+    }
+    throw err;
+  }
+  // pone la serie de MeteoGalicia en la forma de una respuesta de Open-Meteo, sobre un eje de horas locales dado (times) y su desfase respecto a UTC.
+  // El punto de rocío se deriva de T y HR (Magnus); la nubosidad total se aproxima por el máximo de las tres capas; la presión es la reducida al nivel del mar.
+  function mgToOM(o,times,offSec){
+    const at=new Map(o.utc.map((ms,i)=>[new Date(ms+offSec*1000).toISOString().slice(0,16),i])), col=f=>times.map(x=>{const i=at.get(x); return i==null?null:f(i);});
+    const v=o.v, pc=x=>x==null?null:Math.round(100*clamp(x,0,1)), T=col(i=>v.temp[i]==null?null:+(v.temp[i]-273.15).toFixed(1)), RH=col(i=>pc(v.rh[i]));
+    const TD=T.map((tt,i)=>{const rh=RH[i]; if(tt==null||rh==null) return null; const g=Math.log(Math.max(rh,1)/100)+17.625*tt/(243.04+tt); return +(243.04*g/(17.625-g)).toFixed(1);});
+    return {latitude:o.latitude,longitude:o.longitude,hourly:{time:times,temperature_2m:T,relative_humidity_2m:RH,dew_point_2m:TD,
+      wind_speed_10m:col(i=>v.mod[i]==null?null:+(3.6*v.mod[i]).toFixed(1)),wind_direction_10m:col(i=>v.dir[i]==null?null:Math.round(v.dir[i])),
+      cloud_cover_low:col(i=>pc(v.cfl[i])),cloud_cover_mid:col(i=>pc(v.cfm[i])),cloud_cover_high:col(i=>pc(v.cfh[i])),
+      cloud_cover:col(i=>{const a=[v.cfl[i],v.cfm[i],v.cfh[i]].filter(x=>x!=null); return a.length?pc(Math.max(...a)):null;}),
+      visibility:col(i=>v.visibility[i]==null?null:Math.round(v.visibility[i])),precipitation:col(i=>v.prec[i]==null?null:+v.prec[i].toFixed(1)),
+      surface_pressure:col(i=>v.mslp[i]==null?null:+(v.mslp[i]/100).toFixed(1))}};
+  }
+  const offOf=d=>(d&&typeof d.utc_offset_seconds==='number')?d.utc_offset_seconds:-new Date().getTimezoneOffset()*60;
   const SRC={
+    // WRF de MeteoGalicia: anidado de 1 km; la malla del dominio que lo alimenta (h) no consta en el catálogo y se supone de 4 km
+    mg:(la,lo)=>{const e=boxEdge(la,lo,MG.box); return e!=null?{n:'WRF MeteoGalicia',km:1,e,h:4}:null;},
     icon_seamless:(la,lo)=>{let e=boxEdge(la,lo,BOX.icond2); if(e!=null) return {n:'ICON‑D2',km:2.2,e,h:7}; e=boxEdge(la,lo,BOX.iconeu); return e!=null?{n:'ICON‑EU',km:7,e,h:13}:{n:'ICON global',km:13,e:null};},
     gfs_seamless:(la,lo)=>(la>22&&la<52&&lo>-133&&lo<-61)?{n:'HRRR',km:3,e:null}:{n:'GFS 0.11°',km:13,e:null},
     meteofrance_seamless:(la,lo)=>{const e=aromeEdge(la,lo); if(e!=null) return {n:'AROME HD',km:1.3,e,h:11}; return boxEdge(la,lo,BOX.arpeu)!=null?{n:'ARPEGE Europe',km:11,e:null}:{n:'ARPEGE global',km:28,e:null};},
@@ -387,11 +426,11 @@
   const srcInfo=(key,la,lo)=>SRC[key]?SRC[key](la,lo):{n:key,km:10,e:null}; // fuente añadida a MODELS sin entrada en el catálogo: se pide igual y se le suponen 10 km
   // pestaña 1: 'auto' elige la fuente de menor escala efectiva en el punto (malla fina y lejos del borde de su dominio);
   // FILL prolonga con IFS 9 km los modelos de horizonte corto (AROME llega a 48 h, ARPEGE a 4 días)
-  const T1={meteofrance_arome_seamless:'meteofrance_arome_seamless',meteofrance_seamless:'meteofrance_seamless',dmi_seamless:'dmi',knmi_seamless:'knmi',icon_seamless:'icon_seamless',ukmo_seamless:'ukmo_seamless',ecmwf_ifs:'ecmwf_ifs',gfs_seamless:'gfs_seamless'};
-  const FILL={meteofrance_arome_seamless:'ecmwf_ifs',meteofrance_seamless:'ecmwf_ifs'}, IFS9={n:'IFS HRES',km:9,e:null}, T1N={meteofrance_arome_seamless:'AROME HD',dmi_seamless:'HARMONIE DMI',knmi_seamless:'HARMONIE KNMI'}, TAIL_H=54;
-  function planFor(model,lat,lon){
-    if(model==='auto'){
-      const c=['meteofrance_arome_seamless','dmi_seamless','icon_seamless','ukmo_seamless','gfs_seamless','ecmwf_ifs'].map(k=>({k,i:srcInfo(T1[k],lat,lon)})).filter(x=>x.i);
+  const T1={mg_wrf:'mg',meteofrance_arome_seamless:'meteofrance_arome_seamless',meteofrance_seamless:'meteofrance_seamless',dmi_seamless:'dmi',knmi_seamless:'knmi',icon_seamless:'icon_seamless',ukmo_seamless:'ukmo_seamless',ecmwf_ifs:'ecmwf_ifs',gfs_seamless:'gfs_seamless'};
+  const FILL={mg_wrf:'ecmwf_ifs',meteofrance_arome_seamless:'ecmwf_ifs',meteofrance_seamless:'ecmwf_ifs'}, IFS9={n:'IFS HRES',km:9,e:null}, T1N={mg_wrf:'WRF MeteoGalicia',meteofrance_arome_seamless:'AROME HD',dmi_seamless:'HARMONIE DMI',knmi_seamless:'HARMONIE KNMI'}, TAIL_H=54;
+  function planFor(model,lat,lon,skip){
+    if(model==='auto'){ // skip: candidatas que ya fallaron en este cálculo
+      const c=['mg_wrf','meteofrance_arome_seamless','dmi_seamless','icon_seamless','ukmo_seamless','gfs_seamless','ecmwf_ifs'].filter(k=>!(skip||[]).includes(k)||k==='ecmwf_ifs').map(k=>({k,i:srcInfo(T1[k],lat,lon)})).filter(x=>x.i);
       model=c.reduce((a,b)=>effKm(b.i)<effKm(a.i)?b:a).k;
     }
     let info=T1[model]?srcInfo(T1[model],lat,lon):null, tail=false;
@@ -495,14 +534,21 @@
   /* ===== pestaña 1 ===== */
   let R1=null;
   // una sola tubería de descarga y puntuación, reutilizada por el sitio A y por el sitio B de la comparación
-  async function loadSite(lat,lon,costero,model,days){
-    const plan=planFor(model,lat,lon);
+  async function loadSite(lat,lon,costero,model,days,skip){
+    const plan=planFor(model,lat,lon,skip), ext=plan.key==='mg_wrf';
     const url=k=>`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=${HOURLY}&daily=sunrise,sunset&timezone=auto&forecast_days=${days}&models=${k}`;
-    const ok=r=>{const v=r.status==='fulfilled'?r.value:null, H=v&&!v.error&&v.hourly; // una respuesta sin ninguna hora utilizable cuenta como fallo
+    const usable=v=>{const H=v&&!v.error&&v.hourly; // una respuesta sin ninguna hora utilizable cuenta como fallo
       return (H&&H.time&&H.time.some((x,i)=>H.temperature_2m[i]!=null&&H.dew_point_2m[i]!=null&&H.wind_speed_10m[i]!=null))?v:null;};
-    const [ra,rf]=await Promise.allSettled([fetchJSON(url(plan.key),15000), plan.fill?fetchJSON(url(plan.fill),15000):Promise.resolve(null)]);
-    let d=ok(ra), f=ok(rf), primFail=false;
+    const ok=r=>usable(r.status==='fulfilled'?r.value:null);
+    const [ra,rf]=await Promise.allSettled([ext?fetchMG(lat,lon):fetchJSON(url(plan.key),15000), plan.fill?fetchJSON(url(plan.fill),15000):Promise.resolve(null)]);
+    let f=ok(rf), d, primFail=false;
+    if(ext){ // MeteoGalicia no trae eje de horas locales ni orto y ocaso: se apoya en los de la respuesta de relleno
+      const o=ra.status==='fulfilled'?ra.value:null;
+      d=(o&&f)?usable({...mgToOM(o,f.hourly.time,offOf(f)),elevation:f.elevation,daily:f.daily}):null;
+    } else d=ok(ra);
     if(!d&&!f) throw new Error(ra.status==='fulfilled'?(ra.value&&ra.value.reason)||t('nodata'):(ra.reason&&ra.reason.message)||t('nodata'));
+    if(!d&&model==='auto'&&plan.key!=='ecmwf_ifs'&&!(skip&&skip.length>=2)){ // en automático, si la mejor fuente no responde se prueba la siguiente antes de caer al relleno
+      const S2=await loadSite(lat,lon,costero,'auto',days,[...(skip||[]),plan.key]); S2.src.alt=[plan.info?plan.info.n:plan.key,...(S2.src.alt||[])]; return S2; }
     if(!d){ d=f; f=null; primFail=true; } // el modelo fino no respondió o no cubre el punto: queda solo el de relleno
     const m=costero?await getSST(lat,lon):null;
     const H=d.hourly, F=f?f.hourly:null, fi=F?new Map(F.time.map((x,i)=>[x,i])):null, now=Date.now(), {isNight,sinceSun,nextSunrise,sunrises}=dayInfo(d), all=[];
@@ -534,6 +580,7 @@
   const srcTxt=S=>{const x=S.src, i=x.info; let a=i?`${i.n} ${i.km} km`:S.model;
     if(x.cell!=null) a+=' · '+t('cell',{d:x.cell.toFixed(1)});
     if(i&&i.e!=null) a+=' · '+t('edge',{d:Math.round(i.e)});
+    if(x.alt) a+=' · '+t('alt_fail',{m:x.alt.join(', ')});
     if(x.primFail) a+=' · '+t('prim_fail',{m:x.primFail});
     if(x.fillFrom!=null) a+=' · '+t('fill_from',{h:fmtD(S.all.find(r=>r.fill).time),m:x.fillName});
     if(x.tail) a+=' · '+t('then_ifs',{h:TAIL_H});
@@ -708,8 +755,10 @@
   // id: clave del registro de observaciones (no cambiarla); api: identificador que se pide a Open-Meteo si difiere; cat: entrada del catálogo SRC; c: color.
   // DMI y KNMI se piden como modelo regional puro: fuera de su dominio la mezcla "seamless" devolvería IFS y lo contaría dos veces.
   // IFS 0.25° (25 km, paso de 3 h, sin visibilidad) queda sustituido por IFS HRES 9 km y se conserva solo para leer el registro antiguo.
-  const MODELS=[{id:'meteofrance_seamless',name:'AROME/ARPEGE',on:true,c:'#b8862b'},{id:'dmi_harmonie',api:'dmi_harmonie_arome_europe',cat:'dmi',name:'HARMONIE DMI',on:true,v:2,c:'#5b7fd1'},
-    {id:'icon_seamless',name:'ICON',on:true,c:'#1c262e'},{id:'ecmwf_ifs',name:'ECMWF IFS 9 km',on:true,v:2,c:'#6f8f3a'},{id:'ukmo_seamless',name:'UKMO',on:true,c:'#8c4a3a'},{id:'gfs_seamless',name:'GFS',on:true,c:'#3e6d8a'},
+  // ext: la fuente no se pide a Open-Meteo sino a su propio servidor; since: versión de la lista en que apareció (ver SELV)
+  const MODELS=[{id:'mg_wrf',ext:'mg',cat:'mg',name:'WRF MeteoGalicia',on:true,since:3,c:'#c2557a'},
+    {id:'meteofrance_seamless',name:'AROME/ARPEGE',on:true,c:'#b8862b'},{id:'dmi_harmonie',api:'dmi_harmonie_arome_europe',cat:'dmi',name:'HARMONIE DMI',on:true,since:2,c:'#5b7fd1'},
+    {id:'icon_seamless',name:'ICON',on:true,c:'#1c262e'},{id:'ecmwf_ifs',name:'ECMWF IFS 9 km',on:true,since:2,c:'#6f8f3a'},{id:'ukmo_seamless',name:'UKMO',on:true,c:'#8c4a3a'},{id:'gfs_seamless',name:'GFS',on:true,c:'#3e6d8a'},
     {id:'knmi_seamless',api:'knmi_harmonie_arome_europe',cat:'knmi_eu',name:'HARMONIE KNMI',on:false,c:'#2f9c8a'},{id:'gem_seamless',name:'GEM',on:false,c:'#7a5ea8'},{id:'ecmwf_ifs025',name:'ECMWF 0.25°',on:false,legacy:true,c:'#a9b38a'},
     {id:'ens_icon',name:'ICON EPS',ens:'icon_seamless',on:true,c:'#d17f3a'},{id:'ens_gfs',name:'GFS ENS',ens:'gfs_seamless',on:false,c:'#4a8f5c'},{id:'ens_ecmwf',name:'ECMWF ENS',ens:'ecmwf_ifs025',on:false,c:'#b04e8a'}];
   const PI0=0.12,A0=1.2,B0=8.8,LAMBDA=0.7,TH=70,KAP=11,TIMEOUT=12000,RECAL_N=12,RECAL_TAU=6;
@@ -731,12 +780,14 @@
   const isoLocal=d=>{const z=new Date(d); z.setMinutes(z.getMinutes()-z.getTimezoneOffset()); return z.toISOString().slice(0,10);};
   const nightDate=sunrise=>isoLocal(sunrise-12*3600e3);
   const save=()=>{try{localStorage.setItem('niebla_bayes',JSON.stringify(store));}catch(e){}};
-  // selección guardada: el formato antiguo (lista de ids) se respeta, IFS 0.25° pasa a IFS 9 km y las fuentes nuevas conservan su valor por defecto
+  // selección guardada: se respeta, pero una fuente aparecida después de guardarla (since mayor que la versión guardada) conserva su valor por defecto.
+  // El formato más antiguo era una lista de ids (versión 1): en él IFS 0.25° pasa a IFS 9 km.
+  const SELV=3;
   try{const sel=JSON.parse(localStorage.getItem('niebla_models')||'null');
-    if(Array.isArray(sel)){ MODELS.forEach(m=>{ if(m.v!==2) m.on=sel.includes(m.id); }); MODELS.find(m=>m.id==='ecmwf_ifs').on=sel.includes('ecmwf_ifs025'); MODELS.find(m=>m.id==='ecmwf_ifs025').on=false; }
-    else if(sel&&Array.isArray(sel.on)) MODELS.forEach(m=>m.on=sel.on.includes(m.id));}catch(e){}
+    if(Array.isArray(sel)){ MODELS.forEach(m=>{ if(!(m.since>1)) m.on=sel.includes(m.id); }); MODELS.find(m=>m.id==='ecmwf_ifs').on=sel.includes('ecmwf_ifs025'); MODELS.find(m=>m.id==='ecmwf_ifs025').on=false; }
+    else if(sel&&Array.isArray(sel.on)) MODELS.forEach(m=>{ if(!(m.since>(sel.v||2))) m.on=sel.on.includes(m.id); });}catch(e){}
   function mlist(){$('#mlist').innerHTML=MODELS.map(m=>`<label><input type="checkbox" data-id="${m.id}" ${m.on?'checked':''}> ${m.name} <span class="st" id="st_${m.id}"></span></label>`).join('');
-    document.querySelectorAll('#mlist input').forEach(c=>c.addEventListener('change',()=>{MODELS.find(m=>m.id===c.dataset.id).on=c.checked; try{localStorage.setItem('niebla_models',JSON.stringify({v:2,on:MODELS.filter(m=>m.on).map(m=>m.id)}));}catch(e){}}));}
+    document.querySelectorAll('#mlist input').forEach(c=>c.addEventListener('change',()=>{MODELS.find(m=>m.id===c.dataset.id).on=c.checked; try{localStorage.setItem('niebla_models',JSON.stringify({v:SELV,on:MODELS.filter(m=>m.on).map(m=>m.id)}));}catch(e){}}));}
   mlist();
   const setSt=(id,txt,k)=>{const e=$('#st_'+id); if(e){e.textContent=txt;e.className='st '+(k||'');}};
   // prior estructural: Δ = máx(escala efectiva de la fuente en el punto, distancia a la celda que devuelve la API); peso inicial ∝ Δ^(−ρ)
@@ -764,12 +815,18 @@
     const urlFor=m=>m.ens
       ?`https://ensemble-api.open-meteo.com/v1/ensemble?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,wind_speed_10m,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,visibility,precipitation&timezone=auto&forecast_days=2&models=${m.ens}`
       :`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,wind_speed_10m,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,visibility,precipitation&daily=sunrise,sunset&timezone=auto&forecast_days=2&models=${m.api||m.id}`;
-    const results=await Promise.allSettled(req.map(m=>fetchJSON(urlFor(m),m.ens?TIMEOUT+8000:TIMEOUT)
+    const results=await Promise.allSettled(req.map(m=>(m.ext==='mg'?fetchMG(lat,lon):fetchJSON(urlFor(m),m.ens?TIMEOUT+8000:TIMEOUT))
       .then(d=>{if(d.error) throw new Error(d.reason); setSt(m.id,((performance.now()-t0)/1000).toFixed(1)+' s','ok'); return d;})
       .catch(e=>{setSt(m.id,t(e.name==='AbortError'?'timeout':'error'),'ko'); throw e;})));
     const sstM=await sstP, data={}; let ref=null;
-    results.forEach((r,k)=>{if(r.status==='fulfilled'&&r.value&&r.value.hourly){data[req[k].id]=r.value; if(!ref||(!ref.daily&&r.value.daily)) ref=r.value;}});
-    if(ref&&!ref.daily){ try{ref.daily=(await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=sunrise,sunset&timezone=auto&forecast_days=2`,8000)).daily;}catch(e){$('#st2').textContent=t('none');return;} }
+    let mgRaw=null, mgM=null;
+    results.forEach((r,k)=>{ if(r.status!=='fulfilled'||!r.value) return;
+      if(r.value.mg){mgRaw=r.value; mgM=req[k]; return;} // MeteoGalicia se coloca sobre el eje horario de referencia más abajo
+      if(r.value.hourly){data[req[k].id]=r.value; if(!ref||(!ref.daily&&r.value.daily)) ref=r.value;}});
+    if((ref||mgRaw)&&(!ref||!ref.daily)){ // falta el eje de horas locales o el orto y ocaso (solo respondieron ensembles o MeteoGalicia): se piden aparte
+      try{const ax=await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m&daily=sunrise,sunset&timezone=auto&forecast_days=2`,8000);
+        if(ax.error||!ax.daily||!ax.hourly) throw new Error(ax.reason||''); if(ref) ref.daily=ax.daily; else ref=ax;}catch(e){$('#st2').textContent=t('none');return;} }
+    if(mgRaw&&ref) data[mgM.id]=mgToOM(mgRaw,ref.hourly.time,offOf(ref));
     let act=req.filter(m=>data[m.id]);
     if(!act.length){$('#st2').textContent=t('none');return;}
     // metadatos por fuente: modelo efectivo y malla (catálogo), distancia a la celda devuelta, y si publica visibilidad y capas de nubes
