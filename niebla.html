@@ -369,9 +369,10 @@
     return inRect(RT*kk*Math.cos(a)*Math.sin(dl)+1158,RT*kk*(Math.cos(p1)*Math.sin(a)-Math.sin(p1)*Math.cos(a)*Math.cos(dl))+1036,2082,1938);};
   /* ===== MeteoGalicia: WRF de 1 km (dominio d02, toda Galicia), leído de su servidor THREDDS, no de Open-Meteo =====
      Una pasada diaria a las 00Z con 96 h de alcance. El servicio NCSS devuelve la serie del punto en CSV y admite peticiones desde el navegador.
-     Unidades de origen: temp y sst en K, rh y nubes en tanto por uno, mod en m/s, visibility en m, prec en mm por hora, mslp en Pa. */
+     Unidades de origen: temp en K, rh y nubes en tanto por uno, mod y wind_gust en m/s, visibility en m, prec en mm por hora, mslp en Pa.
+     Este bloque, del catálogo a planFor(), es idéntico en niebla.html y astro.html: si se cambia en una, hay que copiarlo a la otra. */
   const MG={base:'https://thredds.meteogalicia.gal/thredds/ncss/grid/modelos/WRF_ARW_1KM_HIST',box:[41.3483,44.6358,-10.2928,-5.7485],
-    vars:['temp','rh','mod','dir','cfl','cfm','cfh','visibility','prec','mslp'],ms:15000};
+    vars:['temp','rh','mod','dir','wind_gust','cfl','cfm','cfh','visibility','prec','mslp'],ms:15000};
   function fetchText(url,ms){const c=new AbortController(), tm=setTimeout(()=>c.abort(),ms); return fetch(url,{signal:c.signal}).then(r=>{if(!r.ok) throw new Error('HTTP '+r.status); return r.text();}).finally(()=>clearTimeout(tm));}
   function parseMG(txt){
     const L=txt.trim().split(/\r?\n/), head=L[0].split(',').map(h=>h.replace(/\[.*$/,'').trim()), ix=k=>head.indexOf(k), o={mg:true,latitude:null,longitude:null,utc:[],v:{}};
@@ -397,7 +398,7 @@
     const v=o.v, pc=x=>x==null?null:Math.round(100*clamp(x,0,1)), T=col(i=>v.temp[i]==null?null:+(v.temp[i]-273.15).toFixed(1)), RH=col(i=>pc(v.rh[i]));
     const TD=T.map((tt,i)=>{const rh=RH[i]; if(tt==null||rh==null) return null; const g=Math.log(Math.max(rh,1)/100)+17.625*tt/(243.04+tt); return +(243.04*g/(17.625-g)).toFixed(1);});
     return {latitude:o.latitude,longitude:o.longitude,hourly:{time:times,temperature_2m:T,relative_humidity_2m:RH,dew_point_2m:TD,
-      wind_speed_10m:col(i=>v.mod[i]==null?null:+(3.6*v.mod[i]).toFixed(1)),wind_direction_10m:col(i=>v.dir[i]==null?null:Math.round(v.dir[i])),
+      wind_speed_10m:col(i=>v.mod[i]==null?null:+(3.6*v.mod[i]).toFixed(1)),wind_direction_10m:col(i=>v.dir[i]==null?null:Math.round(v.dir[i])),wind_gusts_10m:col(i=>v.wind_gust[i]==null?null:+(3.6*v.wind_gust[i]).toFixed(1)),
       cloud_cover_low:col(i=>pc(v.cfl[i])),cloud_cover_mid:col(i=>pc(v.cfm[i])),cloud_cover_high:col(i=>pc(v.cfh[i])),
       cloud_cover:col(i=>{const a=[v.cfl[i],v.cfm[i],v.cfh[i]].filter(x=>x!=null); return a.length?pc(Math.max(...a)):null;}),
       visibility:col(i=>v.visibility[i]==null?null:Math.round(v.visibility[i])),precipitation:col(i=>v.prec[i]==null?null:+v.prec[i].toFixed(1)),
