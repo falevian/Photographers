@@ -10,19 +10,30 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Carta reducida M">
 <meta name="author" content="Rafael Vida">
-<meta name="description" content="Carta reducida de rendering para montura Leica M: siete ejes causales, tres índices declarados y una distancia sobre ellos. Todo el cálculo ocurre en el navegador.">
+<meta name="description" content="Carta reducida de rendering para montura Leica M: siete ejes causales, cuatro índices declarados y una distancia sobre ellos. Todo el cálculo ocurre en el navegador.">
 <meta name="theme-color" content="#04060a">
 <title>Carta reducida de rendering · montura Leica M</title>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Photographers">
 <meta property="og:title" content="Carta reducida de rendering · montura Leica M">
-<meta property="og:description" content="Carta reducida de rendering para montura Leica M: siete ejes causales, tres índices declarados y una distancia sobre ellos. Todo el cálculo ocurre en el navegador.">
+<meta property="og:description" content="Carta reducida de rendering para montura Leica M: siete ejes causales, cuatro índices declarados y una distancia sobre ellos. Todo el cálculo ocurre en el navegador.">
 <meta property="og:url" content="https://falevian.github.io/Photographers/caracter-optico-reducido.html">
 <meta property="og:image" content="https://falevian.github.io/Photographers/og/optica.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="es_ES">
+<meta property="og:locale:alternate" content="en_GB">
 <meta name="twitter:card" content="summary_large_image">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
 <style>
 :root{
   --bg:#05070b; --panel:#0c1119; --panel2:#101724; --hair:#1d2635;
@@ -161,51 +172,79 @@ footer{border-top:1px solid var(--hair);margin-top:44px;padding-top:16px;font-fa
 }
 /* el desplegable de referencia no puede ser más ancho que la pantalla */
 .mapctl label{min-width:0;max-width:100%}.mapctl select{min-width:0;max-width:100%}
+
+/* ---------- conmutador de idioma ---------- */
+html[lang="es"] [data-lang="en"]{display:none!important}
+html[lang="en"] [data-lang="es"]{display:none!important}
+.langbar{position:fixed;top:14px;right:16px;z-index:100;display:flex;background:rgba(12,17,25,.92);
+  border:1px solid var(--hair);border-radius:8px;overflow:hidden;
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.langbar button{font:11.5px var(--sans);letter-spacing:.09em;background:transparent;border:0;
+  color:var(--muted);padding:7px 11px;cursor:pointer;transition:background .15s,color .15s}
+.langbar button+button{border-left:1px solid var(--hair)}
+.langbar button:hover{color:var(--ink)}
+.langbar button.on{background:rgba(232,179,60,.14);color:var(--gold)}
+.langbar button:focus-visible{outline:2px solid rgba(232,179,60,.6);outline-offset:-2px}
+/* enlace a la portada, dentro del conmutador de idioma */
+.langbar a.home{display:flex;align-items:center;padding:0 9px;color:var(--muted);border-right:1px solid var(--hair)}
+.langbar a.home:hover{color:var(--ink);text-decoration:none}
+.langbar a.home svg{width:12px;height:12px;display:block}
+@media (max-width:720px){.langbar{top:8px;right:8px} header.top{padding-top:54px}}
+@media print{.langbar{display:none!important}}
 </style>
 </head>
 <body>
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <a class="home" href="index.html" title="Portada / Home" aria-label="Portada / Home"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.5 8 2.5l5.5 5v6h-4v-4h-3v4h-4z"/></svg></a>
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
 <div class="wrap">
 
 <header class="top">
-  <div class="kicker"><a href="index.html">Photographers</a> / <a href="caracter-optico-leica-m.html">carta completa</a> / carta reducida</div>
-  <h1>Siete ejes bastan<br>para el <em>rendering</em></h1>
-  <p class="thesis">La carta completa maneja 32 descriptores y once generadores. Para lo que un objetivo hace con la imagen sobran la mayoría: el carácter visible queda determinado por siete causas casi independientes, y lo demás (cremosidad, glow, nerviosismo, deriva de foco) son consecuencias. Esta página compara los mismos objetivos en ese subespacio, con cuatro índices estéticos cuya fórmula se imprime junto al resultado.</p>
+  <div class="kicker"><span data-lang="es"><a href="index.html">Photographers</a> / <a href="caracter-optico-leica-m.html">carta completa</a> / carta reducida</span><span data-lang="en"><a href="index.html">Photographers</a> / <a href="caracter-optico-leica-m.html">full chart</a> / reduced chart</span></div>
+  <h1><span data-lang="es">Siete ejes bastan<br>para el <em>rendering</em></span><span data-lang="en">Seven axes are enough<br>for <em>rendering</em></span></h1>
+  <p class="thesis" data-lang="es">La carta completa maneja 32 descriptores y once generadores. Para lo que un objetivo hace con la imagen sobran la mayoría: el carácter visible queda determinado por siete causas casi independientes, y lo demás (cremosidad, glow, nerviosismo, deriva de foco) son consecuencias. Esta página compara los mismos objetivos en ese subespacio, con cuatro índices estéticos cuya fórmula se imprime junto al resultado.</p>
+<p class="thesis" data-lang="en">The full chart handles 32 descriptors and eleven generators. For what a lens does to the image most of them are superfluous: the visible character is determined by seven nearly independent causes, and the rest (creaminess, glow, nervousness, focus shift) are consequences. This page compares the same lenses in that subspace, with four aesthetic indices whose formula is printed next to the result.</p>
   <p id="count"></p>
 </header>
 
 <section id="ejes">
-  <h2>Los siete ejes</h2>
-  <p class="lead">Cada eje es una aberración residual con efecto visual propio. La dirección deseable depende de lo que quiera la foto, no del eje.</p>
+  <h2><span data-lang="es">Los siete ejes</span><span data-lang="en">The seven axes</span></h2>
+  <p class="lead" data-lang="es">Cada eje es una aberración residual con efecto visual propio. La dirección deseable depende de lo que quiera la foto, no del eje.</p>
+<p class="lead" data-lang="en">Each axis is a residual aberration with a visual effect of its own. The desirable direction depends on what the picture wants, not on the axis.</p>
   <div class="axes-legend">
-    <div class="lrow"><b>Esfericidad residual (SA)</b><span class="cause">Con signo: negativa subcorregida, positiva sobrecorregida. Gobierna el perfil del disco de desenfoque, del núcleo cremoso al anillo nervioso, el glow y la deriva de foco. El fondo y el primer plano reciben el efecto con signo opuesto.</span></div>
-    <div class="lrow"><b>Cromatismo longitudinal</b><span class="cause">Ribetes magenta delante y verdes detrás del plano de foco. Ensucia la transición donde el sujeto se separa del fondo: es el principal enemigo del pop.</span></div>
-    <div class="lrow"><b>Microcontraste</b><span class="cause">Contraste a 40 pl/mm. Alto produce textura clínica; moderado, dibujo amable. El relieve no vive aquí sino en las frecuencias bajas.</span></div>
-    <div class="lrow"><b>Velo</b><span class="cause">Luz dispersada por reflexiones internas que eleva el nivel de negro y comprime la curva tonal. Depende sobre todo de los recubrimientos.</span></div>
-    <div class="lrow"><b>Viñeteo</b><span class="cause">Caída total de iluminación a plena apertura, en EV. Jerarquía luminosa: concentra la mirada en el centro.</span></div>
-    <div class="lrow"><b>Recorte de pupila</b><span class="cause">Viñeteo mecánico fuera del eje: discos en ojo de gato y, cuando es intenso, remolino en las esquinas.</span></div>
-    <div class="lrow"><b>Rizado asférico</b><span class="cause">Ondulaciones del mecanizado de las superficies asféricas impresas como anillos concéntricos en los discos de desenfoque.</span></div>
+    <div class="lrow"><b><span data-lang="es">Esfericidad residual (SA)</span><span data-lang="en">Residual spherical aberration (SA)</span></b><span class="cause"><span data-lang="es">Con signo: negativa subcorregida, positiva sobrecorregida. Gobierna el perfil del disco de desenfoque, del núcleo cremoso al anillo nervioso, el glow y la deriva de foco. El fondo y el primer plano reciben el efecto con signo opuesto.</span><span data-lang="en">Signed: negative undercorrected, positive overcorrected. It governs the profile of the defocus disc, from the creamy core to the nervous ring, the glow and the focus shift. Background and foreground receive the effect with opposite sign.</span></span></div>
+    <div class="lrow"><b><span data-lang="es">Cromatismo longitudinal</span><span data-lang="en">Longitudinal chromatic aberration</span></b><span class="cause"><span data-lang="es">Ribetes magenta delante y verdes detrás del plano de foco. Ensucia la transición donde el sujeto se separa del fondo: es el principal enemigo del pop.</span><span data-lang="en">Magenta fringes in front of the plane of focus and green ones behind it. It dirties the transition where the subject separates from the background: it is the chief enemy of pop.</span></span></div>
+    <div class="lrow"><b><span data-lang="es">Microcontraste</span><span data-lang="en">Microcontrast</span></b><span class="cause"><span data-lang="es">Contraste a 40 pl/mm. Alto produce textura clínica; moderado, dibujo amable. El relieve no vive aquí sino en las frecuencias bajas.</span><span data-lang="en">Contrast at 40 lp/mm. High gives a clinical texture; moderate, a gentle drawing. Relief does not reside here but in the low frequencies.</span></span></div>
+    <div class="lrow"><b><span data-lang="es">Velo</span><span data-lang="en">Veiling glare</span></b><span class="cause"><span data-lang="es">Luz dispersada por reflexiones internas que eleva el nivel de negro y comprime la curva tonal. Depende sobre todo de los recubrimientos.</span><span data-lang="en">Light scattered by internal reflections, which raises the black level and compresses the tonal curve. It depends above all on the coatings.</span></span></div>
+    <div class="lrow"><b><span data-lang="es">Viñeteo</span><span data-lang="en">Vignetting</span></b><span class="cause"><span data-lang="es">Caída total de iluminación a plena apertura, en EV. Jerarquía luminosa: concentra la mirada en el centro.</span><span data-lang="en">Total falloff of illumination at full aperture, in EV. A hierarchy of light: it concentrates the gaze on the centre.</span></span></div>
+    <div class="lrow"><b><span data-lang="es">Recorte de pupila</span><span data-lang="en">Pupil clipping</span></b><span class="cause"><span data-lang="es">Viñeteo mecánico fuera del eje: discos en ojo de gato y, cuando es intenso, remolino en las esquinas.</span><span data-lang="en">Mechanical vignetting off axis: cat's-eye discs and, when it is intense, swirl in the corners.</span></span></div>
+    <div class="lrow"><b><span data-lang="es">Rizado asférico</span><span data-lang="en">Aspheric onion ripple</span></b><span class="cause"><span data-lang="es">Ondulaciones del mecanizado de las superficies asféricas impresas como anillos concéntricos en los discos de desenfoque.</span><span data-lang="en">Undulations from the machining of the aspheric surfaces, printed as concentric rings in the defocus discs.</span></span></div>
   </div>
 </section>
 
 <section id="comparar">
-  <h2>Selección y perfiles</h2>
-  <p class="lead">Hasta cuatro objetivos. Las barras usan los mismos índices ordinales de la carta completa; la distancia entre perfiles es euclídea sobre los siete ejes normalizados por su dispersión en el catálogo.</p>
+  <h2><span data-lang="es">Selección y perfiles</span><span data-lang="en">Selection and profiles</span></h2>
+  <p class="lead" data-lang="es">Hasta cuatro objetivos. Las barras usan los mismos índices ordinales de la carta completa; la distancia entre perfiles es euclídea sobre los siete ejes normalizados por su dispersión en el catálogo.</p>
+<p class="lead" data-lang="en">Up to four lenses. The bars use the same ordinal indices as the full chart; the distance between profiles is Euclidean over the seven axes, normalised by their spread in the catalogue.</p>
   <div class="filters">
-    <input id="fText" type="text" placeholder="buscar por nombre" aria-label="Buscar por nombre">
-    <select id="fFocal" aria-label="Filtrar por focal"></select>
-    <button id="fReset" type="button">restablecer</button>
+    <input id="fText" type="text" placeholder="buscar por nombre" aria-label="Buscar por nombre" data-ph-es="buscar por nombre" data-ph-en="search by name" data-aria-es="Buscar por nombre" data-aria-en="Search by name">
+    <select id="fFocal" aria-label="Filtrar por focal" data-aria-es="Filtrar por focal" data-aria-en="Filter by focal length"></select>
+    <button id="fReset" type="button"><span data-lang="es">restablecer</span><span data-lang="en">reset</span></button>
   </div>
-  <div id="fBrand" class="brandchips" role="group" aria-label="Filtrar por marcas"></div>
+  <div id="fBrand" class="brandchips" role="group" aria-label="Filtrar por marcas" data-aria-es="Filtrar por marcas" data-aria-en="Filter by brand"></div>
   <p id="listCount"></p>
-  <div id="list" aria-label="Catálogo de objetivos"></div>
-  <div class="selbar"><span id="chips"></span><button id="clearBtn" type="button" hidden>vaciar selección</button></div>
+  <div id="list" aria-label="Catálogo de objetivos" data-aria-es="Catálogo de objetivos" data-aria-en="Lens catalogue"></div>
+  <div class="selbar"><span id="chips"></span><button id="clearBtn" type="button" hidden><span data-lang="es">vaciar selección</span><span data-lang="en">clear selection</span></button></div>
   <div id="profiles"></div>
   <div id="pairs"></div>
   <div id="formulas"></div>
 
   <div id="pairBox" hidden>
-    <h2>Par enfrentado</h2>
-    <p class="lead">La distancia del par, descompuesta eje a eje: cada barra es la fracción de d² que aporta ese eje, con los valores de ambos objetivos a los lados. Debajo, el disco de desenfoque reconstruido con el mismo modelo de la carta completa: plena apertura, lado del fondo, en el centro y al 75 % del campo, a radio constante para comparar estructura.</p>
+    <h2><span data-lang="es">Par enfrentado</span><span data-lang="en">Head-to-head pair</span></h2>
+    <p class="lead" data-lang="es">La distancia del par, descompuesta eje a eje: cada barra es la fracción de d² que aporta ese eje, con los valores de ambos objetivos a los lados. Debajo, el disco de desenfoque reconstruido con el mismo modelo de la carta completa: plena apertura, lado del fondo, en el centro y al 75 % del campo, a radio constante para comparar estructura.</p>
+<p class="lead" data-lang="en">The distance of the pair, broken down axis by axis: each bar is the fraction of d² contributed by that axis, with the values of both lenses at the sides. Below, the defocus disc reconstructed with the same model as the full chart: full aperture, background side, at the centre and at 75% of the field, at constant radius so as to compare structure.</p>
     <div class="mapctl">
       <label>A <select id="pairA"></select></label>
       <label>B <select id="pairB"></select></label>
@@ -217,44 +256,310 @@ footer{border-top:1px solid var(--hair);margin-top:44px;padding-top:16px;font-fa
 </section>
 
 <section id="vecinos">
-  <h2>Vecinos</h2>
-  <p class="lead">Los diez objetivos más próximos a la referencia en el subespacio de siete ejes. El botón + los añade a la comparación.</p>
+  <h2><span data-lang="es">Vecinos</span><span data-lang="en">Neighbours</span></h2>
+  <p class="lead" data-lang="es">Los diez objetivos más próximos a la referencia en el subespacio de siete ejes. El botón + los añade a la comparación.</p>
+<p class="lead" data-lang="en">The ten lenses closest to the reference in the seven-axis subspace. The + button adds them to the comparison.</p>
   <div class="mapctl">
-    <label>referencia <select id="nbRef"></select></label>
-    <label class="chk"><input type="checkbox" id="nbOther"> solo otros fabricantes</label>
-    <label class="chk"><input type="checkbox" id="nbFocal"> la misma focal</label>
+    <label><span data-lang="es">referencia</span><span data-lang="en">reference</span> <select id="nbRef"></select></label>
+    <label class="chk"><input type="checkbox" id="nbOther"> <span data-lang="es">solo otros fabricantes</span><span data-lang="en">other manufacturers only</span></label>
+    <label class="chk"><input type="checkbox" id="nbFocal"> <span data-lang="es">la misma focal</span><span data-lang="en">the same focal length</span></label>
   </div>
   <div id="nbOut"></div>
 </section>
 
 <section id="mapa">
-  <h2>Mapa</h2>
-  <p class="lead">Cada punto es un objetivo, coloreado por marca; los seleccionados llevan anillo y se dibujan siempre. El mapa obedece los filtros de marca y focal de la sección anterior y reescala sus ejes al subconjunto visible. Los ejes admiten los siete generadores y los tres índices. Con esfericidad frente a microcontraste se dibuja sola la frontera entre el diseño clásico y el asférico.</p>
+  <h2><span data-lang="es">Mapa</span><span data-lang="en">Map</span></h2>
+  <p class="lead" data-lang="es">Cada punto es un objetivo, coloreado por marca; los seleccionados llevan anillo y se dibujan siempre. El mapa obedece los filtros de marca y focal de la sección anterior y reescala sus ejes al subconjunto visible. Los ejes admiten los siete generadores y los cuatro índices. Con esfericidad frente a microcontraste se dibuja sola la frontera entre el diseño clásico y el asférico.</p>
+<p class="lead" data-lang="en">Each point is a lens, coloured by brand; the selected ones carry a ring and are always drawn. The map obeys the brand and focal-length filters of the earlier section and rescales its axes to the visible subset. The axes accept the seven generators and the four indices. With spherical aberration against microcontrast, the border between the classical and the aspheric design draws itself.</p>
   <div class="mapctl">
-    <label>eje X <select id="mx"></select></label>
-    <label>eje Y <select id="my"></select></label>
+    <label><span data-lang="es">eje X</span><span data-lang="en">X axis</span> <select id="mx"></select></label>
+    <label><span data-lang="es">eje Y</span><span data-lang="en">Y axis</span> <select id="my"></select></label>
   </div>
   <div class="mapwrap"><canvas id="map" height="420"></canvas></div>
   <p id="mapCap"></p>
 </section>
 
 <section id="metodo" class="method">
-  <h2>Método y límites</h2>
-  <p><b>Procedencia.</b> Los siete ejes se toman tal cual de los índices ordinales de la <a href="caracter-optico-leica-m.html">carta completa</a>: escala 0 a 100 construida a partir de curvas MTF publicadas, secciones de diseño y coincidencia sostenida entre observadores, salvo el viñeteo, que va en EV y se normaliza al rango del catálogo para entrar en los índices. No son medidas de laboratorio.</p>
-  <p><b>Qué se ha quitado y por qué.</b> Cremosidad, glow, nerviosismo y deriva de foco son funciones de la esfericidad y salen del espacio como generadores. Resolución central y de borde apenas predicen el carácter del desenfoque. Curvatura, distorsión, coma y cromatismo lateral afectan a la geometría y a los bordes extremos más que al rendering a los tamaños de visión habituales; quedan en la carta completa para quien los necesite.</p>
-  <p><b>Los índices</b> son combinaciones lineales declaradas de los ejes, más la pupila de entrada en el caso del onírico, impresas junto al resultado. Son una convención razonable derivada de la física del disco y de las curvas, no un juicio validado con observadores: la misma cautela que la métrica de la carta completa.</p>
-  <p><b>Par enfrentado y vecinos.</b> La descomposición del par reparte d² por generador, igual que un frente de onda en coeficientes. El disco se reconstruye con el mismo modelo de la carta completa, r(ρ) = aρ + bρ³ más cromatismo por canal, recorte de pupila calibrado en transmitancia, rizado asférico y pedestal de velo, a radio constante: compara estructura, no cantidad de desenfoque. La tabla de vecinos ordena el catálogo por la misma distancia; con el filtro de otro fabricante responde a qué objetivo de otra marca ocupa el lugar de la referencia.</p>
-  <p><b>La fila del Q3 43</b> se mantiene como referencia no montable, con anillo hueco en el mapa; puede ser referencia de vecinos pero no candidata.</p>
+  <h2><span data-lang="es">Método y límites</span><span data-lang="en">Method and limits</span></h2>
+  <p data-lang="es"><b>Procedencia.</b> Los siete ejes se toman tal cual de los índices ordinales de la <a href="caracter-optico-leica-m.html">carta completa</a>: escala 0 a 100 construida a partir de curvas MTF publicadas, secciones de diseño y coincidencia sostenida entre observadores, salvo el viñeteo, que va en EV y se normaliza al rango del catálogo para entrar en los índices. No son medidas de laboratorio.</p>
+<p data-lang="en"><b>Provenance.</b> The seven axes are taken as they stand from the ordinal indices of the <a href="caracter-optico-leica-m.html">full chart</a>: a 0 to 100 scale built from published MTF curves, design cross-sections and sustained agreement between observers, except for vignetting, which is given in EV and is normalised to the range of the catalogue in order to enter the indices. They are not laboratory measurements.</p>
+  <p data-lang="es"><b>Qué se ha quitado y por qué.</b> Cremosidad, glow, nerviosismo y deriva de foco son funciones de la esfericidad y salen del espacio como generadores. Resolución central y de borde apenas predicen el carácter del desenfoque. Curvatura, distorsión, coma y cromatismo lateral afectan a la geometría y a los bordes extremos más que al rendering a los tamaños de visión habituales; quedan en la carta completa para quien los necesite.</p>
+<p data-lang="en"><b>What has been removed, and why.</b> Creaminess, glow, nervousness and focus shift are functions of the spherical aberration and are dropped from the space as generators. Centre and edge resolution hardly predict the character of the defocus. Curvature, distortion, coma and lateral chromatic aberration affect geometry and the extreme edges more than the rendering at usual viewing sizes; they remain in the full chart for whoever needs them.</p>
+  <p data-lang="es"><b>Los índices</b> son combinaciones lineales declaradas de los ejes, más la pupila de entrada en el caso del onírico, impresas junto al resultado. Son una convención razonable derivada de la física del disco y de las curvas, no un juicio validado con observadores: la misma cautela que la métrica de la carta completa.</p>
+<p data-lang="en"><b>The indices</b> are declared linear combinations of the axes, plus the entrance pupil in the case of the dreamy one, printed next to the result. They are a reasonable convention derived from the physics of the disc and of the curves, not a judgement validated with observers: the same caution as the metric of the full chart.</p>
+  <p data-lang="es"><b>Par enfrentado y vecinos.</b> La descomposición del par reparte d² por generador, igual que un frente de onda en coeficientes. El disco se reconstruye con el mismo modelo de la carta completa, r(ρ) = aρ + bρ³ más cromatismo por canal, recorte de pupila calibrado en transmitancia, rizado asférico y pedestal de velo, a radio constante: compara estructura, no cantidad de desenfoque. La tabla de vecinos ordena el catálogo por la misma distancia; con el filtro de otro fabricante responde a qué objetivo de otra marca ocupa el lugar de la referencia.</p>
+<p data-lang="en"><b>Head-to-head pair and neighbours.</b> The breakdown of the pair shares out d² by generator, just as a wavefront is decomposed into coefficients. The disc is reconstructed with the same model as the full chart, r(ρ) = aρ + bρ³ plus chromatic aberration per channel, pupil clipping calibrated in transmittance, aspheric ripple and a pedestal of veiling glare, at constant radius: it compares structure, not amount of defocus. The table of neighbours orders the catalogue by the same distance; with the other-manufacturer filter it answers which lens of another brand occupies the place of the reference.</p>
+  <p data-lang="es"><b>La fila del Q3 43</b> se mantiene como referencia no montable, con anillo hueco en el mapa; puede ser referencia de vecinos pero no candidata.</p>
+<p data-lang="en"><b>The Q3 43 row</b> is kept as a reference that cannot be mounted, with a hollow ring on the map; it can be the reference for neighbours but not a candidate.</p>
 </section>
 
-<footer>Cálculo íntegro en el navegador, sin dependencias externas. Los índices ordinales son interpretativos. <a href="caracter-optico-leica-m.html">Carta completa</a> · <a href="manual-caracter-optico.html">manual</a> · <a href="manual-mtf.html">manual de lectura MTF</a>.</footer>
+<footer><span data-lang="es">Cálculo íntegro en el navegador, sin dependencias externas. Los índices ordinales son interpretativos. <a href="caracter-optico-leica-m.html">Carta completa</a> · <a href="manual-caracter-optico.html">manual</a> · <a href="manual-mtf.html">manual de lectura MTF</a>.</span><span data-lang="en">Computed entirely in the browser, with no external dependencies. The ordinal indices are interpretative. <a href="caracter-optico-leica-m.html">Full chart</a> · <a href="manual-caracter-optico.html">manual</a> · <a href="manual-mtf.html">MTF reading manual</a>.</span></footer>
 
 </div>
 <script>
 "use strict";
 /* Carta reducida de rendering, montura M.
-   Siete ejes causales y tres índices declarados.
+   Siete ejes causales y cuatro índices declarados.
    Datos: mismos índices ordinales de la carta completa. */
+
+/* ==== 0. Idioma ====
+   El texto fijo va duplicado en el HTML (data-lang); lo que escribe este guion sale de T.
+   La familia óptica y la nota de cada objetivo están en español en el catálogo y se
+   traducen con FAM_EN y NOTA_EN; del nombre solo se traducen las aclaraciones (dn). */
+const LANG = () => document.documentElement.lang==="en" ? "en" : "es";
+const T = {
+es:{
+  ax_sa:"Esfericidad residual",
+  ax_loca:"Cromatismo longitudinal",
+  ax_micro:"Microcontraste",
+  ax_velo:"Velo",
+  ax_vig:"Viñeteo",
+  ax_mech:"Recorte de pupila",
+  ax_onion:"Rizado asférico",
+  ix_pop:"Pop 3D",
+  ix_crema:"Cremosidad",
+  ix_eleg:"Elegancia",
+  ix_onir:"Onírico",
+  fx_pop:"0,30·(100−velo) + 0,25·(100−LoCA) + 0,20·micro + 0,15·viñeteo + 0,10·(100−|SA|)",
+  fx_crema:"0,55·S′ + 0,25·(100−rizado) + 0,20·(100−LoCA), con S′ = (100−SA)/2",
+  fx_eleg:"0,25·Eμ + 0,25·(100−LoCA) + 0,20·S′ + 0,15·(100−rizado) + 0,15·(100−recorte), con Eμ = max(0, 100 − 1,8·|micro−62|)",
+  fx_onir:"0,25·Sλ + 0,20·D + 0,20·(100−LoCA) + 0,15·(100−velo) + 0,10·viñeteo + 0,10·(100−rizado); Sλ vale 100 con SA entre −45 y −9 y cae 1,8 puntos por unidad fuera; D es la pupila de entrada focal/f en escala logarítmica de 4 a 64 mm",
+  idxSuffix:" (índice)",
+  allFocals:"todas las focales",
+  lens1:"objetivo",
+  lensN:"objetivos",
+  add:"Añadir",
+  remove:"Quitar",
+  isRef:", referencia",
+  noMatch:"Ningún objetivo cumple el filtro.",
+  noSel:"Sin selección. Elija hasta cuatro objetivos en la lista o pulse puntos del mapa.",
+  cardSub:"{brand}, {year}, {family}. {el} el/{gr} gr, {asph} asf, {blades} palas, {mfd} m, {weight} g.",
+  pctPairs:"(percentil {p} de los pares del catálogo)",
+  versus:"frente a",
+  pctCat:"(percentil {p} del catálogo)",
+  field:"campo {p}",
+  chooseRef:"elija una referencia",
+  refGroup:"Referencia no montable",
+  nbEmpty:"Con una referencia elegida, la tabla muestra los diez objetivos más próximos en los siete ejes. Con el filtro de otro fabricante responde a qué objetivo de otra marca ocupa el lugar de este.",
+  nbAdd:"Añadir {name} a la comparación",
+  nbNone:"Ningún candidato cumple los filtros.",
+  mapNone:"Ningún objetivo cumple los filtros.",
+  mapCap:"{n} {lenses} a la vista. Pase por un punto para identificarlo; pulse para añadirlo a la comparación.",
+  count:"{n} objetivos de montura M más la fila de referencia del Q3 43, {a} ejes, {i} índices declarados."
+},
+en:{
+  ax_sa:"Residual spherical aberration",
+  ax_loca:"Longitudinal CA",
+  ax_micro:"Microcontrast",
+  ax_velo:"Veiling glare",
+  ax_vig:"Vignetting",
+  ax_mech:"Pupil clipping",
+  ax_onion:"Aspheric onion ripple",
+  ix_pop:"3D pop",
+  ix_crema:"Creaminess",
+  ix_eleg:"Elegance",
+  ix_onir:"Dreamy",
+  fx_pop:"0.30·(100−veiling glare) + 0.25·(100−LoCA) + 0.20·micro + 0.15·vignetting + 0.10·(100−|SA|)",
+  fx_crema:"0.55·S′ + 0.25·(100−ripple) + 0.20·(100−LoCA), with S′ = (100−SA)/2",
+  fx_eleg:"0.25·Eμ + 0.25·(100−LoCA) + 0.20·S′ + 0.15·(100−ripple) + 0.15·(100−clipping), with Eμ = max(0, 100 − 1.8·|micro−62|)",
+  fx_onir:"0.25·Sλ + 0.20·D + 0.20·(100−LoCA) + 0.15·(100−veiling glare) + 0.10·vignetting + 0.10·(100−ripple); Sλ is 100 with SA between −45 and −9 and falls 1.8 points per unit outside; D is the entrance pupil focal/f on a logarithmic scale from 4 to 64 mm",
+  idxSuffix:" (index)",
+  allFocals:"all focal lengths",
+  lens1:"lens",
+  lensN:"lenses",
+  add:"Add",
+  remove:"Remove",
+  isRef:", reference",
+  noMatch:"No lens matches the filter.",
+  noSel:"No selection. Choose up to four lenses in the list, or click points on the map.",
+  cardSub:"{brand}, {year}, {family}. {el} elements/{gr} groups, {asph} asph., {blades} blades, {mfd} m, {weight} g.",
+  pctPairs:"(percentile {p} of the pairs in the catalogue)",
+  versus:"against",
+  pctCat:"(percentile {p} of the catalogue)",
+  field:"field {p}",
+  chooseRef:"choose a reference",
+  refGroup:"Reference, not mountable",
+  nbEmpty:"With a reference chosen, the table shows the ten closest lenses on the seven axes. With the other-manufacturer filter it answers which lens of another brand occupies the place of this one.",
+  nbAdd:"Add {name} to the comparison",
+  nbNone:"No candidate matches the filters.",
+  mapNone:"No lens matches the filters.",
+  mapCap:"{n} {lenses} in view. Hover over a point to identify it; click to add it to the comparison.",
+  count:"{n} M-mount lenses plus the Q3 43 reference row, {a} axes, {i} declared indices."
+}
+};
+function t(k,v){
+  let s = T[LANG()][k]; if(s===undefined) s = T.es[k];
+  if(v) for(const x in v) s = s.split("{"+x+"}").join(v[x]);
+  return s;
+}
+/* el español separa el signo de porcentaje; el inglés no */
+const pc = v => v + (LANG()==="en" ? "%" : " %");
+const FAM_EN = {
+ "Apocromático":"Apochromat",
+ "Apocromático asférico":"Aspheric apochromat",
+ "Biogon simétrico":"Symmetrical Biogon",
+ "Doble Gauss":"Double Gauss",
+ "Foco suave":"Soft focus",
+ "Gauss asférico":"Aspheric Gauss",
+ "Gauss asférico PGM":"Aspheric Gauss, PGM",
+ Heliar:"Heliar",
+ Retrofoco:"Retrofocus",
+ "Retrofoco asférico":"Aspheric retrofocus",
+ Sonnar:"Sonnar",
+ "Sonnar-Gauss":"Sonnar-Gauss",
+ Telefoto:"Telephoto",
+ "Telefoto con lupa":"Telephoto with goggles",
+ Tessar:"Tessar",
+ Triplete:"Triplet",
+ "Zoom escalonado asférico":"Aspheric stepped zoom"
+};
+const NOTA_EN = {
+ "Super-Angulon-M 21 f/4":"Almost perfect symmetry: minimal distortion and a very pronounced light falloff. Contrast is limited by the single coating.",
+ "Super-Angulon-M 21 f/3.4":"The historical reference for sharpness in a symmetrical wide angle. The rear group reaches into the body and blocks the meter of several models.",
+ "Elmarit-M 21 f/2.8":"The retrofocus design frees the space inside the body at the cost of more distortion and curvature than the Super-Angulon.",
+ "Elmarit-M 21 f/2.8 ASPH":"The aspheric surface corrects edge astigmatism. The defocus comes out somewhat more structured than in the spherical version.",
+ "Super-Elmar-M 21 f/3.4 ASPH":"Almost flat correction across the whole field and very little lateral chromatic aberration. A deliberately neutral character.",
+ "Summilux-M 21 f/1.4 ASPH":"Extreme aperture in a wide angle. Mechanical vignetting clips the discs in the corners and produces lateral smearing.",
+ "Elmarit-M 24 f/2.8 ASPH":"Compact and highly corrected. Flat from f/4, with little lateral chromatic aberration for its angle.",
+ "Summilux-M 24 f/1.4 ASPH":"The same approach as the 21 f/1.4 with a less demanding angle. Ample defocus and a heavily deformed pupil off axis.",
+ "Super-Elmar-M 24 f/3.8 ASPH":"The sober option at 24 mm: small, very flat and with a minimal colour cast.",
+ "Hektor 2,8cm f/6.3":"An uncoated triplet from the screw-mount era. Overall veiling glare, abundant halo and corners that never sharpen up. It renders a characteristic low-contrast image.",
+ "Summaron 28 f/5.6":"A compact symmetrical design, moderate contrast and soft corners up to f/8. The warm tone of the glasses of its time.",
+ "Elmarit 28 f/2.8 (1ª serie)":"Nine elements and a deep rear group, incompatible with several digital bodies. A classic medium-contrast signature.",
+ "Elmarit-M 28 f/2.8 (4ª serie)":"The last spherical version: contrast already modern, without the bite of the later aspheric.",
+ "Elmarit-M 28 f/2.8 ASPH":"One of the most compact M lenses with this level of correction. Neutral, flat and free of casts.",
+ "Summicron-M 28 f/2 ASPH":"A balance between aperture and size. Smoother transitions than in the aspheric 28 f/2.8, thanks to its slightly undercorrected spherical aberration.",
+ "Summicron-M 28 f/2 ASPH (2ª serie)":"A shorter mechanical redesign with revised optics. Somewhat flatter than the first version.",
+ "Summilux-M 28 f/1.4 ASPH":"A fast wide angle with unusually smooth defocus for its type. Strong pupil deformation in the corners.",
+ "Summaron-M 28 f/5.6 (reedición)":"A reissue of the 1955 design with modern coating: the same drawing, considerably less veiling glare.",
+ "Summaron 35 f/3.5":"Low contrast and appreciable halo at full aperture. A tonal scale compressed in the highlights, very recognisable in black and white.",
+ "Summaron 35 f/2.8":"The version with rare-earth glasses: it raises contrast without losing the smoothness of the original drawing.",
+ "Summilux 35 f/1.4 (1ª serie)":"The first 35 mm Summilux. Dominant spherical veil at f/1.4 that clears towards f/2.8. The basis of the Steel Rim cult.",
+ "Summilux 35 f/1.4 pre-ASPH":"Almost three decades in the catalogue with the same design. A warm halo at full aperture and a very gradual transition to defocus.",
+ "Summilux-M 35 f/1.4 Aspherical":"Two hand-polished aspherics in a very short run. An unprecedented leap in contrast in its day, with visible ripple in out-of-focus highlights.",
+ "Summilux-M 35 f/1.4 ASPH":"The version that divided opinion: high contrast and defocus structured by slightly overcorrected spherical aberration.",
+ "Summilux-M 35 f/1.4 ASPH FLE":"The floating element corrects the loss of performance at close range and almost entirely removes focus shift. The modern reference for the format.",
+ "Summilux-M 35 f/1.4 ASPH FLE II":"Focusing down to 0.40 m and eleven blades. Rounder discs on stopping down and a slightly smoother transition than the original FLE.",
+ "Summicron 35 f/2 (ocho elementos)":"Eight elements for a modest aperture. A reputation built on tonal gradation and a defocus without marked edges.",
+ "Summicron 35 f/2 (seis elementos)":"Mandler's simplification: fewer surfaces, more contrast and the smooth drawing that characterises the whole spherical series.",
+ "Summicron-M 35 f/2 (4ª serie)":"Known for the quality of its defocus. Residual undercorrection keeps the core of the disc bright and the edge fading.",
+ "Summicron-M 35 f/2 ASPH":"Very flat and high in contrast. Spherical overcorrection produces defined outlines in out-of-focus highlights.",
+ "APO-Summicron-M 35 f/2 ASPH":"Apochromatic correction with focusing down to 0.30 m. Practically no longitudinal chromatic aberration, with clean defocus and no colour cast.",
+ "Summarit-M 35 f/2.5":"The economy series, with modern correction and a restrained aperture. Neutral and without marked traits.",
+ "Summarit-M 35 f/2.4 ASPH":"An update of the Summarit with one aspheric. Performance close to the aspheric Summicron at lower cost.",
+ "Noctilux-M 35 f/1.2 ASPH":"Three precision-moulded aspherics and a floating element. It combines apochromatic control of chromatic aberration with the ample transition typical of the Noctilux series.",
+ "Elmar 50 f/3.5":"Four elements, three groups, uncoated. Little lateral veiling glare thanks to its small number of surfaces, but a high overall glare against the light.",
+ "Summar 50 f/2":"The extreme case of classical character: heavily undercorrected spherical aberration, swirl in the corners from mechanical vignetting, and abundant veiling glare. A soft front element prone to scratching.",
+ "Xenon 50 f/1.5":"A Schneider design under Taylor Hobson licence. Intense halo at full aperture that dissolves on closing two stops.",
+ "Summarit 50 f/1.5":"A coated Xenon. The same spherical veil with somewhat less internal scatter. Much sought after for its halo in specular highlights.",
+ "Summicron 50 f/2 (colapsable)":"The first Summicron, with rare-earth glass. Medium contrast and ample gradation in the highlights.",
+ "Summicron 50 f/2 rígido y DR":"The rigid and its close-focus version. High microcontrast for its time, with a very orderly defocus.",
+ "Summicron-M 50 f/2 (3ª serie)":"Reduced to six elements with new glasses. The basis of every later 50 Summicron.",
+ "Summicron-M 50 f/2 (4ª serie)":"The reference standard for decades. Neutral, with a slight undercorrection that softens backgrounds.",
+ "Summicron-M 50 f/2 (5ª serie)":"Updated coatings and a revised barrel on the same design. More contrast against the light.",
+ "APO-Summicron-M 50 f/2 ASPH":"Full apochromatic correction. The highest resolution and microcontrast in the M catalogue, with defocus that is clean and neutral rather than creamy.",
+ "Summilux 50 f/1.4 (1ª serie)":"First generation, very close to the Summarit in character. Marked spherical veil and ample bokeh.",
+ "Summilux 50 f/1.4 pre-ASPH E43":"The Mandler design that defined the look of the fast 50 for thirty years. A transition to defocus without discontinuities.",
+ "Summilux-M 50 f/1.4 pre-ASPH E46":"The last spherical series, with modern coating. The same drawing with less veiling glare against the light.",
+ "Summilux-M 50 f/1.4 ASPH":"High correction while keeping a certain signature. The slight overcorrection gives defined outlines in highlights at middle distances.",
+ "Summilux-M 50 f/1.4 Classic":"A reissue of the pre-aspheric design with present-day coating. It brings back the spherical veil of the E43 series with less internal scatter.",
+ "Noctilux 50 f/1.2 ASPH (1966)":"Leica's first production aspherics, polished by hand. Irregular performance and a defocus of a breadth no other 50 equalled.",
+ "Noctilux-M 50 f/1.2 ASPH (reedición)":"A reproduction of the 1966 design with modern coating. It keeps the veil and the swirl and adds base contrast.",
+ "Noctilux-M 50 f/1":"No aspherics, and glasses of very high index. An extremely thin plane of focus and the most gradual transition in the whole catalogue.",
+ "Noctilux-M 50 f/0.95 ASPH":"Far better corrected than the f/1, with the same minimal depth of field. Slightly outlined discs and severe mechanical vignetting off axis.",
+ "Elmar-M 50 f/2.8":"A modern Tessar, collapsible and of only four elements. High contrast thanks to the small number of surfaces.",
+ "Summarit-M 50 f/2.5":"A restrained alternative to the Summicron. Neutral, flat and without marked character.",
+ "Summarit-M 50 f/2.4":"A minor revision of the Summarit series, with a longer barrel and the same optical sobriety.",
+ "Tri-Elmar-M 28-35-50 f/4 ASPH":"Three fixed focal lengths in a single barrel. Homogeneous correction and an optical signature deliberately uniform between positions.",
+ "Tri-Elmar-M 16-18-21 f/4 ASPH":"An ultra-wide angle with three positions. Distortion well contained for its angle, and a light falloff very visible without a correcting filter.",
+ "Summilux-M 75 f/1.4":"A very thin plane of focus and a defocus of great breadth. Modest correction at full aperture that is resolved by f/2.8.",
+ "APO-Summicron-M 75 f/2 ASPH":"Apochromatic correction with useful focusing down to 0.70 m. It separates the subject with no chromatic residue in the outlines.",
+ "Noctilux-M 75 f/1.25 ASPH":"The greatest separation of planes in the catalogue. High correction and an extraordinarily gradual transition despite the aspheric control.",
+ "Summarit-M 75 f/2.4":"A sober, light short telephoto, without notable traits of character.",
+ "Thambar 90 f/2.2":"A soft-focus lens with a removable central neutral-density spot. Spherical aberration is left uncorrected by design, to produce controlled halo in the highlights.",
+ "Thambar-M 90 f/2.2":"A reissue of the 1935 design. With the central spot fitted the halo dominates; removed, the image gains contrast without becoming sharp.",
+ "Elmarit 90 f/2.8":"A classic portrait telephoto. Ample gradation and orderly defocus, with fifteen blades that keep the disc round.",
+ "Tele-Elmarit 90 f/2.8 (1ª serie)":"A telephoto design shorter than the Elmarit. Medium contrast and very clean bokeh.",
+ "Tele-Elmarit-M 90 f/2.8 (2ª serie)":"The light, compact version. A very good ratio of mass to performance, with smooth defocus.",
+ "Elmarit-M 90 f/2.8":"Four elements in four groups and high contrast. Sober, free of casts and highly corrected for its cost.",
+ "Summicron-M 90 f/2":"The spherical version of the fast 90. Longitudinal chromatic aberration visible in high-contrast out-of-focus outlines.",
+ "APO-Summicron-M 90 f/2 ASPH":"One of the best-corrected portrait telephotos in existence. Immediate sharpness at full aperture with no chromatic residue.",
+ "Summarit-M 90 f/2.4":"A light alternative to the APO, with high correction and a neutral character.",
+ "Tele-Elmar-M 135 f/4":"One of the sharpest designs in the whole M mount. Very high correction with very little lateral chromatic aberration.",
+ "Elmarit-M 135 f/2.8":"It carries goggles that enlarge the rangefinder base. Demanding focusing and a very ample defocus for the format.",
+ "APO-Telyt-M 135 f/3.4":"An apochromat without aspherics. Almost perfect chromatic correction, and the M lens that asks most of the rangefinder.",
+ "Distagon T* 15 f/2.8 ZM":"A fifteen-element retrofocus with notable residual distortion but excellent field correction. Very resistant to veiling glare.",
+ "Distagon T* 18 f/4 ZM":"Barrel distortion clearly visible in straight lines, correctable in software. High contrast across the whole field.",
+ "Biogon T* 21 f/2.8 ZM":"Symmetrical, almost free of distortion and very high in contrast. Strong light falloff and an extreme angle of incidence at the edge of the sensor.",
+ "Biogon T* 25 f/2.8 ZM":"The same symmetrical recipe with a less demanding angle. Very flat and free of perceptible distortion.",
+ "Biogon T* 28 f/2.8 ZM":"High contrast and clean geometry. A reference for sharpness at 28 mm, beyond what its price suggests.",
+ "Distagon T* 35 f/1.4 ZM":"A fast retrofocus with an ample transition and very clean bokeh. It raises contrast without removing the volume of the defocus.",
+ "Biogon T* 35 f/2 ZM":"Distortion and curvature practically nil. Very high microcontrast, with somewhat outlined defocus.",
+ "C-Biogon T* 35 f/2.8 ZM":"Compact and surgically corrected in geometry. Intended for reproduction and architecture.",
+ "C-Sonnar T* 50 f/1.5 ZM":"A six-element Sonnar with deliberately undercorrected spherical aberration. Pronounced focus shift between f/1.5 and f/2.8, which the user can calibrate. The most enveloping defocus among the ZM lenses.",
+ "Planar T* 50 f/2 ZM":"A symmetrical, highly corrected double Gauss. Neutral, with defocus that is clean rather than smooth.",
+ "Tele-Tessar T* 85 f/4 ZM":"A short telephoto of high contrast and low mass. Outstanding correction for its price.",
+ "Hyper Wide Heliar 10 f/5.6":"A 130-degree angle with surprisingly well-contained rectilinear distortion. Very strong light falloff on digital.",
+ "Ultra Wide Heliar 12 f/5.6 III":"Third version, with mount coding. Very clean geometry for its angle.",
+ "Super Wide Heliar 15 f/4.5 III":"The retrofocus redesign reduces the angle of incidence and with it the colour shift at the edges of the sensor.",
+ "Color-Skopar 21 f/3.5":"Very compact for its focal length and well corrected. Without marked traits of character.",
+ "Nokton 21 f/1.4":"A very fast wide angle with notable correction. Twelve blades keep the disc round on stopping down.",
+ "Ultron 28 f/2":"Balanced and compact, with a smoother transition to defocus than most modern aspherics.",
+ "Nokton 28 f/1.5":"Extreme aperture at 28 mm with high correction. Strong pupil deformation in the corners at full aperture.",
+ "Nokton 35 f/1.2 III":"Third version, far more compact. It renders with volume at f/1.2 and turns neutral from f/2 onwards.",
+ "Nokton Classic 35 f/1.4 II MC":"A reinterpretation of the spherical Summilux. Appreciable field curvature and a very gradual transition to defocus.",
+ "Nokton Classic 35 f/1.4 II SC":"An identical design with single coating. More veiling glare against the light and more open highlights.",
+ "Ultron 35 f/1.7 Asf.":"Compact and well corrected, with a drawing halfway between the Nokton Classic and the modern aspheric.",
+ "APO-Lanthar 35 f/2 Asf.":"Apochromatic correction at a price far below that of the German alternatives. Out-of-focus outlines with no colour residue.",
+ "Nokton 40 f/1.2 Asf.":"A defocus of great breadth with reasonable correction. Appreciable halo in specular highlights at full aperture.",
+ "Nokton Classic 40 f/1.4":"Very small and of marked classical character. Available in a single-coated version with more intentional veiling glare.",
+ "Nokton 50 f/1 Asf.":"An f/1 aperture with far better correction than the original spherical Noctilux. Twelve blades and intense mechanical vignetting off axis.",
+ "Nokton 50 f/1.2 Asf.":"Compact for its aperture, with ample defocus and modern correction. Much used as an alternative to the aspheric Summilux.",
+ "Nokton 50 f/1.5 Asf. II":"Second version, with closer focusing. A balance between size, aperture and correction.",
+ "APO-Lanthar 50 f/2 Asf.":"A true apochromat with focusing down to 0.45 m. One of the best performances per unit of cost in the whole mount.",
+ "Heliar Classic 50 f/3.5":"A Heliar design in three groups, collapsible. Ample gradation and a smooth drawing without lapsing into overall veiling glare.",
+ "Nokton 75 f/1.5 Asf.":"A fast short telephoto with ample, clean defocus. Focusing down to 0.70 m, unusual in the mount.",
+ "APO-Skopar 90 f/2.8":"A compact apochromat of high contrast. Out-of-focus outlines with no colour fringe.",
+ "Canon 50 f/0.95":"Conceived for the Canon 7 with its own bayonet mount; it requires conversion to M. Dominant spherical veil and intense swirl in the corners.",
+ "Canon 50 f/1.2 LTM":"Leica thread, directly adaptable. Abundant halo at full aperture that soon clears.",
+ "Canon 35 f/2 LTM":"One of the best screw-mount 35s of its decade. Medium contrast with a very orderly defocus.",
+ "Nikkor-S.C 5cm f/1.4":"Leica thread, from the fifties. A warm rendition with marked halo and soft corners at full aperture.",
+ "Nikkor K 55 f/1.2 pre-AI":"Nikon F mount, mountable on M via an adapter ring, without rangefinder coupling. Intense spherical veil and sagittal coma at full aperture that clear towards f/2.8; the NIC multicoating keeps base contrast above that of its single-coated contemporaries.",
+ "Jupiter-3 50 f/1.5":"A Soviet copy of the Zeiss Sonnar. A thread pitch and a focusing base different from the Leica standard, which calls for recalibration. Very high spherical veil.",
+ "Jupiter-9 85 f/2":"A portrait Sonnar with fifteen blades. Very smooth defocus and low contrast at full aperture.",
+ "Konica M-Hexanon 35 f/2":"A discontinued series of very high mechanical and optical quality. An uncommon compromise between contrast and smoothness.",
+ "Konica M-Hexanon 50 f/2":"Performance on a par with the fifth-version Summicron, with a slightly warmer character.",
+ "Konica M-Hexanon 90 f/2.8":"A highly corrected short telephoto, moderately priced on the second-hand market.",
+ "Minolta M-Rokkor 40 f/2":"Designed for the Leitz Minolta CL. Very compact, with a smooth drawing and decent contrast. Prone to corrosion of the internal coating.",
+ "Minolta M-Rokkor 90 f/4":"A four-element short telephoto, light and sharp from full aperture.",
+ "Light Lens Lab 35 f/2 (ocho elementos)":"A reproduction of the 1958 Summicron design, down to the tolerance of the coating. It reproduces the tonal gradation of the original.",
+ "Light Lens Lab 50 f/2 (rígido)":"A copy of the rigid Summicron with glass equivalent to the original. A classic signature without the uncertainties of a sixty-year-old unit.",
+ "Light Lens Lab 50 f/1.5 Z21":"A homage to the Angénieux S21 50 mm, with high-index lanthanum glass and a preset diaphragm. Bubble bokeh at full aperture: bright-edged discs from overcorrected spherical aberration. It covers up to 44x33 mm. Field curvature and distortion are read from the curves published by the maker.",
+ "Light Lens Lab 50 f/1.2 (Noctilux)":"A reproduction of the 1966 aspheric Noctilux. It recovers the veil and the swirl of the original, including its irregular performance at the edge.",
+ "MS Optics Sonnetar 50 f/1.1":"Miyazaki's hand-built design, with a spherical-aberration corrector adjustable by the user. Intense focus shift and a very enveloping defocus.",
+ "7Artisans 50 f/1.1":"A very low-cost lens with an exaggerated classical character. High veiling glare and unresolved corners at full aperture.",
+ "TTArtisan 50 f/0.95":"A functional replica of the Noctilux approach at a fraction of the price. Fourteen blades and a very ample defocus.",
+ "TTArtisan 90 f/1.25":"A portrait lens of extreme aperture. Very critical focusing with the rangefinder and a defocus of great magnitude.",
+ "Thypoch Simera 35 f/1.4":"A recent maker with a notable mechanical finish. Fourteen blades with aperture notches that keep the disc almost circular.",
+ "Thypoch Simera 28 f/1.4":"The same approach in a fast wide angle. High correction with a gentler transition to defocus than the aspheric average.",
+ "Funleader Caps 18 f/8":"A body-cap lens of three elements and fixed aperture. An optical curiosity of modest performance and negligible mass.",
+ "APO-Summicron-ASPH 43 f/2 (Q3 43)":"A reference row, not part of the M catalogue: it is the fixed lens of the Q3 43 and cannot be mounted on an M. The indices have been rated by the same criterion as the rest, not measured; the mass is an estimate, because Leica does not publish that of the optical unit on its own. It is here so that any lens in the catalogue can be compared with the one already being carried."
+};
+const fam  = L => LANG()==="en" ? (FAM_EN[L.family]  || L.family) : L.family;
+const nota = L => LANG()==="en" ? (NOTA_EN[L.name]   || L.nota)   : L.nota;
+/* Nombre que se muestra. En inglés se traducen las aclaraciones del catálogo
+   («1ª serie», «reedición», «Asf.»…); L.name sigue siendo la clave de enlaces y tablas. */
+const NAME_EN_RULES = [
+  [/\((\d)ª serie\)/, (m,n)=>"("+n+(["","st","nd","rd"][n]||"th")+" version)"],
+  [/\(reedición\)/, "(reissue)"], [/\(ocho elementos\)/, "(eight elements)"], [/\(seis elementos\)/, "(six elements)"],
+  [/\(colapsable\)/, "(collapsible)"], [/rígido y DR/, "rigid and DR"], [/\(rígido\)/, "(rigid)"], [/\bAsf\./, "Asph."]
+];
+const NAME_EN_MEMO = new Map();
+function dn(L){
+  if(LANG()!=="en") return L.name;
+  if(!NAME_EN_MEMO.has(L.name)) NAME_EN_MEMO.set(L.name, NAME_EN_RULES.reduce((s,r)=>s.replace(r[0],r[1]), L.name));
+  return NAME_EN_MEMO.get(L.name);
+}
 
 /* ==== 1. Datos ==== */
 const RAW = `
@@ -378,7 +683,7 @@ Minolta M-Rokkor 40 f/2|Minolta|40|2|1973|Doble Gauss|6|4|0|10|0.8|40|185|multi|
 Minolta M-Rokkor 90 f/4|Minolta|90|4|1973|Tessar|4|4|0|10|1.0|40|340|multi|74|-14|16|26|85|91|85|22|12|12|0.05|0.2|1.0|22|0|8|30|Tele corto de cuatro elementos, ligero y nítido desde plena apertura.
 Light Lens Lab 35 f/2 (ocho elementos)|Light Lens Lab|35|2|2019|Doble Gauss|8|6|0|10|0.7|39|235|mono|78|-36|40|52|64|72|54|34|28|30|0.13|-0.7|2.0|34|0|24|28|Reproducción del trazado Summicron de 1958, incluida la tolerancia del tratamiento. Reproduce la gradación tonal del original.
 Light Lens Lab 50 f/2 (rígido)|Light Lens Lab|50|2|2021|Doble Gauss|7|6|0|10|0.9|39|280|mono|80|-32|34|46|66|76|58|36|28|30|0.12|0.3|1.8|36|0|22|24|Copia del Summicron rígido con vidrio equivalente al original. Firma clásica sin las incertidumbres de una unidad de sesenta años.
-Light Lens Lab 50 f/1.5 Z21|Light Lens Lab|50|1.5|2025|Doble Gauss|6|4|0|10|0.7|52|313|multi|88|-50|54|44|62|70|48|40|30|32|0.33|-1.2|2.4|50|0|40|24|Homenaje al Angénieux S21 de 50 mm con vidrio de lantano de alto índice y diafragma preselector. Cubre hasta 44x33 mm. La curvatura de campo y la distorsión están leídas de las curvas publicadas por el fabricante.
+Light Lens Lab 50 f/1.5 Z21|Light Lens Lab|50|1.5|2025|Doble Gauss|6|4|0|10|0.7|52|313|multi|40|50|54|44|62|70|48|40|30|32|0.33|-1.2|2.4|50|0|40|80|Homenaje al Angénieux S21 de 50 mm con vidrio de lantano de alto índice y diafragma preselector. Bokeh de burbuja a plena apertura: discos de borde brillante por esférica sobrecorregida. Cubre hasta 44x33 mm. La curvatura de campo y la distorsión están leídas de las curvas publicadas por el fabricante.
 Light Lens Lab 50 f/1.2 (Noctilux)|Light Lens Lab|50|1.2|2022|Gauss asférico|6|4|2|10|1.0|48|500|mono|92|-50|56|58|54|64|40|46|32|44|0.24|0.5|2.9|68|38|36|30|Reproducción del Noctilux asférico de 1966. Recupera el velo y el remolino del original, incluido su rendimiento irregular en el borde.
 MS Optics Sonnetar 50 f/1.1|MS Optics|50|1.1|2012|Sonnar|6|4|0|12|0.8|46|230|multi|90|-68|72|58|50|62|34|48|28|42|0.28|0.5|2.7|62|0|72|20|Diseño artesanal de Miyazaki con corrector de esfericidad ajustable por el usuario. Deriva de foco intensa y desenfoque muy envolvente.
 7Artisans 50 f/1.1|7Artisans|50|1.1|2017|Doble Gauss|7|4|0|13|0.7|49|380|multi|86|-60|66|70|42|54|30|48|34|46|0.26|0.5|2.8|64|0|54|24|Objetivo de coste muy bajo con carácter clásico exagerado. Velo alto y esquinas irresueltas a plena apertura.
@@ -406,33 +711,33 @@ const LENSES = RAW.trim().split("\n").filter(s=>s.trim()).map((line,i)=>{
 
 /* ==== 2. Ejes y fórmulas ==== */
 const AXES = [
-  {k:"sa",    label:"Esfericidad residual", fmt:v=>fmt(v,0),        note:"−100 subcorregida, +100 sobrecorregida"},
-  {k:"loca",  label:"Cromatismo longitudinal", fmt:v=>fmt(v,0),     note:"0 puro, 100 ribetes intensos"},
-  {k:"micro", label:"Microcontraste", fmt:v=>fmt(v,0),              note:"MTF a 40 pl/mm"},
-  {k:"velo",  label:"Velo", fmt:v=>fmt(v,0),                        note:"nivel de negro"},
-  {k:"vig",   label:"Viñeteo", fmt:v=>fmt(v,1)+" EV",               note:"caída total a plena apertura"},
-  {k:"mech",  label:"Recorte de pupila", fmt:v=>fmt(v,0),           note:"ojo de gato, remolino"},
-  {k:"onion", label:"Rizado asférico", fmt:v=>fmt(v,0),             note:"anillos en el disco"}
+  {k:"sa",    get label(){return t("ax_sa");}, fmt:v=>fmt(v,0),        note:"−100 subcorregida, +100 sobrecorregida"},
+  {k:"loca",  get label(){return t("ax_loca");}, fmt:v=>fmt(v,0),     note:"0 puro, 100 ribetes intensos"},
+  {k:"micro", get label(){return t("ax_micro");}, fmt:v=>fmt(v,0),              note:"MTF a 40 pl/mm"},
+  {k:"velo",  get label(){return t("ax_velo");}, fmt:v=>fmt(v,0),                        note:"nivel de negro"},
+  {k:"vig",   get label(){return t("ax_vig");}, fmt:v=>fmt(v,1)+" EV",               note:"caída total a plena apertura"},
+  {k:"mech",  get label(){return t("ax_mech");}, fmt:v=>fmt(v,0),           note:"ojo de gato, remolino"},
+  {k:"onion", get label(){return t("ax_onion");}, fmt:v=>fmt(v,0),             note:"anillos en el disco"}
 ];
 
 const sPrime = L => (100 - L.sa)/2;
 const IDX = [
-  {k:"pop",   label:"Pop 3D",
+  {k:"pop",   get label(){return t("ix_pop");},
    f:L => 0.30*(100-L.velo) + 0.25*(100-L.loca) + 0.20*L.micro + 0.15*L.vigN + 0.10*(100-Math.abs(L.sa)),
-   formula:"0,30·(100−velo) + 0,25·(100−LoCA) + 0,20·micro + 0,15·viñeteo + 0,10·(100−|SA|)"},
-  {k:"crema", label:"Cremosidad",
+   get formula(){return t("fx_pop");}},
+  {k:"crema", get label(){return t("ix_crema");},
    f:L => 0.55*sPrime(L) + 0.25*(100-L.onion) + 0.20*(100-L.loca),
-   formula:"0,55·S′ + 0,25·(100−rizado) + 0,20·(100−LoCA), con S′ = (100−SA)/2"},
-  {k:"eleg",  label:"Elegancia",
+   get formula(){return t("fx_crema");}},
+  {k:"eleg",  get label(){return t("ix_eleg");},
    f:L => 0.25*Math.max(0,100-1.8*Math.abs(L.micro-62)) + 0.25*(100-L.loca) + 0.20*sPrime(L) + 0.15*(100-L.onion) + 0.15*(100-L.mech),
-   formula:"0,25·Eμ + 0,25·(100−LoCA) + 0,20·S′ + 0,15·(100−rizado) + 0,15·(100−recorte), con Eμ = max(0, 100 − 1,8·|micro−62|)"},
-  {k:"onir",  label:"Onírico",
+   get formula(){return t("fx_eleg");}},
+  {k:"onir",  get label(){return t("ix_onir");},
    f:L => {
      const D = Math.max(0, Math.min(100, (Math.log2(L.focal/L.fmax) - 2) / 4 * 100));
      const Sl = Math.max(0, 100 - 1.8*Math.max(0, Math.abs(L.sa+27) - 18));
      return 0.25*Sl + 0.20*D + 0.20*(100-L.loca) + 0.15*(100-L.velo) + 0.10*L.vigN + 0.10*(100-L.onion);
    },
-   formula:"0,25·Sλ + 0,20·D + 0,20·(100−LoCA) + 0,15·(100−velo) + 0,10·viñeteo + 0,10·(100−rizado); Sλ vale 100 con SA entre −45 y −9 y cae 1,8 puntos por unidad fuera; D es la pupila de entrada focal/f en escala logarítmica de 4 a 64 mm"}
+   get formula(){return t("fx_onir");}}
 ];
 LENSES.forEach(L=>{ IDX.forEach(d=>{ L[d.k]=d.f(L); }); });
 
@@ -458,7 +763,7 @@ const pct = d => {
 /* ==== 4. Utilidades ==== */
 const $  = s=>document.querySelector(s);
 const $$ = s=>Array.from(document.querySelectorAll(s));
-const fmt=(v,d=0)=>v.toLocaleString("es-ES",{minimumFractionDigits:d,maximumFractionDigits:d,useGrouping:false});
+const fmt=(v,d=0)=>v.toLocaleString(LANG()==="en"?"en-GB":"es-ES",{minimumFractionDigits:d,maximumFractionDigits:d,useGrouping:false});
 const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 const BRANDCOL={"Leica":"#E8B33C","Zeiss":"#35B7E6","Voigtländer":"#4FBF95","Canon":"#DB4A3E","Nikon":"#8A6BE0",
   "Konica":"#D9A0C8","Minolta":"#7FB4E8","Light Lens Lab":"#C9CDD6","KMZ":"#B08968","MS Optics":"#9AA98F",
@@ -477,7 +782,10 @@ function fillFilters(){
   $("#fBrand").innerHTML = brands.map(b=>
     `<button type="button" class="bchip" data-b="${esc(b)}" aria-pressed="false"><span class="dot" style="background:${bcol(b)}"></span>${esc(b)}</button>`).join("");
   const focs=[...new Set(LENSES.map(L=>L.focal))].sort((a,b)=>a-b);
-  $("#fFocal").innerHTML = `<option value="">todas las focales</option>` + focs.map(f=>`<option value="${f}">${f} mm</option>`).join("");
+  const vf=$("#fFocal").value;
+  $("#fFocal").innerHTML = `<option value="">${t("allFocals")}</option>` + focs.map(f=>`<option value="${f}">${f} mm</option>`).join("");
+  $("#fFocal").value=vf;
+  paintBrandChips();
 }
 function paintBrandChips(){
   $$("#fBrand .bchip").forEach(c=>{
@@ -493,20 +801,20 @@ function baseFilter(L){
 }
 function visible(){
   const q=$("#fText").value.trim().toLowerCase();
-  return LENSES.filter(L=> baseFilter(L) && (!q || L.name.toLowerCase().includes(q)));
+  return LENSES.filter(L=> baseFilter(L) && (!q || L.name.toLowerCase().includes(q) || dn(L).toLowerCase().includes(q)));
 }
 function renderList(){
   const V=visible();
-  $("#listCount").textContent = fmt(V.length) + (V.length===1?" objetivo":" objetivos");
+  $("#listCount").textContent = fmt(V.length) + " " + t(V.length===1?"lens1":"lensN");
   $("#list").innerHTML = V.map(L=>{
     const on=sel.includes(L.i);
     return `<div class="row${on?" on":""}" data-i="${L.i}">
-      <button type="button" class="pick" data-i="${L.i}" aria-label="${on?"Quitar":"Añadir"} ${esc(L.name)}">${on?"–":"+"}</button>
+      <button type="button" class="pick" data-i="${L.i}" aria-label="${t(on?"remove":"add")} ${esc(dn(L))}">${on?"–":"+"}</button>
       <span class="dot" style="background:${bcol(L.brand)}"></span>
-      <span class="nm">${esc(L.name)}</span>
-      <span class="meta">${L.year}${L.ref?", referencia":""}</span>
+      <span class="nm">${esc(dn(L))}</span>
+      <span class="meta">${L.year}${L.ref?t("isRef"):""}</span>
     </div>`;
-  }).join("") || `<div class="empty">Ningún objetivo cumple el filtro.</div>`;
+  }).join("") || `<div class="empty">${t("noMatch")}</div>`;
 }
 function toggle(i){
   const p=sel.indexOf(i);
@@ -519,8 +827,8 @@ function toggle(i){
 function renderSel(){
   $("#chips").innerHTML = sel.map((i,k)=>{
     const L=LENSES[i];
-    return `<button type="button" class="chip" data-i="${i}" style="border-color:${SLOT[k]}" aria-label="Quitar ${esc(L.name)}">
-      <span class="sw" style="background:${SLOT[k]}"></span>${esc(L.name)}<span class="x">×</span></button>`;
+    return `<button type="button" class="chip" data-i="${i}" style="border-color:${SLOT[k]}" aria-label="${t("remove")} ${esc(dn(L))}">
+      <span class="sw" style="background:${SLOT[k]}"></span>${esc(dn(L))}<span class="x">×</span></button>`;
   }).join("");
   $("#clearBtn").hidden = sel.length===0;
 }
@@ -535,7 +843,7 @@ function saBar(sa,color){
 }
 function renderProfiles(){
   const box=$("#profiles");
-  if(!sel.length){ box.innerHTML=`<div class="empty">Sin selección. Elija hasta cuatro objetivos en la lista o pulse puntos del mapa.</div>`; $("#pairs").innerHTML=""; return; }
+  if(!sel.length){ box.innerHTML=`<div class="empty">${t("noSel")}</div>`; $("#pairs").innerHTML=""; return; }
   box.innerHTML = sel.map((i,k)=>{
     const L=LENSES[i], c=SLOT[k];
     const axes = AXES.map(a=>{
@@ -547,17 +855,17 @@ function renderProfiles(){
     }).join("");
     const idx = IDX.map(d=>`<div class="ix"><span class="il">${d.label}</span>${bar(L[d.k],100,c)}<span class="av">${fmt(L[d.k],0)}</span></div>`).join("");
     return `<article class="card" style="border-top-color:${c}">
-      <h3>${esc(L.name)}</h3>
-      <p class="sub">${esc(L.brand)}, ${L.year}, ${esc(L.family)}. ${L.el} el/${L.gr} gr, ${L.asph} asf, ${L.blades} palas, ${fmt(L.mfd,L.mfd<1?2:1)} m, ${fmt(L.weight)} g.</p>
+      <h3>${esc(dn(L))}</h3>
+      <p class="sub">${t("cardSub",{brand:esc(L.brand),year:L.year,family:esc(fam(L)),el:L.el,gr:L.gr,asph:L.asph,blades:L.blades,mfd:fmt(L.mfd,L.mfd<1?2:1),weight:fmt(L.weight)})}</p>
       <div class="axes">${axes}</div>
       <div class="idx">${idx}</div>
-      <p class="nota">${esc(L.nota)}</p>
+      <p class="nota">${esc(nota(L))}</p>
     </article>`;
   }).join("");
   const P=[];
   for(let a=0;a<sel.length;a++) for(let b=a+1;b<sel.length;b++){
     const A=LENSES[sel[a]],B=LENSES[sel[b]],d=dist(A,B);
-    P.push(`<span class="pair"><span class="sw" style="background:${SLOT[a]}"></span><span class="sw" style="background:${SLOT[b]}"></span> d = ${fmt(d,2)} <span class="meta">(percentil ${pct(d)} % de los pares del catálogo)</span></span>`);
+    P.push(`<span class="pair"><span class="sw" style="background:${SLOT[a]}"></span><span class="sw" style="background:${SLOT[b]}"></span> d = ${fmt(d,2)} <span class="meta">${t("pctPairs",{p:pc(pct(d))})}</span></span>`);
   }
   $("#pairs").innerHTML = P.join("");
 }
@@ -669,7 +977,7 @@ function renderDisc(cv, L, o){
 
 /* ==== 7c. Par enfrentado ==== */
 function pairOptions(){
-  const opts=k=>sel.map((i,s)=>`<option value="${i}">${esc(LENSES[i].name)}</option>`).join("");
+  const opts=k=>sel.map((i,s)=>`<option value="${i}">${esc(dn(LENSES[i]))}</option>`).join("");
   const a=$("#pairA"), b=$("#pairB");
   const va=a.value, vb=b.value;
   a.innerHTML=opts(); b.innerHTML=opts();
@@ -692,21 +1000,21 @@ function renderPair(){
     return {ax,share,va:A[ax.k],vb:B[ax.k]};
   }).sort((x,y)=>y.share-x.share);
   $("#pairHead").innerHTML =
-    `<span class="sw" style="background:${cA}"></span> ${esc(A.name)} frente a <span class="sw" style="background:${cB}"></span> ${esc(B.name)}: d = ${fmt(d,2)} <span class="meta">(percentil ${pct(d)} % del catálogo)</span>`;
+    `<span class="sw" style="background:${cA}"></span> ${esc(dn(A))} ${t("versus")} <span class="sw" style="background:${cB}"></span> ${esc(dn(B))}: d = ${fmt(d,2)} <span class="meta">${t("pctCat",{p:pc(pct(d))})}</span>`;
   $("#decomp").innerHTML = rows.map(r=>`
     <div class="drow">
       <span class="dl">${r.ax.label}</span>
       <span class="dv" style="color:${cA}">${r.ax.fmt(r.va)}</span>
       <div class="track"><div class="fill" style="width:${Math.min(100,r.share)}%;background:var(--muted)"></div></div>
       <span class="dv" style="color:${cB}">${r.ax.fmt(r.vb)}</span>
-      <span class="ds">${fmt(r.share,0)} %</span>
+      <span class="ds">${pc(fmt(r.share,0))}</span>
     </div>`).join("");
   $("#discs").innerHTML = [A,B].map((L,q)=>{
     const c=q?cB:cA;
     return `<div class="discrow">
-      <span class="discname" style="border-left-color:${c}">${esc(L.name)}</span>
-      <figure><canvas class="disc" data-i="${L.i}" data-field="0"></canvas><figcaption>campo 0 %</figcaption></figure>
-      <figure><canvas class="disc" data-i="${L.i}" data-field="0.75"></canvas><figcaption>campo 75 %</figcaption></figure>
+      <span class="discname" style="border-left-color:${c}">${esc(dn(L))}</span>
+      <figure><canvas class="disc" data-i="${L.i}" data-field="0"></canvas><figcaption>${t("field",{p:pc(0)})}</figcaption></figure>
+      <figure><canvas class="disc" data-i="${L.i}" data-field="0.75"></canvas><figcaption>${t("field",{p:pc(75)})}</figcaption></figure>
     </div>`;
   }).join("");
   requestAnimationFrame(()=>{
@@ -725,13 +1033,15 @@ function fillNb(){
   LENSES.filter(L=>!L.ref).forEach(L=>{ (brands[L.brand]=brands[L.brand]||[]).push(L); });
   const g=Object.keys(brands).sort((a,b)=>a.localeCompare(b,"es")).map(b=>
     `<optgroup label="${esc(b)}">`+brands[b].sort((x,y)=>x.focal-y.focal||x.year-y.year)
-      .map(L=>`<option value="${L.i}">${esc(L.name)}</option>`).join("")+`</optgroup>`).join("");
-  $("#nbRef").innerHTML = `<option value="">elija una referencia</option>` + g +
-    `<optgroup label="Referencia no montable"><option value="${LENSES.find(L=>L.ref).i}">${esc(REFNAME)}</option></optgroup>`;
+      .map(L=>`<option value="${L.i}">${esc(dn(L))}</option>`).join("")+`</optgroup>`).join("");
+  const vr=$("#nbRef").value;
+  $("#nbRef").innerHTML = `<option value="">${t("chooseRef")}</option>` + g +
+    `<optgroup label="${t("refGroup")}"><option value="${LENSES.find(L=>L.ref).i}">${esc(dn(LENSES.find(L=>L.ref)))}</option></optgroup>`;
+  $("#nbRef").value=vr;
 }
 function renderNb(){
   const v=$("#nbRef").value;
-  if(v===""){ $("#nbOut").innerHTML=`<div class="empty">Con una referencia elegida, la tabla muestra los diez objetivos más próximos en los siete ejes. Con el filtro de otro fabricante responde a qué objetivo de otra marca ocupa el lugar de este.</div>`; return; }
+  if(v===""){ $("#nbOut").innerHTML=`<div class="empty">${t("nbEmpty")}</div>`; return; }
   const R=LENSES[parseInt(v,10)];
   const other=$("#nbOther").checked, same=$("#nbFocal").checked;
   const C=LENSES.filter(L=>L.i!==R.i && !L.ref
@@ -741,22 +1051,25 @@ function renderNb(){
   $("#nbOut").innerHTML = C.length ? `<div class="nbt">`+C.map((r,k)=>`
     <div class="nbrow">
       <span class="nbrank">${k+1}</span>
-      <button type="button" class="pick" data-i="${r.L.i}" aria-label="Añadir ${esc(r.L.name)} a la comparación">+</button>
+      <button type="button" class="pick" data-i="${r.L.i}" aria-label="${t("nbAdd",{name:esc(dn(r.L))})}">+</button>
       <span class="dot" style="background:${bcol(r.L.brand)}"></span>
-      <span class="nm">${esc(r.L.name)}</span>
+      <span class="nm">${esc(dn(r.L))}</span>
       <span class="meta">${r.L.year}</span>
       <span class="nbd">d = ${fmt(r.d,2)}</span>
-      <span class="meta nbp">pct ${pct(r.d)} %</span>
+      <span class="meta nbp">pct ${pc(pct(r.d))}</span>
     </div>`).join("")+`</div>`
-    : `<div class="empty">Ningún candidato cumple los filtros.</div>`;
+    : `<div class="empty">${t("nbNone")}</div>`;
 }
 
 /* ==== 8. Mapa ==== */
-const QTY = AXES.map(a=>({k:a.k,label:a.label,fmt:a.fmt})).concat(IDX.map(d=>({k:d.k,label:d.label+" (índice)",fmt:v=>fmt(v,0)})));
+const QTY = AXES.map(a=>({k:a.k,get label(){return a.label;},fmt:a.fmt}))
+  .concat(IDX.map(d=>({k:d.k,get label(){return d.label+t("idxSuffix");},fmt:v=>fmt(v,0)})));
 function fillMapSel(){
   const opts=QTY.map(q=>`<option value="${q.k}">${q.label}</option>`).join("");
+  /* al cambiar de idioma se rehacen las opciones sin perder los ejes elegidos */
+  const vx=$("#mx").value||"sa", vy=$("#my").value||"micro";
   $("#mx").innerHTML=opts; $("#my").innerHTML=opts;
-  $("#mx").value="sa"; $("#my").value="micro";
+  $("#mx").value=vx; $("#my").value=vy;
 }
 let hover=-1;
 function drawMap(){
@@ -772,7 +1085,7 @@ function drawMap(){
   sel.forEach(i=>drawn.add(i));
   const DR=LENSES.filter(L=>drawn.has(L.i));
   cv._map=null;
-  if(!DR.length){ $("#mapCap").textContent="Ningún objetivo cumple los filtros."; return; }
+  if(!DR.length){ $("#mapCap").textContent=t("mapNone"); return; }
   const xs=DR.map(L=>L[xk]), ys=DR.map(L=>L[yk]);
   let x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
   const px=(x1-x0)*0.06||1, py=(y1-y0)*0.06||1; x0-=px;x1+=px;y0-=py;y1+=py;
@@ -799,8 +1112,8 @@ function drawMap(){
   if(hover>=0 && drawn.has(hover)){const L=LENSES[hover];g.beginPath();g.arc(X(L[xk]),Y(L[yk]),5.5,0,7);g.strokeStyle=cInk;g.stroke();}
   cv._map={X,Y,xk,yk,DR};
   const cap = (hover>=0 && drawn.has(hover))
-    ? `${LENSES[hover].name}: ${qx.label} ${qx.fmt(LENSES[hover][xk])}, ${qy.label} ${qy.fmt(LENSES[hover][yk])}`
-    : `${fmt(DR.length)} ${DR.length===1?"objetivo":"objetivos"} a la vista. Pase por un punto para identificarlo; pulse para añadirlo a la comparación.`;
+    ? `${dn(LENSES[hover])}: ${qx.label} ${qx.fmt(LENSES[hover][xk])}, ${qy.label} ${qy.fmt(LENSES[hover][yk])}`
+    : t("mapCap",{n:fmt(DR.length),lenses:t(DR.length===1?"lens1":"lensN")});
   $("#mapCap").textContent=cap;
 }
 function nearPoint(ev){
@@ -813,11 +1126,19 @@ function nearPoint(ev){
 }
 
 /* ==== 9. Arranque ==== */
-function boot(){
-  $("#count").textContent = `${fmt(LENSES.length-1)} objetivos de montura M más la fila de referencia del Q3 43, ${fmt(AXES.length)} ejes, ${fmt(IDX.length)} índices declarados.`;
+/* Todo lo que este guion escribe en la página. Se llama al arrancar y cada vez que cambia el idioma:
+   los desplegables se rehacen conservando su valor y la selección de objetivos no se toca. */
+let READY=false;
+function paintAll(){
+  $("#count").textContent = t("count",{n:fmt(LENSES.length-1),a:fmt(AXES.length),i:fmt(IDX.length)});
   $("#formulas").innerHTML = IDX.map(d=>`<div><span class="fl">${d.label}</span> = ${d.formula}</div>`).join("");
   fillFilters(); fillMapSel(); fillNb();
   renderList(); renderSel(); renderProfiles(); renderPair(); renderNb(); drawMap();
+}
+/* el conmutador llama a onLangChange también al cargar, antes de que boot() haya corrido */
+window.onLangChange = () => { if(READY) paintAll(); };
+function boot(){
+  paintAll(); READY=true;
   $("#pairA").addEventListener("change",renderPair);
   $("#pairB").addEventListener("change",renderPair);
   $("#nbRef").addEventListener("change",renderNb);
@@ -857,6 +1178,45 @@ function boot(){
 }
 document.addEventListener("DOMContentLoaded",boot);
 
+</script>
+<script>
+"use strict";
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{ title:"Carta reducida de rendering · montura Leica M",
+         desc:"Carta reducida de rendering para montura Leica M: siete ejes causales, cuatro índices declarados y una distancia sobre ellos. Todo el cálculo ocurre en el navegador." },
+    en:{ title:"Reduced rendering chart · Leica M mount",
+         desc:"A reduced rendering chart for the Leica M mount: seven causal axes, four declared indices and a distance over them. Every calculation happens in the browser." }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    ["title","ph","alt","aria"].forEach(function(k){
+      [].forEach.call(document.querySelectorAll("[data-"+k+"-"+l+"]"),function(e){
+        var attr = k==="ph" ? "placeholder" : (k==="aria" ? "aria-label" : k);
+        e.setAttribute(attr, e.getAttribute("data-"+k+"-"+l));
+      });
+    });
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
 </script>
 </body>
 </html>

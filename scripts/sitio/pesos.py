@@ -7,7 +7,7 @@ se escriben a mano y se quedan atrás en cuanto una página cambia. Este script
 las recalcula a partir del tamaño real: KB = bytes/1024 redondeado; a partir de
 1024 KB, MB con un decimal (coma en español y en la portada, punto en inglés).
 
-Uso, desde la raíz del repositorio:
+Uso, desde cualquier carpeta:
     python3 scripts/sitio/pesos.py           corrige index.html y README.md
     python3 scripts/sitio/pesos.py --mira    solo dice qué cifras no coinciden
 """
@@ -74,6 +74,8 @@ def frase_explorador(txt, cambios, donde):
 
 
 def main():
+    # las rutas del README y de la portada son relativas a la raíz del repositorio
+    os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
     cambios = []
     for nombre, pasos in (("README.md", (readme, lambda t, c: frase_explorador(t, c, "README"))),
                           ("index.html", (portada, lambda t, c: frase_explorador(t, c, "index ")))):
