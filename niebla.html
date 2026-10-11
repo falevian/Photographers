@@ -57,6 +57,15 @@
   .tab{background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;color:var(--ink2);font-size:15px;font-weight:500;padding:10px 16px;border-radius:0}
   .tab.on{color:var(--ink);border-bottom-color:var(--ink);font-weight:700}
   .pane{display:none}.pane.on{display:block}
+  @media (max-width:520px){.tabs{flex-wrap:wrap}.tab{padding:10px 7px;font-size:13.5px;white-space:nowrap}}
+  @media (max-width:380px){.tab{padding:9px 5px;font-size:13px}}
+  input[type=text]{font-family:var(--mono);font-size:14px;padding:7px 9px;border:1px solid var(--line);border-radius:5px;background:#fff;color:var(--ink);width:84px;text-transform:uppercase}
+  label.chk{display:inline-flex;align-items:center;gap:6px;text-transform:none;letter-spacing:0;font-size:14px;color:var(--ink);margin:0 0 8px}
+  #retlog{font-family:var(--mono);font-size:11px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:10px 12px;max-height:240px;overflow:auto;white-space:pre-wrap;word-break:break-all;margin:0;min-height:2.4em}
+  #tret td.l,#tret th.l{text-align:left}
+  .minis{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+  .minis .mt{font-family:var(--mono);font-size:11px;color:var(--ink2);margin-bottom:2px}
+  #metarinfo code{word-break:break-word}
   .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-bottom:22px}
   .card{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:16px 18px}
   .eyebrow{font-family:var(--mono);font-size:11px;color:var(--ink2);letter-spacing:.08em;text-transform:uppercase}
@@ -129,6 +138,7 @@
   <div class="tabs" role="tablist">
     <button class="tab on" data-pane="p1" role="tab" data-i18n="tab1">Índice de niebla</button>
     <button class="tab" data-pane="p2" role="tab" data-i18n="tab2">Fusión bayesiana</button>
+    <button class="tab" data-pane="p3" role="tab" data-i18n="tab3">Calibración</button>
   </div>
 
   <div class="pane on" id="p1">
@@ -197,23 +207,43 @@
         <div class="obs-row">
           <div><label for="odate" data-i18n="night_of">Noche del</label><input id="odate" type="date"></div>
           <div><label for="oval" data-i18n="observed">Observado al amanecer</label><select id="oval"><option value="1" data-i18n="o_fog">Niebla</option><option value="0.5" data-i18n="o_mist">Bruma</option><option value="0" data-i18n="o_none">Nada</option></select></div>
+          <div><label for="icao" data-i18n="met_st">Estación METAR (OACI)</label><input id="icao" type="text" maxlength="4" autocapitalize="characters" autocomplete="off" spellcheck="false"></div>
+          <button id="metarbtn" class="ghost" type="button" data-i18n="met_btn">Consultar METAR</button>
           <button id="saveobs" type="button" data-i18n="save_obs">Guardar con la previsión actual</button>
           <button id="exp" class="ghost" type="button" data-i18n="export">Exportar JSON</button>
           <label style="display:inline-block;margin:0"><span style="cursor:pointer;border:1px solid var(--ink);padding:7px 12px;border-radius:5px;font-size:14px;display:inline-block;text-transform:none;letter-spacing:0;color:var(--ink)" data-i18n="import">Importar JSON</span><input id="imp" type="file" accept="application/json" style="display:none"></label>
           <button id="clear" class="ghost" type="button" data-i18n="clear">Borrar registro</button>
         </div>
+        <p class="note" id="metarinfo" aria-live="polite"></p>
         <p class="note" data-i18n="obs_note"></p>
         <div class="wrap"><table id="tobs"></table></div>
         <p class="note" id="lessons"></p>
       </div></section>
     <section><h2 data-i18n="h_method">Método</h2><p class="note" data-i18n="method"></p></section>
   </div>
+
+  <div class="pane" id="p3">
+    <div class="panel controls" style="margin-top:0">
+      <div><label for="icao3" data-i18n="met_st">Estación METAR (OACI)</label><input id="icao3" type="text" maxlength="4" autocapitalize="characters" autocomplete="off" spellcheck="false"></div>
+      <div><label for="retdays" data-i18n="ret_days">Periodo (noches)</label><select id="retdays"><option value="60">60</option><option value="90" selected>90</option><option value="120">120</option><option value="180">180</option></select></div>
+      <button id="goret" type="button" data-i18n="ret_go">Calibrar</button>
+      <button id="retstop" class="ghost" type="button" data-i18n="ret_stop" hidden>Cancelar</button>
+      <label class="chk"><input id="reton" type="checkbox"> <span data-i18n="ret_on">Aplicar en la fusión</span></label>
+      <button id="retclear" class="ghost" type="button" data-i18n="ret_clear">Borrar calibración</button>
+      <div class="status" id="retst" aria-live="polite"></div>
+    </div>
+    <p class="note" data-i18n="ret_intro"></p>
+    <section><h2 data-i18n="h_ret">Resultado por fuente</h2><p class="note" id="retsum"></p><div class="wrap"><table id="tret"></table></div><p class="note" data-i18n="ret_tnote"></p></section>
+    <section><h2 data-i18n="h_retc">Curvas de índice a probabilidad</h2><div class="minis" id="retchart"></div><p class="note" data-i18n="ret_cnote"></p></section>
+    <section><h2 data-i18n="h_retl">Registro de peticiones</h2><pre id="retlog"></pre><p class="note" data-i18n="ret_lnote"></p></section>
+    <section><h2 data-i18n="h_retm">Método y límites</h2><div class="note" data-i18n="ret_method"></div></section>
+  </div>
 </main>
 
 <script>
 (function(){
   const I18N={
-  es:{portada:'Portada',guia:'Guía rápida',astro_link:'Astrofotografía',manual:'Manual',title:'Niebla para fotografía',subtitle:'Pestaña 1: índice físico de niebla con un modelo. Pestaña 2: fusión bayesiana de varios modelos con aprendizaje a partir de tus observaciones. Datos de Open‑Meteo y de MeteoGalicia, sin clave.',
+  es:{portada:'Portada',guia:'Guía rápida',astro_link:'Astrofotografía',manual:'Manual',title:'Niebla para fotografía',subtitle:'Pestaña 1: índice físico de niebla con un modelo. Pestaña 2: fusión bayesiana de varios modelos con aprendizaje a partir de tus observaciones. Pestaña 3: calibración de las fuentes con el histórico de una estación METAR. Datos de Open‑Meteo, MeteoGalicia e Iowa Environmental Mesonet, sin clave.',
     lat:'Latitud',lon:'Longitud',env:'Entorno',env_coast:'Costero (advección)',env_inland:'Interior',geo:'Usar mi posición',tab1:'Índice de niebla',tab2:'Fusión bayesiana',model:'Modelo',best:'Selección de Open‑Meteo (best match)',auto:'Automático: la fuente de menor escala efectiva aquí',compute:'Calcular',
     h_strip:'Índice horario (48 h)',strip_legend:'Barra: índice 0 a 100. Fondo gris: noche. Hora en rojo: amanecer. Ámbar (50 a 74): bruma posible. Rojizo (≥ 75): niebla probable.',
     h_conv:'Convergencia de temperatura y punto de rocío',leg1:'<i style="background:#1c262e"></i>T (°C) <i style="background:#3e6d8a"></i>Td (°C) <i style="background:#b8862b"></i>viento (km/h, eje derecho) <i style="background:#d9a0a0"></i>T − Td &lt; 2 °C <i style="background:#7a5ea8;height:6px"></i>visibilidad prevista o estimada &lt; 2 km (barra inferior)',
@@ -221,13 +251,13 @@
     how1:'El índice suma contribuciones y se satura en 100. <code>ΔT = T − Td</code>: 40 puntos si ΔT ≤ 0.5 °C, decreciendo linealmente hasta 0 en 4 °C. Viento a 10 m: 2 a 8 km/h (20), calma (14), 8 a 15 (8), 15 a 20 (3), &gt; 20 (0). Nubosidad por encima de la capa de niebla, es decir medias y altas (las bajas de un modelo pueden ser la propia niebla y no penalizan salvo que la visibilidad, prevista o estimada, supere 5 km: eso indica estratos sobre una superficie sin saturar): &lt; 25 % (20), 25 a 60 % (8), más (0). Si la fuente no desglosa la nubosidad por capas, como los ensembles, solo se conoce la total: por debajo del 25 % puntúa 20 y en otro caso 8, valor neutro, porque una cobertura total alta puede ser la propia niebla. Visibilidad del modelo: &lt; 1 km (20), &lt; 3 km (10), &lt; 6 km (4). Si la fuente no la publica (AROME, ARPEGE, ensembles ICON), se estima con el diagnóstico FSL <code>V = 6000·(T − Td)/HR^1.75</code> (en millas), se marca con ~ y puntúa al 60 %, porque no confirma nada que ΔT y HR no digan ya. HR ≥ 97 %: +10. Lluvia &gt; 0.5 mm: −15. Persistencia: +2 por cada hora nocturna previa consecutiva con ΔT &lt; 1.5 °C y viento &lt; 12 km/h, hasta +8. En modo costero, advección: Td del aire por encima de la SST con viento de 8 a 30 km/h, hasta +30. De día se multiplica por 0.65, salvo en las dos horas siguientes al amanecer (0.85), cuando la niebla aún persiste. Umbrales: ≥ 75 niebla probable, 50 a 74 bruma posible.',
     models_lbl:'Modelos y ensembles (descarga en paralelo; EPS/ENS son conjuntos de 30 a 50 miembros y tardan algo más)',alpha:'γ (peso de los modelos frente a la climatología, 0.1 a 1)',h_prob:'Probabilidad horaria por modelo y posterior',h_sun:'Estado del amanecer por modelo',h_w:'Pesos bayesianos y prior',h_obs:'Registro de observaciones (aprendizaje)',
     night_of:'Noche del',observed:'Observado al amanecer',o_fog:'Niebla (vis < 1 km)',o_mist:'Bruma o neblina',o_none:'Nada',save_obs:'Guardar observación',export:'Exportar JSON',import:'Importar JSON',clear:'Borrar registro',
-    obs_note:'Cada vez que calculas, la previsión para el próximo amanecer queda congelada automáticamente, asociada a la fecha de esa noche. Por la mañana basta con elegir la noche recién terminada, indicar lo observado y guardar: la observación se empareja con la previsión que se congeló la víspera, nunca con una posterior. Si esa noche no llegaste a calcular, la observación solo actualiza el prior climatológico, no los pesos. El registro se guarda en este navegador; exporta el JSON si cambias de equipo.',
+    obs_note:'Cada vez que calculas, la previsión para el próximo amanecer queda congelada automáticamente, asociada a la fecha de esa noche. Por la mañana basta con elegir la noche recién terminada, indicar lo observado y guardar: la observación se empareja con la previsión que se congeló la víspera, nunca con una posterior. Si esa noche no llegaste a calcular, la observación solo actualiza el prior climatológico, no los pesos. Al elegir la noche, la página lee los METAR de la estación indicada (por defecto LECO, Alvedro) en la ventana del amanecer, de 2.5 h antes a 1.5 h después del orto, y preselecciona la etiqueta: niebla si algún parte da FG o menos de 1000 m, bruma si da BR, niebla en bancos o menos de 5000 m, y nada en otro caso. Es una propuesta y no se guarda sola: la estación no es tu emplazamiento, así que corrígela si viste otra cosa. El registro se guarda en este navegador; exporta el JSON si cambias de equipo.',
     snap_info:'Previsión congelada para la noche del {d} ({n} modelos, {h}).',no_snap:'No hay previsión congelada para la noche del {d}; la observación actualiza solo el prior.',obs_saved:'Observación guardada para la noche del {d}.',pending:'pendiente',
-    h_method:'Método',method:'Cada modelo determinista da un índice s por hora (misma heurística de la pestaña 1) que se convierte en probabilidad con <code>p_m = σ((s − 70)/11)</code>. Las fuentes EPS/ENS son ensembles: se calcula el índice para cada miembro y p_m es la media de las probabilidades de los miembros, una probabilidad genuina que refleja la dispersión del propio modelo. Con 12 o más noches registradas se ajusta además una recalibración de Platt <code>q = σ(a·logit P + b)</code> sobre pares (posterior, observado), con prior a≈1, b≈0. Prior climatológico π ~ Beta(a, b), inicial Beta(1.2, 8.8), actualizado con cada noche observada (a += y, b += 1 − y). Consenso de modelos por media ponderada en log‑odds: <code>logit p̄ = Σ w_m · logit p_m / Σ w_m</code>, que garantiza min p_m ≤ p̄ ≤ max p_m. Posterior por contracción hacia la climatología: <code>logit P = logit π + γ · (logit p̄ − logit π)</code>, con γ entre 0.1 y 1: P queda siempre entre la tasa climatológica π y el consenso p̄, nunca fuera de la envolvente de los modelos. γ = 1 se fía por completo del consenso; valores menores lo moderan hacia tu frecuencia local, lo razonable mientras la calibración de p_m no esté contrastada. Pesos <code>w_m ∝ Δ_m^(−0.5) · exp(0.7 · Σ log P_m(y_obs))</code>: probabilidad a posteriori de que m sea el mejor modelo, con tempering y un prior estructural que depende de la escala efectiva Δ_m de la fuente en el punto (paso de malla, degradado hacia la escala del modelo anfitrión a menos de 200 km del borde de un dominio limitado, y nunca menor que la distancia a la celda que devuelve la API). Sin observaciones los pesos son ese prior: una fuente con Δ de 2 km pesa 2.1 veces más que una de 9 km y 3.7 veces más que una de 28 km. En las noches en que una fuente no tiene previsión congelada se le imputa la log‑verosimilitud media de las demás, de modo que una fuente recién añadida entra con peso neutro y no con ventaja.',
+    h_method:'Método',method:'Cada modelo determinista da un índice s por hora (misma heurística de la pestaña 1) que se convierte en probabilidad con <code>p_m = σ((s − 70)/11)</code>. Las fuentes EPS/ENS son ensembles: se calcula el índice para cada miembro y p_m es la media de las probabilidades de los miembros, una probabilidad genuina que refleja la dispersión del propio modelo. Con 12 o más noches registradas se ajusta además una recalibración de Platt <code>q = σ(a·logit P + b)</code> sobre pares (posterior, observado), con prior a≈1, b≈0. Prior climatológico π ~ Beta(a, b), inicial Beta(1.2, 8.8), actualizado con cada noche observada (a += y, b += 1 − y). Consenso de modelos por media ponderada en log‑odds: <code>logit p̄ = Σ w_m · logit p_m / Σ w_m</code>, que garantiza min p_m ≤ p̄ ≤ max p_m. Posterior por contracción hacia la climatología: <code>logit P = logit π + γ · (logit p̄ − logit π)</code>, con γ entre 0.1 y 1: P queda siempre entre la tasa climatológica π y el consenso p̄, nunca fuera de la envolvente de los modelos. γ = 1 se fía por completo del consenso; valores menores lo moderan hacia tu frecuencia local, lo razonable mientras la calibración de p_m no esté contrastada. Pesos <code>w_m ∝ Δ_m^(−0.5) · exp(0.7 · Σ log P_m(y_obs))</code>: probabilidad a posteriori de que m sea el mejor modelo, con tempering y un prior estructural que depende de la escala efectiva Δ_m de la fuente en el punto (paso de malla, degradado hacia la escala del modelo anfitrión a menos de 200 km del borde de un dominio limitado, y nunca menor que la distancia a la celda que devuelve la API). Sin observaciones los pesos son ese prior: una fuente con Δ de 2 km pesa 2.1 veces más que una de 9 km y 3.7 veces más que una de 28 km. En las noches en que una fuente no tiene previsión congelada se le imputa la log‑verosimilitud media de las demás, de modo que una fuente recién añadida entra con peso neutro y no con ventaja. Con la calibración de la pestaña 3 aplicada, cada fuente calibrada corrige antes su punto de rocío con el sesgo medido, usa su propia curva <code>logit p_m = a·(s_r − 70)/11 + b</code> sobre el índice reducido s_r (sin visibilidad nativa, capas de nubes ni advección, que el archivo de pasadas no conserva), suma a su log‑verosimilitud diez veces su ventaja media por noche y el prior climatológico arranca en la frecuencia medida en la estación.',
     dl:'Descargando previsión…',dl_n:'Descargando {n} modelos en paralelo…',err:'Error: ',nopos:'Sin posición: ',geo_wait:'Obteniendo posición… (acepta el permiso si el navegador lo pide)',geo_denied:'Permiso de ubicación denegado. Actívalo en el candado de la barra de direcciones, o escribe las coordenadas a mano.',geo_denied_app:'Permiso de ubicación denegado para la app de pantalla de inicio. En iPhone: Ajustes → Privacidad y seguridad → Localización activada, y en "Sitios web de Safari" elige "Al usar la app". Si sigue fallando, elimina el icono del escritorio y vuelve a añadirlo para que pida permiso de nuevo.',geo_timeout:'La posición tardó demasiado. Reintenta, o escribe las coordenadas a mano.',geo_unavail:'Posición no disponible en este dispositivo. Escribe las coordenadas a mano.',geo_insecure:'La geolocalización solo funciona con HTTPS (por ejemplo en GitHub Pages) o en localhost; abierta como archivo local el navegador la bloquea. Escribe las coordenadas a mano.',geo_unsupported:'Este navegador no ofrece geolocalización. Escribe las coordenadas a mano.',nossT:' · sin SST, advección desactivada',elev:'elevación',
     next6:'Próximas 6 horas',max_at:'máximo a las',sunrise:'Amanecer',window:'ventana −2.5 h a +1.5 h, máximo a las',mindt:'Mínima depresión del punto de rocío esta noche',at:'a las',wind:'viento',clouds:'nubes',pressure:'presión',
     fog:'Niebla probable',mist:'Bruma o neblina posible',unlikely:'Improbable',range:'rango',disp:'Dispersión entre modelos (amanecer)',agree_h:'Acuerdo alto',agree_m:'Acuerdo moderado',agree_l:'Desacuerdo',mean:'media',disp_note:'Desviación típica de las probabilidades de los modelos: incertidumbre epistémica.',
-    th1:['Hora','Índice','T','Td','ΔT','HR','Viento','Dir','Nubes','Bajas','Medias','Altas','Vis km','SST','P hPa'],thsun:['Modelo','P máx','hora','ΔT','HR','viento','nubes','vis km','señales'],thw:['Modelo','peso w','Brier','aciertos','log‑veros.'],thobs:['Noche','y'],posterior:'posterior',del:'eliminar',
+    th1:['Hora','Índice','T','Td','ΔT','HR','Viento','Dir','Nubes','Bajas','Medias','Altas','Vis km','SST','P hPa'],thsun:['Modelo','P máx','hora','ΔT','HR','viento','nubes','vis km','señales'],thw:['Modelo','peso w','Brier','aciertos','log‑veros.'],thobs:['Noche','y','METAR'],posterior:'posterior',del:'eliminar',
     post_leg:'posterior',range_leg:'rango',prior_info:'Prior: Beta({a}, {b}), media {pi} % sobre {n} noches registradas. Calibración p = σ((s − 70)/11).',
     sel1:'Selecciona al menos un modelo.',none:'Ningún modelo respondió a tiempo. Reintenta o reduce la selección.',fused:'{k} modelos fusionados',failed:', {f} sin respuesta',nocov_n:', {c} sin cobertura',nocov:'sin cobertura',nodata:'sin datos',
     cell:'celda a {d} km',edge:'borde del dominio a {d} km',fill_from:'desde {h}, {m}',prim_fail:'{m} sin datos aquí',then_ifs:'IFS 9 km a partir de unas +{h} h',fill_fail:'{m} no respondió: sin relleno',alt_fail:'{m} no disponible',none_cov:'Ninguna de las fuentes marcadas cubre este punto.',
@@ -258,8 +288,34 @@
     w_note:'Brier: media de (p − y)², donde 0 es perfecto y 0.25 es lo que da predecir siempre 50 %. Aciertos: porcentaje de noches en que el modelo cayó del lado correcto del 50 % y, entre paréntesis, cuántas noches tenía congeladas. La log‑verosimilitud es lo que fija el peso; Brier y aciertos son la misma información en unidades legibles. En las noches en que un modelo no tenía previsión congelada, su log‑verosimilitud suma la media de los demás: las fuentes con menos noches registradas no salen favorecidas.',
     les_head:'Lecciones de tu registro:',les_none:'Todavía no hay noches con rasgos congelados. Cada vez que calculas en esta pestaña, la ficha guarda además el ΔT, el viento, las nubes y la visibilidad previstos para el amanecer de esa noche; en cuanto tengas una noche observada con esos rasgos, aquí aparecerán tus umbrales locales.',
     les_fog:'En tu sitio ha habido niebla o bruma con ΔT previsto de hasta {dt} °C y viento de hasta {w} km/h ({n} noches).',les_cloud:'La mayor nubosidad media prevista con la que llegó a haberla fue del {c} %.',les_vis:'La visibilidad prevista más alta con la que llegó a haberla fue de {v} km.',les_nofog:'La noche sin nada con menor ΔT previsto tuvo {dt} °C ({n} noches sin nada).',les_tail:'Rasgos del modelo de mayor peso, sobre {n} noches con previsión congelada.',
+    tab3:'Calibración',met_st:'Estación METAR (OACI)',met_btn:'Consultar METAR',met_wait:'Consultando el METAR de {st}…',
+    met_err:'METAR de {st} no disponible ({e}). Indica lo observado a mano.',met_bad:'Indicativo OACI no válido: tres o cuatro letras o cifras, por ejemplo LECO.',met_nosun:'sin orto ese día',
+    met_early:'El amanecer que cierra la noche del {d} todavía no ha llegado: no hay partes que leer.',
+    met_none:'{st}: ningún parte METAR entre las {a} y las {b}. Comprueba el indicativo o indica lo observado a mano.',
+    met_ev:'{st}{km}: {n} partes entre las {a} y las {b}. Visibilidad mínima {v} a las {h}{wx}{dt}.',met_km:', a {km} km del punto',met_dt:'; T − Td = {x} °C',
+    met_prop:'Propuesta: <b>{lab}</b>.',met_y1:'niebla',met_y5:'bruma',met_y0:'nada',met_oth:'La visibilidad reducida se atribuye a {wx}, no a niebla.',
+    met_part:'La ventana del amanecer no ha terminado y la propuesta puede cambiar.',met_few:'Hay pocos partes en la ventana.',met_far:'La estación queda lejos y puede no representar tu emplazamiento.',
+    met_has:'Ya hay una observación guardada para esa noche (y = {y}) y el desplegable la conserva.',met_conf:'Corrige el desplegable si en tu sitio viste otra cosa y guarda.',
+    met_raw:'Parte de visibilidad mínima: <code>{raw}</code>',cal_on:'calibración {st} en {k} fuentes',prior_cal:'Con la calibración de {st}: prior inicial medido (ȳ = {y}) y curva propia en {k} fuentes.',
+    s_cal:'calibrada en {st}: sesgo ΔT {b} °C, umbral {th}, escala {k}',
+    ret_days:'Periodo (noches)',ret_go:'Calibrar',ret_stop:'Cancelar',ret_on:'Aplicar en la fusión',ret_clear:'Borrar calibración',ret_confirm:'¿Borrar la calibración guardada?',
+    ret_intro:'Compara, noche a noche, lo que observó una estación METAR al amanecer con lo que cada fuente preveía la víspera para ese mismo punto. De ahí salen, por fuente, el sesgo medio de T − Td, una curva propia de índice a probabilidad y su ventaja o desventaja medida, que pasan a ser el punto de partida de la fusión. La descarga tarda de uno a varios minutos, porque MeteoGalicia entrega cada pasada por separado.',
+    h_ret:'Resultado por fuente',h_retc:'Curvas de índice a probabilidad',h_retl:'Registro de peticiones',h_retm:'Método y límites',
+    thret:['Fuente','Modelo en la estación','Noches','Sesgo ΔT °C','EAM ΔT °C','Umbral 50 %','Escala κ','Brier','BSS','Δℓ por noche','Factor de peso'],
+    ret_none:'Todavía no hay calibración. Elige la estación y el periodo y pulsa Calibrar.',
+    ret_sum:'{st} ({lat}, {lon}), a {km} km del punto. {n} noches evaluables entre el {a} y el {b}: {nf} con niebla, {nm} con bruma y {n0} sin nada; frecuencia media ȳ = {y}. Calculada el {at}.',
+    ret_state_on:'Se aplica en la fusión.',ret_state_off:'Guardada, pero sin aplicar.',ret_far:'El punto de la pestaña 1 queda a {km} km de la estación: el sesgo y las curvas pueden no trasladarse.',
+    ret_w_nocov:'sin cobertura en la estación',ret_w_few:'menos de {k} noches con datos',ret_w_err:'sin previsiones archivadas: {e}',ret_clim:'Climatología (predecir siempre ȳ = {y})',
+    ret_tnote:'Sesgo: media de (T − Td previsto) − (T − Td del METAR) en las horas de la ventana del amanecer; positivo significa que la fuente seca de más. EAM: error absoluto medio de esa misma diferencia. Umbral y escala: el índice al que la curva propia da 50 % y los puntos de índice por unidad de logit; los valores comunes son 70 y 11. Brier y BSS (mejora relativa del Brier frente a la climatología) se obtienen por validación cruzada en cinco bloques. Δℓ: diferencia media por noche entre la log‑verosimilitud de la fuente y la media de las fuentes evaluadas. El factor de peso es exp(0.7 · 10 · Δℓ), el equivalente a diez noches propias.',
+    ret_cnote:'Trazo de color: curva ajustada de la fuente. Trazo gris discontinuo: curva común σ((s − 70)/11). Círculos: frecuencia observada por tramos del índice, con el número de noches; la bruma cuenta 0.5.',
+    ret_lnote:'Si algo falla, copia estas líneas: dicen qué servidor respondió, con cuántos datos y en cuánto tiempo.',
+    ret_s_met:'Descargando los METAR de {st}…',ret_s_fc:'Previsiones archivadas de Open‑Meteo: {k} de {n} fuentes…',ret_s_mg:'Pasadas archivadas de MeteoGalicia: {k} de {n}…',ret_s_fit:'Ajustando…',
+    ret_done:'Calibración lista: {k} fuentes con {n} noches · {s} s',ret_fail:'No se pudo calibrar: {e}',ret_nomet:'{st} no devuelve partes METAR con coordenadas en ese periodo',
+    ret_fewn:'solo {n} noches con partes suficientes y hacen falta {k}',ret_cancel:'Cancelado.',ret_stopping:'Cancelando…',ret_nosrc:'ninguna fuente tiene bastantes noches archivadas',
+    ret_l_nights:'noches evaluables',ret_l_full:'h completas',ret_l_runs:'pasadas',ret_l_dead:'servidor sin respuesta, se abandona',ret_l_end:'el archivo no llega más atrás',ret_l_bias:'sesgo',
+    ret_method:'<p><b>Verdad.</b> Cada noche se etiqueta con los partes METAR de la ventana del amanecer, de 2.5 h antes a 1.5 h después del orto en la estación: 1 si algún parte da FG o visibilidad inferior a 1000 m; 0.5 si da BR, niebla en bancos, parcial, baja o en las inmediaciones, o menos de 5000 m; 0 en otro caso. Una visibilidad reducida con otro fenómeno y sin FG ni BR (lluvia, calima) no cuenta. Se descartan las noches con menos de cuatro partes.</p><p><b>Previsión.</b> Para las fuentes de Open‑Meteo se usa el archivo de pasadas anteriores (<code>previous_day1</code>): el valor que daba para cada hora la última pasada emitida con al menos 24 h de antelación, es decir, entre 24 y unas 30 h. Para MeteoGalicia, la pasada de las 00Z del día de la tarde, unas 30 h antes del amanecer. Todas se piden en las coordenadas de la estación. Las fuentes se comparan así a igual antelación. En uso real, la previsión que congelas por la tarde lleva de 6 a 18 h de antelación en las fuentes de Open‑Meteo y las mismas 30 h en MeteoGalicia, que solo tiene una pasada diaria: la destreza medida es una cota prudente para las primeras y la ventaja relativa favorece algo a MeteoGalicia.</p><p><b>Índice reducido.</b> El archivo conserva temperatura, humedad, viento, nubosidad total y precipitación, pero no la visibilidad ni las capas de nubes. La retrospectiva calcula por eso un índice reducido, s_r: visibilidad estimada, nubes sin desglose y sin advección. La curva se ajusta y se valida sobre s_r, y en la fusión la probabilidad de una fuente calibrada sale de ese mismo s_r: <code>logit p = a·(s_r − 70)/11 + b</code>. La visibilidad que publica el modelo, las capas de nubes y la advección siguen a la vista en la pestaña 1 y en las señales de cada fuente, pero no entran en la probabilidad de una fuente calibrada, porque no hay archivo con el que medir cuánto valen. Los ensembles y las fuentes sin calibrar conservan el índice completo y la curva común.</p><p><b>Sesgo.</b> Antes de calcular el índice se corrige el punto de rocío de la fuente con su sesgo medio, <code>Td′ = mín(T, Td + sesgo)</code>, y la humedad se recalcula con Td′. Los METAR dan T y Td en grados enteros: eso añade ruido, no sesgo, y con unas 90 noches el error típico del sesgo medio ronda 0.1 °C.</p><p><b>Curva.</b> Los parámetros <code>a</code> y <code>b</code> se ajustan por máxima verosimilitud con un prior gaussiano centrado en la curva común (a = 1, b = 0): con pocas noches de niebla la curva apenas se separa de la común.</p><p><b>Pesos y prior.</b> La ventaja medida de cada fuente entra en la fusión como diez noches de observación propia y multiplica al prior por malla; tus observaciones siguen actualizando los pesos a partir de ahí. La frecuencia media de la estación sustituye al 12 % inicial del prior climatológico, con el mismo peso de diez noches.</p><p><b>Límites.</b> La verdad es la estación, no tu emplazamiento: Alvedro está a unos 7 km de la costa y a 100 m de altitud, y su niebla no tiene por qué coincidir con la de la ría o la de un valle. Los ensembles no se evalúan porque el archivo no guarda sus miembros. Conviene repetir la calibración cada pocas semanas: el sesgo de los modelos cambia con la estación del año y con sus actualizaciones.</p>',
     ens_band:'p10–p90 {a}–{b} %',ens_frac:'{k} de {n} miembros con niebla',},
-  en:{portada:'Home',guia:'Quick guide',astro_link:'Astrophotography',manual:'Manual',title:'Fog for photography',subtitle:'Tab 1: physical fog index from one model. Tab 2: Bayesian fusion of several models that learns from your observations. Data from Open‑Meteo and MeteoGalicia, no API key.',
+  en:{portada:'Home',guia:'Quick guide',astro_link:'Astrophotography',manual:'Manual',title:'Fog for photography',subtitle:'Tab 1: physical fog index from one model. Tab 2: Bayesian fusion of several models that learns from your observations. Tab 3: calibration of the sources against the history of a METAR station. Data from Open‑Meteo, MeteoGalicia and the Iowa Environmental Mesonet, no API key.',
     lat:'Latitude',lon:'Longitude',env:'Setting',env_coast:'Coastal (advection)',env_inland:'Inland',geo:'Use my location',tab1:'Fog index',tab2:'Bayesian fusion',model:'Model',best:'Open‑Meteo selection (best match)',auto:'Automatic: the source with the smallest effective scale here',compute:'Compute',
     h_strip:'Hourly index (48 h)',strip_legend:'Bar: index 0 to 100. Grey background: night. Red hour: sunrise. Amber (50 to 74): mist possible. Reddish (≥ 75): fog likely.',
     h_conv:'Temperature and dew point convergence',leg1:'<i style="background:#1c262e"></i>T (°C) <i style="background:#3e6d8a"></i>Td (°C) <i style="background:#b8862b"></i>wind (km/h, right axis) <i style="background:#d9a0a0"></i>T − Td &lt; 2 °C <i style="background:#7a5ea8;height:6px"></i>forecast or estimated visibility &lt; 2 km (bottom bar)',
@@ -267,13 +323,13 @@
     how1:'The index adds independent contributions and saturates at 100. <code>ΔT = T − Td</code>: 40 points if ΔT ≤ 0.5 °C, decreasing linearly to 0 at 4 °C. 10 m wind: 2 to 8 km/h (20), calm (14), 8 to 15 (8), 15 to 20 (3), &gt; 20 (0). Cloud above the fog layer, i.e. mid and high (a model&#8217;s low cloud may be the fog itself and does not penalise unless visibility, forecast or estimated, exceeds 5 km: that indicates stratus over an unsaturated surface): &lt; 25 % (20), 25 to 60 % (8), more (0). If the source does not split cloud by layer, as with ensembles, only total cover is known: below 25 % it scores 20 and otherwise 8, a neutral value, because high total cover may be the fog itself. Model visibility: &lt; 1 km (20), &lt; 3 km (10), &lt; 6 km (4). If the source does not publish it (AROME, ARPEGE, ICON ensembles), it is estimated with the FSL diagnostic <code>V = 6000·(T − Td)/RH^1.75</code> (in miles), flagged with ~ and scored at 60 %, because it confirms nothing that ΔT and RH do not already say. RH ≥ 97 %: +10. Rain &gt; 0.5 mm: −15. Persistence: +2 for each preceding consecutive night hour with ΔT &lt; 1.5 °C and wind &lt; 12 km/h, up to +8. In coastal mode, advection: air dew point above SST with wind 8 to 30 km/h, up to +30. Daytime values are multiplied by 0.65, except the two hours after sunrise (0.85), when fog still lingers. Thresholds: ≥ 75 fog likely, 50 to 74 mist possible.',
     models_lbl:'Models and ensembles (parallel download; EPS/ENS are 30 to 50 member ensembles and take a bit longer)',alpha:'γ (weight of models vs climatology, 0.1 to 1)',h_prob:'Hourly probability per model and posterior',h_sun:'Sunrise state per model',h_w:'Bayesian weights and prior',h_obs:'Observation log (learning)',
     night_of:'Night of',observed:'Observed at sunrise',o_fog:'Fog (vis < 1 km)',o_mist:'Mist or haze',o_none:'Nothing',save_obs:'Save observation',export:'Export JSON',import:'Import JSON',clear:'Clear log',
-    obs_note:'Every time you compute, the forecast for the next sunrise is frozen automatically and attached to the date of that night. In the morning just pick the night that has just ended, choose what you observed and save: the observation is paired with the forecast frozen the evening before, never with a later one. If you did not compute that night, the observation only updates the climatological prior, not the weights. The log lives in this browser; export the JSON if you change device.',
+    obs_note:'Every time you compute, the forecast for the next sunrise is frozen automatically and attached to the date of that night. In the morning just pick the night that has just ended, choose what you observed and save: the observation is paired with the forecast frozen the evening before, never with a later one. If you did not compute that night, the observation only updates the climatological prior, not the weights. When you pick the night, the page reads the METAR reports of the chosen station (LECO, Alvedro, by default) in the sunrise window, from 2.5 h before to 1.5 h after sunrise, and preselects the label: fog if any report gives FG or less than 1000 m, mist if it gives BR, fog patches or less than 5000 m, and nothing otherwise. It is a proposal and is never saved on its own: the station is not your site, so correct it if you saw something else. The log lives in this browser; export the JSON if you change device.',
     snap_info:'Forecast frozen for the night of {d} ({n} models, {h}).',no_snap:'No frozen forecast for the night of {d}; the observation only updates the prior.',obs_saved:'Observation saved for the night of {d}.',pending:'pending',
-    h_method:'Method',method:'Each deterministic model yields an hourly index s (same heuristic as tab 1), mapped to a probability with <code>p_m = σ((s − 70)/11)</code>. EPS/ENS sources are ensembles: the index is computed for every member and p_m is the mean of member probabilities, a genuine probability reflecting the model&#8217;s own spread. With 12 or more logged nights a Platt recalibration <code>q = σ(a·logit P + b)</code> is also fitted on (posterior, observed) pairs, with prior a≈1, b≈0. Climatological prior π ~ Beta(a, b), initially Beta(1.2, 8.8), updated with every observed night (a += y, b += 1 − y). Model consensus as a weighted mean in log‑odds: <code>logit p̄ = Σ w_m · logit p_m / Σ w_m</code>, which guarantees min p_m ≤ p̄ ≤ max p_m. Posterior by shrinkage towards climatology: <code>logit P = logit π + γ · (logit p̄ − logit π)</code>, with γ between 0.1 and 1: P always lies between the climatological rate π and the consensus p̄, never outside the model envelope. γ = 1 fully trusts the consensus; smaller values moderate it towards your local frequency, sensible while the calibration of p_m is untested. Weights <code>w_m ∝ Δ_m^(−0.5) · exp(0.7 · Σ log P_m(y_obs))</code>: posterior probability that m is the best model, tempered, with a structural prior that depends on the effective scale Δ_m of the source at the point (grid spacing, degraded towards the scale of the host model within 200 km of the edge of a limited domain, and never smaller than the distance to the cell the API returns). With no observations the weights are that prior: a source with Δ of 2 km weighs 2.1 times a 9 km one and 3.7 times a 28 km one. On nights when a source has no frozen forecast it is assigned the mean log‑likelihood of the others, so a newly added source enters with neutral weight rather than an advantage.',
+    h_method:'Method',method:'Each deterministic model yields an hourly index s (same heuristic as tab 1), mapped to a probability with <code>p_m = σ((s − 70)/11)</code>. EPS/ENS sources are ensembles: the index is computed for every member and p_m is the mean of member probabilities, a genuine probability reflecting the model&#8217;s own spread. With 12 or more logged nights a Platt recalibration <code>q = σ(a·logit P + b)</code> is also fitted on (posterior, observed) pairs, with prior a≈1, b≈0. Climatological prior π ~ Beta(a, b), initially Beta(1.2, 8.8), updated with every observed night (a += y, b += 1 − y). Model consensus as a weighted mean in log‑odds: <code>logit p̄ = Σ w_m · logit p_m / Σ w_m</code>, which guarantees min p_m ≤ p̄ ≤ max p_m. Posterior by shrinkage towards climatology: <code>logit P = logit π + γ · (logit p̄ − logit π)</code>, with γ between 0.1 and 1: P always lies between the climatological rate π and the consensus p̄, never outside the model envelope. γ = 1 fully trusts the consensus; smaller values moderate it towards your local frequency, sensible while the calibration of p_m is untested. Weights <code>w_m ∝ Δ_m^(−0.5) · exp(0.7 · Σ log P_m(y_obs))</code>: posterior probability that m is the best model, tempered, with a structural prior that depends on the effective scale Δ_m of the source at the point (grid spacing, degraded towards the scale of the host model within 200 km of the edge of a limited domain, and never smaller than the distance to the cell the API returns). With no observations the weights are that prior: a source with Δ of 2 km weighs 2.1 times a 9 km one and 3.7 times a 28 km one. On nights when a source has no frozen forecast it is assigned the mean log‑likelihood of the others, so a newly added source enters with neutral weight rather than an advantage. With the calibration of tab 3 applied, each calibrated source first corrects its dew point with the measured bias, uses its own curve <code>logit p_m = a·(s_r − 70)/11 + b</code> on the reduced index s_r (without native visibility, cloud layers or advection, which the previous runs archive does not keep), adds ten times its mean advantage per night to its log‑likelihood, and the climatological prior starts at the frequency measured at the station.',
     dl:'Downloading forecast…',dl_n:'Downloading {n} models in parallel…',err:'Error: ',nopos:'No position: ',geo_wait:'Getting position… (accept the permission prompt if shown)',geo_denied:'Location permission denied. Enable it from the padlock in the address bar, or type the coordinates.',geo_denied_app:'Location permission denied for the home-screen app. On iPhone: Settings → Privacy & Security → Location Services on, and under "Safari Websites" choose "While Using the App". If it still fails, remove the home-screen icon and add it again so the prompt reappears.',geo_timeout:'Position took too long. Retry, or type the coordinates.',geo_unavail:'Position unavailable on this device. Type the coordinates.',geo_insecure:'Geolocation only works over HTTPS (e.g. GitHub Pages) or on localhost; browsers block it for local files. Type the coordinates.',geo_unsupported:'This browser does not offer geolocation. Type the coordinates.',nossT:' · no SST, advection disabled',elev:'elevation',
     next6:'Next 6 hours',max_at:'peak at',sunrise:'Sunrise',window:'window −2.5 h to +1.5 h, peak at',mindt:'Minimum dew point depression tonight',at:'at',wind:'wind',clouds:'clouds',pressure:'pressure',
     fog:'Fog likely',mist:'Mist or haze possible',unlikely:'Unlikely',range:'range',disp:'Spread between models (sunrise)',agree_h:'High agreement',agree_m:'Moderate agreement',agree_l:'Disagreement',mean:'mean',disp_note:'Standard deviation of model probabilities: epistemic uncertainty.',
-    th1:['Time','Index','T','Td','ΔT','RH','Wind','Dir','Clouds','Low','Mid','High','Vis km','SST','P hPa'],thsun:['Model','P max','time','ΔT','RH','wind','clouds','vis km','signals'],thw:['Model','weight w','Brier','hits','log‑lik.'],thobs:['Night','y'],posterior:'posterior',del:'delete',
+    th1:['Time','Index','T','Td','ΔT','RH','Wind','Dir','Clouds','Low','Mid','High','Vis km','SST','P hPa'],thsun:['Model','P max','time','ΔT','RH','wind','clouds','vis km','signals'],thw:['Model','weight w','Brier','hits','log‑lik.'],thobs:['Night','y','METAR'],posterior:'posterior',del:'delete',
     post_leg:'posterior',range_leg:'range',prior_info:'Prior: Beta({a}, {b}), mean {pi} % over {n} logged nights. Calibration p = σ((s − 70)/11).',
     sel1:'Select at least one model.',none:'No model answered in time. Retry or reduce the selection.',fused:'{k} models fused',failed:', {f} without response',nocov_n:', {c} without coverage',nocov:'no coverage',nodata:'no data',
     cell:'cell {d} km away',edge:'domain edge {d} km away',fill_from:'from {h}, {m}',prim_fail:'{m} has no data here',then_ifs:'IFS 9 km from about +{h} h',fill_fail:'{m} did not answer: no fill',alt_fail:'{m} unavailable',none_cov:'None of the ticked sources covers this point.',
@@ -304,6 +360,32 @@
     w_note:'Brier: mean of (p − y)², where 0 is perfect and 0.25 is what always predicting 50 % gives. Hits: percentage of nights the model fell on the right side of 50 %, with the number of frozen nights in brackets. The log-likelihood is what sets the weight; Brier and hits are the same information in readable units. On nights when a model had no frozen forecast, its log‑likelihood adds the mean of the others: sources with fewer logged nights are not favoured.',
     les_head:'Lessons from your log:',les_none:'No nights with frozen features yet. Every time you compute in this tab the page also stores the ΔT, wind, cloud and visibility forecast for that night at sunrise; as soon as one observed night carries those features, your local thresholds will appear here.',
     les_fog:'At your site there has been fog or mist with a forecast ΔT of up to {dt} °C and wind up to {w} km/h ({n} nights).',les_cloud:'The highest forecast mid cloud it ever appeared with was {c} %.',les_vis:'The highest forecast visibility it ever appeared with was {v} km.',les_nofog:'The blank night with the lowest forecast ΔT had {dt} °C ({n} blank nights).',les_tail:'Features from the highest-weight model, over {n} nights with a frozen forecast.',
+    tab3:'Calibration',met_st:'METAR station (ICAO)',met_btn:'Query METAR',met_wait:'Querying the METAR of {st}…',
+    met_err:'METAR of {st} unavailable ({e}). Enter what you observed by hand.',met_bad:'Invalid ICAO code: three or four letters or digits, for example LECO.',met_nosun:'no sunrise that day',
+    met_early:'The sunrise that closes the night of {d} has not arrived yet: there are no reports to read.',
+    met_none:'{st}: no METAR report between {a} and {b}. Check the code or enter what you observed by hand.',
+    met_ev:'{st}{km}: {n} reports between {a} and {b}. Minimum visibility {v} at {h}{wx}{dt}.',met_km:', {km} km from the point',met_dt:'; T − Td = {x} °C',
+    met_prop:'Proposal: <b>{lab}</b>.',met_y1:'fog',met_y5:'mist',met_y0:'nothing',met_oth:'The reduced visibility is attributed to {wx}, not to fog.',
+    met_part:'The sunrise window has not ended and the proposal may change.',met_few:'There are few reports in the window.',met_far:'The station is far away and may not represent your site.',
+    met_has:'An observation is already saved for that night (y = {y}) and the selector keeps it.',met_conf:'Correct the selector if you saw something else at your site, then save.',
+    met_raw:'Minimum visibility report: <code>{raw}</code>',cal_on:'{st} calibration on {k} sources',prior_cal:'With the {st} calibration: measured initial prior (ȳ = {y}) and own curve for {k} sources.',
+    s_cal:'calibrated at {st}: ΔT bias {b} °C, threshold {th}, scale {k}',
+    ret_days:'Period (nights)',ret_go:'Calibrate',ret_stop:'Cancel',ret_on:'Apply in the fusion',ret_clear:'Delete calibration',ret_confirm:'Delete the stored calibration?',
+    ret_intro:'Compares, night by night, what a METAR station observed at sunrise with what each source forecast the day before for that same point. This yields, per source, the mean T − Td bias, its own index to probability curve and its measured advantage or disadvantage, which become the starting point of the fusion. The download takes one to several minutes, because MeteoGalicia delivers each run separately.',
+    h_ret:'Result per source',h_retc:'Index to probability curves',h_retl:'Request log',h_retm:'Method and limits',
+    thret:['Source','Model at the station','Nights','ΔT bias °C','ΔT MAE °C','50 % threshold','Scale κ','Brier','BSS','Δℓ per night','Weight factor'],
+    ret_none:'No calibration yet. Choose the station and the period and press Calibrate.',
+    ret_sum:'{st} ({lat}, {lon}), {km} km from the point. {n} usable nights between {a} and {b}: {nf} with fog, {nm} with mist and {n0} with nothing; mean frequency ȳ = {y}. Computed on {at}.',
+    ret_state_on:'Applied in the fusion.',ret_state_off:'Stored, but not applied.',ret_far:'The point of tab 1 lies {km} km from the station: the bias and the curves may not transfer.',
+    ret_w_nocov:'no coverage at the station',ret_w_few:'fewer than {k} nights with data',ret_w_err:'no archived forecasts: {e}',ret_clim:'Climatology (always predicting ȳ = {y})',
+    ret_tnote:'Bias: mean of (forecast T − Td) − (METAR T − Td) over the hours of the sunrise window; positive means the source is too dry. MAE: mean absolute error of that same difference. Threshold and scale: the index at which the source curve gives 50 % and the index points per logit unit; the common values are 70 and 11. Brier and BSS (relative Brier improvement over climatology) come from cross-validation in five blocks. Δℓ: mean difference per night between the log‑likelihood of the source and the mean of the evaluated sources. The weight factor is exp(0.7 · 10 · Δℓ), the equivalent of ten nights of your own.',
+    ret_cnote:'Coloured line: fitted curve of the source. Dashed grey line: common curve σ((s − 70)/11). Circles: observed frequency per index band, with the number of nights; mist counts 0.5.',
+    ret_lnote:'If something fails, copy these lines: they say which server answered, with how much data and how long it took.',
+    ret_s_met:'Downloading the METAR reports of {st}…',ret_s_fc:'Archived Open‑Meteo forecasts: {k} of {n} sources…',ret_s_mg:'Archived MeteoGalicia runs: {k} of {n}…',ret_s_fit:'Fitting…',
+    ret_done:'Calibration ready: {k} sources with {n} nights · {s} s',ret_fail:'Calibration failed: {e}',ret_nomet:'{st} returns no METAR reports with coordinates for that period',
+    ret_fewn:'only {n} nights with enough reports and {k} are needed',ret_cancel:'Cancelled.',ret_stopping:'Cancelling…',ret_nosrc:'no source has enough archived nights',
+    ret_l_nights:'usable nights',ret_l_full:'complete h',ret_l_runs:'runs',ret_l_dead:'server not answering, abandoned',ret_l_end:'the archive goes no further back',ret_l_bias:'bias',
+    ret_method:'<p><b>Truth.</b> Each night is labelled with the METAR reports of the sunrise window, from 2.5 h before to 1.5 h after sunrise at the station: 1 if any report gives FG or visibility below 1000 m; 0.5 if it gives BR, fog in patches, partial, shallow or in the vicinity, or less than 5000 m; 0 otherwise. Reduced visibility with another phenomenon and neither FG nor BR (rain, haze) does not count. Nights with fewer than four reports are discarded.</p><p><b>Forecast.</b> For Open‑Meteo sources the previous runs archive is used (<code>previous_day1</code>): the value given for each hour by the latest run issued at least 24 h ahead, that is, between 24 and about 30 h. For MeteoGalicia, the 00Z run of the day of the evening, about 30 h before sunrise. All are requested at the station coordinates. The sources are thus compared at equal lead. In real use, the forecast you freeze in the evening has a lead of 6 to 18 h for Open‑Meteo sources and the same 30 h for MeteoGalicia, which has a single daily run: the measured skill is a prudent bound for the former and the relative advantage favours MeteoGalicia somewhat.</p><p><b>Reduced index.</b> The archive keeps temperature, humidity, wind, total cloud and precipitation, but neither visibility nor cloud layers. The retrospective therefore computes a reduced index, s_r: estimated visibility, cloud without layers and no advection. The curve is fitted and validated on s_r, and in the fusion the probability of a calibrated source comes from that same s_r: <code>logit p = a·(s_r − 70)/11 + b</code>. The visibility published by the model, the cloud layers and advection remain visible in tab 1 and in the signals of each source, but they do not enter the probability of a calibrated source, because there is no archive against which to measure what they are worth. Ensembles and uncalibrated sources keep the full index and the common curve.</p><p><b>Bias.</b> Before the index is computed the dew point of the source is corrected with its mean bias, <code>Td′ = min(T, Td + bias)</code>, and humidity is recomputed with Td′. METAR gives T and Td in whole degrees: that adds noise, not bias, and with about 90 nights the standard error of the mean bias is near 0.1 °C.</p><p><b>Curve.</b> The parameters <code>a</code> and <code>b</code> are fitted by maximum likelihood with a Gaussian prior centred on the common curve (a = 1, b = 0): with few foggy nights the curve barely departs from the common one.</p><p><b>Weights and prior.</b> The measured advantage of each source enters the fusion as ten nights of your own observation and multiplies the mesh prior; your observations keep updating the weights from there. The mean frequency at the station replaces the initial 12 % of the climatological prior, with the same weight of ten nights.</p><p><b>Limits.</b> The truth is the station, not your site: Alvedro lies about 7 km from the coast at 100 m altitude, and its fog need not match that of the estuary or of a valley. Ensembles are not evaluated because the archive does not keep their members. Repeat the calibration every few weeks: model bias changes with the season and with model upgrades.</p>',
     ens_band:'p10–p90 {a}–{b} %',ens_frac:'{k} of {n} members with fog',}
   };
   function $(s){return document.querySelector(s);}
@@ -318,7 +400,7 @@
     document.documentElement.lang=LANG; $('#lg-es').classList.toggle('on',LANG==='es'); $('#lg-en').classList.toggle('on',LANG==='en');
     $('#abtog').textContent=t(AB.on?'ab_hide':'ab_toggle');
     if(R1) render1(); else renderK();
-    if(B.last) render2(); calib();
+    if(B.last) render2(); calib(); renderMetar(); renderRetro();
   }
   ['es','en'].forEach(l=>$('#lg-'+l).addEventListener('click',()=>{LANG=l; try{localStorage.setItem('pn-lang',l);localStorage.setItem('niebla_lang',l);}catch(e){} applyLang();}));
 
@@ -510,7 +592,8 @@
   document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
     document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));
     document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id===b.dataset.pane));
-    if(b.dataset.pane==='p2'&&!B.ran){tobs(); run2();}
+    if(b.dataset.pane==='p2'&&!B.ran){tobs(); run2(); proposeMetar();}
+    if(b.dataset.pane==='p3') renderRetro();
   }));
   $('#geo').addEventListener('click',()=>{
     const standalone=(navigator.standalone===true)||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);
@@ -781,6 +864,19 @@
   const isoLocal=d=>{const z=new Date(d); z.setMinutes(z.getMinutes()-z.getTimezoneOffset()); return z.toISOString().slice(0,10);};
   const nightDate=sunrise=>isoLocal(sunrise-12*3600e3);
   const save=()=>{try{localStorage.setItem('niebla_bayes',JSON.stringify(store));}catch(e){}};
+  /* ===== estación METAR de referencia y calibración retrospectiva guardada (las funciones están más abajo) =====
+     CAL_NEQ: noches propias a las que equivale la ventaja medida de una fuente; CAL_MIN: noches mínimas para calibrarla;
+     CAL_VA y CAL_VB: varianzas del prior gaussiano de la curva (pendiente relativa a, centrada en 1, y desplazamiento b, centrado en 0). */
+  const CAL_V=1, CAL_NEQ=10, CAL_MIN=20, CAL_VA=0.5, CAL_VB=4, CAL_FOLDS=5, WIN_A=2.5*3600e3, WIN_B=1.5*3600e3;
+  const MET={st:'LECO',ev:null,tk:0,man:{}}; try{const r=JSON.parse(localStorage.getItem('niebla_metar')||'null'); if(r&&/^[A-Z0-9]{3,4}$/.test(r.st||'')) MET.st=r.st;}catch(e){}
+  let RET=null; try{const r=JSON.parse(localStorage.getItem('niebla_cal')||'null'); if(r&&r.v===CAL_V&&r.idx===IDX_V&&r.src) RET=r;}catch(e){}
+  const saveRet=()=>{try{ if(RET) localStorage.setItem('niebla_cal',JSON.stringify(RET)); else localStorage.removeItem('niebla_cal'); }catch(e){}};
+  const calOf=id=>{const c=RET&&RET.on?RET.src[id]:null; return c&&c.ok?c:null;};
+  // índice reducido: sin visibilidad nativa, capas de nubes ni advección, que es lo único reconstruible con las pasadas archivadas
+  const redRec=h=>({...h,vis:null,cloudL:null,cloudM:null,cloudH:null,sst:null});
+  // curva propia de una fuente calibrada. Se ajusta y se valida sobre el índice reducido, y la fusión la aplica a ese mismo índice:
+  // la visibilidad nativa, las capas y la advección no entran en la probabilidad de una fuente calibrada porque no hay archivo con que medir cuánto valen
+  const curveP=(c,s)=>clamp(sig(c.a*(s-TH)/KAP+c.b),0.005,0.995);
   // selección guardada: se respeta, pero una fuente aparecida después de guardarla (since mayor que la versión guardada) conserva su valor por defecto.
   // El formato más antiguo era una lista de ids (versión 1): en él IFS 0.25° pasa a IFS 9 km.
   const SELV=3;
@@ -802,8 +898,11 @@
       MODELS.forEach(m=>{const p=o.p[m.id]; if(p==null) return; const q=clamp(p,0.005,0.995); l[m.id]=o.y*Math.log(q)+(1-o.y)*Math.log(1-q); sum+=l[m.id]; k++;});
       if(!k) return;
       MODELS.forEach(m=>{ll[m.id]+=l[m.id]!=null?l[m.id]:sum/k;});});
+    // calibración retrospectiva: la ventaja media por noche de cada fuente frente a la media de las evaluadas cuenta como CAL_NEQ noches propias; las no evaluadas quedan en la media
+    MODELS.forEach(m=>{const c=calOf(m.id); if(c&&c.d) ll[m.id]+=CAL_NEQ*c.d;});
     const mx=Math.max(...MODELS.map(m=>ll[m.id])); let w={},Z=0; MODELS.forEach(m=>{w[m.id]=priorW(m,meta)*Math.exp(LAMBDA*(ll[m.id]-mx));Z+=w[m.id];}); MODELS.forEach(m=>w[m.id]/=Z); return {w,ll};}
-  function prior(){let a=A0,b=B0; store.obs.forEach(o=>{a+=o.y;b+=1-o.y;}); return {a,b,pi:a/(a+b)};}
+  // con calibración aplicada, el prior climatológico arranca en la frecuencia medida en la estación, con el mismo peso total (A0 + B0 noches)
+  function prior(){let a=A0,b=B0; if(RET&&RET.on&&RET.ybar!=null){a=(A0+B0)*clamp(RET.ybar,0.02,0.7); b=A0+B0-a;} store.obs.forEach(o=>{a+=o.y;b+=1-o.y;}); return {a,b,pi:a/(a+b)};}
   async function run2(){
     const {lat,lon,costero}=coords(), alpha=clamp(+$('#alpha').value||0.7,0.05,1), sel=MODELS.filter(m=>m.on);
     if(!sel.length){$('#st2').textContent=t('sel1');return;}
@@ -832,15 +931,18 @@
     if(!act.length){$('#st2').textContent=t('none');return;}
     // metadatos por fuente: modelo efectivo y malla (catálogo), distancia a la celda devuelta, y si publica visibilidad y capas de nubes
     const meta={}; act.forEach(mo=>{const d=data[mo.id]; meta[mo.id]={...info[mo.id],cell:(d.latitude!=null&&d.longitude!=null)?hav(lat,lon,d.latitude,d.longitude):null,vis:false,lay:false};});
-    const {isNight,sinceSun,nextSunrise}=dayInfo(ref), now=Date.now(), rows=[], times=ref.hourly.time;
+    const {isNight,sinceSun,nextSunrise}=dayInfo(ref), now=Date.now(), rows=[], pre=[], times=ref.hourly.time;
     act.forEach(mo=>{mo.sufs=null;});
-    for(let i=0;i<times.length;i++){const ts=new Date(times[i]).getTime(); if(ts<now-3600e3) continue; if(rows.length>=36) break;
+    // las horas ya pasadas (hasta 7 h atrás) no se muestran: solo alimentan la racha de persistencia, que de otro modo arrancaría de cero en la primera hora
+    for(let i=0;i<times.length;i++){const ts=new Date(times[i]).getTime(); if(ts<now-8*3600e3) continue; const old=ts<now-3600e3; if(!old&&rows.length>=36) break;
       const r={time:times[i],ts,night:isNight(ts),sinceSun:sinceSun(ts),sun:ts<=nextSunrise&&nextSunrise<ts+3600e3,per:{},sst:sstAt(sstM,times[i])};
       act.forEach(mo=>{const H=data[mo.id].hourly, j=H.time.indexOf(times[i]); if(j<0) return;
         if(!mo.ens){
           const L=v=>H[v]?H[v][j]:null;
           const h={t:L('temperature_2m'),td:L('dew_point_2m'),rh:L('relative_humidity_2m'),wind:L('wind_speed_10m'),cloud:L('cloud_cover'),cloudL:L('cloud_cover_low'),cloudM:L('cloud_cover_mid'),cloudH:L('cloud_cover_high'),vis:L('visibility'),precip:L('precipitation'),night:r.night,sinceSun:r.sinceSun,sst:r.sst};
-          if(h.t==null||h.td==null||h.wind==null||h.cloud==null) return; r.per[mo.id]=h;
+          if(h.t==null||h.td==null||h.wind==null||h.cloud==null) return;
+          const c=calOf(mo.id); if(c){ h.td0=h.td; h.rh0=h.rh; h.td=Math.min(h.t,h.td+c.bias); h.rh=rhOf(h.t,h.td); } // sesgo medido del punto de rocío; td0 y rh0 conservan lo que dio la fuente
+          r.per[mo.id]=h;
           if(h.vis!=null) meta[mo.id].vis=true; if(h.cloudM!=null||h.cloudH!=null) meta[mo.id].lay=true;
         } else {
           if(!mo.sufs){ mo.sufs=['']; Object.keys(H).forEach(k=>{const m2=k.match(/^temperature_2m(_member\d+)$/); if(m2) mo.sufs.push(m2[1]);}); }
@@ -853,10 +955,10 @@
           if(!ss.length) return;
           const base=ctrl||ss[0]; r.per[mo.id]={...base,members:ss,isEns:true};
         }});
-      rows.push(r);}
-    act.forEach(mo=>{ const seq=rows.map(r=>r.per[mo.id]||null); persistence(seq);
+      (old?pre:rows).push(r);}
+    act.forEach(mo=>{ const seq=pre.concat(rows).map(r=>r.per[mo.id]||null); persistence(seq);
       rows.forEach(r=>{const q=r.per[mo.id]; if(!q) return;
-        if(!q.isEns){ const sc=score(q,costero); q.s=sc.s; q.why=sc.why; q.p=p_of(sc.s); q.visU=sc.vis; q.visE=sc.visE; }
+        if(!q.isEns){ const sc=score(q,costero), c=calOf(mo.id); q.s=sc.s; q.why=sc.why; q.p=c?curveP(c,score(redRec(q),false).s):p_of(sc.s); q.visU=sc.vis; q.visE=sc.visE; }
         else { const ss=[],pp=[]; q.members.forEach(h=>{h.pers=q.pers; const sc=score(h,costero); ss.push(sc.s); pp.push(p_of(sc.s));});
           q.nfog=ss.filter(x=>x>=75).length; ss.sort((a,b)=>a-b); const sp=pp.slice().sort((a,b)=>a-b), qt=u=>sp[clamp(Math.round(u*(sp.length-1)),0,sp.length-1)];
           q.p10=qt(.1); q.p90=qt(.9); q.frac=q.nfog/ss.length;
@@ -869,15 +971,16 @@
     const Zp=act.reduce((a,mo)=>a+priorW(mo,meta),0); act.forEach(mo=>{meta[mo.id].w0=priorW(mo,meta)/Zp;});
     const rc=platt();
     rows.forEach(r=>{let num=0,den=0,ps=[]; act.forEach(mo=>{const q=r.per[mo.id]; if(!q) return; num+=wa[mo.id]*logit(q.p); den+=wa[mo.id]; ps.push(q.p);}); const zpool=den>0?num/den:logit(pr.pi); const z=logit(pr.pi)+alpha*(zpool-logit(pr.pi)); r.postRaw=sig(z); r.post=rc?rc.apply(r.postRaw):r.postRaw; r.min=ps.length?Math.min(...ps):0; r.max=ps.length?Math.max(...ps):0;});
-    B.last={rows,act,wa,ll,pr,nextSunrise,alpha,lat,lon,rc,meta,fail:req.length-act.length,nocov:sel.length-req.length,secs:((performance.now()-t0)/1000).toFixed(1),nosst:costero&&!sstM};
+    const calU={}; act.forEach(mo=>{const c=calOf(mo.id); if(c&&!mo.ens) calU[mo.id]=c;});
+    B.last={rows,act,wa,ll,pr,nextSunrise,alpha,lat,lon,rc,meta,cal:(RET&&RET.on)?{st:RET.st,ybar:RET.ybar,src:calU}:null,fail:req.length-act.length,nocov:sel.length-req.length,secs:((performance.now()-t0)/1000).toFixed(1),nosst:costero&&!sstM};
     // congelar la previsión del próximo amanecer
     const win0=sunWin(); if(win0.length){ const p={}; act.forEach(mo=>{const c=win0.filter(r=>r.per[mo.id]); p[mo.id]=c.length?Math.max(...c.map(r=>r.per[mo.id].p)):null;});
-      const feat={}; act.forEach(mo=>{const c=win0.filter(r=>r.per[mo.id]); if(!c.length) return; const q=c.reduce((x,y)=>y.per[mo.id].p>x.per[mo.id].p?y:x).per[mo.id]; if(q.t==null||q.td==null||q.wind==null) return; feat[mo.id]={dT:+(q.t-q.td).toFixed(2),w:+q.wind.toFixed(1),c:q.cloud,cm:q.cloudM,ch:q.cloudH,v:q.vis!=null?Math.round(q.vis):null,pers:q.pers||0,adv:(q.sst!=null&&q.td!=null)?+(q.td-q.sst).toFixed(2):null};});
-      const nd=nightDate(nextSunrise); store.snap[nd]={p,post:Math.max(...win0.map(r=>r.postRaw)),at:new Date().toISOString(),lat,lon,n:act.length,feat,v:IDX_V}; save();
+      const feat={}; act.forEach(mo=>{const c=win0.filter(r=>r.per[mo.id]); if(!c.length) return; const q=c.reduce((x,y)=>y.per[mo.id].p>x.per[mo.id].p?y:x).per[mo.id]; if(q.t==null||q.td==null||q.wind==null) return; const td0=q.td0!=null?q.td0:q.td; feat[mo.id]={dT:+(q.t-td0).toFixed(2),w:+q.wind.toFixed(1),c:q.cloud,cm:q.cloudM,ch:q.cloudH,v:q.vis!=null?Math.round(q.vis):null,pers:q.pers||0,adv:q.sst!=null?+(td0-q.sst).toFixed(2):null};});
+      const nd=nightDate(nextSunrise); store.snap[nd]={p,post:Math.max(...win0.map(r=>r.postRaw)),at:new Date().toISOString(),lat,lon,n:act.length,feat,v:IDX_V,cal:B.last.cal?RET.at:null}; save();
       const ex=store.obs.find(o=>o.date===nd&&!o.p); if(ex){ex.p=p; ex.post=store.snap[nd].post; ex.v=IDX_V; save();} }
     render2(); calib();
   }
-  function render2(){const L=B.last, nd=nightDate(L.nextSunrise), sn=store.snap[nd]; $('#st2').textContent=t('fused',{k:L.act.length})+(L.fail?t('failed',{f:L.fail}):'')+(L.nocov?t('nocov_n',{c:L.nocov}):'')+` · ${L.secs} s · ${L.lat.toFixed(4)}, ${L.lon.toFixed(4)}`+(L.nosst?t('nossT'):'')+(L.rc?' · '+t('recal',{n:L.rc.n,a:L.rc.a.toFixed(2),b:L.rc.b.toFixed(2)}):'')+(sn?' · '+t('snap_info',{d:nd,n:sn.n,h:new Date(sn.at).toLocaleTimeString(LOC(),{hour:'2-digit',minute:'2-digit'})}):''); cards2(); chart2(); tsun(); tw(); tsrc(); tobs();}
+  function render2(){const L=B.last, nd=nightDate(L.nextSunrise), sn=store.snap[nd]; $('#st2').textContent=t('fused',{k:L.act.length})+(L.fail?t('failed',{f:L.fail}):'')+(L.nocov?t('nocov_n',{c:L.nocov}):'')+` · ${L.secs} s · ${L.lat.toFixed(4)}, ${L.lon.toFixed(4)}`+(L.nosst?t('nossT'):'')+(L.cal?' · '+t('cal_on',{st:L.cal.st,k:Object.keys(L.cal.src).length}):'')+(L.rc?' · '+t('recal',{n:L.rc.n,a:L.rc.a.toFixed(2),b:L.rc.b.toFixed(2)}):'')+(sn?' · '+t('snap_info',{d:nd,n:sn.n,h:new Date(sn.at).toLocaleTimeString(LOC(),{hour:'2-digit',minute:'2-digit'})}):''); cards2(); chart2(); tsun(); tw(); tsrc(); tobs();}
   const sunWin=()=>{const {rows,nextSunrise}=B.last; return rows.filter(r=>r.ts>=nextSunrise-2.5*3600e3&&r.ts<=nextSunrise+1.5*3600e3);};
   function cards2(){
     const {rows,nextSunrise,act,alpha}=B.last, n6=rows.slice(0,6), m6=n6.reduce((a,b)=>b.post>a.post?b:a,n6[0]), win=sunWin(), ms=win.length?win.reduce((a,b)=>b.post>a.post?b:a,win[0]):null;
@@ -906,10 +1009,12 @@
     $('#chart2').innerHTML=`<svg viewBox="0 0 ${W} ${Hh}" role="img">${g}</svg>`;
     $('#legend2').innerHTML=`<i style="background:#1c262e;height:4px"></i>${t('post_leg')} <i style="background:#9fb0bd;height:8px;opacity:.5"></i>${t('range_leg')} `+act.map(mo=>`<i style="background:${mo.c}"></i>${mo.name} (w=${wa[mo.id].toFixed(2)})`).join('');
   }
+  // ΔT de la fuente y, si la calibración lo corrige, el valor que entra en el índice
+  const dTtxt=q=>{const raw=q.t-(q.td0!=null?q.td0:q.td), cor=q.t-q.td; return raw.toFixed(1)+(Math.abs(raw-cor)>=0.05?' → '+cor.toFixed(1):'');};
   function tsun(){const {act}=B.last, win=sunWin(); if(!win.length){$('#tsun').innerHTML='';return;}
     let h='<tr>'+t('thsun').map(x=>'<th>'+x+'</th>').join('')+'</tr>';
-    act.forEach(mo=>{const c=win.filter(r=>r.per[mo.id]); if(!c.length) return; const best=c.reduce((a,b)=>b.per[mo.id].p>a.per[mo.id].p?b:a), q=best.per[mo.id];
-      h+=`<tr><td>${mo.name}</td><td><span class="tag ${clsP(q.p)}">${(100*q.p).toFixed(0)}%</span></td><td>${fmtH(best.time)}</td><td>${(q.t-q.td).toFixed(1)}</td><td>${q.rh!=null?q.rh+'%':'–'}</td><td>${q.wind.toFixed(0)}</td><td>${q.cloud}%</td><td>${visTxt(q)}</td><td style="text-align:left">${whyTxt(q.why)}${(mo.ens&&q.nm)?' · '+t('ens_band',{a:(100*q.p10).toFixed(0),b:(100*q.p90).toFixed(0)})+' · '+t('ens_frac',{k:q.nfog,n:q.nm}):''}</td></tr>`;});
+    act.forEach(mo=>{const c=win.filter(r=>r.per[mo.id]); if(!c.length) return; const best=c.reduce((a,b)=>b.per[mo.id].p>a.per[mo.id].p?b:a), q=best.per[mo.id], rh0=q.td0!=null?q.rh0:q.rh;
+      h+=`<tr><td>${mo.name}</td><td><span class="tag ${clsP(q.p)}">${(100*q.p).toFixed(0)}%</span></td><td>${fmtH(best.time)}</td><td>${dTtxt(q)}</td><td>${rh0!=null?rh0+'%':'–'}</td><td>${q.wind.toFixed(0)}</td><td>${q.cloud}%</td><td>${visTxt(q)}</td><td style="text-align:left">${whyTxt(q.why)}${(mo.ens&&q.nm)?' · '+t('ens_band',{a:(100*q.p10).toFixed(0),b:(100*q.p90).toFixed(0)})+' · '+t('ens_frac',{k:q.nfog,n:q.nm}):''}</td></tr>`;});
     $('#tsun').innerHTML=h;}
   // fuentes en este punto: qué modelo hay detrás de cada identificador, con qué malla, a qué distancia queda su celda y qué variables publica
   function tsrc(){
@@ -920,6 +1025,7 @@
       else { nt.push(t(i.km<=3?'s_fine':i.km<10?'s_mid':'s_coarse')); if(i.e!=null&&i.e<EDGE_KM) nt.push(t('s_edge'));
         if(mt){ if(mt.cell!=null&&mt.cell>Math.max(i.km,3)) nt.push(t('s_far')); if(!mt.vis) nt.push(t('s_novis')); if(!mt.lay) nt.push(t('s_nolay')); } }
       if(i&&i.dup) nt.push(t('s_dup')); if(m.legacy) nt.push(t('s_legacy'));
+      const cu=on&&L.cal?L.cal.src[m.id]:null; if(cu) nt.push(t('s_cal',{st:L.cal.st,b:(cu.bias>0?'+':cu.bias<0?'−':'')+Math.abs(cu.bias).toFixed(1),th:(TH-KAP*cu.b/cu.a).toFixed(0),k:(KAP/cu.a).toFixed(1)}));
       h+=`<tr class="${on?'':'dim'}"><td>${m.name}</td><td class="l">${i?i.n:'–'}</td><td>${i?i.km:'–'}</td><td>${mt&&mt.cell!=null?mt.cell.toFixed(1):'–'}</td><td>${i?(i.e!=null?Math.round(i.e):'–'):'–'}</td><td>${i?(mt?deltaOf(mt):effKm(i)).toFixed(1):'–'}</td><td>${mt?t(mt.vis?'yes':'est'):'–'}</td><td>${mt?t(mt.lay?'yes':'no'):'–'}</td><td>${mt&&mt.w0!=null?mt.w0.toFixed(2):'–'}</td><td class="rd">${nt.join(' · ')}</td></tr>`;});
     el.innerHTML=h;
     const a=L.act.filter(m=>L.meta[m.id]&&L.meta[m.id].km); if(!a.length){$('#srcread').textContent='';return;}
@@ -933,11 +1039,11 @@
   function tw(){const {act,wa,ll,pr}=B.last, st=modelStats(); let h='<tr>'+t('thw').map(x=>'<th>'+x+'</th>').join('')+'</tr>';
     act.forEach(mo=>{const k=st[mo.id];
       h+=`<tr><td>${mo.name}</td><td>${wa[mo.id].toFixed(3)} <span class="wbar" style="width:${(60*wa[mo.id]).toFixed(0)}px"></span></td><td>${k.br!=null?k.br.toFixed(3):'–'}</td><td>${k.hit!=null?(100*k.hit).toFixed(0)+'% ('+k.n+')':'–'}</td><td>${ll[mo.id].toFixed(2)}</td></tr>`;});
-    $('#tw').innerHTML=h; $('#priorinfo').textContent=t('prior_info',{a:pr.a.toFixed(1),b:pr.b.toFixed(1),pi:(100*pr.pi).toFixed(1),n:store.obs.length})+' '+t('w_note');}
+    $('#tw').innerHTML=h; $('#priorinfo').textContent=t('prior_info',{a:pr.a.toFixed(1),b:pr.b.toFixed(1),pi:(100*pr.pi).toFixed(1),n:store.obs.length})+(B.last.cal?' '+t('prior_cal',{st:B.last.cal.st,y:B.last.cal.ybar.toFixed(2),k:Object.keys(B.last.cal.src).length}):'')+' '+t('w_note');}
   function tobs(){
     const withData=MODELS.filter(m=>store.obs.some(o=>o.p&&o.p[m.id]!=null)), cols=withData.length?withData:MODELS.filter(m=>m.on); // en móvil, solo las columnas con datos
     let h='<tr>'+t('thobs').map(x=>'<th>'+x+'</th>').join('')+cols.map(m=>'<th>'+m.name+'</th>').join('')+'<th>'+t('posterior')+'</th><th></th></tr>';
-    store.obs.slice().reverse().forEach((o,k)=>{const idx=store.obs.length-1-k; h+=`<tr><td>${o.date}</td><td>${o.y}</td>`+cols.map(m=>'<td>'+(o.p&&o.p[m.id]!=null?(100*o.p[m.id]).toFixed(0)+'%':'–')+'</td>').join('')+`<td>${o.post!=null?(100*o.post).toFixed(0)+'%':'<span style="color:var(--warn)">'+t('pending')+'</span>'}</td><td><button class="small ghost" data-i="${idx}">${t('del')}</button></td></tr>`;});
+    store.obs.slice().reverse().forEach((o,k)=>{const idx=store.obs.length-1-k; const mt=o.m?`${visM(o.m.v)}${o.m.wx?' '+esc(o.m.wx):''} · ${esc(o.m.st)}${o.m.y!==o.y?' · ≠':''}`:'–'; h+=`<tr><td>${o.date}</td><td>${o.y}</td><td>${mt}</td>`+cols.map(m=>'<td>'+(o.p&&o.p[m.id]!=null?(100*o.p[m.id]).toFixed(0)+'%':'–')+'</td>').join('')+`<td>${o.post!=null?(100*o.post).toFixed(0)+'%':'<span style="color:var(--warn)">'+t('pending')+'</span>'}</td><td><button class="small ghost" data-i="${idx}">${t('del')}</button></td></tr>`;});
     $('#tobs').innerHTML=h; document.querySelectorAll('#tobs button').forEach(b=>b.addEventListener('click',()=>{store.obs.splice(+b.dataset.i,1);save(); if(B.last) render2(); else tobs(); calib();}));
     lessons();}
   // lectura pura de store.snap[fecha].feat cruzada con store.obs: los umbrales locales que el registro ya contiene
@@ -1004,14 +1110,265 @@
     read.textContent=calRead(scored,raw,bins);
   }
 
+  /* ===== METAR: etiqueta propuesta y calibración retrospectiva =====
+     Partes del archivo ASOS del Iowa Environmental Mesonet (CSV, CORS abierto, sin clave). La visibilidad llega en millas terrestres. */
+  const IEM='https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py', PREV='https://previous-runs-api.open-meteo.com/v1/forecast';
+  const deg=x=>x*180/Math.PI, isoDay=ms=>new Date(ms).toISOString().slice(0,10), zISO=ms=>new Date(ms).toISOString().slice(0,16)+'Z';
+  const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  // orto y ocaso (ms UTC) del día civil y-mo-d en lat, lon; algoritmo de la NOAA con la posición del sol recalculada en el instante de cada suceso.
+  // Error inferior a un minuto en latitudes medias. null con sol o noche permanentes
+  function sunTimes(y,mo,d,lat,lon){
+    const D0=Date.UTC(y,mo-1,d), r=rad;
+    const sol=ms=>{ const T=(ms/86400e3+2440587.5-2451545)/36525, om=125.04-1934.136*T;
+      const L0=(280.46646+T*(36000.76983+0.0003032*T))%360, M=357.52911+T*(35999.05029-0.0001537*T), e=0.016708634-T*(0.000042037+0.0000001267*T);
+      const C=Math.sin(r(M))*(1.914602-T*(0.004817+0.000014*T))+Math.sin(r(2*M))*(0.019993-0.000101*T)+Math.sin(r(3*M))*0.000289;
+      const lam=L0+C-0.00569-0.00478*Math.sin(r(om)), eps=23+(26+(21.448-T*(46.815+T*(0.00059-T*0.001813)))/60)/60+0.00256*Math.cos(r(om)), yv=Math.tan(r(eps/2))**2;
+      return {dec:Math.asin(Math.sin(r(eps))*Math.sin(r(lam))),
+        eqt:4*deg(yv*Math.sin(2*r(L0))-2*e*Math.sin(r(M))+4*e*yv*Math.sin(r(M))*Math.cos(2*r(L0))-0.5*yv*yv*Math.sin(4*r(L0))-1.25*e*e*Math.sin(2*r(M)))}; };
+    const ev=sg=>{ let ms=D0+(720-4*lon)*60e3;
+      for(let i=0;i<3;i++){ const s=sol(ms), cH=(Math.cos(r(90.833))-Math.sin(r(lat))*Math.sin(s.dec))/(Math.cos(r(lat))*Math.cos(s.dec)); if(Math.abs(cH)>1) return null;
+        ms=D0+(720-4*(lon+sg*deg(Math.acos(cH)))-s.eqt)*60e3; }
+      return ms; };
+    const rise=ev(1), set=ev(-1); return (rise==null||set==null)?null:{rise,set};
+  }
+  // primer orto posterior a un instante, buscado en los días UTC contiguos
+  const sunAfter=(ms,lat,lon)=>{ let best=null; for(let k=-1;k<=2;k++){ const d=new Date(ms+k*86400e3), s=sunTimes(d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate(),lat,lon); if(s&&s.rise>=ms&&(best==null||s.rise<best)) best=s.rise; } return best; };
+  // orto que cierra la noche "date" en la retrospectiva: el del día siguiente al de la tarde, con la fecha contada en la longitud de la estación
+  const nightSun=(date,lat,lon)=>{const d=new Date(Date.parse(date+'T00:00:00Z')+86400e3); return sunTimes(d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate(),lat,lon);};
+  // noche y horas desde el orto para un instante, con el sol calculado en el punto (la retrospectiva no dispone del orto y ocaso de Open-Meteo)
+  function sunClock(lat,lon){ const mem=new Map(), day=k=>{ if(!mem.has(k)){const d=new Date(k*86400e3); mem.set(k,sunTimes(d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate(),lat,lon));} return mem.get(k); };
+    return ts=>{ const k=Math.floor(ts/86400e3); let night=true, since=null;
+      for(const j of [k-1,k,k+1]){ const s=day(j); if(!s) continue; if(ts>=s.rise&&ts<s.set) night=false; const h=(ts-s.rise)/3600e3; if(h>=0&&h<6) since=h; }
+      return {night,sinceSun:since}; }; }
+  const winHours=rise=>{const a=[]; for(let ts=Math.ceil((rise-WIN_A)/3600e3)*3600e3; ts<=rise+WIN_B; ts+=3600e3) a.push(ts); return a;};
+  // millas del archivo a metros en los escalones del METAR (50 m por debajo de 800 m, 100 m hasta 5 km, 1 km por encima; 9999 se lee como 10 km o más)
+  const metVis=mi=>{ if(mi==null) return null; const m=mi*1609.344; return m>=9000?(m>=9500?10000:9000) : m>=5000?Math.round(m/1000)*1000 : m>=800?Math.round(m/100)*100 : Math.round(m/50)*50; };
+  const visM=v=>v==null?'–':v>=10000?'≥ 10 km':v<1000?v+' m':(v/1000).toFixed(1)+' km';
+  const metarURL=(st,t0,t1,raw)=>`${IEM}?station=${st}&data=vsby,tmpc,dwpc,wxcodes${raw?',metar':''}&sts=${zISO(t0)}&ets=${zISO(t1)}&tz=Etc%2FUTC&format=onlycomma&latlon=yes&report_type=3,4`;
+  function parseMetar(txt){
+    const L=txt.trim().split(/\r?\n/).filter(l=>l&&l[0]!=='#'), H=(L[0]||'').split(',').map(x=>x.trim()), ix=k=>H.indexOf(k), iv=ix('valid'), is=ix('vsby'), im=ix('metar');
+    if(iv<0||is<0) throw new Error((L[0]||'CSV').slice(0,80));
+    const num=x=>(x==null||x===''||x==='M'||x==='null'||!isFinite(+x))?null:+x, str=x=>(x==null||x==='M'||x==='null')?'':x.trim(), o={lat:null,lon:null,rows:[]};
+    for(let i=1;i<L.length;i++){ const c=L[i].split(','), v=(c[iv]||'').trim(), ts=/^\d{4}-\d\d-\d\d[ T]\d\d:\d\d/.test(v)?Date.parse(v.slice(0,16).replace(' ','T')+':00Z'):NaN; if(!isFinite(ts)) continue;
+      if(o.lat==null&&ix('lat')>=0){ o.lat=num(c[ix('lat')]); o.lon=num(c[ix('lon')]); }
+      o.rows.push({ts,vis:metVis(num(c[is])),t:num(c[ix('tmpc')]),td:num(c[ix('dwpc')]),wx:str(c[ix('wxcodes')]),raw:im>=0?str(c.slice(im).join(',')):''}); }
+    if(o.lat==null||o.lon==null){o.lat=null;o.lon=null;}
+    o.rows.sort((a,b)=>a.ts-b.ts); return o;
+  }
+  // etiqueta de un conjunto de partes. 1: niebla (FG, o visibilidad < 1000 m sin otro fenómeno que la explique). 0.5: bruma (BR; niebla en bancos, parcial, baja
+  // o en las inmediaciones; o menos de 5000 m sin otro fenómeno). 0: nada. lo es el parte de visibilidad mínima; oth, el fenómeno que la reduce cuando no es niebla.
+  function metarLabel(rows){
+    let y=0, lo=null; const wx=[];
+    rows.forEach(r=>{ const tok=r.wx.split(/\s+/).filter(Boolean).map(x=>x.replace(/^[+-]/,'')); tok.forEach(x=>{if(!wx.includes(x)) wx.push(x);});
+      const fg=tok.filter(x=>x.includes('FG')), full=fg.some(x=>!/^(VC|MI|BC|PR)/.test(x)), br=tok.some(x=>x.includes('BR')), other=tok.length>0&&!fg.length&&!br;
+      r.oth=other?tok.join(' '):'';
+      let yr=0; if(full||(r.vis!=null&&r.vis<1000&&!other)) yr=1; else if(fg.length||br||(r.vis!=null&&r.vis<5000&&!other)) yr=0.5;
+      if(yr>y) y=yr; if(r.vis!=null&&(lo==null||r.vis<lo.vis)) lo=r; });
+    return {y,n:rows.length,lo,wx,oth:(y===0&&lo&&lo.vis<5000)?lo.oth:''};
+  }
+  /* ----- etiqueta propuesta para la noche elegida en el registro ----- */
+  const metCache={};
+  async function metarFor(date,st,lat,lon){
+    const key=st+'|'+date; let c=metCache[key];
+    if(!c||c.part){ const t0=Date.parse(date+'T00:00:00Z'); c=metCache[key]={o:parseMetar(await fetchText(metarURL(st,t0,t0+48*3600e3,true),15000))}; }
+    // la noche se identifica por la fecha local de su tarde: el orto que la cierra es el primero después de las 18:00 de ese día
+    const o=c.o, rise=sunAfter(new Date(date+'T18:00:00').getTime(),o.lat!=null?o.lat:lat,o.lon!=null?o.lon:lon), now=Date.now();
+    if(rise==null) throw new Error(t('met_nosun'));
+    const ev={date,st,km:o.lat!=null?hav(lat,lon,o.lat,o.lon):null,rise,...metarLabel(o.rows.filter(r=>r.ts>=rise-WIN_A&&r.ts<=rise+WIN_B))};
+    ev.early=now<rise-WIN_A; ev.part=!ev.early&&now<rise+WIN_B; c.part=ev.early||ev.part; return ev;
+  }
+  async function proposeMetar(){
+    const date=$('#odate').value, st=MET.st; if(!date) return; const {lat,lon}=coords(), tk=++MET.tk;
+    MET.ev={wait:true,st}; renderMetar();
+    let ev; try{ ev=await metarFor(date,st,lat,lon); }catch(e){ ev={err:e.name==='AbortError'?'timeout':(e.message||'error'),st,date}; }
+    if(tk!==MET.tk) return; MET.ev=ev;
+    // el desplegable muestra, por este orden: lo que hayas elegido a mano para esa noche, lo ya guardado, o la propuesta
+    const ex=store.obs.find(o=>o.date===date), man=MET.man[date];
+    if(man!=null) $('#oval').value=man; else if(ex) $('#oval').value=String(ex.y); else if(!ev.err&&!ev.early&&ev.n) $('#oval').value=String(ev.y);
+    renderMetar();
+  }
+  function renderMetar(){
+    const el=$('#metarinfo'); if(!el) return; const ev=MET.ev; let h='';
+    if(!ev) h='';
+    else if(ev.wait) h=t('met_wait',{st:ev.st});
+    else if(ev.err) h=t('met_err',{st:ev.st,e:esc(ev.err==='timeout'?t('timeout'):ev.err)});
+    else if(ev.early) h=t('met_early',{d:ev.date});
+    else { const a=fmtT(ev.rise-WIN_A), b=fmtT(ev.rise+WIN_B);
+      if(!ev.n) h=t('met_none',{st:ev.st,a,b});
+      else { const lo=ev.lo;
+        h=t('met_ev',{st:ev.st,km:ev.km!=null?t('met_km',{km:ev.km.toFixed(1)}):'',n:ev.n,a,b,v:lo?visM(lo.vis):'–',h:lo?fmtT(lo.ts):'–',wx:ev.wx.length?' ('+esc(ev.wx.join(' '))+')':'',dt:(lo&&lo.t!=null&&lo.td!=null)?t('met_dt',{x:(lo.t-lo.td).toFixed(0)}):''})
+          +' '+t('met_prop',{lab:t(ev.y===1?'met_y1':ev.y===0.5?'met_y5':'met_y0')});
+        if(ev.oth) h+=' '+t('met_oth',{wx:esc(ev.oth)});
+        if(ev.part) h+=' '+t('met_part'); if(ev.n<4) h+=' '+t('met_few'); if(ev.km!=null&&ev.km>30) h+=' '+t('met_far');
+        const ex=store.obs.find(o=>o.date===ev.date); h+=' '+(ex?t('met_has',{y:esc(ex.y)}):t('met_conf'));
+        if(lo&&lo.raw) h+='<br>'+t('met_raw',{raw:esc(lo.raw)}); } }
+    el.innerHTML=h;
+  }
+  // lo que se guarda con la observación: la evidencia METAR de esa noche, si la hay
+  const metarRec=date=>{const ev=MET.ev; return (ev&&ev.date===date&&!ev.err&&!ev.wait&&!ev.early&&ev.n)?{st:ev.st,y:ev.y,n:ev.n,v:ev.lo?ev.lo.vis:null,wx:ev.wx.join(' ')}:null;};
+  function setStation(v){
+    v=String(v||'').trim().toUpperCase(); const ok=/^[A-Z0-9]{3,4}$/.test(v);
+    if(ok&&v!==MET.st){ MET.st=v; try{localStorage.setItem('niebla_metar',JSON.stringify({st:v}));}catch(e){} }
+    ['#icao','#icao3'].forEach(q=>{const e=$(q); if(e) e.value=MET.st;});
+    if(!ok){ MET.tk++; MET.ev=null; $('#metarinfo').textContent=t('met_bad'); return false; }
+    return true;
+  }
+
+  /* ----- calibración retrospectiva: lo que observó la estación frente a lo que cada fuente preveía la víspera ----- */
+  // noches evaluables del periodo, con su etiqueta METAR; se descartan las que tienen menos de cuatro partes en la ventana
+  function retroNights(met,d0,nd,now){ const N=[], R=met.rows; let j0=0;
+    for(let k=0;k<nd;k++){ const date=isoDay(d0+k*86400e3), sun=nightSun(date,met.lat,met.lon); if(!sun||sun.rise+WIN_B>now) continue;
+      while(j0<R.length&&R[j0].ts<sun.rise-WIN_A) j0++; const rows=[]; for(let j=j0;j<R.length&&R[j].ts<=sun.rise+WIN_B;j++) rows.push(R[j]);
+      if(rows.length<4) continue; N.push({date,rise:sun.rise,rows,...metarLabel(rows)}); }
+    return N; }
+  // sesgo medio de la depresión del punto de rocío, (T − Td) previsto menos (T − Td) del parte más cercano a cada hora de la ventana (a 20 min como mucho)
+  function retroBias(F,N){ const at=new Map(F.map(f=>[f.ts,f])); let n=0,k=0,sum=0,abs=0;
+    N.forEach(nt=>{ let any=false; winHours(nt.rise).forEach(ts=>{ const f=at.get(ts); if(!f||f.t==null||f.td==null) return;
+        let o=null,best=21*60e3; nt.rows.forEach(r=>{const d=Math.abs(r.ts-ts); if(d<best&&r.t!=null&&r.td!=null){best=d;o=r;}}); if(!o) return;
+        const e=(f.t-f.td)-(o.t-o.td); sum+=e; abs+=Math.abs(e); n++; any=true; }); if(any) k++; });
+    return {n,k,mean:n?sum/n:0,mae:n?abs/n:0}; }
+  // índice reducido hora a hora de una serie archivada, tras corregir el punto de rocío con el sesgo; un hueco en la serie corta la racha de persistencia
+  function retroIndex(F,bias,clock){ const seq=[]; let prev=null;
+    F.forEach(f=>{ if(prev!=null&&f.ts-prev>3600e3) seq.push(null); prev=f.ts;
+      if(f.t==null||f.td==null||f.wind==null||f.cloud==null){ seq.push(null); return; }
+      const td=Math.min(f.t,f.td+bias), c=clock(f.ts); seq.push(redRec({ts:f.ts,t:f.t,td,rh:rhOf(f.t,td),wind:f.wind,cloud:f.cloud,precip:f.precip,night:c.night,sinceSun:c.sinceSun})); });
+    persistence(seq); const S=new Map(); seq.forEach(h=>{ if(h) S.set(h.ts,score(h,false).s); }); return S; }
+  // curva de una fuente, z = a·(s − TH)/KAP + b, por máxima verosimilitud penalizada con prior gaussiano centrado en la curva común (a = 1, b = 0). Newton en dos parámetros
+  function fitCurve(X,Y){ let a=1,b=0;
+    for(let it=0;it<80;it++){ let ga=(a-1)/CAL_VA, gb=b/CAL_VB, haa=1/CAL_VA, hab=0, hbb=1/CAL_VB;
+      for(let i=0;i<X.length;i++){ const u=(X[i]-TH)/KAP, q=sig(a*u+b), e=q-Y[i], w=Math.max(q*(1-q),1e-6); ga+=e*u; gb+=e; haa+=w*u*u; hab+=w*u; hbb+=w; }
+      const det=haa*hbb-hab*hab; let da=clamp((hbb*ga-hab*gb)/det,-1,1), db=clamp((haa*gb-hab*ga)/det,-2,2);
+      if(a-da<0.2){ da=a-0.2; db=clamp((gb-hab*da)/hbb,-2,2); } // en el suelo de la pendiente: paso de Newton en b con a fijada
+      a-=da; b-=db; if(Math.abs(da)+Math.abs(db)<1e-8) break; }
+    return {a,b}; }
+  const xent=(y,p)=>y*Math.log(p)+(1-y)*Math.log(1-p);
+  const RBINS=[0,40,55,70,85,101];
+  function retroSource(F,N,clock){
+    const bs=retroBias(F,N); if(bs.k<CAL_MIN) return {ok:false,why:'few',n:bs.k};
+    const bias=clamp(bs.mean,-3,3), S=retroIndex(F,bias,clock), X=[],Y=[],I=[];
+    N.forEach((nt,i)=>{ const v=winHours(nt.rise).map(ts=>S.get(ts)).filter(x=>x!=null); if(v.length<3) return; X.push(Math.max(...v)); Y.push(nt.y); I.push(i); });
+    const n=X.length; if(n<CAL_MIN) return {ok:false,why:'few',n};
+    const c=fitCurve(X,Y), l=new Array(N.length).fill(null), pv=new Array(N.length).fill(null);
+    for(let f=0;f<CAL_FOLDS;f++){ const lo=Math.floor(f*n/CAL_FOLDS), hi=Math.floor((f+1)*n/CAL_FOLDS), Xt=[],Yt=[]; for(let j=0;j<n;j++) if(j<lo||j>=hi){Xt.push(X[j]);Yt.push(Y[j]);}
+      const cf=fitCurve(Xt,Yt); for(let j=lo;j<hi;j++){ const p=curveP(cf,X[j]); l[I[j]]=xent(Y[j],p); pv[I[j]]=p; } }
+    const bins=[]; for(let q=0;q<RBINS.length-1;q++){ let k=0,sx=0,sy=0; for(let j=0;j<n;j++) if(X[j]>=RBINS[q]&&X[j]<RBINS[q+1]){k++;sx+=X[j];sy+=Y[j];} if(k) bins.push([+(sx/k).toFixed(1),+(sy/k).toFixed(3),k]); }
+    return {ok:true,n,bias:+bias.toFixed(2),mae:+bs.mae.toFixed(2),a:+c.a.toFixed(3),b:+c.b.toFixed(3),bins,l,pv};
+  }
+  // S: series por fuente. Devuelve por fuente sesgo, curva, Brier y log-verosimilitud validados (cinco bloques contiguos) y su ventaja relativa d:
+  // la media por noche de la diferencia entre su log-verosimilitud y la media de las fuentes evaluadas esa noche
+  function retroFit(S,N,clock){
+    const out={}, ids=Object.keys(S).filter(id=>S[id].F); ids.forEach(id=>{out[id]=retroSource(S[id].F,N,clock);});
+    const ok=ids.filter(id=>out[id].ok), sy=N.reduce((u,n)=>u+n.y,0), ds={}, dn={}; ok.forEach(id=>{ds[id]=0;dn[id]=0;});
+    N.forEach(nt=>{nt.pc=clamp((sy-nt.y)/Math.max(N.length-1,1),0.005,0.995);}); // climatología dejando fuera la propia noche
+    N.forEach((nt,i)=>{ const v=ok.filter(id=>out[id].l[i]!=null); if(v.length<2) return; const mean=v.reduce((u,id)=>u+out[id].l[i],0)/v.length; v.forEach(id=>{ds[id]+=out[id].l[i]-mean; dn[id]++;}); });
+    ok.forEach(id=>{ const o=out[id]; let br=0,bc=0,ll=0,k=0; N.forEach((nt,i)=>{ if(o.l[i]==null) return; br+=(o.pv[i]-nt.y)**2; bc+=(nt.pc-nt.y)**2; ll+=o.l[i]; k++; });
+      o.br=+(br/k).toFixed(4); o.bss=bc>0?+(1-br/bc).toFixed(3):null; o.ll=+(ll/k).toFixed(4); o.d=dn[id]?+(ds[id]/dn[id]).toFixed(4):0; delete o.l; delete o.pv; });
+    return out;
+  }
+  const PV=['temperature_2m','relative_humidity_2m','dew_point_2m','wind_speed_10m','cloud_cover','precipitation'], MGR=['temp','rh','mod','cfl','cfm','cfh','prec'];
+  // previsión de la víspera en Open-Meteo: el valor que daba para cada hora la pasada emitida un día antes (sufijo _previous_day1)
+  const prevURL=(m,lat,lon,a,b)=>`${PREV}?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}&hourly=${PV.map(v=>v+'_previous_day1').join(',')}&models=${m.api||m.id}&start_date=${a}&end_date=${b}&timezone=GMT`;
+  async function retroOM(url){
+    const d=await fetchJSON(url,45000); if(!d||d.error) throw new Error((d&&d.reason)||t('error')); const H=d.hourly; if(!H||!Array.isArray(H.time)) throw new Error(t('nodata'));
+    const g=v=>H[v+'_previous_day1']||[], T=g('temperature_2m'), RH=g('relative_humidity_2m'), TD=g('dew_point_2m'), W=g('wind_speed_10m'), C=g('cloud_cover'), P=g('precipitation'), nn=x=>x==null?null:x;
+    return H.time.map((x,i)=>{ const tt=nn(T[i]), rh=nn(RH[i]); let td=nn(TD[i]);
+      if(td==null&&tt!=null&&rh!=null){ const q=Math.log(Math.max(rh,1)/100)+17.625*tt/(243.04+tt); td=243.04*q/(17.625-q); }
+      return {ts:Date.parse(x+':00Z'),t:tt,td,rh,wind:nn(W[i]),cloud:nn(C[i]),precip:nn(P[i])}; });
+  }
+  // previsión de la víspera en MeteoGalicia: la pasada de las 00Z del día de la tarde, de +15 h a +35 h (la tarde, la noche y la mañana siguiente)
+  const mgRunURL=(lat,lon,date)=>{ const ymd=date.replace(/-/g,''), d0=Date.parse(date+'T00:00:00Z'), iso=h=>new Date(d0+h*3600e3).toISOString().slice(0,19)+'Z';
+    return `${MG.base}/${ymd}/wrf_arw_det_history_d02_${ymd}_0000.nc4?${MGR.map(v=>'var='+v).join('&')}&latitude=${lat}&longitude=${lon}&time_start=${iso(15)}&time_end=${iso(35)}&accept=csv`; };
+  async function retroMG(url){
+    const o=parseMG(await fetchText(url,MG.ms)), times=o.utc.map(ms=>new Date(ms).toISOString().slice(0,16)), H=mgToOM(o,times,0).hourly;
+    return times.map((x,i)=>({ts:o.utc[i],t:H.temperature_2m[i],td:H.dew_point_2m[i],rh:H.relative_humidity_2m[i],wind:H.wind_speed_10m[i],cloud:H.cloud_cover[i],precip:H.precipitation[i]}));
+  }
+  const RR={busy:false,stop:false,log:[]};
+  const rlog=s=>{RR.log.push(s); const el=$('#retlog'); if(el){el.textContent=RR.log.join('\n'); el.scrollTop=el.scrollHeight;}};
+  const setR=s=>{$('#retst').textContent=s;};
+  const secs=t0=>((performance.now()-t0)/1000).toFixed(1);
+  async function pool(items,k,fn){ let i=0; await Promise.all(Array.from({length:Math.min(k,items.length)},async()=>{ while(i<items.length&&!RR.stop){ await fn(items[i++]); } })); }
+  async function runRetro(){
+    if(RR.busy) return; if(!setStation($('#icao3').value)) { setR(t('met_bad')); return; }
+    const st=MET.st, days=clamp(+$('#retdays').value||90,30,365), t0=performance.now(), emsg=e=>e.name==='AbortError'?t('timeout'):(e.message||t('error'));
+    RR.busy=true; RR.stop=false; RR.log=[]; $('#retlog').textContent=''; $('#goret').disabled=true; $('#retstop').hidden=false;
+    try{
+      const now=Date.now(), dEnd=Date.parse(isoDay(now)+'T00:00:00Z'), d0=dEnd-days*86400e3, murl=metarURL(st,d0,dEnd+86400e3,false);
+      setR(t('ret_s_met',{st})); rlog('GET '+murl); let tq=performance.now();
+      const met=parseMetar(await fetchText(murl,60000));
+      rlog(`IEM ${st} · ${met.rows.length} METAR`+(met.rows.length?` · ${zISO(met.rows[0].ts)} → ${zISO(met.rows[met.rows.length-1].ts)}`:'')+(met.lat!=null?` · ${met.lat}, ${met.lon}`:'')+` · ${secs(tq)} s`);
+      if(met.lat==null||!met.rows.length) throw new Error(t('ret_nomet',{st}));
+      const N=retroNights(met,d0,days,now), cnt=v=>N.filter(n=>n.y===v).length;
+      rlog(`${N.length} ${t('ret_l_nights')} · y=1: ${cnt(1)} · y=0.5: ${cnt(0.5)} · y=0: ${cnt(0)}`);
+      if(N.length<CAL_MIN) throw new Error(t('ret_fewn',{n:N.length,k:CAL_MIN}));
+      const a=N[0].date, b=isoDay(Date.parse(N[N.length-1].date+'T00:00:00Z')+86400e3), S={}, cand=MODELS.filter(m=>!m.ens&&!m.legacy);
+      cand.forEach(m=>{ if(!srcInfo(m.cat||m.id,met.lat,met.lon)) S[m.id]={why:'nocov'}; });
+      const om=cand.filter(m=>!m.ext&&!S[m.id]); let k=0; setR(t('ret_s_fc',{k,n:om.length}));
+      await pool(om,3,async m=>{ const url=prevURL(m,met.lat,met.lon,a,b), tq=performance.now(); if(m===om[0]) rlog('GET '+url);
+        try{ const F=await retroOM(url), nv=F.filter(f=>f.t!=null&&f.td!=null&&f.wind!=null&&f.cloud!=null).length; S[m.id]=nv?{F}:{why:'err',msg:t('nodata')}; rlog(`previous-runs ${m.api||m.id} · ${F.length} h · ${nv} ${t('ret_l_full')} · ${secs(tq)} s`); }
+        catch(e){ S[m.id]={why:'err',msg:emsg(e)}; rlog(`previous-runs ${m.api||m.id} · ✗ ${emsg(e)} · ${secs(tq)} s`); }
+        k++; setR(t('ret_s_fc',{k,n:om.length})); });
+      const mg=cand.find(m=>m.ext==='mg');
+      if(mg&&!S[mg.id]&&!RR.stop){ const F=[], errs={}; let done=0, okc=0, run=0, dead=false; tq=performance.now(); setR(t('ret_s_mg',{k:0,n:N.length})); rlog('GET '+mgRunURL(met.lat,met.lon,N[N.length-1].date));
+        // de la noche más reciente hacia atrás: si las seis primeras fallan el servidor no responde, y doce fallos seguidos indican que el archivo no llega más atrás
+        await pool(N.slice().reverse(),2,async nt=>{ if(dead) return;
+          try{ const f=await retroMG(mgRunURL(met.lat,met.lon,nt.date)); if(f.length){ F.push(...f); okc++; run=0; } else { errs[t('nodata')]=(errs[t('nodata')]||0)+1; run++; } }
+          catch(e){ const key=emsg(e); errs[key]=(errs[key]||0)+1; run++; }
+          done++; if((done>=6&&!okc)||run>=12) dead=true; setR(t('ret_s_mg',{k:done,n:N.length})); });
+        F.sort((x,y)=>x.ts-y.ts); const es=Object.keys(errs).map(x=>`${errs[x]}× ${x}`).join(', ');
+        S[mg.id]=okc?{F}:{why:'err',msg:Object.keys(errs).join(', ')||t('error')}; rlog(`MeteoGalicia · ${okc}/${N.length} ${t('ret_l_runs')}`+(es?` · ✗ ${es}`:'')+(dead?` · ${t(okc?'ret_l_end':'ret_l_dead')}`:'')+` · ${secs(tq)} s`); }
+      if(RR.stop) throw new Error(t('ret_cancel'));
+      setR(t('ret_s_fit')); const fit=retroFit(S,N,sunClock(met.lat,met.lon)), src={};
+      cand.forEach(m=>{ const s=S[m.id]; if(!s) return; src[m.id]=s.F?fit[m.id]:{ok:false,why:s.why,msg:s.msg}; const c=src[m.id];
+        if(s.F) rlog(c.ok?`${m.api||m.id} · n=${c.n} · ${t('ret_l_bias')} ${c.bias} · a=${c.a} b=${c.b} · Brier ${c.br} · Δℓ ${c.d}`:`${m.api||m.id} · n=${c.n} < ${CAL_MIN}`); });
+      const nOk=Object.keys(src).filter(id=>src[id].ok).length; if(!nOk) throw new Error(t('ret_nosrc'));
+      RET={v:CAL_V,idx:IDX_V,on:RET?RET.on:true,st,lat:met.lat,lon:met.lon,at:new Date().toISOString(),days,a:N[0].date,b:N[N.length-1].date,n:N.length,nf:cnt(1),nm:cnt(0.5),
+        ybar:+(N.reduce((u,n)=>u+n.y,0)/N.length).toFixed(3),brc:+(N.reduce((u,n)=>u+(n.pc-n.y)**2,0)/N.length).toFixed(4),src};
+      saveRet(); renderRetro(); setR(t('ret_done',{k:nOk,n:N.length,s:secs(t0)})); if(B.ran) run2();
+    }catch(e){ const m=RR.stop?t('ret_cancel'):t('ret_fail',{e:emsg(e)}); setR(m); rlog('✗ '+m); }
+    finally{ RR.busy=false; $('#goret').disabled=false; $('#retstop').hidden=true; }
+  }
+  function renderRetro(){
+    const sum=$('#retsum'), tb=$('#tret'), ch=$('#retchart'); if(!sum) return;
+    $('#reton').checked=!!(RET&&RET.on); $('#reton').disabled=!RET; $('#retclear').disabled=!RET;
+    if(!RET){ sum.textContent=t('ret_none'); tb.innerHTML=''; ch.innerHTML=''; return; }
+    const {lat,lon}=coords(), km=hav(lat,lon,RET.lat,RET.lon), sg=(x,k)=>(x>0?'+':x<0?'−':'')+Math.abs(x).toFixed(k);
+    sum.textContent=t('ret_sum',{st:RET.st,lat:RET.lat.toFixed(3),lon:RET.lon.toFixed(3),km:km.toFixed(1),n:RET.n,a:RET.a,b:RET.b,nf:RET.nf,nm:RET.nm,n0:RET.n-RET.nf-RET.nm,y:RET.ybar.toFixed(2),at:new Date(RET.at).toLocaleDateString(LOC())})
+      +' '+t(RET.on?'ret_state_on':'ret_state_off')+(km>30?' '+t('ret_far',{km:km.toFixed(0)}):'');
+    const th=t('thret'), ms=MODELS.filter(m=>RET.src[m.id]); let h='<tr>'+th.map((x,i)=>`<th${i<2?' class="l"':''}>${x}</th>`).join('')+'</tr>';
+    ms.forEach(m=>{ const c=RET.src[m.id], i=srcInfo(m.cat||m.id,RET.lat,RET.lon), nm=`<td class="l"><span class="swatch" style="background:${m.c};margin-left:0"></span>${m.name}</td><td class="l">${i?i.n:'–'}</td>`;
+      if(!c.ok){ h+=`<tr class="dim">${nm}<td>${c.n!=null?c.n:'–'}</td><td class="l" colspan="${th.length-3}">${c.why==='nocov'?t('ret_w_nocov'):c.why==='few'?t('ret_w_few',{k:CAL_MIN}):t('ret_w_err',{e:esc(c.msg||'')})}</td></tr>`; return; }
+      h+=`<tr>${nm}<td>${c.n}</td><td>${sg(c.bias,2)}</td><td>${c.mae.toFixed(2)}</td><td>${(TH-KAP*c.b/c.a).toFixed(0)}</td><td>${(KAP/c.a).toFixed(1)}</td><td>${c.br.toFixed(3)}</td><td>${c.bss!=null?sg(c.bss,2):'–'}</td><td>${sg(c.d,3)}</td><td>× ${Math.exp(LAMBDA*CAL_NEQ*c.d).toFixed(2)}</td></tr>`; });
+    h+=`<tr class="dim"><td class="l" colspan="2">${t('ret_clim',{y:RET.ybar.toFixed(2)})}</td><td>${RET.n}</td><td>–</td><td>–</td><td>–</td><td>–</td><td>${RET.brc.toFixed(3)}</td><td>0</td><td>–</td><td>–</td></tr>`;
+    tb.innerHTML=h;
+    const W=230,Hh=150,pl=28,pr=8,pt=8,pb=20, X=s=>pl+(W-pl-pr)*s/100, Y=p=>pt+(Hh-pt-pb)*(1-p), path=f=>{let d=''; for(let s=0;s<=100;s+=2) d+=(s?'L':'M')+X(s).toFixed(1)+','+Y(f(s)).toFixed(1)+' '; return d;};
+    const mono='font-size="9" fill="#55636d" font-family="IBM Plex Mono"';
+    ch.innerHTML=ms.filter(m=>RET.src[m.id].ok).map(m=>{ const c=RET.src[m.id]; let g='';
+      [0,.5,1].forEach(v=>{g+=`<line x1="${pl}" x2="${W-pr}" y1="${Y(v)}" y2="${Y(v)}" stroke="#eceff2"/><text x="${pl-5}" y="${Y(v)+3}" text-anchor="end" ${mono}>${100*v}</text>`;});
+      [0,50,100].forEach(v=>{g+=`<text x="${X(v)}" y="${Hh-6}" text-anchor="middle" ${mono}>${v}</text>`;});
+      g+=`<path d="${path(p_of)}" fill="none" stroke="#9fb0bd" stroke-width="1.3" stroke-dasharray="4 3"/><path d="${path(s=>curveP(c,s))}" fill="none" stroke="${m.c}" stroke-width="2.2"/>`;
+      (c.bins||[]).forEach(q=>{g+=`<circle cx="${X(q[0]).toFixed(1)}" cy="${Y(q[1]).toFixed(1)}" r="${Math.min(2+Math.sqrt(q[2]),8).toFixed(1)}" fill="${m.c}" fill-opacity=".35" stroke="${m.c}"/><text x="${X(q[0]).toFixed(1)}" y="${Math.max(Y(q[1])-10,9).toFixed(1)}" text-anchor="middle" ${mono}>${q[2]}</text>`;});
+      return `<div><div class="mt">${m.name}</div><svg viewBox="0 0 ${W} ${Hh}" role="img">${g}</svg></div>`; }).join('');
+  }
+  $('#icao').value=$('#icao3').value=MET.st;
+  $('#icao').addEventListener('change',()=>{ if(setStation($('#icao').value)) proposeMetar(); });
+  $('#icao3').addEventListener('change',()=>{ if(!setStation($('#icao3').value)){ setR(t('met_bad')); return; } setR(''); if(B.ran) proposeMetar(); });
+  $('#metarbtn').addEventListener('click',()=>{ if(setStation($('#icao').value)) proposeMetar(); });
+  $('#odate').addEventListener('change',()=>{ proposeMetar(); });
+  $('#oval').addEventListener('change',()=>{ MET.man[$('#odate').value]=$('#oval').value; });
+  $('#goret').addEventListener('click',runRetro);
+  $('#retstop').addEventListener('click',()=>{ RR.stop=true; setR(t('ret_stopping')); });
+  $('#reton').addEventListener('change',()=>{ if(!RET) return; RET.on=$('#reton').checked; saveRet(); renderRetro(); if(B.ran) run2(); });
+  $('#retclear').addEventListener('click',()=>{ if(!RET||!confirm(t('ret_confirm'))) return; RET=null; saveRet(); renderRetro(); setR(''); if(B.ran) run2(); });
+
   $('#saveobs').addEventListener('click',()=>{
     const date=$('#odate').value; if(!date) return; const y=+$('#oval').value, sn=store.snap[date];
     const ex=store.obs.findIndex(o=>o.date===date);
-    const rec={date,y,p:sn?sn.p:null,post:sn?sn.post:null,lat:sn?sn.lat:null,lon:sn?sn.lon:null,v:sn?(sn.v||1):null};
-    if(ex>=0){ store.obs[ex].y=y; if(!store.obs[ex].p&&sn){store.obs[ex].p=sn.p;store.obs[ex].post=sn.post;store.obs[ex].v=sn.v||1;} } else store.obs.push(rec);
+    const rec={date,y,p:sn?sn.p:null,post:sn?sn.post:null,lat:sn?sn.lat:null,lon:sn?sn.lon:null,v:sn?(sn.v||1):null}, m=metarRec(date); if(m) rec.m=m;
+    if(ex>=0){ store.obs[ex].y=y; if(m) store.obs[ex].m=m; if(!store.obs[ex].p&&sn){store.obs[ex].p=sn.p;store.obs[ex].post=sn.post;store.obs[ex].v=sn.v||1;} } else store.obs.push(rec);
     save();
     const msg=sn?t('obs_saved',{d:date}):t('no_snap',{d:date});
     if(B.last){ render2(); calib(); $('#st2').textContent=msg+' · '+$('#st2').textContent; } else { $('#st2').textContent=msg; tobs(); }
+    delete MET.man[date]; renderMetar();
   });
   $('#exp').addEventListener('click',()=>{const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(store,null,1)],{type:'application/json'})); a.download='niebla_observaciones.json'; a.click();});
   $('#imp').addEventListener('change',e=>{const f=e.target.files[0]; if(!f) return; f.text().then(x=>{try{const s=JSON.parse(x); if(Array.isArray(s.obs)){store=s; if(!store.snap) store.snap={}; save(); run2();}}catch(err){$('#st2').textContent=t('badjson');}});});
