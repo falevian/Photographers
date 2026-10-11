@@ -22,7 +22,18 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="es_ES">
+<meta property="og:locale:alternate" content="en_GB">
 <meta name="twitter:card" content="summary_large_image">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
 <style>
 :root{
   --bg:#05070b; --panel:#0c1119; --panel2:#101724; --hair:#1d2635;
@@ -68,204 +79,256 @@ figcaption{font-family:var(--sans);font-size:13px;color:var(--muted);padding:8px
 .figrow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media (max-width:640px){.figrow{grid-template-columns:1fr}}
 footer{border-top:1px solid var(--hair);margin-top:48px;padding-top:16px;font-family:var(--sans);font-size:13px;color:var(--muted)}
+
+/* ---------- conmutador de idioma ---------- */
+html[lang="es"] [data-lang="en"]{display:none!important}
+html[lang="en"] [data-lang="es"]{display:none!important}
+.langbar{position:fixed;top:14px;right:16px;z-index:100;display:flex;background:rgba(12,17,25,.92);
+  border:1px solid var(--hair);border-radius:8px;overflow:hidden;
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.langbar button{font:11.5px var(--sans);letter-spacing:.09em;background:transparent;border:0;
+  color:var(--muted);padding:7px 11px;cursor:pointer;transition:background .15s,color .15s}
+.langbar button+button{border-left:1px solid var(--hair)}
+.langbar button:hover{color:var(--ink)}
+.langbar button.on{background:rgba(232,179,60,.14);color:var(--gold)}
+.langbar button:focus-visible{outline:2px solid rgba(232,179,60,.6);outline-offset:-2px}
+/* enlace a la portada, dentro del conmutador de idioma */
+.langbar a.home{display:flex;align-items:center;padding:0 9px;color:var(--muted);border-right:1px solid var(--hair)}
+.langbar a.home:hover{color:var(--ink);text-decoration:none}
+.langbar a.home svg{width:12px;height:12px;display:block}
+@media (max-width:720px){.langbar{top:8px;right:8px} header.top{padding-top:54px}}
+@media print{.langbar{display:none!important}}
 </style>
 </head>
 <body>
+<div class="langbar" role="group" aria-label="Idioma / Language">
+  <a class="home" href="index.html" title="Portada / Home" aria-label="Portada / Home"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.5 8 2.5l5.5 5v6h-4v-4h-3v4h-4z"/></svg></a>
+  <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+  <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+</div>
 <div class="wrap">
 
 <header class="top">
-  <div class="kicker"><a href="index.html">Photographers</a> / <a href="caracter-optico-leica-m.html">carta completa</a> / <a href="caracter-optico-reducido.html">carta reducida</a> / manual MTF</div>
-  <h1>Leer una MTF:<br>del gráfico al <em>rendering</em></h1>
-  <p class="thesis">Una ficha MTF es un informe de aberraciones cifrado. Este manual lo descifra en las dos direcciones: de la forma de la curva al defecto que la produce, y de la cualidad que buscas (pop, cremosidad, glow) a lo que debes exigirle a la gráfica. Cada firma va con su gráfica ilustrativa, generada aquí mismo.</p>
+  <div class="kicker"><span data-lang="es"><a href="index.html">Photographers</a> / <a href="caracter-optico-leica-m.html">carta completa</a> / <a href="caracter-optico-reducido.html">carta reducida</a> / manual MTF</span><span data-lang="en"><a href="index.html">Photographers</a> / <a href="caracter-optico-leica-m.html">full chart</a> / <a href="caracter-optico-reducido.html">reduced chart</a> / MTF manual</span></div>
+  <h1><span data-lang="es">Leer una MTF:<br>del gráfico al <em>rendering</em></span><span data-lang="en">Reading an MTF:<br>from the graph to the <em>rendering</em></span></h1>
+  <p class="thesis" data-lang="es">Una ficha MTF es un informe de aberraciones cifrado. Este manual lo descifra en las dos direcciones: de la forma de la curva al defecto que la produce, y de la cualidad que buscas (pop, cremosidad, glow) a lo que debes exigirle a la gráfica. Cada firma va con su gráfica ilustrativa, generada aquí mismo.</p>
+<p class="thesis" data-lang="en">An MTF sheet is an encrypted report of aberrations. This manual deciphers it in both directions: from the shape of the curve to the defect that produces it, and from the quality you are after (pop, creaminess, glow) to what you should demand of the graph. Each signature comes with its illustrative graph, generated right here.</p>
 </header>
 
 <section>
-<h2>1. Qué es y qué no es</h2>
-<p>La MTF mide la fracción de contraste de una mira sinusoidal que sobrevive al objetivo, en función de la frecuencia espacial (pares de líneas por mm) y de la altura de imagen Y (mm desde el centro del fotograma; 21,6 mm es la esquina del paso universal). Tres cautelas previas: las fichas de fabricante suelen ser calculadas desde el diseño, sin tolerancias de fabricación ni recubrimientos; se trazan a foco óptimo y casi siempre a infinito, y el retrato se hace a dos metros; y son policromáticas, lo que diluye el cromatismo longitudinal hasta hacerlo casi invisible.</p>
+<h2><span data-lang="es">1. Qué es y qué no es</span><span data-lang="en">1. What it is and what it is not</span></h2>
+<p data-lang="es">La MTF mide la fracción de contraste de una mira sinusoidal que sobrevive al objetivo, en función de la frecuencia espacial (pares de líneas por mm) y de la altura de imagen Y (mm desde el centro del fotograma; 21,6 mm es la esquina del paso universal). Tres cautelas previas: las fichas de fabricante suelen ser calculadas desde el diseño, sin tolerancias de fabricación ni recubrimientos; se trazan a foco óptimo y casi siempre a infinito, y el retrato se hace a dos metros; y son policromáticas, lo que diluye el cromatismo longitudinal hasta hacerlo casi invisible.</p>
+<p data-lang="en">The MTF measures the fraction of the contrast of a sinusoidal target that survives the lens, as a function of spatial frequency (line pairs per mm) and of image height Y (mm from the centre of the frame; 21.6 mm is the corner of the 24×36 format). Three cautions first: manufacturers' sheets are usually computed from the design, without manufacturing tolerances or coatings; they are plotted at best focus and almost always at infinity, whereas a portrait is taken at two metres; and they are polychromatic, which dilutes longitudinal chromatic aberration until it is almost invisible.</p>
 </section>
 
 <section>
-<h2>2. Anatomía de la ficha</h2>
-<p>El formato Leica/Zeiss dibuja cuatro frecuencias (5, 10, 20 y 40 pl/mm, de arriba abajo) con dos curvas cada una: tangencial (T, trazo continuo, estructuras perpendiculares al radio) y sagital (S, discontinuo, estructuras a lo largo del radio), y repite la familia a plena apertura y a f/5.6. Qué cuenta cada banda: 5 y 10 pl/mm es el contraste de las masas grandes, el relieve y la profundidad (la banda que según Heynacher y Nasse domina el juicio subjetivo); 20 pl/mm es la nitidez percibida a distancia normal; 40 pl/mm es el microcontraste, la frontera entre clínico y amable. Regla de oro: compara siempre T con S de la misma frecuencia, nunca curvas adyacentes.</p>
-<figure><div id="fig-anatomia"></div><figcaption>Ficha tipo a plena apertura de un diseño moderno equilibrado. Las cuatro frecuencias apiladas, T continua y S discontinua. La flecha marca la lectura fundamental: separación vertical T/S a una misma altura Y.</figcaption></figure>
+<h2><span data-lang="es">2. Anatomía de la ficha</span><span data-lang="en">2. Anatomy of the sheet</span></h2>
+<p data-lang="es">El formato Leica/Zeiss dibuja cuatro frecuencias (5, 10, 20 y 40 pl/mm, de arriba abajo) con dos curvas cada una: tangencial (T, trazo continuo, estructuras perpendiculares al radio) y sagital (S, discontinuo, estructuras a lo largo del radio), y repite la familia a plena apertura y a f/5.6. Qué cuenta cada banda: 5 y 10 pl/mm es el contraste de las masas grandes, el relieve y la profundidad (la banda que según Heynacher y Nasse domina el juicio subjetivo); 20 pl/mm es la nitidez percibida a distancia normal; 40 pl/mm es el microcontraste, la frontera entre clínico y amable. Regla de oro: compara siempre T con S de la misma frecuencia, nunca curvas adyacentes.</p>
+<p data-lang="en">The Leica/Zeiss format draws four frequencies (5, 10, 20 and 40 lp/mm, from top to bottom) with two curves each: tangential (T, solid line, structures perpendicular to the radius) and sagittal (S, dashed, structures along the radius), and repeats the family at full aperture and at f/5.6. What each band tells: 5 and 10 lp/mm are the contrast of the large masses, relief and depth (the band which, according to Heynacher and Nasse, dominates subjective judgement); 20 lp/mm is perceived sharpness at normal viewing distance; 40 lp/mm is microcontrast, the border between clinical and gentle. Golden rule: always compare T with S at the same frequency, never adjacent curves.</p>
+<figure><div id="fig-anatomia"></div><figcaption><span data-lang="es">Ficha tipo a plena apertura de un diseño moderno equilibrado. Las cuatro frecuencias apiladas, T continua y S discontinua. La flecha marca la lectura fundamental: separación vertical T/S a una misma altura Y.</span><span data-lang="en">A typical sheet at full aperture for a balanced modern design. The four frequencies stacked, T solid and S dashed. The arrow marks the fundamental reading: the vertical T/S separation at one and the same height Y.</span></figcaption></figure>
 </section>
 
 <section>
-<h2>3. Protocolo de lectura en diez pasos</h2>
+<h2><span data-lang="es">3. Protocolo de lectura en diez pasos</span><span data-lang="en">3. A ten-step reading protocol</span></h2>
 <ol class="proto">
-<li>Lee los cuatro valores en Y = 0 a plena apertura: el de 10 pl/mm predice el relieve, el de 40 el carácter clínico o suave.</li>
-<li>Mide el hueco entre la familia de plena apertura y la de f/5.6 en el centro: grande, mucha esférica; casi nulo, diseño apocromático.</li>
-<li>Busca separaciones T/S a cada altura.</li>
-<li>Sigue la monotonía de cada curva: valles y remontadas con T y S en fase delatan curvatura de campo.</li>
-<li>Mira la esquina a 5 pl/mm: dice si las masas llegan al borde.</li>
-<li>Compara tangenciales y sagitales en el último tercio también a f/5.6: T persistentemente peor es cromatismo lateral.</li>
-<li>Anota a qué altura empieza la degradación: ahí acaba el territorio del sujeto.</li>
-<li>Clasifica cada defecto como curable al diafragmar (esférica, coma) o estructural (astigmatismo, curvatura, LaCA).</li>
-<li>Abre la hoja de viñeteo y distorsión del mismo documento: no están en la MTF y cambian la lectura estética.</li>
-<li>Recuerda lo que no has visto: velo, signo de la esférica, LoCA, estructura del disco (sección 6).</li>
+<li><span data-lang="es">Lee los cuatro valores en Y = 0 a plena apertura: el de 10 pl/mm predice el relieve, el de 40 el carácter clínico o suave.</span><span data-lang="en">Read the four values at Y = 0 at full aperture: the one at 10 lp/mm predicts relief, the one at 40 a clinical or a soft character.</span></li>
+<li><span data-lang="es">Mide el hueco entre la familia de plena apertura y la de f/5.6 en el centro: grande, mucha esférica; casi nulo, diseño apocromático.</span><span data-lang="en">Measure the gap between the full-aperture family and the f/5.6 family at the centre: large, plenty of spherical aberration; almost nil, an apochromatic design.</span></li>
+<li><span data-lang="es">Busca separaciones T/S a cada altura.</span><span data-lang="en">Look for T/S separations at every height.</span></li>
+<li><span data-lang="es">Sigue la monotonía de cada curva: valles y remontadas con T y S en fase delatan curvatura de campo.</span><span data-lang="en">Follow the monotonicity of each curve: dips and recoveries with T and S in phase betray field curvature.</span></li>
+<li><span data-lang="es">Mira la esquina a 5 pl/mm: dice si las masas llegan al borde.</span><span data-lang="en">Look at the corner at 5 lp/mm: it says whether the masses reach the edge.</span></li>
+<li><span data-lang="es">Compara tangenciales y sagitales en el último tercio también a f/5.6: T persistentemente peor es cromatismo lateral.</span><span data-lang="en">Compare tangentials and sagittals in the last third at f/5.6 as well: T persistently worse is lateral chromatic aberration.</span></li>
+<li><span data-lang="es">Anota a qué altura empieza la degradación: ahí acaba el territorio del sujeto.</span><span data-lang="en">Note the height at which degradation begins: that is where the territory of the subject ends.</span></li>
+<li><span data-lang="es">Clasifica cada defecto como curable al diafragmar (esférica, coma) o estructural (astigmatismo, curvatura, LaCA).</span><span data-lang="en">Classify each defect as curable by stopping down (spherical, coma) or structural (astigmatism, curvature, LaCA).</span></li>
+<li><span data-lang="es">Abre la hoja de viñeteo y distorsión del mismo documento: no están en la MTF y cambian la lectura estética.</span><span data-lang="en">Open the vignetting and distortion page of the same document: they are not in the MTF and they change the aesthetic reading.</span></li>
+<li><span data-lang="es">Recuerda lo que no has visto: velo, signo de la esférica, LoCA, estructura del disco (sección 6).</span><span data-lang="en">Remember what you have not seen: veiling glare, the sign of the spherical aberration, LoCA, the structure of the disc (section 6).</span></li>
 </ol>
 </section>
 
 <section>
-<h2>4. Firmas de las aberraciones</h2>
+<h2><span data-lang="es">4. Firmas de las aberraciones</span><span data-lang="en">4. Signatures of the aberrations</span></h2>
 <table>
-<tr><th>Aberración</th><th>Firma en la MTF</th><th>Prueba de confirmación</th></tr>
-<tr><td>Esférica (SA)</td><td>Depresión también en Y = 0 a plena apertura</td><td>Se cura espectacularmente a f/5.6</td></tr>
-<tr><td>Glow (SA alta)</td><td>5 y 10 pl/mm hundidas en eje, 40 con cola digna</td><td>Contraste bajo con resolución alta</td></tr>
-<tr><td>Coma</td><td>T/S separadas y hundidas en el tercio exterior</td><td>Desaparece a f/4 o f/5.6</td></tr>
-<tr><td>Astigmatismo</td><td>Separación T/S a igual Y</td><td>Persiste al diafragmar</td></tr>
-<tr><td>Curvatura de campo</td><td>Oscilación no monótona de T y S en fase</td><td>Persiste; el valle se desplaza</td></tr>
-<tr><td>Cromatismo lateral</td><td>T bajo S en el borde del campo</td><td>Inmune al diafragma</td></tr>
-<tr><td>Cromatismo longitudinal</td><td>Casi invisible: pérdida pequeña y uniforme</td><td>Curvas por longitud de onda o imagen real</td></tr>
+<tr><th><span data-lang="es">Aberración</span><span data-lang="en">Aberration</span></th><th><span data-lang="es">Firma en la MTF</span><span data-lang="en">Signature in the MTF</span></th><th><span data-lang="es">Prueba de confirmación</span><span data-lang="en">Confirming test</span></th></tr>
+<tr><td><span data-lang="es">Esférica (SA)</span><span data-lang="en">Spherical (SA)</span></td><td><span data-lang="es">Depresión también en Y = 0 a plena apertura</span><span data-lang="en">A depression at Y = 0 too, at full aperture</span></td><td><span data-lang="es">Se cura espectacularmente a f/5.6</span><span data-lang="en">Cured spectacularly at f/5.6</span></td></tr>
+<tr><td><span data-lang="es">Glow (SA alta)</span><span data-lang="en">Glow (high SA)</span></td><td><span data-lang="es">5 y 10 pl/mm hundidas en eje, 40 con cola digna</span><span data-lang="en">5 and 10 lp/mm sunk on axis, 40 with a respectable tail</span></td><td><span data-lang="es">Contraste bajo con resolución alta</span><span data-lang="en">Low contrast with high resolution</span></td></tr>
+<tr><td><span data-lang="es">Coma</span><span data-lang="en">Coma</span></td><td><span data-lang="es">T/S separadas y hundidas en el tercio exterior</span><span data-lang="en">T/S apart and sunk in the outer third</span></td><td><span data-lang="es">Desaparece a f/4 o f/5.6</span><span data-lang="en">Gone at f/4 or f/5.6</span></td></tr>
+<tr><td><span data-lang="es">Astigmatismo</span><span data-lang="en">Astigmatism</span></td><td><span data-lang="es">Separación T/S a igual Y</span><span data-lang="en">T/S separation at equal Y</span></td><td><span data-lang="es">Persiste al diafragmar</span><span data-lang="en">Persists on stopping down</span></td></tr>
+<tr><td><span data-lang="es">Curvatura de campo</span><span data-lang="en">Field curvature</span></td><td><span data-lang="es">Oscilación no monótona de T y S en fase</span><span data-lang="en">Non-monotonic oscillation of T and S in phase</span></td><td><span data-lang="es">Persiste; el valle se desplaza</span><span data-lang="en">Persists; the dip moves</span></td></tr>
+<tr><td><span data-lang="es">Cromatismo lateral</span><span data-lang="en">Lateral chromatic aberration</span></td><td><span data-lang="es">T bajo S en el borde del campo</span><span data-lang="en">T below S at the edge of the field</span></td><td><span data-lang="es">Inmune al diafragma</span><span data-lang="en">Immune to the aperture</span></td></tr>
+<tr><td><span data-lang="es">Cromatismo longitudinal</span><span data-lang="en">Longitudinal chromatic aberration</span></td><td><span data-lang="es">Casi invisible: pérdida pequeña y uniforme</span><span data-lang="en">Almost invisible: a small, uniform loss</span></td><td><span data-lang="es">Curvas por longitud de onda o imagen real</span><span data-lang="en">Curves by wavelength, or a real image</span></td></tr>
 </table>
 
-<h3>Esférica residual</h3>
-<p>Única aberración monocromática activa en el eje: deprime el contraste en Y = 0 a plena apertura y el hueco respecto a f/5.6 mide su cantidad. Límite esencial: la MTF a foco óptimo es ciega al signo. Subcorregida y sobrecorregida con igual módulo dan curvas casi idénticas; el signo, que decide si el bokeh es cremoso o nervioso, solo aparece en el through-focus, en la deriva de foco al diafragmar o en los discos reales.</p>
-<figure><div id="fig-esferica"></div><figcaption>La firma: la misma curva de 20 pl/mm a plena apertura y a f/5.6. El hueco en el eje es esférica residual; al cerrar, los rayos marginales dejan de participar y la curva se recupera.</figcaption></figure>
+<h3><span data-lang="es">Esférica residual</span><span data-lang="en">Residual spherical aberration</span></h3>
+<p data-lang="es">Única aberración monocromática activa en el eje: deprime el contraste en Y = 0 a plena apertura y el hueco respecto a f/5.6 mide su cantidad. Límite esencial: la MTF a foco óptimo es ciega al signo. Subcorregida y sobrecorregida con igual módulo dan curvas casi idénticas; el signo, que decide si el bokeh es cremoso o nervioso, solo aparece en el through-focus, en la deriva de foco al diafragmar o en los discos reales.</p>
+<p data-lang="en">The only monochromatic aberration active on axis: it depresses contrast at Y = 0 at full aperture, and the gap with respect to f/5.6 measures how much of it there is. An essential limit: the MTF at best focus is blind to the sign. Undercorrected and overcorrected with the same modulus give almost identical curves; the sign, which decides whether the bokeh is creamy or nervous, shows only in the through-focus, in the focus shift on stopping down, or in real discs.</p>
+<figure><div id="fig-esferica"></div><figcaption><span data-lang="es">La firma: la misma curva de 20 pl/mm a plena apertura y a f/5.6. El hueco en el eje es esférica residual; al cerrar, los rayos marginales dejan de participar y la curva se recupera.</span><span data-lang="en">The signature: the same 20 lp/mm curve at full aperture and at f/5.6. The gap on axis is residual spherical aberration; on stopping down, the marginal rays cease to take part and the curve recovers.</span></figcaption></figure>
 
-<h3>Glow</h3>
-<p>Esférica muy alta más dispersión: PSF de núcleo nítido rodeado de halo. El halo roba contraste a las masas sin destruir el detalle: frecuencias bajas anormalmente hundidas con la de 40 conservando cola. Contraste global bajo con resolución sorprendentemente alta es la firma del velo esférico.</p>
-<figure><div id="fig-glow"></div><figcaption>Familia comprimida por arriba: la curva de 5 pl/mm, que en un objetivo normal rozaría 1, arranca en 0,78. La distancia entre 5 y 40 se ha estrechado: eso es el halo.</figcaption></figure>
+<h3><span data-lang="es">Glow</span><span data-lang="en">Glow</span></h3>
+<p data-lang="es">Esférica muy alta más dispersión: PSF de núcleo nítido rodeado de halo. El halo roba contraste a las masas sin destruir el detalle: frecuencias bajas anormalmente hundidas con la de 40 conservando cola. Contraste global bajo con resolución sorprendentemente alta es la firma del velo esférico.</p>
+<p data-lang="en">Very high spherical aberration plus scatter: a PSF with a sharp core surrounded by a halo. The halo steals contrast from the masses without destroying detail: low frequencies abnormally sunk, with the 40 keeping its tail. Low overall contrast with surprisingly high resolution is the signature of spherical veil.</p>
+<figure><div id="fig-glow"></div><figcaption><span data-lang="es">Familia comprimida por arriba: la curva de 5 pl/mm, que en un objetivo normal rozaría 1, arranca en 0,78. La distancia entre 5 y 40 se ha estrechado: eso es el halo.</span><span data-lang="en">A family compressed from above: the 5 lp/mm curve, which in a normal lens would graze 1, starts at 0.78. The distance between 5 and 40 has narrowed: that is the halo.</span></figcaption></figure>
 
-<h3>Coma frente a astigmatismo</h3>
-<p>Ambos separan T de S en el campo; la biografía los distingue. El coma muere al diafragmar; el astigmatismo sobrevive. Separación que se cierra a f/4: coma. Separación que persiste: astigmatismo (o curvatura, si T y S oscilan juntas).</p>
+<h3><span data-lang="es">Coma frente a astigmatismo</span><span data-lang="en">Coma versus astigmatism</span></h3>
+<p data-lang="es">Ambos separan T de S en el campo; la biografía los distingue. El coma muere al diafragmar; el astigmatismo sobrevive. Separación que se cierra a f/4: coma. Separación que persiste: astigmatismo (o curvatura, si T y S oscilan juntas).</p>
+<p data-lang="en">Both separate T from S in the field; their biography tells them apart. Coma dies on stopping down; astigmatism survives. A separation that closes at f/4: coma. A separation that persists: astigmatism (or curvature, if T and S oscillate together).</p>
 <div class="figrow">
-<figure><div id="fig-coma14"></div><figcaption>Coma a plena apertura: el tercio exterior se abre y se hunde.</figcaption></figure>
-<figure><div id="fig-coma56"></div><figcaption>El mismo objetivo a f/5.6: la separación se ha cerrado. Era coma.</figcaption></figure>
+<figure><div id="fig-coma14"></div><figcaption><span data-lang="es">Coma a plena apertura: el tercio exterior se abre y se hunde.</span><span data-lang="en">Coma at full aperture: the outer third opens up and sinks.</span></figcaption></figure>
+<figure><div id="fig-coma56"></div><figcaption><span data-lang="es">El mismo objetivo a f/5.6: la separación se ha cerrado. Era coma.</span><span data-lang="en">The same lens at f/5.6: the separation has closed. It was coma.</span></figcaption></figure>
 </div>
 <div class="figrow">
-<figure><div id="fig-astig14"></div><figcaption>Astigmatismo a plena apertura: T y S divergen desde media altura.</figcaption></figure>
-<figure><div id="fig-astig56"></div><figcaption>A f/5.6 todo sube, pero el hueco T/S sigue ahí. Estructural.</figcaption></figure>
+<figure><div id="fig-astig14"></div><figcaption><span data-lang="es">Astigmatismo a plena apertura: T y S divergen desde media altura.</span><span data-lang="en">Astigmatism at full aperture: T and S diverge from mid-height.</span></figcaption></figure>
+<figure><div id="fig-astig56"></div><figcaption><span data-lang="es">A f/5.6 todo sube, pero el hueco T/S sigue ahí. Estructural.</span><span data-lang="en">At f/5.6 everything rises, but the T/S gap is still there. Structural.</span></figcaption></figure>
 </div>
 
-<h3>Curvatura de campo</h3>
-<p>La superficie nítida es un casquete que corta al sensor en anillos: las curvas caen, hacen valle en la zona media y remontan hacia la esquina, moviendo T y S en fase. Si oscilan por separado, hay además astigmatismo: las superficies T y S son dos casquetes distintos.</p>
-<figure><div id="fig-curvatura"></div><figcaption>La oscilación no monótona: valle hacia Y = 12 y remontada hacia la esquina. El casquete de foco se aleja del sensor y vuelve a cortarlo.</figcaption></figure>
+<h3><span data-lang="es">Curvatura de campo</span><span data-lang="en">Field curvature</span></h3>
+<p data-lang="es">La superficie nítida es un casquete que corta al sensor en anillos: las curvas caen, hacen valle en la zona media y remontan hacia la esquina, moviendo T y S en fase. Si oscilan por separado, hay además astigmatismo: las superficies T y S son dos casquetes distintos.</p>
+<p data-lang="en">The sharp surface is a cap that cuts the sensor in rings: the curves fall, dip in the middle zone and recover towards the corner, with T and S moving in phase. If they oscillate separately there is astigmatism as well: the T and S surfaces are two different caps.</p>
+<figure><div id="fig-curvatura"></div><figcaption><span data-lang="es">La oscilación no monótona: valle hacia Y = 12 y remontada hacia la esquina. El casquete de foco se aleja del sensor y vuelve a cortarlo.</span><span data-lang="en">The non-monotonic oscillation: a dip around Y = 12 and a recovery towards the corner. The cap of focus moves away from the sensor and cuts it again.</span></figcaption></figure>
 
-<h3>Cromatismo lateral</h3>
-<p>El aumento depende de la longitud de onda: el punto se estira radialmente en un pequeño arcoíris que emborrona las estructuras tangenciales del borde. Firma: tangenciales persistentemente por debajo de las sagitales en el último tercio, insensible al diafragma. Se corrige bien por software.</p>
-<figure><div id="fig-laca"></div><figcaption>T cayendo bajo S solo en el borde del campo. Repite la lectura a f/5.6: si no cambia, es LaCA.</figcaption></figure>
+<h3><span data-lang="es">Cromatismo lateral</span><span data-lang="en">Lateral chromatic aberration</span></h3>
+<p data-lang="es">El aumento depende de la longitud de onda: el punto se estira radialmente en un pequeño arcoíris que emborrona las estructuras tangenciales del borde. Firma: tangenciales persistentemente por debajo de las sagitales en el último tercio, insensible al diafragma. Se corrige bien por software.</p>
+<p data-lang="en">Magnification depends on wavelength: the point is stretched radially into a small rainbow that smears the tangential structures at the edge. Signature: tangentials persistently below the sagittals in the last third, insensitive to the aperture. It is well corrected in software.</p>
+<figure><div id="fig-laca"></div><figcaption><span data-lang="es">T cayendo bajo S solo en el borde del campo. Repite la lectura a f/5.6: si no cambia, es LaCA.</span><span data-lang="en">T falling below S only at the edge of the field. Repeat the reading at f/5.6: if it does not change, it is LaCA.</span></figcaption></figure>
 
-<h3>Cromatismo longitudinal, el punto ciego</h3>
-<p>En una MTF policromática la LoCA queda diluida como una pérdida pequeña y uniforme, indistinguible de otras causas; en fichas calculadas, ni eso. Se detecta en imagen (ribetes magenta delante y verdes detrás del foco) o con curvas monocromáticas que casi nadie publica.</p>
-<figure><div id="fig-loca"></div><figcaption>Dos objetivos, uno con LoCA marcada y otro sin ella: sus curvas policromáticas son casi indistinguibles. La aberración que más daña el bokeh es invisible aquí.</figcaption></figure>
+<h3><span data-lang="es">Cromatismo longitudinal, el punto ciego</span><span data-lang="en">Longitudinal chromatic aberration, the blind spot</span></h3>
+<p data-lang="es">En una MTF policromática la LoCA queda diluida como una pérdida pequeña y uniforme, indistinguible de otras causas; en fichas calculadas, ni eso. Se detecta en imagen (ribetes magenta delante y verdes detrás del foco) o con curvas monocromáticas que casi nadie publica.</p>
+<p data-lang="en">In a polychromatic MTF, LoCA is diluted into a small, uniform loss, indistinguishable from other causes; in computed sheets, not even that. It is detected in the image (magenta fringes in front of focus and green ones behind it) or with monochromatic curves that hardly anyone publishes.</p>
+<figure><div id="fig-loca"></div><figcaption><span data-lang="es">Dos objetivos, uno con LoCA marcada y otro sin ella: sus curvas policromáticas son casi indistinguibles. La aberración que más daña el bokeh es invisible aquí.</span><span data-lang="en">Two lenses, one with marked LoCA and one without: their polychromatic curves are almost indistinguishable. The aberration that does most harm to bokeh is invisible here.</span></figcaption></figure>
 </section>
 
 <section>
-<h2>5. De la cualidad a la curva</h2>
+<h2><span data-lang="es">5. De la cualidad a la curva</span><span data-lang="en">5. From the quality to the curve</span></h2>
 
-<h3>Pop 3D</h3>
-<p>Curvas de 5 y 10 pl/mm altas y planas en el tercio central a plena apertura (0,9 o más), hueco moderado respecto a f/5.6, y en la hoja adyacente 1 a 2 EV de viñeteo. Lo que la MTF no garantiza: LoCA baja y negros profundos, que dependen de los recubrimientos. Nasse: entre dos objetivos de igual resolución límite, el que gana a 10 y 20 pl/mm parece más tridimensional.</p>
+<h3><span data-lang="es">Pop 3D</span><span data-lang="en">3D pop</span></h3>
+<p data-lang="es">Curvas de 5 y 10 pl/mm altas y planas en el tercio central a plena apertura (0,9 o más), hueco moderado respecto a f/5.6, y en la hoja adyacente 1 a 2 EV de viñeteo. Lo que la MTF no garantiza: LoCA baja y negros profundos, que dependen de los recubrimientos. Nasse: entre dos objetivos de igual resolución límite, el que gana a 10 y 20 pl/mm parece más tridimensional.</p>
+<p data-lang="en">5 and 10 lp/mm curves high and flat in the central third at full aperture (0.9 or more), a moderate gap with respect to f/5.6 and, on the adjacent page, 1 to 2 EV of vignetting. What the MTF does not guarantee: low LoCA and deep blacks, which depend on the coatings. Nasse: between two lenses of equal limiting resolution, the one that wins at 10 and 20 lp/mm looks more three-dimensional.</p>
 
-<h3>Cremosidad y doble línea: el perfil del disco</h3>
-<p>La ficha solo da la condición necesaria (hueco grande entre familias: esférica abundante); el signo decide el resultado y hay que buscarlo fuera. Subcorregida: disco con núcleo brillante y borde que se desvanece, fondos que se funden como acuarela, deriva de foco hacia atrás al diafragmar. Sobrecorregida: anillo brillante en el borde del disco que, solapado a lo largo de una rama desenfocada, duplica la línea; deriva hacia delante. El error clásico es atribuir la doble línea al astigmatismo: no, es esférica con el signo equivocado.</p>
-<figure><div id="fig-discos"></div><figcaption>Perfil de intensidad del disco de desenfoque según el estado de corrección. El mismo módulo de esférica con signos opuestos produce la acuarela o la doble línea; la MTF en foco no los distingue.</figcaption></figure>
+<h3><span data-lang="es">Cremosidad y doble línea: el perfil del disco</span><span data-lang="en">Creaminess and double line: the profile of the disc</span></h3>
+<p data-lang="es">La ficha solo da la condición necesaria (hueco grande entre familias: esférica abundante); el signo decide el resultado y hay que buscarlo fuera. Subcorregida: disco con núcleo brillante y borde que se desvanece, fondos que se funden como acuarela, deriva de foco hacia atrás al diafragmar. Sobrecorregida: anillo brillante en el borde del disco que, solapado a lo largo de una rama desenfocada, duplica la línea; deriva hacia delante. El error clásico es atribuir la doble línea al astigmatismo: no, es esférica con el signo equivocado.</p>
+<p data-lang="en">The sheet gives only the necessary condition (a large gap between families: abundant spherical aberration); the sign decides the outcome and has to be sought elsewhere. Undercorrected: a disc with a bright core and an edge that fades away, backgrounds that melt like watercolour, focus shift backwards on stopping down. Overcorrected: a bright ring at the edge of the disc which, overlapped along an out-of-focus branch, doubles the line; forward shift. The classic mistake is to blame the double line on astigmatism: no, it is spherical aberration with the wrong sign.</p>
+<figure><div id="fig-discos"></div><figcaption><span data-lang="es">Perfil de intensidad del disco de desenfoque según el estado de corrección. El mismo módulo de esférica con signos opuestos produce la acuarela o la doble línea; la MTF en foco no los distingue.</span><span data-lang="en">Intensity profile of the defocus disc according to the state of correction. The same modulus of spherical aberration with opposite signs produces the watercolour or the double line; the in-focus MTF does not tell them apart.</span></figcaption></figure>
 
-<h3>Glow onírico</h3>
-<p>La firma de la sección 4, con dos exigencias añadidas: que a f/2.8 el glow se apague (quieres poder elegirlo) y un velo moderado que lo alimente.</p>
+<h3><span data-lang="es">Glow onírico</span><span data-lang="en">Dreamy glow</span></h3>
+<p data-lang="es">La firma de la sección 4, con dos exigencias añadidas: que a f/2.8 el glow se apague (quieres poder elegirlo) y un velo moderado que lo alimente.</p>
+<p data-lang="en">The signature of section 4, with two further demands: that at f/2.8 the glow goes out (you want to be able to choose it), and a moderate veiling glare to feed it.</p>
 
-<h3>Remolino</h3>
-<p>Astigmatismo fuerte en el tercio exterior (visible: hueco T/S grande y persistente) más recorte mecánico de pupila, que la MTF no muestra: búscalo en la hoja de viñeteo, donde una caída brusca superior a 2 EV sugiere pupila muy recortada.</p>
+<h3><span data-lang="es">Remolino</span><span data-lang="en">Swirl</span></h3>
+<p data-lang="es">Astigmatismo fuerte en el tercio exterior (visible: hueco T/S grande y persistente) más recorte mecánico de pupila, que la MTF no muestra: búscalo en la hoja de viñeteo, donde una caída brusca superior a 2 EV sugiere pupila muy recortada.</p>
+<p data-lang="en">Strong astigmatism in the outer third (visible: a large, persistent T/S gap) plus mechanical clipping of the pupil, which the MTF does not show: look for it on the vignetting page, where an abrupt fall of more than 2 EV suggests a heavily clipped pupil.</p>
 
-<h3>Clínico frente a elegante</h3>
-<p>Clínico: la curva de 40 pegada a la de 20 en todo el campo y hueco casi nulo entre aperturas. Elegancia clásica: 10 y 20 altas con la de 40 deliberadamente descolgada a 0,6 o 0,7: macro sin micro, dibujo amable sin sacrificar relieve.</p>
+<h3><span data-lang="es">Clínico frente a elegante</span><span data-lang="en">Clinical versus elegant</span></h3>
+<p data-lang="es">Clínico: la curva de 40 pegada a la de 20 en todo el campo y hueco casi nulo entre aperturas. Elegancia clásica: 10 y 20 altas con la de 40 deliberadamente descolgada a 0,6 o 0,7: macro sin micro, dibujo amable sin sacrificar relieve.</p>
+<p data-lang="en">Clinical: the 40 curve hugging the 20 across the whole field and an almost nil gap between apertures. Classical elegance: 10 and 20 high with the 40 deliberately left behind at 0.6 or 0.7: macro without micro, a gentle drawing without giving up relief.</p>
 <div class="figrow">
-<figure><div id="fig-clinico"></div><figcaption>Perfil clínico: 20 y 40 pl/mm casi pegadas. Textura dura.</figcaption></figure>
-<figure><div id="fig-elegante"></div><figcaption>Perfil clásico: mismo macro, la de 40 descolgada. Dibujo amable.</figcaption></figure>
+<figure><div id="fig-clinico"></div><figcaption><span data-lang="es">Perfil clínico: 20 y 40 pl/mm casi pegadas. Textura dura.</span><span data-lang="en">Clinical profile: 20 and 40 lp/mm almost together. A hard texture.</span></figcaption></figure>
+<figure><div id="fig-elegante"></div><figcaption><span data-lang="es">Perfil clásico: mismo macro, la de 40 descolgada. Dibujo amable.</span><span data-lang="en">Classical profile: the same macro, the 40 left behind. A gentle drawing.</span></figcaption></figure>
 </div>
 
-<h3>Esquinas que se funden</h3>
-<p>Caída fuerte de todas las frecuencias en el último tercio con la de 5 pl/mm aguantando: las masas llegan, el detalle no. Periferia expresiva sin destrucción geométrica.</p>
+<h3><span data-lang="es">Esquinas que se funden</span><span data-lang="en">Corners that melt away</span></h3>
+<p data-lang="es">Caída fuerte de todas las frecuencias en el último tercio con la de 5 pl/mm aguantando: las masas llegan, el detalle no. Periferia expresiva sin destrucción geométrica.</p>
+<p data-lang="en">A strong fall of every frequency in the last third with the 5 lp/mm holding: the masses arrive, the detail does not. An expressive periphery without geometric destruction.</p>
 </section>
 
 <section>
-<h2>6. Los puntos ciegos</h2>
+<h2><span data-lang="es">6. Los puntos ciegos</span><span data-lang="en">6. The blind spots</span></h2>
 <table>
-<tr><th>Cualidad</th><th>Por qué no está en la MTF</th><th>Dónde mirarla</th></tr>
-<tr><td>Velo, nivel de negro</td><td>MTF normalizada a 1 en frecuencia cero; el cálculo ignora recubrimientos</td><td>Contraluces reales, generación del tratamiento</td></tr>
-<tr><td>Signo de la esférica</td><td>Simetría de la MTF a foco óptimo</td><td>Through-focus, deriva de foco, discos</td></tr>
-<tr><td>LoCA</td><td>Diluida en la integración policromática</td><td>Bordes fuera de foco en imagen</td></tr>
-<tr><td>Rizado asférico</td><td>Estructura fina del disco</td><td>Discos de altas luces ampliados</td></tr>
-<tr><td>Ojo de gato, recorte</td><td>Propiedad de la pupila fuera de eje</td><td>Hoja de viñeteo, discos en esquina</td></tr>
-<tr><td>Viñeteo y distorsión</td><td>Hojas aparte</td><td>Ficha de iluminación relativa</td></tr>
-<tr><td>Deriva de foco</td><td>Fenómeno entre aperturas</td><td>Series de enfoque diafragmando</td></tr>
-<tr><td>Bokeh en general</td><td>Requiere la PSF 3D, no su corte en foco</td><td>Imágenes; modelo r(ρ) = aρ + bρ³</td></tr>
+<tr><th><span data-lang="es">Cualidad</span><span data-lang="en">Quality</span></th><th><span data-lang="es">Por qué no está en la MTF</span><span data-lang="en">Why it is not in the MTF</span></th><th><span data-lang="es">Dónde mirarla</span><span data-lang="en">Where to look for it</span></th></tr>
+<tr><td><span data-lang="es">Velo, nivel de negro</span><span data-lang="en">Veiling glare, black level</span></td><td><span data-lang="es">MTF normalizada a 1 en frecuencia cero; el cálculo ignora recubrimientos</span><span data-lang="en">MTF normalised to 1 at zero frequency; the computation ignores coatings</span></td><td><span data-lang="es">Contraluces reales, generación del tratamiento</span><span data-lang="en">Real backlit scenes, the generation of the coating</span></td></tr>
+<tr><td><span data-lang="es">Signo de la esférica</span><span data-lang="en">Sign of the spherical aberration</span></td><td><span data-lang="es">Simetría de la MTF a foco óptimo</span><span data-lang="en">Symmetry of the MTF at best focus</span></td><td><span data-lang="es">Through-focus, deriva de foco, discos</span><span data-lang="en">Through-focus, focus shift, discs</span></td></tr>
+<tr><td><span data-lang="es">LoCA</span><span data-lang="en">LoCA</span></td><td><span data-lang="es">Diluida en la integración policromática</span><span data-lang="en">Diluted in the polychromatic integration</span></td><td><span data-lang="es">Bordes fuera de foco en imagen</span><span data-lang="en">Out-of-focus edges in the image</span></td></tr>
+<tr><td><span data-lang="es">Rizado asférico</span><span data-lang="en">Aspheric onion ripple</span></td><td><span data-lang="es">Estructura fina del disco</span><span data-lang="en">Fine structure of the disc</span></td><td><span data-lang="es">Discos de altas luces ampliados</span><span data-lang="en">Enlarged highlight discs</span></td></tr>
+<tr><td><span data-lang="es">Ojo de gato, recorte</span><span data-lang="en">Cat's eye, clipping</span></td><td><span data-lang="es">Propiedad de la pupila fuera de eje</span><span data-lang="en">A property of the pupil off axis</span></td><td><span data-lang="es">Hoja de viñeteo, discos en esquina</span><span data-lang="en">Vignetting page, discs in the corner</span></td></tr>
+<tr><td><span data-lang="es">Viñeteo y distorsión</span><span data-lang="en">Vignetting and distortion</span></td><td><span data-lang="es">Hojas aparte</span><span data-lang="en">Separate pages</span></td><td><span data-lang="es">Ficha de iluminación relativa</span><span data-lang="en">Relative illumination sheet</span></td></tr>
+<tr><td><span data-lang="es">Deriva de foco</span><span data-lang="en">Focus shift</span></td><td><span data-lang="es">Fenómeno entre aperturas</span><span data-lang="en">A phenomenon between apertures</span></td><td><span data-lang="es">Series de enfoque diafragmando</span><span data-lang="en">Focus series while stopping down</span></td></tr>
+<tr><td><span data-lang="es">Bokeh en general</span><span data-lang="en">Bokeh in general</span></td><td><span data-lang="es">Requiere la PSF 3D, no su corte en foco</span><span data-lang="en">It needs the 3D PSF, not its in-focus section</span></td><td><span data-lang="es">Imágenes; modelo r(ρ) = aρ + bρ³</span><span data-lang="en">Images; the model r(ρ) = aρ + bρ³</span></td></tr>
 </table>
-<p class="note">Corolario: dos objetivos con fichas idénticas pueden renderizar distinto. Es el caso Summilux-M 50 ASPH 11891 frente a 11728: curvas iguales, diferencias reales solo mecánicas y, si acaso, de recubrimiento.</p>
+<p class="note" data-lang="es">Corolario: dos objetivos con fichas idénticas pueden renderizar distinto. Es el caso Summilux-M 50 ASPH 11891 frente a 11728: curvas iguales, diferencias reales solo mecánicas y, si acaso, de recubrimiento.</p>
+<p class="note" data-lang="en">Corollary: two lenses with identical sheets may render differently. That is the case of the Summilux-M 50 ASPH 11891 against the 11728: the same curves, the real differences being merely mechanical and, at most, a matter of coating.</p>
 </section>
 
 <section>
-<h2>7. Ejemplos leídos</h2>
-<p>Ocho fichas analizadas con el protocolo: siete de objetivos concretos, entre clásicos célebres y homenajes modernos, y un ejemplo en formato Sigma para aprender a leer fichas que no siguen el convenio Leica/Zeiss. Las gráficas son redibujos aproximados a partir de las hojas de datos y mediciones publicadas, hechos para ilustrar la lectura; no sustituyen a la ficha original de cada fabricante. Cada ejemplo cierra con su traducción a imagen: pop, cremosidad, borde del disco, glow. Esa traducción combina la ficha con los puntos ciegos conocidos (deriva, discos, catálogo), y se indica cuándo el dato no sale de la gráfica.</p>
+<h2><span data-lang="es">7. Ejemplos leídos</span><span data-lang="en">7. Worked examples</span></h2>
+<p data-lang="es">Ocho fichas analizadas con el protocolo: siete de objetivos concretos, entre clásicos célebres y homenajes modernos, y un ejemplo en formato Sigma para aprender a leer fichas que no siguen el convenio Leica/Zeiss. Las gráficas son redibujos aproximados a partir de las hojas de datos y mediciones publicadas, hechos para ilustrar la lectura; no sustituyen a la ficha original de cada fabricante. Cada ejemplo cierra con su traducción a imagen: pop, cremosidad, borde del disco, glow. Esa traducción combina la ficha con los puntos ciegos conocidos (deriva, discos, catálogo), y se indica cuándo el dato no sale de la gráfica.</p>
+<p data-lang="en">Eight sheets analysed with the protocol: seven of specific lenses, among celebrated classics and modern homages, and one example in Sigma's format, to learn to read sheets that do not follow the Leica/Zeiss convention. The graphs are approximate redrawings from published data sheets and measurements, made to illustrate the reading; they do not replace each manufacturer's original sheet. Each example closes with its translation into image: pop, creaminess, disc edge, glow. That translation combines the sheet with the known blind spots (shift, discs, catalogue), and it is stated whenever a datum does not come from the graph.</p>
 
-<h3>Mandler 50 f/1.4 E46 Pre-A (2026), la ficha con tres paneles (f/1.4)</h3>
-<p>Aclaración de nombres antes de nada: Mandler es aquí una marca moderna que homenajea a Walter Mandler, el diseñador de Midland que firma tres objetivos de esta sección. Su 50 f/1.4 reinterpreta el Summilux pre-ASPH con 7 elementos en 5 grupos solo esféricos, vidrio actual (el fabricante declara un 20 a 25 % más de resolución que el original), 12 palas y 0,5 m de mínima: centro moderno sobre periferia clásica deliberada.</p>
-<p>La MTF lo cuenta tal cual: centro en 0,99 / 0,96 / 0,87 / 0,69, macro excelente y micro no clínico; primer tercio sin astigmatismo; colapso sagital en zona media con valle y remontada; esquina donde las masas aún llegan. Y este fabricante publica además los dos paneles que confirman el diagnóstico: el de curvatura de campo muestra las superficies T y S separándose hacia el borde en dos casquetes de signo opuesto (la remontada sagital de la MTF es, literalmente, su casquete volviendo a cortar el sensor), y el de distorsión queda bajo el 0,3 %, irrelevante. Es el mejor ejemplo del manual de cómo tres paneles cuentan una sola historia coherente.</p>
-<figure><div id="fig-simera"></div><figcaption>La MTF a f/1.4 con las tres lecturas clave anotadas: el hueco T/S a 40 pl/mm en Y = 12,6 (astigmatismo), el valle con remontada de las sagitales y la curva de 5 pl/mm llegando a la esquina con 0,72.</figcaption></figure>
+<h3><span data-lang="es">Mandler 50 f/1.4 E46 Pre-A (2026), la ficha con tres paneles (f/1.4)</span><span data-lang="en">Mandler 50 f/1.4 E46 Pre-A (2026), the sheet with three panels (f/1.4)</span></h3>
+<p data-lang="es">Aclaración de nombres antes de nada: Mandler es aquí una marca moderna que homenajea a Walter Mandler, el diseñador de Midland que firma tres objetivos de esta sección. Su 50 f/1.4 reinterpreta el Summilux pre-ASPH con 7 elementos en 5 grupos solo esféricos, vidrio actual (el fabricante declara un 20 a 25 % más de resolución que el original), 12 palas y 0,5 m de mínima: centro moderno sobre periferia clásica deliberada.</p>
+<p data-lang="en">A clarification of names before anything else: Mandler is here a modern brand paying homage to Walter Mandler, the Midland designer behind three lenses in this section. Its 50 f/1.4 reinterprets the pre-ASPH Summilux with 7 elements in 5 groups, all spherical, and present-day glass (the maker claims 20 to 25% more resolution than the original), 12 blades and a 0.5 m close focus: a modern centre over a deliberately classical periphery.</p>
+<p data-lang="es">La MTF lo cuenta tal cual: centro en 0,99 / 0,96 / 0,87 / 0,69, macro excelente y micro no clínico; primer tercio sin astigmatismo; colapso sagital en zona media con valle y remontada; esquina donde las masas aún llegan. Y este fabricante publica además los dos paneles que confirman el diagnóstico: el de curvatura de campo muestra las superficies T y S separándose hacia el borde en dos casquetes de signo opuesto (la remontada sagital de la MTF es, literalmente, su casquete volviendo a cortar el sensor), y el de distorsión queda bajo el 0,3 %, irrelevante. Es el mejor ejemplo del manual de cómo tres paneles cuentan una sola historia coherente.</p>
+<p data-lang="en">The MTF tells it as it is: centre at 0.99 / 0.96 / 0.87 / 0.69, excellent macro and a micro that is not clinical; a first third free of astigmatism; a sagittal collapse in the middle zone with a dip and a recovery; a corner the masses still reach. And this maker also publishes the two panels that confirm the diagnosis: the field curvature panel shows the T and S surfaces parting towards the edge into two caps of opposite sign (the sagittal recovery of the MTF is, literally, its cap cutting the sensor again), and the distortion panel stays below 0.3%, irrelevant. It is the best example in the manual of how three panels tell a single coherent story.</p>
+<figure><div id="fig-simera"></div><figcaption><span data-lang="es">La MTF a f/1.4 con las tres lecturas clave anotadas: el hueco T/S a 40 pl/mm en Y = 12,6 (astigmatismo), el valle con remontada de las sagitales y la curva de 5 pl/mm llegando a la esquina con 0,72.</span><span data-lang="en">The MTF at f/1.4 with the three key readings annotated: the T/S gap at 40 lp/mm at Y = 12.6 (astigmatism), the dip and recovery of the sagittals, and the 5 lp/mm curve reaching the corner at 0.72.</span></figcaption></figure>
 <div class="figrow">
-<figure><div id="fig-mandler-fc"></div><figcaption>Curvatura de campo: T y S se separan en dos casquetes de signo opuesto hacia el borde. La distancia horizontal entre ambas familias a igual altura es el astigmatismo.</figcaption></figure>
-<figure><div id="fig-mandler-dist"></div><figcaption>Distorsión: bajo el 0,3 % en la esquina, estéticamente irrelevante.</figcaption></figure>
+<figure><div id="fig-mandler-fc"></div><figcaption><span data-lang="es">Curvatura de campo: T y S se separan en dos casquetes de signo opuesto hacia el borde. La distancia horizontal entre ambas familias a igual altura es el astigmatismo.</span><span data-lang="en">Field curvature: T and S part into two caps of opposite sign towards the edge. The horizontal distance between the two families at equal height is the astigmatism.</span></figcaption></figure>
+<figure><div id="fig-mandler-dist"></div><figcaption><span data-lang="es">Distorsión: bajo el 0,3 % en la esquina, estéticamente irrelevante.</span><span data-lang="en">Distortion: below 0.3% in the corner, aesthetically irrelevant.</span></figcaption></figure>
 </div>
-<div class="verdict"><div class="vrow"><span class="vk">Pop 3D</span><span class="vv">Alto en el tercio central: macro 0,96 y plano con negros de vidrio moderno; la separación de planos la remata la pupila de 36 mm.</span></div><div class="vrow"><span class="vk">Cremosidad</span><span class="vv">Central cremosa y periferia arremolinada: el astigmatismo con curvatura de los paneles estira los discos tangencialmente, y el fabricante declara el remolino como rasgo buscado.</span></div><div class="vrow"><span class="vk">Borde del disco</span><span class="vv">Fundido: esférica subcorregida heredada del pre-ASPH, sin asféricas y por tanto sin cebolla; 12 palas mantienen el disco redondo al cerrar.</span></div><div class="vrow"><span class="vk">Glow</span><span class="vv">Ligero a f/1.4, atenuado respecto al pre-ASPH original por el vidrio y los recubrimientos actuales. Signo y deriva, como siempre, a confirmar en los discos.</span></div></div>
+<div class="verdict"><div class="vrow"><span class="vk"><span data-lang="es">Pop 3D</span><span data-lang="en">3D pop</span></span><span class="vv"><span data-lang="es">Alto en el tercio central: macro 0,96 y plano con negros de vidrio moderno; la separación de planos la remata la pupila de 36 mm.</span><span data-lang="en">High in the central third: macro 0.96 and flat, with the blacks of modern glass; the separation of planes is rounded off by the 36 mm pupil.</span></span></div><div class="vrow"><span class="vk"><span data-lang="es">Cremosidad</span><span data-lang="en">Creaminess</span></span><span class="vv"><span data-lang="es">Central cremosa y periferia arremolinada: el astigmatismo con curvatura de los paneles estira los discos tangencialmente, y el fabricante declara el remolino como rasgo buscado.</span><span data-lang="en">Creamy in the centre and swirling at the periphery: the astigmatism with curvature seen in the panels stretches the discs tangentially, and the maker declares the swirl a deliberate trait.</span></span></div><div class="vrow"><span class="vk"><span data-lang="es">Borde del disco</span><span data-lang="en">Disc edge</span></span><span class="vv"><span data-lang="es">Fundido: esférica subcorregida heredada del pre-ASPH, sin asféricas y por tanto sin cebolla; 12 palas mantienen el disco redondo al cerrar.</span><span data-lang="en">Melted: undercorrected spherical aberration inherited from the pre-ASPH, no aspherics and therefore no onion rings; 12 blades keep the disc round on stopping down.</span></span></div><div class="vrow"><span class="vk"><span data-lang="es">Glow</span><span data-lang="en">Glow</span></span><span class="vv"><span data-lang="es">Ligero a f/1.4, atenuado respecto al pre-ASPH original por el vidrio y los recubrimientos actuales. Signo y deriva, como siempre, a confirmar en los discos.</span><span data-lang="en">Slight at f/1.4, toned down from the original pre-ASPH by present-day glass and coatings. Sign and shift, as always, to be confirmed in the discs.</span></span></div></div>
 
-<h3>Summilux-M 50 f/1.4 ASPH, el moderno con secreto (f/1.4)</h3>
-<p>Centro en 0,97 / 0,93 / 0,85 / 0,68: macro de referencia y micro alto que se queda deliberadamente a un paso de lo clínico. Caída monótona y suave, astigmatismo moderado que crece desde Y = 8 sin dramatismo, nada estructural grave: una ficha casi aburrida de buena. El giro está en lo que no aparece: su punto débil célebre es la LoCA, bien visible en los bordes del bokeh, y una esférica ligeramente sobrecorregida con deriva de foco leve. La ficha impecable esconde el defecto real, y es el mismo objetivo del caso 11891/11728: curvas idénticas entre versiones.</p>
-<figure><div id="fig-lux50"></div><figcaption>El perfil del Summilux 50 ASPH a plena apertura: alto, monótono, con separaciones T/S contenidas. Su LoCA, el rasgo que más condiciona su bokeh, es invisible aquí.</figcaption></figure>
-<div class="verdict"><div class="vrow"><span class="vk">Pop 3D</span><span class="vv">Alto: macro 0,93 a 10 pl/mm, negros profundos y 2,2 EV de viñeteo que encuadran la mirada.</span></div><div class="vrow"><span class="vk">Cremosidad</span><span class="vv">Media: sobrecorrección leve (+8 en la carta): disco con borde apenas insinuado que endurece el follaje a media distancia; el primer plano, por antisimetría, sale suave.</span></div><div class="vrow"><span class="vk">Borde del disco</span><span class="vv">Insinuado, con algo de rizado asférico en luces puntuales; la mancha real del bokeh es la LoCA, ribetes magenta y verde invisibles en la ficha.</span></div><div class="vrow"><span class="vk">Glow</span><span class="vv">Nulo.</span></div></div>
+<h3><span data-lang="es">Summilux-M 50 f/1.4 ASPH, el moderno con secreto (f/1.4)</span><span data-lang="en">Summilux-M 50 f/1.4 ASPH, the modern lens with a secret (f/1.4)</span></h3>
+<p data-lang="es">Centro en 0,97 / 0,93 / 0,85 / 0,68: macro de referencia y micro alto que se queda deliberadamente a un paso de lo clínico. Caída monótona y suave, astigmatismo moderado que crece desde Y = 8 sin dramatismo, nada estructural grave: una ficha casi aburrida de buena. El giro está en lo que no aparece: su punto débil célebre es la LoCA, bien visible en los bordes del bokeh, y una esférica ligeramente sobrecorregida con deriva de foco leve. La ficha impecable esconde el defecto real, y es el mismo objetivo del caso 11891/11728: curvas idénticas entre versiones.</p>
+<p data-lang="en">Centre at 0.97 / 0.93 / 0.85 / 0.68: reference macro and a high micro that deliberately stops one step short of clinical. A smooth, monotonic fall, moderate astigmatism growing from Y = 8 without drama, nothing structurally serious: a sheet almost dull in its goodness. The twist lies in what does not appear: its celebrated weak point is LoCA, plain to see at the edges of the bokeh, and a slightly overcorrected spherical aberration with a mild focus shift. The impeccable sheet hides the real defect, and it is the same lens as in the 11891/11728 case: identical curves between versions.</p>
+<figure><div id="fig-lux50"></div><figcaption><span data-lang="es">El perfil del Summilux 50 ASPH a plena apertura: alto, monótono, con separaciones T/S contenidas. Su LoCA, el rasgo que más condiciona su bokeh, es invisible aquí.</span><span data-lang="en">The profile of the Summilux 50 ASPH at full aperture: high, monotonic, with contained T/S separations. Its LoCA, the trait that most conditions its bokeh, is invisible here.</span></figcaption></figure>
+<div class="verdict"><div class="vrow"><span class="vk"><span data-lang="es">Pop 3D</span><span data-lang="en">3D pop</span></span><span class="vv"><span data-lang="es">Alto: macro 0,93 a 10 pl/mm, negros profundos y 2,2 EV de viñeteo que encuadran la mirada.</span><span data-lang="en">High: macro 0.93 at 10 lp/mm, deep blacks and 2.2 EV of vignetting that frame the gaze.</span></span></div><div class="vrow"><span class="vk"><span data-lang="es">Cremosidad</span><span data-lang="en">Creaminess</span></span><span class="vv"><span data-lang="es">Media: sobrecorrección leve (+8 en la carta): disco con borde apenas insinuado que endurece el follaje a media distancia; el primer plano, por antisimetría, sale suave.</span><span data-lang="en">Medium: slight overcorrection (+8 in the chart): a disc with a barely hinted edge that hardens foliage at middle distance; the foreground, by antisymmetry, comes out soft.</span></span></div><div class="vrow"><span class="vk"><span data-lang="es">Borde del disco</span><span data-lang="en">Disc edge</span></span><span class="vv"><span data-lang="es">Insinuado, con algo de rizado asférico en luces puntuales; la mancha real del bokeh es la LoCA, ribetes magenta y verde invisibles en la ficha.</span><span data-lang="en">Hinted, with some aspheric ripple in point highlights; the real stain on the bokeh is LoCA, magenta and green fringes invisible in the sheet.</span></span></div><div class="vrow"><span class="vk"><span data-lang="es">Glow</span><span data-lang="en">Glow</span></span><span class="vv"><span data-lang="es">Nulo.</span><span data-lang="en">None.</span></span></div></div>
 
-<h3>Summicron-M 50 f/2 (diseño Mandler, 1979), el patrón de medida (f/2)</h3>
-<p>Seis elementos y vidrios económicos, optimización de coste llevada a arte: 0,96 / 0,92 / 0,82 / 0,62 en el centro a plena apertura. El 0,62 a 40 pl/mm es exactamente la zona elegante: macro alto con micro moderado, dibujo amable sin sacrificar relieve. Ligera curvatura en zona media que aplana las sagitales sin llegar a valle, astigmatismo contenido, y a f/5.6 roza el comportamiento apocromático. Durante décadas fue el patrón contra el que se midió todo lo demás, y la ficha explica por qué.</p>
-<figure><div id="fig-cron50"></div><figcaption>El Summicron 50 a f/2: la de 40 descolgada en la zona del compromiso clásico, sagitales que se aplanan en zona media por curvatura leve.</figcaption></figure>
-<div class="verdict"><div class="vrow"><span class="vk">Pop 3D</span><span class="vv">Medio-alto: macro excelente a f/2 y negros honestos; le falta la apertura para separar planos con violencia.</span></div><div class="vrow"><span class="vk">Cremosidad</span><span class="vv">Media-alta: subcorrección suave, transición dócil, fondo que se funde sin llamar la atención.</span></div><div class="vrow"><span class="vk">Borde del disco</span><span class="vv">Limpio y sin anillo: no hay asféricas, cero cebolla. Bokeh educado más que espectacular.</span></div><div class="vrow"><span class="vk">Glow</span><span class="vv">Nulo. El resumen es la elegancia: micro moderado sobre macro alto, piel amable.</span></div></div>
+<h3><span data-lang="es">Summicron-M 50 f/2 (diseño Mandler, 1979), el patrón de medida (f/2)</span><span data-lang="en">Summicron-M 50 f/2 (Mandler design, 1979), the yardstick (f/2)</span></h3>
+<p data-lang="es">Seis elementos y vidrios económicos, optimización de coste llevada a arte: 0,96 / 0,92 / 0,82 / 0,62 en el centro a plena apertura. El 0,62 a 40 pl/mm es exactamente la zona elegante: macro alto con micro moderado, dibujo amable sin sacrificar relieve. Ligera curvatura en zona media que aplana las sagitales sin llegar a valle, astigmatismo contenido, y a f/5.6 roza el comportamiento apocromático. Durante décadas fue el patrón contra el que se midió todo lo demás, y la ficha explica por qué.</p>
+<p data-lang="en">Six elements and inexpensive glasses, cost optimisation raised to an art: 0.96 / 0.92 / 0.82 / 0.62 at the centre at full aperture. The 0.62 at 40 lp/mm is exactly the elegant zone: high macro with moderate micro, a gentle drawing without giving up relief. A slight curvature in the middle zone that flattens the sagittals without reaching a dip, contained astigmatism, and at f/5.6 it comes close to apochromatic behaviour. For decades it was the yardstick against which everything else was measured, and the sheet explains why.</p>
+<figure><div id="fig-cron50"></div><figcaption><span data-lang="es">El Summicron 50 a f/2: la de 40 descolgada en la zona del compromiso clásico, sagitales que se aplanan en zona media por curvatura leve.</span><span data-lang="en">The Summicron 50 at f/2: the 40 left behind in the zone of the classical compromise, sagittals flattening in the middle zone through slight curvature.</span></figcaption></figure>
+<div class="verdict"><div class="vrow"><span class="vk"><span data-lang="es">Pop 3D</span><span data-lang="en">3D pop</span></span><span class="vv"><span data-lang="es">Medio-alto: macro excelente a f/2 y negros honestos; le falta la apertura para separar planos con violencia.</span><span data-lang="en">Medium-high: excellent macro at f/2 and honest blacks; it lacks the aperture to separate planes with violence.</span></span></div><div class="vrow"><span class="vk"><span data-lang="es">Cremosidad</span><span data-lang="en">Creaminess</span></span><span class="vv"><span data-lang="es">Media-alta: subcorrección suave, transición dócil, fondo que se funde sin llamar la atención.</span><span data-lang="en">Medium-high: gentle undercorrection, a docile transition, a background that melts without calling attention to itself.</span></span></div><div class="vrow"><span class="vk"><span data-lang="es">Borde del disco</span><span data-lang="en">Disc edge</span></span><span class="vv"><span data-lang="es">Limpio y sin anillo: no hay asféricas, cero cebolla. Bokeh educado más que espectacular.</span><span data-lang="en">Clean and ringless: there are no aspherics, zero onion rings. A well-mannered bokeh rather than a spectacular one.</span></span></div><div class="vrow"><span class="vk"><span data-lang="es">Glow</span><span data-lang="en">Glow</span></span><span class="vv"><span data-lang="es">Nulo. El resumen es la elegancia: micro moderado sobre macro alto, piel amable.</span><span data-lang="en">None. The summary is elegance: moderate micro over high macro, kind to skin.</span></span></div></div>
 
-<h3>Summilux-M 75 f/1.4 (diseño de Walter Mandler, 1980), el glow de catálogo (f/1.4)</h3>
-<p>La firma de la esférica masiva en estado puro: toda la familia deprimida también en Y = 0, con la de 40 en 0,38. La curva teal muestra la prueba diagnóstica: la de 20 pl/mm salta de 0,55 a 0,90 al cerrar a f/5.6. Defecto curable, es decir, conmutable: a plena apertura núcleo nítido envuelto en halo, dos pasos cerrado un objetivo serio. Subcorregida, con deriva de foco hacia atrás y fondo de acuarela: el onírico clásico de la casa, y la razón de que en los foros el Mandler sea sinónimo de un rendering y no de un diseñador.</p>
-<figure><div id="fig-lux75"></div><figcaption>Summilux 75 a f/1.4 con la curva de 20 pl/mm a f/5.6 superpuesta: el hueco vertical en el eje es la esférica, y su cierre al diafragmar la confirma como curable.</figcaption></figure>
-<div class="verdict"><div class="vrow"><span class="vk">Pop 3D</span><span class="vv">Moderado a f/1.4: el velo esférico templa los negros; sube un escalón al cerrar un paso.</span></div><div class="vrow"><span class="vk">Cremosidad</span><span class="vv">Alta: subcorrección franca, núcleo brillante y borde desvanecido: la acuarela de catálogo. El primer plano desenfocado, en cambio, sale duro.</span></div><div class="vrow"><span class="vk">Borde del disco</span><span class="vv">Desvanecido, sin cebolla; la LoCA sí mancha las transiciones, y es su talón real.</span></div><div class="vrow"><span class="vk">Glow</span><span class="vv">Presente y conmutable: halo a f/1.4, apagado a f/2.8. Deriva hacia atrás al diafragmar, fuera de la ficha.</span></div></div>
-
-
-<h3>Noctilux-M 50 f/1.0 (Walter Mandler, 1976), la ficha más baja publicada con orgullo (f/1.0)</h3>
-<p>Walter Mandler diseñó el Summicron 50 de arriba, el Summilux 75 y este; la pareja 75/1.4 y Noctilux f/1 es lo que los foros llaman el look Mandler, y lo que la marca homónima del primer ejemplo homenajea. La ficha es el protocolo entero en modo extremo: toda la familia deprimida también en Y = 0 (esférica masiva a pupila de 50 mm), con la de 40 arrancando en 0,26; desplome sagital del campo exterior que mezcla coma (la parte que se cura al cerrar) con astigmatismo; y la curva teal de 20 pl/mm a f/5.6 saltando de 0,44 a 0,88, la transformación más dramática del catálogo Leica. La lección que añade: esta ficha no mide el propósito del objetivo, que es fotografiar la luz que no hay; juzgarla con el criterio del Sigma de antes es un error de categoría.</p>
-<figure><div id="fig-noct1"></div><figcaption>El Noctilux f/1 a plena apertura con la curva de 20 pl/mm a f/5.6 superpuesta: el salto de 0,44 a 0,88 es la esférica curándose, y el desplome sagital exterior, coma sobre astigmatismo.</figcaption></figure>
-<div class="verdict"><div class="vrow"><span class="vk">Pop 3D</span><span class="vv">Por aislamiento, no por contraste: negros velados a f/1, pero separación brutal vía pupila de 50 mm y más de 3 EV de viñeteo que funden las esquinas en sombra.</span></div><div class="vrow"><span class="vk">Cremosidad</span><span class="vv">Alta y turbulenta: núcleo fundido por la subcorrección, pero ojo de gato severísimo que estira los discos y tiende al remolino, fuera de la ficha.</span></div><div class="vrow"><span class="vk">Borde del disco</span><span class="vv">Desvanecido, sin cebolla (no hay asféricas); la coma deforma las luces puntuales de esquina en cometas, y la LoCA es generosa.</span></div><div class="vrow"><span class="vk">Glow</span><span class="vv">El rey del halo nocturno a f/1, apagado desde f/2.8. Deriva de foco notable. El onírico sin paliativos.</span></div></div>
+<h3><span data-lang="es">Summilux-M 75 f/1.4 (diseño de Walter Mandler, 1980), el glow de catálogo (f/1.4)</span><span data-lang="en">Summilux-M 75 f/1.4 (designed by Walter Mandler, 1980), the textbook glow (f/1.4)</span></h3>
+<p data-lang="es">La firma de la esférica masiva en estado puro: toda la familia deprimida también en Y = 0, con la de 40 en 0,38. La curva teal muestra la prueba diagnóstica: la de 20 pl/mm salta de 0,55 a 0,90 al cerrar a f/5.6. Defecto curable, es decir, conmutable: a plena apertura núcleo nítido envuelto en halo, dos pasos cerrado un objetivo serio. Subcorregida, con deriva de foco hacia atrás y fondo de acuarela: el onírico clásico de la casa, y la razón de que en los foros el Mandler sea sinónimo de un rendering y no de un diseñador.</p>
+<p data-lang="en">The signature of massive spherical aberration in its pure state: the whole family depressed at Y = 0 too, with the 40 at 0.38. The teal curve shows the diagnostic test: the 20 lp/mm jumps from 0.55 to 0.90 on stopping down to f/5.6. A curable defect, that is, a switchable one: at full aperture a sharp core wrapped in a halo, two stops down a serious lens. Undercorrected, with backward focus shift and a watercolour background: the classic dreamy look of the house, and the reason why in the forums Mandler is a synonym for a rendering and not for a designer.</p>
+<figure><div id="fig-lux75"></div><figcaption><span data-lang="es">Summilux 75 a f/1.4 con la curva de 20 pl/mm a f/5.6 superpuesta: el hueco vertical en el eje es la esférica, y su cierre al diafragmar la confirma como curable.</span><span data-lang="en">Summilux 75 at f/1.4 with the 20 lp/mm curve at f/5.6 overlaid: the vertical gap on axis is the spherical aberration, and its closing on stopping down confirms it as curable.</span></figcaption></figure>
+<div class="verdict"><div class="vrow"><span class="vk"><span data-lang="es">Pop 3D</span><span data-lang="en">3D pop</span></span><span class="vv"><span data-lang="es">Moderado a f/1.4: el velo esférico templa los negros; sube un escalón al cerrar un paso.</span><span data-lang="en">Moderate at f/1.4: the spherical veil tempers the blacks; it climbs a step on closing one stop.</span></span></div><div class="vrow"><span class="vk"><span data-lang="es">Cremosidad</span><span data-lang="en">Creaminess</span></span><span class="vv"><span data-lang="es">Alta: subcorrección franca, núcleo brillante y borde desvanecido: la acuarela de catálogo. El primer plano desenfocado, en cambio, sale duro.</span><span data-lang="en">High: frank undercorrection, bright core and fading edge: the textbook watercolour. The out-of-focus foreground, by contrast, comes out hard.</span></span></div><div class="vrow"><span class="vk"><span data-lang="es">Borde del disco</span><span data-lang="en">Disc edge</span></span><span class="vv"><span data-lang="es">Desvanecido, sin cebolla; la LoCA sí mancha las transiciones, y es su talón real.</span><span data-lang="en">Fading, no onion rings; LoCA does stain the transitions, and it is its real Achilles heel.</span></span></div><div class="vrow"><span class="vk"><span data-lang="es">Glow</span><span data-lang="en">Glow</span></span><span class="vv"><span data-lang="es">Presente y conmutable: halo a f/1.4, apagado a f/2.8. Deriva hacia atrás al diafragmar, fuera de la ficha.</span><span data-lang="en">Present and switchable: halo at f/1.4, gone at f/2.8. Backward shift on stopping down, outside the sheet.</span></span></div></div>
 
 
-<h3>Light Lens Lab 35 f/1.4 Aspherical, réplica del 11873 (f/1.4)</h3>
-<p>El Summilux-M 35 Aspherical de 1990 fue el primer 35 de Leica con asféricas: dos superficies talladas una a una, unas dos mil unidades, el puente entre el pre-ASPH y el ASPH de producción. La réplica de Light Lens Lab devuelve la fórmula al mercado. La ficha es de transición y se nota: centro en 0,97 / 0,92 / 0,82 / 0,64, micro alto sin llegar a clínico y velo bajo para la época; el primer tercio aguanta limpio, y del 9 en adelante T y S se abren con una mezcla de coma (la parte que se cierra a f/5.6) y astigmatismo moderado, sin el colapso sagital del Mandler 50. En nuestra carta su esfericidad queda en −22: justo la meseta de lo ligeramente subcorregido, el punto dulce del que hablaba la sección 5.</p>
-<figure><div id="fig-aa"></div><figcaption>El 35 Aspherical a f/1.4, redibujo aproximado: la ficha de transición entre dos eras, con el tercio exterior abriéndose sin dramatismo.</figcaption></figure>
-<div class="verdict"><div class="vrow"><span class="vk">Pop 3D</span><span class="vv">Alto: macro de 0,92 a 10 pl/mm, negros dignos y 2,3 EV de viñeteo.</span></div><div class="vrow"><span class="vk">Cremosidad</span><span class="vv">Media-alta y equilibrada: subcorrección moderada (−22), núcleo que se funde sin teatro; el perfil más cercano a la receta de esférica ligera, LoCA contenida y viñeteo generoso.</span></div><div class="vrow"><span class="vk">Borde del disco</span><span class="vv">Suave, pero con rizado apreciable en luces puntuales (34 en la carta): asféricas de primera generación, visible al ampliar, fuera de la ficha.</span></div><div class="vrow"><span class="vk">Glow</span><span class="vv">Nulo; coma de esquina a plena apertura que se apaga al cerrar. Deriva leve.</span></div></div>
+<h3><span data-lang="es">Noctilux-M 50 f/1.0 (Walter Mandler, 1976), la ficha más baja publicada con orgullo (f/1.0)</span><span data-lang="en">Noctilux-M 50 f/1.0 (Walter Mandler, 1976), the lowest sheet ever published with pride (f/1.0)</span></h3>
+<p data-lang="es">Walter Mandler diseñó el Summicron 50 de arriba, el Summilux 75 y este; la pareja 75/1.4 y Noctilux f/1 es lo que los foros llaman el look Mandler, y lo que la marca homónima del primer ejemplo homenajea. La ficha es el protocolo entero en modo extremo: toda la familia deprimida también en Y = 0 (esférica masiva a pupila de 50 mm), con la de 40 arrancando en 0,26; desplome sagital del campo exterior que mezcla coma (la parte que se cura al cerrar) con astigmatismo; y la curva teal de 20 pl/mm a f/5.6 saltando de 0,44 a 0,88, la transformación más dramática del catálogo Leica. La lección que añade: esta ficha no mide el propósito del objetivo, que es fotografiar la luz que no hay; juzgarla con el criterio del Sigma que cierra esta sección es un error de categoría.</p>
+<p data-lang="en">Walter Mandler designed the Summicron 50 above, the Summilux 75 and this one; the pair 75/1.4 and Noctilux f/1 is what the forums call the Mandler look, and what the namesake brand of the first example pays homage to. The sheet is the whole protocol in extreme mode: the entire family depressed at Y = 0 too (massive spherical aberration with a 50 mm pupil), with the 40 starting at 0.26; a sagittal collapse of the outer field that mixes coma (the part cured by stopping down) with astigmatism; and the teal 20 lp/mm curve at f/5.6 jumping from 0.44 to 0.88, the most dramatic transformation in the Leica catalogue. The lesson it adds: this sheet does not measure the purpose of the lens, which is to photograph the light that is not there; to judge it by the standard of the Sigma that closes this section is a category mistake.</p>
+<figure><div id="fig-noct1"></div><figcaption><span data-lang="es">El Noctilux f/1 a plena apertura con la curva de 20 pl/mm a f/5.6 superpuesta: el salto de 0,44 a 0,88 es la esférica curándose, y el desplome sagital exterior, coma sobre astigmatismo.</span><span data-lang="en">The Noctilux f/1 at full aperture with the 20 lp/mm curve at f/5.6 overlaid: the jump from 0.44 to 0.88 is the spherical aberration being cured, and the outer sagittal collapse, coma on top of astigmatism.</span></figcaption></figure>
+<div class="verdict"><div class="vrow"><span class="vk"><span data-lang="es">Pop 3D</span><span data-lang="en">3D pop</span></span><span class="vv"><span data-lang="es">Por aislamiento, no por contraste: negros velados a f/1, pero separación brutal vía pupila de 50 mm y más de 3 EV de viñeteo que funden las esquinas en sombra.</span><span data-lang="en">By isolation, not by contrast: veiled blacks at f/1, but brutal separation through the 50 mm pupil and more than 3 EV of vignetting that melt the corners into shadow.</span></span></div><div class="vrow"><span class="vk"><span data-lang="es">Cremosidad</span><span data-lang="en">Creaminess</span></span><span class="vv"><span data-lang="es">Alta y turbulenta: núcleo fundido por la subcorrección, pero ojo de gato severísimo que estira los discos y tiende al remolino, fuera de la ficha.</span><span data-lang="en">High and turbulent: a core melted by the undercorrection, but a most severe cat's eye that stretches the discs and tends to swirl, outside the sheet.</span></span></div><div class="vrow"><span class="vk"><span data-lang="es">Borde del disco</span><span data-lang="en">Disc edge</span></span><span class="vv"><span data-lang="es">Desvanecido, sin cebolla (no hay asféricas); la coma deforma las luces puntuales de esquina en cometas, y la LoCA es generosa.</span><span data-lang="en">Fading, no onion rings (there are no aspherics); coma deforms the point highlights of the corner into comets, and LoCA is generous.</span></span></div><div class="vrow"><span class="vk"><span data-lang="es">Glow</span><span data-lang="en">Glow</span></span><span class="vv"><span data-lang="es">El rey del halo nocturno a f/1, apagado desde f/2.8. Deriva de foco notable. El onírico sin paliativos.</span><span data-lang="en">The king of the nocturnal halo at f/1, gone from f/2.8. Notable focus shift. Dreaminess without qualification.</span></span></div></div>
 
-<h3>Light Lens Lab Z21, la fotografía de 1932 (f/1.5)</h3>
-<p>Réplica del Sonnar 5cm f/1.5 original, así que la ficha es un documento de época: micro bajo (0,36 en el centro), sagitales con valle hacia Y = 13 y remontada clara (el casquete de curvatura del Sonnar), separaciones T/S grandes y persistentes, y sin embargo la de 5 pl/mm aguantando con dignidad: las masas brillan, que es el encanto Sonnar. Lo que la ficha no cuenta: la réplica monta recubrimientos modernos, así que el velo es menor que el del original, y hereda la deriva de foco legendaria del diseño (la esférica subcorregida que a la vez le da el fondo fundido).</p>
-<figure><div id="fig-z21"></div><figcaption>El Z21 a f/1.5: la ficha de un diseño de 1932. Valle y remontada sagital, micro bajo, masas dignas. Compárese con el Summilux 50 ASPH: noventa años de corrección en una mirada.</figcaption></figure>
-<div class="verdict"><div class="vrow"><span class="vk">Pop 3D</span><span class="vv">Bajo-medio: masas brillantes sobre negros templados; el brillo Sonnar es relieve sin dureza.</span></div><div class="vrow"><span class="vk">Cremosidad</span><span class="vv">Muy alta: el fondo se funde en discos de núcleo luminoso; primer plano quebradizo por antisimetría.</span></div><div class="vrow"><span class="vk">Borde del disco</span><span class="vv">Desvanecido y sin cebolla; ojo de gato marcado con tendencia a remolino suave, cortesía del recorte Sonnar, fuera de la ficha.</span></div><div class="vrow"><span class="vk">Glow</span><span class="vv">Presente a f/1.5, de época, aunque más limpio que el original por el recubrimiento moderno de la réplica. Deriva de foco legendaria.</span></div></div>
 
-<h3>El formato Sigma: leer con otro convenio (un 35 mm Art a plena apertura)</h3>
-<p>Antes de leer valores hay que recalibrar tres convenciones. Solo dos frecuencias: rojo 10 pl/mm (masas, relieve) y azul 30 pl/mm, a medio camino entre el 20 y el 40 de Leica. El convenio de trazos está invertido: aquí la continua es la sagital (S) y la discontinua la meridional (M, la tangencial de Leica). Y no hay familia a f/5.6; a cambio Sigma publica dos paneles del mismo objetivo a plena apertura: la MTF por difracción (cálculo ondulatorio completo, la realista) y la geométrica (solo trazado de rayos), que por construcción va siempre igual o más alta.</p>
+<h3><span data-lang="es">Light Lens Lab 35 f/1.4 Aspherical, réplica del 11873 (f/1.4)</span><span data-lang="en">Light Lens Lab 35 f/1.4 Aspherical, replica of the 11873 (f/1.4)</span></h3>
+<p data-lang="es">El Summilux-M 35 Aspherical de 1990 fue el primer 35 de Leica con asféricas: dos superficies talladas una a una, unas dos mil unidades, el puente entre el pre-ASPH y el ASPH de producción. La réplica de Light Lens Lab devuelve la fórmula al mercado. La ficha es de transición y se nota: centro en 0,97 / 0,92 / 0,82 / 0,64, micro alto sin llegar a clínico y velo bajo para la época; el primer tercio aguanta limpio, y del 9 en adelante T y S se abren con una mezcla de coma (la parte que se cierra a f/5.6) y astigmatismo moderado, sin el colapso sagital del Mandler 50. En nuestra carta su esfericidad queda en −22: justo la meseta de lo ligeramente subcorregido, el punto dulce del que hablaba la sección 5.</p>
+<p data-lang="en">The Summilux-M 35 Aspherical of 1990 was the first Leica 35 with aspherics: two surfaces ground one by one, some two thousand units, the bridge between the pre-ASPH and the production ASPH. The Light Lens Lab replica brings the formula back to the market. The sheet is one of transition, and it shows: centre at 0.97 / 0.92 / 0.82 / 0.64, a high micro short of clinical and low veiling glare for its time; the first third holds clean, and from 9 onwards T and S open up with a mixture of coma (the part that closes at f/5.6) and moderate astigmatism, without the sagittal collapse of the Mandler 50. In our chart its spherical aberration stands at −22: precisely the plateau of the slightly undercorrected, the sweet spot section 5 spoke of.</p>
+<figure><div id="fig-aa"></div><figcaption><span data-lang="es">El 35 Aspherical a f/1.4, redibujo aproximado: la ficha de transición entre dos eras, con el tercio exterior abriéndose sin dramatismo.</span><span data-lang="en">The 35 Aspherical at f/1.4, an approximate redrawing: the sheet of transition between two eras, with the outer third opening up without drama.</span></figcaption></figure>
+<div class="verdict"><div class="vrow"><span class="vk"><span data-lang="es">Pop 3D</span><span data-lang="en">3D pop</span></span><span class="vv"><span data-lang="es">Alto: macro de 0,92 a 10 pl/mm, negros dignos y 2,3 EV de viñeteo.</span><span data-lang="en">High: macro of 0.92 at 10 lp/mm, respectable blacks and 2.3 EV of vignetting.</span></span></div><div class="vrow"><span class="vk"><span data-lang="es">Cremosidad</span><span data-lang="en">Creaminess</span></span><span class="vv"><span data-lang="es">Media-alta y equilibrada: subcorrección moderada (−22), núcleo que se funde sin teatro; el perfil más cercano a la receta de esférica ligera, LoCA contenida y viñeteo generoso.</span><span data-lang="en">Medium-high and balanced: moderate undercorrection (−22), a core that melts without theatre; the profile closest to the recipe of light spherical aberration, contained LoCA and generous vignetting.</span></span></div><div class="vrow"><span class="vk"><span data-lang="es">Borde del disco</span><span data-lang="en">Disc edge</span></span><span class="vv"><span data-lang="es">Suave, pero con rizado apreciable en luces puntuales (34 en la carta): asféricas de primera generación, visible al ampliar, fuera de la ficha.</span><span data-lang="en">Soft, but with appreciable ripple in point highlights (34 in the chart): first-generation aspherics, visible on enlargement, outside the sheet.</span></span></div><div class="vrow"><span class="vk"><span data-lang="es">Glow</span><span data-lang="en">Glow</span></span><span class="vv"><span data-lang="es">Nulo; coma de esquina a plena apertura que se apaga al cerrar. Deriva leve.</span><span data-lang="en">None; corner coma at full aperture that goes out on stopping down. Mild shift.</span></span></div></div>
+
+<h3><span data-lang="es">Light Lens Lab Z21, la fotografía de 1932 (f/1.5)</span><span data-lang="en">Light Lens Lab Z21, the photography of 1932 (f/1.5)</span></h3>
+<p data-lang="es">Réplica del Sonnar 5cm f/1.5 original, así que la ficha es un documento de época: micro bajo (0,36 en el centro), sagitales con valle hacia Y = 13 y remontada clara (el casquete de curvatura del Sonnar), separaciones T/S grandes y persistentes, y sin embargo la de 5 pl/mm aguantando con dignidad: las masas brillan, que es el encanto Sonnar. Lo que la ficha no cuenta: la réplica monta recubrimientos modernos, así que el velo es menor que el del original, y hereda la deriva de foco legendaria del diseño (la esférica subcorregida que a la vez le da el fondo fundido).</p>
+<p data-lang="en">A replica of the original Sonnar 5cm f/1.5, so the sheet is a period document: low micro (0.36 at the centre), sagittals with a dip around Y = 13 and a clear recovery (the Sonnar's cap of curvature), large and persistent T/S separations, and yet the 5 lp/mm holding with dignity: the masses shine, which is the Sonnar charm. What the sheet does not tell: the replica carries modern coatings, so the veiling glare is lower than the original's, and it inherits the legendary focus shift of the design (the undercorrected spherical aberration that at the same time gives it the melted background).</p>
+<figure><div id="fig-z21"></div><figcaption><span data-lang="es">El Z21 a f/1.5: la ficha de un diseño de 1932. Valle y remontada sagital, micro bajo, masas dignas. Compárese con el Summilux 50 ASPH: noventa años de corrección en una mirada.</span><span data-lang="en">The Z21 at f/1.5: the sheet of a 1932 design. Sagittal dip and recovery, low micro, respectable masses. Compare it with the Summilux 50 ASPH: ninety years of correction at a glance.</span></figcaption></figure>
+<div class="verdict"><div class="vrow"><span class="vk"><span data-lang="es">Pop 3D</span><span data-lang="en">3D pop</span></span><span class="vv"><span data-lang="es">Bajo-medio: masas brillantes sobre negros templados; el brillo Sonnar es relieve sin dureza.</span><span data-lang="en">Low-medium: bright masses over tempered blacks; the Sonnar sparkle is relief without hardness.</span></span></div><div class="vrow"><span class="vk"><span data-lang="es">Cremosidad</span><span data-lang="en">Creaminess</span></span><span class="vv"><span data-lang="es">Muy alta: el fondo se funde en discos de núcleo luminoso; primer plano quebradizo por antisimetría.</span><span data-lang="en">Very high: the background melts into discs with a luminous core; a brittle foreground, by antisymmetry.</span></span></div><div class="vrow"><span class="vk"><span data-lang="es">Borde del disco</span><span data-lang="en">Disc edge</span></span><span class="vv"><span data-lang="es">Desvanecido y sin cebolla; ojo de gato marcado con tendencia a remolino suave, cortesía del recorte Sonnar, fuera de la ficha.</span><span data-lang="en">Fading and free of onion rings; a marked cat's eye with a tendency to a gentle swirl, courtesy of the Sonnar clipping, outside the sheet.</span></span></div><div class="vrow"><span class="vk"><span data-lang="es">Glow</span><span data-lang="en">Glow</span></span><span class="vv"><span data-lang="es">Presente a f/1.5, de época, aunque más limpio que el original por el recubrimiento moderno de la réplica. Deriva de foco legendaria.</span><span data-lang="en">Present at f/1.5, of its period, though cleaner than the original thanks to the modern coating of the replica. Legendary focus shift.</span></span></div></div>
+
+<h3><span data-lang="es">El formato Sigma: leer con otro convenio (un 35 mm Art a plena apertura)</span><span data-lang="en">The Sigma format: reading under another convention (a 35 mm Art at full aperture)</span></h3>
+<p data-lang="es">Antes de leer valores hay que recalibrar tres convenciones. Solo dos frecuencias: rojo 10 pl/mm (masas, relieve) y azul 30 pl/mm, a medio camino entre el 20 y el 40 de Leica. El convenio de trazos está invertido: aquí la continua es la sagital (S) y la discontinua la meridional (M, la tangencial de Leica). Y no hay familia a f/5.6; a cambio Sigma publica dos paneles del mismo objetivo a plena apertura: la MTF por difracción (cálculo ondulatorio completo, la realista) y la geométrica (solo trazado de rayos), que por construcción va siempre igual o más alta.</p>
+<p data-lang="en">Before reading values, three conventions have to be recalibrated. Only two frequencies: red is 10 lp/mm (masses, relief) and blue is 30 lp/mm, halfway between Leica's 20 and 40. The line convention is inverted: here the solid line is the sagittal (S) and the dashed one the meridional (M, Leica's tangential). And there is no f/5.6 family; in exchange, Sigma publishes two panels of the same lens at full aperture: the diffraction MTF (a full wave-optics computation, the realistic one) and the geometrical MTF (ray tracing only), which by construction is always equal or higher.</p>
 <div class="figrow">
-<figure><div id="fig-sigma-dif"></div><figcaption>Panel por difracción: la ficha realista. Planicie hasta 15 mm, astigmatismo solo en la esquina.</figcaption></figure>
-<figure><div id="fig-sigma-geo"></div><figcaption>Panel geométrico: sin difracción. Apenas por encima del otro: lo que falta hasta 1 es aberración real.</figcaption></figure>
+<figure><div id="fig-sigma-dif"></div><figcaption><span data-lang="es">Panel por difracción: la ficha realista. Planicie hasta 15 mm, astigmatismo solo en la esquina.</span><span data-lang="en">Diffraction panel: the realistic sheet. A plateau out to 15 mm, astigmatism only in the corner.</span></figcaption></figure>
+<figure><div id="fig-sigma-geo"></div><figcaption><span data-lang="es">Panel geométrico: sin difracción. Apenas por encima del otro: lo que falta hasta 1 es aberración real.</span><span data-lang="en">Geometrical panel: no diffraction. Barely above the other: what is missing up to 1 is real aberration.</span></figcaption></figure>
 </div>
-<p>Lectura: centro en 0,97 a 10 pl/mm y 0,84 a 30, territorio apocromático a plena apertura, con micro extrapolado hacia 0,75 a 40 pl/mm, lado clínico de la escala. Las cuatro curvas se mantienen casi horizontales hasta 15 mm: dos tercios del campo útiles para el sujeto. El vaivén del azul entre 7 y 14 mm, donde M baja, cruza y queda sobre S, es una diferencia leve de curvatura entre las dos superficies focales, de amplitud trivial. Del 15 en adelante, astigmatismo moderado de esquina con la meridional aguantando mejor; las masas llegan al borde en 0,84.</p>
-<p>El diagnóstico propio de este formato está en comparar paneles, que sustituye en parte a la familia diafragmada ausente: la geométrica va solo marginalmente por encima de la de difracción (0,87 contra 0,84 en el centro a 30 pl/mm). A plena apertura de un luminoso la difracción es despreciable, así que esa distancia corta dice que lo poco que falta hasta 1 lo ponen aberraciones residuales reales, y pocas. Un clásico tendría la geométrica muy por encima allí donde sus aberraciones dominan. Traducción al rendering: candidato a pop por la banda de 10 alta y plana, micro alto tirando a clínico, nada estructural; el carácter, si lo tiene, vive íntegramente en los puntos ciegos de la sección 6.</p>
-<div class="verdict"><div class="vrow"><span class="vk">Pop 3D</span><span class="vv">Alto: banda de 10 plana hasta 15 mm y, en estos diseños luminosos, más de 2 EV de viñeteo a plena apertura.</span></div><div class="vrow"><span class="vk">Cremosidad</span><span class="vv">Media-baja: corrección alta implica disco casi uniforme de borde definido: bokeh correcto, no fundido.</span></div><div class="vrow"><span class="vk">Borde del disco</span><span class="vv">Definido; en asféricos de este grado conviene vigilar el rizado (cebolla) en luces puntuales, invisible aquí.</span></div><div class="vrow"><span class="vk">Glow</span><span class="vv">Nulo; micro en el lado clínico. Si aparece carácter, estará en los puntos ciegos: LoCA, velo, discos.</span></div></div>
+<p data-lang="es">Lectura: centro en 0,97 a 10 pl/mm y 0,84 a 30, territorio apocromático a plena apertura, con micro extrapolado hacia 0,75 a 40 pl/mm, lado clínico de la escala. Las cuatro curvas se mantienen casi horizontales hasta 15 mm: dos tercios del campo útiles para el sujeto. El vaivén del azul entre 7 y 14 mm, donde M baja, cruza y queda sobre S, es una diferencia leve de curvatura entre las dos superficies focales, de amplitud trivial. Del 15 en adelante, astigmatismo moderado de esquina con la meridional aguantando mejor; las masas llegan al borde en 0,84.</p>
+<p data-lang="en">Reading: centre at 0.97 at 10 lp/mm and 0.84 at 30, apochromatic territory at full aperture, with the micro extrapolated to around 0.75 at 40 lp/mm, the clinical side of the scale. The four curves stay almost horizontal out to 15 mm: two thirds of the field usable for the subject. The to-and-fro of the blue between 7 and 14 mm, where M drops, crosses and ends above S, is a slight difference of curvature between the two focal surfaces, of trivial amplitude. From 15 onwards, moderate corner astigmatism with the meridional holding better; the masses reach the edge at 0.84.</p>
+<p data-lang="es">El diagnóstico propio de este formato está en comparar paneles, que sustituye en parte a la familia diafragmada ausente: la geométrica va solo marginalmente por encima de la de difracción (0,87 contra 0,84 en el centro a 30 pl/mm). A plena apertura de un luminoso la difracción es despreciable, así que esa distancia corta dice que lo poco que falta hasta 1 lo ponen aberraciones residuales reales, y pocas. Un clásico tendría la geométrica muy por encima allí donde sus aberraciones dominan. Traducción al rendering: candidato a pop por la banda de 10 alta y plana, micro alto tirando a clínico, nada estructural; el carácter, si lo tiene, vive íntegramente en los puntos ciegos de la sección 6.</p>
+<p data-lang="en">The diagnosis peculiar to this format lies in comparing panels, which partly replaces the missing stopped-down family: the geometrical curve runs only marginally above the diffraction one (0.87 against 0.84 at the centre at 30 lp/mm). At the full aperture of a fast lens diffraction is negligible, so that short distance says that the small shortfall from 1 is due to real residual aberrations, and few of them. A classic would have the geometrical curve far above wherever its aberrations dominate. Translation into rendering: a candidate for pop on account of the high, flat 10 band, a high micro leaning towards clinical, nothing structural; the character, if it has any, lives entirely in the blind spots of section 6.</p>
+<div class="verdict"><div class="vrow"><span class="vk"><span data-lang="es">Pop 3D</span><span data-lang="en">3D pop</span></span><span class="vv"><span data-lang="es">Alto: banda de 10 plana hasta 15 mm y, en estos diseños luminosos, más de 2 EV de viñeteo a plena apertura.</span><span data-lang="en">High: a 10 band flat out to 15 mm and, in these fast designs, more than 2 EV of vignetting at full aperture.</span></span></div><div class="vrow"><span class="vk"><span data-lang="es">Cremosidad</span><span data-lang="en">Creaminess</span></span><span class="vv"><span data-lang="es">Media-baja: corrección alta implica disco casi uniforme de borde definido: bokeh correcto, no fundido.</span><span data-lang="en">Medium-low: high correction implies an almost uniform disc with a defined edge: a well-behaved bokeh, not a melted one.</span></span></div><div class="vrow"><span class="vk"><span data-lang="es">Borde del disco</span><span data-lang="en">Disc edge</span></span><span class="vv"><span data-lang="es">Definido; en asféricos de este grado conviene vigilar el rizado (cebolla) en luces puntuales, invisible aquí.</span><span data-lang="en">Defined; in aspheric designs of this calibre it is worth watching for ripple (onion rings) in point highlights, invisible here.</span></span></div><div class="vrow"><span class="vk"><span data-lang="es">Glow</span><span data-lang="en">Glow</span></span><span class="vv"><span data-lang="es">Nulo; micro en el lado clínico. Si aparece carácter, estará en los puntos ciegos: LoCA, velo, discos.</span><span data-lang="en">None; micro on the clinical side. If any character appears, it will be in the blind spots: LoCA, veiling glare, discs.</span></span></div></div>
 </section>
 
 <section>
-<h2>8. Errores comunes</h2>
+<h2><span data-lang="es">8. Errores comunes</span><span data-lang="en">8. Common mistakes</span></h2>
 <ol class="proto">
-<li>Comparar una curva T con la S de la frecuencia vecina.</li>
-<li>Juzgar por la resolución límite en vez de por 10 y 20 pl/mm.</li>
-<li>Leer una ficha calculada como si incluyera recubrimientos y tolerancias.</li>
-<li>Atribuir al astigmatismo el bokeh de doble línea (es esférica sobrecorregida).</li>
-<li>Concluir el signo de la esférica desde una sola familia de curvas.</li>
-<li>Olvidar que la ficha es a infinito y el retrato se hace a dos metros.</li>
-<li>Tratar el viñeteo como defecto a restar en vez de como parámetro estético.</li>
-<li>Esperar que MTF idéntica implique rendering idéntico.</li>
+<li><span data-lang="es">Comparar una curva T con la S de la frecuencia vecina.</span><span data-lang="en">Comparing a T curve with the S of the neighbouring frequency.</span></li>
+<li><span data-lang="es">Juzgar por la resolución límite en vez de por 10 y 20 pl/mm.</span><span data-lang="en">Judging by limiting resolution instead of by 10 and 20 lp/mm.</span></li>
+<li><span data-lang="es">Leer una ficha calculada como si incluyera recubrimientos y tolerancias.</span><span data-lang="en">Reading a computed sheet as though it included coatings and tolerances.</span></li>
+<li><span data-lang="es">Atribuir al astigmatismo el bokeh de doble línea (es esférica sobrecorregida).</span><span data-lang="en">Blaming double-line bokeh on astigmatism (it is overcorrected spherical aberration).</span></li>
+<li><span data-lang="es">Concluir el signo de la esférica desde una sola familia de curvas.</span><span data-lang="en">Inferring the sign of the spherical aberration from a single family of curves.</span></li>
+<li><span data-lang="es">Olvidar que la ficha es a infinito y el retrato se hace a dos metros.</span><span data-lang="en">Forgetting that the sheet is at infinity and the portrait is taken at two metres.</span></li>
+<li><span data-lang="es">Tratar el viñeteo como defecto a restar en vez de como parámetro estético.</span><span data-lang="en">Treating vignetting as a defect to be subtracted rather than as an aesthetic parameter.</span></li>
+<li><span data-lang="es">Esperar que MTF idéntica implique rendering idéntico.</span><span data-lang="en">Expecting an identical MTF to imply an identical rendering.</span></li>
 </ol>
 </section>
 
-<footer>Gráficas ilustrativas generadas en el navegador, sin dependencias. Referencias: H. H. Nasse, “How to Read MTF Curves” I y II, Carl Zeiss; E. Heynacher, Zeiss; hojas de datos de Leica Camera AG. <a href="caracter-optico-reducido.html">Carta reducida</a> · <a href="caracter-optico-leica-m.html">carta completa</a>.</footer>
+<footer><span data-lang="es">Gráficas ilustrativas generadas en el navegador, sin dependencias. Referencias: H. H. Nasse, “How to Read MTF Curves” I y II, Carl Zeiss; E. Heynacher, Zeiss; hojas de datos de Leica Camera AG. <a href="caracter-optico-reducido.html">Carta reducida</a> · <a href="caracter-optico-leica-m.html">carta completa</a>.</span><span data-lang="en">Illustrative graphs generated in the browser, with no dependencies. References: H. H. Nasse, “How to Read MTF Curves” I and II, Carl Zeiss; E. Heynacher, Zeiss; data sheets of Leica Camera AG. <a href="caracter-optico-reducido.html">Reduced chart</a> · <a href="caracter-optico-leica-m.html">full chart</a>.</span></footer>
 
 </div>
 <script>
@@ -275,6 +338,81 @@ footer{border-top:1px solid var(--hair);margin-top:48px;padding-top:16px;font-fa
 const NS="http://www.w3.org/2000/svg";
 const INK="#d8d2c4", MUT="#8a93a3", HAIR="#1d2635", GOLD="#E8B33C", TEAL="#35B7E6", CORAL="#F0997B";
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+/* Idioma: los rótulos se escriben en español en las figuras y se traducen aquí al dibujar. */
+const LANG=()=>document.documentElement.lang==="en"?"en":"es";
+const CH_EN={
+ "Gráfica MTF ilustrativa": "Illustrative MTF graph",
+ "Panel": "Panel",
+ "Y (mm)": "Y (mm)",
+ "T/S a igual Y": "T/S at equal Y",
+ "esférica residual": "residual spherical",
+ "banda estrechada: halo": "narrowed band: halo",
+ "se abre al borde": "opens at the edge",
+ "cerrada: era coma": "closed: it was coma",
+ "persiste": "persists",
+ "valle": "dip",
+ "remontada en fase": "recovery in phase",
+ "T bajo S": "T below S",
+ "sin LoCA": "no LoCA",
+ "con LoCA": "with LoCA",
+ "casi coincidentes": "almost coincident",
+ "radio del disco": "disc radius",
+ "subcorregida: acuarela": "undercorrected: watercolour",
+ "corregida": "corrected",
+ "sobrecorregida: doble línea": "overcorrected: double line",
+ "anillo brillante": "bright ring",
+ "núcleo que se funde": "core that melts",
+ "pegadas": "together",
+ "macro sin micro": "macro without micro",
+ "micro alto, no clínico": "high micro, not clinical",
+ "T/S moderada y tardía": "moderate, late T/S",
+ "la zona elegante": "the elegant zone",
+ "S se aplana: curvatura leve": "S flattens: slight curvature",
+ "20 a f/5.6": "20 at f/5.6",
+ "esférica: se cura al cerrar": "spherical: cured by stopping down",
+ "de 0,44 a 0,88: esférica": "0.44 to 0.88: spherical",
+ "desplome sagital: coma + astig.": "sagittal collapse: coma + astig.",
+ "valle y remontada: el casquete Sonnar": "dip and recovery: the Sonnar cap",
+ "micro de 1932": "the micro of 1932",
+ "vaivén S/M: curvatura leve": "S/M to-and-fro: slight curvature",
+ "astigmatismo solo en la esquina": "astigmatism in the corner only",
+ "lo que falta: aberración real": "what is missing: real aberration",
+ "astigmatismo": "astigmatism",
+ "valle y remontada: curvatura": "dip and recovery: curvature",
+ "las masas llegan: 0,72": "the masses arrive: 0.72",
+ "coma + astig. moderados": "moderate coma + astig.",
+ "curvatura (mm)": "curvature (mm)",
+ "dos casquetes": "two caps",
+ "distorsión (%)": "distortion (%)",
+ "Ficha MTF tipo con cuatro frecuencias y curvas T y S": "Typical MTF sheet with four frequencies and T and S curves",
+ "Curva de 20 pl/mm a plena apertura y a f/5.6": "The 20 lp/mm curve at full aperture and at f/5.6",
+ "Familia comprimida por el halo del glow": "A family compressed by the halo of the glow",
+ "Coma a plena apertura": "Coma at full aperture",
+ "El coma desaparece a f/5.6": "The coma disappears at f/5.6",
+ "Astigmatismo a plena apertura": "Astigmatism at full aperture",
+ "El astigmatismo persiste a f/5.6": "The astigmatism persists at f/5.6",
+ "Curvatura de campo: valle y remontada en fase": "Field curvature: dip and recovery in phase",
+ "Cromatismo lateral: tangencial bajo sagital en el borde": "Lateral chromatic aberration: tangential below sagittal at the edge",
+ "La LoCA es casi invisible en la MTF policromática": "LoCA is almost invisible in the polychromatic MTF",
+ "Perfil de intensidad del disco según la corrección esférica": "Intensity profile of the disc according to the spherical correction",
+ "Perfil clínico: 20 y 40 casi pegadas": "Clinical profile: 20 and 40 almost together",
+ "Perfil clásico: la de 40 descolgada": "Classical profile: the 40 left behind",
+ "Summilux 50 ASPH a f/1.4, redibujo aproximado": "Summilux 50 ASPH at f/1.4, approximate redrawing",
+ "Summicron 50 diseño Mandler a f/2, redibujo aproximado": "Summicron 50, Mandler design, at f/2, approximate redrawing",
+ "Summilux 75 Mandler a f/1.4 con la curva de 20 a f/5.6 superpuesta": "Mandler's Summilux 75 at f/1.4 with the 20 curve at f/5.6 overlaid",
+ "Noctilux 50 f/1 a plena apertura con la curva de 20 a f/5.6 superpuesta": "Noctilux 50 f/1 at full aperture with the 20 curve at f/5.6 overlaid",
+ "Light Lens Lab Z21 a f/1.5, redibujo aproximado": "Light Lens Lab Z21 at f/1.5, approximate redrawing",
+ "Formato Sigma, panel por difracción: 10 y 30 pl/mm, S continua y M discontinua": "Sigma format, diffraction panel: 10 and 30 lp/mm, S solid and M dashed",
+ "Formato Sigma, panel geométrico: solo trazado de rayos, sin difracción": "Sigma format, geometrical panel: ray tracing only, no diffraction",
+ "Ficha anotada con astigmatismo, curvatura y esquina": "Annotated sheet with astigmatism, curvature and corner",
+ "Summilux 35 Aspherical (réplica LLL del 11873) a f/1.4, redibujo aproximado": "Summilux 35 Aspherical (LLL replica of the 11873) at f/1.4, approximate redrawing",
+ "Curvatura de campo del Mandler 50: T y S se separan en dos casquetes": "Field curvature of the Mandler 50: T and S part into two caps",
+ "Distorsión del Mandler 50: bajo el 0,3 por ciento": "Distortion of the Mandler 50: below 0.3 per cent"
+};
+const tr=s=>(LANG()==="en" && CH_EN[s]!==undefined) ? CH_EN[s] : s;
+/* la coma decimal es del español; en inglés, punto */
+const num=s=>LANG()==="en" ? s : s.replace(".",",");
 
 function interp(pts){
   return y=>{
@@ -303,25 +441,26 @@ function txt(parent,x,y,s,attrs){
 
 function drawChart(id,cfg){
   const host=document.getElementById(id); if(!host) return;
+  host.textContent="";
   const W=460, H=cfg.h||250;
   const ml=36, mr=cfg.mr!==undefined?cfg.mr:34, mt=14, mb=34;
   const x0=cfg.x0!==undefined?cfg.x0:0, x1=cfg.x1!==undefined?cfg.x1:21.6;
   const X=v=>ml+(v-x0)/(x1-x0)*(W-ml-mr);
   const Y=v=>H-mb-v*(H-mt-mb);
-  const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,role:"img","aria-label":cfg.alt||"Gráfica MTF ilustrativa"});
+  const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,role:"img","aria-label":tr(cfg.alt||"Gráfica MTF ilustrativa")});
   host.appendChild(svg);
   for(let v=0;v<=1.001;v+=0.2){
     el("line",{x1:ml,y1:Y(v),x2:W-mr,y2:Y(v),stroke:HAIR,"stroke-width":1},svg);
-    txt(svg,ml-6,Y(v)+3.5,v.toFixed(1).replace(".",","),{"text-anchor":"end"});
+    txt(svg,ml-6,Y(v)+3.5,num(v.toFixed(1)),{"text-anchor":"end"});
   }
   const xt=cfg.xticks||[0,5,10,15,20];
   xt.forEach(v=>{
     el("line",{x1:X(v),y1:mt,x2:X(v),y2:H-mb,stroke:HAIR,"stroke-width":1},svg);
-    txt(svg,X(v),H-mb+14,String(v).replace(".",","),{"text-anchor":"middle"});
+    txt(svg,X(v),H-mb+14,num(String(v)),{"text-anchor":"middle"});
   });
   el("line",{x1:ml,y1:H-mb,x2:W-mr,y2:H-mb,stroke:MUT,"stroke-width":0.8},svg);
   el("line",{x1:ml,y1:mt,x2:ml,y2:H-mb,stroke:MUT,"stroke-width":0.8},svg);
-  txt(svg,W-mr,H-mb+28,cfg.xlab||"Y (mm)",{"text-anchor":"end"});
+  txt(svg,W-mr,H-mb+28,tr(cfg.xlab||"Y (mm)"),{"text-anchor":"end"});
   cfg.curves.forEach(c=>{
     let d="";
     const n=120;
@@ -332,7 +471,7 @@ function drawChart(id,cfg){
     const p=el("path",{d,fill:"none",stroke:c.color||INK,"stroke-width":c.w||1.6},svg);
     if(c.dash) p.setAttribute("stroke-dasharray","5 4");
     if(c.op) p.setAttribute("stroke-opacity",c.op);
-    if(c.end) txt(svg,W-mr+4,Y(clamp(c.fn(x1),0,1))+3.5,c.end,{fill:c.color||MUT});
+    if(c.end) txt(svg,W-mr+4,Y(clamp(c.fn(x1),0,1))+3.5,tr(c.end),{fill:c.color||MUT});
   });
   (cfg.ann||[]).forEach(a=>{
     if(a.t==="varr"){
@@ -341,21 +480,27 @@ function drawChart(id,cfg){
       [[a.y1,1],[a.y2,-1]].forEach(([yy,s])=>{
         el("path",{d:`M${X(a.x)-3.5} ${Y(yy)+5*s}L${X(a.x)} ${Y(yy)}L${X(a.x)+3.5} ${Y(yy)+5*s}`,fill:"none"},g);
       });
-      if(a.lab) txt(svg,X(a.x)+(a.dx!==undefined?a.dx:7),Y((a.y1+a.y2)/2)+3.5,a.lab,{fill:a.c||GOLD,"text-anchor":a.dx<0?"end":"start"});
+      if(a.lab) txt(svg,X(a.x)+(a.dx!==undefined?a.dx:7),Y((a.y1+a.y2)/2)+3.5,tr(a.lab),{fill:a.c||GOLD,"text-anchor":a.dx<0?"end":"start"});
     }
     if(a.t==="note"){
       if(a.lx!==undefined) el("line",{x1:X(a.x),y1:Y(a.y),x2:X(a.lx),y2:Y(a.ly),stroke:MUT,"stroke-width":0.6,"stroke-dasharray":"3 3"},svg);
-      txt(svg,X(a.lx!==undefined?a.lx:a.x)+(a.dx||0),Y(a.ly!==undefined?a.ly:a.y)+(a.dy||0),a.lab,{fill:a.c||GOLD,"text-anchor":a.anchor||"start"});
+      txt(svg,X(a.lx!==undefined?a.lx:a.x)+(a.dx||0),Y(a.ly!==undefined?a.ly:a.y)+(a.dy||0),tr(a.lab),{fill:a.c||GOLD,"text-anchor":a.anchor||"start"});
     }
   });
   if(cfg.legend){
+    /* la leyenda se mide de verdad y, si no cabe en una fila, se reduce el cuerpo de letra */
+    const ly=mt+8, gap=16, avail=W-8-(ml+10);
+    const items=cfg.legend.map(L=>({L,t:txt(svg,0,ly+3.5,tr(L.lab),{fill:L.color&&L.c!==false?L.color:MUT})}));
+    /* anchura real del texto; si el motor no la da (página oculta), se estima por caracteres */
+    const width=it=>{ let w=0; try{ w=it.t.getComputedTextLength(); }catch(e){} return w||it.t.textContent.length*5.6*(+it.t.getAttribute("font-size"))/11; };
+    const total=()=>items.reduce((s,it)=>s+25+width(it)+gap,-gap);
+    for(let fs=11; total()>avail && fs>8.5; ){ fs-=0.5; items.forEach(it=>it.t.setAttribute("font-size",fs)); }
     let lx=ml+10;
-    cfg.legend.forEach(L=>{
-      const ly=mt+8;
-      const ln=el("line",{x1:lx,y1:ly,x2:lx+20,y2:ly,stroke:L.color||INK,"stroke-width":1.6},svg);
-      if(L.dash) ln.setAttribute("stroke-dasharray","5 4");
-      const t=txt(svg,lx+25,ly+3.5,L.lab,{fill:L.color&&L.c!==false?L.color:MUT});
-      lx+=25+L.lab.length*5.6+16;
+    items.forEach(it=>{
+      const ln=el("line",{x1:lx,y1:ly,x2:lx+20,y2:ly,stroke:it.L.color||INK,"stroke-width":1.6},svg);
+      if(it.L.dash) ln.setAttribute("stroke-dasharray","5 4");
+      it.t.setAttribute("x",lx+25);
+      lx+=25+width(it)+gap;
     });
   }
 }
@@ -496,7 +641,7 @@ const FIGS={
   {fn:interp([[0,0.26],[6,0.16],[11,0.08],[16,0.04],[21.6,0.02]]),dash:1},
   {fn:interp([[0,0.88],[10,0.78],[16,0.66],[21.6,0.52]]),color:TEAL,end:"20 a f/5.6"}],
  ann:[{t:"varr",x:1.2,y1:0.455,y2:0.865,lab:"de 0,44 a 0,88: esférica",dx:8},
-      {t:"note",x:14,y:0.26,lx:16.5,ly:0.34,lab:"desplome sagital: coma + astig.",c:TEAL,dx:4}]},
+      {t:"note",x:14,y:0.26,lx:11.5,ly:0.34,lab:"desplome sagital: coma + astig.",c:TEAL,dx:4}]},
 
 "fig-z21":{h:300,legend:TS,alt:"Light Lens Lab Z21 a f/1.5, redibujo aproximado",curves:[
   {fn:interp([[0,0.88],[8,0.82],[14,0.72],[21.6,0.58]]),end:"5"},
@@ -507,7 +652,7 @@ const FIGS={
   {fn:interp([[0,0.58],[5,0.44],[10,0.30],[13.5,0.24],[17,0.27],[21.6,0.24]]),dash:1},
   {fn:interp([[0,0.36],[8,0.26],[14,0.18],[21.6,0.10]]),end:"40"},
   {fn:interp([[0,0.36],[5,0.24],[10,0.13],[14,0.08],[18,0.10],[21.6,0.09]]),dash:1}],
- ann:[{t:"note",x:13.5,y:0.24,lx:16,ly:0.40,lab:"valle y remontada: el casquete Sonnar",c:TEAL,dx:4},
+ ann:[{t:"note",x:13.5,y:0.24,lx:10.5,ly:0.40,lab:"valle y remontada: el casquete Sonnar",c:TEAL,dx:4},
       {t:"note",x:0.6,y:0.36,lx:4,ly:0.22,lab:"micro de 1932",dx:4}]},
 
 "fig-sigma-dif":{h:260,mr:40,alt:"Formato Sigma, panel por difracción: 10 y 30 pl/mm, S continua y M discontinua",
@@ -540,7 +685,7 @@ const FIGS={
   {fn:interp([[0,0.69],[4,0.52],[8,0.30],[11,0.12],[12.6,0.07],[15,0.08],[18,0.10],[21.6,0.19]]),dash:1}],
  ann:[
   {t:"varr",x:12.6,y1:0.085,y2:0.435,lab:"astigmatismo",dx:8},
-  {t:"note",x:12.6,y:0.38,lx:16.5,ly:0.56,lab:"valle y remontada: curvatura",c:TEAL,dx:4},
+  {t:"note",x:12.6,y:0.38,lx:13,ly:0.56,lab:"valle y remontada: curvatura",c:TEAL,dx:4},
   {t:"note",x:21.3,y:0.72,lx:17.5,ly:0.86,lab:"las masas llegan: 0,72",anchor:"end",dx:-4}]}
 };
 
@@ -559,13 +704,14 @@ FIGS["fig-aa"]={h:300,legend:TS,alt:"Summilux 35 Aspherical (réplica LLL del 11
 /* panel vertical: curvatura de campo y distorsión (Y en vertical) */
 function drawVert(id,cfg){
   const host=document.getElementById(id); if(!host) return;
+  host.textContent="";
   const W=300, H=300, ml=44, mr=14, mt=14, mb=36, Ymax=21.4;
   const X=v=>ml+(v-cfg.x0)/(cfg.x1-cfg.x0)*(W-ml-mr);
   const Yc=v=>H-mb-(v/Ymax)*(H-mt-mb);
-  const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,role:"img","aria-label":cfg.alt||"Panel"},host);
+  const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,role:"img","aria-label":tr(cfg.alt||"Panel")},host);
   cfg.xticks.forEach(v=>{
     el("line",{x1:X(v),y1:mt,x2:X(v),y2:H-mb,stroke:v===0?MUT:HAIR,"stroke-width":v===0?0.8:1},svg);
-    txt(svg,X(v),H-mb+14,String(v).replace(".",","),{"text-anchor":"middle"});
+    txt(svg,X(v),H-mb+14,num(String(v)),{"text-anchor":"middle"});
   });
   [0,5,10,15,20].forEach(v=>{
     el("line",{x1:ml,y1:Yc(v),x2:W-mr,y2:Yc(v),stroke:HAIR,"stroke-width":1},svg);
@@ -573,7 +719,7 @@ function drawVert(id,cfg){
   });
   el("line",{x1:ml,y1:mt,x2:ml,y2:H-mb,stroke:MUT,"stroke-width":0.8},svg);
   el("line",{x1:ml,y1:H-mb,x2:W-mr,y2:H-mb,stroke:MUT,"stroke-width":0.8},svg);
-  txt(svg,W-mr,H-mb+28,cfg.xlab,{"text-anchor":"end"});
+  txt(svg,W-mr,H-mb+28,tr(cfg.xlab),{"text-anchor":"end"});
   txt(svg,ml-6,mt-2,"Y",{"text-anchor":"end"});
   cfg.curves.forEach(c=>{
     let d="";
@@ -589,12 +735,13 @@ function drawVert(id,cfg){
     cfg.legend.forEach(L=>{
       const ln=el("line",{x1:lx,y1:mt+8,x2:lx+18,y2:mt+8,stroke:INK,"stroke-width":1.5},svg);
       if(L.dash) ln.setAttribute("stroke-dasharray","5 4");
-      txt(svg,lx+23,mt+11.5,L.lab);
-      lx+=23+L.lab.length*6+14;
+      const lab=tr(L.lab);
+      txt(svg,lx+23,mt+11.5,lab);
+      lx+=23+lab.length*6+14;
     });
   }
   (cfg.ann||[]).forEach(a=>{
-    txt(svg,X(a.x),Yc(a.y),a.lab,{fill:a.c||GOLD,"text-anchor":a.anchor||"start"});
+    txt(svg,X(a.x),Yc(a.y),tr(a.lab),{fill:a.c||GOLD,"text-anchor":a.anchor||"start"});
   });
 }
 const VFIGS={
@@ -614,11 +761,53 @@ const VFIGS={
   {fn:y=>-0.32*Math.pow(y/21.4,2.5)}]}
 };
 
-document.addEventListener("DOMContentLoaded",()=>{
+function drawAll(){
   for(const id in FIGS) drawChart(id,FIGS[id]);
   for(const id in VFIGS) drawVert(id,VFIGS[id]);
-});
+}
+/* el conmutador de idioma llama a onLangChange al arrancar y en cada cambio */
+window.onLangChange=drawAll;
+document.addEventListener("DOMContentLoaded",drawAll);
 
+</script>
+<script>
+"use strict";
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{ title:"Manual de lectura MTF · del gráfico al rendering",
+         desc:"Manual de lectura de curvas MTF: anatomía de la ficha, firmas de cada aberración con gráficas ilustrativas, y la traducción de la curva al rendering: pop, cremosidad, glow, bokeh." },
+    en:{ title:"MTF reading manual · from the graph to the rendering",
+         desc:"A manual for reading MTF curves: anatomy of the sheet, the signature of each aberration with illustrative graphs, and the translation of the curve into rendering: pop, creaminess, glow, bokeh." }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    ["title","ph","alt","aria"].forEach(function(k){
+      [].forEach.call(document.querySelectorAll("[data-"+k+"-"+l+"]"),function(e){
+        var attr = k==="ph" ? "placeholder" : (k==="aria" ? "aria-label" : k);
+        e.setAttribute(attr, e.getAttribute("data-"+k+"-"+l));
+      });
+    });
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  apply(document.documentElement.lang==="en"?"en":"es");
+})();
 </script>
 </body>
 </html>

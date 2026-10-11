@@ -1171,6 +1171,177 @@ function t(k){ const D=T[LANG()]||T.es; return D[k]!==undefined ? D[k] : (T.es[k
    objeto. Mantiene la frase entera en cada idioma en vez de trocearla.     */
 function tf(k,o){ return t(k).replace(/\{(\w+)\}/g, (m,c)=> o[c]!==undefined ? o[c] : m); }
 
+/* ---- Texto del catálogo en inglés ----
+   La familia óptica y la nota de cada objetivo están en español en RAW. En inglés se
+   leen de estas dos tablas, las mismas que usa la carta reducida. */
+const FAM_EN = {
+ "Apocromático":"Apochromat",
+ "Apocromático asférico":"Aspheric apochromat",
+ "Biogon simétrico":"Symmetrical Biogon",
+ "Doble Gauss":"Double Gauss",
+ "Foco suave":"Soft focus",
+ "Gauss asférico":"Aspheric Gauss",
+ "Gauss asférico PGM":"Aspheric Gauss, PGM",
+ "Heliar":"Heliar",
+ "Retrofoco":"Retrofocus",
+ "Retrofoco asférico":"Aspheric retrofocus",
+ "Sonnar":"Sonnar",
+ "Sonnar-Gauss":"Sonnar-Gauss",
+ "Telefoto":"Telephoto",
+ "Telefoto con lupa":"Telephoto with goggles",
+ "Tessar":"Tessar",
+ "Triplete":"Triplet",
+ "Zoom escalonado asférico":"Aspheric stepped zoom"
+};
+const NOTA_EN = {
+ "Super-Angulon-M 21 f/4":"Almost perfect symmetry: minimal distortion and a very pronounced light falloff. Contrast is limited by the single coating.",
+ "Super-Angulon-M 21 f/3.4":"The historical reference for sharpness in a symmetrical wide angle. The rear group reaches into the body and blocks the meter of several models.",
+ "Elmarit-M 21 f/2.8":"The retrofocus design frees the space inside the body at the cost of more distortion and curvature than the Super-Angulon.",
+ "Elmarit-M 21 f/2.8 ASPH":"The aspheric surface corrects edge astigmatism. The defocus comes out somewhat more structured than in the spherical version.",
+ "Super-Elmar-M 21 f/3.4 ASPH":"Almost flat correction across the whole field and very little lateral chromatic aberration. A deliberately neutral character.",
+ "Summilux-M 21 f/1.4 ASPH":"Extreme aperture in a wide angle. Mechanical vignetting clips the discs in the corners and produces lateral smearing.",
+ "Elmarit-M 24 f/2.8 ASPH":"Compact and highly corrected. Flat from f/4, with little lateral chromatic aberration for its angle.",
+ "Summilux-M 24 f/1.4 ASPH":"The same approach as the 21 f/1.4 with a less demanding angle. Ample defocus and a heavily deformed pupil off axis.",
+ "Super-Elmar-M 24 f/3.8 ASPH":"The sober option at 24 mm: small, very flat and with a minimal colour cast.",
+ "Hektor 2,8cm f/6.3":"An uncoated triplet from the screw-mount era. Overall veiling glare, abundant halo and corners that never sharpen up. It renders a characteristic low-contrast image.",
+ "Summaron 28 f/5.6":"A compact symmetrical design, moderate contrast and soft corners up to f/8. The warm tone of the glasses of its time.",
+ "Elmarit 28 f/2.8 (1ª serie)":"Nine elements and a deep rear group, incompatible with several digital bodies. A classic medium-contrast signature.",
+ "Elmarit-M 28 f/2.8 (4ª serie)":"The last spherical version: contrast already modern, without the bite of the later aspheric.",
+ "Elmarit-M 28 f/2.8 ASPH":"One of the most compact M lenses with this level of correction. Neutral, flat and free of casts.",
+ "Summicron-M 28 f/2 ASPH":"A balance between aperture and size. Smoother transitions than in the aspheric 28 f/2.8, thanks to its slightly undercorrected spherical aberration.",
+ "Summicron-M 28 f/2 ASPH (2ª serie)":"A shorter mechanical redesign with revised optics. Somewhat flatter than the first version.",
+ "Summilux-M 28 f/1.4 ASPH":"A fast wide angle with unusually smooth defocus for its type. Strong pupil deformation in the corners.",
+ "Summaron-M 28 f/5.6 (reedición)":"A reissue of the 1955 design with modern coating: the same drawing, considerably less veiling glare.",
+ "Summaron 35 f/3.5":"Low contrast and appreciable halo at full aperture. A tonal scale compressed in the highlights, very recognisable in black and white.",
+ "Summaron 35 f/2.8":"The version with rare-earth glasses: it raises contrast without losing the smoothness of the original drawing.",
+ "Summilux 35 f/1.4 (1ª serie)":"The first 35 mm Summilux. Dominant spherical veil at f/1.4 that clears towards f/2.8. The basis of the Steel Rim cult.",
+ "Summilux 35 f/1.4 pre-ASPH":"Almost three decades in the catalogue with the same design. A warm halo at full aperture and a very gradual transition to defocus.",
+ "Summilux-M 35 f/1.4 Aspherical":"Two hand-polished aspherics in a very short run. An unprecedented leap in contrast in its day, with visible ripple in out-of-focus highlights.",
+ "Summilux-M 35 f/1.4 ASPH":"The version that divided opinion: high contrast and defocus structured by slightly overcorrected spherical aberration.",
+ "Summilux-M 35 f/1.4 ASPH FLE":"The floating element corrects the loss of performance at close range and almost entirely removes focus shift. The modern reference for the format.",
+ "Summilux-M 35 f/1.4 ASPH FLE II":"Focusing down to 0.40 m and eleven blades. Rounder discs on stopping down and a slightly smoother transition than the original FLE.",
+ "Summicron 35 f/2 (ocho elementos)":"Eight elements for a modest aperture. A reputation built on tonal gradation and a defocus without marked edges.",
+ "Summicron 35 f/2 (seis elementos)":"Mandler's simplification: fewer surfaces, more contrast and the smooth drawing that characterises the whole spherical series.",
+ "Summicron-M 35 f/2 (4ª serie)":"Known for the quality of its defocus. Residual undercorrection keeps the core of the disc bright and the edge fading.",
+ "Summicron-M 35 f/2 ASPH":"Very flat and high in contrast. Spherical overcorrection produces defined outlines in out-of-focus highlights.",
+ "APO-Summicron-M 35 f/2 ASPH":"Apochromatic correction with focusing down to 0.30 m. Practically no longitudinal chromatic aberration, with clean defocus and no colour cast.",
+ "Summarit-M 35 f/2.5":"The economy series, with modern correction and a restrained aperture. Neutral and without marked traits.",
+ "Summarit-M 35 f/2.4 ASPH":"An update of the Summarit with one aspheric. Performance close to the aspheric Summicron at lower cost.",
+ "Noctilux-M 35 f/1.2 ASPH":"Three precision-moulded aspherics and a floating element. It combines apochromatic control of chromatic aberration with the ample transition typical of the Noctilux series.",
+ "Elmar 50 f/3.5":"Four elements, three groups, uncoated. Little lateral veiling glare thanks to its small number of surfaces, but a high overall glare against the light.",
+ "Summar 50 f/2":"The extreme case of classical character: heavily undercorrected spherical aberration, swirl in the corners from mechanical vignetting, and abundant veiling glare. A soft front element prone to scratching.",
+ "Xenon 50 f/1.5":"A Schneider design under Taylor Hobson licence. Intense halo at full aperture that dissolves on closing two stops.",
+ "Summarit 50 f/1.5":"A coated Xenon. The same spherical veil with somewhat less internal scatter. Much sought after for its halo in specular highlights.",
+ "Summicron 50 f/2 (colapsable)":"The first Summicron, with rare-earth glass. Medium contrast and ample gradation in the highlights.",
+ "Summicron 50 f/2 rígido y DR":"The rigid and its close-focus version. High microcontrast for its time, with a very orderly defocus.",
+ "Summicron-M 50 f/2 (3ª serie)":"Reduced to six elements with new glasses. The basis of every later 50 Summicron.",
+ "Summicron-M 50 f/2 (4ª serie)":"The reference standard for decades. Neutral, with a slight undercorrection that softens backgrounds.",
+ "Summicron-M 50 f/2 (5ª serie)":"Updated coatings and a revised barrel on the same design. More contrast against the light.",
+ "APO-Summicron-M 50 f/2 ASPH":"Full apochromatic correction. The highest resolution and microcontrast in the M catalogue, with defocus that is clean and neutral rather than creamy.",
+ "Summilux 50 f/1.4 (1ª serie)":"First generation, very close to the Summarit in character. Marked spherical veil and ample bokeh.",
+ "Summilux 50 f/1.4 pre-ASPH E43":"The Mandler design that defined the look of the fast 50 for thirty years. A transition to defocus without discontinuities.",
+ "Summilux-M 50 f/1.4 pre-ASPH E46":"The last spherical series, with modern coating. The same drawing with less veiling glare against the light.",
+ "Summilux-M 50 f/1.4 ASPH":"High correction while keeping a certain signature. The slight overcorrection gives defined outlines in highlights at middle distances.",
+ "Summilux-M 50 f/1.4 Classic":"A reissue of the pre-aspheric design with present-day coating. It brings back the spherical veil of the E43 series with less internal scatter.",
+ "Noctilux 50 f/1.2 ASPH (1966)":"Leica's first production aspherics, polished by hand. Irregular performance and a defocus of a breadth no other 50 equalled.",
+ "Noctilux-M 50 f/1.2 ASPH (reedición)":"A reproduction of the 1966 design with modern coating. It keeps the veil and the swirl and adds base contrast.",
+ "Noctilux-M 50 f/1":"No aspherics, and glasses of very high index. An extremely thin plane of focus and the most gradual transition in the whole catalogue.",
+ "Noctilux-M 50 f/0.95 ASPH":"Far better corrected than the f/1, with the same minimal depth of field. Slightly outlined discs and severe mechanical vignetting off axis.",
+ "Elmar-M 50 f/2.8":"A modern Tessar, collapsible and of only four elements. High contrast thanks to the small number of surfaces.",
+ "Summarit-M 50 f/2.5":"A restrained alternative to the Summicron. Neutral, flat and without marked character.",
+ "Summarit-M 50 f/2.4":"A minor revision of the Summarit series, with a longer barrel and the same optical sobriety.",
+ "Tri-Elmar-M 28-35-50 f/4 ASPH":"Three fixed focal lengths in a single barrel. Homogeneous correction and an optical signature deliberately uniform between positions.",
+ "Tri-Elmar-M 16-18-21 f/4 ASPH":"An ultra-wide angle with three positions. Distortion well contained for its angle, and a light falloff very visible without a correcting filter.",
+ "Summilux-M 75 f/1.4":"A very thin plane of focus and a defocus of great breadth. Modest correction at full aperture that is resolved by f/2.8.",
+ "APO-Summicron-M 75 f/2 ASPH":"Apochromatic correction with useful focusing down to 0.70 m. It separates the subject with no chromatic residue in the outlines.",
+ "Noctilux-M 75 f/1.25 ASPH":"The greatest separation of planes in the catalogue. High correction and an extraordinarily gradual transition despite the aspheric control.",
+ "Summarit-M 75 f/2.4":"A sober, light short telephoto, without notable traits of character.",
+ "Thambar 90 f/2.2":"A soft-focus lens with a removable central neutral-density spot. Spherical aberration is left uncorrected by design, to produce controlled halo in the highlights.",
+ "Thambar-M 90 f/2.2":"A reissue of the 1935 design. With the central spot fitted the halo dominates; removed, the image gains contrast without becoming sharp.",
+ "Elmarit 90 f/2.8":"A classic portrait telephoto. Ample gradation and orderly defocus, with fifteen blades that keep the disc round.",
+ "Tele-Elmarit 90 f/2.8 (1ª serie)":"A telephoto design shorter than the Elmarit. Medium contrast and very clean bokeh.",
+ "Tele-Elmarit-M 90 f/2.8 (2ª serie)":"The light, compact version. A very good ratio of mass to performance, with smooth defocus.",
+ "Elmarit-M 90 f/2.8":"Four elements in four groups and high contrast. Sober, free of casts and highly corrected for its cost.",
+ "Summicron-M 90 f/2":"The spherical version of the fast 90. Longitudinal chromatic aberration visible in high-contrast out-of-focus outlines.",
+ "APO-Summicron-M 90 f/2 ASPH":"One of the best-corrected portrait telephotos in existence. Immediate sharpness at full aperture with no chromatic residue.",
+ "Summarit-M 90 f/2.4":"A light alternative to the APO, with high correction and a neutral character.",
+ "Tele-Elmar-M 135 f/4":"One of the sharpest designs in the whole M mount. Very high correction with very little lateral chromatic aberration.",
+ "Elmarit-M 135 f/2.8":"It carries goggles that enlarge the rangefinder base. Demanding focusing and a very ample defocus for the format.",
+ "APO-Telyt-M 135 f/3.4":"An apochromat without aspherics. Almost perfect chromatic correction, and the M lens that asks most of the rangefinder.",
+ "Distagon T* 15 f/2.8 ZM":"A fifteen-element retrofocus with notable residual distortion but excellent field correction. Very resistant to veiling glare.",
+ "Distagon T* 18 f/4 ZM":"Barrel distortion clearly visible in straight lines, correctable in software. High contrast across the whole field.",
+ "Biogon T* 21 f/2.8 ZM":"Symmetrical, almost free of distortion and very high in contrast. Strong light falloff and an extreme angle of incidence at the edge of the sensor.",
+ "Biogon T* 25 f/2.8 ZM":"The same symmetrical recipe with a less demanding angle. Very flat and free of perceptible distortion.",
+ "Biogon T* 28 f/2.8 ZM":"High contrast and clean geometry. A reference for sharpness at 28 mm, beyond what its price suggests.",
+ "Distagon T* 35 f/1.4 ZM":"A fast retrofocus with an ample transition and very clean bokeh. It raises contrast without removing the volume of the defocus.",
+ "Biogon T* 35 f/2 ZM":"Distortion and curvature practically nil. Very high microcontrast, with somewhat outlined defocus.",
+ "C-Biogon T* 35 f/2.8 ZM":"Compact and surgically corrected in geometry. Intended for reproduction and architecture.",
+ "C-Sonnar T* 50 f/1.5 ZM":"A six-element Sonnar with deliberately undercorrected spherical aberration. Pronounced focus shift between f/1.5 and f/2.8, which the user can calibrate. The most enveloping defocus among the ZM lenses.",
+ "Planar T* 50 f/2 ZM":"A symmetrical, highly corrected double Gauss. Neutral, with defocus that is clean rather than smooth.",
+ "Tele-Tessar T* 85 f/4 ZM":"A short telephoto of high contrast and low mass. Outstanding correction for its price.",
+ "Hyper Wide Heliar 10 f/5.6":"A 130-degree angle with surprisingly well-contained rectilinear distortion. Very strong light falloff on digital.",
+ "Ultra Wide Heliar 12 f/5.6 III":"Third version, with mount coding. Very clean geometry for its angle.",
+ "Super Wide Heliar 15 f/4.5 III":"The retrofocus redesign reduces the angle of incidence and with it the colour shift at the edges of the sensor.",
+ "Color-Skopar 21 f/3.5":"Very compact for its focal length and well corrected. Without marked traits of character.",
+ "Nokton 21 f/1.4":"A very fast wide angle with notable correction. Twelve blades keep the disc round on stopping down.",
+ "Ultron 28 f/2":"Balanced and compact, with a smoother transition to defocus than most modern aspherics.",
+ "Nokton 28 f/1.5":"Extreme aperture at 28 mm with high correction. Strong pupil deformation in the corners at full aperture.",
+ "Nokton 35 f/1.2 III":"Third version, far more compact. It renders with volume at f/1.2 and turns neutral from f/2 onwards.",
+ "Nokton Classic 35 f/1.4 II MC":"A reinterpretation of the spherical Summilux. Appreciable field curvature and a very gradual transition to defocus.",
+ "Nokton Classic 35 f/1.4 II SC":"An identical design with single coating. More veiling glare against the light and more open highlights.",
+ "Ultron 35 f/1.7 Asf.":"Compact and well corrected, with a drawing halfway between the Nokton Classic and the modern aspheric.",
+ "APO-Lanthar 35 f/2 Asf.":"Apochromatic correction at a price far below that of the German alternatives. Out-of-focus outlines with no colour residue.",
+ "Nokton 40 f/1.2 Asf.":"A defocus of great breadth with reasonable correction. Appreciable halo in specular highlights at full aperture.",
+ "Nokton Classic 40 f/1.4":"Very small and of marked classical character. Available in a single-coated version with more intentional veiling glare.",
+ "Nokton 50 f/1 Asf.":"An f/1 aperture with far better correction than the original spherical Noctilux. Twelve blades and intense mechanical vignetting off axis.",
+ "Nokton 50 f/1.2 Asf.":"Compact for its aperture, with ample defocus and modern correction. Much used as an alternative to the aspheric Summilux.",
+ "Nokton 50 f/1.5 Asf. II":"Second version, with closer focusing. A balance between size, aperture and correction.",
+ "APO-Lanthar 50 f/2 Asf.":"A true apochromat with focusing down to 0.45 m. One of the best performances per unit of cost in the whole mount.",
+ "Heliar Classic 50 f/3.5":"A Heliar design in three groups, collapsible. Ample gradation and a smooth drawing without lapsing into overall veiling glare.",
+ "Nokton 75 f/1.5 Asf.":"A fast short telephoto with ample, clean defocus. Focusing down to 0.70 m, unusual in the mount.",
+ "APO-Skopar 90 f/2.8":"A compact apochromat of high contrast. Out-of-focus outlines with no colour fringe.",
+ "Canon 50 f/0.95":"Conceived for the Canon 7 with its own bayonet mount; it requires conversion to M. Dominant spherical veil and intense swirl in the corners.",
+ "Canon 50 f/1.2 LTM":"Leica thread, directly adaptable. Abundant halo at full aperture that soon clears.",
+ "Canon 35 f/2 LTM":"One of the best screw-mount 35s of its decade. Medium contrast with a very orderly defocus.",
+ "Nikkor-S.C 5cm f/1.4":"Leica thread, from the fifties. A warm rendition with marked halo and soft corners at full aperture.",
+ "Nikkor K 55 f/1.2 pre-AI":"Nikon F mount, mountable on M via an adapter ring, without rangefinder coupling. Intense spherical veil and sagittal coma at full aperture that clear towards f/2.8; the NIC multicoating keeps base contrast above that of its single-coated contemporaries.",
+ "Jupiter-3 50 f/1.5":"A Soviet copy of the Zeiss Sonnar. A thread pitch and a focusing base different from the Leica standard, which calls for recalibration. Very high spherical veil.",
+ "Jupiter-9 85 f/2":"A portrait Sonnar with fifteen blades. Very smooth defocus and low contrast at full aperture.",
+ "Konica M-Hexanon 35 f/2":"A discontinued series of very high mechanical and optical quality. An uncommon compromise between contrast and smoothness.",
+ "Konica M-Hexanon 50 f/2":"Performance on a par with the fifth-version Summicron, with a slightly warmer character.",
+ "Konica M-Hexanon 90 f/2.8":"A highly corrected short telephoto, moderately priced on the second-hand market.",
+ "Minolta M-Rokkor 40 f/2":"Designed for the Leitz Minolta CL. Very compact, with a smooth drawing and decent contrast. Prone to corrosion of the internal coating.",
+ "Minolta M-Rokkor 90 f/4":"A four-element short telephoto, light and sharp from full aperture.",
+ "Light Lens Lab 35 f/2 (ocho elementos)":"A reproduction of the 1958 Summicron design, down to the tolerance of the coating. It reproduces the tonal gradation of the original.",
+ "Light Lens Lab 50 f/2 (rígido)":"A copy of the rigid Summicron with glass equivalent to the original. A classic signature without the uncertainties of a sixty-year-old unit.",
+ "Light Lens Lab 50 f/1.5 Z21":"A homage to the Angénieux S21 50 mm, with high-index lanthanum glass and a preset diaphragm. It covers up to 44x33 mm. Field curvature and distortion are read from the curves published by the maker.",
+ "Light Lens Lab 50 f/1.2 (Noctilux)":"A reproduction of the 1966 aspheric Noctilux. It recovers the veil and the swirl of the original, including its irregular performance at the edge.",
+ "MS Optics Sonnetar 50 f/1.1":"Miyazaki's hand-built design, with a spherical-aberration corrector adjustable by the user. Intense focus shift and a very enveloping defocus.",
+ "7Artisans 50 f/1.1":"A very low-cost lens with an exaggerated classical character. High veiling glare and unresolved corners at full aperture.",
+ "TTArtisan 50 f/0.95":"A functional replica of the Noctilux approach at a fraction of the price. Fourteen blades and a very ample defocus.",
+ "TTArtisan 90 f/1.25":"A portrait lens of extreme aperture. Very critical focusing with the rangefinder and a defocus of great magnitude.",
+ "Thypoch Simera 35 f/1.4":"A recent maker with a notable mechanical finish. Fourteen blades with aperture notches that keep the disc almost circular.",
+ "Thypoch Simera 28 f/1.4":"The same approach in a fast wide angle. High correction with a gentler transition to defocus than the aspheric average.",
+ "Funleader Caps 18 f/8":"A body-cap lens of three elements and fixed aperture. An optical curiosity of modest performance and negligible mass.",
+ "APO-Summicron-ASPH 43 f/2 (Q3 43)":"A reference row, not part of the M catalogue: it is the fixed lens of the Q3 43 and cannot be mounted on an M. The indices have been rated by the same criterion as the rest, not measured; the mass is an estimate, because Leica does not publish that of the optical unit on its own. It is here so that any lens in the catalogue can be compared with the one already being carried."
+};
+const fam  = L => LANG()==="en" ? (FAM_EN[L.family] || L.family) : L.family;
+const nota = L => LANG()==="en" ? (NOTA_EN[L.name]  || L.nota)   : L.nota;
+/* Nombre que se muestra. En inglés se traducen las aclaraciones del catálogo
+   («1ª serie», «reedición», «Asf.»…); L.name sigue siendo la clave de enlaces y tablas. */
+const NAME_EN_RULES = [
+  [/\((\d)ª serie\)/, (m,n)=>"("+n+(["","st","nd","rd"][n]||"th")+" version)"],
+  [/\(reedición\)/, "(reissue)"], [/\(ocho elementos\)/, "(eight elements)"], [/\(seis elementos\)/, "(six elements)"],
+  [/\(colapsable\)/, "(collapsible)"], [/rígido y DR/, "rigid and DR"], [/\(rígido\)/, "(rigid)"], [/\bAsf\./, "Asph."]
+];
+const NAME_EN_MEMO = new Map();
+function dn(L){
+  if(LANG()!=="en") return L.name;
+  if(!NAME_EN_MEMO.has(L.name)) NAME_EN_MEMO.set(L.name, NAME_EN_RULES.reduce((s,r)=>s.replace(r[0],r[1]), L.name));
+  return NAME_EN_MEMO.get(L.name);
+}
+
+
 /* =======================================================================
    Catálogo. Campos:
    0 nombre |1 marca |2 focal |3 f máx |4 año |5 familia óptica |6 elementos
@@ -1999,7 +2170,7 @@ function pintarSelbar(){
   const h=$("selbar");
   if(!sel.length){ h.innerHTML="<span class='kv'>"+t("sinSel")+"</span>"; return; }
   h.innerHTML=sel.map((i,k)=>{ const L=LENSES[i];
-    return "<span class='slot'><b style='background:"+SLOTCOL[k]+"'></b>"+L.name
+    return "<span class='slot'><b style='background:"+SLOTCOL[k]+"'></b>"+dn(L)
       +" <button type='button' data-q='"+i+"' aria-label='"+t("quitar")+"'>×</button></span>";}).join("");
   h.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>toggleSel(+b.dataset.q));
 }
@@ -2026,7 +2197,7 @@ function filtrar(){
     if(fil.era && (L.year<fil.era[0]||L.year>fil.era[1])) return false;
     if(fil.tag && L.tags.indexOf(fil.tag)<0) return false;
     if(fil.monta && (L.ref || L.mount==="nodig")) return false;
-    if(q && (L.name+" "+L.brand+" "+L.family+" "+arqNombre(L)+" "+L.nota+" "
+    if(q && (L.name+" "+dn(L)+" "+L.brand+" "+L.family+" "+fam(L)+" "+arqNombre(L)+" "+L.nota+" "+nota(L)+" "
       +L.tags.map(t).join(" ")+" "+L.usos.map(t).join(" ")).toLowerCase().indexOf(q)<0) return false;
     return true;
   }).sort((a,b)=> fil.sort==="name" ? a.name.localeCompare(b.name,"es")
@@ -2046,8 +2217,8 @@ function pintarLista(){
     const sp=[o.crema,o.micro,o.resB,o.pureza,o.contraste].map(v=>
       "<i style='height:"+Math.max(2,v/100*20)+"px;background:"+(v>72?"var(--d)":v>45?"#8a7440":"#3A4656")+"'></i>").join("");
     r.innerHTML="<button class='pick' type='button' data-p='"+o.i+"' aria-pressed='"+(c?"true":"false")
-      +"' style='--c:"+(c||"var(--d)")+"' aria-label='"+t("comparar")+" "+o.name+"'></button>"
-      +"<div><button class='nm nmbtn' type='button' data-open='"+o.i+"'>"+o.name+"</button><div class='mt'>"+o.brand+" · "+o.year+" · K "+fmt(o.K,2)+" · "+arqNombre(o)+"</div></div>"
+      +"' style='--c:"+(c||"var(--d)")+"' aria-label='"+t("comparar")+" "+dn(o)+"'></button>"
+      +"<div><button class='nm nmbtn' type='button' data-open='"+o.i+"'>"+dn(o)+"</button><div class='mt'>"+o.brand+" · "+o.year+" · K "+fmt(o.K,2)+" · "+arqNombre(o)+"</div></div>"
       +"<div class='spark'>"+sp+"</div>";
     r.querySelector(".pick").onclick=e=>{ e.stopPropagation(); toggleSel(o.i); };
     r.querySelector("[data-open]").onclick=()=>abrirFicha(o);
@@ -2272,7 +2443,7 @@ function pintarIntencion(){
       +(colorDe(o.L.i)?"true":"false")+"' style='--c:"+(colorDe(o.L.i)||"var(--d)")
       +"' aria-label='"+t("comparar")+"'></button></td>"
       +"<td><span class='nm' data-io='"+o.L.i+"' style='font-family:var(--cond);font-size:12.5px;color:var(--hi);cursor:pointer'>"
-      +o.L.name+"</span><div class='kv'>"+o.L.brand+" · "+o.L.year+" · "+arqNombre(o.L)+"</div></td>"
+      +dn(o.L)+"</span><div class='kv'>"+o.L.brand+" · "+o.L.year+" · "+arqNombre(o.L)+"</div></td>"
       +"<td class='v' style='color:var(--d)'>"+fmt(o.s,1)+"</td>"
       +"<td class='v'>"+fmt(o.L.weight)+" g</td><td class='v'>"+fap(o.L.fmax)+"</td></tr>";
   });
@@ -2296,8 +2467,8 @@ function pintarIntencion(){
 }
 
 function pintarFicha(L){
-  $("f-brandline").textContent=L.brand+" · "+L.family+" · "+L.year;
-  $("f-name").textContent=L.name;
+  $("f-brandline").textContent=L.brand+" · "+fam(L)+" · "+L.year;
+  $("f-name").textContent=dn(L);
   const v=vigModel(L), nc=1/(LAM*L.fmax);
   $("f-badges").innerHTML=["<span class='badge k'>"+arqNombre(L)+"</span>",
     "<span class='badge'>"+L.el+"e / "+L.gr+"g</span>",
@@ -2305,7 +2476,7 @@ function pintarFicha(L){
     "<span class='badge'>"+L.blades+" "+t("b_palas")+"</span>",
     "<span class='badge'>"+coatName(L.coat)+"</span>",
     "<span class='badge'>K "+fmt(L.K,2)+"</span>"].join("");
-  $("f-note").textContent=L.nota;
+  $("f-note").textContent=nota(L);
   $("f-arqdesc").textContent=arqDesc(L)||"";
   $("f-uso").innerHTML="<span class='eyebrow'>"+t("usoRegla")+"</span> "
     +(L.usos.length?L.usos.map(u=>"<span class='badge k'>"+t(u)+"</span>").join(" "):"<span class='badge'>"+t("sinCoincidencia")+"</span>")
@@ -2425,7 +2596,7 @@ function pintarParecidos(L){
   const ix=SUB[0][1], arr=distr(0);
   const lista=LENSES.filter(o=>o.i!==L.i).map(o=>({o,d:dSub(L.i,o.i,ix)}))
     .sort((a,b)=>a.d-b.d).slice(0,6);
-  $("f-masparecido").innerHTML=t("masParecido")+" <b style=\'color:var(--hi)\'>"+lista[0].o.name
+  $("f-masparecido").innerHTML=t("masParecido")+" <b style=\'color:var(--hi)\'>"+dn(lista[0].o)
     +"</b> "+t("aD")+" "+fmt(lista[0].d,2)+", "+t("percentil")+" "+fmt(pctil(lista[0].d,arr))+" %";
   let h="<h3 style=\'margin-bottom:4px\'>"+t("parecidosTit")+"</h3>"
     +"<div class=\'kv\' style=\'margin-bottom:9px\'>"+t("parecidosSub")+"</div>";
@@ -2433,7 +2604,7 @@ function pintarParecidos(L){
   lista.forEach(v=>{ const p=pctil(v.d,arr), c=colorDe(v.o.i);
     h+="<tr><td><button class=\'pick\' type=\'button\' data-p=\'"+v.o.i+"\' aria-pressed=\'"+(c?"true":"false")
       +"\' style=\'--c:"+(c||"var(--d)")+"\' aria-label=\'"+t("comparar")+"\'></button></td>"
-      +"<td><span data-go=\'"+v.o.i+"\' style=\'font-family:var(--cond);font-size:12.5px;color:var(--hi);cursor:pointer\'>"+v.o.name+"</span>"
+      +"<td><span data-go=\'"+v.o.i+"\' style=\'font-family:var(--cond);font-size:12.5px;color:var(--hi);cursor:pointer\'>"+dn(v.o)+"</span>"
       +(dSub(L.i,v.o.i,ix)<0.10?" <span class=\'badge\' style=\'border-color:var(--C);color:var(--C)\'>"+t("casiIdenticos")+"</span>":"")
       +"<div class=\'kv\'>"+v.o.brand+" · "+v.o.year+" · "+arqNombre(v.o)+"</div></td>"
       +"<td class=\'v\' style=\'color:var(--d)\'>"+fmt(v.d,2)+"</td>"
@@ -2466,7 +2637,7 @@ function pintarPerfiles(){
     cv.width=180; cv.height=180; w.appendChild(cv);
     const N=L.fmax*Math.pow(2,st/2);
     const cap=document.createElement("div"); cap.className="cap";
-    cap.innerHTML="<span style='color:"+SLOTCOL[k]+"'>■</span> "+L.name+"<br>"+apLabel(L,st)+" · "+t("esfCorta")+" "+(L.sa>0?"+":"")+L.sa
+    cap.innerHTML="<span style='color:"+SLOTCOL[k]+"'>■</span> "+dn(L)+"<br>"+apLabel(L,st)+" · "+t("esfCorta")+" "+(L.sa>0?"+":"")+L.sa
       +(escala==="cantidad"?"<br>"+t("met_pupila").toLowerCase()+" "+fmt(L.focal/N,1)+" mm":"");
     w.appendChild(cap); dh.appendChild(w);
     const o={N,side:"bg",field:fd,exp:0,fast:true};
@@ -2479,7 +2650,7 @@ function pintarPerfiles(){
     [t("gen_mech"),"mech",0],[t("met_vig"),"vig",1],[t("met_pop"),"pop",0],
     [t("met_clasico"),"clasico",0],[t("met_weight"),"weight",0]];
   if(!ls.length){ $("c-tab").innerHTML=""; return; }
-  let h="<tr><th>"+t("thDescriptor")+"</th>"+ls.map((L,k)=>"<th style='text-align:right;color:"+SLOTCOL[k]+"'>"+L.name+"</th>").join("")+"</tr>";
+  let h="<tr><th>"+t("thDescriptor")+"</th>"+ls.map((L,k)=>"<th style='text-align:right;color:"+SLOTCOL[k]+"'>"+dn(L)+"</th>").join("")+"</tr>";
   rows.forEach(r=>{ h+="<tr><td>"+r[0]+"</td>"+ls.map(L=>"<td class='v'>"+(r[1]==="sa"&&L.sa>0?"+":"")+fmt(L[r[1]],r[2])+"</td>").join("")+"</tr>"; });
   $("c-tab").innerHTML=h;
 }
@@ -2487,7 +2658,7 @@ function pintarMatriz(){
   const ls=sel.map(i=>LENSES[i]), ix=SUB[sub][1], arr=distr(sub);
   if(ls.length<2){ $("c-mtx").innerHTML="<tr><td class='kv' style='border:0'>"+t("minDos")+"</td></tr>"; return; }
   let h="<tr><th></th>"+ls.map((L,k)=>"<th style='color:"+SLOTCOL[k]+"'>"+(k+1)+"</th>").join("")+"</tr>";
-  ls.forEach((A,a)=>{ h+="<tr><th style='text-align:left;color:"+SLOTCOL[a]+"'>"+(a+1)+" · "+A.name+"</th>";
+  ls.forEach((A,a)=>{ h+="<tr><th style='text-align:left;color:"+SLOTCOL[a]+"'>"+(a+1)+" · "+dn(A)+"</th>";
     ls.forEach((B,b)=>{
       if(a===b){ h+="<td class='dg'>·</td>"; return; }
       const d=dSub(A.i,B.i,ix), p=pctil(d,arr);
@@ -2509,8 +2680,8 @@ function pintarPar2(){
   const tot=cs.reduce((a,c)=>a+c.v,0)||1; cs.sort((a,b)=>b.v-a.v);
   const mx=cs[0].v/tot;
   let h="<div class='eyebrow' style='margin-bottom:6px'>"+t("descomposicion")+" "+fmt(dSub(A.i,B.i,ix),2)+" "+t("enSubespacio")+" "+SUB[sub][0]().toLowerCase()+"</div>";
-  h+="<div class='kv' style='margin-bottom:9px;line-height:1.5'><span style='color:var(--d)'>■</span> "+A.name
-    +" &nbsp; <span style='color:var(--F)'>■</span> "+B.name+"</div>";
+  h+="<div class='kv' style='margin-bottom:9px;line-height:1.5'><span style='color:var(--d)'>■</span> "+dn(A)
+    +" &nbsp; <span style='color:var(--F)'>■</span> "+dn(B)+"</div>";
   h+="<table><tr><th>"+t("thGenerador")+"</th><th style='text-align:right'>d²</th><th style='width:110px'></th>"
     +"<th style='text-align:right;color:var(--d)'>A</th><th style='text-align:right;color:var(--F)'>B</th></tr>";
   cs.forEach(c=>{ const k=GEN[c.g][0], f=c.v/tot;
@@ -2534,7 +2705,7 @@ function pintarPar2(){
     const w=document.createElement("div"), cv=document.createElement("canvas");
     cv.width=180; cv.height=180; w.appendChild(cv);
     const cap=document.createElement("div"); cap.className="cap";
-    cap.innerHTML="<span style='color:"+c+"'>■</span> "+L.name+" · "+fap(L.fmax)
+    cap.innerHTML="<span style='color:"+c+"'>■</span> "+dn(L)+" · "+fap(L.fmax)
       +(escala==="cantidad"?" · "+fmt(L.pupila,1)+" mm":"");
     w.appendChild(cap); dh.appendChild(w);
     const o={N:L.fmax,side:"bg",field:0.75,exp:0,fast:true};
@@ -2564,7 +2735,7 @@ function pintarVecinos(){
   lista.forEach(o=>{ const p=pctil(o.d,arr), c=colorDe(o.B.i);
     h+="<tr><td><button class='pick' type='button' data-p='"+o.B.i+"' aria-pressed='"+(c?"true":"false")
       +"' style='--c:"+(c||"var(--d)")+"' aria-label='"+t("comparar")+"'></button></td>"
-      +"<td><span class='nm' data-open='"+o.B.i+"' style='font-family:var(--cond);font-size:12.5px;color:var(--hi);cursor:pointer'>"+o.B.name+"</span>"
+      +"<td><span class='nm' data-open='"+o.B.i+"' style='font-family:var(--cond);font-size:12.5px;color:var(--hi);cursor:pointer'>"+dn(o.B)+"</span>"
       +(dSub(A.i,o.B.i,SUB[0][1])<0.10?" <span class='badge' style='border-color:var(--C);color:var(--C)'>"+t("casiIdenticos")+"</span>":"")
       +"<div class='kv'>"+o.B.brand+" · "+o.B.year+" · "+arqNombre(o.B)+"</div></td>"
       +"<td class='v' style='color:var(--d)'>"+fmt(o.d,2)+"</td>"
@@ -2604,13 +2775,13 @@ function drawMap(){
     const p=el(s,"circle",{cx,cy,r,fill:BRANDCOL[o.brand]||"#8A93A0","fill-opacity":c?.9:.45,
       stroke:c||BRANDCOL[o.brand]||"#8A93A0","stroke-width":1.1,class:"pt"});
     p.addEventListener("mouseenter",e=>{ tip.style.opacity=1;
-      tip.innerHTML=o.name+"<br>"+mx.n+" "+fmt(o[mapX],2)+"<br>"+my.n+" "+fmt(o[mapY],2)
+      tip.innerHTML=dn(o)+"<br>"+mx.n+" "+fmt(o[mapX],2)+"<br>"+my.n+" "+fmt(o[mapY],2)
         +"<br><span style='color:var(--mut)'>"+(mapAcc==="sel"?t("pulseComparar"):t("pulseFicha"))+"</span>";
       const b=$("mapwrap").getBoundingClientRect();
       tip.style.left=(e.clientX-b.left+12)+"px"; tip.style.top=(e.clientY-b.top-8)+"px"; });
     p.addEventListener("mouseleave",()=>tip.style.opacity=0);
     p.addEventListener("click",()=>{ if(mapAcc==="sel") toggleSel(o.i); else abrirFicha(o); });
-    if(mapLab) txt(s,cx+7,cy+3,o.name.replace(/\s*\(.*\)/,""),"axl");
+    if(mapLab) txt(s,cx+7,cy+3,dn(o).replace(/\s*\(.*\)/,""),"axl");
   });
 }
 
@@ -2624,7 +2795,7 @@ function pintarBanco(){
   ls.forEach(L=>{
     const c=document.createElement("div"); c.className="cellb";
     const cv=document.createElement("canvas"); cv.width=168; cv.height=168; c.appendChild(cv);
-    const cap=document.createElement("div"); cap.className="cap"; cap.textContent=L.name;
+    const cap=document.createElement("div"); cap.className="cap"; cap.textContent=dn(L);
     const sb=document.createElement("div"); sb.className="sub";
     sb.textContent=L.year+" · "+t("esfCorta")+" "+(L.sa>0?"+":"")+L.sa
       +(escala==="cantidad"?" · "+t("met_pupila").toLowerCase()+" "+fmt(L.pupila,1)+" mm":"");
@@ -2659,7 +2830,7 @@ function pintarSeccionMetrica(){
   $("m-cargas").innerHTML=tb;
   let v="<tr><th>d</th><th>"+t("thPar")+"</th><th>"+t("thFamilia")+"</th></tr>";
   PCA.pares.forEach(pr=>{ const A=LENSES[pr.i],B=LENSES[pr.j];
-    v+="<tr><td class='v' style='width:44px'>"+fmt(pr.d,3)+"</td><td>"+A.name+" + "+B.name+"</td>"
+    v+="<tr><td class='v' style='width:44px'>"+fmt(pr.d,3)+"</td><td>"+dn(A)+" + "+dn(B)+"</td>"
       +"<td style='color:"+(A.family===B.family?"var(--ok)":"var(--mut)")+"'>"+(A.family===B.family?t("coincide"):t("distinta"))+"</td></tr>"; });
   $("m-pares").innerHTML=v;
   $("m-acierto").innerHTML=t("aciertoA")+" <b style='color:var(--ok)'>"+fmt(PCA.acierto)
@@ -2737,8 +2908,16 @@ function aplicarEtiquetas(){
     $("f-add").textContent=t("addCmp");
   }
 }
+/* desplegable del objetivo de referencia: se rehace al cambiar de idioma sin perder lo elegido */
+function llenarRecRef(){
+  const s=$("rec-ref"), v=s.value;
+  s.innerHTML=LENSES.slice().sort((a,b)=>a.name.localeCompare(b.name,"es"))
+    .map(L=>"<option value='"+L.i+"'>"+dn(L)+"</option>").join("");
+  if(v!=="") s.value=v;
+}
 function aplicarIdioma(){
   aplicarEtiquetas();
+  llenarRecRef();
   /* listas y selectores reconstruidos con los rótulos nuevos */
   const so=$("sort").value;
   $("sort").innerHTML=SORTS().map(s=>"<option value='"+s[0]+"'>"+s[1]+"</option>").join("");
@@ -2819,8 +2998,7 @@ function init(){
     ["perf","dist","vec"].forEach(t=>$("pane-"+t).hidden=(t!==tab));
     pintarBanco2(); });
   ["s-cN","s-cfield"].forEach(id=>$(id).oninput=thr(pintarPerfiles));
-  $("rec-ref").innerHTML=LENSES.slice().sort((a,b)=>a.name.localeCompare(b.name,"es"))
-    .map(L=>"<option value='"+L.i+"'>"+L.name+"</option>").join("");
+  llenarRecRef();
   $("rec-ref").onchange=e=>{rec.ref=+e.target.value;pintarVecinos();};
 
   /* mapa */
