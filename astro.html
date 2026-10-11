@@ -59,7 +59,8 @@
   .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin:18px 0 14px}
   label{font-size:12px;color:var(--ink2);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em}
   input[type=number],select,input[type=date]{font-family:var(--mono);font-size:14px;padding:7px 9px;border:1px solid var(--line);border-radius:5px;background:#0f1419;color:var(--ink);width:130px;color-scheme:dark}
-  select{width:auto}
+  select{width:auto;max-width:100%}
+  .controls>div{min-width:0;max-width:100%}
   button{font-family:var(--sans);font-size:14px;font-weight:500;padding:8px 14px;border-radius:5px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);cursor:pointer}
   button.ghost{background:transparent;color:var(--ink)}
   button.small{padding:4px 9px;font-size:12px}
@@ -101,8 +102,12 @@
   .hour.dark{background:#0b1016;border-radius:3px}
   .hour.moon .t{color:var(--warn)}
   .wbar{height:8px;background:var(--ok);border-radius:2px;display:inline-block;vertical-align:middle}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  @media (max-width:800px){.grid2{grid-template-columns:1fr}}
+  .grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+  .grid2>*{min-width:0}
+  @media (max-width:800px){.grid2{grid-template-columns:minmax(0,1fr)}}
+  tr.dim td{color:#66727f}
+  #tsrc td.l,#tsrc th.l{text-align:left}
+  #tsrc td.rd{text-align:left;white-space:normal;min-width:230px}
   .obs-row{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
   .mlist{display:flex;flex-wrap:wrap;gap:8px;font-family:var(--mono);font-size:12px}
   .mlist label{display:inline-flex;align-items:center;gap:4px;text-transform:none;letter-spacing:0;font-size:12px;color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:3px 7px;background:#0f1419;margin:0}
@@ -173,8 +178,8 @@
   </div>
   <h1 data-i18n="title"></h1>
   <p class="sub" data-i18n="subtitle"></p>
-  <p class="netnote" data-lang="es"><b>Necesita conexión a internet.</b> Cada cálculo descarga la previsión de <b>Open‑Meteo</b> (<code>api.open-meteo.com</code>) y la transparencia atmosférica del modelo <b>CAMS</b> (<code>air-quality-api.open-meteo.com</code>). Sin red la página se abre igual, pero no puede predecir nada. No hay clave ni registro; tus observaciones se quedan en este navegador.</p>
-  <p class="netnote" data-lang="en"><b>An internet connection is required.</b> Every computation downloads the forecast from <b>Open‑Meteo</b> (<code>api.open-meteo.com</code>) and the atmospheric transparency from the <b>CAMS</b> model (<code>air-quality-api.open-meteo.com</code>). With no network the page still opens, but it cannot forecast anything. There is no API key and no sign‑up; your observations stay in this browser.</p>
+  <p class="netnote" data-lang="es"><b>Necesita conexión a internet.</b> Cada cálculo descarga la previsión de <b>Open‑Meteo</b> (<code>api.open-meteo.com</code>), dentro de Galicia también la del WRF de <b>MeteoGalicia</b> (<code>thredds.meteogalicia.gal</code>), y la transparencia atmosférica del modelo <b>CAMS</b> (<code>air-quality-api.open-meteo.com</code>). Sin red la página se abre igual, pero no puede predecir nada. No hay clave ni registro; tus observaciones se quedan en este navegador.</p>
+  <p class="netnote" data-lang="en"><b>An internet connection is required.</b> Every computation downloads the forecast from <b>Open‑Meteo</b> (<code>api.open-meteo.com</code>), within Galicia also the <b>MeteoGalicia</b> WRF (<code>thredds.meteogalicia.gal</code>), and the atmospheric transparency from the <b>CAMS</b> model (<code>air-quality-api.open-meteo.com</code>). With no network the page still opens, but it cannot forecast anything. There is no API key and no sign‑up; your observations stay in this browser.</p>
 </header>
 <main>
   <div class="panel controls">
@@ -193,9 +198,10 @@
     <div class="panel controls" style="margin-top:0">
       <div><label for="model" data-i18n="model"></label>
         <select id="model">
+          <option value="auto" data-i18n="auto"></option>
+          <option value="mg_wrf">WRF 1 km MeteoGalicia</option><option value="meteofrance_seamless">AROME/ARPEGE</option><option value="dmi_seamless">HARMONIE DMI 2 km + IFS</option><option value="knmi_seamless">HARMONIE KNMI 5.5 km + IFS</option>
+          <option value="icon_seamless">ICON (DWD)</option><option value="ecmwf_ifs">ECMWF IFS 9 km</option><option value="ukmo_seamless">UKMO</option><option value="gfs_seamless">GFS (NOAA)</option>
           <option value="best_match" data-i18n="best"></option>
-          <option value="icon_seamless">ICON (DWD)</option><option value="gfs_seamless">GFS (NOAA)</option>
-          <option value="meteofrance_seamless">AROME/ARPEGE</option><option value="ecmwf_ifs025">ECMWF IFS 0.25°</option><option value="ukmo_seamless">UKMO</option>
         </select></div>
       <button id="go1" type="button" data-i18n="compute"></button>
       <div class="status" id="st1"></div>
@@ -236,6 +242,7 @@
       <div><h2 data-i18n="h_night"></h2><div class="wrap"><table id="tnight"></table></div></div>
       <div><h2 data-i18n="h_w"></h2><div class="wrap"><table id="tw"></table></div><p class="note" id="priorinfo"></p></div>
     </section>
+    <section><h2 data-i18n="h_src"></h2><div class="wrap"><table id="tsrc"></table></div><p class="note" id="srcread"></p><p class="note" data-i18n="src_note"></p></section>
     <section><h2 data-i18n="h_cal"></h2><div id="calib" style="max-width:560px"></div><p class="note" id="calread"></p></section>
     <section><h2 data-i18n="h_obs"></h2>
       <div class="panel">
@@ -299,8 +306,8 @@
 <script>
 (function(){
   const I18N={
-  es:{m_new:"Luna nueva",m_wax_cres:"Creciente",m_first:"Cuarto creciente",m_wax_gib:"Gibosa creciente",m_full:"Luna llena",m_wan_gib:"Gibosa menguante",m_last:"Cuarto menguante",m_wan_cres:"Menguante",fog_link:'Niebla',manual:'Manual',title:'Cielo para astrofotografía',subtitle:'Pestaña 1: índice de calidad de cielo nocturno con un modelo (nubes por capas, transparencia, seeing, humedad, Luna). Pestaña 2: fusión bayesiana de varios modelos que aprende de tus noches. Datos de Open‑Meteo, sin clave.',
-    lat:'Latitud',lon:'Longitud',target:'Objetivo',t_deep:'Cielo profundo',t_planet:'Planetaria / Luna',t_wide:'Paisaje nocturno / Vía Láctea',geo:'Usar mi posición',tab1:'Índice de cielo',tab2:'Fusión bayesiana',model:'Modelo',best:'Mejor disponible',compute:'Calcular',
+  es:{m_new:"Luna nueva",m_wax_cres:"Creciente",m_first:"Cuarto creciente",m_wax_gib:"Gibosa creciente",m_full:"Luna llena",m_wan_gib:"Gibosa menguante",m_last:"Cuarto menguante",m_wan_cres:"Menguante",fog_link:'Niebla',manual:'Manual',title:'Cielo para astrofotografía',subtitle:'Pestaña 1: índice de calidad de cielo nocturno con un modelo (nubes por capas, transparencia, seeing, humedad, Luna). Pestaña 2: fusión bayesiana de varios modelos que aprende de tus noches. Datos de Open‑Meteo y de MeteoGalicia, sin clave.',
+    lat:'Latitud',lon:'Longitud',target:'Objetivo',t_deep:'Cielo profundo',t_planet:'Planetaria / Luna',t_wide:'Paisaje nocturno / Vía Láctea',geo:'Usar mi posición',tab1:'Índice de cielo',tab2:'Fusión bayesiana',model:'Modelo',best:'Selección de Open‑Meteo (best match)',auto:'Automático: la fuente de menor escala efectiva aquí',compute:'Calcular',
     h_strip:'Índice horario (48 h)',strip_legend:'Barra: índice 0 a 100 (verde ≥ 70 excelente, ámbar 50 a 69 aceptable, rojo &lt; 50 malo). Fondo oscuro: noche astronómica. Hora en ámbar: Luna sobre el horizonte. Rombo violeta: núcleo galáctico por encima de 10° en noche astronómica y sin Luna (solo con el objetivo Paisaje nocturno).',
     h_chart:'Nubes, Luna e índice',leg1:'<i style="background:#6dbb8a;height:4px"></i>índice <i style="background:#9aa7b5"></i>nubes totales % <i style="background:#5aa0c8"></i>nubes altas % <i style="background:#d9a441;height:8px;opacity:.5"></i>Luna sobre el horizonte (altura) <i style="background:#22304a;height:8px"></i>noche astronómica',
     h_table:'Tabla horaria',h_how:'Cómo se calcula',
@@ -309,7 +316,7 @@
     night_of:'Noche del',observed:'Observado',o_clear:'Útil: despejado la mayor parte',o_part:'Parcial: nubes intermitentes',o_bad:'Inútil: cubierto o bruma',save_obs:'Guardar observación',export:'Exportar JSON',import:'Importar JSON',clear:'Borrar registro',
     obs_note:'Cada vez que calculas, la previsión de la próxima noche queda congelada automáticamente, asociada a la fecha de esa noche (la del atardecer). Al día siguiente elige esa noche, indica cómo fue y guarda: la observación se empareja con la previsión de la víspera. Si no calculaste esa tarde, la observación solo actualiza el prior. El registro se guarda en este navegador; exporta el JSON si cambias de equipo.',
     snap_info:'Previsión congelada para la noche del {d} ({n} modelos, {h}).',no_snap:'No hay previsión congelada para la noche del {d}; la observación actualiza solo el prior.',obs_saved:'Observación guardada para la noche del {d}.',pending:'pendiente',
-    h_method:'Método',method:'Para cada modelo se calcula el índice horario s y, en cada noche astronómica, la media del mejor tramo de 3 horas, s₃. La probabilidad de “noche útil” es <code>p_m = σ((s₃ − 58)/12)</code>,  Prior climatológico π ~ Beta(a, b), inicial Beta(3.5, 6.5), actualizado con cada noche observada (a += y, b += 1 − y). Consenso por media ponderada en log‑odds y contracción hacia la climatología: <code>logit P = logit π + γ · (Σ w_m logit p_m / Σ w_m − logit π)</code>; P queda siempre entre π y el consenso de los modelos. Pesos <code>w_m ∝ exp(0.7 · Σ log P_m(y_obs))</code>. La transparencia (AOD) procede de un único modelo de composición atmosférica (CAMS) y es común a todos; las diferencias entre modelos provienen de nubes, humedad y viento.',
+    h_method:'Método',method:'Para cada modelo se calcula el índice horario s y, en cada noche astronómica, la media del mejor tramo de 3 horas, s₃. La probabilidad de “noche útil” es <code>p_m = σ((s₃ − 58)/12)</code>,  Prior climatológico π ~ Beta(a, b), inicial Beta(3.5, 6.5), actualizado con cada noche observada (a += y, b += 1 − y). Consenso por media ponderada en log‑odds y contracción hacia la climatología: <code>logit P = logit π + γ · (Σ w_m logit p_m / Σ w_m − logit π)</code>; P queda siempre entre π y el consenso de los modelos. Pesos <code>w_m ∝ Δ_m^(−0.5) · exp(0.7 · Σ log P_m(y_obs))</code>: el primer factor es un prior estructural que depende de la escala efectiva Δ_m de la fuente en el punto (paso de malla, degradado hacia la escala del modelo anfitrión a menos de 200 km del borde de un dominio limitado, y nunca menor que la distancia a la celda que devuelve la API); sin observaciones los pesos son ese prior. En las noches en que una fuente no tiene previsión congelada se le imputa la log‑verosimilitud media de las demás, de modo que una fuente recién añadida entra con peso neutro. La transparencia (AOD) procede de un único modelo de composición atmosférica (CAMS) y es común a todos; el viento a 250 hPa es propio de cada modelo cuando lo publica y, si no, el de IFS 0.25°; las diferencias entre modelos provienen de nubes, humedad y viento en superficie.',
     dl:'Descargando previsión…',dl_n:'Descargando {n} modelos en paralelo…',err:'Error: ',nopos:'Sin posición: ',geo_wait:'Obteniendo posición… (acepta el permiso si el navegador lo pide)',geo_denied:'Permiso de ubicación denegado. Actívalo en el candado de la barra de direcciones, o escribe las coordenadas a mano.',geo_denied_app:'Permiso de ubicación denegado para la app de pantalla de inicio. En iPhone: Ajustes → Privacidad y seguridad → Localización activada, y en "Sitios web de Safari" elige "Al usar la app". Si sigue fallando, elimina el icono del escritorio y vuelve a añadirlo para que pida permiso de nuevo.',geo_timeout:'La posición tardó demasiado. Reintenta, o escribe las coordenadas a mano.',geo_unavail:'Posición no disponible en este dispositivo. Escribe las coordenadas a mano.',geo_insecure:'La geolocalización solo funciona con HTTPS (por ejemplo en GitHub Pages) o en localhost; abierta como archivo local el navegador la bloquea. Escribe las coordenadas a mano.',geo_unsupported:'Este navegador no ofrece geolocalización. Escribe las coordenadas a mano.',noaod:' · sin AOD, transparencia neutra',elev:'elevación',
     tonight:'Esta noche',tomorrow:'Mañana por la noche',no_night:'Sin noche astronómica en el intervalo',best_win:'mejor tramo',mean:'media',astro:'noche astronómica',moon:'Luna',illum:'iluminación',moon_up:'sobre el horizonte',moon_down:'bajo el horizonte',all_night:'toda la noche',dew:'rocío',
     exc:'Excelente',acc:'Aceptable',bad:'Malo',range:'rango',disp:'Dispersión entre modelos (esta noche)',agree_h:'Acuerdo alto',agree_m:'Acuerdo moderado',agree_l:'Desacuerdo',disp_note:'Desviación típica de las probabilidades de los modelos: incertidumbre epistémica.',
@@ -317,7 +324,12 @@
     th1:['Hora','Índice','Nubes','Bajas','Medias','Altas','mm/h','HR','T−Td','V10','Rachas','V250','AOD','Luna','Sol°'],thnight:['Modelo','P útil','s₃','nubes','altas','HR','V250','tramo'],thw:['Modelo','peso w','','log‑veros.'],thobs:['Noche','y'],posterior:'posterior',del:'eliminar',
     post_leg:'posterior',range_leg:'rango',prior_info:'Prior: Beta({a}, {b}), media {pi} % sobre {n} noches registradas. Calibración p = σ((s₃ − 58)/12).',
     h_cal:'Calibración (diagrama de fiabilidad)',cal_empty:'Se dibuja cuando el registro tenga noches con previsión congelada.',cal_few:'Aún hay pocas noches para leer la calibración (n={n}; orientativo a partir de 10, fiable a partir de 30).',cal_thin:'Los grupos extremos (0–25 % y 75–100 %) tienen pocas noches (n={n}); todavía no hay señal clara sobre γ.',cal_mixed:'Los grupos se contradicen entre sí: sin señal clara sobre γ; déjalo como está y sigue registrando.',cal_up:'Las frecuencias reales son más extremas que el posterior: sube γ.',cal_down:'Las frecuencias reales son menos extremas que el posterior: baja γ.',cal_ok:'La calibración es razonable: deja γ como está.',cal_diag:'calibración perfecta',cal_x:'posterior predicho (%)',cal_y:'frecuencia real de noches útiles (%)',
-    sel1:'Selecciona al menos un modelo.',none:'Ningún modelo respondió a tiempo.',fused:'{k} modelos fusionados',failed:', {f} sin respuesta',first:'Calcula primero.',badjson:'JSON no válido',confirm:'¿Borrar todo el registro de observaciones?',
+    sel1:'Selecciona al menos un modelo.',none:'Ningún modelo respondió a tiempo.',nocov_n:', {c} sin cobertura',nocov:'sin cobertura',nodata:'sin datos',none_cov:'Ninguna de las fuentes marcadas cubre este punto.',
+    cell:'celda a {d} km',edge:'borde del dominio a {d} km',fill_from:'desde {h}, {m}',prim_fail:'{m} sin datos aquí',alt_fail:'{m} no disponible',then_ifs:'IFS 9 km a partir de unas +{h} h',fill_fail:'{m} no respondió: sin relleno',
+    h_src:'Fuentes en este punto',thsrc:['Fuente','Modelo efectivo aquí','Malla km','Celda a km','Borde km','Δ km','V250','Prior','Lectura'],own:'propio',shared:'común',
+    s_fine:'resuelve costa y relieve',s_mid:'malla intermedia',s_coarse:'malla gruesa',s_edge:'cerca del borde del dominio',s_far:'celda desplazada respecto al punto',s_nocov:'sin cobertura en este punto',s_legacy:'sustituida por IFS 9 km; solo para leer el registro antiguo',s_dup:'probablemente la misma integración que HARMONIE DMI (dominio común UWC‑West) remuestreada: no marques las dos',
+    src_read:'Menor escala efectiva entre las fuentes fusionadas: {a}, Δ = {km} km. {n} de las {k} tienen Δ de 10 km o más.',
+    src_note:'Muchos identificadores de Open‑Meteo son mezclas de modelos, y cuál de ellos responde depende del punto. La tabla resuelve la mezcla para estas coordenadas: modelo efectivo y paso de malla (de las definiciones de rejilla de Open‑Meteo), distancia entre el punto y la celda que devuelve la API y distancia al borde del dominio en los modelos de área limitada. Δ es la escala efectiva de la fuente en el punto: su paso de malla, salvo a menos de 200 km del borde de un dominio limitado, donde se interpola linealmente hacia la escala del modelo que lo alimenta; si la celda devuelta queda más lejos que eso, manda esa distancia. El prior es el peso de partida, proporcional a Δ^(−0.5); el registro de observaciones lo corrige noche a noche. V250 indica si la fuente trae su propio viento a 250 hPa o usa el común de IFS 0.25°. WRF MeteoGalicia se lee del servidor THREDDS de MeteoGalicia (pasada de las 00Z, 96 h); su nubosidad total es el máximo de las tres capas. El borde oeste de AROME es una estimación (±50 km). Las filas atenuadas son fuentes desmarcadas o sin respuesta. Fuera de Europa el catálogo es aproximado.',fused:'{k} modelos fusionados',failed:', {f} sin respuesta',first:'Calcula primero.',badjson:'JSON no válido',confirm:'¿Borrar todo el registro de observaciones?',
     w_cloud:'nubes',w_high:'altas',w_aod:'AOD',w_rh:'HR',w_jet:'V250',w_wind:'viento',w_dew:'rocío',w_moon:'Luna',timeout:'timeout',error:'error',
     /* ---- razones del veredicto, horas utiles, nucleo galactico, panorama semanal, camara ---- */
     w_rain:'lluvia',w_gust:'rachas',th_gc:'Núcleo',
@@ -361,8 +373,8 @@
     h_lim:'Límites y glosario',
     limits_dl:'<dt>Seeing</dt><dd>No se mide: se estima por el viento a 250 hPa, la altura del chorro. El seeing real depende de la turbulencia integrada en toda la columna y de la topografía local; puede ser bueno con chorro fuerte y malo con chorro flojo.</dd><dt>Contaminación lumínica</dt><dd>El índice no la conoce: no sabe si estás en Bortle 3 o en Bortle 7. Eso lo pones tú al elegir sitio, y entra solo en el panel de subexposición.</dd><dt>Astronomía</dt><dd>Algoritmos de baja precisión, error por debajo de medio grado: sobra para crepúsculos, Luna y núcleo galáctico, no sirve para efemérides finas.</dd><dt>Aerosoles</dt><dd>La AOD de CAMS tiene resolución de decenas de kilómetros: no ve una calima de valle. Si CAMS falla, la transparencia queda en un valor neutro y la línea de estado lo dice.</dd><dt>Capas de nubes</dt><dd>No están disponibles en todos los modelos. Cuando faltan se usa el total para las bajas y cero para medias y altas: el término de cirros deja de discriminar.</dd><dt>Horizonte</dt><dd>Se supone horizonte libre. No hay relieve, ni árboles, ni el edificio de enfrente.</dd><dt>Alcance</dt><dd>De la tercera noche en adelante las nubes son orientativas y la AOD deja de estar disponible. La lluvia anula el índice, pero un chubasco a siete días vista es una hipótesis, no un pronóstico.</dd>',
     gloss_dl:'<dt>AOD 550 nm</dt><dd>Profundidad óptica de aerosoles: cuánta luz se lleva el polvo en suspensión. Por debajo de 0,1 el cielo es transparente y las estrellas débiles llegan; 0,3 es calima visible, con halo alrededor de las luces y un fondo lechoso que se come el contraste; por encima de 0,5 no merece la pena montar.</dd><dt>Nubes altas</dt><dd>Cirros por encima de 6 km. Son lo peor previsto de toda la meteorología y lo más traicionero: no tapan la Luna ni disparan el higrómetro, pero convierten cada estrella en un halo. Un 30 % de nubes altas estropea una toma de cielo profundo más que un 30 % de nubes bajas lejos del encuadre.</dd><dt>T − Td</dt><dd>Temperatura menos punto de rocío. Por debajo de 2 °C el aire está a punto de condensar; por debajo de 1 °C la lente frontal se empaña en menos de una hora si no lleva cinta calefactora.</dd><dt>Viento a 250 hPa</dt><dd>Velocidad del chorro a unos 10 km de altura, el proxy de seeing. Por debajo de 50 km/h la atmósfera está en calma y las estrellas quedan puntuales; por encima de 130 km/h el disco de una estrella hierve y la planetaria no sale. Manda en planetaria y en cielo profundo a focal larga; a un paisaje de 24 mm casi no le afecta.</dd><dt>Noche astronómica</dt><dd>Sol por debajo de −18°. Antes de ese umbral queda luz crepuscular en el fondo de cielo; el índice lo recoge con un factor de oscuridad que vale 0,7 entre −12° y −18° y 1 por debajo.</dd><dt>Horas útiles</dt><dd>Noche astronómica y Luna bajo el horizonte a la vez. Es el presupuesto real de integración para cielo profundo y Vía Láctea: la media del índice no distingue una Luna al 30 % que se pone a las 23:00 de otra que aguanta hasta el alba.</dd><dt>Núcleo galáctico</dt><dd>El centro de la Vía Láctea, en Sagitario (AR 17 h 45 m, Dec −29°). Desde 43° N no pasa de unos 24° sobre el horizonte y solo es fotografiable de marzo a octubre; el resto del año el objetivo Paisaje nocturno sigue dando puntos, pero no hay banda que fotografiar.</dd>'},
-  en:{m_new:"New moon",m_wax_cres:"Waxing crescent",m_first:"First quarter",m_wax_gib:"Waxing gibbous",m_full:"Full moon",m_wan_gib:"Waning gibbous",m_last:"Last quarter",m_wan_cres:"Waning crescent",fog_link:'Fog',manual:'Manual',title:'Sky for astrophotography',subtitle:'Tab 1: night‑sky quality index from one model (cloud layers, transparency, seeing, humidity, Moon). Tab 2: Bayesian fusion of several models that learns from your nights. Open‑Meteo data, no API key.',
-    lat:'Latitude',lon:'Longitude',target:'Target',t_deep:'Deep sky',t_planet:'Planetary / Moon',t_wide:'Nightscape / Milky Way',geo:'Use my location',tab1:'Sky index',tab2:'Bayesian fusion',model:'Model',best:'Best available',compute:'Compute',
+  en:{m_new:"New moon",m_wax_cres:"Waxing crescent",m_first:"First quarter",m_wax_gib:"Waxing gibbous",m_full:"Full moon",m_wan_gib:"Waning gibbous",m_last:"Last quarter",m_wan_cres:"Waning crescent",fog_link:'Fog',manual:'Manual',title:'Sky for astrophotography',subtitle:'Tab 1: night‑sky quality index from one model (cloud layers, transparency, seeing, humidity, Moon). Tab 2: Bayesian fusion of several models that learns from your nights. Data from Open‑Meteo and MeteoGalicia, no API key.',
+    lat:'Latitude',lon:'Longitude',target:'Target',t_deep:'Deep sky',t_planet:'Planetary / Moon',t_wide:'Nightscape / Milky Way',geo:'Use my location',tab1:'Sky index',tab2:'Bayesian fusion',model:'Model',best:'Open‑Meteo selection (best match)',auto:'Automatic: the source with the smallest effective scale here',compute:'Compute',
     h_strip:'Hourly index (48 h)',strip_legend:'Bar: index 0 to 100 (green ≥ 70 excellent, amber 50 to 69 acceptable, red &lt; 50 poor). Dark background: astronomical night. Amber hour: Moon above the horizon. Violet diamond: galactic core above 10° in astronomical night with no Moon (Nightscape target only).',
     h_chart:'Clouds, Moon and index',leg1:'<i style="background:#6dbb8a;height:4px"></i>index <i style="background:#9aa7b5"></i>total clouds % <i style="background:#5aa0c8"></i>high clouds % <i style="background:#d9a441;height:8px;opacity:.5"></i>Moon above horizon (altitude) <i style="background:#22304a;height:8px"></i>astronomical night',
     h_table:'Hourly table',h_how:'How it is computed',
@@ -371,7 +383,7 @@
     night_of:'Night of',observed:'Observed',o_clear:'Usable: clear most of the night',o_part:'Partial: intermittent clouds',o_bad:'Useless: overcast or haze',save_obs:'Save observation',export:'Export JSON',import:'Import JSON',clear:'Clear log',
     obs_note:'Every time you compute, the forecast for the coming night is frozen automatically under the date of that night (the evening date). The next day pick that night, say how it went and save: the observation is paired with the previous evening’s forecast. If you did not compute that evening, the observation only updates the prior. The log lives in this browser; export the JSON if you change device.',
     snap_info:'Forecast frozen for the night of {d} ({n} models, {h}).',no_snap:'No frozen forecast for the night of {d}; the observation only updates the prior.',obs_saved:'Observation saved for the night of {d}.',pending:'pending',
-    h_method:'Method',method:'For each model the hourly index s is computed and, within each astronomical night, the mean of the best 3‑hour stretch, s₃. The probability of a “usable night” is <code>p_m = σ((s₃ − 58)/12)</code>,  Climatological prior π ~ Beta(a, b), initially Beta(3.5, 6.5), updated with each observed night (a += y, b += 1 − y). Consensus as a weighted mean in log‑odds with shrinkage towards climatology: <code>logit P = logit π + γ · (Σ w_m logit p_m / Σ w_m − logit π)</code>; P always lies between π and the model consensus. Weights <code>w_m ∝ exp(0.7 · Σ log P_m(y_obs))</code>. Transparency (AOD) comes from a single atmospheric composition model (CAMS) shared by all; model differences come from clouds, humidity and wind.',
+    h_method:'Method',method:'For each model the hourly index s is computed and, within each astronomical night, the mean of the best 3‑hour stretch, s₃. The probability of a “usable night” is <code>p_m = σ((s₃ − 58)/12)</code>,  Climatological prior π ~ Beta(a, b), initially Beta(3.5, 6.5), updated with each observed night (a += y, b += 1 − y). Consensus as a weighted mean in log‑odds with shrinkage towards climatology: <code>logit P = logit π + γ · (Σ w_m logit p_m / Σ w_m − logit π)</code>; P always lies between π and the model consensus. Weights <code>w_m ∝ Δ_m^(−0.5) · exp(0.7 · Σ log P_m(y_obs))</code>: the first factor is a structural prior that depends on the effective scale Δ_m of the source at the point (grid spacing, degraded towards the scale of the host model within 200 km of the edge of a limited domain, and never smaller than the distance to the cell the API returns); with no observations the weights are that prior. On nights when a source has no frozen forecast it is assigned the mean log‑likelihood of the others, so a newly added source enters with neutral weight. Transparency (AOD) comes from a single atmospheric composition model (CAMS) shared by all; the 250 hPa wind is each model&#8217;s own when published and otherwise that of IFS 0.25°; model differences come from clouds, humidity and surface wind.',
     dl:'Downloading forecast…',dl_n:'Downloading {n} models in parallel…',err:'Error: ',nopos:'No position: ',geo_wait:'Getting position… (accept the permission prompt if shown)',geo_denied:'Location permission denied. Enable it from the padlock in the address bar, or type the coordinates.',geo_denied_app:'Location permission denied for the home-screen app. On iPhone: Settings → Privacy & Security → Location Services on, and under "Safari Websites" choose "While Using the App". If it still fails, remove the home-screen icon and add it again so the prompt reappears.',geo_timeout:'Position took too long. Retry, or type the coordinates.',geo_unavail:'Position unavailable on this device. Type the coordinates.',geo_insecure:'Geolocation only works over HTTPS (e.g. GitHub Pages) or on localhost; browsers block it for local files. Type the coordinates.',geo_unsupported:'This browser does not offer geolocation. Type the coordinates.',noaod:' · no AOD, neutral transparency',elev:'elevation',
     tonight:'Tonight',tomorrow:'Tomorrow night',no_night:'No astronomical night in range',best_win:'best stretch',mean:'mean',astro:'astronomical night',moon:'Moon',illum:'illumination',moon_up:'above horizon',moon_down:'below horizon',all_night:'all night',dew:'dew',
     exc:'Excellent',acc:'Acceptable',bad:'Poor',range:'range',disp:'Spread between models (tonight)',agree_h:'High agreement',agree_m:'Moderate agreement',agree_l:'Disagreement',disp_note:'Standard deviation of model probabilities: epistemic uncertainty.',
@@ -379,7 +391,12 @@
     th1:['Time','Index','Clouds','Low','Mid','High','mm/h','RH','T−Td','W10','Gusts','W250','AOD','Moon','Sun°'],thnight:['Model','P usable','s₃','clouds','high','RH','W250','stretch'],thw:['Model','weight w','','log‑lik.'],thobs:['Night','y'],posterior:'posterior',del:'delete',
     post_leg:'posterior',range_leg:'range',prior_info:'Prior: Beta({a}, {b}), mean {pi} % over {n} logged nights. Calibration p = σ((s₃ − 58)/12).',
     h_cal:'Calibration (reliability diagram)',cal_empty:'Drawn once the log has nights with a frozen forecast.',cal_few:'Too few nights yet to read calibration (n={n}; indicative from 10, reliable from 30).',cal_thin:'The extreme groups (0–25 % and 75–100 %) hold few nights (n={n}); no clear signal on γ yet.',cal_mixed:'The groups contradict each other: no clear signal on γ; leave it as it is and keep logging.',cal_up:'Actual frequencies are more extreme than the posterior: raise γ.',cal_down:'Actual frequencies are less extreme than the posterior: lower γ.',cal_ok:'Calibration is reasonable: leave γ as it is.',cal_diag:'perfect calibration',cal_x:'predicted posterior (%)',cal_y:'actual usable-night frequency (%)',
-    sel1:'Select at least one model.',none:'No model answered in time.',fused:'{k} models fused',failed:', {f} without response',first:'Compute first.',badjson:'Invalid JSON',confirm:'Delete the whole observation log?',
+    sel1:'Select at least one model.',none:'No model answered in time.',nocov_n:', {c} without coverage',nocov:'no coverage',nodata:'no data',none_cov:'None of the ticked sources covers this point.',
+    cell:'cell {d} km away',edge:'domain edge {d} km away',fill_from:'from {h}, {m}',prim_fail:'{m} has no data here',alt_fail:'{m} unavailable',then_ifs:'IFS 9 km from about +{h} h',fill_fail:'{m} did not answer: no fill',
+    h_src:'Sources at this point',thsrc:['Source','Effective model here','Mesh km','Cell at km','Edge km','Δ km','W250','Prior','Reading'],own:'own',shared:'shared',
+    s_fine:'resolves coast and relief',s_mid:'intermediate mesh',s_coarse:'coarse mesh',s_edge:'close to the domain edge',s_far:'cell displaced from the point',s_nocov:'no coverage at this point',s_legacy:'replaced by IFS 9 km; kept only to read the old log',s_dup:'probably the same run as HARMONIE DMI (common UWC‑West domain), resampled: do not tick both',
+    src_read:'Smallest effective scale among the fused sources: {a}, Δ = {km} km. {n} of the {k} have Δ of 10 km or more.',
+    src_note:'Many Open‑Meteo identifiers are blends of models, and which one answers depends on the point. The table resolves the blend for these coordinates: effective model and grid spacing (from Open‑Meteo grid definitions), distance between the point and the cell the API returns and distance to the domain edge for limited‑area models. Δ is the effective scale of the source at the point: its grid spacing, except within 200 km of the edge of a limited domain, where it is interpolated linearly towards the scale of the model feeding it; if the returned cell lies farther than that, the cell distance prevails. The prior is the starting weight, proportional to Δ^(−0.5); the observation log corrects it night by night. W250 says whether the source brings its own 250 hPa wind or uses the shared one from IFS 0.25°. WRF MeteoGalicia is read from the MeteoGalicia THREDDS server (00Z run, 96 h); its total cloud is the maximum of the three layers. The western AROME edge is an estimate (±50 km). Dimmed rows are unticked or unresponsive sources. Outside Europe the catalogue is approximate.',fused:'{k} models fused',failed:', {f} without response',first:'Compute first.',badjson:'Invalid JSON',confirm:'Delete the whole observation log?',
     w_cloud:'clouds',w_high:'high',w_aod:'AOD',w_rh:'RH',w_jet:'W250',w_wind:'wind',w_dew:'dew',w_moon:'Moon',timeout:'timeout',error:'error',
     /* ---- verdict reasons, useful hours, galactic core, weekly outlook, camera ---- */
     w_rain:'rain',w_gust:'gusts',th_gc:'Core',
@@ -511,11 +528,121 @@ function moonName(phase,illum){
   const HOURLY='temperature_2m,relative_humidity_2m,dew_point_2m,wind_speed_10m,wind_gusts_10m,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,precipitation,wind_speed_250hPa';
   const coords=()=>({lat:+$('#lat').value,lon:+$('#lon').value,target:$('#target').value});
   function fetchJSON(url,ms){const c=new AbortController();const tm=setTimeout(()=>c.abort(),ms);return fetch(url,{signal:c.signal}).then(r=>r.json()).finally(()=>clearTimeout(tm));}
+  /* ===== catálogo de fuentes: qué modelo sirve realmente cada identificador de Open-Meteo en un punto =====
+     Pasos de malla y dominios tomados de las definiciones de rejilla del código de Open-Meteo (github.com/open-meteo/open-meteo).
+     Cada entrada devuelve {n: modelo efectivo, km: paso de malla, e: distancia en km al borde del dominio distribuido (null si es global)}
+     o null si el punto queda fuera de un modelo de área limitada. Fuera de Europa el catálogo es aproximado. */
+  const RT=6371.229, rad=x=>x*Math.PI/180;
+  const hav=(a1,o1,a2,o2)=>{const q=Math.sin(rad(a2-a1)/2)**2+Math.cos(rad(a1))*Math.cos(rad(a2))*Math.sin(rad(o2-o1)/2)**2; return 2*RT*Math.asin(Math.min(1,Math.sqrt(q)));};
+  const boxEdge=(la,lo,b)=>!(la>=b[0]&&la<=b[1]&&lo>=b[2]&&lo<=b[3])?null:111.2*Math.min(la-b[0],b[1]-la,(lo-b[2])*Math.cos(rad(la)),(b[3]-lo)*Math.cos(rad(la)));
+  const inRect=(dx,dy,W,H)=>(dx>=0&&dy>=0&&dx<=W&&dy<=H)?Math.min(dx,dy,W-dx,H-dy):null;
+  const BOX={arome:[37.5,55.4,-12,16],icond2:[43.18,58.08,-3.94,20.34],iconeu:[29.5,70.5,-23.5,62.5],arpeu:[20,72,-32,42],knminl:[49,56.002,0,11.281]};
+  // cónica conforme de Lambert tangente en φ0 con meridiano central λ0: coordenadas planas en km respecto al punto (φ0, λ0)
+  const lcc=(f0,l0)=>{const n=Math.sin(rad(f0)), F=Math.cos(rad(f0))*Math.tan(Math.PI/4+rad(f0)/2)**n/n, rho=x=>RT*F/Math.tan(Math.PI/4+rad(x)/2)**n;
+    return (a,o)=>{const th=n*rad(o-l0); return [rho(a)*Math.sin(th),rho(f0)-rho(a)*Math.cos(th)];};};
+  // DMI HARMONIE-AROME (DINI): Lambert con λ0 = −8°, φ0 = 55.5°, 1906 × 1606 puntos de 2 km, esquina SO en 39.671 N, 25.422 O
+  const dmiXY=lcc(55.5,-8), dmi0=dmiXY(39.671,-25.421997);
+  const dmiEdge=(la,lo)=>{const p=dmiXY(la,lo); return inRect(p[0]-dmi0[0],p[1]-dmi0[1],3810,3210);};
+  // AROME-France: la malla nativa es Lambert, 1440 × 1536 puntos de 1.3 km; Open-Meteo la sirve recortada a lat-lon (37.5 a 55.4 N, 12 O a 16 E) y fuera
+  // del dominio nativo no hay dato. Centro (46.45 N, 2 E) deducido de ese recorte, cuya altura coincide con 1536 × 1.3 km. Los bordes norte y sur quedan
+  // bien fijados; los bordes este y oeste dependen del meridiano central supuesto y son una estimación con unos ±50 km de incertidumbre.
+  const aroXY=lcc(46.45,2);
+  const aromeEdge=(la,lo)=>{const b=boxEdge(la,lo,BOX.arome); if(b==null) return null; const p=aroXY(la,lo), e=inRect(p[0]+936,p[1]+998.4,1872,1996.8); return e==null?null:Math.min(e,b);};
+  // escala efectiva de una fuente en el punto. En un modelo de área limitada, cerca del borde lateral la solución es la del modelo que lo alimenta:
+  // a menos de EDGE_KM del borde la escala se interpola linealmente entre su paso de malla (km) y la escala de ese modelo anfitrión (h), que es
+  // también lo que el mismo identificador sirve justo fuera del dominio, de modo que Δ no salta al cruzar el borde.
+  const EDGE_KM=200;
+  const effKm=i=>(i.e!=null&&i.h>i.km)?i.km+(i.h-i.km)*Math.max(0,1-i.e/EDGE_KM):i.km;
+  // KNMI HARMONIE-AROME Europa: lat-lon rotada con polo sur en (−35°, −8°), 676 × 564 puntos de 0.05°
+  const knmiEdge=(la,lo)=>{const t0=rad(55), a=rad(la), o=rad(lo+8), x=Math.cos(a)*Math.cos(o), y=Math.cos(a)*Math.sin(o), z=Math.sin(a);
+    const rl=Math.asin(clamp(-Math.sin(t0)*x+Math.cos(t0)*z,-1,1))*180/Math.PI, ro=Math.atan2(y,Math.cos(t0)*x+Math.sin(t0)*z)*180/Math.PI, k=111.2*Math.cos(rad(rl));
+    return inRect((ro+13.5)*k,(rl+13.6)*111.2,33.75*k,28.15*111.2);};
+  // UKV: azimutal equivalente de Lambert centrada en (54.9 N, 2.5 O), 1042 × 970 puntos de 2 km
+  const ukvEdge=(la,lo)=>{const p1=rad(54.9), a=rad(la), dl=rad(lo+2.5), kk=Math.sqrt(2/(1+Math.sin(p1)*Math.sin(a)+Math.cos(p1)*Math.cos(a)*Math.cos(dl)));
+    return inRect(RT*kk*Math.cos(a)*Math.sin(dl)+1158,RT*kk*(Math.cos(p1)*Math.sin(a)-Math.sin(p1)*Math.cos(a)*Math.cos(dl))+1036,2082,1938);};
+  /* ===== MeteoGalicia: WRF de 1 km (dominio d02, toda Galicia), leído de su servidor THREDDS, no de Open-Meteo =====
+     Una pasada diaria a las 00Z con 96 h de alcance. El servicio NCSS devuelve la serie del punto en CSV y admite peticiones desde el navegador.
+     Unidades de origen: temp en K, rh y nubes en tanto por uno, mod y wind_gust en m/s, visibility en m, prec en mm por hora, mslp en Pa.
+     Este bloque, del catálogo a planFor(), es idéntico en niebla.html y astro.html: si se cambia en una, hay que copiarlo a la otra. */
+  const MG={base:'https://thredds.meteogalicia.gal/thredds/ncss/grid/modelos/WRF_ARW_1KM_HIST',box:[41.3483,44.6358,-10.2928,-5.7485],
+    vars:['temp','rh','mod','dir','wind_gust','cfl','cfm','cfh','visibility','prec','mslp'],ms:15000};
+  function fetchText(url,ms){const c=new AbortController(), tm=setTimeout(()=>c.abort(),ms); return fetch(url,{signal:c.signal}).then(r=>{if(!r.ok) throw new Error('HTTP '+r.status); return r.text();}).finally(()=>clearTimeout(tm));}
+  function parseMG(txt){
+    const L=txt.trim().split(/\r?\n/), head=L[0].split(',').map(h=>h.replace(/\[.*$/,'').trim()), ix=k=>head.indexOf(k), o={mg:true,latitude:null,longitude:null,utc:[],v:{}};
+    MG.vars.forEach(v=>{o.v[v]=[];});
+    for(let i=1;i<L.length;i++){const c=L[i].split(','), ms=Date.parse(c[ix('time')]); if(!isFinite(ms)) continue;
+      if(o.latitude==null){o.latitude=parseFloat(c[ix('latitude')]); o.longitude=parseFloat(c[ix('longitude')]);}
+      o.utc.push(ms); MG.vars.forEach(v=>{const j=ix(v), x=j>=0?parseFloat(c[j]):NaN; o.v[v].push(isFinite(x)&&Math.abs(x)<1e30?x:null);});}
+    return o;
+  }
+  async function fetchMG(lat,lon){
+    let err=new Error('MeteoGalicia');
+    for(const back of [0,1]){ // pasada de las 00Z de hoy (UTC); si aún no está publicada, la de ayer, que sigue cubriendo tres días
+      const day=new Date(Date.now()-back*86400e3).toISOString().slice(0,10), ymd=day.replace(/-/g,''), t0=day+'T01:00:00Z', t1=new Date(Date.parse(t0)+95*3600e3).toISOString().slice(0,19)+'Z'; // de 01Z del día de la pasada a 00Z cuatro días después
+      const url=`${MG.base}/${ymd}/wrf_arw_det_history_d02_${ymd}_0000.nc4?${MG.vars.map(v=>'var='+v).join('&')}&latitude=${lat}&longitude=${lon}&time_start=${t0}&time_end=${t1}&accept=csv`;
+      try{ const o=parseMG(await fetchText(url,MG.ms)); if(o.utc.length){o.run=ymd; return o;} }catch(e){ err=e; if(e.name==='AbortError') break; }
+    }
+    throw err;
+  }
+  // pone la serie de MeteoGalicia en la forma de una respuesta de Open-Meteo, sobre un eje de horas locales dado (times) y su desfase respecto a UTC.
+  // El punto de rocío se deriva de T y HR (Magnus); la nubosidad total se aproxima por el máximo de las tres capas; la presión es la reducida al nivel del mar.
+  function mgToOM(o,times,offSec){
+    const at=new Map(o.utc.map((ms,i)=>[new Date(ms+offSec*1000).toISOString().slice(0,16),i])), col=f=>times.map(x=>{const i=at.get(x); return i==null?null:f(i);});
+    const v=o.v, pc=x=>x==null?null:Math.round(100*clamp(x,0,1)), T=col(i=>v.temp[i]==null?null:+(v.temp[i]-273.15).toFixed(1)), RH=col(i=>pc(v.rh[i]));
+    const TD=T.map((tt,i)=>{const rh=RH[i]; if(tt==null||rh==null) return null; const g=Math.log(Math.max(rh,1)/100)+17.625*tt/(243.04+tt); return +(243.04*g/(17.625-g)).toFixed(1);});
+    return {latitude:o.latitude,longitude:o.longitude,hourly:{time:times,temperature_2m:T,relative_humidity_2m:RH,dew_point_2m:TD,
+      wind_speed_10m:col(i=>v.mod[i]==null?null:+(3.6*v.mod[i]).toFixed(1)),wind_direction_10m:col(i=>v.dir[i]==null?null:Math.round(v.dir[i])),wind_gusts_10m:col(i=>v.wind_gust[i]==null?null:+(3.6*v.wind_gust[i]).toFixed(1)),
+      cloud_cover_low:col(i=>pc(v.cfl[i])),cloud_cover_mid:col(i=>pc(v.cfm[i])),cloud_cover_high:col(i=>pc(v.cfh[i])),
+      cloud_cover:col(i=>{const a=[v.cfl[i],v.cfm[i],v.cfh[i]].filter(x=>x!=null); return a.length?pc(Math.max(...a)):null;}),
+      visibility:col(i=>v.visibility[i]==null?null:Math.round(v.visibility[i])),precipitation:col(i=>v.prec[i]==null?null:+v.prec[i].toFixed(1)),
+      surface_pressure:col(i=>v.mslp[i]==null?null:+(v.mslp[i]/100).toFixed(1))}};
+  }
+  const offOf=d=>(d&&typeof d.utc_offset_seconds==='number')?d.utc_offset_seconds:-new Date().getTimezoneOffset()*60;
+  const SRC={
+    // WRF de MeteoGalicia: anidado de 1 km; la malla del dominio que lo alimenta (h) no consta en el catálogo y se supone de 4 km
+    mg:(la,lo)=>{const e=boxEdge(la,lo,MG.box); return e!=null?{n:'WRF MeteoGalicia',km:1,e,h:4}:null;},
+    icon_seamless:(la,lo)=>{let e=boxEdge(la,lo,BOX.icond2); if(e!=null) return {n:'ICON‑D2',km:2.2,e,h:7}; e=boxEdge(la,lo,BOX.iconeu); return e!=null?{n:'ICON‑EU',km:7,e,h:13}:{n:'ICON global',km:13,e:null};},
+    gfs_seamless:(la,lo)=>(la>22&&la<52&&lo>-133&&lo<-61)?{n:'HRRR',km:3,e:null}:{n:'GFS 0.11°',km:13,e:null},
+    meteofrance_seamless:(la,lo)=>{const e=aromeEdge(la,lo); if(e!=null) return {n:'AROME HD',km:1.3,e,h:11}; return boxEdge(la,lo,BOX.arpeu)!=null?{n:'ARPEGE Europe',km:11,e:null}:{n:'ARPEGE global',km:28,e:null};},
+    meteofrance_arome_seamless:(la,lo)=>{const e=aromeEdge(la,lo); return e!=null?{n:'AROME HD',km:1.3,e,h:11}:null;},
+    ecmwf_ifs:()=>({n:'IFS HRES',km:9,e:null}),
+    ecmwf_ifs025:()=>({n:'IFS 0.25°',km:28,e:null}),
+    ukmo_seamless:(la,lo)=>{const e=ukvEdge(la,lo); return e!=null?{n:'UKV',km:2,e,h:10}:{n:'UKMO global',km:10,e:null};},
+    dmi:(la,lo)=>{const e=dmiEdge(la,lo); return e!=null?{n:'HARMONIE‑AROME DMI',km:2,e,h:9}:null;},
+    // knmi: mezcla "seamless" de la pestaña 1 (malla de Países Bajos y, fuera de ella, la europea); knmi_eu: el modelo europeo puro que pide la pestaña 2
+    knmi:(la,lo)=>{let e=boxEdge(la,lo,BOX.knminl); if(e!=null) return {n:'HARMONIE‑AROME NL',km:2,e,h:5.5}; e=knmiEdge(la,lo); return e!=null?{n:'HARMONIE‑AROME KNMI',km:5.5,e,h:9}:null;},
+    knmi_eu:(la,lo)=>{const e=knmiEdge(la,lo); return e!=null?{n:'HARMONIE‑AROME KNMI',km:5.5,e,h:9,dup:true}:null;},
+    gem_seamless:(la,lo)=>(la>25&&lo>-170&&lo<-50)?{n:'GEM regional',km:10,e:null}:{n:'GEM global',km:15,e:null},
+    ens_icon:(la,lo)=>{const e=boxEdge(la,lo,BOX.iconeu); return e!=null?{n:'ICON‑EU‑EPS',km:13,e,h:26}:{n:'ICON‑EPS',km:26,e:null};},
+    ens_gfs:()=>({n:'GEFS 0.25°',km:25,e:null}),
+    ens_ecmwf:()=>({n:'IFS ENS 0.25°',km:28,e:null})
+  };
+  const srcInfo=(key,la,lo)=>SRC[key]?SRC[key](la,lo):{n:key,km:10,e:null}; // fuente añadida a MODELS sin entrada en el catálogo: se pide igual y se le suponen 10 km
+  // pestaña 1: 'auto' elige la fuente de menor escala efectiva en el punto (malla fina y lejos del borde de su dominio);
+  // FILL prolonga con IFS 9 km los modelos de horizonte corto (AROME llega a 48 h, ARPEGE a 4 días)
+  const T1={mg_wrf:'mg',meteofrance_arome_seamless:'meteofrance_arome_seamless',meteofrance_seamless:'meteofrance_seamless',dmi_seamless:'dmi',knmi_seamless:'knmi',icon_seamless:'icon_seamless',ukmo_seamless:'ukmo_seamless',ecmwf_ifs:'ecmwf_ifs',gfs_seamless:'gfs_seamless'};
+  const FILL={mg_wrf:'ecmwf_ifs',meteofrance_arome_seamless:'ecmwf_ifs',meteofrance_seamless:'ecmwf_ifs'}, IFS9={n:'IFS HRES',km:9,e:null}, T1N={mg_wrf:'WRF MeteoGalicia',meteofrance_arome_seamless:'AROME HD',dmi_seamless:'HARMONIE DMI',knmi_seamless:'HARMONIE KNMI'}, TAIL_H=54;
+  function planFor(model,lat,lon,skip){
+    if(model==='auto'){ // skip: candidatas que ya fallaron en este cálculo
+      const c=['mg_wrf','meteofrance_arome_seamless','dmi_seamless','icon_seamless','ukmo_seamless','gfs_seamless','ecmwf_ifs'].filter(k=>!(skip||[]).includes(k)||k==='ecmwf_ifs').map(k=>({k,i:srcInfo(T1[k],lat,lon)})).filter(x=>x.i);
+      model=c.reduce((a,b)=>effKm(b.i)<effKm(a.i)?b:a).k;
+    }
+    let info=T1[model]?srcInfo(T1[model],lat,lon):null, tail=false;
+    if(model==='dmi_seamless'||model==='knmi_seamless'){ if(info) tail=true; else info=IFS9; } // estas mezclas las prolonga el servidor con IFS; fuera del dominio son solo IFS
+    return {key:model,fill:FILL[model]||null,info,tail};
+  }
   let aodCache={key:null,data:null};
   async function getAOD(lat,lon){const key=lat+','+lon; if(aodCache.key===key) return aodCache.data; let m=null;
     try{m=await fetchJSON(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&hourly=aerosol_optical_depth&timezone=auto&forecast_days=7`,10000); if(m.error) m=null;}catch(e){m=null;}
     aodCache={key,data:m}; return m;}
   const aodAt=(m,iso)=>{if(!m||!m.hourly) return null; const j=m.hourly.time.indexOf(iso); return j>=0?m.hourly.aerosol_optical_depth[j]:null;};
+  // viento a 250 hPa común: IFS HRES 9 km, HARMONIE, AROME HD y el WRF de MeteoGalicia no publican niveles de presión.
+  // Es un campo de escala sinóptica: para las fuentes que no lo traen se toma de IFS 0.25°, una sola vez por emplazamiento.
+  let jetCache={key:null,data:null};
+  async function getJet(lat,lon){const key=lat+','+lon; if(jetCache.key===key) return jetCache.data; let m=null;
+    try{m=await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=wind_speed_250hPa&timezone=auto&forecast_days=7&models=ecmwf_ifs025`,10000); if(m.error||!m.hourly) m=null;}catch(e){m=null;}
+    jetCache={key,data:m}; return m;}
+  const jetAt=(m,iso)=>{if(!m||!m.hourly||!m.hourly.wind_speed_250hPa) return null; const j=m.hourly.time.indexOf(iso); return j>=0?m.hourly.wind_speed_250hPa[j]:null;};
 
   const WEIGHTS={deep:{cloud:45,aod:15,rh:10,seeing:15,dew:5,moon:10},planet:{cloud:45,aod:8,rh:6,seeing:30,dew:5,moon:1},wide:{cloud:45,aod:12,rh:14,seeing:4,dew:5,moon:20}};
   const PARTS=['cloud','aod','rh','seeing','dew','moon'];
@@ -615,26 +742,66 @@ function moonName(phase,illum){
 
   /* ===== pestaña 1 ===== */
   let R1=null;
-  function buildRows(H,aodM,lat,lon,target,limit){const now=Date.now(), rows=[];
+  function buildRows(H,aodM,lat,lon,target,limit,jetM){const now=Date.now(), rows=[];
     for(let i=0;i<H.time.length;i++){const ts=new Date(H.time[i]).getTime(); if(ts<now-3600e3) continue; if(rows.length>=limit) break;
       const a=astro(ts+1800e3,lat,lon);
       const gc=gcAltAz(ts+1800e3,lat,lon);
-      const r={time:H.time[i],ts,t:H.temperature_2m[i],td:H.dew_point_2m[i],rh:H.relative_humidity_2m[i],wind:H.wind_speed_10m[i],cloud:H.cloud_cover[i],cloudL:H.cloud_cover_low[i],cloudM:H.cloud_cover_mid[i],cloudH:H.cloud_cover_high[i],precip:H.precipitation[i],gust:H.wind_gusts_10m?H.wind_gusts_10m[i]:null,jet:H.wind_speed_250hPa?H.wind_speed_250hPa[i]:null,aod:aodAt(aodM,H.time[i]),sunAlt:a.sunAlt,moonAlt:a.moonAlt,illum:a.illum, phase:a.phase,gcAlt:gc.alt,gcAz:gc.az};
-      if(r.t==null||r.cloud==null||r.rh==null) continue; if(r.cloudL==null) r.cloudL=r.cloud; if(r.cloudM==null) r.cloudM=0; if(r.cloudH==null) r.cloudH=0; if(r.td==null) r.td=r.t-3;
+      const r={time:H.time[i],ts,t:H.temperature_2m[i],td:H.dew_point_2m[i],rh:H.relative_humidity_2m[i],wind:H.wind_speed_10m[i],cloud:H.cloud_cover[i],cloudL:H.cloud_cover_low[i],cloudM:H.cloud_cover_mid[i],cloudH:H.cloud_cover_high[i],precip:H.precipitation[i],gust:H.wind_gusts_10m?H.wind_gusts_10m[i]:null,jet:H.wind_speed_250hPa?H.wind_speed_250hPa[i]:null,fill:H._fill?!!H._fill[i]:false,aod:aodAt(aodM,H.time[i]),sunAlt:a.sunAlt,moonAlt:a.moonAlt,illum:a.illum, phase:a.phase,gcAlt:gc.alt,gcAz:gc.az};
+      if(r.t==null||r.cloud==null||r.rh==null) continue; r.jetOwn=r.jet!=null; if(r.jet==null) r.jet=jetAt(jetM,H.time[i]); if(r.cloudL==null) r.cloudL=r.cloud; if(r.cloudM==null) r.cloudM=0; if(r.cloudH==null) r.cloudH=0; if(r.td==null) r.td=r.t-3;
       const sc=score(r,target); r.s=sc.s; r.why=sc.why; r.parts=sc.parts; r.rain=sc.rain; rows.push(r);}
     return rows;}
+  // serie horaria de la pestaña 1: la fuente elegida (o la que resuelve el automático) y, más allá de su horizonte, IFS 9 km
+  const KEYS=HOURLY.split(',');
+  async function loadSeries(lat,lon,model,days,skip){
+    const plan=planFor(model,lat,lon,skip), ext=plan.key==='mg_wrf';
+    const url=k=>`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=${HOURLY}&timezone=auto&forecast_days=${days}&models=${k}`;
+    const good=(H,i)=>H.temperature_2m[i]!=null&&H.relative_humidity_2m[i]!=null&&H.cloud_cover&&H.cloud_cover[i]!=null;
+    const usable=v=>{const H=v&&!v.error&&v.hourly; return (H&&H.time&&H.temperature_2m&&H.relative_humidity_2m&&H.time.some((x,i)=>good(H,i)))?v:null;}; // sin ninguna hora utilizable cuenta como fallo
+    const ok=r=>usable(r.status==='fulfilled'?r.value:null);
+    const [ra,rf]=await Promise.allSettled([ext?fetchMG(lat,lon):fetchJSON(url(plan.key),15000), plan.fill?fetchJSON(url(plan.fill),15000):Promise.resolve(null)]);
+    let f=ok(rf), d, primFail=false;
+    if(ext){ const o=ra.status==='fulfilled'?ra.value:null; d=(o&&f)?usable({...mgToOM(o,f.hourly.time,offOf(f)),elevation:f.elevation}):null; } // MeteoGalicia se apoya en el eje horario del relleno
+    else d=ok(ra);
+    if(!d&&!f) throw new Error(ra.status==='fulfilled'?(ra.value&&ra.value.reason)||t('nodata'):(ra.reason&&ra.reason.message)||t('nodata'));
+    if(!d&&model==='auto'&&plan.key!=='ecmwf_ifs'&&!(skip&&skip.length>=2)){ // en automático, si la mejor fuente no responde se prueba la siguiente
+      const S2=await loadSeries(lat,lon,'auto',days,[...(skip||[]),plan.key]); S2.src.alt=[plan.info?plan.info.n:plan.key,...(S2.src.alt||[])]; return S2; }
+    if(!d){ d=f; f=null; primFail=true; }
+    const H=d.hourly, F=f?f.hourly:null, fi=F?new Map(F.time.map((x,i)=>[x,i])):null, now=Date.now(), M={time:H.time,_fill:[]}; KEYS.forEach(k=>{M[k]=[];});
+    let fillFrom=null;
+    H.time.forEach((tt,i)=>{ let S=H, j=i, fill=false;
+      if(!good(H,i)&&F&&fi.has(tt)&&good(F,fi.get(tt))){ S=F; j=fi.get(tt); fill=true; }
+      KEYS.forEach(k=>{M[k].push(S[k]?S[k][j]:null);});
+      if(plan.tail&&!primFail&&new Date(tt).getTime()>now+TAIL_H*3600e3) fill=true; // DMI y KNMI: el servidor continúa con IFS; marca aproximada
+      else if(fill&&fillFrom==null&&new Date(tt).getTime()>=now-3600e3) fillFrom=tt;
+      M._fill.push(fill); });
+    const info=primFail?IFS9:plan.info, cell=(d.latitude!=null&&d.longitude!=null)?hav(lat,lon,d.latitude,d.longitude):null;
+    return {hourly:M,elev:d.elevation,model:primFail?plan.fill:plan.key,
+      src:{info,cell,fillFrom,fillName:IFS9.n+' '+IFS9.km+' km',primFail:primFail?(plan.info?plan.info.n:(T1N[plan.key]||plan.key)):null,tail:plan.tail&&!primFail,fillFail:!!plan.fill&&!f&&!primFail}};
+  }
+  // línea de estado: modelo efectivo en el punto, paso de malla, distancia a la celda usada y al borde del dominio
+  const srcTxt=S=>{const x=S.src, i=x.info; let a=i?`${i.n} ${i.km} km`:S.model;
+    if(x.cell!=null) a+=' · '+t('cell',{d:x.cell.toFixed(1)});
+    if(i&&i.e!=null) a+=' · '+t('edge',{d:Math.round(i.e)});
+    if(x.alt) a+=' · '+t('alt_fail',{m:x.alt.join(', ')});
+    if(x.primFail) a+=' · '+t('prim_fail',{m:x.primFail});
+    if(x.fillFrom!=null) a+=' · '+t('fill_from',{h:fmtD(x.fillFrom),m:x.fillName});
+    if(x.tail) a+=' · '+t('then_ifs',{h:TAIL_H});
+    if(x.fillFail) a+=' · '+t('fill_fail',{m:x.fillName});
+    return a;};
   async function run1(){
     const {lat,lon,target}=coords(), model=$('#model').value;
     $('#st1').textContent=t('dl'); let d;
-    try{d=await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=${HOURLY}&timezone=auto&forecast_days=7&models=${model}`,15000); if(d.error) throw new Error(d.reason);}catch(e){$('#st1').textContent=t('err')+e.message;return;}
-    const aodM=await getAOD(lat,lon);
+    const aodP=getAOD(lat,lon), jetP=getJet(lat,lon);
+    try{d=await loadSeries(lat,lon,model,7);}catch(e){$('#st1').textContent=t('err')+e.message;return;}
+    const aodM=await aodP, jetM=await jetP;
     /* Siete días para el panorama semanal; las tarjetas, la tira, la gráfica y la tabla
        siguen viviendo en las primeras 48 h, que es lo que se prevé con alguna fiabilidad. */
-    const rows=buildRows(d.hourly,aodM,lat,lon,target,168);
-    R1={rows,rows48:rows.slice(0,48),nights:nights(rows),model,elev:d.elevation,lat,lon,target,noaod:!aodM}; render1();
+    const rows=buildRows(d.hourly,aodM,lat,lon,target,168,jetM);
+    if(!rows.length){$('#st1').textContent=t('err')+t('nodata');return;}
+    R1={rows,rows48:rows.slice(0,48),nights:nights(rows),model:d.model,src:d.src,elev:d.elev,lat,lon,target,noaod:!aodM}; render1();
   }
   function render1(){const {rows48,model,elev,lat,lon,noaod}=R1;
-    $('#st1').textContent=`${model} · ${lat.toFixed(4)}, ${lon.toFixed(4)} · ${t('elev')} ${elev} m · ${new Date().toLocaleTimeString(LOC())}`+(noaod?t('noaod'):'');
+    $('#st1').textContent=`${srcTxt(R1)} · ${lat.toFixed(4)}, ${lon.toFixed(4)} · ${t('elev')} ${elev} m · ${new Date().toLocaleTimeString(LOC())}`+(noaod?t('noaod'):'');
     cards1(); week1(); strip1(rows48); chart1(rows48); table1(rows48); camPanel();}
   /* ---------- el veredicto dicho en una frase ----------
      Los dos términos que más restan en el mejor tramo, con la hora en que empiezan y acaban
@@ -770,58 +937,93 @@ function moonName(phase,illum){
   $('#go1').addEventListener('click',run1);
 
   /* ===== pestaña 2 ===== */
-  const MODELS=[{id:'icon_seamless',name:'ICON',on:true},{id:'gfs_seamless',name:'GFS',on:true},{id:'meteofrance_seamless',name:'AROME/ARPEGE',on:true},{id:'ecmwf_ifs025',name:'ECMWF',on:true},{id:'ukmo_seamless',name:'UKMO',on:true},{id:'gem_seamless',name:'GEM',on:false},{id:'knmi_seamless',name:'KNMI',on:false}];
-  const COL=['#e6eaf0','#5aa0c8','#d9a441','#6dbb8a','#c0574a','#a98ad8','#2fb3a0'];
+  // id: clave del registro de observaciones (no cambiarla); api: identificador que se pide a Open-Meteo si difiere; cat: entrada del catálogo SRC;
+  // ext: la fuente se pide a su propio servidor; since: versión de la lista en que apareció (ver SELV); c: color.
+  // DMI y KNMI se piden como modelo regional puro: fuera de su dominio la mezcla "seamless" devolvería IFS y lo contaría dos veces.
+  // IFS 0.25° (25 km, paso de 3 h) queda sustituido por IFS HRES 9 km y se conserva solo para leer el registro antiguo.
+  const MODELS=[{id:'mg_wrf',ext:'mg',cat:'mg',name:'WRF MeteoGalicia',on:true,since:2,c:'#e07aa0'},
+    {id:'meteofrance_seamless',name:'AROME/ARPEGE',on:true,c:'#d9a441'},{id:'dmi_harmonie',api:'dmi_harmonie_arome_europe',cat:'dmi',name:'HARMONIE DMI',on:true,since:2,c:'#7f9cf0'},
+    {id:'icon_seamless',name:'ICON',on:true,c:'#e6eaf0'},{id:'ecmwf_ifs',name:'ECMWF IFS 9 km',on:true,since:2,c:'#9ccf6a'},{id:'ukmo_seamless',name:'UKMO',on:true,c:'#c0574a'},{id:'gfs_seamless',name:'GFS',on:true,c:'#5aa0c8'},
+    {id:'knmi_seamless',api:'knmi_harmonie_arome_europe',cat:'knmi_eu',name:'HARMONIE KNMI',on:false,c:'#2fb3a0'},{id:'gem_seamless',name:'GEM',on:false,c:'#a98ad8'},{id:'ecmwf_ifs025',name:'ECMWF 0.25°',on:false,legacy:true,c:'#7d8a6c'}];
   const PI0=0.35,A0=3.5,B0=6.5,LAMBDA=0.7,TH=58,KAP=12,TIMEOUT=12000;
+  const RHO=0.5; // exponente del prior estructural w0 ∝ Δ^(−ρ); 0 devuelve pesos iniciales iguales
+  const IDX_V=2; // versión con la que se congela cada previsión (2: fuentes nuevas y viento a 250 hPa común)
   const p_of=s=>clamp(sig((s-TH)/KAP),0.005,0.995);
   const B={ran:false,last:null};
   let store={obs:[],snap:{}}; try{const raw=localStorage.getItem('astro_bayes'); if(raw) store=JSON.parse(raw);}catch(e){} if(!store.snap) store.snap={}; if(!store.obs) store.obs=[];
   const save=()=>{try{localStorage.setItem('astro_bayes',JSON.stringify(store));}catch(e){}};
-  try{const sel=JSON.parse(localStorage.getItem('astro_models')||'null'); if(sel) MODELS.forEach(m=>m.on=sel.includes(m.id));}catch(e){}
+  // selección guardada: se respeta, pero una fuente aparecida después de guardarla (since mayor que la versión guardada) conserva su valor por defecto.
+  // El formato antiguo era una lista de ids (versión 1): en él IFS 0.25° pasa a IFS 9 km.
+  const SELV=2;
+  try{const sel=JSON.parse(localStorage.getItem('astro_models')||'null');
+    if(Array.isArray(sel)){ MODELS.forEach(m=>{ if(!(m.since>1)) m.on=sel.includes(m.id); }); MODELS.find(m=>m.id==='ecmwf_ifs').on=sel.includes('ecmwf_ifs025'); MODELS.find(m=>m.id==='ecmwf_ifs025').on=false; }
+    else if(sel&&Array.isArray(sel.on)) MODELS.forEach(m=>{ if(!(m.since>(sel.v||1))) m.on=sel.on.includes(m.id); });}catch(e){}
   function mlist(){$('#mlist').innerHTML=MODELS.map(m=>`<label><input type="checkbox" data-id="${m.id}" ${m.on?'checked':''}> ${m.name} <span class="st" id="st_${m.id}"></span></label>`).join('');
-    document.querySelectorAll('#mlist input').forEach(c=>c.addEventListener('change',()=>{MODELS.find(m=>m.id===c.dataset.id).on=c.checked; try{localStorage.setItem('astro_models',JSON.stringify(MODELS.filter(m=>m.on).map(m=>m.id)));}catch(e){}}));}
+    document.querySelectorAll('#mlist input').forEach(c=>c.addEventListener('change',()=>{MODELS.find(m=>m.id===c.dataset.id).on=c.checked; try{localStorage.setItem('astro_models',JSON.stringify({v:SELV,on:MODELS.filter(m=>m.on).map(m=>m.id)}));}catch(e){}}));}
   mlist();
   const setSt=(id,txt,k)=>{const e=$('#st_'+id); if(e){e.textContent=txt;e.className='st '+(k||'');}};
-  function weights(){const ll={}; MODELS.forEach(m=>ll[m.id]=0);
-    store.obs.forEach(o=>MODELS.forEach(m=>{const p=o.p&&o.p[m.id]; if(p==null) return; ll[m.id]+=o.y*Math.log(p)+(1-o.y)*Math.log(1-p);}));
-    const mx=Math.max(...MODELS.map(m=>ll[m.id])); let w={},Z=0; MODELS.forEach(m=>{w[m.id]=Math.exp(LAMBDA*(ll[m.id]-mx));Z+=w[m.id];}); MODELS.forEach(m=>w[m.id]/=Z); return {w,ll};}
+  // prior estructural: Δ = máx(escala efectiva de la fuente en el punto, distancia a la celda que devuelve la API); peso inicial ∝ Δ^(−ρ)
+  const deltaOf=mt=>Math.max(effKm(mt),mt.cell||0);
+  // una fuente sin metadatos de la última fusión (desmarcada, sin respuesta o antigua) recibe el prior del catálogo para las coordenadas escritas
+  const priorW=(m,meta)=>{const mt=(meta&&meta[m.id])||srcInfo(m.cat||m.id,+$('#lat').value,+$('#lon').value); return (mt&&mt.km)?Math.pow(deltaOf(mt),-RHO):0;};
+  // log-verosimilitud por fuente. Si una noche una fuente no tiene previsión congelada (se añadió después, falló o estaba desmarcada)
+  // se le imputa la media de las demás en esa noche: no gana ni pierde peso por las noches en que no jugó.
+  function weights(meta){const ll={}; MODELS.forEach(m=>ll[m.id]=0);
+    store.obs.forEach(o=>{ if(!o.p||o.y==null) return; const l={}; let sum=0,k=0;
+      MODELS.forEach(m=>{const p=o.p[m.id]; if(p==null) return; const q=clamp(p,0.005,0.995); l[m.id]=o.y*Math.log(q)+(1-o.y)*Math.log(1-q); sum+=l[m.id]; k++;});
+      if(!k) return;
+      MODELS.forEach(m=>{ll[m.id]+=l[m.id]!=null?l[m.id]:sum/k;});});
+    const mx=Math.max(...MODELS.map(m=>ll[m.id])); let w={},Z=0; MODELS.forEach(m=>{w[m.id]=priorW(m,meta)*Math.exp(LAMBDA*(ll[m.id]-mx));Z+=w[m.id];}); MODELS.forEach(m=>w[m.id]/=Z); return {w,ll};}
   function prior(){let a=A0,b=B0; store.obs.forEach(o=>{a+=o.y;b+=1-o.y;}); return {a,b,pi:a/(a+b)};}
   async function run2(){
     const {lat,lon,target}=coords(), alpha=clamp(+$('#alpha').value||0.7,0.05,1), sel=MODELS.filter(m=>m.on);
     if(!sel.length){$('#st2').textContent=t('sel1');return;}
-    B.ran=true; $('#st2').textContent=t('dl_n',{n:sel.length}); MODELS.forEach(m=>setSt(m.id,'')); sel.forEach(m=>setSt(m.id,'…'));
-    const t0=performance.now(), aodP=getAOD(lat,lon);
-    const results=await Promise.allSettled(sel.map(m=>fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=${HOURLY}&timezone=auto&forecast_days=3&models=${m.id}`,TIMEOUT)
+    // una fuente regional cuyo dominio no cubre el punto no se pide: se marca "sin cobertura" y no cuenta como fallo
+    const info={}; sel.forEach(m=>{info[m.id]=srcInfo(m.cat||m.id,lat,lon);}); const req=sel.filter(m=>info[m.id]);
+    B.ran=true; MODELS.forEach(m=>setSt(m.id,'')); sel.forEach(m=>info[m.id]?setSt(m.id,'…'):setSt(m.id,t('nocov'),'ko'));
+    if(!req.length){$('#st2').textContent=t('none_cov');return;}
+    $('#st2').textContent=t('dl_n',{n:req.length});
+    const t0=performance.now(), aodP=getAOD(lat,lon), jetP=getJet(lat,lon);
+    const results=await Promise.allSettled(req.map(m=>(m.ext==='mg'?fetchMG(lat,lon):fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=${HOURLY}&timezone=auto&forecast_days=3&models=${m.api||m.id}`,TIMEOUT))
       .then(d=>{if(d.error) throw new Error(d.reason); setSt(m.id,((performance.now()-t0)/1000).toFixed(1)+' s','ok'); return d;})
       .catch(e=>{setSt(m.id,t(e.name==='AbortError'?'timeout':'error'),'ko'); throw e;})));
-    const aodM=await aodP, per={}; let ref=null;
-    results.forEach((r,k)=>{if(r.status==='fulfilled'){per[sel[k].id]=buildRows(r.value.hourly,aodM,lat,lon,target,60); if(!ref) ref=per[sel[k].id];}});
-    const act=sel.filter(m=>per[m.id]&&per[m.id].length);
+    const aodM=await aodP, jetM=await jetP, per={}, raw={}; let axis=null, mgRaw=null, mgM=null;
+    results.forEach((r,k)=>{ if(r.status!=='fulfilled'||!r.value) return;
+      if(r.value.mg){mgRaw=r.value; mgM=req[k]; return;} // MeteoGalicia se coloca más abajo sobre el eje de horas locales de una respuesta de Open-Meteo
+      if(r.value.hourly){raw[req[k].id]=r.value; if(!axis) axis=r.value;}});
+    if(mgRaw&&!axis){ try{const ax=await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m&timezone=auto&forecast_days=3`,8000); if(ax.error||!ax.hourly) throw new Error(ax.reason||''); axis=ax;}catch(e){mgRaw=null; setSt(mgM.id,t('error'),'ko');} }
+    if(mgRaw) raw[mgM.id]=mgToOM(mgRaw,axis.hourly.time,offOf(axis));
+    req.forEach(m=>{ if(!raw[m.id]) return; per[m.id]=buildRows(raw[m.id].hourly,aodM,lat,lon,target,60,jetM); if(!per[m.id].length) setSt(m.id,t('nodata'),'ko'); });
+    const act=req.filter(m=>per[m.id]&&per[m.id].length);
     if(!act.length){$('#st2').textContent=t('none');return;}
-    // filas comunes por hora
-    const times=per[act[0].id].map(r=>r.time), rows=times.map((time,i)=>{const base=per[act[0].id][i]; const r={time,ts:base.ts,sunAlt:base.sunAlt,moonAlt:base.moonAlt,illum:base.illum,per:{}};
+    // metadatos por fuente: modelo efectivo y malla (catálogo), distancia a la celda devuelta y si trae su propio viento a 250 hPa
+    const meta={}; act.forEach(mo=>{const d=raw[mo.id]; meta[mo.id]={...info[mo.id],cell:(d.latitude!=null&&d.longitude!=null)?hav(lat,lon,d.latitude,d.longitude):null,jet:per[mo.id].some(r=>r.jetOwn)};});
+    // filas comunes por hora, sobre la fuente con más horas
+    const base0=act.reduce((a,b)=>per[b.id].length>per[a.id].length?b:a);
+    const times=per[base0.id].map(r=>r.time), rows=times.map((time,i)=>{const base=per[base0.id][i]; const r={time,ts:base.ts,sunAlt:base.sunAlt,moonAlt:base.moonAlt,illum:base.illum,per:{}};
       act.forEach(mo=>{const q=per[mo.id].find(z=>z.time===time); if(q) r.per[mo.id]={...q,p:p_of(q.s)};}); return r;});
-    const {w,ll}=weights(), pr=prior(), Zw=act.reduce((a,mo)=>a+w[mo.id],0), wa={}; act.forEach(mo=>wa[mo.id]=w[mo.id]/Zw);
+    const {w,ll}=weights(meta), pr=prior(), Zw=act.reduce((a,mo)=>a+w[mo.id],0), wa={}; act.forEach(mo=>wa[mo.id]=w[mo.id]/Zw);
+    const Zp=act.reduce((a,mo)=>a+priorW(mo,meta),0); act.forEach(mo=>{meta[mo.id].w0=priorW(mo,meta)/Zp;});
     rows.forEach(r=>{let acc=0,den=0,ps=[]; act.forEach(mo=>{const q=r.per[mo.id]; if(!q) return; acc+=wa[mo.id]*logit(q.p); den+=wa[mo.id]; ps.push(q.p);}); const zpool=den>0?acc/den:logit(pr.pi); r.post=sig(logit(pr.pi)+alpha*(zpool-logit(pr.pi))); r.min=ps.length?Math.min(...ps):0; r.max=ps.length?Math.max(...ps):0;});
     // noche por modelo: s3 y p
     const nightsPer={}; act.forEach(mo=>{nightsPer[mo.id]=nights(per[mo.id]);});
     /* Fusión de la noche j-ésima del modelo de referencia. j = 0 esta noche, j = 1 mañana:
        la instantánea del registro (store.snap) sigue congelando solo refN, la noche 0. */
-    const fuseNight=j=>{ const nn=nightsPer[act[0].id][j]||null; if(!nn) return {n:null,p:{},post:null};
+    const fuseNight=j=>{ const nn=nightsPer[base0.id][j]||null; if(!nn) return {n:null,p:{},post:null};
       let acc=0,den=0,pp={}; act.forEach(mo=>{const nm=nightsPer[mo.id][j]; if(!nm) return; pp[mo.id]=p_of(nm.s3); acc+=wa[mo.id]*logit(pp[mo.id]); den+=wa[mo.id];});
       const zpool=den>0?acc/den:logit(pr.pi); return {n:nn,p:pp,post:sig(logit(pr.pi)+alpha*(zpool-logit(pr.pi)))}; };
     const f0=fuseNight(0), f1=fuseNight(1);
     const refN=f0.n, nightP=f0.p, nightPost=f0.post;
     B.last={rows,act,wa,ll,pr,alpha,lat,lon,target,nightsPer,refN,nightP,nightPost,
             refN2:f1.n,nightP2:f1.p,nightPost2:f1.post,
-            fail:sel.length-act.length,secs:((performance.now()-t0)/1000).toFixed(1),noaod:!aodM};
-    if(refN){ store.snap[refN.date]={p:nightP,post:nightPost,at:new Date().toISOString(),lat,lon,n:act.length,target}; save();
+            meta,fail:req.length-act.length,nocov:sel.length-req.length,secs:((performance.now()-t0)/1000).toFixed(1),noaod:!aodM};
+    if(refN){ store.snap[refN.date]={p:nightP,post:nightPost,at:new Date().toISOString(),lat,lon,n:act.length,target,v:IDX_V}; save();
       const ex=store.obs.find(o=>o.date===refN.date&&!o.p); if(ex){ex.p=nightP; ex.post=nightPost; save();} }
     render2();
   }
   function render2(){const L=B.last, sn=L.refN?store.snap[L.refN.date]:null;
-    $('#st2').textContent=t('fused',{k:L.act.length})+(L.fail?t('failed',{f:L.fail}):'')+` · ${L.secs} s · ${L.lat.toFixed(4)}, ${L.lon.toFixed(4)}`+(L.noaod?t('noaod'):'')+(sn?' · '+t('snap_info',{d:L.refN.date,n:sn.n,h:new Date(sn.at).toLocaleTimeString(LOC(),{hour:'2-digit',minute:'2-digit'})}):'');
-    cards2(); chart2(); tnight(); tw(); tobs();}
+    $('#st2').textContent=t('fused',{k:L.act.length})+(L.fail?t('failed',{f:L.fail}):'')+(L.nocov?t('nocov_n',{c:L.nocov}):'')+` · ${L.secs} s · ${L.lat.toFixed(4)}, ${L.lon.toFixed(4)}`+(L.noaod?t('noaod'):'')+(sn?' · '+t('snap_info',{d:L.refN.date,n:sn.n,h:new Date(sn.at).toLocaleTimeString(LOC(),{hour:'2-digit',minute:'2-digit'})}):'');
+    cards2(); chart2(); tnight(); tw(); tsrc(); tobs();}
   function cards2(){const {act,refN,nightP,nightPost,alpha,refN2,nightP2,nightPost2,nightsPer,wa,target}=B.last; if(!refN){$('#cards2').innerHTML=`<div class="card"><div class="why">${t('no_night')}</div></div>`;return;}
     const ps=act.map(mo=>nightP[mo.id]).filter(x=>x!=null), mean=ps.reduce((a,b)=>a+b,0)/ps.length, sd=Math.sqrt(ps.reduce((a,b)=>a+(b-mean)**2,0)/ps.length);
     /* Las razones se leen del modelo de mayor peso: el consenso da el número, pero la frase
@@ -839,11 +1041,11 @@ function moonName(phase,illum){
     let up='',dn=''; rows.forEach((r,i)=>{up+=(i?'L':'M')+x(i).toFixed(1)+','+y(r.max).toFixed(1)+' ';}); for(let i=n-1;i>=0;i--) dn+='L'+x(i).toFixed(1)+','+y(rows[i].min).toFixed(1)+' ';
     g+=`<path d="${up}${dn}Z" fill="#5aa0c8" opacity=".18"/>`;
     for(let v=0;v<=1;v+=.25) g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}" stroke="#222b36"/><text x="${pl-6}" y="${y(v)+4}" font-size="10" text-anchor="end" fill="#9aa7b5" font-family="IBM Plex Mono">${100*v}</text>`;
-    act.forEach(mo=>{const c=COL[MODELS.indexOf(mo)%COL.length]; let d='',first=true; rows.forEach((r,i)=>{if(!r.per[mo.id]) return; d+=(first?'M':'L')+x(i).toFixed(1)+','+y(r.per[mo.id].p).toFixed(1)+' '; first=false;}); g+=`<path d="${d}" fill="none" stroke="${c}" stroke-width="1.2" opacity=".7"/>`;});
+    act.forEach(mo=>{const c=mo.c; let d='',first=true; rows.forEach((r,i)=>{if(!r.per[mo.id]) return; d+=(first?'M':'L')+x(i).toFixed(1)+','+y(r.per[mo.id].p).toFixed(1)+' '; first=false;}); g+=`<path d="${d}" fill="none" stroke="${c}" stroke-width="1.2" opacity=".7"/>`;});
     g+=`<path d="${rows.map((r,i)=>(i?'L':'M')+x(i).toFixed(1)+','+y(r.post).toFixed(1)).join(' ')}" fill="none" stroke="#6dbb8a" stroke-width="3"/>`;
     rows.forEach((r,i)=>{if(i%6===0) g+=`<text x="${x(i)}" y="${Hh-10}" font-size="10" text-anchor="middle" fill="#9aa7b5" font-family="IBM Plex Mono">${fmtH(r.time)}</text>`;});
     $('#chart2').innerHTML=`<svg viewBox="0 0 ${W} ${Hh}" role="img">${g}</svg>`;
-    $('#legend2').innerHTML=`<i style="background:#6dbb8a;height:4px"></i>${t('post_leg')} <i style="background:#5aa0c8;height:8px;opacity:.4"></i>${t('range_leg')} `+act.map(mo=>`<i style="background:${COL[MODELS.indexOf(mo)%COL.length]}"></i>${mo.name} (w=${wa[mo.id].toFixed(2)})`).join('');
+    $('#legend2').innerHTML=`<i style="background:#6dbb8a;height:4px"></i>${t('post_leg')} <i style="background:#5aa0c8;height:8px;opacity:.4"></i>${t('range_leg')} `+act.map(mo=>`<i style="background:${mo.c}"></i>${mo.name} (w=${wa[mo.id].toFixed(2)})`).join('');
   }
   function tnight(){const {act,nightsPer,nightP}=B.last; let h='<tr>'+t('thnight').map(x=>'<th>'+x+'</th>').join('')+'</tr>';
     act.forEach(mo=>{const n=nightsPer[mo.id][0]; if(!n) return; const mid=n.rows[Math.floor(n.rows.length/2)];
@@ -853,8 +1055,24 @@ function moonName(phase,illum){
   function tw(){const {act,wa,ll,pr}=B.last; let h='<tr>'+t('thw').map(x=>'<th>'+x+'</th>').join('')+'</tr>';
     act.forEach(mo=>h+=`<tr><td>${mo.name}</td><td>${wa[mo.id].toFixed(3)}</td><td><span class="wbar" style="width:${(120*wa[mo.id]).toFixed(0)}px"></span></td><td>${ll[mo.id].toFixed(2)}</td></tr>`);
     $('#tw').innerHTML=h; $('#priorinfo').textContent=t('prior_info',{a:pr.a.toFixed(1),b:pr.b.toFixed(1),pi:(100*pr.pi).toFixed(1),n:store.obs.length});}
-  function tobs(){let h='<tr>'+t('thobs').map(x=>'<th>'+x+'</th>').join('')+MODELS.map(m=>'<th>'+m.name+'</th>').join('')+'<th>'+t('posterior')+'</th><th></th></tr>';
-    store.obs.slice().reverse().forEach((o,k)=>{const idx=store.obs.length-1-k; h+=`<tr><td>${o.date}</td><td>${o.y}</td>`+MODELS.map(m=>'<td>'+(o.p&&o.p[m.id]!=null?(100*o.p[m.id]).toFixed(0)+'%':'–')+'</td>').join('')+`<td>${o.post!=null?(100*o.post).toFixed(0)+'%':'<span style="color:var(--warn)">'+t('pending')+'</span>'}</td><td><button class="small ghost" data-i="${idx}">${t('del')}</button></td></tr>`;});
+  // fuentes en este punto: qué modelo hay detrás de cada identificador, con qué malla y a qué distancia queda su celda
+  function tsrc(){
+    const el=$('#tsrc'); if(!el||!B.last) return; const L=B.last, th=t('thsrc');
+    let h='<tr>'+th.map((x,i)=>`<th${(i===1||i===th.length-1)?' class="l"':''}>${x}</th>`).join('')+'</tr>';
+    MODELS.forEach(m=>{const i=srcInfo(m.cat||m.id,L.lat,L.lon), on=L.act.includes(m), mt=on?L.meta[m.id]:null, nt=[];
+      if(!i) nt.push(t('s_nocov'));
+      else { nt.push(t(i.km<=3?'s_fine':i.km<10?'s_mid':'s_coarse')); if(i.e!=null&&i.e<EDGE_KM) nt.push(t('s_edge'));
+        if(mt&&mt.cell!=null&&mt.cell>Math.max(i.km,3)) nt.push(t('s_far')); }
+      if(i&&i.dup) nt.push(t('s_dup')); if(m.legacy) nt.push(t('s_legacy'));
+      h+=`<tr class="${on?'':'dim'}"><td>${m.name}</td><td class="l">${i?i.n:'–'}</td><td>${i?i.km:'–'}</td><td>${mt&&mt.cell!=null?mt.cell.toFixed(1):'–'}</td><td>${i?(i.e!=null?Math.round(i.e):'–'):'–'}</td><td>${i?(mt?deltaOf(mt):effKm(i)).toFixed(1):'–'}</td><td>${mt?t(mt.jet?'own':'shared'):'–'}</td><td>${mt&&mt.w0!=null?mt.w0.toFixed(2):'–'}</td><td class="rd">${nt.join(' · ')}</td></tr>`;});
+    el.innerHTML=h;
+    const a=L.act.filter(m=>L.meta[m.id]&&L.meta[m.id].km); if(!a.length){$('#srcread').textContent='';return;}
+    const best=a.reduce((x,y)=>deltaOf(L.meta[y.id])<deltaOf(L.meta[x.id])?y:x), mb=L.meta[best.id];
+    $('#srcread').textContent=t('src_read',{a:mb.n,km:deltaOf(mb).toFixed(1),n:a.filter(m=>deltaOf(L.meta[m.id])>=10).length,k:a.length});
+  }
+  function tobs(){const withData=MODELS.filter(m=>store.obs.some(o=>o.p&&o.p[m.id]!=null)), COLS=withData.length?withData:MODELS.filter(m=>m.on); // solo las columnas con datos
+    let h='<tr>'+t('thobs').map(x=>'<th>'+x+'</th>').join('')+COLS.map(m=>'<th>'+m.name+'</th>').join('')+'<th>'+t('posterior')+'</th><th></th></tr>';
+    store.obs.slice().reverse().forEach((o,k)=>{const idx=store.obs.length-1-k; h+=`<tr><td>${o.date}</td><td>${o.y}</td>`+COLS.map(m=>'<td>'+(o.p&&o.p[m.id]!=null?(100*o.p[m.id]).toFixed(0)+'%':'–')+'</td>').join('')+`<td>${o.post!=null?(100*o.post).toFixed(0)+'%':'<span style="color:var(--warn)">'+t('pending')+'</span>'}</td><td><button class="small ghost" data-i="${idx}">${t('del')}</button></td></tr>`;});
     $('#tobs').innerHTML=h; document.querySelectorAll('#tobs button').forEach(b=>b.addEventListener('click',()=>{store.obs.splice(+b.dataset.i,1);save(); if(B.last) render2(); else tobs();})); calib();}
   /* ---------- calibración: diagrama de fiabilidad sobre el registro ---------- */
   function calBins(){
