@@ -2,7 +2,11 @@
 """Fusiona varias páginas del repositorio en una sola con pestañas.
 Cada fuente conserva su CSS (aislado bajo .part-<clave>), su HTML y su JS;
 solo se renombran los ids que colisionan entre partes y se encadenan los
-manejadores de idioma. Uso: merge.py <spec.json>"""
+manejadores de idioma. Uso: python3 scripts/sitio/fusionar.py <spec.json> [--forzar]
+
+Una especificación con la clave "congelada" describe una página que se ha seguido
+editando después de fusionarla: regenerarla perdería esos cambios, así que el script
+se detiene y solo sigue con --forzar. Para añadirle pestañas está ampliar.py."""
 import io,re,os,sys,json,collections,urllib.parse
 
 def scope_css(css, cls):
@@ -290,4 +294,7 @@ html[lang="en"] [data-lang="es"]{{display:none!important}}
     print(spec["out"],"·",round(len(out.encode())/1024),"KB · es/en",out.count('data-lang="es"'),out.count('data-lang="en"'),"· ids dup:",ids)
 
 if __name__=="__main__":
-    build(json.load(io.open(sys.argv[1],encoding="utf-8")))
+    spec=json.load(io.open(sys.argv[1],encoding="utf-8"))
+    if spec.get("congelada") and "--forzar" not in sys.argv:
+        sys.exit("%s está congelada: %s\nPara regenerarla de todos modos, añade --forzar."%(spec["out"],spec["congelada"]))
+    build(spec)

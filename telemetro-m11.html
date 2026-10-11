@@ -154,6 +154,10 @@
                   opacity:.62;border-right:1px solid rgba(125,132,140,.35);background:none}
   .langbar a.home:hover{opacity:1}
   .langbar a.home svg{width:12px;height:12px;display:block;background:none;border:0;border-radius:0}
+/* una columna 1fr no baja de la anchura mínima de su contenido y la página se desbordaba; minmax(0,1fr) sí */
+@media(max-width:900px){.grid,.loupe-row{grid-template-columns:minmax(0,1fr)}}
+/* la tabla de lectura no partía sus celdas y ensanchaba la página */
+@media(max-width:560px){table.readouts td:first-child,table.readouts td:last-child{white-space:normal}}
 </style>
 </head>
 <body>
@@ -729,7 +733,7 @@ function srcLabel(src){ if(!src) return t("srcDefault"); return SRC_KEY[src] ? t
 /* ================= Constantes de la M11 ================= */
 const BASE = 69.25;          // mm, base mecánica
 const MAG  = 0.73;           // aumento del visor
-const PITCH = 3.76;          // µm por píxel (el mismo valor que sensor.html y leica-sensores.html)
+const PITCH = 3.76;          // µm por píxel (el mismo valor que la pestaña de datos de sensor.html)
 const LAMBDA = 0.55e-3;      // mm, 550 nm
 const COUPLE_MIN = 0.7;      // m, tope de la leva
 const DMAX = 60;             // m, posición de ∞ en la escala

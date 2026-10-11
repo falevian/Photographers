@@ -242,6 +242,9 @@ header{padding-right:118px}
                   opacity:.62;border-right:1px solid rgba(125,132,140,.35);background:none}
   .langbar a.home:hover{opacity:1}
   .langbar a.home svg{width:12px;height:12px;display:block;background:none;border:0;border-radius:0}
+/* una columna 1fr no baja de la anchura mínima de su contenido y la página se desbordaba; minmax(0,1fr) sí */
+.layout{grid-template-columns:300px minmax(0,1fr)}
+@media(max-width:700px){.layout{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
 <body class="font-typewriter">
@@ -558,10 +561,12 @@ header{padding-right:118px}
 })();
 </script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/exifr@7.1.3/dist/full.umd.js"></script>
+<script src="vendor/jspdf.umd.2.5.1.min.js"></script>
+<script>window.jspdf||document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>')</script>
+<script src="vendor/exifr.full.umd.7.1.3.js"></script>
+<script>window.exifr||document.write('<script src="https://cdn.jsdelivr.net/npm/exifr@7.1.3/dist/full.umd.js"><\/script>')</script>
 <script>
-// Las dos librerías vienen de CDN. Si no hay red, la página NO se muere:
+// Las dos librerías se sirven desde vendor/ (con el CDN de reserva). Si aun así no cargan, la página NO se muere:
 // se queda viva, ordena por fecha de archivo y lo dice en el estado.
 const HAS_PDF  = !!(window.jspdf && window.jspdf.jsPDF);
 const HAS_EXIF = (typeof exifr !== 'undefined' && exifr && typeof exifr.parse === 'function');
