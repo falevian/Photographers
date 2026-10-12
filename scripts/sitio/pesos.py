@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """Pone al día los pesos que el sitio declara de cada documento.
 
-La portada (index.html, etiqueta de cada tarjeta) y el README (última columna de
-las tablas, en español y en inglés) dicen cuánto pesa cada archivo. Esas cifras
+El README (última columna de las tablas, en español y en inglés) dice cuánto pesa
+cada archivo, y la portada (index.html) cita el peso del explorador de distancias en
+su tarjeta. Esas cifras
 se escriben a mano y se quedan atrás en cuanto una página cambia. Este script
 las recalcula a partir del tamaño real: KB = bytes/1024 redondeado; a partir de
 1024 KB, MB con un decimal (coma en español y en la portada, punto en inglés).
@@ -63,7 +64,10 @@ def frase_explorador(txt, cambios, donde):
     """La nota sobre el explorador de distancias cita su peso en el texto."""
     ruta = "explorador_distancias.html"
     for patron, coma in ((r"(explorador de distancias pesa )(\d[\d.,]* MB)", True),
-                         (r"(distance explorer weighs )(\d[\d.,]* MB)", False)):
+                         (r"(distance explorer weighs )(\d[\d.,]* MB)", False),
+                         # tarjeta de la portada
+                         (r"(Pesa )(\d[\d.,]* MB)(?= porque lleva las fotos)", True),
+                         (r"(It weighs )(\d[\d.,]* MB)(?= because it carries)", False)):
         def f(m, coma=coma):
             nuevo = peso(ruta, coma)
             if nuevo != m.group(2):
