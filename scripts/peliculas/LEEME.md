@@ -75,7 +75,10 @@ Dos vías de trabajo:
 
 Medido sobre el ColorChecker de 24 parches frente a la reproducción
 colorimétrica exacta de la misma escena. ΔC* es el exceso de croma, Δh el giro
-de tono en grados, Δu′v′ la deriva de los neutros.
+de tono en grados, Δu′v′ la deriva de los neutros. Se midieron con las curvas
+anteriores a la reparación que describe la sección 4; con las curvas reparadas,
+que son las de por omisión, el croma medio de velvia50 y pro400h apenas cambia,
+el de k64 sube a unos +11.8 y el de k25, la columna que más se mueve, a unos +8.6.
 
 | | k25 | k64 | velvia50 | pro400h (copia normal) |
 |---|---|---|---|---|
@@ -90,7 +93,7 @@ Lectura corta: los dos Kodachrome comparten firma de familia (capa roja por
 encima en toda la escala, sombras que caen a cálido; los picos de colorante
 salen casi idénticos en ambas digitalizaciones, 0.76/1.05/1.25 frente a
 0.77/1.06/1.28, porque el K-14 usa los mismos acopladores). El 25 es la
-versión contenida, gamma ~1.5 frente a ~2.0, la paleta callada de Ghirri. El
+versión contenida, gamma del gris ~1.3 frente a ~1.6, la paleta callada de Ghirri. El
 64 es más gráfico. Velvia va aparte: tres capas apareadas por diseño, neutros
 clavados hasta el fondo, y el carácter puesto entero en el croma y en unos
 verdes oscurecidos y girados a esmeralda. El sistema negativo+papel es el más
@@ -211,8 +214,8 @@ python3 grano.py exportada.jpg salida.jpg --pelicula trix --intensidad 1.2
      Tri-X, hecho con la curva del papel sin reparar, oscilaba con el tono
      (1.8× en D 0.74, 1.0× en D 1.0, 1.7× en D 1.3) y en un fondo desenfocado
      daba zonas con el doble de grano que las vecinas: nubes de grano que
-     seguían la textura del bokeh. El nuevo: 0.3 en las altas luces, 1.0 en
-     D 1.0, máximo 1.07 en D 1.3, cero en el negro del papel.
+     seguían la textura del bokeh. El nuevo: 0.3 en las altas luces, máximo 1.04
+     en D 0.85, 1.0 en D 1.0, cero en el negro del papel.
 
    Sin `--pelicula` se aplica la ley genérica σ ∝ √D (Kodachrome 200:
    `--rms 16`).
@@ -273,7 +276,7 @@ con periodo ~0.05 logE); tramos rellenados con una recta entre puntos escasos,
 con gamma exactamente constante y un escalón al final (K64: gamma 0.82 durante
 0.5 logE y salto a 1.39 justo por encima del gris medio; K25: 0.98 durante
 0.7 logE y salto a 2.0, que dejaba la gamma del gris en 0.98 y hacía al K25
-falsamente «contenido»); y saltos y bultos donde el trazador se confundió de
+falsamente “contenido”); y saltos y bultos donde el trazador se confundió de
 curva (Multigrade grado 2: picos de gamma local 4.4 y 5.6 con un valle de 0.95
 en medio). Desde esta versión las curvas se reparan al cargarlas, con el mismo
 tratamiento para todas y solo numpy: los rellenos lineales se sustituyen por un
@@ -287,7 +290,7 @@ forzando la monotonía. Dmin, Dmax y la colocación de la exposición no cambian
 Resultado: en el K64 desaparece el escalón de contraste entre gris y blanco
 (pendiente en L*: de 24 → 20 → 17 → 19 → 21 L*/EV a 24 → 22 → 20 → 19 → 17);
 en el K25 la gamma del gris sube de 0.98 a 1.27 (15.5 → 19.8 L*/EV); en el
-MG2 la gamma máxima baja de 5.6 a 4.0 con la ISO(R) intacta (108).
+MG2 la gamma máxima baja de 5.6 a 4.0 con la ISO(R) intacta (110).
 `--curvas crudas` recupera las digitalizaciones originales.
 
 **Cadena de diapositiva** (k64, k25, velvia50): matriz 3×3 XYZ→exposición de

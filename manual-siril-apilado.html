@@ -227,8 +227,8 @@ html[lang="en"] [data-lang="es"]{display:none!important}
 
 <header>
   <div class="wrap">
-    <div class="eyebrow" data-lang="es">Manual de apilado · Siril 1.2+</div>
-    <div class="eyebrow" data-lang="en">Stacking manual · Siril 1.2+</div>
+    <div class="eyebrow" data-lang="es">Manual de apilado · Siril 1.4+</div>
+    <div class="eyebrow" data-lang="en">Stacking manual · Siril 1.4+</div>
     <h1 data-lang="es">Del DNG al máster:<br>apilado con <span class="oiii">OIII</span> y <span class="ha">Hα</span></h1>
     <h1 data-lang="en">From DNG to master:<br>stacking with <span class="oiii">OIII</span> and <span class="ha">Hα</span></h1>
     <p class="sub" data-lang="es">Flujo completo de preprocesado y apilado en Siril para series de cielo profundo, adaptado a este equipo concreto: sensor color sin modificar, filtro UHC frontal y montura de seguimiento ligera.</p>
@@ -393,8 +393,8 @@ html[lang="en"] [data-lang="es"]{display:none!important}
       <div class="note warn" data-lang="en">Do not change the focus or the filter position between lights and flats: field correction depends on the geometry being identical.</div>
       <details open><summary><span data-lang="es">¿Qué es imprescindible con tu sensor?</span><span data-lang="en">What is essential with your sensor?</span></summary>
         <div class="inner">
-          <p data-lang="es">El modelo de señal por píxel es S = objeto + sesgo de lectura + señal térmica, multiplicado por la respuesta del sistema. Cada tipo de toma aísla un término, y no todos pesan igual con un CMOS BSI moderno y subexposiciones cortas:</p>
-          <p data-lang="en">The per-pixel signal model is S = object + read offset + thermal signal, multiplied by the system response. Each frame type isolates one term, and they do not all weigh the same with a modern BSI CMOS and short subexposures:</p>
+          <p data-lang="es">El modelo de señal por píxel es S = objeto × respuesta del sistema + sesgo de lectura + señal térmica. Cada tipo de toma aísla un término, y no todos pesan igual con un CMOS BSI moderno y subexposiciones cortas:</p>
+          <p data-lang="en">The per-pixel signal model is S = object × system response + read offset + thermal signal. Each frame type isolates one term, and they do not all weigh the same with a modern BSI CMOS and short subexposures:</p>
           <table data-lang="es">
             <thead><tr><th>Tipo</th><th>Qué mide</th><th>Con la M11P + UHC</th></tr></thead>
             <tbody>
@@ -415,14 +415,14 @@ html[lang="en"] [data-lang="es"]{display:none!important}
           </table>
           <p data-lang="es"><strong>LENR de la cámara:</strong> la M11 incluye reducción de ruido de larga exposición que captura y resta internamente un dark de igual duración. Para apilar conviene desactivarla en el menú: duplica el tiempo por toma y añade el ruido de esa resta a cada light. Es más eficiente invertir ese tiempo en más subexposiciones. Si la dejas activada, los darks externos sobran por completo (estarías restando el término térmico dos veces).</p>
           <p data-lang="en"><strong>The camera's LENR:</strong> the M11 has long-exposure noise reduction that internally captures and subtracts a dark of equal duration. For stacking it is best disabled in the menu: it doubles the time per frame and adds the noise of that subtraction to every light. That time is better spent on more subexposures. If you leave it on, external darks are entirely redundant (you would be subtracting the thermal term twice).</p>
-          <p data-lang="es">Si prescindes de darks, mantén en la calibración la corrección cosmética a partir del máster bias o usa <code>find_hot</code>, y no renuncies al dithering.</p>
-          <p data-lang="en">If you skip the darks, keep the cosmetic correction in calibration based on the master bias or use <code>find_hot</code>, and do not give up dithering.</p>
+          <p data-lang="es">Si prescindes de darks, mantén en la calibración la corrección cosmética con un mapa de píxeles defectuosos hecho con <code>find_hot</code>, y no renuncies al dithering.</p>
+          <p data-lang="en">If you skip the darks, keep the cosmetic correction in calibration with a bad-pixel map made with <code>find_hot</code>, and do not give up dithering.</p>
         </div>
       </details>
       <details><summary><span data-lang="es">Flats con pantalla de móvil: procedimiento</span><span data-lang="en">Flats with a phone screen: procedure</span></summary>
         <div class="inner">
-          <p data-lang="es">Una pantalla a pocos centímetros con el objetivo a infinito queda totalmente desenfocada, así que su textura no es problema. Lo que sí hay que corregir es su emisión: no es lambertiana (el color del OLED cambia con el ángulo de visión, y el 28 mm recoge rayos de hasta 37 grados), está polarizada (el UHC a incidencia oblicua transmite distinto según la polarización) y el brillo se regula por PWM, que produce bandeado en exposiciones cortas. Los tres efectos se resuelven igual:</p>
-          <p data-lang="en">A screen a few centimetres away, with the lens at infinity, is completely out of focus, so its texture is no problem. What does need correcting is its emission: it is not Lambertian (an OLED's colour changes with viewing angle, and the 28 mm collects rays at up to 37 degrees), it is polarised (a UHC at oblique incidence transmits differently depending on polarisation) and its brightness is regulated by PWM, which produces banding at short exposures. All three effects are solved the same way:</p>
+          <p data-lang="es">Una pantalla a pocos centímetros con el objetivo a infinito queda totalmente desenfocada, así que su textura no es problema. Lo que sí hay que corregir es su emisión: no es lambertiana (el color del OLED cambia con el ángulo de visión, y el 28 mm recoge rayos de hasta 38 grados), está polarizada (el UHC a incidencia oblicua transmite distinto según la polarización) y el brillo se regula por PWM, que produce bandeado en exposiciones cortas. Los tres efectos se resuelven igual:</p>
+          <p data-lang="en">A screen a few centimetres away, with the lens at infinity, is completely out of focus, so its texture is no problem. What does need correcting is its emission: it is not Lambertian (an OLED's colour changes with viewing angle, and the 28 mm collects rays at up to 38 degrees), it is polarised (a UHC at oblique incidence transmits differently depending on polarisation) and its brightness is regulated by PWM, which produces banding at short exposures. All three effects are solved the same way:</p>
           <ul class="plain" data-lang="es">
             <li>Pantalla en blanco a brillo máximo, con dos o tres folios blancos encima como difusor y despolarizador, apoyados en el parasol o el portafiltros.</li>
             <li>Obturador mecánico y exposición de 0.5 a 2 s a ISO base, para promediar muchos ciclos de PWM.</li>
@@ -704,18 +704,18 @@ seqapplyreg pp_light -framing=min</pre>
       </div>
       <p data-lang="es">La media con rechazo Winsorized sigma clipping es el estándar para series de 20 o más tomas: promedia el fondo (la SNR crece como √N) y elimina trazas de aviones y satélites:</p>
       <p data-lang="en">Mean stacking with Winsorized sigma clipping is the standard for series of 20 or more frames: it averages the background (SNR grows as √N) and removes plane and satellite trails:</p>
-      <pre><button class="copy">copiar</button>stack r_pp_light rej w 3 3 -norm=addscale -output_norm -weight_from_wfwhm -out=result
+      <pre><button class="copy">copiar</button>stack r_pp_light rej w 3 3 -norm=addscale -output_norm -weight=wfwhm -out=result
 load result
 save cygnus_master</pre>
       <ul class="plain" data-lang="es">
-        <li><code>rej w 3 3</code>: rechazo Winsorized con umbrales de 3σ por arriba y por abajo. Si quedan restos de trazas, baja el umbral alto a 2.5.</li>
+        <li><code>rej w 3 3</code>: rechazo Winsorized con umbrales de 3σ por arriba y por abajo. Si quedan restos de trazas, baja el umbral alto (el segundo número) a 2.5.</li>
         <li><code>-norm=addscale</code>: normaliza nivel y escala entre tomas, necesario si el fondo varió durante la sesión (paso de nubes finas, cambio de altura del objeto).</li>
-        <li><code>-weight_from_wfwhm</code>: pondera cada toma por la calidad de sus estrellas, penalizando las tomas con viento o seguimiento imperfecto.</li>
+        <li><code>-weight=wfwhm</code>: pondera cada toma por la calidad de sus estrellas, penalizando las tomas con viento o seguimiento imperfecto.</li>
       </ul>
       <ul class="plain" data-lang="en">
-        <li><code>rej w 3 3</code>: Winsorized rejection with 3σ thresholds above and below. If trail remnants survive, lower the high threshold to 2.5.</li>
+        <li><code>rej w 3 3</code>: Winsorized rejection with 3σ thresholds above and below. If trail remnants survive, lower the high threshold (the second number) to 2.5.</li>
         <li><code>-norm=addscale</code>: normalises level and scale between frames, needed if the background varied during the session (thin passing clouds, change in the object's altitude).</li>
-        <li><code>-weight_from_wfwhm</code>: weights each frame by the quality of its stars, penalising frames with wind or imperfect tracking.</li>
+        <li><code>-weight=wfwhm</code>: weights each frame by the quality of its stars, penalising frames with wind or imperfect tracking.</li>
       </ul>
       <div class="note" data-lang="es">Con 40 tomas de 90 s acumulas una hora de integración: suficiente para el complejo de Cygnus o California con este cielo. El máster queda en 32 bits, listo para el postprocesado.</div>
       <div class="note" data-lang="en">With 40 frames of 90 s you accumulate an hour of integration: enough for the Cygnus complex or California under this sky. The master is kept in 32 bits, ready for postprocessing.</div>
@@ -835,7 +835,7 @@ save cygnus_master</pre>
         <tbody>
           <tr><td>Gradiente magenta o verde hacia los bordes</td><td>Desplazamiento espectral del UHC en el gran angular</td><td>Flats con filtro, recorte, extracción de fondo por canal</td></tr>
           <tr><td>Estrellas alargadas en esquinas</td><td>Coma o astigmatismo a plena abertura</td><td>Cerrar a f/2.8 o f/4</td></tr>
-          <tr><td>Trazas residuales tras apilar</td><td>Umbral de rechazo alto</td><td><code>rej w 2.5 3</code></td></tr>
+          <tr><td>Trazas residuales tras apilar</td><td>Umbral de rechazo alto</td><td><code>rej w 3 2.5</code></td></tr>
           <tr><td>Bandas o patrón fijo en el fondo</td><td>Ruido correlacionado sin dithering</td><td>Dithering entre tomas en la siguiente sesión</td></tr>
           <tr><td>Registro falla en pocas estrellas</td><td>UHC deja pocas estrellas débiles</td><td>Bajar umbral de detección en ajustes de registro</td></tr>
         </tbody>
@@ -845,7 +845,7 @@ save cygnus_master</pre>
         <tbody>
           <tr><td>Magenta or green gradient towards the edges</td><td>Spectral shift of the UHC on the wide angle</td><td>Flats with the filter, crop, per-channel background extraction</td></tr>
           <tr><td>Elongated stars in the corners</td><td>Coma or astigmatism wide open</td><td>Stop down to f/2.8 or f/4</td></tr>
-          <tr><td>Residual trails after stacking</td><td>Rejection threshold too high</td><td><code>rej w 2.5 3</code></td></tr>
+          <tr><td>Residual trails after stacking</td><td>Rejection threshold too high</td><td><code>rej w 3 2.5</code></td></tr>
           <tr><td>Banding or fixed pattern in the background</td><td>Correlated noise without dithering</td><td>Dither between frames next session</td></tr>
           <tr><td>Registration fails on few stars</td><td>The UHC leaves few faint stars</td><td>Lower the detection threshold in the registration settings</td></tr>
         </tbody>

@@ -1,12 +1,12 @@
 ############################################
-# Script Siril 1.2+  ·  Leica M11P + UHC
+# Script Siril 1.4+  ·  Leica M11P + UHC
 # Variante SIN darks (recomendada con subs de
 # 60 a 120 s, noche fresca y dithering).
 # Estructura esperada en el directorio de trabajo:
 #   lights/  flats/  biases/
 # Requisito: LENR de la camara desactivada.
 ############################################
-requires 1.2.0
+requires 1.4.0
 
 # --- master bias ---
 cd biases
@@ -35,7 +35,7 @@ seqapplyreg pp_light -framing=min
 
 # --- apilado: media con rechazo Winsorized 3/3,
 #     normalizacion aditiva con escalado y ponderacion por FWHM ---
-stack r_pp_light rej w 3 3 -norm=addscale -output_norm -weight_from_wfwhm -out=../result
+stack r_pp_light rej w 3 3 -norm=addscale -output_norm -weight=wfwhm -out=../result
 
 cd ..
 load result

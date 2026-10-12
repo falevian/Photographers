@@ -162,9 +162,9 @@ por píxel) y una totalidad de 76 s con el Sol a 12 grados de altura.
    de diámetros aparentes, unos 60 segundos de arco, es decir 27 px. En una ráfaga de 5 s baja
    a 1,8 px. Conviene procesar por grupos temporales de menos de unos 10 s y combinar después.
 3. **Rotación de campo sin montura ecuatorial.** Con `omega = 15,04 cos(phi) cos(A) / cos(h)`
-   en grados por hora, para 43,4 grados de latitud, 12 de altura y azimut 295, sale 4,7 grados
-   por hora, o 0,10 grados en 76 s. A 3 radios lunares del centro son 4,9 segundos de arco,
-   2,2 px que la traslación no corrige.
+   en grados por hora, para 43,4 grados de latitud, 12 de altura y azimut 279, sale 1,8 grados
+   por hora, o 0,04 grados en 76 s. A 3 radios lunares del centro son 1,8 segundos de arco,
+   0,8 px que la traslación no corrige.
 4. **Viñeteado y aplanado radial.** El perfil está centrado en la Luna y el viñeteado en el eje
    óptico. Si la Luna está descentrada, el aplanado convierte el viñeteado en una modulación
    azimutal espuria, indistinguible de una asimetría real.
@@ -184,7 +184,7 @@ por píxel) y una totalidad de 76 s con el Sol a 12 grados de altura.
    entre lentes ni bruma localizada. Comparar `--bg plane` con `--bg poly2`: lo que cambie de
    sitio no es corona.
 9. **Requisitos geométricos.** El limbo completo debe estar en el encuadre y el radio ha de
-   caer entre 0,04 y 0,35 de la dimensión menor del fotograma. A partir de unos 1200 mm sobre
+   caer entre 0,04 y 0,35 de la dimensión menor del fotograma. A partir de unos 1800 mm sobre
    fotograma completo hay que dar `--moon-radius`.
 10. **Rechazo limitado a eventos de un solo fotograma.** El recorte por grupos elimina lo que
     afecta a una única toma de un grupo de 3 o más. Una nube que cubre varias tomas seguidas,
@@ -195,7 +195,7 @@ por píxel) y una totalidad de 76 s con el Sol a 12 grados de altura.
 
 - Abertura e ISO fijos durante toda la totalidad. La escala fotométrica se reconstruye con
   `t · ISO / N²`, pero cambiar de abertura cambia también el viñeteado y la PSF.
-- Horquilla de 16 EV en pasos de 2 EV, por ejemplo de 1/4000 a 1/2 s a f/8 e ISO 200. El paso
+- Horquilla de 12 EV en pasos de 2 EV, por ejemplo de 1/8000 a 1/2 s a f/8 e ISO 200. El paso
   de 2 EV es suficiente porque la ponderación por `e_i` hace que los solapes contribuyan de
   forma óptima.
 - Ráfagas repetidas de la misma escalera, con al menos 3 tomas por escalón dentro de cada
@@ -203,7 +203,7 @@ por píxel) y una totalidad de 76 s con el Sol a 12 grados de altura.
   exposición se combinan y la relación señal a ruido crece como raíz de N.
 - Dejar cielo en el encuadre. A 400 mm el campo es de 5,15 por 3,44 grados y el radio lunar
   mide 420 px, de modo que la región con r > 4 R cubre el 81 % del fotograma. A 800 mm esa
-  fracción cae al 25 % y conviene `--bg-k 3`. A focales mayores, `--bg const`.
+  fracción cae al 30 % y conviene `--bg-k 3`. A focales mayores, `--bg const`.
 - Enfoque manual fijado antes de la totalidad y bloqueado. RAW sin compresión con pérdida y sin
   reducción de ruido en cámara.
 
