@@ -342,11 +342,11 @@ html[lang="en"] [data-lang="es"]{display:none!important}
       <figcaption class="figcap"><span data-lang="es">Datos reales de la validación interna del programa: perfil radial de
       luminancia medido sobre sus propias salidas. La intensidad cae 3,58 dex (un factor 3800) entre
       1,05 y 4,1 radios lunares; tras la división por el perfil, el residuo radial queda en 0,0018 dex
-      de RMS. Ninguna curva de mapeo tonal comprime ese gradiente: se elimina por división.</span><span data-lang="en">Real data
+      de RMS. Ese gradiente se elimina por división, sin ninguna curva de mapeo tonal que lo comprima.</span><span data-lang="en">Real data
       from the program's internal validation: radial luminance profile measured on its own outputs.
       The intensity falls by 3.58 dex (a factor of 3800) between 1.05 and 4.1 lunar radii; after
-      division by the profile, the radial residual stands at 0.0018 dex RMS. No tone mapping curve
-      compresses that gradient: it is removed by division.</span></figcaption>
+      division by the profile, the radial residual stands at 0.0018 dex RMS. That gradient is
+      removed by division, without any tone mapping curve to compress it.</span></figcaption>
     </figure>
 
     <div class="stats">
@@ -454,10 +454,10 @@ html[lang="en"] [data-lang="es"]{display:none!important}
   <span class="h2num" data-lang="en">Scope</span>
   <h2 data-lang="es">Qué produce y qué deja fuera</h2>
   <h2 data-lang="en">What it produces and what it leaves out</h2>
-  <p class="lead" data-lang="es">El programa resuelve un problema fotométrico, no estético. Su salida
-  principal es un mapa de radiancia relativa; la imagen presentable es un subproducto.</p>
-  <p class="lead" data-lang="en">The program solves a photometric problem, not an aesthetic one. Its
-  principal output is a map of relative radiance; the presentable image is a by-product.</p>
+  <p class="lead" data-lang="es">El programa resuelve un problema fotométrico. Su salida principal
+  es un mapa de radiancia relativa, y la imagen presentable es un subproducto.</p>
+  <p class="lead" data-lang="en">The program solves a photometric problem. Its principal output is
+  a map of relative radiance, and the presentable image is a by-product.</p>
 
   <h4 data-lang="es">Sí</h4>
   <h4 data-lang="en">Yes</h4>
@@ -591,10 +591,10 @@ python eclipse_hdr.py totalidad/IMG_2*.CR3 -o salida</pre>
   to the number of photoelectrons per pixel, with the white balance multipliers applied
   (<code>--wb camera</code> or <code>--wb daylight</code>). Linearity is the condition that
   permits division by the exposure time at stage 3.</p>
-  <p data-lang="es">La saturación no se detecta en la imagen revelada, donde el interpolado cromático ya ha
-  mezclado píxeles buenos con píxeles a tope, sino en el mosaico:</p>
-  <p data-lang="en">Saturation is not detected on the developed image, where demosaicing has already
-  blended sound pixels with pixels at full scale, but on the mosaic:</p>
+  <p data-lang="es">Como en la imagen revelada el interpolado cromático ya ha mezclado píxeles buenos con
+  píxeles a tope, la saturación se detecta en el mosaico:</p>
+  <p data-lang="en">Since demosaicing has already blended sound pixels with pixels at full scale on the
+  developed image, saturation is detected on the mosaic:</p>
   <div class="eq" data-lang="es"><i>saturado</i> <span class="op">⇔</span> <i>M</i> ≥ <i>negro</i> + 0,97 (<i>blanco</i> <span class="op">−</span> <i>negro</i>)</div>
   <div class="eq" data-lang="en"><i>saturated</i> <span class="op">⇔</span> <i>M</i> ≥ <i>black</i> + 0.97 (<i>white</i> <span class="op">−</span> <i>black</i>)</div>
   <p data-lang="es">La máscara se reorienta según el <em>flip</em> declarado en el RAW, se combina en OR con
@@ -675,7 +675,7 @@ python eclipse_hdr.py totalidad/IMG_2*.CR3 -o salida</pre>
   <p data-lang="es">El peso tiene tres factores. Uno anula los píxeles saturados con una rampa suave entre
   0,92 y 0,98 de la escala, más la máscara del mosaico. Otro anula los que están bajo el suelo
   de ruido, con rampa entre <code>--floor</code> y tres veces ese valor. El tercero es
-  <i>e<sub>i</sub></i>, y no es arbitrario: si el ruido dominante es fotónico,
+  <i>e<sub>i</sub></i>, y se justifica así: si el ruido dominante es fotónico,
   var(<i>I</i>) ∝ <i>I</i>, de modo que la varianza del estimador
   <i>L̂<sub>i</sub></i> = <i>I<sub>i</sub></i>/<i>e<sub>i</sub></i> es proporcional a
   <i>L</i>/<i>e<sub>i</sub></i>. El peso de varianza inversa es entonces proporcional a la
@@ -683,17 +683,17 @@ python eclipse_hdr.py totalidad/IMG_2*.CR3 -o salida</pre>
   <p data-lang="en">The weight has three factors. One annuls the saturated pixels with a smooth ramp
   between 0.92 and 0.98 of full scale, together with the mosaic mask. Another annuls those below
   the noise floor, with a ramp between <code>--floor</code> and three times that value. The third
-  is <i>e<sub>i</sub></i>, and it is not arbitrary: if the dominant noise is photon noise,
+  is <i>e<sub>i</sub></i>, and the justification is as follows: if the dominant noise is photon noise,
   var(<i>I</i>) ∝ <i>I</i>, so that the variance of the estimator
   <i>L̂<sub>i</sub></i> = <i>I<sub>i</sub></i>/<i>e<sub>i</sub></i> is proportional to
   <i>L</i>/<i>e<sub>i</sub></i>. The inverse-variance weight is then proportional to the
   exposure, which is exactly what is applied.</p>
   <p data-lang="es">Los píxeles en los que ningún fotograma aporta peso (el núcleo saturado en todas las
   tomas) se rellenan con la estimación de la exposición más corta, para que la imagen no
-  contenga huecos. Es un relleno, no una medida: en esa zona la fotometría no existe.</p>
+  contenga huecos. Es solo un relleno, porque en esa zona no hay fotometría.</p>
   <p data-lang="en">Pixels to which no frame contributes any weight (the core, saturated in every
   exposure) are filled in with the estimate from the shortest exposure, so that the image contains
-  no holes. It is a fill, not a measurement: in that region there is no photometry.</p>
+  no holes. It is only a fill, since in that region there is no photometry.</p>
   <p data-lang="es">Cuando hay varias tomas por escalón de exposición, y con ráfagas las hay, los fotogramas
   de igual exposición (tolerancia de 0,25 EV, con independencia del orden de captura) se
   combinan antes con una media recortada por píxel: con <i>n</i> ≥ 3 se descarta el máximo,
@@ -856,13 +856,13 @@ python eclipse_hdr.py totalidad/IMG_2*.CR3 -o salida</pre>
   <p data-lang="es">Las escalas por omisión, σ = 3, 10, 30 y 90 px con ganancias decrecientes, cubren desde
   las estrías finas de la corona hasta los penachos. La codificación final estira entre los
   percentiles 0,5 y 99,7 medidos también en el anillo estructural, y aplica gamma 2,2. El
-  estirado se mide donde está la señal que interesa, no en todo el fotograma, que es el error
+  estirado se mide donde está la señal que interesa; medirlo en todo el fotograma es el error
   que produce imágenes lavadas.</p>
   <p data-lang="en">The default scales, σ = 3, 10, 30 and 90 px with decreasing gains, span everything
   from the fine striations of the corona to the coronal streamers. The final encoding stretches
   between the 0.5 and 99.7 percentiles, likewise measured within the structural annulus, and
-  applies gamma 2.2. The stretch is measured where the signal of interest lies, not across the
-  whole frame, which is the error that yields washed-out images.</p>
+  applies gamma 2.2. The stretch is measured where the signal of interest lies; measuring it
+  across the whole frame is the error that yields washed-out images.</p>
 </section>
 
 <hr>
@@ -932,13 +932,13 @@ python eclipse_hdr.py totalidad/IMG_2*.CR3 -o salida</pre>
     <span class="tag">Photoshop</span>
     <div data-lang="es">
       <p>Los TIFF float32 se abren en modo 32 bits por canal. Al convertir a 16 bits, Photoshop
-      ofrece un mapeo tonal: hay que elegir exposición y gamma, no ninguno de los métodos
+      ofrece un mapeo tonal: hay que elegir exposición y gamma, y evitar los métodos
       adaptativos, porque el gradiente radial ya está eliminado y cualquier compresión local
       volvería a introducir halos en el limbo.</p>
     </div>
     <div data-lang="en">
       <p>The float32 TIFFs open in 32-bit-per-channel mode. On converting to 16 bits, Photoshop
-      offers a tone mapping: choose exposure and gamma, and none of the adaptive methods, because
+      offers a tone mapping: choose exposure and gamma, and avoid the adaptive methods, because
       the radial gradient has already been removed and any local compression would reintroduce
       haloes at the limb.</p>
     </div>
@@ -997,14 +997,14 @@ python eclipse_hdr.py totalidad/IMG_2*.CR3 -o salida</pre>
   </dl>
   <p data-lang="es">Lo que la prueba no demuestra: que LibRaw lea correctamente tu cámara, que el EXIF de tus
   ficheros esté completo, que la corona real, que no es axisimétrica ni exponencial, se comporte
-  como el modelo, ni que la atmósfera colabore. Es una verificación de la implementación
-  matemática, no del sistema completo. Para eso está el ensayo con material propio y
+  como el modelo, ni que la atmósfera colabore. Verifica la implementación matemática; el
+  sistema completo se comprueba en el ensayo con material propio y
   <code>--no-align</code>.</p>
   <p data-lang="en">What the test does not prove: that LibRaw reads your camera correctly, that the EXIF
   of your files is complete, that the real corona, which is neither axisymmetric nor exponential,
-  behaves like the model, or that the atmosphere will oblige. It is a verification of the
-  mathematical implementation, not of the complete system. For that there is the rehearsal on
-  material of your own with <code>--no-align</code>.</p>
+  behaves like the model, or that the atmosphere will oblige. It verifies the mathematical
+  implementation; the complete system is checked in the rehearsal on material of your own with
+  <code>--no-align</code>.</p>
 </section>
 
 <hr>
@@ -1036,13 +1036,13 @@ python eclipse_hdr.py totalidad/IMG_2*.CR3 -o salida</pre>
   acumulado durante toda la totalidad es del orden de la diferencia de diámetros aparentes,
   aproximadamente 1 minuto de arco, es decir, unos 27 px. Mezclar fotogramas del segundo
   contacto con fotogramas del tercero difumina la corona en esa cantidad. Dentro de una ráfaga
-  de 5 s el efecto baja a 1,8 px. La conclusión práctica: procesar por grupos temporales
-  próximos y componer después, no fusionar los 76 s en un solo pase.</p>
+  de 5 s el efecto baja a 1,8 px. En la práctica, conviene procesar por grupos temporales
+  próximos y componer después, en vez de fusionar los 76 s en un solo pase.</p>
   <p data-lang="en">Registration fixes the Moon, so the corona moves. The relative displacement
   accumulated over the whole of totality is of the order of the difference in apparent diameters,
   approximately 1 arcminute, that is to say some 27 px. Mixing frames from second contact with
   frames from third smears the corona by that amount. Within a 5 s burst the effect falls to
-  1.8 px. The practical conclusion: process by groups close together in time and composite
+  1.8 px. In practice, it is better to process by groups close together in time and composite
   afterwards, rather than merging the whole 76 s in a single pass.</p>
 
   <h4 data-lang="es">L3 · Rotación de campo sin montura ecuatorial</h4>
@@ -1214,13 +1214,13 @@ python eclipse_hdr.py totalidad/IMG_2*.CR3 -o salida</pre>
     <span class="tag" data-lang="en">Before the twelfth</span>
     <div data-lang="es">
       <p>Ejecuta <code>--selftest</code> y después una horquilla propia con
-      <code>--no-align --half</code>. Lo que falla el día del eclipse no son los algoritmos, es
-      un formato RAW que LibRaw no reconoce, un EXIF incompleto o una tarjeta llena.</p>
+      <code>--no-align --half</code>. Lo que falla el día del eclipse, mucho antes que los
+      algoritmos, es un formato RAW que LibRaw no reconoce, un EXIF incompleto o una tarjeta llena.</p>
     </div>
     <div data-lang="en">
       <p>Run <code>--selftest</code>, and then a bracket of your own with
-      <code>--no-align --half</code>. What fails on the day of the eclipse is not the algorithms;
-      it is a RAW format that LibRaw does not recognise, an incomplete EXIF or a full card.</p>
+      <code>--no-align --half</code>. What fails on the day of the eclipse, long before the
+      algorithms do, is a RAW format that LibRaw does not recognise, an incomplete EXIF or a full card.</p>
     </div>
   </div>
 </section>

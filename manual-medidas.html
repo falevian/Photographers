@@ -405,13 +405,13 @@ html[lang="en"] [data-lang="es"]{display:none!important}
     </tbody>
   </table>
   <p class="note" data-lang="es">Todas las medianas, MAD e intervalos de confianza de este documento se
-  calculan por remuestreo o por fórmula cerrada; ningún resultado numérico mostrado aquí se
-  ha inventado a mano, se ha recalculado con las funciones citadas en cada ficha durante la
-  redacción de este manual.</p>
+  calculan por remuestreo o por fórmula cerrada. Los resultados numéricos que se muestran aquí
+  se recalcularon con las funciones citadas en cada ficha durante la redacción de este
+  manual, sin inventar ninguno a mano.</p>
   <p class="note" data-lang="en">Every median, MAD and confidence interval in this document is
-  computed by resampling or in closed form; no numerical result shown here has
-  been invented by hand, each was recomputed with the functions cited in the corresponding datasheet while this
-  manual was being written.</p>
+  computed by resampling or in closed form. The numerical results shown here were
+  recomputed with the functions cited in the corresponding datasheet while this
+  manual was being written, and none was invented by hand.</p>
 </section>
 
 <section class="sec" id="s2">
@@ -448,14 +448,14 @@ html[lang="en"] [data-lang="es"]{display:none!important}
         gaussiano de <i>&sigma;</i>&nbsp;=&nbsp;8&nbsp;px. La constante aditiva 0,05 evita
         dividir por valores cercanos a cero en sombras profundas; sin ella, el ruido de
         cuantización de una sombra casi negra produciría cocientes desproporcionados y el
-        mapa marcaría como "sujeto" el ruido de las zonas oscuras en lugar del sujeto real.</dd></dl>
+        mapa marcaría como “sujeto” el ruido de las zonas oscuras en lugar del sujeto real.</dd></dl>
       <dl class="row"><dt>Justificación física</dt><dd>a diafragma abierto, el plano
         enfocado concentra la energía de alta frecuencia; el resto del fotograma, difuminado
         por la profundidad de campo finita, la pierde. El laplaciano es el operador lineal
         más simple sensible a la curvatura de la señal y, por tanto, a los bordes.</dd></dl>
       <dl class="row"><dt>Degrada con</dt><dd>escenas a hiperfocal (todo enfocado, sin
         contraste de nitidez que discriminar) y con grano de película muy marcado, que
-        introduce energía de alta frecuencia en todo el fotograma, no solo en el sujeto.</dd></dl>
+        introduce energía de alta frecuencia en todo el fotograma, también fuera del sujeto.</dd></dl>
     </div>
   </div>
   <div class="card" data-lang="en">
@@ -474,14 +474,14 @@ html[lang="en"] [data-lang="es"]{display:none!important}
         Gaussian kernel of <i>&sigma;</i>&nbsp;=&nbsp;8&nbsp;px. The additive constant 0.05 prevents
         division by values close to zero in deep shadows; without it, the quantisation
         noise of an almost black shadow would produce disproportionate ratios and the
-        map would mark the noise of the dark areas as the "subject" instead of the real subject.</dd></dl>
+        map would mark the noise of the dark areas as the “subject” instead of the real subject.</dd></dl>
       <dl class="row"><dt>Physical rationale</dt><dd>at a wide aperture, the plane of
         focus concentrates the high-frequency energy; the rest of the frame, blurred
         by the finite depth of field, loses it. The Laplacian is the simplest linear
         operator sensitive to the curvature of the signal and therefore to edges.</dd></dl>
       <dl class="row"><dt>Degrades with</dt><dd>scenes shot at the hyperfocal distance (everything in focus, with no
         sharpness contrast to discriminate) and with very pronounced film grain, which
-        introduces high-frequency energy across the whole frame, not only in the subject.</dd></dl>
+        introduces high-frequency energy across the whole frame, outside the subject as well.</dd></dl>
     </div>
   </div>
 
@@ -502,8 +502,8 @@ html[lang="en"] [data-lang="es"]{display:none!important}
         (4&sup3;&nbsp;=&nbsp;64 colores posibles), <i>f<sub>k&prime;</sub></i> la frecuencia
         relativa del color <i>k&prime;</i> y &Vert;&middot;&Vert;<sub>2</sub> la distancia
         euclídea en RGB. Cada celda hereda la puntuación de su color cuantizado.</dd></dl>
-      <dl class="row"><dt>Detecta el sujeto por</dt><dd>anomalía cromática o tonal, no por
-        enfoque: útil cuando el sujeto se diferencia por color (un objeto rojo sobre fondo
+      <dl class="row"><dt>Detecta el sujeto por</dt><dd>anomalía cromática o tonal, con independencia del
+        enfoque. Es útil cuando el sujeto se diferencia por color (un objeto rojo sobre fondo
         verde) aunque toda la escena esté igual de nítida.</dd></dl>
     </div>
   </div>
@@ -522,8 +522,8 @@ html[lang="en"] [data-lang="es"]{display:none!important}
         (4&sup3;&nbsp;=&nbsp;64 possible colours), <i>f<sub>k&prime;</sub></i> the relative
         frequency of colour <i>k&prime;</i> and &Vert;&middot;&Vert;<sub>2</sub> the Euclidean
         distance in RGB. Each cell inherits the score of its quantised colour.</dd></dl>
-      <dl class="row"><dt>Detects the subject by</dt><dd>chromatic or tonal anomaly, not by
-        focus: useful when the subject stands out by colour (a red object against a green
+      <dl class="row"><dt>Detects the subject by</dt><dd>chromatic or tonal anomaly, regardless of
+        focus. It is useful when the subject stands out by colour (a red object against a green
         background) even though the whole scene is equally sharp.</dd></dl>
     </div>
   </div>
@@ -533,18 +533,18 @@ html[lang="en"] [data-lang="es"]{display:none!important}
   <p data-lang="es">Con <code>method=both</code> (opción por defecto), el mapa final es la combinación
   convexa <i>m</i> = <i>w</i>&middot;sharpness + (1&minus;<i>w</i>)&middot;contrast, con
   <i>w</i> = <code>--w-sharp</code> = 0,65 por defecto, y ambos mapas renormalizados a
-  [0,&nbsp;1] antes de mezclarse. El centroide no se calcula sobre <i>m</i> completo, que
-  daría un valor trivialmente próximo al centro por simple promedio de todo el fotograma,
-  sino sobre la componente conexa de <i>m</i>&nbsp;&ge;&nbsp;<code>--level</code>&middot;max(<i>m</i>)
+  [0,&nbsp;1] antes de mezclarse. Calcular el centroide sobre <i>m</i> completo daría
+  un valor trivialmente próximo al centro, por simple promedio de todo el fotograma; por eso
+  se calcula sobre la componente conexa de <i>m</i>&nbsp;&ge;&nbsp;<code>--level</code>&middot;max(<i>m</i>)
   que contiene el máximo, hallada por inundación en cuatro vecindades
   (<code>_flood()</code>). Si esa componente ocupa más de <code>--max-area</code> del
   fotograma (0,35 por defecto), el umbral sube en pasos de 0,05 hasta que deja de hacerlo.</p>
   <p data-lang="en">With <code>method=both</code> (the default), the final map is the convex
   combination <i>m</i> = <i>w</i>&middot;sharpness + (1&minus;<i>w</i>)&middot;contrast, with
   <i>w</i> = <code>--w-sharp</code> = 0.65 by default, both maps being renormalised to
-  [0,&nbsp;1] before being mixed. The centroid is not computed over the whole of <i>m</i>, which
-  would give a value trivially close to the centre by simple averaging over the entire frame,
-  but over the connected component of <i>m</i>&nbsp;&ge;&nbsp;<code>--level</code>&middot;max(<i>m</i>)
+  [0,&nbsp;1] before being mixed. Computing the centroid over the whole of <i>m</i> would
+  give a value trivially close to the centre, by simple averaging over the entire frame; that is
+  why it is computed over the connected component of <i>m</i>&nbsp;&ge;&nbsp;<code>--level</code>&middot;max(<i>m</i>)
   that contains the maximum, found by four-neighbour flood fill
   (<code>_flood()</code>). If that component occupies more than <code>--max-area</code> of the
   frame (0.35 by default), the threshold is raised in steps of 0.05 until it no longer does.</p>
@@ -630,12 +630,12 @@ html[lang="en"] [data-lang="es"]{display:none!important}
     <div class="cardtop"><span class="col">confidence</span><span class="fn">centroid()</span></div>
     <div class="body">
       <dl class="row"><dt>Rango</dt><dd>[0, 1]</dd></dl>
-      <dl class="row"><dt>Mide</dt><dd>compacidad geométrica de la componente conexa, no la
-        existencia real de un sujeto.</dd></dl>
+      <dl class="row"><dt>Mide</dt><dd>compacidad geométrica de la componente conexa,
+        exista o no un sujeto real.</dd></dl>
       <dl class="row"><dt>Límite</dt><dd>una imagen de ruido puro con una concentración
         casual de energía puede dar confianza alta sin que exista ningún sujeto. Sirve para
-        descartar fotogramas sin región dominante (cielos, texturas uniformes), no para
-        validar que la detección es correcta. El propio manual de uso del script recomienda
+        descartar fotogramas sin región dominante (cielos, texturas uniformes), pero no
+        confirma que la detección sea correcta. El propio manual de uso del script recomienda
         inspeccionar entre 30 y 40 miniaturas de <code>--overlay</code> antes de fiarse de un lote.</dd></dl>
     </div>
   </div>
@@ -643,11 +643,11 @@ html[lang="en"] [data-lang="es"]{display:none!important}
     <div class="cardtop"><span class="col">confidence</span><span class="fn">centroid()</span></div>
     <div class="body">
       <dl class="row"><dt>Range</dt><dd>[0, 1]</dd></dl>
-      <dl class="row"><dt>Measures</dt><dd>the geometric compactness of the connected component, not the
-        actual existence of a subject.</dd></dl>
+      <dl class="row"><dt>Measures</dt><dd>the geometric compactness of the connected component,
+        whether or not a real subject exists.</dd></dl>
       <dl class="row"><dt>Limit</dt><dd>an image of pure noise with a chance
         concentration of energy can yield high confidence without any subject being present. It serves to
-        discard frames with no dominant region (skies, uniform textures), not to
+        discard frames with no dominant region (skies, uniform textures), but it does not
         confirm that the detection is correct. The script's own usage manual recommends
         inspecting between 30 and 40 <code>--overlay</code> thumbnails before trusting a batch.</dd></dl>
     </div>
@@ -659,9 +659,9 @@ html[lang="en"] [data-lang="es"]{display:none!important}
     desenfoque (sección&nbsp;6) operan sobre <code>gray</code>, calculado como
     0,2126R&prime;&nbsp;+&nbsp;0,7152G&prime;&nbsp;+&nbsp;0,0722B&prime; directamente sobre
     los canales sRGB <i>codificados con gamma</i>, sin linealizar. Es <i>luma</i> de
-    Rec.&nbsp;709, una magnitud perceptual, no la luminancia física. La sección&nbsp;3
+    Rec.&nbsp;709, una magnitud perceptual distinta de la luminancia física. La sección&nbsp;3
     (tono), en cambio, sí linealiza antes de promediar (<code>srgb_to_linear()</code>) para
-    obtener <i>Y</i>. La distinción importa: dos fotogramas con la misma luminancia física
+    obtener <i>Y</i>. La distinción importa porque dos fotogramas con la misma luminancia física
     pero distinta clave de exposición no producen el mismo campo de gradiente en luma, así
     que la nitidez y el grano medidos aquí están débilmente acoplados a la exposición,
     mientras que <code>key_stops</code> y <code>dr_stops</code> están definidos exactamente
@@ -672,9 +672,9 @@ html[lang="en"] [data-lang="es"]{display:none!important}
     block (section&nbsp;6) operate on <code>gray</code>, computed as
     0.2126R&prime;&nbsp;+&nbsp;0.7152G&prime;&nbsp;+&nbsp;0.0722B&prime; directly on
     the <i>gamma-encoded</i> sRGB channels, without linearisation. This is Rec.&nbsp;709
-    <i>luma</i>, a perceptual quantity, not physical luminance. Section&nbsp;3
+    <i>luma</i>, a perceptual quantity distinct from physical luminance. Section&nbsp;3
     (tone), by contrast, does linearise before averaging (<code>srgb_to_linear()</code>) in order to
-    obtain <i>Y</i>. The distinction matters: two frames with the same physical luminance
+    obtain <i>Y</i>. The distinction matters because two frames with the same physical luminance
     but a different exposure key do not produce the same gradient field in luma, so
     the sharpness and grain measured here are weakly coupled to exposure,
     whereas <code>key_stops</code> and <code>dr_stops</code> are defined precisely
@@ -686,10 +686,10 @@ html[lang="en"] [data-lang="es"]{display:none!important}
     <h2 data-lang="en">Tone</h2>
     <span class="tag">tone_traits()</span></div>
 
-  <p data-lang="es">Toda la sección parte de la luminancia linealizada, no de la luma de la sección
-  anterior. La transferencia sRGB (IEC 61966&#8209;2&#8209;1) se deshace canal a canal:</p>
-  <p data-lang="en">The whole section starts from linearised luminance, not from the luma of the previous
-  section. The sRGB transfer function (IEC 61966&#8209;2&#8209;1) is undone channel by channel:</p>
+  <p data-lang="es">A diferencia de la sección anterior, que usa luma, aquí todo parte de la
+  luminancia linealizada. La transferencia sRGB (IEC 61966&#8209;2&#8209;1) se deshace canal a canal:</p>
+  <p data-lang="en">Unlike the previous section, which uses luma, everything here starts from
+  linearised luminance. The sRGB transfer function (IEC 61966&#8209;2&#8209;1) is undone channel by channel:</p>
 
   <div class="eqn small" data-lang="es">
     R<sub>lin</sub> = <span class="frac"><span>R&prime;</span><span>12,92</span></span> &nbsp;si R&prime;&nbsp;&le;&nbsp;0,04045
@@ -725,14 +725,14 @@ html[lang="en"] [data-lang="es"]{display:none!important}
     <div class="body">
       <dl class="row"><dt>Fórmula</dt><dd>
         <div class="eqn small">key<sub>stops</sub> = log<sub>2</sub><span class="frac"><span>med(Y)</span><span>0,18</span></span></div>
-        la mediana, no la media, para no dejar que un cielo saturado o una sombra cerrada
-        desplacen la lectura de clave, exactamente el motivo por el que un fotómetro de
+        se usa la mediana, más robusta que la media, para que un cielo saturado o una sombra
+        cerrada no desplacen la lectura de clave; es exactamente el motivo por el que un fotómetro de
         integración pondera de forma distinta que uno puntual.</dd></dl>
       <dl class="row"><dt>Rango típico</dt><dd>de &minus;5 a +5 diafragmos; sin cota dura</dd></dl>
       <dl class="row"><dt>Unidades</dt><dd>diafragmos (EV) respecto al gris del 18&nbsp;%</dd></dl>
       <dl class="row"><dt>Cero de la escala</dt><dd>0,18 en luminancia lineal es la
-        reflectancia estándar de una carta gris fotográfica; no es una convención de este
-        script sino el punto de referencia habitual en fotometría de exposición.</dd></dl>
+        reflectancia estándar de una carta gris fotográfica y el punto de referencia habitual
+        en fotometría de exposición; el script se limita a adoptarlo.</dd></dl>
     </div>
   </div>
   <div class="card" data-lang="en">
@@ -740,14 +740,14 @@ html[lang="en"] [data-lang="es"]{display:none!important}
     <div class="body">
       <dl class="row"><dt>Formula</dt><dd>
         <div class="eqn small">key<sub>stops</sub> = log<sub>2</sub><span class="frac"><span>med(Y)</span><span>0.18</span></span></div>
-        the median, not the mean, so that neither a blown sky nor a blocked-up shadow
-        can displace the reading of the key, precisely the reason why an integrating
+        the median, which is more robust than the mean, is used so that neither a blown sky nor a
+        blocked-up shadow can displace the reading of the key; this is precisely the reason why an integrating
         light meter weights differently from a spot meter.</dd></dl>
       <dl class="row"><dt>Typical range</dt><dd>from &minus;5 to +5 stops; with no hard bound</dd></dl>
       <dl class="row"><dt>Units</dt><dd>stops (EV) with respect to the 18&nbsp;% grey</dd></dl>
       <dl class="row"><dt>Zero of the scale</dt><dd>0.18 in linear luminance is the
-        standard reflectance of a photographic grey card; it is not a convention of this
-        script but the usual reference point in exposure photometry.</dd></dl>
+        standard reflectance of a photographic grey card and the usual reference point in
+        exposure photometry; the script simply adopts it.</dd></dl>
     </div>
   </div>
 
@@ -839,13 +839,13 @@ html[lang="en"] [data-lang="es"]{display:none!important}
       18&nbsp;% (curva calculada linealizando exactamente como <code>rgb_to_lab()</code>), con
       las once bandas iguales de L* superpuestas. El gris del 18&nbsp;% cae en L*&nbsp;=&nbsp;49,5,
       zona&nbsp;V; el blanco de papel, a +2,47 diafragmos, cierra la zona&nbsp;X. Derecha: qué
-      ocurriría si la zona se definiera como un diafragmo entero desde el 18&nbsp;%&mdash;las
+      ocurriría si la zona se definiera como un diafragmo entero desde el 18&nbsp;%. Las
       zonas +3 a +5 quedarían comprimidas en menos de un punto de L*.</div>
       <div data-lang="en"><b>Figure 3.1.</b> Left: L* as a function of the stops relative to the
       18&nbsp;% grey (a curve computed by linearising exactly as <code>rgb_to_lab()</code> does), with
       the eleven equal L* bands superimposed. The 18&nbsp;% grey falls at L*&nbsp;=&nbsp;49.5,
       zone&nbsp;V; paper white, at +2.47 stops, closes zone&nbsp;X. Right: what
-      would happen if the zone were defined as a whole stop from the 18&nbsp;% grey&mdash;zones
+      would happen if the zone were defined as a whole stop from the 18&nbsp;% grey. Zones
       +3 to +5 would be compressed into less than one point of L*.</div>
     </figcaption>
   </figure>
@@ -1042,7 +1042,7 @@ html[lang="en"] [data-lang="es"]{display:none!important}
         puede devolver temperaturas de decenas o cientos de miles de grados, o negativas,
         sin ningún significado. El código comprueba
         |y&minus;0,1858|&nbsp;&gt;&nbsp;10&#8315;&#8309; antes de evaluar, pero eso solo evita
-        la división por cero exacta, no la inestabilidad del entorno cercano.</dd></dl>
+        la división por cero exacta; la inestabilidad del entorno cercano sigue ahí.</dd></dl>
       <dl class="row"><dt>Guardián aplicado en color_traits()</dt><dd>
         <pre class="code"><span class="k">if not</span> (isfinite(cct) <span class="k">and</span> 1000 &le; cct &le; 25000):
     cct, duv = NaN, NaN
@@ -1052,7 +1052,7 @@ html[lang="en"] [data-lang="es"]{display:none!important}
         si la CCT es razonable pero el punto está lejos del locus (|Duv|&nbsp;&gt;&nbsp;0,05),
         solo se anula cct_k. Un valor vacío en cct_k significa que el color medio de la
         escena no se parece a la luz de ningún cuerpo negro a ninguna temperatura, caso en
-        el que la calidez se lee en <code>lab_b</code>, no en kelvin.</dd></dl>
+        el que la calidez solo puede leerse en <code>lab_b</code>.</dd></dl>
     </div>
   </div>
   <div class="card" data-lang="en">
@@ -1070,7 +1070,7 @@ html[lang="en"] [data-lang="es"]{display:none!important}
         may return temperatures of tens or hundreds of thousands of degrees, or negative ones,
         with no meaning whatever. The code checks that
         |y&minus;0.1858|&nbsp;&gt;&nbsp;10&#8315;&#8309; before evaluating, but that only avoids
-        exact division by zero, not the instability of the surrounding neighbourhood.</dd></dl>
+        exact division by zero; the instability of the surrounding neighbourhood remains.</dd></dl>
       <dl class="row"><dt>Guard applied in color_traits()</dt><dd>
         <pre class="code"><span class="k">if not</span> (isfinite(cct) <span class="k">and</span> 1000 &le; cct &le; 25000):
     cct, duv = NaN, NaN
@@ -1080,7 +1080,7 @@ html[lang="en"] [data-lang="es"]{display:none!important}
         if the CCT is reasonable but the point lies far from the locus (|Duv|&nbsp;&gt;&nbsp;0.05),
         only cct_k is voided. An empty value in cct_k means that the mean colour of the
         scene does not resemble the light of any black body at any temperature, in which
-        case the warmth is read from <code>lab_b</code>, not in kelvin.</dd></dl>
+        case the warmth can only be read from <code>lab_b</code>.</dd></dl>
     </div>
   </div>
 
@@ -1140,12 +1140,12 @@ html[lang="en"] [data-lang="es"]{display:none!important}
   </figure>
 
   <div class="verif" data-lang="es"><b>Comprobación.</b> Los tres valores de la figura se generaron
-  llamando a <code>color_traits()</code> directamente, no reconstruidos a mano; el caso D65
+  llamando directamente a <code>color_traits()</code>, sin reconstruir nada a mano; el caso D65
   coincide, salvo un residuo de 0,54&nbsp;K, con el valor de referencia habitual de 6504&nbsp;K
   para el iluminante D65, diferencia atribuible a la propia aproximación polinómica de
   McCamy y no a un error del código.</div>
   <div class="verif" data-lang="en"><b>Check.</b> The three values in the figure were generated
-  by calling <code>color_traits()</code> directly, not reconstructed by hand; the D65 case
+  by calling <code>color_traits()</code> directly, with nothing reconstructed by hand; the D65 case
   agrees, but for a residue of 0.54&nbsp;K, with the usual reference value of 6504&nbsp;K
   for the D65 illuminant, a difference attributable to McCamy's polynomial approximation
   itself and not to an error in the code.</div>
@@ -1153,11 +1153,11 @@ html[lang="en"] [data-lang="es"]{display:none!important}
   <h3 class="sub" data-lang="es"><span class="num">4.4</span>Estadística circular del tono</h3>
   <h3 class="sub" data-lang="en"><span class="num">4.4</span>Circular statistics of hue</h3>
   <p data-lang="es">El ángulo de tono h&nbsp;=&nbsp;atan2(b*,a*) es una variable circular: la media
-  aritmética de 359&deg; y 1&deg; debería ser 0&deg;, no 180&deg;. Se usa la media vectorial
+  de 359&deg; y 1&deg; debería ser 0&deg;, pero la media aritmética da 180&deg;. Se usa la media vectorial
   ponderada por croma, restringida a píxeles con C*&nbsp;&gt;&nbsp;3 para excluir el gris
   casi neutro, que tiene un ángulo de tono indefinido en la práctica:</p>
-  <p data-lang="en">The hue angle h&nbsp;=&nbsp;atan2(b*,a*) is a circular variable: the arithmetic
-  mean of 359&deg; and 1&deg; ought to be 0&deg;, not 180&deg;. The chroma-weighted vector
+  <p data-lang="en">The hue angle h&nbsp;=&nbsp;atan2(b*,a*) is a circular variable: the mean
+  of 359&deg; and 1&deg; ought to be 0&deg;, but the arithmetic mean gives 180&deg;. The chroma-weighted vector
   mean is used, restricted to pixels with C*&nbsp;&gt;&nbsp;3 so as to exclude the almost
   neutral grey, whose hue angle is in practice undefined:</p>
   <div class="eqn small" data-lang="es">
@@ -1277,9 +1277,9 @@ html[lang="en"] [data-lang="es"]{display:none!important}
         (1/&Phi;&#8315;&sup1;(3/4)).</dd></dl>
       <dl class="row"><dt>Límite, documentado en la cabecera del script</dt><dd>en escenas con
         textura fina repartida por todo el cuadro (follaje, gravilla, tejidos) no existen
-        teselas realmente planas, la suposición de partida falla y el valor queda
+        teselas planas de verdad, la suposición de partida falla y el valor queda
         sobrestimado; en las pruebas de este mismo desarrollo, hasta un factor 1,5. Sirve
-        para comparar dentro de un corpus homogéneo, no como medida absoluta de la
+        para comparar dentro de un corpus homogéneo, pero no da una medida absoluta de la
         emulsión.</dd></dl>
     </div>
   </div>
@@ -1303,9 +1303,9 @@ html[lang="en"] [data-lang="es"]{display:none!important}
         (1/&Phi;&#8315;&sup1;(3/4)).</dd></dl>
       <dl class="row"><dt>Limit, documented in the script's header</dt><dd>in scenes with
         fine texture spread over the whole frame (foliage, gravel, fabrics) there are no
-        genuinely flat tiles, the starting assumption fails and the value is
+        properly flat tiles, the starting assumption fails and the value is
         overestimated; in the tests made during this very development, by as much as a factor of 1.5. It serves
-        for comparison within a homogeneous corpus, not as an absolute measure of the
+        for comparison within a homogeneous corpus, but it does not give an absolute measure of the
         emulsion.</dd></dl>
     </div>
   </div>
@@ -1405,15 +1405,15 @@ html[lang="en"] [data-lang="es"]{display:none!important}
   <div class="limit" data-lang="es"><b>Confusión con la exposición.</b> <code>acutance</code>,
   <code>grain_levels</code> y <code>alpha_spectral</code> operan sobre <code>gray</code>
   (luma sin linealizar, sección&nbsp;2.4). Un fotograma subexpuesto y luego corregido en el
-  escaneo puede mostrar más grano aparente que el mismo negativo bien expuesto, no porque la
-  emulsión tenga más grano físico, sino porque la amplificación de la señal en zonas oscuras
-  amplifica también el ruido de captura del escáner antes de que este script vea la
+  escaneo puede mostrar más grano aparente que el mismo negativo bien expuesto aunque el grano
+  físico de la emulsión sea el mismo: al amplificar la señal en zonas oscuras se amplifica
+  también el ruido de captura del escáner antes de que este script vea la
   imagen.</div>
   <div class="limit" data-lang="en"><b>Confounding with exposure.</b> <code>acutance</code>,
   <code>grain_levels</code> and <code>alpha_spectral</code> operate on <code>gray</code>
   (luma without linearisation, section&nbsp;2.4). An underexposed frame afterwards corrected at
-  the scanning stage may show more apparent grain than the same negative correctly exposed, not because the
-  emulsion has more physical grain, but because amplifying the signal in the dark areas
+  the scanning stage may show more apparent grain than the same negative correctly exposed even though the
+  physical grain of the emulsion is the same: amplifying the signal in the dark areas
   amplifies the scanner's capture noise as well, before this script ever sees the
   image.</div>
 </section>
@@ -1440,7 +1440,7 @@ html[lang="en"] [data-lang="es"]{display:none!important}
         En una imagen ya nítida, el segundo difuminado destruye mucho más gradiente que el
         primero y el cociente es pequeño; en una imagen ya borrosa, ninguno de los dos
         cambia gran cosa y el cociente tiende a 1. Es una magnitud relativa entre dos escalas
-        de la misma imagen, no una medida absoluta de círculo de confusión en
+        de la misma imagen y no mide el círculo de confusión en
         micras.</dd></dl>
       <dl class="row"><dt>Por qué un cociente y no una diferencia</dt><dd>al ser un
         cociente, se cancela el contraste global de la imagen: un fondo cremoso de bajo
@@ -1475,7 +1475,7 @@ html[lang="en"] [data-lang="es"]{display:none!important}
         In an already sharp image, the second blurring destroys far more gradient than the
         first and the ratio is small; in an already blurred image, neither of the two
         changes much and the ratio tends to 1. It is a quantity relative to two scales
-        of the same image, not an absolute measure of the circle of confusion in
+        of the same image and does not measure the circle of confusion in
         micrometres.</dd></dl>
       <dl class="row"><dt>Why a ratio and not a difference</dt><dd>being a
         ratio, the global contrast of the image cancels out: a creamy background of low
@@ -1594,10 +1594,10 @@ html[lang="en"] [data-lang="es"]{display:none!important}
         cociente laplaciano/luminancia local de <code>sharpness_map()</code> (sección&nbsp;2.1),
         evaluado sobre el fondo y sobre el sujeto respectivamente, en niveles de 8&nbsp;bits.</dd></dl>
       <dl class="row"><dt>Naturaleza de la fórmula</dt><dd>es un convenio explícito, producto
-        de dos magnitudes medidas y sin constantes libres ajustadas, no una medida canónica
-        de bokeh de la literatura óptica. Combina "cuánto se ha perdido la nitidez del
-        fondo respecto a las escalas de referencia" con "qué fracción del microcontraste
-        total del fotograma sigue viniendo del fondo en vez de del sujeto": un fondo con
+        de dos magnitudes medidas y sin constantes libres ajustadas, que no pretende ser una medida
+        canónica de bokeh de la literatura óptica. Combina “cuánto se ha perdido la nitidez del
+        fondo respecto a las escalas de referencia” con “qué fracción del microcontraste
+        total del fotograma sigue viniendo del fondo en vez de del sujeto”: un fondo con
         blur_bg alto pero que conserva bordes de alto contraste (ramas, rejas) tiene
         bg_rel alto y por tanto creaminess bajo, aun estando bastante desenfocado.</dd></dl>
       <dl class="row"><dt>Límite explícito</dt><dd>nada en esta fórmula distingue un
@@ -1605,8 +1605,8 @@ html[lang="en"] [data-lang="es"]{display:none!important}
         determinada; para eso hace falta inspeccionar uno a uno los círculos de las luces
         especulares del fondo, algo que ninguna magnitud escalar puede resumir. Depende de
         la nitidez del propio sujeto por construcción, lo cual es intencional: un fotograma
-        cuyo sujeto no está nítido no tiene "fondo cremoso" en ningún sentido fotográfico
-        útil, y la fórmula lo refleja en vez de ocultarlo.</dd></dl>
+        cuyo sujeto no está nítido no tiene “fondo cremoso” en ningún sentido fotográfico
+        útil, y la fórmula lo refleja.</dd></dl>
       <dl class="row"><dt>Condición de cómputo</dt><dd>si la componente conexa del sujeto
         cubre menos de 64&nbsp;px&sup2; muestreados o el fondo menos de 1024, todas las
         columnas de esta sección quedan vacías: no hay separación fiable entre sujeto y
@@ -1625,10 +1625,10 @@ html[lang="en"] [data-lang="es"]{display:none!important}
         Laplacian/local-luminance ratio as in <code>sharpness_map()</code> (section&nbsp;2.1),
         evaluated over the background and over the subject respectively, in 8-bit levels.</dd></dl>
       <dl class="row"><dt>Nature of the formula</dt><dd>it is an explicit convention, the product
-        of two measured quantities and with no free constants fitted, not a canonical measure
-        of bokeh from the optical literature. It combines "how much sharpness the background
-        has lost with respect to the reference scales" with "what fraction of the frame's total
-        micro-contrast still comes from the background rather than from the subject": a background with
+        of two measured quantities with no free constants fitted, and it does not claim to be a canonical measure
+        of bokeh from the optical literature. It combines “how much sharpness the background
+        has lost with respect to the reference scales” with “what fraction of the frame's total
+        micro-contrast still comes from the background rather than from the subject”: a background with
         a high blur_bg but which retains high-contrast edges (branches, railings) has
         a high bg_rel and therefore a low creaminess, even while being considerably defocused.</dd></dl>
       <dl class="row"><dt>Explicit limit</dt><dd>nothing in this formula distinguishes a
@@ -1636,8 +1636,8 @@ html[lang="en"] [data-lang="es"]{display:none!important}
         lens; that calls for inspecting one by one the discs of the specular highlights
         of the background, something no scalar quantity can summarise. It depends on
         the sharpness of the subject itself by construction, which is intentional: a frame
-        whose subject is not sharp has no "creamy background" in any useful photographic
-        sense, and the formula reflects that instead of concealing it.</dd></dl>
+        whose subject is not sharp has no “creamy background” in any useful photographic
+        sense, and the formula reflects that.</dd></dl>
       <dl class="row"><dt>Condition for computation</dt><dd>if the subject's connected component
         covers fewer than 64&nbsp;px&sup2; sampled, or the background fewer than 1024, all the
         columns of this section are left empty: there is no reliable separation between subject and
@@ -1757,7 +1757,7 @@ html[lang="en"] [data-lang="es"]{display:none!important}
 
   <h3 class="sub" data-lang="es"><span class="num">8.1</span>Percentiles robustos y recorte de ejes</h3>
   <h3 class="sub" data-lang="en"><span class="num">8.1</span>Robust percentiles and axis trimming</h3>
-  <p data-lang="es">La mediana se calcula por selección parcial (<i>quickselect</i>), no ordenando el
+  <p data-lang="es">La mediana se calcula por selección parcial (<i>quickselect</i>), sin ordenar el
   vector completo, lo que evita el coste O(<i>n</i>&thinsp;log&thinsp;<i>n</i>) de una
   ordenación cuando solo hace falta O(<i>n</i>) en el caso medio. El recorte de ejes
   (<code>robustRange()</code>) sustituye el mínimo y el máximo exactos por los percentiles 1
@@ -1765,7 +1765,7 @@ html[lang="en"] [data-lang="es"]{display:none!important}
   aplastar el resto de la escala contra un borde del gráfico. Los puntos que caen fuera del
   rango recortado se cuentan y se informan en pantalla, nunca se descartan en
   silencio.</p>
-  <p data-lang="en">The median is computed by partial selection (<i>quickselect</i>), not by sorting the
+  <p data-lang="en">The median is computed by partial selection (<i>quickselect</i>), without sorting the
   whole vector, which avoids the O(<i>n</i>&thinsp;log&thinsp;<i>n</i>) cost of a
   sort when only O(<i>n</i>) is needed in the average case. Axis trimming
   (<code>robustRange()</code>) replaces the exact minimum and maximum by the 1st
@@ -1785,7 +1785,7 @@ html[lang="en"] [data-lang="es"]{display:none!important}
         <i>B</i> medianas (<i>B</i>&nbsp;=&nbsp;1200 a 2000 según el contexto: 2000 en la
         tabla por grupo y en los intervalos del contraste entre dos grupos, 1200 en la
         diferencia entre el primer y el último tercio de una serie, y el campo
-        «remuestreos» del panel Criterio acotado a 2000 en el veredicto de encuadre). Es el
+        “remuestreos” del panel Criterio acotado a 2000 en el veredicto de encuadre). Es el
         método del percentil, el más simple de los bootstrap de Efron; no aplica la
         corrección de sesgo y aceleración (BC<sub>a</sub>), por lo que puede ser
         ligeramente anticonservador con distribuciones muy asimétricas.</dd></dl>
@@ -1796,7 +1796,7 @@ html[lang="en"] [data-lang="es"]{display:none!important}
         el mismo procedimiento sobre la media en lugar de la mediana. La usa el veredicto de
         encuadre de la sección&nbsp;2.5 para el sesgo direccional: <i>x<sub>norm</sub></i> e
         <i>y<sub>norm</sub></i> llevan signo y se cancelan entre sí, de modo que lo que hay
-        que acotar es su media, no su mediana.</dd></dl>
+        que acotar es su media.</dd></dl>
     </div>
   </div>
   <div class="card" data-lang="en">
@@ -1819,7 +1819,7 @@ html[lang="en"] [data-lang="es"]{display:none!important}
         the same procedure on the mean rather than the median. The framing verdict of
         section&nbsp;2.5 uses it for the directional bias: <i>x<sub>norm</sub></i> and
         <i>y<sub>norm</sub></i> are signed and cancel one another, so what has to be
-        bounded is their mean, not their median.</dd></dl>
+        bounded is their mean.</dd></dl>
     </div>
   </div>
 
@@ -1831,7 +1831,7 @@ html[lang="en"] [data-lang="es"]{display:none!important}
       <tr><td class="mono">permTest()</td>
         <td>diferencia de medianas observada; se mezclan las dos muestras y se recalcula
         la diferencia <i>B</i> veces con la etiqueta de grupo permutada al azar, siendo
-        <i>B</i> el campo «remuestreos» del panel Criterio (10&nbsp;000 por defecto,
+        <i>B</i> el campo “remuestreos” del panel Criterio (10&nbsp;000 por defecto,
         acotado a [1000, 50&nbsp;000]); el valor p es (<i>b</i>+1)/(<i>B</i>+1), con
         <i>b</i> el número de permutaciones cuya diferencia absoluta iguala o supera a la
         observada. El +1 en el numerador y en el denominador es la corrección de
@@ -1855,7 +1855,7 @@ html[lang="en"] [data-lang="es"]{display:none!important}
         las dos acumuladas empíricas), con el valor p por la serie asintótica de
         Kolmogórov evaluada hasta convergencia numérica (100 términos como máximo, corte
         cuando el término deja de aportar).</td>
-        <td>sensible a diferencias de forma, no solo de posición: dos distribuciones con la
+        <td>sensible tanto a diferencias de forma como de posición: dos distribuciones con la
         misma mediana pero distinta dispersión pueden dar D grande y U de Mann&#8209;Whitney
         pequeña.</td></tr>
     </tbody>
@@ -1890,7 +1890,7 @@ html[lang="en"] [data-lang="es"]{display:none!important}
         the two empirical cumulative distributions), with the p-value from Kolmogorov's
         asymptotic series evaluated to numerical convergence (100 terms at most, cut off
         when the term ceases to contribute).</td>
-        <td>sensitive to differences of shape, not only of location: two distributions with the
+        <td>sensitive to differences of shape as well as of location: two distributions with the
         same median but different dispersion can give a large D and a small Mann&#8209;Whitney
         U.</td></tr>
     </tbody>
@@ -2012,7 +2012,7 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
   falso hallazgo muy marcado). El mismo conjunto, contrastado por sesión como hace el panel,
   no declara ningún cambio.</div>
   <div class="verif" data-lang="en"><b>Check.</b> On a set built for the purpose, of 630
-  frames distributed over 14 sessions, with a genuinely null trend between sessions
+  frames distributed over 14 sessions, with no real trend between sessions
   (<i>p</i>&nbsp;=&nbsp;0.58 computed independently on the 14 medians) but
   with fine random variation within each session, treating each frame as an
   independent observation gives <i>z</i>&nbsp;&asymp;&nbsp;3.6 in the test of
@@ -2095,9 +2095,9 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
         <div class="eqn small">m = med<sub>i&lt;j, |x<sub>j</sub>&minus;x<sub>i</sub>|&gt;&epsilon;</sub> <span class="frac"><span>y<sub>j</sub>&minus;y<sub>i</sub></span><span>x<sub>j</sub>&minus;x<sub>i</sub></span></span></div>
         insensible a valores atípicos porque, a diferencia de la pendiente de mínimos
         cuadrados, cada observación individual solo puede desplazar la mediana de las
-        pendientes, no arrastrarla proporcionalmente a su distancia al resto.</dd></dl>
+        pendientes, sin arrastrarla en proporción a su distancia al resto.</dd></dl>
       <dl class="row"><dt>Umbral de separación mínima, &epsilon;</dt><dd>&epsilon; se fija
-        en el 0,1&nbsp;% del recorrido total del eje <i>x</i>, no en un valor absoluto.
+        en términos relativos, en el 0,1&nbsp;% del recorrido total del eje <i>x</i>.
         Se exige además un mínimo de 8 observaciones y al menos 8 pares admisibles.</dd></dl>
     </div>
   </div>
@@ -2109,9 +2109,9 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
         <div class="eqn small">m = med<sub>i&lt;j, |x<sub>j</sub>&minus;x<sub>i</sub>|&gt;&epsilon;</sub> <span class="frac"><span>y<sub>j</sub>&minus;y<sub>i</sub></span><span>x<sub>j</sub>&minus;x<sub>i</sub></span></span></div>
         insensitive to outliers because, unlike the least-squares
         slope, any individual observation can only displace the median of the
-        slopes, not drag it in proportion to its distance from the rest.</dd></dl>
+        slopes, without dragging it in proportion to its distance from the rest.</dd></dl>
       <dl class="row"><dt>Minimum separation threshold, &epsilon;</dt><dd>&epsilon; is set
-        at 0.1&nbsp;% of the total span of the <i>x</i> axis, not at an absolute value.
+        in relative terms, at 0.1&nbsp;% of the total span of the <i>x</i> axis.
         A minimum of 8 observations and at least 8 admissible pairs are further required.</dd></dl>
     </div>
   </div>
@@ -2159,7 +2159,7 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
         <i>t</i>.</dd></dl>
       <dl class="row"><dt>Uso en el panel</dt><dd>solo se informa una fecha de ruptura
         cuando <i>p</i>&nbsp;&lt;&nbsp;0,05 y el punto de corte no cae en el 10&nbsp;% inicial
-        o final de la serie, para no señalar como "ruptura" lo que en realidad es el
+        o final de la serie, para no señalar como “ruptura” lo que en realidad es el
         principio o el final del propio archivo.</dd></dl>
     </div>
   </div>
@@ -2182,7 +2182,7 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
         <i>t</i>.</dd></dl>
       <dl class="row"><dt>Use in the panel</dt><dd>a change-point date is reported only
         when <i>p</i>&nbsp;&lt;&nbsp;0.05 and the change point does not fall in the first or last
-        10&nbsp;% of the series, so as not to flag as a "change point" what is in reality the
+        10&nbsp;% of the series, so as not to flag as a “change point” what is in reality the
         beginning or the end of the archive itself.</dd></dl>
     </div>
   </div>
@@ -2209,7 +2209,7 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
       <dl class="row"><dt>Por qué hace falta</dt><dd>con los 32 descriptores del
         catálogo <code>SENTIDO</code> contrastados a &alpha;&nbsp;=&nbsp;0,05 cada uno, la
         probabilidad de al menos un falso positivo por puro azar es
-        1&minus;0,95&sup3;&sup2;&nbsp;&asymp;&nbsp;81&nbsp;%, no el 5&nbsp;% que
+        1&minus;0,95&sup3;&sup2;&nbsp;&asymp;&nbsp;81&nbsp;%, muy lejos del 5&nbsp;% que
         parece a primera vista. El procedimiento de Benjamini&#8209;Hochberg controla la
         proporción <i>esperada</i> de falsos hallazgos entre los declarados, no la
         probabilidad de cometer al menos uno, lo que permite seguir declarando varios
@@ -2228,7 +2228,7 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
       <dl class="row"><dt>Why it is needed</dt><dd>with the 32 descriptors of the
         <code>SENTIDO</code> catalogue each tested at &alpha;&nbsp;=&nbsp;0.05, the
         probability of at least one false positive by pure chance is
-        1&minus;0.95&sup3;&sup2;&nbsp;&asymp;&nbsp;81&nbsp;%, not the 5&nbsp;% that
+        1&minus;0.95&sup3;&sup2;&nbsp;&asymp;&nbsp;81&nbsp;%, far from the 5&nbsp;% that
         it appears to be at first sight. The Benjamini&#8209;Hochberg procedure controls the
         <i>expected</i> proportion of false findings among those declared, not the
         probability of committing at least one, which makes it possible to go on declaring several
@@ -2263,7 +2263,7 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
     <div class="cardtop"><span class="col">robustPCA() &middot; jacobiEigen()</span><span class="fn">Jacobi (1846)</span></div>
     <div class="body">
       <dl class="row"><dt>Estandarización</dt><dd>cada descriptor se centra en su mediana y
-        se escala por 1,4826&middot;MAD, no por la media y la desviación típica: un puñado
+        se escala por 1,4826&middot;MAD. Se evitan la media y la desviación típica porque un puñado
         de fotogramas extremos no debe fijar la escala de los ejes. Los valores se recortan
         a &plusmn;6 desviaciones robustas y los ausentes se imputan a la mediana (z=0), sin
         contribuir ni a favor ni en contra de ninguna dirección.</dd></dl>
@@ -2290,7 +2290,7 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
     <div class="cardtop"><span class="col">robustPCA() &middot; jacobiEigen()</span><span class="fn">Jacobi (1846)</span></div>
     <div class="body">
       <dl class="row"><dt>Standardisation</dt><dd>each descriptor is centred on its median and
-        scaled by 1.4826&middot;MAD, not by the mean and the standard deviation: a handful
+        scaled by 1.4826&middot;MAD. The mean and the standard deviation are avoided because a handful
         of extreme frames must not set the scale of the axes. Values are clipped
         to &plusmn;6 robust deviations and missing ones are imputed to the median (z=0), so as to contribute
         neither for nor against any direction.</dd></dl>
@@ -2364,14 +2364,14 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
   <h3 class="sub" data-lang="es"><span class="num">9.8</span>Correlación de rangos: rho de Spearman</h3>
   <h3 class="sub" data-lang="en"><span class="num">9.8</span>Rank correlation: Spearman's rho</h3>
   <p data-lang="es"><i>&rho;</i> es la correlación de Pearson calculada sobre los rangos de cada variable
-  en vez de sobre sus valores; detecta relaciones monótonas, no solo lineales. El valor p
+  en vez de sobre sus valores; detecta cualquier relación monótona, sea lineal o no. El valor p
   sale de permutar al azar los rangos de una de las dos variables y recalcular
   <i>&rho;</i>; con miles de fotogramas, 2000 permutaciones bastan para acotar el valor p
   con margen suficiente, así que el número de iteraciones se ajusta de forma adaptativa,
   entre 500 y 2000, según <i>n</i>, para mantener acotado el coste total (iteraciones
   &times; <i>n</i>) cuando hay muchas observaciones.</p>
   <p data-lang="en"><i>&rho;</i> is the Pearson correlation computed on the ranks of each variable
-  rather than on their values; it detects monotonic relations, not merely linear ones. The p-value
+  rather than on their values; it detects any monotonic relation, linear or not. The p-value
   comes from permuting at random the ranks of one of the two variables and recomputing
   <i>&rho;</i>; with thousands of frames, 2000 permutations suffice to bound the p-value
   with an ample margin, so the number of iterations is adjusted adaptively,
@@ -2427,9 +2427,9 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
   pendiente espectral (sección&nbsp;5) son otra historia: el grano físico de una película,
   que en un escaneo a resolución completa ocupa un puñado de píxeles, queda promediado por
   el filtro anti&#8209;alias del redimensionado antes de que <code>estimate_noise()</code>
-  pueda medirlo. Lo que <code>grain_levels</code> informa por defecto no es el grano de la
-  emulsión a resolución de escaneo, sino una micro&#8209;variación tonal <i>a la escala de
-  512&nbsp;px</i>, una magnitud relacionada pero distinta, y comparable entre fotogramas de
+  pueda medirlo. Lo que <code>grain_levels</code> informa por defecto es una
+  micro&#8209;variación tonal <i>a la escala de 512&nbsp;px</i>, relacionada con el grano de
+  la emulsión a resolución de escaneo pero distinta de él, y comparable entre fotogramas de
   este mismo corpus solo si todos se procesaron con el mismo <code>--max-side</code>.
   Subir ese valor (por ejemplo, <code>--max-side&nbsp;2000</code>) acerca la medida al grano
   real a costa de un tiempo de proceso mayor.</p>
@@ -2440,9 +2440,9 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
   spectral slope (section&nbsp;5) are another matter: the physical grain of a film,
   which in a full-resolution scan occupies a handful of pixels, is averaged away by
   the anti&#8209;aliasing filter of the resizing before <code>estimate_noise()</code>
-  can measure it. What <code>grain_levels</code> reports by default is not the grain of the
-  emulsion at scanning resolution, but a tonal micro&#8209;variation <i>at the scale of
-  512&nbsp;px</i>, a related but distinct quantity, and comparable between frames of
+  can measure it. What <code>grain_levels</code> reports by default is a tonal
+  micro&#8209;variation <i>at the scale of 512&nbsp;px</i>, related to the grain of the emulsion
+  at scanning resolution but distinct from it, and comparable between frames of
   this same corpus only if all of them were processed with the same <code>--max-side</code>.
   Raising that value (for instance, <code>--max-side&nbsp;2000</code>) brings the measurement closer to the real
   grain, at the cost of a longer processing time.</p>
@@ -2453,8 +2453,8 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
   nativas distintas y ambos acaban reducidos a los mismos &le;512&nbsp;px antes de medir
   nada, &iquest;queda alguna huella de la resolución de partida? Se comprobó de forma
   empírica en vez de razonarlo solo en abstracto, generando ocho escenas sintéticas
-  independientes, cada una guardada dos veces&mdash;a 6,76&nbsp;Mpx y a 3,38&nbsp;Mpx,
-  la misma razón de área que separa un sensor de 40&nbsp;Mpx de uno de 20&nbsp;Mpx&mdash;
+  independientes, cada una guardada dos veces, a 6,76&nbsp;Mpx y a 3,38&nbsp;Mpx
+  (la misma razón de área que separa un sensor de 40&nbsp;Mpx de uno de 20&nbsp;Mpx),
   mediante una reducción de área propia (<code>Image.BOX</code>, sin alias), y pasando
   ambas versiones de cada escena por la función <code>analyse()</code> real, con el mismo
   <code>--max-side&nbsp;512</code> por defecto.</p>
@@ -2462,8 +2462,8 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
   native resolutions and both end up reduced to the same &le;512&nbsp;px before anything is
   measured, does any trace of the starting resolution remain? This was checked
   empirically rather than reasoned out in the abstract, by generating eight independent
-  synthetic scenes, each saved twice&mdash;at 6.76&nbsp;Mpx and at 3.38&nbsp;Mpx,
-  the same area ratio that separates a 40&nbsp;Mpx sensor from a 20&nbsp;Mpx one&mdash;
+  synthetic scenes, each saved twice, at 6.76&nbsp;Mpx and at 3.38&nbsp;Mpx
+  (the same area ratio that separates a 40&nbsp;Mpx sensor from a 20&nbsp;Mpx one),
   by means of a proper area reduction (<code>Image.BOX</code>, without aliasing), and passing
   both versions of each scene through the real <code>analyse()</code> function, with the same
   default <code>--max-side&nbsp;512</code>.</p>
@@ -2513,50 +2513,50 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
     </tbody>
   </table>
 
-  <div class="limit" data-lang="es"><b>Hay un efecto, es pequeño, y no va en la dirección que cabría
+  <div class="limit" data-lang="es"><b>Hay un efecto pequeño, y va en la dirección contraria a la que cabría
   suponer.</b> Con una razón de área 2:1 en el origen (equivalente a 40 frente a
   20&nbsp;Mpx), <code>acutance</code> y <code>grain_levels</code> se desplazan entre un
   3&nbsp;% y un 5&nbsp;% relativo de forma consistente en las ocho repeticiones, y
   <code>area_frac</code> y <code>r_norm</code> un 1&#8211;3&nbsp;%. Pero el sentido del
-  desplazamiento es el contrario al que se esperaría de "más resolución nativa preserva
-  más detalle real": en esta prueba, el archivo de <i>menor</i> resolución nativa dio
-  <i>más</i> acutancia y <i>más</i> grano aparente, no menos. La causa más plausible no es
-  que se pierda información al reducir, sino cómo interactúa el filtro de área de
+  desplazamiento es el contrario al que se esperaría de “más resolución nativa preserva
+  más detalle real”: en esta prueba, el archivo de <i>menor</i> resolución nativa dio
+  <i>más</i> acutancia y <i>más</i> grano aparente. La pérdida de información al reducir no
+  parece ser la causa; la más plausible es cómo interactúa el filtro de área de
   <code>Image.BOX</code> con el espectro casi autosimilar (1/f&sup2;) de una escena natural:
   el filtrado de área no es una renormalización perfecta de ese tipo de campo, y dos
   reducciones de distinta magnitud parten de un residuo espectral ligeramente distinto
   cerca de su propia frecuencia de Nyquist. No hay, por tanto, un factor de corrección
-  simple ("divide por los megapíxeles") que deshaga el efecto, porque ni siquiera el signo
+  simple (“divide por los megapíxeles”) que deshaga el efecto, porque ni siquiera el signo
   es uniforme entre descriptores: <code>alpha_spectral</code> y las columnas de tono
-  (<code>key_stops</code>, <code>dr_stops</code>) resultaron esencialmente insensibles
+  (<code>key_stops</code>, <code>dr_stops</code>) resultaron prácticamente insensibles
   (variación menor al 1&nbsp;% relativo, o sin consistencia de signo, es decir, dentro del
   ruido), mientras que <code>focus_frac</code> dio una diferencia nula en esta prueba
   concreta, aunque con una reserva importante: la escena sintética usada no incluye ninguna
-  región genuinamente desenfocada por óptica, así que ese resultado nulo pesa menos que los
+  región con desenfoque óptico real, así que ese resultado nulo pesa menos que los
   demás.</div>
-  <div class="limit" data-lang="en"><b>There is an effect, it is small, and it does not run in the direction one
+  <div class="limit" data-lang="en"><b>There is a small effect, and it runs opposite to the direction one
   might suppose.</b> With an area ratio of 2:1 at the source (equivalent to 40 against
   20&nbsp;Mpx), <code>acutance</code> and <code>grain_levels</code> shift by between
   3&nbsp;% and 5&nbsp;% in relative terms, consistently across the eight repetitions, and
   <code>area_frac</code> and <code>r_norm</code> by 1&#8211;3&nbsp;%. But the sense of the
-  shift is the opposite of what one would expect from "more native resolution preserves
-  more real detail": in this test, the file of <i>lower</i> native resolution gave
-  <i>more</i> acutance and <i>more</i> apparent grain, not less. The likeliest cause is not
-  that information is lost in reducing, but the way the area filter of
+  shift is the opposite of what one would expect from “more native resolution preserves
+  more real detail”: in this test, the file of <i>lower</i> native resolution gave
+  <i>more</i> acutance and <i>more</i> apparent grain. Loss of information in the reduction
+  does not seem to be the cause; the likeliest one is the way the area filter of
   <code>Image.BOX</code> interacts with the almost self-similar (1/f&sup2;) spectrum of a natural scene:
   area filtering is not a perfect renormalisation of that kind of field, and two
   reductions of different magnitude start from a slightly different spectral residue
   near their own Nyquist frequency. There is therefore no simple correction factor
-  ("divide by the megapixels") that would undo the effect, because not even the sign
+  (“divide by the megapixels”) that would undo the effect, because not even the sign
   is uniform across descriptors: <code>alpha_spectral</code> and the tone columns
-  (<code>key_stops</code>, <code>dr_stops</code>) proved essentially insensitive
+  (<code>key_stops</code>, <code>dr_stops</code>) proved practically insensitive
   (a variation of less than 1&nbsp;% in relative terms, or without sign consistency, that is, within the
   noise), while <code>focus_frac</code> gave a null difference in this particular
   test, though with an important reservation: the synthetic scene used includes no
-  region genuinely defocused by optics, so that null result carries less weight than the
+  region with real optical defocus, so that null result carries less weight than the
   others.</div>
 
-  <p data-lang="es">La consecuencia práctica es concreta: antes de leer una diferencia de
+  <p data-lang="es">En la práctica, antes de leer una diferencia de
   <code>acutance</code>, <code>grain_levels</code>, <code>area_frac</code> o
   <code>r_norm</code> entre dos grupos como una diferencia de comportamiento fotográfico,
   hay que descartar que sea, en realidad, una diferencia de resolución de origen entre los
@@ -2566,7 +2566,7 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
   origen correlaciona con el descriptor que se está comparando dentro de cada grupo, la
   matriz de correlaciones de la sección&nbsp;9.8 lo hará visible antes de que ninguna
   conclusión de la pestaña Conclusiones se dé por buena.</p>
-  <p data-lang="en">The practical consequence is concrete: before reading a difference of
+  <p data-lang="en">In practice, before reading a difference of
   <code>acutance</code>, <code>grain_levels</code>, <code>area_frac</code> or
   <code>r_norm</code> between two groups as a difference of photographic behaviour,
   one must rule out that it is, in reality, a difference of source resolution between the
@@ -2604,10 +2604,10 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
   <p data-lang="es">Con un HDR fusionado y mapeado tonalmente para su visualización, que es el caso
   habitual en un flujo de trabajo fotográfico, no hay error técnico: el archivo que llega
   al script ya es un RGB convencional de 8 o 16&nbsp;bits. Pero <code>dr_stops</code> mide
-  entonces la latitud <i>que sobrevive en los píxeles del archivo final</i>, no la de la
-  escena capturada. El mapeo tonal comprime deliberadamente los diafragmos de la escena
+  entonces la latitud <i>que sobrevive en los píxeles del archivo final</i>, que no tiene por
+  qué coincidir con la de la escena capturada. El mapeo tonal comprime deliberadamente los diafragmos de la escena
   para que quepan en un rango de visualización estrecho: una escena de 12 diafragmos puede
-  acabar ocupando 6 u 8 en el archivo, y un mapeo tonal agresivo de estilo "plano" puede
+  acabar ocupando 6 u 8 en el archivo, y un mapeo tonal agresivo de estilo “plano” puede
   mostrar <code>dr_stops</code> alto por haber estirado el histograma, sin que la escena
   original fuera especialmente contrastada. El número es honesto sobre lo que mide
   (diafragmos que sobreviven en los píxeles recibidos); no sabe nada de la escena real si
@@ -2615,10 +2615,10 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
   <p data-lang="en">With an HDR merged and tone-mapped for display, which is the usual
   case in a photographic workflow, there is no technical error: the file reaching
   the script is already a conventional 8- or 16-bit RGB. But <code>dr_stops</code> then measures
-  the latitude <i>that survives in the pixels of the final file</i>, not that of the
+  the latitude <i>that survives in the pixels of the final file</i>, which need not match that of the
   scene captured. Tone mapping deliberately compresses the stops of the scene
   so that they fit within a narrow display range: a scene of 12 stops may
-  end up occupying 6 or 8 in the file, and an aggressive tone mapping of the "flat"
+  end up occupying 6 or 8 in the file, and an aggressive tone mapping of the “flat”
   kind may show a high <code>dr_stops</code> for having stretched the histogram, without the original
   scene having been particularly contrasty. The number is honest about what it measures
   (the stops that survive in the pixels received); it knows nothing of the real scene if
@@ -2649,9 +2649,9 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
         <td>una sesión sin fecha se define por bloques de archivo de 36 fotogramas; solo es
         una cronología válida si el nombrado del archivo es consecutivo en el tiempo.</td></tr>
       <tr><td>estratificación por focal / diafragma</td><td>9</td>
-        <td>con menos de 12 sesiones dentro de la banda modal, se informa "sin datos"; no
-        es una prueba de ausencia de confusión, solo de que no hay muestra suficiente para
-        comprobarlo.</td></tr>
+        <td>con menos de 12 sesiones dentro de la banda modal, se informa “sin datos”,
+        lo que solo indica que no hay muestra suficiente para comprobar si hay
+        confusión.</td></tr>
       <tr><td>color de escaneos de película</td><td>4</td>
         <td>describe la emulsión, el revelado y el perfil del escáner tanto como la
         escena; un equilibrio de color automático fotograma a fotograma en el escáner
@@ -2684,9 +2684,9 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
         <td>a session without a date is defined by file blocks of 36 frames; this is
         a valid chronology only if the file naming is consecutive in time.</td></tr>
       <tr><td>stratification by focal length / aperture</td><td>9</td>
-        <td>with fewer than 12 sessions within the modal band, "no data" is reported; this is
-        not proof of the absence of confounding, only that there is no sufficient sample to
-        check for it.</td></tr>
+        <td>with fewer than 12 sessions within the modal band, “no data” is reported,
+        which only means that the sample is too small to check for
+        confounding.</td></tr>
       <tr><td>colour of film scans</td><td>4</td>
         <td>it describes the emulsion, the processing and the scanner profile as much as the
         scene; an automatic colour balance frame by frame in the scanner
@@ -2697,10 +2697,10 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
     </tbody>
   </table>
 
-  <p class="note" data-lang="es">Ningún límite de esta tabla es un defecto oculto: todos están declarados
+  <p class="note" data-lang="es">Todos los límites de esta tabla están declarados a la vista
   en el propio código fuente, en el docstring del módulo o en los comentarios de la función
   correspondiente, y este manual no hace más que reunirlos con su justificación numérica.</p>
-  <p class="note" data-lang="en">No limit in this table is a hidden defect: all of them are declared
+  <p class="note" data-lang="en">All the limits in this table are declared openly
   in the source code itself, in the module docstring or in the comments of the corresponding
   function, and this manual does no more than gather them together with their numerical justification.</p>
 </section>
@@ -2864,7 +2864,7 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
       <tr><td class="mono">Krystek, M. (1985)</td>
         <td>&mdash; An algorithm to calculate correlated colour temperature. <i>Color
         Research &amp; Application</i>, 10(1), 38&#8211;40. Aproximación del locus de
-        Planck usada solo para la figura 4.1, no por el código analizado.</td></tr>
+        Planck usada solo para la figura 4.1, fuera del código analizado.</td></tr>
       <tr><td class="mono">Mann, H. B. (1945)</td>
         <td>&mdash; Nonparametric tests against trend. <i>Econometrica</i>, 13(3),
         245&#8211;259. §9.2.</td></tr>
@@ -2936,7 +2936,7 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
       <tr><td class="mono">Krystek, M. (1985)</td>
         <td>&mdash; An algorithm to calculate correlated colour temperature. <i>Color
         Research &amp; Application</i>, 10(1), 38&#8211;40. The approximation of the Planckian
-        locus used only for figure 4.1, not by the code under description.</td></tr>
+        locus used only for figure 4.1, outside the code under description.</td></tr>
       <tr><td class="mono">Mann, H. B. (1945)</td>
         <td>&mdash; Nonparametric tests against trend. <i>Econometrica</i>, 13(3),
         245&#8211;259. §9.2.</td></tr>
@@ -2975,16 +2975,16 @@ p += 2 * (-1)**(k-1) * exp(-2*k*k*lambda*lambda)</pre>
   <div data-lang="es">
     Manual generado a partir de <code>subject_center.py</code> y
     <code>analisis-centrado.html</code>. Todas las cifras marcadas como comprobación se
-    recalcularon ejecutando esas mismas funciones al redactar este documento; ninguna es una
-    estimación de memoria. Documento estático, sin conexiones externas.
+    recalcularon ejecutando esas mismas funciones al redactar este documento, sin
+    estimaciones de memoria. Documento estático, sin conexiones externas.
     Véanse también <a href="analisis-centrado.html">el panel interactivo</a> y
     <a href="scripts/analitica/subject_center.py">el código fuente</a>.
   </div>
   <div data-lang="en">
     Manual generated from <code>subject_center.py</code> and
     <code>analisis-centrado.html</code>. Every figure marked as a check was
-    recomputed by running those same functions while this document was being written; none is an
-    estimate from memory. A static document, with no external connections.
+    recomputed by running those same functions while this document was being written, with no
+    estimates from memory. A static document, with no external connections.
     See also <a href="analisis-centrado.html">the interactive panel</a> and
     <a href="scripts/analitica/subject_center.py">the source code</a>.
   </div>
