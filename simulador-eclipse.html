@@ -779,8 +779,8 @@
         <div class="ctl">
           <label class="lab" for="clockOff"><span data-lang="es">Corrección del reloj</span><span data-lang="en">Clock correction</span> <b><span id="clockOffv">0</span> s</b></label>
           <input type="number" id="clockOff" min="-300" max="300" step="1" value="0">
-          <div class="hint" data-lang="es">Si el reloj del móvil va adelantado o atrasado, ajústalo aquí. Comprueba la hora contra una fuente sincronizada antes de salir: el anillo de diamantes dura un par de segundos y un desfase de 20 s te saca la ráfaga de sitio.</div>
-          <div class="hint" data-lang="en">If your phone clock runs fast or slow, correct it here. Check the time against a synchronised source before you leave: the diamond ring lasts a couple of seconds and a 20 s offset throws the whole burst out of place.</div>
+          <div class="hint" data-lang="es">Si el reloj del móvil va adelantado o atrasado, ajústalo aquí. Comprueba la hora contra una fuente sincronizada antes de salir: el anillo de diamantes dura apenas unos segundos y un desfase de 20 s te saca la ráfaga de sitio.</div>
+          <div class="hint" data-lang="en">If your phone clock runs fast or slow, correct it here. Check the time against a synchronised source before you leave: the diamond ring lasts only a few seconds and a 20 s offset throws the whole burst out of place.</div>
         </div>
       </div>
     </div>
@@ -793,16 +793,16 @@
     <dl class="spec" data-lang="es">
       <dt>Geometría del encuadre</dt><dd>Campo de visión <code>2·arctan(lado / 2·f)</code> con el lado del sensor y la focal efectiva (focal real × teleconvertidor). Disco solar <code>0,5253°</code> para la distancia Tierra-Sol del 2 de agosto de 2027 (1,0149 UA); disco lunar <code>1,079 ×</code> el solar. Escala de placa <code>206265 · paso / f</code> ″/px, con el paso deducido de los milímetros y los megapíxeles. Más detalle en el <a href="manual-tecnico-eclipse.html">manual técnico</a>.</dd>
       <dt>Posición de la Luna instante a instante</dt><dd>La separación de centros se ajusta a los contactos calculados del sitio: velocidad relativa constante en cada rama, entrada y salida por separado, y una separación mínima que reproduce la duración de la totalidad. La fracción de fotosfera cubierta es el área de intersección de dos círculos dividida por el área del disco solar. El ángulo de posición del movimiento lunar sale de la velocidad relativa Luna-Sol proyectada al marco alt-azimutal del sitio.</dd>
-      <dt>Fotometría</dt><dd>Guía de Fred Espenak: <code>t = f² / (ISO · 2^(Q − ΔEV))</code>. Q por estructura: anillo de diamantes 13, perlas de Baily 12, cromosfera 11, protuberancias 9; corona 7 a 0,1 R☉, 5 a 0,2, 3 a 0,5, 1 a 1 R☉ y 0 a 2 R☉, interpolando en logaritmo del radio. Más allá de 2 R☉ se extrapola con <code>Q = −log₂(r/2)</code>, que es la caída de la ley de Baumbach redondeada a un paso por duplicación del radio: por eso una corona de 4 R☉ vale Q ≈ −1.</dd>
-      <dt>Atmósfera</dt><dd>Refracción de Bennett sobre la altura geométrica; masa de aire de Kasten y Young sobre la altura aparente; extinción <code>ΔEV = 1,327 · k · (X − 1)</code> con k = 0,20 en cielo limpio y 0,30 con calima. Seeing estimado <code>2″ · X^0,6</code>. El achatamiento del disco y la dispersión 400-700 nm son consecuencia de la refracción diferencial entre los dos limbos.</dd>
-      <dt>Arrastre y horquilla</dt><dd>Deriva sidérea <code>ω = 15,041″/s · cos δ = 14,32″/s</code> para la declinación del 2 de agosto de 2027 (+17,78°). Tiempo máximo sin arrastre <code>t_max = b · escala / ω</code> con b el presupuesto en píxeles. Focal máxima sin seguimiento <code>f_max = 206265 · paso · b / (ω · t)</code> para la exposición más lenta de la horquilla. La horquilla va del extremo brillante elegido hasta el Q de tu corona con el paso marcado, y se reparte en tandas centradas del tamaño que admita el horquillado de la cámara.</dd>
+      <dt>Fotometría</dt><dd>Guía de Fred Espenak: <code>t = f² / (ISO · 2^(Q − ΔEV))</code>. Q por estructura: anillo de diamantes 13, perlas de Baily 12, cromosfera 11, protuberancias 9; para la corona, la tabla de Espenak da 7 a 0,1 R☉ sobre el limbo, 5 a 0,2, 3 a 0,5, 1 a 1, 0 a 2, −1 a 4 y −3 a 8 R☉. El simulador mide la extensión desde el centro del disco, así que resta 1 R☉ e interpola en el logaritmo de la altura sobre el limbo: una corona hasta 4 R☉ vale Q ≈ −0,6, y una hasta 8 R☉, Q ≈ −2,6.</dd>
+      <dt>Atmósfera</dt><dd>Refracción de Bennett sobre la altura geométrica; masa de aire de Kasten y Young sobre la altura aparente; extinción <code>ΔEV = 1,329 · k · (X − 1)</code> con k = 0,20 en cielo limpio y 0,30 con calima. Seeing estimado <code>2″ · X^0,6</code>. El achatamiento del disco y la dispersión 400-700 nm son consecuencia de la refracción diferencial entre los dos limbos.</dd>
+      <dt>Arrastre y horquilla</dt><dd>Deriva sidérea <code>ω = 15,041″/s · cos δ = 14,32″/s</code> para la declinación del 2 de agosto de 2027 (+17,78°); el Sol va en realidad a 15,00″/s · cos δ, un 0,3 % más despacio, así que el límite de arrastre queda del lado prudente. Tiempo máximo sin arrastre <code>t_max = b · escala / ω</code> con b el presupuesto en píxeles. Focal máxima sin seguimiento <code>f_max = 206265 · paso · b / (ω · t)</code> para la exposición más lenta de la horquilla. La horquilla va del extremo brillante elegido hasta el Q de tu corona con el paso marcado, y se reparte en tandas centradas del tamaño que admita el horquillado de la cámara.</dd>
     </dl>
     <dl class="spec" data-lang="en">
       <dt>Framing geometry</dt><dd>Field of view <code>2·arctan(side / 2·f)</code> from the sensor side and the effective focal length (true focal × teleconverter). Solar disc <code>0.5253°</code> for the Earth-Sun distance of 2 August 2027 (1.0149 AU); lunar disc <code>1.079 ×</code> the solar one. Plate scale <code>206265 · pitch / f</code> ″/px, with the pitch derived from the millimetres and the megapixels. More detail in the <a href="manual-tecnico-eclipse.html">technical manual</a>.</dd>
       <dt>The Moon's position instant by instant</dt><dd>The separation of centres is fitted to the computed contacts of the site: constant relative speed on each branch, ingress and egress separately, and a minimum separation that reproduces the duration of totality. The covered fraction of the photosphere is the intersection area of two circles over the area of the solar disc. The position angle of the lunar motion comes from the Moon-Sun relative velocity projected into the site's alt-azimuth frame.</dd>
-      <dt>Photometry</dt><dd>Fred Espenak's guide: <code>t = f² / (ISO · 2^(Q − ΔEV))</code>. Q by structure: diamond ring 13, Baily's beads 12, chromosphere 11, prominences 9; corona 7 at 0.1 R☉, 5 at 0.2, 3 at 0.5, 1 at 1 R☉ and 0 at 2 R☉, interpolated in the logarithm of the radius. Beyond 2 R☉ it extrapolates as <code>Q = −log₂(r/2)</code>, the Baumbach-law falloff rounded to one stop per doubling of the radius: that is why a 4 R☉ corona comes out at Q ≈ −1.</dd>
-      <dt>Atmosphere</dt><dd>Bennett refraction on the geometric altitude; Kasten and Young air mass on the apparent altitude; extinction <code>ΔEV = 1.327 · k · (X − 1)</code> with k = 0.20 for a clean sky and 0.30 for haze. Estimated seeing <code>2″ · X^0.6</code>. The flattening of the disc and the 400-700 nm dispersion both follow from differential refraction between the two limbs.</dd>
-      <dt>Trailing and the bracket</dt><dd>Sidereal drift <code>ω = 15.041″/s · cos δ = 14.32″/s</code> for the declination of 2 August 2027 (+17.78°). Longest untrailed time <code>t_max = b · scale / ω</code> with b the budget in pixels. Longest focal length without tracking <code>f_max = 206265 · pitch · b / (ω · t)</code> for the slowest exposure of the bracket. The bracket runs from the chosen bright end down to the Q of your corona at the chosen step, and is split into centred runs of whatever size the camera's bracketing allows.</dd>
+      <dt>Photometry</dt><dd>Fred Espenak's guide: <code>t = f² / (ISO · 2^(Q − ΔEV))</code>. Q by structure: diamond ring 13, Baily's beads 12, chromosphere 11, prominences 9; for the corona, Espenak's table gives 7 at 0.1 R☉ above the limb, 5 at 0.2, 3 at 0.5, 1 at 1, 0 at 2, −1 at 4 and −3 at 8 R☉. The simulator measures the extent from the centre of the disc, so it subtracts 1 R☉ and interpolates in the logarithm of the height above the limb: a corona out to 4 R☉ comes out at Q ≈ −0.6, and one out to 8 R☉ at Q ≈ −2.6.</dd>
+      <dt>Atmosphere</dt><dd>Bennett refraction on the geometric altitude; Kasten and Young air mass on the apparent altitude; extinction <code>ΔEV = 1.329 · k · (X − 1)</code> with k = 0.20 for a clean sky and 0.30 for haze. Estimated seeing <code>2″ · X^0.6</code>. The flattening of the disc and the 400-700 nm dispersion both follow from differential refraction between the two limbs.</dd>
+      <dt>Trailing and the bracket</dt><dd>Sidereal drift <code>ω = 15.041″/s · cos δ = 14.32″/s</code> for the declination of 2 August 2027 (+17.78°); the Sun actually moves at 15.00″/s · cos δ, 0.3 % slower, so the trailing limit errs on the safe side. Longest untrailed time <code>t_max = b · scale / ω</code> with b the budget in pixels. Longest focal length without tracking <code>f_max = 206265 · pitch · b / (ω · t)</code> for the slowest exposure of the bracket. The bracket runs from the chosen bright end down to the Q of your corona at the chosen step, and is split into centred runs of whatever size the camera's bracketing allows.</dd>
     </dl>
 
     <h2 style="margin-top:22px" data-lang="es"><span class="pin"></span>Límites y supuestos</h2>
@@ -892,7 +892,7 @@
                 "Micro 4/3 · 17,3 × 13 mm (2,0×)",
                 "Tipo 1\" · 13,2 × 8,8 mm (2,7×)",
                 "Personalizado…"],
-    qtopHint:"El anillo de diamantes y las perlas duran menos de un segundo, no se apilan y ocurren solo en C2 y C3: se disparan aparte, en ráfaga a exposición fija. Sacarlos de la horquilla de corona ahorra dos pasos, y suele ser justo lo que hace que quepa en una sola tanda.",
+    qtopHint:"El anillo de diamantes y las perlas duran apenas unos segundos, no se apilan y ocurren solo en C2 y C3: se disparan aparte, en ráfaga a exposición fija. Sacarlos de la horquilla de corona ahorra dos pasos, y suele ser justo lo que hace que quepa en una sola tanda.",
     qtopOpts:["Anillo de diamantes (Q 13)","Perlas de Baily (Q 12)","Cromosfera (Q 11)","Protuberancias (Q 9)"],
     thRun:"Tanda", thBase:"Exposición base a marcar", thFrames:"Fotogramas", thCov:"Cubre",
     planNote:"En manual, marca la velocidad base de cada tanda y deja que el horquillado la reparta: con número impar de fotogramas la tanda queda centrada en ella. Cada tanda solapa un fotograma con la siguiente, así que no hay huecos.",
@@ -908,7 +908,7 @@
     airy:"Disco de Airy a f/{f}",
     smaxHint:"Tope del obturador. Por encima de 1/8000 casi todas las cámaras solo llegan con obturador electrónico; la Z8 y la Z9 no tienen mecánico y llegan a 1/32000. Ganar ese margen sirve justo en el extremo brillante: el anillo de diamantes y la cromosfera.",
     seqExcl:" Hay {n} disparo(s) más que se salen de la escala de la cámara y no cuentan en ese tiempo.",
-    seqSeries:" Reservando {r} s para los dos anillos de diamantes y para mirar el eclipse, en los {d} s caben unas <b>{k} series</b> completas; la corona no cambia en ese rato, así que dos o tres bastan para apilar y cubrirte de un fallo de sincronía.",
+    seqSeries:" Reservando {r} s para los dos anillos de diamantes y para mirar el eclipse, en los {d} s caben unas <b>{k} series</b> completas; la corona no cambia en ese rato, así que tres o cuatro bastan para apilar y cubrirte de un fallo de sincronía.",
     rangeNeed:" La horquilla abarca {n} pasos y tu cámara ofrece {av} entre {smax} y el límite de arrastre ({lim}) sobre trípode fijo: {v}",
     rangeOk:"sobra margen.",
     rangeShort:"faltan {d}. Sube el presupuesto de arrastre, usa seguimiento o parte la serie en dos ISO.",
@@ -955,12 +955,12 @@
     rowPhot:"Fotosfera (disco)", rowCresc:"Creciente fino (+2 EV)",
     rowDiamond:"Anillo de diamantes", rowBaily:"Perlas de Baily",
     rowChromo:"Cromosfera", rowProm:"Protuberancias",
-    rowCor01:"Corona 0,1 R☉ (interior)", rowCor05:"Corona 0,5 R☉",
-    rowCor1:"Corona 1 R☉", rowCor2:"Corona 2 R☉",
-    rowCorYours:"Corona {r} R☉ (tu extensión)",
+    rowCor01:"Corona hasta 1,1 R☉ (interior)", rowCor05:"Corona hasta 1,5 R☉",
+    rowCor1:"Corona hasta 2 R☉", rowCor2:"Corona hasta 3 R☉",
+    rowCorYours:"Corona hasta {r} R☉ (tu extensión)",
 
     expIntroPar:"Con filtro puesto. El brillo de la fotosfera es constante, mientras que la extinción varía: el Sol sube de {a1}° a {a2}° entre C1 y el final, así que la exposición se acorta ligeramente sobre la marcha. La tabla de abajo da el detalle minuto a minuto.",
-    expIntroTot:"Sin filtro. Entre la cromosfera y tu corona a {r} R☉ hay <b>{n} pasos</b> de diferencia: es imposible en un solo disparo, de ahí la horquilla.",
+    expIntroTot:"Sin filtro. Entre el extremo brillante que has elegido y tu corona a {r} R☉ hay <b>{n} pasos</b> de diferencia: es imposible en un solo disparo, de ahí la horquilla.",
     extApplied:" Corrección de extinción aplicada en este instante: +{ev} EV (Sol a {alt}°, {am} masas de aire).",
     parPlanIntro:"Velocidades con filtro {nd}, ISO {iso} y f/{f}, recalculando la masa de aire en cada instante. Entre C1 y el final del eclipse el Sol sube y la corrección afloja {dev} EV: a esta altura el efecto es pequeño, pero no nulo.",
 
@@ -1145,14 +1145,14 @@
                 "Micro 4/3 · 17.3 × 13 mm (2.0×)",
                 "Type 1\" · 13.2 × 8.8 mm (2.7×)",
                 "Custom…"],
-    qtopHint:"The diamond ring and the beads last less than a second, do not stack and happen only at second and third contact: shoot them separately, as a burst at fixed exposure. Taking them out of the corona bracket saves two stops, and that is often exactly what makes it fit in a single run.",
+    qtopHint:"The diamond ring and the beads last only a few seconds, do not stack and happen only at second and third contact: shoot them separately, as a burst at fixed exposure. Taking them out of the corona bracket saves two stops, and that is often exactly what makes it fit in a single run.",
     qtopOpts:["Diamond ring (Q 13)","Baily's beads (Q 12)","Chromosphere (Q 11)","Prominences (Q 9)"],
     thRun:"Run", thBase:"Base exposure to dial", thFrames:"Frames", thCov:"Covers",
     planNote:"In manual mode, dial the base speed of each run and let the bracketing spread it out: with an odd number of frames the run is centred on it. Each run overlaps one frame with the next, so there are no gaps.",
     planOver:" The last run reaches down to Q {q}, below your corona: bonus frames with more signal in the streamers.",
     planClip:" <span class=\"warn\">The fast end of the first run asks for {v} and your camera reaches {smax}: lower the ISO or close the aperture if you want the diamond ring.</span>",
     planBulb:" The slow end of the last run asks for {v}: outside the scale, use bulb or accept losing the outermost streamer.",
-    maxfHint:"Ceiling of frames in one auto-bracketing run. The Z8 reaches 9, but check in the menu whether that ceiling drops as the increment grows: on several Nikons the 2 and 3 EV steps limit the run to 5 frames. If the ceiling is 9 and you need more, the simulator counts the runs and the re-arming time.",
+    maxfHint:"Ceiling of frames in one auto-bracketing run. On the Z8, increments of 0.3 to 1.7 EV allow 9 frames; at 2 and 3 EV the maximum drops to 5. Nine at 1.7 EV span 13.6 stops, and five at 3 EV, 12. If the bracket does not fit, the simulator counts the runs and adds the re-arming time.",
     setsOne:" It fits in a single run of {m} frames.",
     setsMany:" With runs of {m} frames you need {k}, and counting {r} s to re-arm between them the total per series rises to ≈ {s} s.",
     setsStep:" To fit the {n} stops into a single run of {m} frames the step must be ≥ {p} EV: use {rec} EV.",
@@ -1161,7 +1161,7 @@
     airy:"Airy disc at f/{f}",
     smaxHint:"Shutter ceiling. Above 1/8000 almost every camera only gets there with the electronic shutter; the Z8 and Z9 have no mechanical one and reach 1/32000. That extra margin pays off at the bright end: the diamond ring and the chromosphere.",
     seqExcl:" There are {n} further frame(s) outside the camera scale, not counted in that time.",
-    seqSeries:" Reserving {r} s for the two diamond rings and for looking at the eclipse, {k} complete series fit into the {d} s; the corona does not change meanwhile, so two or three are enough to stack and to insure against a mistimed frame.",
+    seqSeries:" Reserving {r} s for the two diamond rings and for looking at the eclipse, {k} complete series fit into the {d} s; the corona does not change meanwhile, so three or four are enough to stack and to insure against a mistimed frame.",
     rangeNeed:" The bracket spans {n} stops and your camera offers {av} between {smax} and the trailing limit ({lim}) on a fixed tripod: {v}",
     rangeOk:"margin to spare.",
     rangeShort:"{d} short. Raise the trailing budget, use tracking, or split the series across two ISO values.",
@@ -1206,12 +1206,12 @@
     rowPhot:"Photosphere (disc)", rowCresc:"Thin crescent (+2 EV)",
     rowDiamond:"Diamond ring", rowBaily:"Baily's beads",
     rowChromo:"Chromosphere", rowProm:"Prominences",
-    rowCor01:"Corona 0.1 R☉ (inner)", rowCor05:"Corona 0.5 R☉",
-    rowCor1:"Corona 1 R☉", rowCor2:"Corona 2 R☉",
-    rowCorYours:"Corona {r} R☉ (your extent)",
+    rowCor01:"Corona to 1.1 R☉ (inner)", rowCor05:"Corona to 1.5 R☉",
+    rowCor1:"Corona to 2 R☉", rowCor2:"Corona to 3 R☉",
+    rowCorYours:"Corona to {r} R☉ (your extent)",
 
     expIntroPar:"Filter on. The brightness of the photosphere is constant, whereas the extinction varies: the Sun climbs from {a1}° to {a2}° between first contact and the end, so the exposure shortens slightly as you go. The table below gives the detail minute by minute.",
-    expIntroTot:"No filter. Between the chromosphere and your corona at {r} R☉ there are <b>{n} stops</b> of difference: impossible in a single frame, hence the exposure bracket.",
+    expIntroTot:"No filter. Between the bright end you have chosen and your corona at {r} R☉ there are <b>{n} stops</b> of difference: impossible in a single frame, hence the exposure bracket.",
     extApplied:" Extinction correction applied at this instant: +{ev} EV (Sun at {alt}°, {am} air masses).",
     parPlanIntro:"Shutter speeds with the {nd} filter, ISO {iso} and f/{f}, recomputing the air mass at every instant. Between first contact and the end of the eclipse the Sun climbs and the correction relaxes by {dev} EV: at this altitude the effect is small, but not zero.",
 
@@ -1436,11 +1436,11 @@
     var h=Math.max(happ,-0.5);
     return 1/(Math.sin(h*D2R)+0.50572*Math.pow(h+6.07995,-1.6364));
   }
-  // extinción en pasos: ΔEV = 1,327 · k · (X − 1)
+  // extinción en pasos: ΔEV = 1,329 · k · (X − 1)
   function extEVraw(mode,happ){
     if(!mode) return 0;
     var k=(mode===1)?0.20:0.30;
-    return 1.327*k*(airmass(happ)-1);
+    return 1.329*k*(airmass(happ)-1);
   }
   // achatamiento vertical del disco por refracción diferencial (fracción)
   function flattening(h){
@@ -1791,17 +1791,16 @@
     var s=snapShutter(x);
     return {label:shutLabel(s), sec:s.sec, out:false};
   }
+  // Tabla de Espenak: Q de la corona frente a su altura sobre el limbo, en radios solares.
+  // El control mide la extensión desde el centro del disco, así que se resta 1 R☉ antes de interpolar.
   function qCorona(rs){
-    var pts=[[0.1,7],[0.2,5],[0.5,3],[1.0,1],[2.0,0]];
-    if(rs<=pts[0][0]) return pts[0][1];
-    for(var i=0;i<pts.length-1;i++){
-      if(rs<=pts[i+1][0]){
-        var x0=Math.log(pts[i][0])/Math.LN10, x1=Math.log(pts[i+1][0])/Math.LN10;
-        var u=(Math.log(rs)/Math.LN10-x0)/(x1-x0);
-        return pts[i][1]+u*(pts[i+1][1]-pts[i][1]);
-      }
-    }
-    return -(Math.log(rs/2)/Math.LN10)/(Math.log(2)/Math.LN10);
+    var pts=[[0.1,7],[0.2,5],[0.5,3],[1.0,1],[2.0,0],[4.0,-1],[8.0,-3]];
+    var h=rs-1, lg=function(x){ return Math.log(x)/Math.LN10; };
+    if(h<=pts[0][0]) return pts[0][1];
+    var i=0;
+    while(i<pts.length-2 && h>pts[i+1][0]) i++;
+    var u=(lg(h)-lg(pts[i][0]))/(lg(pts[i+1][0])-lg(pts[i][0]));
+    return pts[i][1]+u*(pts[i+1][1]-pts[i][1]);
   }
   function extNow(ms){
     var l=L(), aa=sunAltAz(ms,l.lat,l.lon);
@@ -2100,7 +2099,8 @@
       var warn=!st.track&&!s.out&&s.sec>c.tmax;
       if(s.out) nOut++;
       if(warn) nWarn++;
-      return '<tr><td>'+r[0]+'</td><td class="n" style="text-align:center">'+r[1].toFixed(0).replace("-0","0")+'</td>'
+      var qTxt=Math.abs(r[1]-Math.round(r[1]))<0.05?Math.round(r[1]).toFixed(0).replace("-0","0"):f1(r[1]);   // Q interpolado con un decimal
+      return '<tr><td>'+r[0]+'</td><td class="n" style="text-align:center">'+qTxt+'</td>'
            + '<td class="n'+(warn?' warn':'')+'" '+(s.out?'style="color:var(--gold)"':'')+'>'+s.label+(warn?' ▲':'')+'</td></tr>';
     }
     var extTxt=st.ext>0?t("extApplied",{ev:f1(ev),alt:f1(atm.altApp),am:f1(atm.X)}):"";

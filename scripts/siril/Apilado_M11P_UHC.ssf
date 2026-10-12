@@ -1,11 +1,11 @@
 ############################################
-# Script Siril 1.2+  ·  Leica M11P + UHC
+# Script Siril 1.4+  ·  Leica M11P + UHC
 # Cadena completa: bias + flat + dark
 # Estructura esperada en el directorio de trabajo:
 #   lights/  darks/  flats/  biases/
 # Los DNG se leen directamente (LibRaw).
 ############################################
-requires 1.2.0
+requires 1.4.0
 
 # --- master bias ---
 cd biases
@@ -40,7 +40,7 @@ seqapplyreg pp_light -framing=min
 
 # --- apilado: media con rechazo Winsorized 3/3,
 #     normalizacion aditiva con escalado y ponderacion por FWHM ---
-stack r_pp_light rej w 3 3 -norm=addscale -output_norm -weight_from_wfwhm -out=../result
+stack r_pp_light rej w 3 3 -norm=addscale -output_norm -weight=wfwhm -out=../result
 
 cd ..
 load result

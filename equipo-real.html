@@ -535,7 +535,7 @@
     <code>LensModel</code>. Nada más. <code>ISOSpeed</code> y
     <code>RecommendedExposureIndex</code> solo se usan cuando <code>ISO</code> llega saturado a
     65 535, que es lo que ocurre por encima de esa cifra al ir en un entero de 16 bits: sin ellas,
-    los ISO 102 400 y 204 800 de la SL3-S se leerían como 51 200.</p>
+    los ISO 100 000 y 200 000 de la SL3-S se leerían como 65 535 y caerían en la barra de ISO 51 200.</p>
   <p class="note" data-lang="en">The EXIF reader is home-made and works offline: in JPEGs it looks for
     the APP1 segment with the <code>Exif</code> header and reads the TIFF inside; DNG and TIFF files
     are a TIFF from the very first byte and take the same path. Both byte orders (II and MM) are
@@ -546,7 +546,7 @@
     <code>LensModel</code>. Nothing else. <code>ISOSpeed</code> and
     <code>RecommendedExposureIndex</code> are used only when <code>ISO</code> arrives saturated at
     65,535, which is what happens above that figure in a 16-bit integer: without them the SL3-S's
-    ISO 102,400 and 204,800 would read as 51,200.</p>
+    ISO 100,000 and 200,000 would read as 65,535 and land in the ISO 51,200 bar.</p>
   <p class="note" data-lang="es">De cada archivo se leen solo los primeros 256&nbsp;KB
     (<code>File.slice</code>): el EXIF está al principio, así que mil fotos caben en segundos y en
     poca memoria. Límites: HEIC y HEIF no se intentan y cuentan como no legibles; los vídeos y el
@@ -608,7 +608,7 @@ const DICT={
       " %</b> pasan de f/"+nl+", donde el detalle real cae por debajo de la mitad del sensor.",
     difVerd:(p)=> p<10 ? "Con menos del 10 % cruzando el diafragma crítico, el archivo aprovecha la resolución que pagaste: el L-DNG está justificado."
                 : p<30 ? "Entre el 10 y el 30 % cruzando el crítico, cerrar tanto es la excepción en tu forma de disparar: sigue en L-DNG y vigila las fotos de mucha profundidad."
-                : "Más de un tercio de tus fotos pasan del diafragma crítico: en ellas el L-DNG no aporta nada sobre el M-DNG. O abres más, o te ahorras la mitad del disco.",
+                : "Un 30 % o más de tus fotos pasan del diafragma crítico: en ellas el L-DNG aporta poco o nada sobre el M-DNG. O abres más, o te ahorras la mitad del disco.",
     difLink:"El porqué, con las cifras y el disco de Airy, en la pestaña de difracción de sensor.html.",
     /* ganancia dual */
     gainNone:"Ningún cuerpo con punto de conmutación conocido (M11 200, Q3 400, SL3-S 640) entre estas fotos.",
@@ -616,7 +616,7 @@ const DICT={
       (n===1?" foto con poca luz":" fotos con poca luz")+" (EV &lt; 8), el <b>"+p+" %</b> se quedan por debajo de ISO "+iso+
       ", el punto en que el sensor conmuta a la segunda ganancia.",
     gainVerd:(p)=> p<25 ? "Ahí ya estás del lado bueno del escalón: nada que cambiar."
-                : p<50 ? "Un cuarto largo de tus fotos con poca luz se quedan a un paso de las sombras limpias: sube el mínimo del Auto-ISO hasta el punto de conmutación."
+                : p<50 ? "Entre un cuarto y la mitad de tus fotos con poca luz se quedan a un paso de las sombras limpias: sube el mínimo del Auto-ISO hasta el punto de conmutación."
                 : "Más de la mitad de tus fotos con poca luz están en la zona de peor ruido de lectura: subir un paso de ISO te habría dado sombras más limpias sin coste de rango.",
     gainLink:"Las dos series de ruido, cuerpo por cuerpo, en la sección de ruido de sensor.html.",
     /* trepidación */
@@ -634,7 +634,7 @@ const DICT={
       " mm</b>: cubriría el "+pOne+" % de tus fotos a un paso de encuadre (×0,7–×1,4). "+
       "La mejor pareja es <b>"+a+" + "+b+" mm</b>, con el "+pPair+" %.",
     covVerd:(p)=> p>=70 ? "Con el "+fmtN(p,0)+" % en una sola focal, un objetivo te basta para viajar."
-                : p>=50 ? "Con el "+fmtN(p,0)+" %, una focal te deja fuera media docena de fotos de cada veinte: lleva dos."
+                : p>=50 ? "Con el "+fmtN(p,0)+" %, una focal te deja fuera más de media docena de fotos de cada veinte: lleva dos."
                 : "Con el "+fmtN(p,0)+" %, una sola focal no cubre tu costumbre: necesitas dos, y son las de arriba.",
     /* plena abertura */
     wideNone:"—", wideNoLens:"sin objetivo identificado",
@@ -685,14 +685,14 @@ const DICT={
       " %</b> go past f/"+nl+", where real detail falls below half the sensor.",
     difVerd:(p)=> p<10 ? "With less than 10 % crossing the critical aperture, the archive uses the resolution you paid for: L-DNG is justified."
                 : p<30 ? "Between 10 and 30 % crossing the critical aperture, stopping down that far is the exception in the way you shoot: stay on L-DNG and watch the deep-depth shots."
-                : "More than a third of your photographs go past the critical aperture: in those, L-DNG adds nothing over M-DNG. Either open up, or save half the disk.",
+                : "30 % or more of your photographs go past the critical aperture: in those, L-DNG adds little or nothing over M-DNG. Either open up, or save half the disk.",
     difLink:"The why, with the figures and the Airy disc, in the diffraction tab of sensor.html.",
     gainNone:"No body with a known switching point (M11 200, Q3 400, SL3-S 640) among these photographs.",
     gainLine:(body,iso,p,n)=>"<b>"+body+"</b>: of its "+fmtN(n)+
       (n===1?" low-light photograph":" low-light photographs")+" (EV &lt; 8), <b>"+p+" %</b> stay below ISO "+iso+
       ", the point where the sensor switches to its second gain.",
     gainVerd:(p)=> p<25 ? "You are already on the good side of the step: nothing to change."
-                : p<50 ? "A good quarter of your low-light photographs sit one stop short of clean shadows: raise the Auto-ISO floor to the switching point."
+                : p<50 ? "Between a quarter and a half of your low-light photographs sit one stop short of clean shadows: raise the Auto-ISO floor to the switching point."
                 : "More than half of your low-light photographs are in the worst read-noise zone: one more stop of ISO would have given cleaner shadows at no cost in range.",
     gainLink:"The two noise series, body by body, in the noise section of sensor.html.",
     shakeNone:"Without focal length and shutter together, camera shake cannot be measured.",
@@ -708,7 +708,7 @@ const DICT={
       " mm</b>: it would cover "+pOne+" % of your photographs within one framing stop (×0.7–×1.4). "+
       "The best pair is <b>"+a+" + "+b+" mm</b>, with "+pPair+" %.",
     covVerd:(p)=> p>=70 ? "With "+fmtN(p,0)+" % on a single focal length, one lens is enough to travel with."
-                : p>=50 ? "At "+fmtN(p,0)+" %, one focal length leaves out half a dozen photographs in every twenty: take two."
+                : p>=50 ? "At "+fmtN(p,0)+" %, one focal length leaves out more than half a dozen photographs in every twenty: take two."
                 : "At "+fmtN(p,0)+" %, a single focal length does not cover your habit: you need two, and they are the ones above.",
     wideNone:"—", wideNoLens:"no identified lens",
     wideVerd:(p)=> p>=40 ? "you do use the speed you paid for"
