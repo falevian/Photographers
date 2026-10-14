@@ -296,8 +296,8 @@
     met_prop:'Propuesta: <b>{lab}</b>.',met_y1:'niebla',met_y5:'bruma',met_y0:'nada',met_oth:'La visibilidad reducida se atribuye a {wx}, no a niebla.',
     met_part:'La ventana del amanecer no ha terminado y la propuesta puede cambiar.',met_few:'Hay pocos partes en la ventana.',met_far:'La estación queda lejos y puede no representar tu emplazamiento.',
     met_has:'Ya hay una observación guardada para esa noche (y = {y}) y el desplegable la conserva.',met_conf:'Corrige el desplegable si en tu sitio viste otra cosa y guarda.',
-    met_raw:'Parte de visibilidad mínima: <code>{raw}</code>',cal_on:'calibración {st} en {k} fuentes',prior_cal:'Con la calibración de {st}: prior inicial medido (ȳ = {y}) y curva propia en {k} fuentes.',
-    s_cal:'calibrada en {st}: sesgo ΔT {b} °C, umbral {th}, escala {k}',
+    met_raw:'Parte de visibilidad mínima: <code>{raw}</code>',cal_on:'calibración {st} en {k} fuentes',prior_cal:'Con la calibración de {st}: prior inicial medido (ȳ = {y}) y curva propia en {k} fuentes. Su curva se aplica al índice reducido; lo que el índice completo añade (visibilidad del modelo, capas de nubes, advección) entra como puntos con la pendiente de esa curva. γ contrae hacia la climatología solo la parte del consenso que viene de fuentes sin calibrar, porque la curva calibrada ya la lleva dentro.',
+    s_cal:'calibrada en {st}: sesgo ΔT {b} °C, umbral {th}, escala {k}',cal_idx:'índice {s}, reducido {r}, {d} puntos añadidos',
     ret_days:'Periodo (noches)',ret_go:'Calibrar',ret_stop:'Cancelar',ret_on:'Aplicar en la fusión',ret_clear:'Borrar calibración',ret_confirm:'¿Borrar la calibración guardada?',
     ret_intro:'Compara, noche a noche, lo que observó una estación METAR al amanecer con lo que cada fuente preveía la víspera para ese mismo punto. De ahí salen, por fuente, el sesgo medio de T − Td, una curva propia de índice a probabilidad y su ventaja o desventaja medida, que pasan a ser el punto de partida de la fusión. La descarga tarda unos segundos.',
     h_ret:'Resultado por fuente',h_retc:'Curvas de índice a probabilidad',h_retl:'Registro de peticiones',h_retm:'Método y límites',
@@ -368,8 +368,8 @@
     met_prop:'Proposal: <b>{lab}</b>.',met_y1:'fog',met_y5:'mist',met_y0:'nothing',met_oth:'The reduced visibility is attributed to {wx}, not to fog.',
     met_part:'The sunrise window has not ended and the proposal may change.',met_few:'There are few reports in the window.',met_far:'The station is far away and may not represent your site.',
     met_has:'An observation is already saved for that night (y = {y}) and the selector keeps it.',met_conf:'Correct the selector if you saw something else at your site, then save.',
-    met_raw:'Minimum visibility report: <code>{raw}</code>',cal_on:'{st} calibration on {k} sources',prior_cal:'With the {st} calibration: measured initial prior (ȳ = {y}) and own curve for {k} sources.',
-    s_cal:'calibrated at {st}: ΔT bias {b} °C, threshold {th}, scale {k}',
+    met_raw:'Minimum visibility report: <code>{raw}</code>',cal_on:'{st} calibration on {k} sources',prior_cal:'With the {st} calibration: measured initial prior (ȳ = {y}) and own curve for {k} sources. Its curve is applied to the reduced index; what the full index adds (the model\'s visibility, cloud layers, advection) enters as points with the slope of that curve. γ shrinks towards climatology only the part of the consensus that comes from uncalibrated sources, because a calibrated curve already carries it.',
+    s_cal:'calibrated at {st}: ΔT bias {b} °C, threshold {th}, scale {k}',cal_idx:'index {s}, reduced {r}, {d} points added',
     ret_days:'Period (nights)',ret_go:'Calibrate',ret_stop:'Cancel',ret_on:'Apply in the fusion',ret_clear:'Delete calibration',ret_confirm:'Delete the stored calibration?',
     ret_intro:'Compares, night by night, what a METAR station observed at sunrise with what each source forecast the day before for that same point. This yields, per source, the mean T − Td bias, its own index to probability curve and its measured advantage or disadvantage, which become the starting point of the fusion. The download takes a few seconds.',
     h_ret:'Result per source',h_retc:'Index to probability curves',h_retl:'Request log',h_retm:'Method and limits',
@@ -514,10 +514,11 @@
     if(h.pers>=3) why.push(['w_pers',h.pers+' h']); P.pers=Math.min(h.pers||0,4)*2; s+=P.pers; // persistencia de la saturación
     let fday=1;
     if(!h.night){ fday=(h.sinceSun!=null&&h.sinceSun<2)?0.85:0.65; s*=fday; } // tras el amanecer la niebla tarda 1 a 2 h en disiparse
+    const raw=s; // suma sin recortar: la parte que sobrepasa 100 no se pierde para la evidencia añadida de una fuente calibrada
     s=clamp(Math.round(s),0,100);
     if(fday!==1) Object.keys(P).forEach(k=>{P[k]*=fday;});
     if(w>20) why.push(['w_wind',w.toFixed(0)]); if(above>60&&h.night&&lay) why.push(['w_cloud',Math.round(above)+'%']);
-    return {s,why,parts:P,fday,vis,visE};
+    return {s,raw,why,parts:P,fday,vis,visE};
   }
   // racha de horas nocturnas previas con ΔT < 1.5 °C y viento < 12 km/h (la niebla necesita tiempo de enfriamiento)
   function persistence(seq){ let k=0; seq.forEach(h=>{ if(!h) {k=0; return;} h.pers=k; const sat=(h.t-h.td)<1.5&&h.wind<12&&(h.night||(h.sinceSun!=null&&h.sinceSun<2)); k=sat?Math.min(k+1,6):0; }); }
@@ -835,6 +836,10 @@
   // curva propia de una fuente calibrada. Se ajusta y se valida sobre el índice reducido, y la fusión la aplica a ese mismo índice:
   // la visibilidad nativa, las capas y la advección no entran en la probabilidad de una fuente calibrada porque no hay archivo con que medir cuánto valen
   const curveP=(c,s)=>clamp(sig(c.a*(s-TH)/KAP+c.b),0.005,0.995);
+  // Lo que el índice completo añade al reducido (visibilidad nativa en vez de la estimada, capas de nubes, advección) no está calibrado,
+  // pero es la señal que distingue una noche con niebla prevista de una noche solo saturada, y con el índice reducido recortado a 100
+  // no se vería. Entra como puntos de índice, con la pendiente de la curva de esa fuente: una fuente sin destreza (a en el suelo) apenas lo nota.
+  const calP=(c,sFull,sRed)=>clamp(sig(logit(curveP(c,sRed.s))+c.a*(sFull.raw-sRed.raw)/KAP),0.005,0.995);
   // selección guardada: se respeta, pero una fuente aparecida después de guardarla (since mayor que la versión guardada) conserva su valor por defecto.
   // El formato más antiguo era una lista de ids (versión 1): en él IFS 0.25° pasa a IFS 9 km.
   const SELV=3;
@@ -913,7 +918,7 @@
       (old?pre:rows).push(r);}
     act.forEach(mo=>{ const seq=pre.concat(rows).map(r=>r.per[mo.id]||null); persistence(seq);
       rows.forEach(r=>{const q=r.per[mo.id]; if(!q) return;
-        if(!q.isEns){ const sc=score(q,costero), c=calOf(mo.id); q.s=sc.s; q.why=sc.why; q.p=c?curveP(c,score(redRec(q),false).s):p_of(sc.s); q.visU=sc.vis; q.visE=sc.visE; }
+        if(!q.isEns){ const sc=score(q,costero), c=calOf(mo.id); q.s=sc.s; q.why=sc.why; if(c){ const sr=score(redRec(q),false); q.sr=sr.s; q.dx=sc.raw-sr.raw; q.p=calP(c,sc,sr); } else q.p=p_of(sc.s); q.visU=sc.vis; q.visE=sc.visE; }
         else { const ss=[],pp=[]; q.members.forEach(h=>{h.pers=q.pers; const sc=score(h,costero); ss.push(sc.s); pp.push(p_of(sc.s));});
           q.nfog=ss.filter(x=>x>=75).length; ss.sort((a,b)=>a-b); const sp=pp.slice().sort((a,b)=>a-b), qt=u=>sp[clamp(Math.round(u*(sp.length-1)),0,sp.length-1)];
           q.p10=qt(.1); q.p90=qt(.9); q.frac=q.nfog/ss.length;
@@ -925,7 +930,10 @@
     const {w,ll}=weights(meta), pr=prior(), Zw=act.reduce((a,mo)=>a+w[mo.id],0), wa={}; act.forEach(mo=>wa[mo.id]=w[mo.id]/Zw);
     const Zp=act.reduce((a,mo)=>a+priorW(mo,meta),0); act.forEach(mo=>{meta[mo.id].w0=priorW(mo,meta)/Zp;});
     const rc=platt();
-    rows.forEach(r=>{let num=0,den=0,ps=[]; act.forEach(mo=>{const q=r.per[mo.id]; if(!q) return; num+=wa[mo.id]*logit(q.p); den+=wa[mo.id]; ps.push(q.p);}); const zpool=den>0?num/den:logit(pr.pi); const z=logit(pr.pi)+alpha*(zpool-logit(pr.pi)); r.postRaw=sig(z); r.post=rc?rc.apply(r.postRaw):r.postRaw; r.min=ps.length?Math.min(...ps):0; r.max=ps.length?Math.max(...ps):0;});
+    // γ contrae el consenso hacia la climatología. Una fuente calibrada ya lleva la climatología dentro de su curva (el término b),
+    // así que contraerla otra vez la contaría dos veces: γ actúa solo sobre la parte del peso que viene de fuentes sin calibrar.
+    rows.forEach(r=>{let num=0,den=0,dcal=0,ps=[]; act.forEach(mo=>{const q=r.per[mo.id]; if(!q) return; num+=wa[mo.id]*logit(q.p); den+=wa[mo.id]; if(calOf(mo.id)&&!mo.ens) dcal+=wa[mo.id]; ps.push(q.p);});
+      const zpool=den>0?num/den:logit(pr.pi), g=den>0?1-(1-alpha)*(1-dcal/den):alpha, z=logit(pr.pi)+g*(zpool-logit(pr.pi)); r.postRaw=sig(z); r.gEff=g; r.post=rc?rc.apply(r.postRaw):r.postRaw; r.min=ps.length?Math.min(...ps):0; r.max=ps.length?Math.max(...ps):0;});
     const calU={}; act.forEach(mo=>{const c=calOf(mo.id); if(c&&!mo.ens) calU[mo.id]=c;});
     B.last={rows,act,wa,ll,pr,nextSunrise,alpha,lat,lon,rc,meta,cal:(RET&&RET.on)?{st:RET.st,ybar:RET.ybar,src:calU}:null,fail:req.length-act.length,nocov:sel.length-req.length,secs:((performance.now()-t0)/1000).toFixed(1),nosst:costero&&!sstM};
     // congelar la previsión del próximo amanecer
@@ -969,7 +977,7 @@
   function tsun(){const {act}=B.last, win=sunWin(); if(!win.length){$('#tsun').innerHTML='';return;}
     let h='<tr>'+t('thsun').map(x=>'<th>'+x+'</th>').join('')+'</tr>';
     act.forEach(mo=>{const c=win.filter(r=>r.per[mo.id]); if(!c.length) return; const best=c.reduce((a,b)=>b.per[mo.id].p>a.per[mo.id].p?b:a), q=best.per[mo.id], rh0=q.td0!=null?q.rh0:q.rh;
-      h+=`<tr><td>${mo.name}</td><td><span class="tag ${clsP(q.p)}">${(100*q.p).toFixed(0)}%</span></td><td>${fmtH(best.time)}</td><td>${dTtxt(q)}</td><td>${rh0!=null?rh0+'%':'–'}</td><td>${q.wind.toFixed(0)}</td><td>${q.cloud}%</td><td>${visTxt(q)}</td><td style="text-align:left">${whyTxt(q.why)}${(mo.ens&&q.nm)?' · '+t('ens_band',{a:(100*q.p10).toFixed(0),b:(100*q.p90).toFixed(0)})+' · '+t('ens_frac',{k:q.nfog,n:q.nm}):''}</td></tr>`;});
+      h+=`<tr><td>${mo.name}</td><td><span class="tag ${clsP(q.p)}">${(100*q.p).toFixed(0)}%</span></td><td>${fmtH(best.time)}</td><td>${dTtxt(q)}</td><td>${rh0!=null?rh0+'%':'–'}</td><td>${q.wind.toFixed(0)}</td><td>${q.cloud}%</td><td>${visTxt(q)}</td><td style="text-align:left">${q.sr!=null?t('cal_idx',{s:q.s,r:q.sr,d:(q.dx>=0?'+':'−')+Math.abs(q.dx).toFixed(0)})+' · ':''}${whyTxt(q.why)}${(mo.ens&&q.nm)?' · '+t('ens_band',{a:(100*q.p10).toFixed(0),b:(100*q.p90).toFixed(0)})+' · '+t('ens_frac',{k:q.nfog,n:q.nm}):''}</td></tr>`;});
     $('#tsun').innerHTML=h;}
   // fuentes en este punto: qué modelo hay detrás de cada identificador, con qué malla, a qué distancia queda su celda y qué variables publica
   function tsrc(){
