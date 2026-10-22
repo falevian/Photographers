@@ -5,7 +5,7 @@
 Herramientas de fotografía y física de la luz que funcionan enteras en el navegador.
 Photography and light-physics tools that run entirely in the browser.
 
-🔗 **[falevian.github.io/Photographers](https://falevian.github.io/Photographers/)**
+🔗 **[lab.rafaelvida.com](https://lab.rafaelvida.com/)**
 
 [Español](#español) · [English](#english)
 
@@ -310,7 +310,7 @@ Rafael Vida
 ## Paseo fotográfico · sección aparte
 
 Fuera de «Fotografía para científicos», con su propia portada en
-[`paseos/`](paseos/index.html) ([falevian.github.io/Photographers/paseos/](https://falevian.github.io/Photographers/paseos/)):
+[`paseos/`](paseos/index.html) ([lab.rafaelvida.com/paseos/](https://lab.rafaelvida.com/paseos/)):
 las fichas del paseo fotográfico de la comunidad Foto, preparadas por La Foto Rota. Un tema por salida,
 con autores de referencia, la física que hay debajo y ejercicios para el día. Solo en español, sin conmutador
 de idioma: tienen otro objetivo y otro diseño (negro y blanco puros, Bodoni Moda y Atkinson Hyperlegible

@@ -23,8 +23,8 @@ def integra(src,dest):
     else: ya.append("favicon")
     if "og:url" not in s:
         m=re.search(r'<meta property="og:description"[^>]*>',s); assert m,"falta og:description"
-        s=s[:m.end()]+('\n<meta property="og:url" content="https://falevian.github.io/Photographers/paseos/%s">'%base)+\
-          '\n<meta property="og:image" content="https://falevian.github.io/Photographers/og/paseos.png">'+\
+        s=s[:m.end()]+('\n<meta property="og:url" content="https://lab.rafaelvida.com/paseos/%s">'%base)+\
+          '\n<meta property="og:image" content="https://lab.rafaelvida.com/og/paseos.png">'+\
           '\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">'+\
           '\n<meta name="twitter:card" content="summary_large_image">'+s[m.end():]; hechos.append("og:url/og:image/twitter")
     else: ya.append("og")
