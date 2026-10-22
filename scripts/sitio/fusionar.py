@@ -112,7 +112,7 @@ def build(spec):
     for e in parts:
         for x in e["ext"]:
             if x not in ext: ext.append(x)
-    BASE="https://falevian.github.io/Photographers/"
+    BASE="https://lab.rafaelvida.com/"
     svg=io.open(spec["icon_svg"],encoding="utf-8").read().strip()
     fav='<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,'+urllib.parse.quote(svg)+'">'
     tabs_btn="".join(f'<button type="button" role="tab" data-tab="{t["id"]}" aria-selected="false"><span data-lang="es">{t["es"]}</span><span data-lang="en">{t["en"]}</span></button>' for t in spec["tabs"])
