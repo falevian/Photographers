@@ -1,0 +1,1278 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Filtro temporal</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Compañera de la calculadora de exposiciones largas: el mismo instrumento, ahora para
+   decidir qué tiempo buscas según lo que quieres que se funda en la toma. */
+:root {
+  --bg: #e7e8e3;
+  --panel: #f6f6f2;
+  --hundido: #dcded8;
+  --fg: #161817;
+  --muted: #5e635f;
+  --line: #c9ccc5;
+  --accent: #b4521a;
+  --accent-suave: #f0d9c8;
+  --accent-ink: #ffffff;
+  --warn: #8a5a00;
+  --f-display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "Barlow", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --f-num: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --radio: 16px;
+  --metal: #18191a;
+  --metal-2: #2e3032;
+  --grabado: #f1f0ea;
+  --indice: #e2512e;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1110; --panel: #181b19; --hundido: #111312; --fg: #ecede8; --muted: #959b96; --line: #2a2f2c;
+    --accent: #f08c45; --accent-suave: #3a2416; --accent-ink: #1a1007; --warn: #e3b34e;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1110; --panel: #181b19; --hundido: #111312; --fg: #ecede8; --muted: #959b96; --line: #2a2f2c;
+  --accent: #f08c45; --accent-suave: #3a2416; --accent-ink: #1a1007; --warn: #e3b34e;
+  color-scheme: dark;
+}
+/* Modo nocturno: solo rojo, para conservar la adaptación de los ojos a la oscuridad */
+:root.nocturno, :root.nocturno[data-theme] {
+  --bg: #040000; --panel: #0c0101; --hundido: #070000; --fg: #ff3b2f; --muted: #a8261d; --line: #360904;
+  --accent: #ff3b2f; --accent-suave: #2a0503; --accent-ink: #040000; --warn: #ff3b2f;
+  --metal: #070000; --metal-2: #160302; --grabado: #ff3b2f; --indice: #ff3b2f;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--fg);
+  font: 400 16px/1.5 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 18px 56px;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg);
+}
+main { max-width: 720px; margin: 0 auto; display: grid; gap: 16px; }
+button { font: inherit; color: inherit; }
+button:focus-visible, select:focus-visible, .rueda:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* Cabecera */
+.cabecera { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+h1 {
+  margin: 0; font: 700 26px/1 var(--f-display); letter-spacing: 0.06em; text-transform: uppercase;
+}
+.icono-btn {
+  display: inline-flex; align-items: center; gap: 8px; background: var(--panel); border: 1px solid var(--line);
+  border-radius: 999px; padding: 9px 14px; cursor: pointer; font: 600 14px/1 var(--f-display);
+  letter-spacing: 0.08em; text-transform: uppercase; min-height: 40px;
+}
+.icono-btn svg { width: 16px; height: 16px; }
+.icono-btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+/* Lectura */
+.lectura {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 22px; padding: 22px 20px 20px;
+  display: grid; gap: 14px; position: relative; overflow: hidden;
+}
+.lectura::after {
+  /* escala de fotómetro de fondo */
+  content: ""; position: absolute; inset: auto 0 0 0; height: 10px; opacity: 0.5;
+  background: repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 12px);
+}
+.etq {
+  font: 600 13px/1 var(--f-display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted);
+}
+.tiempo {
+  font: 600 clamp(56px, 17vw, 104px)/0.92 var(--f-num); font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em; color: var(--accent); overflow-wrap: anywhere;
+}
+.tiempo .ud { font-size: 0.42em; letter-spacing: 0; margin: 0 0.25em 0 0.08em; color: var(--fg); opacity: 0.75; }
+.cadena {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px;
+  font: 500 15px/1.3 var(--f-num); font-variant-numeric: tabular-nums; color: var(--muted);
+}
+.cadena b { color: var(--fg); font-weight: 600; }
+.cadena .op { opacity: 0.6; }
+.pastillas { display: flex; flex-wrap: wrap; gap: 8px; }
+.pastilla {
+  font: 600 13px/1 var(--f-display); letter-spacing: 0.06em; text-transform: uppercase;
+  background: var(--hundido); border: 1px solid var(--line); border-radius: 999px; padding: 8px 12px;
+}
+.pastilla.aviso { color: var(--warn); border-color: var(--warn); background: transparent; }
+.pastilla:empty { display: none; }
+.iniciar {
+  display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%;
+  background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 14px; padding: 16px;
+  font: 700 18px/1 var(--f-display); letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; min-height: 56px;
+}
+.iniciar svg { width: 18px; height: 18px; }
+
+/* Barra fija con el resultado al bajar */
+.mini {
+  position: fixed; left: 0; right: 0; top: 0; z-index: 20;
+  padding: calc(env(safe-area-inset-top, 0px) + 8px) max(16px, env(safe-area-inset-right, 0px)) 8px max(16px, env(safe-area-inset-left, 0px));
+  background: color-mix(in srgb, var(--panel) 92%, transparent); border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  transform: translateY(-110%); transition: transform 0.2s ease;
+}
+.mini.visible { transform: none; }
+.mini .t { font: 600 24px/1 var(--f-num); color: var(--accent); font-variant-numeric: tabular-nums; }
+.mini .s { font: 500 13px/1.2 var(--f-num); color: var(--muted); }
+.mini button {
+  background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 10px; padding: 10px 14px;
+  font: 700 14px/1 var(--f-display); letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
+}
+
+/* Bloques de mandos */
+.bloque { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radio); padding: 16px; display: grid; gap: 12px; min-width: 0; }
+.bloque-cab { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.bloque-cab .valor { font: 600 15px/1 var(--f-num); color: var(--fg); font-variant-numeric: tabular-nums; }
+
+select {
+  width: 100%; font: 500 18px/1.2 var(--f-body); color: var(--fg); background: var(--hundido);
+  border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; min-height: 50px; appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 22px) 50%, calc(100% - 16px) 50%; background-size: 6px 6px; background-repeat: no-repeat;
+}
+
+/* Rueda de velocidades: un tambor que gira, con inercia, como los selectores del iPhone */
+.dial-marco { position: relative; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 6px; }
+.paso {
+  width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--hundido);
+  display: grid; place-items: center; cursor: pointer; font: 600 22px/1 var(--f-num);
+}
+.dial-ventana {
+  position: relative; min-width: 0; height: 88px; border-radius: 14px; overflow: hidden;
+  background: var(--hundido); border: 1px solid var(--line);
+}
+.franja {
+  position: absolute; left: 50%; top: 8px; bottom: 8px; width: 66px; margin-left: -33px; border-radius: 10px;
+  background: var(--panel); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12); pointer-events: none;
+}
+.aguja {
+  position: absolute; left: 50%; bottom: 8px; width: 2px; height: 26px; margin-left: -1px; background: var(--accent);
+  z-index: 3; pointer-events: none; border-radius: 1px;
+}
+.rueda {
+  position: absolute; inset: 0; perspective: 640px; touch-action: pan-y; cursor: grab;
+  user-select: none; -webkit-user-select: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 26%, #000 74%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 26%, #000 74%, transparent 100%);
+}
+.rueda.arrastrando { cursor: grabbing; }
+.tambor { position: absolute; inset: 0; transform-style: preserve-3d; }
+.marca {
+  position: absolute; left: 50%; top: 0; height: 100%; width: 66px; margin-left: -33px;
+  display: grid; justify-items: center; align-content: end; gap: 7px; padding-bottom: 12px;
+  backface-visibility: hidden; -webkit-backface-visibility: hidden; will-change: transform, opacity;
+}
+.marca i { display: block; width: 1px; background: var(--muted); height: 10px; opacity: 0.7; }
+.marca.entero i { height: 22px; width: 2px; opacity: 1; background: var(--fg); }
+.marca span { display: block; height: 11px; color: var(--muted); }
+.marca.entero span { height: 14px; color: var(--fg); }
+.marca span svg { display: block; height: 100%; width: auto; overflow: visible; }
+.marca.activa span { color: var(--accent); font-weight: 600; }
+.dial-ventana:focus-within { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* Aro de diafragmas: metal negro, números grabados, moleteado y marca índice fija */
+.aro .dial-ventana {
+  height: 100px; border-color: #000; background: linear-gradient(180deg, var(--metal-2), var(--metal) 60%);
+}
+.aro .moleteado {
+  position: absolute; left: 0; right: 0; top: 0; height: 22px; pointer-events: none;
+  background-image: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.18) 0 2px, rgba(0, 0, 0, 0.45) 2px 6px);
+  background-size: 6px 100%; border-bottom: 1px solid rgba(0, 0, 0, 0.7);
+}
+.aro .rueda { top: 22px; bottom: 20px; }
+.aro .marca { align-content: center; padding: 0; gap: 0; }
+.aro .marca span { display: block; height: 18px; color: var(--grabado); }
+.aro .marca .punto {
+  display: block; width: 5px; height: 5px; border-radius: 50%; background: var(--grabado); opacity: 0.75;
+}
+.aro .marca.activa span { color: var(--indice); }
+.aro .marca.activa .punto { background: var(--indice); opacity: 1; transform: scale(1.4); }
+.aro .base {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 20px; pointer-events: none;
+  background: linear-gradient(180deg, #3a3c3e, #222426); border-top: 1px solid rgba(0, 0, 0, 0.8);
+}
+:root.nocturno .aro .base { background: #0d0101; }
+.aro .indice {
+  position: absolute; left: 50%; top: 3px; margin-left: -6px; width: 0; height: 0;
+  border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 9px solid var(--indice);
+}
+.aro .sombra {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0) 30%, rgba(255, 255, 255, 0.06) 50%, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, 0.8));
+}
+.aro + .subetq { margin-top: 6px; }
+
+/* Fichas */
+.fichas { display: flex; flex-wrap: wrap; gap: 8px; }
+.ficha {
+  display: inline-flex; align-items: baseline; gap: 6px; cursor: pointer;
+  background: var(--hundido); border: 1px solid var(--line); border-radius: 12px; padding: 11px 13px; min-height: 44px;
+  font: 600 16px/1 var(--f-display); letter-spacing: 0.03em;
+}
+.ficha small { font: 500 12px/1 var(--f-num); color: var(--muted); }
+.ficha[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.ficha[aria-pressed="true"] small { color: var(--accent-ink); opacity: 0.85; }
+.subetq { font: 600 12px/1 var(--f-display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+.fila-enlace { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 2px; }
+.enlace {
+  display: inline-flex; align-items: center; gap: 9px; cursor: pointer; min-height: 40px; padding: 4px 4px 4px 10px;
+  background: transparent; border: 0; border-radius: 999px; color: var(--muted);
+  font: 600 12px/1 var(--f-display); letter-spacing: 0.14em; text-transform: uppercase;
+}
+.enlace svg { width: 18px; height: 18px; flex: none; }
+.enlace .pista {
+  position: relative; width: 44px; height: 26px; border-radius: 13px; flex: none;
+  background: var(--hundido); border: 1px solid var(--line); transition: background 0.18s, border-color 0.18s;
+}
+.enlace .pista::after {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%;
+  background: var(--panel); box-shadow: 0 1px 3px rgba(0,0,0,0.3); transition: transform 0.18s;
+}
+.enlace[aria-checked="true"] { color: var(--accent); }
+.enlace[aria-checked="true"] .pista { background: var(--accent); border-color: var(--accent); }
+.enlace[aria-checked="true"] .pista::after { transform: translateX(18px); }
+.enlace .roto { display: none; }
+.enlace[aria-checked="false"] .unido { display: none; }
+.enlace[aria-checked="false"] .roto { display: inline; }
+.enlace:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .enlace .pista, .enlace .pista::after { transition: none; } }
+
+/* Ajustes finos */
+.ajustes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 520px) { .ajustes { grid-template-columns: 1fr; } }
+.contador { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: 8px; }
+.contador output { text-align: center; font: 600 20px/1 var(--f-num); font-variant-numeric: tabular-nums; }
+.segmentos { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--hundido); border: 1px solid var(--line); border-radius: 12px; padding: 3px; }
+.segmentos button {
+  border: 0; background: transparent; border-radius: 9px; padding: 10px 4px; cursor: pointer;
+  font: 600 15px/1 var(--f-display); letter-spacing: 0.04em; min-height: 40px;
+}
+.segmentos button[aria-pressed="true"] { background: var(--panel); color: var(--accent); box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+
+/* Filtro temporal */
+.seg2 { grid-template-columns: 1fr 1fr; }
+.seg5 { grid-template-columns: repeat(5, 1fr); }
+.segmentos button small { display: block; margin-top: 3px; font: 500 11px/1 var(--f-num); color: var(--muted); letter-spacing: 0; }
+.segmentos button[aria-pressed="true"] small { color: var(--accent); opacity: 0.8; }
+.ft-optica { display: grid; grid-template-columns: 1.6fr 1fr; gap: 12px; align-items: end; }
+.ft-optica > div { display: grid; gap: 8px; min-width: 0; }
+@media (max-width: 520px) { .ft-optica { grid-template-columns: 1fr; } }
+.fenomenos { display: grid; grid-template-columns: 1fr; gap: 10px; }
+@media (min-width: 640px) { .fenomenos { grid-template-columns: 1fr 1fr; } }
+.fen { background: var(--hundido); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.fen header { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.fen h3 { margin: 0; font: 700 17px/1 var(--f-display); letter-spacing: 0.08em; text-transform: uppercase; }
+.veredicto { font: 600 15px/1 var(--f-display); letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); text-align: right; }
+.fen .segmentos { background: var(--panel); }
+.fen .segmentos button { padding: 8px 2px; font-size: 14px; }
+.fen .segmentos button[aria-pressed="true"] { background: var(--hundido); }
+.barra { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; }
+.barra .pista-b { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.barra .pista-b i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 3px; transition: width 0.25s ease; }
+.barra output { font: 500 13px/1 var(--f-num); color: var(--muted); min-width: 8ch; text-align: right; }
+.fen p { margin: 0; font-size: 15px; line-height: 1.45; }
+.fen p b { font-family: var(--f-num); font-weight: 600; font-size: 14px; }
+.grafico .env { stroke: var(--accent); stroke-width: 3; fill: none; }
+.grafico .sinc { stroke: var(--muted); stroke-width: 1.5; fill: none; opacity: 0.55; }
+.grafico .tline { stroke: var(--fg); stroke-width: 1.5; stroke-dasharray: 4 4; opacity: 0.6; }
+.grafico .zona-t { fill: var(--accent-suave); opacity: 0.55; }
+.grafico .marca-f { fill: var(--panel); stroke: var(--accent); stroke-width: 3; }
+.grafico text.fuerte { fill: var(--fg); font-weight: 600; }
+.grafico .guia { stroke: var(--accent); stroke-width: 1.2; opacity: 0.7; }
+#ft-grafico svg { max-width: 600px; margin: 0 auto; }
+#ft-grafico text { font-size: 18px; }
+@media (prefers-reduced-motion: reduce) { .barra .pista-b i { transition: none; } }
+
+/* Umbrales y enlace */
+.umbrales { display: flex; flex-wrap: wrap; gap: 6px; }
+.umbral {
+  display: inline-flex; align-items: baseline; gap: 6px; cursor: pointer; min-height: 36px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 8px 11px;
+  font: 600 13px/1 var(--f-display); letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg);
+}
+.umbral small { font: 500 12px/1 var(--f-num); letter-spacing: 0; text-transform: none; color: var(--muted); }
+.umbral.actual { border-color: var(--accent); color: var(--accent); }
+.umbral.actual small { color: var(--accent); }
+.enlace-calc {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; text-decoration: none; color: inherit;
+  background: var(--hundido); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; min-height: 56px;
+}
+.enlace-calc b { font: 700 16px/1.2 var(--f-display); letter-spacing: 0.08em; text-transform: uppercase; }
+.enlace-calc span { color: var(--muted); font-size: 14px; }
+.enlace-calc svg { width: 20px; height: 20px; flex: none; color: var(--accent); }
+
+/* Flujo por pasos */
+.paso-cab { display: flex; align-items: center; gap: 10px; }
+.paso-cab .num {
+  display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; flex: none;
+  background: var(--accent); color: var(--accent-ink); font: 700 15px/1 var(--f-num);
+}
+.paso-cab h2 { margin: 0; font: 700 19px/1.1 var(--f-display); letter-spacing: 0.06em; text-transform: uppercase; }
+.paso-cab .sub { margin-left: auto; font: 500 13px/1 var(--f-num); color: var(--muted); }
+.ico { width: 18px; height: 18px; flex: none; vertical-align: -3px; margin-right: 6px; }
+.ficha { align-items: center; }
+.ficha .ico { margin-right: 0; }
+.umbrales { display: flex; flex-wrap: wrap; gap: 6px; }
+.recomendacion { display: grid; gap: 10px; background: var(--hundido); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+.recomendacion p { margin: 0; }
+.recomendacion b { font-family: var(--f-num); font-weight: 600; font-size: 15px; }
+.recomendacion .choque { color: var(--warn); }
+.acciones-rec { display: grid; gap: 8px; }
+.iniciar.secundario { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+.nota { color: var(--muted); font-size: 14px; margin: 0; }
+.res { display: grid; gap: 8px; padding: 12px 0; border-top: 1px solid var(--line); }
+.res:first-child { border-top: 0; padding-top: 0; }
+.res-cab { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.res-cab b { font: 700 16px/1 var(--f-display); letter-spacing: 0.08em; text-transform: uppercase; }
+.res-cab span { font: 600 15px/1.2 var(--f-display); letter-spacing: 0.05em; text-transform: uppercase; color: var(--warn); text-align: right; }
+.res.ok .res-cab span { color: var(--accent); }
+.res-cab em { font: 400 13px/1.2 var(--f-body); text-transform: none; letter-spacing: 0; color: var(--muted); display: block; }
+.marca-ok { font-style: normal; }
+.res p { margin: 0; font-size: 15px; }
+.res p b { font-family: var(--f-num); font-weight: 600; font-size: 14px; }
+#sim-marco { position: relative; border-radius: 12px; overflow: hidden; background: #000; border: 1px solid var(--line); }
+#sim { display: block; width: 100%; }
+:root.nocturno #sim { filter: grayscale(1) sepia(1) saturate(8) hue-rotate(-40deg) brightness(0.55); }
+.enlace-calc {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; text-decoration: none; color: inherit;
+  background: var(--hundido); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; min-height: 56px;
+}
+.enlace-calc b { font: 700 16px/1.2 var(--f-display); letter-spacing: 0.08em; text-transform: uppercase; }
+.enlace-calc span { color: var(--muted); font-size: 14px; }
+.enlace-calc svg { width: 20px; height: 20px; flex: none; color: var(--accent); }
+
+/* Gráfico, tabla y notas */
+details.bloque > summary {
+  cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center;
+}
+details.bloque > summary::-webkit-details-marker { display: none; }
+details.bloque > summary::after { content: "+"; font: 500 22px/1 var(--f-num); color: var(--muted); }
+details.bloque[open] > summary::after { content: "−"; }
+.grafico svg { width: 100%; height: auto; display: block; }
+.grafico .rej { stroke: var(--line); stroke-dasharray: 2 4; }
+.grafico .ejes { stroke: var(--line); }
+.grafico .id { stroke: var(--muted); stroke-dasharray: 5 4; fill: none; }
+.grafico .curva { stroke: var(--accent); stroke-width: 3; fill: none; }
+.grafico .extra { stroke: var(--accent); stroke-width: 2.5; fill: none; stroke-dasharray: 5 5; opacity: 0.6; }
+.grafico .punto { fill: var(--accent); stroke: var(--panel); stroke-width: 3; }
+.grafico text { fill: var(--muted); font: 500 16px var(--f-num); }
+.leyenda { color: var(--muted); font-size: 14px; margin: 0; }
+.tabla { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 8px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font: 600 12px/1.2 var(--f-display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+td { font: 400 15px/1.2 var(--f-num); }
+td:first-child, th:first-child { text-align: left; }
+tr.actual td { color: var(--accent); font-weight: 600; }
+.notas { color: var(--muted); font-size: 14px; display: grid; gap: 8px; }
+.notas p { margin: 0; max-width: 68ch; }
+.notas a { color: var(--fg); }
+
+/* Temporizador a pantalla completa */
+.reloj {
+  position: fixed; inset: 0; z-index: 40; background: var(--bg);
+  padding: calc(env(safe-area-inset-top, 0px) + 24px) max(16px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 24px) max(16px, env(safe-area-inset-left, 0px));
+  display: grid; place-items: center; align-content: center; gap: 22px; text-align: center;
+}
+.anillo { position: relative; width: min(78vw, 360px); aspect-ratio: 1; max-width: 100%; }
+.anillo svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.anillo .fondo { stroke: var(--line); }
+.anillo .progreso { stroke: var(--accent); stroke-linecap: round; transition: stroke-dashoffset 0.25s linear; }
+.anillo .dentro { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; gap: 6px; }
+.cuenta { font: 600 clamp(44px, 14vw, 72px)/1 var(--f-num); font-variant-numeric: tabular-nums; letter-spacing: -0.03em; }
+.fin { color: var(--muted); font: 500 15px/1.4 var(--f-body); }
+.reloj .acciones { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.reloj button {
+  border-radius: 14px; padding: 15px 26px; min-height: 52px; cursor: pointer;
+  font: 700 17px/1 var(--f-display); letter-spacing: 0.1em; text-transform: uppercase;
+  background: transparent; color: var(--fg); border: 1px solid var(--line);
+}
+.reloj button.primario { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+@media (prefers-reduced-motion: reduce) { .mini, .anillo .progreso { transition: none; } }
+</style>
+
+<div class="mini" id="mini" aria-hidden="true">
+  <div><div class="t" id="mini-t"></div><div class="s" id="mini-s"></div></div>
+</div>
+
+<main>
+  <div class="cabecera">
+    <h1>Filtro temporal</h1>
+    <button class="icono-btn" id="btn-noche" type="button" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      <span>Nocturno</span>
+    </button>
+  </div>
+
+  <section class="bloque">
+    <div class="paso-cab"><span class="num">1</span><h2>Qué hay en la escena</h2></div>
+    <div class="fichas" id="escena"></div>
+    <div class="ft-optica" id="optica">
+      <div><span class="subetq">Formato</span><div class="segmentos seg5" id="formato"></div></div>
+      <div><span class="subetq">Focal</span>
+        <div class="contador">
+          <button class="paso" type="button" id="f-menos" aria-label="Focal más corta">−</button>
+          <output id="focal">35 mm</output>
+          <button class="paso" type="button" id="f-mas" aria-label="Focal más larga">+</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bloque">
+    <div class="paso-cab"><span class="num">2</span><h2>Cómo lo quieres</h2></div>
+    <p class="nota" id="vacio" hidden>Marca en el paso 1 lo que hay delante de la cámara.</p>
+    <div class="fenomenos" id="deseos"></div>
+  </section>
+
+  <section class="bloque" id="paso3">
+    <div class="paso-cab"><span class="num">3</span><h2>Tiempo</h2></div>
+    <div class="recomendacion" id="recomendacion"></div>
+    <div class="tiempo" id="res-tiempo"></div>
+    <div class="dial-marco aro">
+      <button class="paso" type="button" id="t-menos" aria-label="Un tercio de paso más corto">−</button>
+      <div class="dial-ventana">
+        <div class="moleteado" id="mol-t"></div>
+        <div class="rueda" id="rueda-t" tabindex="0" role="slider" aria-label="Tiempo de exposición"><div class="tambor" id="tambor-t"></div></div>
+        <div class="base"><span class="indice"></span></div>
+        <div class="sombra"></div>
+      </div>
+      <button class="paso" type="button" id="t-mas" aria-label="Un tercio de paso más largo">+</button>
+    </div>
+  </section>
+
+  <section class="bloque">
+    <div class="paso-cab"><span class="num">4</span><h2>Así sale</h2></div>
+    <div id="sim-marco"><canvas id="sim" role="img" aria-label="Simulación de la escena con este tiempo"></canvas></div>
+    <p class="nota">Escena esquemática a escala: las estelas miden en la imagen lo mismo que en el negativo con tu formato y tu focal.</p>
+    <div id="resultados"></div>
+    <a class="enlace-calc" href="https://claude.ai/artifact/MiCYb6JmLDhMbCuRboFZt8" target="_blank" rel="noopener">
+      <div><b>Calcular filtros</b><br><span>Lleva este tiempo a la calculadora de exposiciones largas</span></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+  </section>
+
+  <details class="bloque grafico">
+    <summary><span class="etq">Respuesta de la exposición</span></summary>
+    <div id="grafico"></div>
+    <p class="leyenda">Cada cosa se coloca por su tiempo característico: el periodo de las olas, lo que tarda una nube en recorrer un 5 % del encuadre, lo que alguien se queda quieto y lo que tarda una estrella en salirse del círculo de confusión. A la izquierda de T se funde, a la derecha se queda. La línea fina es la respuesta exacta de una ventana rectangular; la gruesa, su promedio en media octava, porque ni las olas ni el viento tienen un periodo único.</p>
+  </details>
+
+  <details class="bloque notas">
+    <summary><span class="etq">Cómo se calcula</span></summary>
+    <p>La exposición es una ventana rectangular de duración T. Su respuesta a un movimiento de periodo P es sen(πT/P)/(πT/P), que se anula cuando T es un múltiplo exacto de P. En la práctica eso no ocurre, porque el oleaje mezcla periodos, así que se usa la respuesta promediada en media octava. El agua pasa a movida cuando queda menos del 60 % de su relieve, a sedosa por debajo del 25 % y a lisa por debajo del 8 %.</p>
+    <p>Las nubes se desplazan con velocidad angular v/d, y en el negativo recorren f·v·T/d. Se suponen moviéndose de lado; si vienen hacia ti, las estelas salen radiales y más cortas. Suaves es cuando la estela supera el círculo de confusión, estelas a partir del 2 % del lado largo y velo a partir del 15 %.</p>
+    <p>Alguien que se queda quieto un tiempo τ aporta a ese punto la fracción τ/T de la luz, es decir, log₂(T/τ) pasos por debajo del fondo: fantasma a partir de un paso, fantasma tenue a partir de tres y desaparece a partir de cinco. Una persona que cruza andando se queda en cada punto unas tres décimas de segundo.</p>
+    <p>Las estrellas giran 15° por hora en el ecuador celeste, multiplicado por el coseno de la declinación. Salen como puntos mientras la estela no supera el círculo de confusión y como trazos a partir de cuatro veces ese tamaño. El círculo de confusión es el convencional de cada formato: 0,03 mm en 24×36, 0,05 en 6×6, 0,055 en 6×7 y 0,1 en 4×5. En digital se toman dos píxeles de unos 3,8 µm, que es lo que da un sensor de 60 MP en 24×36.</p>
+    <p>La recomendación es el tiempo más corto que cumple todo lo que pides, redondeado hacia arriba al tercio de paso; si solo hay límites superiores, como estrellas en puntos, es el más largo que los respeta. El anillo usa el valor exacto en potencias de dos, como la calculadora: 15 s valen 16 s y 1 min vale 64 s.</p>
+  </details>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  // ------------------------------------------------------------ formato
+  function coma(x, d) { return x.toFixed(d).replace('.', ','); }
+  function partes(s) {
+    // [[número, unidad], ...] para la lectura grande
+    if (!isFinite(s)) return [['∞', '']];
+    if (s < 0.95) return [['1/' + Math.round(1 / s), 's']];
+    if (s < 10) return [[coma(s, 1), 's']];
+    if (s < 60) return [[String(Math.round(s)), 's']];
+    var t = Math.round(s), h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), seg = t % 60;
+    var out = [];
+    if (h) out.push([String(h), 'h']);
+    if (h || m) out.push([String(m), 'min']);
+    if (seg && h < 10) out.push([String(seg), 's']);
+    return out;
+  }
+  function texto(s) { return partes(s).map(function (p) { return p[0] + (p[1] ? ' ' + p[1] : ''); }).join(' '); }
+  function corto(s) {
+    if (!isFinite(s)) return '∞';
+    if (s < 600) return texto(s);
+    var t = Math.round(s / 60), h = Math.floor(t / 60), m = t % 60;
+    return h ? h + ' h ' + String(m).padStart(2, '0') : m + ' min';
+  }
+  function reloj(s) {
+    s = Math.max(0, Math.ceil(s));
+    var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), seg = s % 60;
+    return (h ? h + ':' + String(m).padStart(2, '0') : String(m)) + ':' + String(seg).padStart(2, '0');
+  }
+  function redondear(s, modo) {
+    if (modo === 'exacto' || s < 30) return s;
+    var paso = Number(modo);
+    return Math.max(paso, Math.round(s / paso) * paso);
+  }
+  function fraccion(x) {
+    var n = Math.round(x * 3), e = Math.trunc(n / 3), r = Math.abs(n % 3);
+    var signo = n < 0 ? '−' : (n > 0 ? '+' : '');
+    var ent = Math.abs(e), frac = r ? (r === 1 ? '1/3' : '2/3') : '';
+    if (!ent && !frac) return '0';
+    return signo + (ent ? ent : '') + (ent && frac ? ' ' : '') + frac;
+  }
+
+  // ------------------------------------------------------------ cifras grabadas
+  // Letra de trazo propia para las escalas, dibujada con las reglas de las letras de
+  // grabado por fresado: un solo grosor, tramos rectos, giros en ángulo recto, curvas de
+  // cuarto de círculo y extremos redondeados, como si una fresa la trazara de una pasada.
+  // Rejilla de 5 por 8 unidades, con el eje y hacia abajo.
+  var GLIFOS = {
+    '0': [5, 'M1.6 0H3.4A1.6 1.6 0 0 1 5 1.6V6.4A1.6 1.6 0 0 1 3.4 8H1.6A1.6 1.6 0 0 1 0 6.4V1.6A1.6 1.6 0 0 1 1.6 0Z'],
+    '1': [3.4, 'M0.4 1.8L2.4 0V8'],
+    '2': [5, 'M0 1.6A1.6 1.6 0 0 1 1.6 0H3.4A1.6 1.6 0 0 1 5 1.6V2.4A2 2 0 0 1 4.4 3.8L0 8H5'],
+    '3': [5, 'M0 0H5L2.2 3.4H3.4A1.6 1.6 0 0 1 5 5V6.4A1.6 1.6 0 0 1 3.4 8H1.6A1.6 1.6 0 0 1 0 6.4'],
+    '4': [5, 'M3.8 8V0L0 5.6H5'],
+    '5': [5, 'M5 0H0.4L0.2 3.4H3.4A1.6 1.6 0 0 1 5 5V6.4A1.6 1.6 0 0 1 3.4 8H1.6A1.6 1.6 0 0 1 0 6.4'],
+    '6': [5, 'M4.4 0H1.6A1.6 1.6 0 0 0 0 1.6V6.4A1.6 1.6 0 0 0 1.6 8H3.4A1.6 1.6 0 0 0 5 6.4V5A1.6 1.6 0 0 0 3.4 3.4H0'],
+    '7': [5, 'M0 0H5L1.6 8'],
+    '8': [5, 'M1.6 0H3.4A1.6 1.6 0 0 1 5 1.6V2A1.6 1.6 0 0 1 3.4 3.6H1.6A1.6 1.6 0 0 1 0 2V1.6A1.6 1.6 0 0 1 1.6 0ZM1.6 3.6H3.4A1.6 1.6 0 0 1 5 5.2V6.4A1.6 1.6 0 0 1 3.4 8H1.6A1.6 1.6 0 0 1 0 6.4V5.2A1.6 1.6 0 0 1 1.6 3.6Z'],
+    '9': [5, 'M0.6 8H3.4A1.6 1.6 0 0 0 5 6.4V1.6A1.6 1.6 0 0 0 3.4 0H1.6A1.6 1.6 0 0 0 0 1.6V3A1.6 1.6 0 0 0 1.6 4.6H5'],
+    ',': [1.4, 'M0.7 7.2V8L0.2 9.2'],
+    '.': [1.2, 'M0.6 7.7V7.8'],
+    '/': [3, 'M0 8.4L3 -0.4'],
+    '"': [2, 'M0.5 0L0.3 2M1.7 0L1.5 2'],
+    "'": [0.8, 'M0.5 0L0.3 2'],
+    'h': [4.4, 'M0 0V8M0 5A1.6 1.6 0 0 1 1.6 3.4H2.8A1.6 1.6 0 0 1 4.4 5V8'],
+    ' ': [2, '']
+  };
+  var cacheGrabado = {};
+  function grabado(texto, grosor) {
+    var clave = texto + '|' + (grosor || 1);
+    if (cacheGrabado[clave]) return cacheGrabado[clave];
+    var x = 0, trazos = '', ESP = 1.5;
+    for (var i = 0; i < texto.length; i++) {
+      var g = GLIFOS[texto[i]];
+      if (!g) continue;
+      if (g[1]) trazos += '<path transform="translate(' + x.toFixed(2) + ' 0)" d="' + g[1] + '"/>';
+      x += g[0] + ESP;
+    }
+    x -= ESP;
+    var svg = '<svg viewBox="-0.8 -0.8 ' + (x + 1.6).toFixed(2) + ' 9.8" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="' +
+      (grosor || 1) + '" stroke-linecap="round" stroke-linejoin="round">' + trazos + '</g></svg>';
+    cacheGrabado[clave] = svg;
+    return svg;
+  }
+
+  // ------------------------------------------------------------ ruedas
+  // Un componente para las tres ruedas (velocidades y los dos anillos de diafragma).
+  // Física: posición continua en índices; al soltar, inercia con decaimiento exponencial
+  // (constante de tiempo TAU, como el desplazamiento de iOS) y después un muelle con
+  // amortiguamiento crítico hasta la marca más cercana. Fuera de los extremos, el
+  // arrastre se frena y el muelle devuelve la rueda a su sitio.
+  var sinMovimiento = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function crearRueda(o) {
+    var rueda = o.rueda, tambor = o.tambor, MAX = o.etiquetas.length - 1;
+    var PASO = (o.grados || 28) * Math.PI / 180, TAU = 0.33, KM = 170, CM = 2 * Math.sqrt(170);
+    var R = 150, PX = R * PASO;
+    var pos = o.inicial, vel = 0, modo = 'quieta', objetivo = pos, ultimo = 0, anim = null, conducida = false;
+    var arrastre = null, muestras = [], timer = null, actual = o.inicial;
+    var marcas = o.etiquetas.map(function (e, i) {
+      var m = document.createElement('div'), mayor = o.mayor(i);
+      m.className = 'marca' + (mayor ? ' entero' : '');
+      m.dataset.i = String(i);
+      m.innerHTML = o.contenido(e, mayor);
+      tambor.appendChild(m);
+      return m;
+    });
+    function medir() {
+      var ancho = rueda.clientWidth || 300;
+      // radio para que el tambor llene la ventana; con 28 grados entre marcas, la separación
+      // en el centro (R sen 28) supera el ancho de la etiqueta más larga
+      R = Math.max(110, ancho / 2 / Math.sin(82 * Math.PI / 180));
+      PX = R * PASO;
+    }
+    function limitar(i) { return Math.max(0, Math.min(MAX, i)); }
+    function pintar() {
+      var activo = limitar(Math.round(pos));
+      for (var i = 0; i < marcas.length; i++) {
+        var th = (i - pos) * PASO, m = marcas[i];
+        if (Math.abs(th) > 1.5) { m.style.visibility = 'hidden'; continue; }
+        m.style.visibility = 'visible';
+        m.style.transform = 'translateX(' + (R * Math.sin(th)).toFixed(2) + 'px) translateZ(' +
+          (R * (Math.cos(th) - 1)).toFixed(2) + 'px) rotateY(' + (th * 180 / Math.PI).toFixed(2) + 'deg)';
+        m.style.opacity = Math.pow(Math.max(0, Math.cos(th)), 1.6).toFixed(3);
+        m.classList.toggle('activa', i === activo);
+      }
+      if (o.alPintar) o.alPintar(pos, PX);
+      if (activo !== actual) {
+        actual = activo;
+        rueda.setAttribute('aria-valuetext', o.texto(activo));
+        if (!conducida) o.alCambiar(activo);
+      }
+    }
+    function bucle(t) {
+      var dt = Math.min(1 / 30, (t - (ultimo || t)) / 1000);
+      ultimo = t;
+      if (modo === 'inercia') {
+        vel *= Math.exp(-dt / TAU);
+        pos += vel * dt;
+        if (pos < -0.4 || pos > MAX + 0.4) { objetivo = limitar(Math.round(pos)); modo = 'muelle'; }
+        else if (Math.abs(vel) < 2.2) { objetivo = limitar(Math.round(pos + vel * 0.08)); modo = 'muelle'; }
+      } else if (modo === 'muelle') {
+        vel += (-KM * (pos - objetivo) - CM * vel) * dt;
+        pos += vel * dt;
+        if (Math.abs(pos - objetivo) < 0.002 && Math.abs(vel) < 0.02) { pos = objetivo; vel = 0; modo = 'quieta'; }
+      }
+      pintar();
+      if (modo === 'inercia' || modo === 'muelle') anim = requestAnimationFrame(bucle);
+      else { anim = null; ultimo = 0; conducida = false; }
+    }
+    function arrancar(nuevo) {
+      modo = nuevo;
+      if (sinMovimiento && modo !== 'quieta') {
+        pos = modo === 'muelle' ? objetivo : limitar(Math.round(pos)); vel = 0; modo = 'quieta'; pintar(); conducida = false; return;
+      }
+      if (!anim) { ultimo = 0; anim = requestAnimationFrame(bucle); }
+    }
+    function mover(d) {
+      conducida = false;
+      var base = modo === 'muelle' ? objetivo : limitar(Math.round(pos));
+      objetivo = limitar(base + d);
+      arrancar('muelle');
+    }
+    function goma(x) {
+      if (x < 0) return -Math.pow(-x, 0.7) * 0.6;
+      if (x > MAX) return MAX + Math.pow(x - MAX, 0.7) * 0.6;
+      return x;
+    }
+    rueda.addEventListener('pointerdown', function (e) {
+      if (e.button !== undefined && e.button !== 0) return;
+      conducida = false;
+      medir();
+      if (anim) { cancelAnimationFrame(anim); anim = null; }
+      arrastre = { x: e.clientX, y: e.clientY, crudo: pos, movido: 0, id: e.pointerId, horizontal: null };
+      muestras = [{ t: performance.now(), x: e.clientX }];
+      vel = 0; modo = 'arrastre';
+    });
+    rueda.addEventListener('pointermove', function (e) {
+      if (!arrastre || e.pointerId !== arrastre.id) return;
+      var dx = e.clientX - arrastre.x, dy = e.clientY - arrastre.y;
+      if (arrastre.horizontal === null && (Math.abs(dx) > 6 || Math.abs(dy) > 6)) {
+        arrastre.horizontal = Math.abs(dx) >= Math.abs(dy);
+        if (arrastre.horizontal) { try { rueda.setPointerCapture(e.pointerId); } catch (er) {} rueda.classList.add('arrastrando'); }
+      }
+      if (!arrastre.horizontal) return;
+      arrastre.movido += Math.abs(dx);
+      arrastre.crudo -= dx / PX;
+      arrastre.x = e.clientX; arrastre.y = e.clientY;
+      pos = goma(arrastre.crudo);
+      var ahora = performance.now();
+      muestras.push({ t: ahora, x: e.clientX });
+      while (muestras.length > 2 && ahora - muestras[0].t > 100) muestras.shift();
+      pintar();
+    });
+    function soltar(e) {
+      if (!arrastre || (e && e.pointerId !== arrastre.id)) return;
+      rueda.classList.remove('arrastrando');
+      var fueToque = arrastre.horizontal !== true && arrastre.movido < 6;
+      arrastre = null;
+      if (fueToque && e) {
+        var m = e.target.closest ? e.target.closest('.marca') : null;
+        if (m) { objetivo = Number(m.dataset.i); arrancar('muelle'); return; }
+        objetivo = limitar(Math.round(pos)); arrancar('muelle'); return;
+      }
+      var a = muestras[0], b = muestras[muestras.length - 1];
+      var dt = (b.t - a.t) / 1000;
+      vel = dt > 0.008 ? -((b.x - a.x) / PX) / dt : 0;
+      vel = Math.max(-60, Math.min(60, vel));
+      if (pos < 0 || pos > MAX) { objetivo = limitar(Math.round(pos)); arrancar('muelle'); }
+      else if (Math.abs(vel) > 2.2) arrancar('inercia');
+      else { objetivo = limitar(Math.round(pos)); arrancar('muelle'); }
+    }
+    rueda.addEventListener('pointerup', soltar);
+    rueda.addEventListener('pointercancel', soltar);
+    rueda.addEventListener('wheel', function (e) {
+      var d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      if (!d) return;
+      e.preventDefault();
+      conducida = false;
+      medir();
+      if (anim) { cancelAnimationFrame(anim); anim = null; }
+      modo = 'quieta';
+      pos = limitar(pos + d / PX * 0.5);
+      pintar();
+      clearTimeout(timer);
+      timer = setTimeout(function () { objetivo = limitar(Math.round(pos)); arrancar('muelle'); }, 120);
+    }, { passive: false });
+    rueda.addEventListener('keydown', function (ev) {
+      if (ev.key === 'ArrowRight') { mover(1); ev.preventDefault(); }
+      if (ev.key === 'ArrowLeft') { mover(-1); ev.preventDefault(); }
+    });
+    if (o.menos) o.menos.addEventListener('click', function () { mover(-1); });
+    if (o.mas) o.mas.addEventListener('click', function () { mover(1); });
+    window.addEventListener('resize', function () { medir(); pintar(); });
+    rueda.setAttribute('aria-valuetext', o.texto(o.inicial));
+    return {
+      iniciar: function () { medir(); pintar(); },
+      // la mueve otra rueda: anima hasta i sin avisar con alCambiar, para no realimentar
+      seguir: function (i) {
+        conducida = true; medir();
+        objetivo = limitar(i); arrancar('muelle');
+      },
+      sincronizar: function (i) {
+        if (modo === 'quieta' && Math.round(pos) !== i) { pos = i; objetivo = i; actual = i; pintar(); }
+      }
+    };
+  }
+
+  var ICONOS = {
+    agua: '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 9c2.5-2.5 5-2.5 7.5 0s5 2.5 7.5 0 3.5-2 5-1M2 15c2.5-2.5 5-2.5 7.5 0s5 2.5 7.5 0 3.5-2 5-1"/></svg>',
+    nubes: '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M7 18h10a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.2 9.1 4.5 4.5 0 0 0 7 18z"/></svg>',
+    gente: '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="5" r="2.5"/><path d="M12 9v6M8.5 21l3.5-6 3.5 6M7.5 12h9"/></svg>',
+    estrellas: '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.1 1.2 6L12 16.4 6.6 19.4l1.2-6L3.3 9.3l6.1-.7z"/></svg>'
+  };
+  // ------------------------------------------------------------ datos
+  var FORMATOS = [
+    { id: '135', n: '24×36', L: 36, corto: 24, coc: 0.03 },
+    { id: 'dig', n: '60 MP', L: 36, corto: 24, coc: 0.0076, px: 0.0038 },
+    { id: '66', n: '6×6', L: 56, corto: 56, coc: 0.05 },
+    { id: '67', n: '6×7', L: 70, corto: 56, coc: 0.055 },
+    { id: '45', n: '4×5', L: 121, corto: 97, coc: 0.1 }
+  ];
+  var FOCALES = [14, 16, 18, 21, 24, 28, 35, 40, 50, 65, 75, 80, 90, 100, 110, 135, 150, 180, 210, 250, 300, 400];
+  var PRESETS = {
+    agua: [{ v: 0.5, n: 'Río', u: '0,5 s' }, { v: 3, n: 'Marejada', u: '3 s' }, { v: 10, n: 'Mar de fondo', u: '10 s' }],
+    viento: [{ v: 10, n: 'Calma', u: '10 km/h' }, { v: 30, n: 'Brisa', u: '30 km/h' }, { v: 60, n: 'Viento', u: '60 km/h' }],
+    dist: [{ v: 1, n: 'Cerca', u: '1 km' }, { v: 3, n: 'Media', u: '3 km' }, { v: 8, n: 'Horizonte', u: '8 km' }],
+    quieto: [{ v: 0.3, n: 'De paso', u: '0,3 s' }, { v: 3, n: 'Se para', u: '3 s' }, { v: 20, n: 'Posa', u: '20 s' }],
+    dec: [{ v: 0, n: 'Ecuador', u: '0°' }, { v: 45, n: 'Media', u: '45°' }, { v: 80, n: 'Polo', u: '80°' }]
+  };
+  var K0 = -15, K1 = 42;   // anillo de 1/30 s a 4 h en tercios de paso; valor exacto 2^(k/3)
+  var MAYORES = { '-5': '1/30', '-4': '1/15', '-3': '1/8', '-2': '1/4', '-1': '1/2', '0': '1"', '1': '2"', '2': '4"', '3': '8"',
+    '4': '15"', '5': '30"', '6': "1'", '7': "2'", '8': "4'", '9': "8'", '10': "15'", '11': "30'", '12': '1h', '13': '2h', '14': '4h' };
+  var ETQ = [];
+  for (var kk = K0; kk <= K1; kk++) ETQ.push(kk % 3 === 0 ? MAYORES[String(kk / 3)] : '');
+  var TMIN = Math.pow(2, K0 / 3), TMAX = Math.pow(2, K1 / 3);
+
+  // ------------------------------------------------------------ estado
+  var estado = {
+    escena: ['agua', 'nubes'], deseo: { agua: 3, nubes: 2, gente: 3, estrellas: 0 },
+    k: 24, formato: '135', focal: 35, agua: 3, viento: 30, dist: 3, quieto: 3, dec: 0
+  };
+  try {
+    var g = JSON.parse(localStorage.getItem('filtro-temporal-2') || 'null');
+    if (g && typeof g === 'object') {
+      var d = Object.assign({}, estado.deseo, g.deseo || {});
+      estado = Object.assign(estado, g); estado.deseo = d;
+    }
+  } catch (e) { /* sin almacenamiento: valores de ejemplo */ }
+  function guardar() { try { localStorage.setItem('filtro-temporal-2', JSON.stringify(estado)); } catch (e) {} }
+  var $ = function (id) { return document.getElementById(id); };
+  function fmt() { return FORMATOS.filter(function (x) { return x.id === estado.formato; })[0] || FORMATOS[0]; }
+
+  // ------------------------------------------------------------ física
+  function sinc(u) { return u < 1e-6 ? 1 : Math.sin(Math.PI * u) / (Math.PI * u); }
+  // respuesta de la ventana rectangular promediada en media octava alrededor de x = T/P:
+  // ni las olas ni el viento tienen un periodo único
+  function residuo(x) {
+    if (x <= 0) return 1;
+    var s = 0, n = 24;
+    for (var i = 0; i < n; i++) { var u = x * Math.pow(2, (i / (n - 1) - 0.5)); s += sinc(u) * sinc(u); }
+    return Math.sqrt(s / n);
+  }
+  var cacheRes = {};
+  function tiempoResiduo(P, umbral) {
+    var c = P + '|' + umbral;
+    if (cacheRes[c]) return cacheRes[c];
+    for (var e = -6; e <= 16; e += 1 / 48) {
+      var T = P * Math.pow(2, e);
+      if (residuo(T / P) <= umbral) return (cacheRes[c] = T);
+    }
+    return Infinity;
+  }
+  function wNube() { return (estado.viento / 3.6) / (estado.dist * 1000); }       // rad/s
+  function wEstrella() { return 7.2921e-5 * Math.cos(estado.dec * Math.PI / 180); } // rad/s
+
+  // Cada elemento: sus efectos, de menos a más fundido, y los tiempos que los separan
+  var ELEMENTOS = {
+    agua: {
+      nombre: 'Agua', efectos: ['Nítida', 'Movida', 'Sedosa', 'Lisa'],
+      frases: ['agua nítida', 'agua movida', 'agua sedosa', 'agua lisa'],
+      limites: function () { var P = estado.agua; return [tiempoResiduo(P, 0.6), tiempoResiduo(P, 0.25), tiempoResiduo(P, 0.08)]; },
+      queda: function (T) { return residuo(T / estado.agua); },
+      tiempoCar: function () { return estado.agua; },
+      texto: function (T) {
+        var P = estado.agua, n = T / P;
+        return n < 1 ? 'La toma dura menos que una ola de ' + coma(P, P < 1 ? 1 : 0) + ' s.'
+          : 'Pasan <b>' + veces(n) + '</b> olas de ' + coma(P, P < 1 ? 1 : 0) + ' s; queda un <b>' + pc(residuo(n)) + '</b> de su relieve.';
+      }
+    },
+    nubes: {
+      nombre: 'Nubes', efectos: ['Quietas', 'Suaves', 'Estelas', 'Velo'],
+      frases: ['nubes quietas', 'nubes suaves', 'nubes en estelas', 'nubes en velo'],
+      limites: function () { var f = estado.focal, w = wNube(), F = fmt(); return [F.coc / (f * w), 0.02 * F.L / (f * w), 0.15 * F.L / (f * w)]; },
+      queda: function (T) { var F = fmt(); return residuo(T / (0.05 * F.L / (estado.focal * wNube()))); },
+      tiempoCar: function () { return 0.05 * fmt().L / (estado.focal * wNube()); },
+      texto: function (T) {
+        var F = fmt(), Ln = estado.focal * wNube() * T, fr = Ln / F.L;
+        return 'Recorren <b>' + mm(Ln) + '</b> en el negativo, ' + (fr < 1 ? 'el <b>' + pc(fr) + '</b> del lado largo.' : '<b>' + coma(fr, 1) + '</b> veces el lado largo.');
+      }
+    },
+    gente: {
+      nombre: 'Gente', efectos: ['Visible', 'Fantasma', 'Fantasma tenue', 'Desaparece'],
+      frases: ['gente visible', 'gente como fantasma', 'gente como fantasma tenue', 'gente que desaparece'],
+      limites: function () { var t = estado.quieto; return [2 * t, 8 * t, 32 * t]; },
+      queda: function (T) { return Math.min(1, estado.quieto / T); },
+      tiempoCar: function () { return estado.quieto; },
+      texto: function (T) {
+        var t = estado.quieto;
+        if (t >= T) return 'Quien se queda ' + coma(t, t < 1 ? 1 : 0) + ' s está quieto toda la toma.';
+        return 'Quien se queda ' + coma(t, t < 1 ? 1 : 0) + ' s queda <b>' + coma(Math.log2(T / t), 1) + '</b> pasos por debajo del fondo. Un coche a 50 km/h recorre <b>' + metros(50 / 3.6 * T) + '</b>.';
+      }
+    },
+    estrellas: {
+      nombre: 'Estrellas', efectos: ['Puntos', 'Alargadas', 'Trazos'],
+      frases: ['estrellas en puntos', 'estrellas alargadas', 'estrellas en trazos'],
+      limites: function () { var tE = fmt().coc / (estado.focal * wEstrella()); return [tE, 4 * tE]; },
+      queda: function (T) { var F = fmt(), Le = estado.focal * wEstrella() * T; return Math.min(1, F.coc / Math.max(Le, 1e-9)); },
+      tiempoCar: function () { return fmt().coc / (estado.focal * wEstrella()); },
+      texto: function (T) {
+        var F = fmt(), Le = estado.focal * wEstrella() * T, arco = wEstrella() * T * 180 / Math.PI;
+        return 'Se desplazan <b>' + mm(Le) + '</b> en el negativo' + (F.px ? ' (<b>' + veces(Le / F.px) + '</b> píxeles)' : '') + ', ' + coma(arco, arco < 1 ? 2 : 1) + '° de arco.';
+      }
+    }
+  };
+  var ORDEN = ['agua', 'nubes', 'gente', 'estrellas'];
+  function intervalo(id, i) {
+    var lim = ELEMENTOS[id].limites();
+    return [i === 0 ? 0 : lim[i - 1], i === lim.length ? Infinity : lim[i]];
+  }
+  function efectoCon(id, T) {
+    var lim = ELEMENTOS[id].limites(), i = 0;
+    while (i < lim.length && T >= lim[i]) i++;
+    return i;
+  }
+
+  // ------------------------------------------------------------ formato de números
+  function pc(a) { return a >= 0.995 ? '100 %' : (a < 0.01 ? coma(a * 100, a < 0.001 ? 2 : 1) + ' %' : Math.round(a * 100) + ' %'); }
+  function mm(x) { return x < 0.1 ? coma(x * 1000, 0) + ' µm' : coma(x, x < 10 ? (x < 1 ? 2 : 1) : 0) + ' mm'; }
+  function metros(x) { return x < 1000 ? Math.round(x) + ' m' : coma(x / 1000, x < 10000 ? 1 : 0) + ' km'; }
+  function veces(n) { return n < 10 ? coma(n, 1) : Math.round(n).toLocaleString('es-ES'); }
+  function tc(t) {
+    if (!isFinite(t) || t > TMAX * 1.05) return 'más de 4 h';
+    if (t < TMIN) return 'menos de 1/30';
+    return corto(t);
+  }
+  function kDe(t, haciaAbajo) {
+    var k = 3 * Math.log2(Math.max(TMIN, Math.min(TMAX, t)));
+    return Math.max(K0, Math.min(K1, haciaAbajo ? Math.floor(k + 1e-9) : Math.ceil(k - 1e-9)));
+  }
+
+  // ------------------------------------------------------------ paso 1: escena
+  ORDEN.forEach(function (id) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'ficha'; b.dataset.id = id;
+    b.innerHTML = ICONOS[id] + ELEMENTOS[id].nombre;
+    b.addEventListener('click', function () {
+      var i = estado.escena.indexOf(id);
+      if (i >= 0) estado.escena.splice(i, 1); else estado.escena.push(id);
+      estado.escena.sort(function (a, c) { return ORDEN.indexOf(a) - ORDEN.indexOf(c); });
+      construirDeseos(); actualizar(); guardar();
+    });
+    $('escena').appendChild(b);
+  });
+
+  function botones(cont, lista, alPulsar) {
+    cont.innerHTML = '';
+    lista.forEach(function (o) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.dataset.v = o.v;
+      b.innerHTML = o.n + (o.u ? '<small>' + o.u + '</small>' : '');
+      b.addEventListener('click', function () { alPulsar(o.v); });
+      cont.appendChild(b);
+    });
+    cont.style.gridTemplateColumns = 'repeat(' + lista.length + ', 1fr)';
+  }
+  function parametro(clave) {
+    return function (v) { estado[clave] = v; actualizar(); guardar(); };
+  }
+  botones($('formato'), FORMATOS.map(function (F) { return { v: F.id, n: F.n }; }), parametro('formato'));
+  function cambiarFocal(dd) {
+    var i = FOCALES.indexOf(estado.focal);
+    if (i < 0) i = FOCALES.indexOf(35);
+    estado.focal = FOCALES[Math.max(0, Math.min(FOCALES.length - 1, i + dd))];
+    actualizar(); guardar();
+  }
+  $('f-menos').addEventListener('click', function () { cambiarFocal(-1); });
+  $('f-mas').addEventListener('click', function () { cambiarFocal(1); });
+
+  // ------------------------------------------------------------ paso 2: cómo lo quieres
+  var PARAMS = { agua: [['agua', 'Oleaje']], nubes: [['viento', 'Viento a su altura'], ['dist', 'Distancia']], gente: [['quieto', 'Cuánto se queda quieta']], estrellas: [['dec', 'Declinación']] };
+  function construirDeseos() {
+    var cont = $('deseos');
+    cont.innerHTML = '';
+    estado.escena.forEach(function (id) {
+      var E = ELEMENTOS[id], art = document.createElement('article');
+      art.className = 'fen';
+      var h = '<header><h3>' + ICONOS[id] + E.nombre + '</h3><span class="veredicto" id="rango-' + id + '"></span></header>';
+      PARAMS[id].forEach(function (p) { h += '<span class="subetq">' + p[1] + '</span><div class="segmentos" id="p-' + p[0] + '"></div>'; });
+      h += '<span class="subetq">Cómo lo quieres</span><div class="segmentos efectos" id="d-' + id + '"></div>';
+      art.innerHTML = h;
+      cont.appendChild(art);
+      PARAMS[id].forEach(function (p) { botones($('p-' + p[0]), PRESETS[p[0]], parametro(p[0])); });
+      botones($('d-' + id), E.efectos.map(function (n, i) { return { v: i, n: n }; }), function (v) {
+        estado.deseo[id] = v; actualizar(); guardar();
+      });
+    });
+    $('vacio').hidden = estado.escena.length > 0;
+  }
+
+  // ------------------------------------------------------------ paso 3: tiempo
+  var mol = $('mol-t');
+  var rueda = crearRueda({
+    rueda: $('rueda-t'), tambor: $('tambor-t'), etiquetas: ETQ, inicial: estado.k - K0, grados: 13,
+    menos: $('t-menos'), mas: $('t-mas'),
+    mayor: function (i) { return i % 3 === 0; },
+    contenido: function (e, mayor) { return mayor ? '<span aria-hidden="true">' + grabado(e, 1.05) + '</span>' : '<span class="punto"></span>'; },
+    texto: function (i) { return texto(Math.pow(2, (K0 + i) / 3)); },
+    alPintar: function (p, px) { mol.style.backgroundPosition = (-p * px).toFixed(1) + 'px 0'; },
+    alCambiar: function (i) { estado.k = K0 + i; actualizar(true); guardar(); }
+  });
+  function usar(k) { estado.k = k; actualizar(); guardar(); }
+
+  function recomendar() {
+    var cont = $('recomendacion'), sel = estado.escena;
+    if (!sel.length) { cont.innerHTML = '<p>Elige primero qué hay en la escena.</p>'; return; }
+    var lo = 0, hi = Infinity, idLo = null, idHi = null;
+    sel.forEach(function (id) {
+      var iv = intervalo(id, Math.min(estado.deseo[id], ELEMENTOS[id].efectos.length - 1));
+      if (iv[0] > lo) { lo = iv[0]; idLo = id; }
+      if (iv[1] < hi) { hi = iv[1]; idHi = id; }
+    });
+    var frases = sel.map(function (id) { return ELEMENTOS[id].frases[estado.deseo[id]]; });
+    var lista = frases.length > 1 ? frases.slice(0, -1).join(', ') + ' y ' + frases[frases.length - 1] : frases[0];
+    var h = '';
+    if (lo <= hi) {
+      var k = lo > 0 ? kDe(lo, false) : kDe(hi, true);
+      if (Math.pow(2, k / 3) > hi * 1.0001 && lo > 0) k = kDe(Math.sqrt(lo * Math.min(hi, TMAX)), false);
+      var rango = lo > 0 && isFinite(hi) ? 'entre <b>' + tc(lo) + '</b> y <b>' + tc(hi) + '</b>' : lo > 0 ? 'desde <b>' + tc(lo) + '</b>' : isFinite(hi) ? 'hasta <b>' + tc(hi) + '</b>' : 'con cualquier tiempo';
+      h += '<p>Para ' + lista + ': ' + rango + '.' + (lo > TMAX ? ' Pasa de las 4 horas del anillo: piensa en apilar varias tomas.' : '') + '</p>';
+      var tk = Math.pow(2, k / 3);
+      h += '<div class="acciones-rec"><button type="button" class="iniciar" data-k="' + k + '">Usar ' + texto(tk) + '</button></div>';
+      h += '<p class="nota">' + (lo > 0 ? 'Es el tiempo más corto que lo consigue, redondeado al tercio de paso.' : 'Es el tiempo más largo que lo mantiene, redondeado al tercio de paso.') + ' También puedes elegir otro con el anillo.</p>';
+    } else {
+      var a = ELEMENTOS[idLo], b = ELEMENTOS[idHi];
+      h += '<p class="choque">No caben a la vez: ' + a.frases[estado.deseo[idLo]] + ' pide al menos <b>' + tc(lo) + '</b> y ' + b.frases[estado.deseo[idHi]] + ' como mucho <b>' + tc(hi) + '</b>.</p>';
+      var ka = kDe(lo, false), kb = kDe(hi, true);
+      // qué se queda sin cumplir con cada opción
+      var fallan = function (k) {
+        var T = Math.pow(2, k / 3), f = sel.filter(function (id) { return efectoCon(id, T) !== estado.deseo[id]; });
+        return f.map(function (id) { return ELEMENTOS[id].frases[efectoCon(id, T)]; });
+      };
+      var lineaFallos = function (k) {
+        var f = fallan(k);
+        return f.length ? '<p class="nota">Con ese tiempo saldría ' + (f.length > 1 ? f.slice(0, -1).join(', ') + ' y ' + f[f.length - 1] : f[0]) + '.</p>' : '';
+      };
+      h += '<div class="acciones-rec">' +
+        '<button type="button" class="iniciar" data-k="' + ka + '">Prioriza ' + a.nombre.toLowerCase() + ' · ' + texto(Math.pow(2, ka / 3)) + '</button>' + lineaFallos(ka) +
+        '<button type="button" class="iniciar secundario" data-k="' + kb + '">Prioriza ' + b.nombre.toLowerCase() + ' · ' + texto(Math.pow(2, kb / 3)) + '</button>' + lineaFallos(kb) + '</div>';
+    }
+    cont.innerHTML = h;
+    Array.prototype.forEach.call(cont.querySelectorAll('button[data-k]'), function (bt) {
+      bt.addEventListener('click', function () { usar(Number(bt.dataset.k)); });
+    });
+  }
+
+  // ------------------------------------------------------------ paso 4: así sale
+  function resultados(T) {
+    var cont = $('resultados'), h = '', resumen = [];
+    estado.escena.forEach(function (id) {
+      var E = ELEMENTOS[id], i = efectoCon(id, T), quiero = estado.deseo[id], ok = i === quiero;
+      resumen.push(E.frases[i]);
+      h += '<div class="res' + (ok ? ' ok' : '') + '"><div class="res-cab"><b>' + ICONOS[id] + E.nombre + '</b><span>' + E.efectos[i] +
+        (ok ? ' <i class="marca-ok" aria-label="como querías">✓</i>' : ' <em>querías ' + E.efectos[quiero].toLowerCase() + '</em>') + '</span></div>' +
+        '<div class="barra"><div class="pista-b"><i style="width:' + (Math.max(0, Math.min(1, E.queda(T))) * 100).toFixed(1) + '%"></i></div><output>queda ' + pc(E.queda(T)) + '</output></div>' +
+        '<p>' + E.texto(T) + '</p></div>';
+    });
+    cont.innerHTML = h || '<p class="nota">Sin elementos en la escena.</p>';
+    return resumen;
+  }
+
+  function marcar(cont, valor) {
+    if (!cont) return;
+    Array.prototype.forEach.call(cont.querySelectorAll('button'), function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.v) === String(valor) ? 'true' : 'false');
+    });
+  }
+
+  function actualizar(desdeRueda) {
+    document.querySelectorAll('#escena .ficha').forEach(function (b) {
+      b.setAttribute('aria-pressed', estado.escena.indexOf(b.dataset.id) >= 0 ? 'true' : 'false');
+    });
+    var optica = estado.escena.indexOf('nubes') >= 0 || estado.escena.indexOf('estrellas') >= 0;
+    $('optica').hidden = !optica;
+    marcar($('formato'), estado.formato);
+    $('focal').textContent = estado.focal + ' mm';
+    ['agua', 'viento', 'dist', 'quieto', 'dec'].forEach(function (c) { marcar($('p-' + c), estado[c]); });
+    estado.escena.forEach(function (id) {
+      marcar($('d-' + id), estado.deseo[id]);
+      var iv = intervalo(id, estado.deseo[id]);
+      $('rango-' + id).textContent = iv[0] > 0 && isFinite(iv[1]) ? tc(iv[0]) + ' a ' + tc(iv[1]) : iv[0] > 0 ? 'desde ' + tc(iv[0]) : 'hasta ' + tc(iv[1]);
+    });
+    recomendar();
+    if (!desdeRueda) rueda.sincronizar(estado.k - K0);
+    var T = Math.pow(2, estado.k / 3);
+    $('res-tiempo').innerHTML = partes(T).map(function (p) { return p[0] + (p[1] ? '<span class="ud">' + p[1] + '</span>' : ''); }).join('');
+    var resumen = resultados(T);
+    $('mini-t').textContent = texto(T);
+    $('mini-s').textContent = resumen.join(' · ') || 'Elige la escena';
+    simular(T);
+    var tiempos = {};
+    estado.escena.forEach(function (id) { tiempos[id] = ELEMENTOS[id].tiempoCar(); });
+    dibujar(T, tiempos);
+  }
+
+  // ------------------------------------------------------------ simulación
+  // Escena esquemática en blanco y negro, a escala con el formato y la focal: las estelas de
+  // las nubes y de las estrellas miden en la imagen lo mismo que en el negativo, el agua
+  // conserva el relieve que deja pasar el filtro y la figura se desvanece con τ/T.
+  function azar(semilla) {
+    return function () {
+      semilla |= 0; semilla = semilla + 0x6D2B79F5 | 0;
+      var t = Math.imul(semilla ^ semilla >>> 15, 1 | semilla);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  var capas = { clave: '' };
+  function lienzo(w, h) { var c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
+  function prepararCapas(W, H, hz, noche) {
+    var clave = [W, H, hz, noche].join('|');
+    if (capas.clave === clave) return;
+    capas.clave = clave;
+    // nubes, periódicas en horizontal para poder barrerlas sin bordes
+    var r = azar(7), cn = lienzo(W, hz), x = cn.getContext('2d');
+    var color = noche ? '74,74,80' : '255,255,255';
+    for (var n = 0; n < 16; n++) {
+      var cx = r() * W, cy = hz * (0.12 + 0.7 * r()), esc = (0.5 + 0.9 * r()) * (0.35 + 0.65 * (1 - cy / hz)) * H * 0.09;
+      for (var b = 0; b < 9; b++) {
+        var bx = cx + (r() - 0.5) * esc * 4, by = cy + (r() - 0.5) * esc * 0.9, br = esc * (0.6 + r() * 0.8);
+        [-W, 0, W].forEach(function (dx) {
+          var gr = x.createRadialGradient(bx + dx, by, 0, bx + dx, by, br);
+          gr.addColorStop(0, 'rgba(' + color + ',' + (noche ? 0.95 : 0.8) + ')');
+          gr.addColorStop(1, 'rgba(' + color + ',0)');
+          x.fillStyle = gr; x.beginPath(); x.arc(bx + dx, by, br, 0, 2 * Math.PI); x.fill();
+        });
+      }
+    }
+    capas.nubes = cn;
+    // relieve del agua: trazos claros y oscuros que crecen hacia el primer plano
+    var ca = lienzo(W, H - hz), y = ca.getContext('2d'), ra = azar(11);
+    for (var fy = 0; fy < H - hz;) {
+      var prof = fy / (H - hz), alto = 1 + prof * prof * H * 0.018;
+      for (var k = 0; k < 6 + prof * 10; k++) {
+        var lx = ra() * W, largo = (0.03 + 0.08 * ra()) * W * (0.4 + prof);
+        y.fillStyle = ra() < 0.5 ? (noche ? 'rgba(90,90,96,0.8)' : 'rgba(235,235,235,0.75)') : (noche ? 'rgba(0,0,0,0.8)' : 'rgba(40,40,40,0.55)');
+        y.beginPath(); y.ellipse(lx, fy, largo / 2, alto / 2, 0, 0, 2 * Math.PI); y.fill();
+      }
+      fy += Math.max(1, alto * 1.3);
+    }
+    capas.agua = ca;
+    // estrellas: posiciones y brillo fijos
+    var rs = azar(23); capas.estrellas = [];
+    for (var s = 0; s < 160; s++) capas.estrellas.push([rs() * W, rs() * hz * 0.98, 0.35 + 0.65 * Math.pow(rs(), 2)]);
+  }
+
+  function simular(T) {
+    var c = $('sim'), marco = $('sim-marco');
+    var F = fmt(), dpr = Math.min(2, window.devicePixelRatio || 1);
+    var cw = marco.clientWidth || 340, ch = Math.round(cw * F.corto / F.L);
+    var W = Math.round(cw * dpr), H = Math.round(ch * dpr);
+    if (c.width !== W || c.height !== H) { c.width = W; c.height = H; c.style.height = ch + 'px'; }
+    var x = c.getContext('2d'), sel = estado.escena;
+    var tiene = function (id) { return sel.indexOf(id) >= 0; };
+    var noche = tiene('estrellas'), agua = tiene('agua');
+    var hz = Math.round(H * (agua ? 0.58 : 0.7));
+    prepararCapas(W, H, hz, noche);
+    var esc = W / F.L;   // píxeles por milímetro de negativo
+
+    // cielo
+    var gc = x.createLinearGradient(0, 0, 0, hz);
+    gc.addColorStop(0, noche ? '#09090b' : '#8a8a8a'); gc.addColorStop(1, noche ? '#2b2b30' : '#dadada');
+    x.fillStyle = gc; x.fillRect(0, 0, W, hz);
+
+    // estrellas: arcos alrededor de un polo fuera del encuadre
+    if (noche) {
+      var lpx = estado.focal * wEstrella() * T * esc;
+      var px0 = W * 0.5, py0 = -H * 0.9, rc = Math.hypot(W * 0.5 - px0, H * 0.4 - py0);
+      var dphi = Math.min(2 * Math.PI, lpx / rc);
+      x.lineCap = 'round'; x.lineWidth = Math.max(1, 1.3 * dpr);
+      capas.estrellas.forEach(function (st) {
+        var dx = st[0] - px0, dy = st[1] - py0, r = Math.hypot(dx, dy), a0 = Math.atan2(dy, dx), arco = r * dphi;
+        var alfa = st[2] * Math.max(0.16, Math.min(1, 2.2 * dpr / (arco + 2.2 * dpr)));
+        x.strokeStyle = 'rgba(255,255,255,' + alfa.toFixed(3) + ')';
+        x.beginPath();
+        if (arco < 1) { x.arc(st[0], st[1], x.lineWidth * 0.55, 0, 2 * Math.PI); x.fillStyle = x.strokeStyle; x.fill(); }
+        else { x.arc(px0, py0, r, a0, a0 + dphi); x.stroke(); }
+      });
+    }
+
+    // nubes: media de copias desplazadas a lo largo de la estela, sumadas en modo aditivo
+    if (tiene('nubes')) {
+      var spx = estado.focal * wNube() * T * esc, N = Math.max(1, Math.min(64, Math.ceil(spx / (1.5 * dpr))));
+      var acc = lienzo(W, hz), ax = acc.getContext('2d');
+      ax.globalCompositeOperation = 'lighter';
+      ax.globalAlpha = 1 / N;
+      for (var j = 0; j < N; j++) {
+        var off = N === 1 ? 0 : (spx * j / (N - 1)) % W;
+        ax.drawImage(capas.nubes, off, 0); ax.drawImage(capas.nubes, off - W, 0);
+      }
+      x.drawImage(acc, 0, 0);
+    }
+
+    // agua o tierra
+    if (agua) {
+      var ga = x.createLinearGradient(0, hz, 0, H);
+      ga.addColorStop(0, noche ? '#232327' : '#bdbdbd'); ga.addColorStop(1, noche ? '#0c0c0e' : '#6b6b6b');
+      x.fillStyle = ga; x.fillRect(0, hz, W, H - hz);
+      x.globalAlpha = Math.max(0, Math.min(1, ELEMENTOS.agua.queda(T)));
+      x.drawImage(capas.agua, 0, hz);
+      x.globalAlpha = 1;
+    } else {
+      var gt = x.createLinearGradient(0, hz, 0, H);
+      gt.addColorStop(0, noche ? '#141416' : '#5a5a5a'); gt.addColorStop(1, noche ? '#060607' : '#2c2c2c');
+      x.fillStyle = gt; x.fillRect(0, hz, W, H - hz);
+    }
+    x.fillStyle = noche ? '#3a3a40' : '#f0f0f0'; x.globalAlpha = 0.35; x.fillRect(0, hz - Math.max(1, dpr), W, Math.max(1, dpr)); x.globalAlpha = 1;
+
+    // lo que no se mueve: postes en el agua o un árbol en tierra
+    var oscuro = noche ? '#020203' : '#141414';
+    x.fillStyle = oscuro; x.strokeStyle = oscuro;
+    if (agua) {
+      for (var p = 0; p < 8; p++) {
+        var t = p / 7, persp = 1 - 0.82 * t;
+        var bx = W * (0.1 + 0.36 * t), by = hz + (H - hz) * (0.88 - 0.82 * t);
+        var ancho = W * 0.012 * persp, alto = H * 0.2 * persp;
+        x.fillRect(bx - ancho / 2, by - alto, ancho, alto);
+        x.globalAlpha = 0.35 + 0.4 * (1 - ELEMENTOS.agua.queda(T));
+        x.fillRect(bx - ancho / 2, by, ancho, alto * 0.45);
+        x.globalAlpha = 1;
+      }
+    } else {
+      var tx = W * 0.3, ty = hz + (H - hz) * 0.35;
+      x.lineWidth = W * 0.008; x.lineCap = 'round';
+      x.beginPath(); x.moveTo(tx, ty); x.lineTo(tx, ty - H * 0.22); x.stroke();
+      x.beginPath(); x.ellipse(tx, ty - H * 0.3, W * 0.06, H * 0.11, 0, 0, 2 * Math.PI); x.fill();
+    }
+
+    // la figura: un embarcadero si hay agua, y encima alguien que se desvanece con τ/T
+    if (tiene('gente')) {
+      var suelo = agua ? hz + (H - hz) * 0.62 : hz + (H - hz) * 0.7, fx = W * 0.74, alto = H * 0.17;
+      if (agua) { x.fillStyle = oscuro; x.fillRect(W * 0.62, suelo, W * 0.38, H * 0.025); x.fillRect(W * 0.66, suelo, W * 0.008, H * 0.12); x.fillRect(W * 0.86, suelo, W * 0.008, H * 0.12); }
+      x.globalAlpha = Math.max(0, Math.min(1, ELEMENTOS.gente.queda(T)));
+      x.fillStyle = oscuro;
+      x.beginPath(); x.arc(fx, suelo - alto * 0.88, alto * 0.11, 0, 2 * Math.PI); x.fill();
+      x.beginPath();
+      if (x.roundRect) x.roundRect(fx - alto * 0.13, suelo - alto * 0.75, alto * 0.26, alto * 0.45, alto * 0.08); else x.rect(fx - alto * 0.13, suelo - alto * 0.75, alto * 0.26, alto * 0.45);
+      x.fill();
+      x.fillRect(fx - alto * 0.11, suelo - alto * 0.32, alto * 0.09, alto * 0.32);
+      x.fillRect(fx + alto * 0.02, suelo - alto * 0.32, alto * 0.09, alto * 0.32);
+      x.globalAlpha = 1;
+    }
+  }
+  window.addEventListener('resize', function () { capas.clave = ''; simular(Math.pow(2, estado.k / 3)); });
+
+  // ------------------------------------------------------------ gráfico
+  function dibujar(T, tiempos) {
+    var W = 560, H = 320, ml = 52, mr = 16, mt = 48, mb = 40, xmin = -1, xmax = 4;
+    var X = function (v) { return ml + (v - xmin) / (xmax - xmin) * (W - ml - mr); };
+    var Y = function (v) { return H - mb - v * (H - mt - mb); };
+    var et = { '-1': '0,1 s', '0': '1 s', '1': '10 s', '2': '100 s', '3': '17 min', '4': '2,8 h' };
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Respuesta temporal de la exposición">';
+    var lT = Math.max(xmin, Math.min(xmax, Math.log10(T)));
+    s += '<rect class="zona-t" x="' + X(xmin) + '" y="' + Y(1) + '" width="' + (X(lT) - X(xmin)) + '" height="' + (Y(0) - Y(1)) + '"/>';
+    for (var v = xmin; v <= xmax; v++) {
+      s += '<line class="rej" x1="' + X(v) + '" y1="' + Y(0) + '" x2="' + X(v) + '" y2="' + Y(1) + '"/>';
+      s += '<text x="' + X(v) + '" y="' + (H - mb + 26) + '" text-anchor="' + (v === xmax ? 'end' : v === xmin ? 'start' : 'middle') + '">' + et[v] + '</text>';
+    }
+    [0, 0.5, 1].forEach(function (q) {
+      s += '<line class="rej" x1="' + X(xmin) + '" y1="' + Y(q) + '" x2="' + X(xmax) + '" y2="' + Y(q) + '"/>';
+      s += '<text x="' + (ml - 8) + '" y="' + (Y(q) + 5) + '" text-anchor="end">' + Math.round(q * 100) + '</text>';
+    });
+    var dS = '', dE = '';
+    for (var i = 0; i <= 300; i++) {
+      var lt = xmin + (xmax - xmin) * i / 300, t = Math.pow(10, lt);
+      dS += (i ? ' L ' : 'M ') + X(lt).toFixed(1) + ',' + Y(Math.abs(sinc(T / t))).toFixed(1);
+      dE += (i ? ' L ' : 'M ') + X(lt).toFixed(1) + ',' + Y(residuo(T / t)).toFixed(1);
+    }
+    s += '<path class="sinc" d="' + dS + '"/><path class="env" d="' + dE + '"/>';
+    s += '<line class="tline" x1="' + X(lT) + '" y1="' + Y(0) + '" x2="' + X(lT) + '" y2="' + (Y(1) - 6) + '"/>';
+    s += '<text class="fuerte" x="' + X(lT) + '" y="' + (Y(1) - 12) + '" text-anchor="middle">T</text>';
+    if (X(lT) - X(xmin) > 110) s += '<text x="' + (X(lT) - 10) + '" y="' + (Y(1) + 24) + '" text-anchor="end">se funde</text>';
+    if (X(xmax) - X(lT) > 110) s += '<text x="' + (X(lT) + 10) + '" y="' + (Y(1) + 24) + '">se queda</text>';
+    // marcadores sobre la curva; las etiquetas van en una fila con guías hasta su punto,
+    // repartidas para que no se pisen y agrupadas si dos caen en el mismo sitio
+    var puntos = [];
+    Object.keys(tiempos).forEach(function (k) {
+      var lt = Math.max(xmin, Math.min(xmax, Math.log10(tiempos[k])));
+      var px = X(lt), py = Y(residuo(T / Math.pow(10, lt)));
+      var mismo = puntos.filter(function (q) { return Math.abs(q.x - px) < 3; })[0];
+      if (mismo) mismo.n += ' y ' + k; else puntos.push({ n: k, x: px, y: py });
+    });
+    puntos.sort(function (a, b) { return a.x - b.x; });
+    var fila = Y(0.74), car = 10.8;
+    puntos.forEach(function (q) { q.w = q.n.length * car; q.lx = q.x; });
+    for (var it = 0; it < 3; it++) {
+      for (var a = 0; a < puntos.length; a++) {
+        var izq = a ? puntos[a - 1].lx + (puntos[a - 1].w + puntos[a].w) / 2 + 12 : X(xmin) + puntos[a].w / 2;
+        puntos[a].lx = Math.max(puntos[a].lx, izq);
+      }
+      for (var b = puntos.length - 1; b >= 0; b--) {
+        var der = b < puntos.length - 1 ? puntos[b + 1].lx - (puntos[b + 1].w + puntos[b].w) / 2 - 12 : X(xmax) - puntos[b].w / 2;
+        puntos[b].lx = Math.min(puntos[b].lx, der);
+      }
+    }
+    puntos.forEach(function (q) {
+      var arriba = q.y < fila + 14;
+      var ty = arriba ? q.y + 34 : fila;
+      s += '<line class="guia" x1="' + q.lx.toFixed(1) + '" y1="' + (arriba ? ty - 18 : ty + 6) + '" x2="' + q.x.toFixed(1) + '" y2="' + q.y.toFixed(1) + '"/>';
+      s += '<circle class="marca-f" cx="' + q.x.toFixed(1) + '" cy="' + q.y.toFixed(1) + '" r="7"/>';
+      s += '<text class="fuerte" x="' + q.lx.toFixed(1) + '" y="' + ty.toFixed(1) + '" text-anchor="middle">' + q.n + '</text>';
+    });
+    s += '<text x="' + ml + '" y="18">queda, %</text>';
+    s += '<text x="' + (W - mr) + '" y="18" text-anchor="end">tiempo característico</text></svg>';
+    $('grafico').innerHTML = s;
+  }
+
+  // ------------------------------------------------------------ barra fija
+  try {
+    var obs = new IntersectionObserver(function (e) {
+      var v = !e[0].isIntersecting;
+      $('mini').classList.toggle('visible', v);
+      $('mini').setAttribute('aria-hidden', v ? 'false' : 'true');
+    }, { threshold: 0 });
+    obs.observe($('res-tiempo'));
+  } catch (e) {}
+
+  // ------------------------------------------------------------ modo nocturno
+  var noche = false;
+  try { noche = localStorage.getItem('filtro-temporal-noche') === '1'; } catch (e) {}
+  function aplicarNoche() {
+    document.documentElement.classList.toggle('nocturno', noche);
+    $('btn-noche').setAttribute('aria-pressed', noche ? 'true' : 'false');
+    try { localStorage.setItem('filtro-temporal-noche', noche ? '1' : '0'); } catch (e) {}
+  }
+  $('btn-noche').addEventListener('click', function () { noche = !noche; aplicarNoche(); });
+  aplicarNoche();
+
+  construirDeseos();
+  rueda.iniciar();
+  actualizar();
+})();
+</script>
+
+</body></html>
