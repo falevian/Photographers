@@ -1,0 +1,886 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Crect%20width%3D%2764%27%20height%3D%2764%27%20rx%3D%2713%27%20fill%3D%27%23161817%27%2F%3E%3Cpath%20d%3D%27M12%2042a20%2020%200%200%201%2040%200%27%20fill%3D%27none%27%20stroke%3D%27%23e7e8e3%27%20stroke-width%3D%273%27%20stroke-linecap%3D%27round%27%2F%3E%3Cpath%20d%3D%27M32%2042L44%2024%27%20stroke%3D%27%23f08c45%27%20stroke-width%3D%274%27%20stroke-linecap%3D%27round%27%2F%3E%3Ccircle%20cx%3D%2732%27%20cy%3D%2742%27%20r%3D%274%27%20fill%3D%27%23f08c45%27%2F%3E%3C%2Fsvg%3E">
+<link rel="apple-touch-icon" href="icons/reciprocidad-180.png">
+<meta name="theme-color" content="#e7e8e3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1110" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Reciprocidad">
+<title>Exposiciones largas: filtros ND y reciprocidad · Rafael Vida</title>
+<meta name="author" content="Rafael Vida">
+<meta name="description" content="Exposiciones largas con filtros ND: el tiempo con filtros y la corrección por fallo de reciprocidad de la película, con los datos de Ilford, Kodak y Fujifilm, y un temporizador para la toma.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Photographers">
+<meta property="og:title" content="Exposiciones largas: filtros ND y reciprocidad · Rafael Vida">
+<meta property="og:description" content="El tiempo con filtros ND y la corrección por fallo de reciprocidad, con los datos de Ilford, Kodak y Fujifilm, y un temporizador para la toma.">
+<meta property="og:url" content="https://lab.rafaelvida.com/reciprocidad.html">
+<link rel="canonical" href="https://lab.rafaelvida.com/reciprocidad.html">
+<meta property="og:image" content="https://lab.rafaelvida.com/og/exposicion-larga.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="es_ES">
+<meta property="og:locale:alternate" content="en_GB">
+<meta name="twitter:card" content="summary_large_image">
+<script>
+/* Fija el idioma antes de pintar, para que no parpadeen los dos a la vez. */
+(function(){
+  var K="pn-lang", u=null;
+  try{ u=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(u!=="es"&&u!=="en"){ try{ u=localStorage.getItem(K); }catch(e){ u=null; } }
+  if(u!=="es"&&u!=="en"){ u=/^es/i.test(navigator.language||"") ? "es" : "en"; }
+  document.documentElement.lang=u;
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Concepto: un fotómetro de mano. La lectura arriba, grande, como la aguja del instrumento;
+   debajo los mandos: un dial de velocidades como el de la cámara y los filtros como fichas. */
+:root {
+  --bg: #e7e8e3;
+  --panel: #f6f6f2;
+  --hundido: #dcded8;
+  --fg: #161817;
+  --muted: #5e635f;
+  --line: #c9ccc5;
+  --accent: #b4521a;
+  --accent-suave: #f0d9c8;
+  --accent-ink: #ffffff;
+  --warn: #8a5a00;
+  --f-display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "Barlow", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --f-num: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --radio: 16px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1110; --panel: #181b19; --hundido: #111312; --fg: #ecede8; --muted: #959b96; --line: #2a2f2c;
+    --accent: #f08c45; --accent-suave: #3a2416; --accent-ink: #1a1007; --warn: #e3b34e;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1110; --panel: #181b19; --hundido: #111312; --fg: #ecede8; --muted: #959b96; --line: #2a2f2c;
+  --accent: #f08c45; --accent-suave: #3a2416; --accent-ink: #1a1007; --warn: #e3b34e;
+  color-scheme: dark;
+}
+/* Modo nocturno: solo rojo, para conservar la adaptación de los ojos a la oscuridad */
+:root.nocturno, :root.nocturno[data-theme] {
+  --bg: #040000; --panel: #0c0101; --hundido: #070000; --fg: #ff3b2f; --muted: #a8261d; --line: #360904;
+  --accent: #ff3b2f; --accent-suave: #2a0503; --accent-ink: #040000; --warn: #ff3b2f;
+  color-scheme: dark;
+}
+
+html[lang="es"] [data-lang="en"] { display: none !important; }
+html[lang="en"] [data-lang="es"] { display: none !important; }
+[hidden] { display: none !important; }
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg); color: var(--fg);
+  font: 400 16px/1.5 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 18px 56px;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg);
+}
+main { max-width: 720px; margin: 0 auto; display: grid; gap: 16px; }
+button { font: inherit; color: inherit; }
+button:focus-visible, select:focus-visible, .dial:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* Cabecera */
+.cabecera { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+h1 {
+  margin: 0; font: 700 26px/1 var(--f-display); letter-spacing: 0.06em; text-transform: uppercase;
+}
+.icono-btn {
+  display: inline-flex; align-items: center; gap: 8px; background: var(--panel); border: 1px solid var(--line);
+  border-radius: 999px; padding: 9px 14px; cursor: pointer; font: 600 14px/1 var(--f-display);
+  letter-spacing: 0.08em; text-transform: uppercase; min-height: 40px;
+}
+.icono-btn svg { width: 16px; height: 16px; }
+.icono-btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.botones-cab { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.idioma { display: inline-flex; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 3px; min-height: 40px; align-items: center; }
+.idioma a, .idioma button {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 32px; padding: 0 8px;
+  border: 0; background: transparent; border-radius: 999px; cursor: pointer; color: var(--muted);
+  font: 600 13px/1 var(--f-num); letter-spacing: 0.06em; text-decoration: none;
+}
+.idioma svg { width: 16px; height: 16px; }
+.idioma button.on { background: var(--accent); color: var(--accent-ink); }
+.relacion { font-size: 14px; color: var(--muted); margin: 0; }
+.relacion a { color: var(--fg); }
+
+/* Lectura */
+.lectura {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 22px; padding: 22px 20px 20px;
+  display: grid; gap: 14px; position: relative; overflow: hidden;
+}
+.lectura::after {
+  /* escala de fotómetro de fondo */
+  content: ""; position: absolute; inset: auto 0 0 0; height: 10px; opacity: 0.5;
+  background: repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 12px);
+}
+.etq {
+  font: 600 13px/1 var(--f-display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted);
+}
+.tiempo {
+  font: 600 clamp(56px, 17vw, 104px)/0.92 var(--f-num); font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em; color: var(--accent); overflow-wrap: anywhere;
+}
+.tiempo .ud { font-size: 0.42em; letter-spacing: 0; margin: 0 0.25em 0 0.08em; color: var(--fg); opacity: 0.75; }
+.cadena {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px;
+  font: 500 15px/1.3 var(--f-num); font-variant-numeric: tabular-nums; color: var(--muted);
+}
+.cadena b { color: var(--fg); font-weight: 600; }
+.cadena .op { opacity: 0.6; }
+.pastillas { display: flex; flex-wrap: wrap; gap: 8px; }
+.pastilla {
+  font: 600 13px/1 var(--f-display); letter-spacing: 0.06em; text-transform: uppercase;
+  background: var(--hundido); border: 1px solid var(--line); border-radius: 999px; padding: 8px 12px;
+}
+.pastilla.aviso { color: var(--warn); border-color: var(--warn); background: transparent; }
+.pastilla:empty { display: none; }
+.iniciar {
+  display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%;
+  background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 14px; padding: 16px;
+  font: 700 18px/1 var(--f-display); letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; min-height: 56px;
+}
+.iniciar svg { width: 18px; height: 18px; }
+
+/* Barra fija con el resultado al bajar */
+.mini {
+  position: fixed; left: 0; right: 0; top: 0; z-index: 20;
+  padding: calc(env(safe-area-inset-top, 0px) + 8px) max(16px, env(safe-area-inset-right, 0px)) 8px max(16px, env(safe-area-inset-left, 0px));
+  background: color-mix(in srgb, var(--panel) 92%, transparent); border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  transform: translateY(-110%); transition: transform 0.2s ease;
+}
+.mini.visible { transform: none; }
+.mini .t { font: 600 24px/1 var(--f-num); color: var(--accent); font-variant-numeric: tabular-nums; }
+.mini .s { font: 500 13px/1.2 var(--f-num); color: var(--muted); }
+.mini button {
+  background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 10px; padding: 10px 14px;
+  font: 700 14px/1 var(--f-display); letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
+}
+
+/* Bloques de mandos */
+.bloque { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radio); padding: 16px; display: grid; gap: 12px; min-width: 0; }
+.bloque-cab { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.bloque-cab .valor { font: 600 15px/1 var(--f-num); color: var(--fg); font-variant-numeric: tabular-nums; }
+
+select {
+  width: 100%; font: 500 18px/1.2 var(--f-body); color: var(--fg); background: var(--hundido);
+  border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; min-height: 50px; appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 22px) 50%, calc(100% - 16px) 50%; background-size: 6px 6px; background-repeat: no-repeat;
+}
+
+/* Dial de velocidades */
+.dial-marco { position: relative; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 6px; }
+.paso {
+  width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--hundido);
+  display: grid; place-items: center; cursor: pointer; font: 600 22px/1 var(--f-num);
+}
+.dial-ventana { position: relative; min-width: 0; }
+.dial-ventana::before, .dial-ventana::after {
+  content: ""; position: absolute; top: 0; bottom: 0; width: 36px; z-index: 2; pointer-events: none;
+}
+.dial-ventana::before { left: 0; background: linear-gradient(90deg, var(--panel), transparent); }
+.dial-ventana::after { right: 0; background: linear-gradient(270deg, var(--panel), transparent); }
+.aguja {
+  position: absolute; left: 50%; top: 44px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--accent);
+  z-index: 3; pointer-events: none; border-radius: 1px;
+}
+.dial {
+  display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+  padding-inline: calc(50% - 26px); background: var(--hundido); border: 1px solid var(--line); border-radius: 12px;
+  -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;
+}
+.dial::-webkit-scrollbar { display: none; }
+.marca {
+  flex: 0 0 52px; scroll-snap-align: center; display: grid; justify-items: center; align-content: end; gap: 6px;
+  height: 74px; padding-bottom: 10px; cursor: pointer; user-select: none; -webkit-user-select: none;
+}
+.marca i { display: block; width: 1px; background: var(--muted); height: 10px; opacity: 0.6; }
+.marca.entero i { height: 22px; width: 2px; opacity: 1; background: var(--fg); }
+.marca span { font: 500 12px/1 var(--f-num); color: var(--muted); white-space: nowrap; }
+.marca.entero span { font-size: 14px; font-weight: 600; color: var(--fg); }
+.marca.activa span { color: var(--accent); }
+
+/* Fichas */
+.fichas { display: flex; flex-wrap: wrap; gap: 8px; }
+.ficha {
+  display: inline-flex; align-items: baseline; gap: 6px; cursor: pointer;
+  background: var(--hundido); border: 1px solid var(--line); border-radius: 12px; padding: 11px 13px; min-height: 44px;
+  font: 600 16px/1 var(--f-display); letter-spacing: 0.03em;
+}
+.ficha small { font: 500 12px/1 var(--f-num); color: var(--muted); }
+.ficha[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.ficha[aria-pressed="true"] small { color: var(--accent-ink); opacity: 0.85; }
+.subetq { font: 600 12px/1 var(--f-display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+
+/* Ajustes finos */
+.ajustes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 520px) { .ajustes { grid-template-columns: 1fr; } }
+.contador { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: 8px; }
+.contador output { text-align: center; font: 600 20px/1 var(--f-num); font-variant-numeric: tabular-nums; }
+.segmentos { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--hundido); border: 1px solid var(--line); border-radius: 12px; padding: 3px; }
+.segmentos button {
+  border: 0; background: transparent; border-radius: 9px; padding: 10px 4px; cursor: pointer;
+  font: 600 15px/1 var(--f-display); letter-spacing: 0.04em; min-height: 40px;
+}
+.segmentos button[aria-pressed="true"] { background: var(--panel); color: var(--accent); box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+
+/* Gráfico, tabla y notas */
+details.bloque > summary {
+  cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center;
+}
+details.bloque > summary::-webkit-details-marker { display: none; }
+details.bloque > summary::after { content: "+"; font: 500 22px/1 var(--f-num); color: var(--muted); }
+details.bloque[open] > summary::after { content: "−"; }
+.grafico svg { width: 100%; height: auto; display: block; }
+.grafico .rej { stroke: var(--line); stroke-dasharray: 2 4; }
+.grafico .ejes { stroke: var(--line); }
+.grafico .id { stroke: var(--muted); stroke-dasharray: 5 4; fill: none; }
+.grafico .curva { stroke: var(--accent); stroke-width: 3; fill: none; }
+.grafico .extra { stroke: var(--accent); stroke-width: 2.5; fill: none; stroke-dasharray: 5 5; opacity: 0.6; }
+.grafico .punto { fill: var(--accent); stroke: var(--panel); stroke-width: 3; }
+.grafico text { fill: var(--muted); font: 500 16px var(--f-num); }
+.leyenda { color: var(--muted); font-size: 14px; margin: 0; }
+.tabla { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 8px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font: 600 12px/1.2 var(--f-display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+td { font: 400 15px/1.2 var(--f-num); }
+td:first-child, th:first-child { text-align: left; }
+tr.actual td { color: var(--accent); font-weight: 600; }
+.notas { color: var(--muted); font-size: 14px; display: grid; gap: 8px; }
+.notas p { margin: 0; max-width: 68ch; }
+.notas a { color: var(--fg); }
+
+/* Temporizador a pantalla completa */
+.reloj {
+  position: fixed; inset: 0; z-index: 40; background: var(--bg);
+  padding: calc(env(safe-area-inset-top, 0px) + 24px) max(16px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 24px) max(16px, env(safe-area-inset-left, 0px));
+  display: grid; place-items: center; align-content: center; gap: 22px; text-align: center;
+}
+.anillo { position: relative; width: min(78vw, 360px); aspect-ratio: 1; max-width: 100%; }
+.anillo svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.anillo .fondo { stroke: var(--line); }
+.anillo .progreso { stroke: var(--accent); stroke-linecap: round; transition: stroke-dashoffset 0.25s linear; }
+.anillo .dentro { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; gap: 6px; }
+.cuenta { font: 600 clamp(44px, 14vw, 72px)/1 var(--f-num); font-variant-numeric: tabular-nums; letter-spacing: -0.03em; }
+.fin { color: var(--muted); font: 500 15px/1.4 var(--f-body); }
+.reloj .acciones { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.reloj button {
+  border-radius: 14px; padding: 15px 26px; min-height: 52px; cursor: pointer;
+  font: 700 17px/1 var(--f-display); letter-spacing: 0.1em; text-transform: uppercase;
+  background: transparent; color: var(--fg); border: 1px solid var(--line);
+}
+.reloj button.primario { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+@media (prefers-reduced-motion: reduce) { .mini, .anillo .progreso { transition: none; } }
+</style>
+
+<div class="mini" id="mini" aria-hidden="true">
+  <div><div class="t" id="mini-t"></div><div class="s" id="mini-s"></div></div>
+  <button type="button" id="mini-iniciar"><span data-lang="es">Iniciar</span><span data-lang="en">Start</span></button>
+</div>
+
+<main>
+  <div class="cabecera">
+    <h1><span data-lang="es">Exposiciones largas</span><span data-lang="en">Long exposures</span></h1>
+    <div class="botones-cab">
+      <button class="icono-btn" id="btn-noche" type="button" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <span data-lang="es">Nocturno</span><span data-lang="en">Night</span>
+      </button>
+      <div class="idioma" role="group" aria-label="Idioma / Language">
+        <a href="index.html" title="Portada / Home" aria-label="Portada / Home"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.5 8 2.5l5.5 5v6h-4v-4h-3v4h-4z"/></svg></a>
+        <button type="button" data-setlang="es" aria-pressed="true">ES</button>
+        <button type="button" data-setlang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+  </div>
+
+  <section class="lectura" id="lectura" aria-live="polite">
+    <span class="etq"><span data-lang="es">Expón</span><span data-lang="en">Expose</span></span>
+    <div class="tiempo" id="res-tiempo"></div>
+    <div class="cadena" id="cadena"></div>
+    <div class="pastillas">
+      <span class="pastilla" id="p-revelado"></span>
+      <span class="pastilla aviso" id="p-aviso"></span>
+    </div>
+    <button class="iniciar" id="btn-iniciar" type="button">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>
+      <span id="btn-iniciar-t"></span>
+    </button>
+  </section>
+
+  <section class="bloque">
+    <div class="bloque-cab"><span class="etq"><span data-lang="es">Película</span><span data-lang="en">Film</span></span><span class="valor" id="v-pelicula"></span></div>
+    <select id="pelicula" aria-label="Película" data-aria-es="Película" data-aria-en="Film"></select>
+  </section>
+
+  <section class="bloque">
+    <div class="bloque-cab"><span class="etq"><span data-lang="es">Medición sin filtros</span><span data-lang="en">Metered without filters</span></span><span class="valor" id="v-medicion"></span></div>
+    <div class="dial-marco">
+      <button class="paso" type="button" id="dial-menos" aria-label="Un tercio de paso más rápido" data-aria-es="Un tercio de paso más rápido" data-aria-en="One third of a stop faster">−</button>
+      <div class="dial-ventana">
+        <div class="aguja"></div>
+        <div class="dial" id="dial" tabindex="0" role="slider" aria-label="Tiempo medido sin filtros" data-aria-es="Tiempo medido sin filtros" data-aria-en="Time metered without filters"></div>
+      </div>
+      <button class="paso" type="button" id="dial-mas" aria-label="Un tercio de paso más lento" data-aria-es="Un tercio de paso más lento" data-aria-en="One third of a stop slower">+</button>
+    </div>
+  </section>
+
+  <section class="bloque">
+    <div class="bloque-cab"><span class="etq"><span data-lang="es">Filtros</span><span data-lang="en">Filters</span></span><span class="valor" id="v-filtros"></span></div>
+    <div class="subetq"><span data-lang="es">Densidad neutra</span><span data-lang="en">Neutral density</span></div>
+    <div class="fichas" id="fichas-nd"></div>
+    <div class="subetq"><span data-lang="es">Otros, con su factor típico</span><span data-lang="en">Others, with their typical factor</span></div>
+    <div class="fichas" id="fichas-otros"></div>
+  </section>
+
+  <section class="bloque">
+    <div class="ajustes">
+      <div style="display:grid;gap:8px">
+        <span class="etq"><span data-lang="es">Pasos adicionales</span><span data-lang="en">Extra stops</span></span>
+        <div class="contador">
+          <button class="paso" type="button" id="extra-menos" aria-label="Quitar un tercio de paso" data-aria-es="Quitar un tercio de paso" data-aria-en="Remove one third of a stop">−</button>
+          <output id="extra">0</output>
+          <button class="paso" type="button" id="extra-mas" aria-label="Añadir un tercio de paso" data-aria-es="Añadir un tercio de paso" data-aria-en="Add one third of a stop">+</button>
+        </div>
+      </div>
+      <div style="display:grid;gap:8px">
+        <span class="etq"><span data-lang="es">Redondeo</span><span data-lang="en">Rounding</span></span>
+        <div class="segmentos" id="redondeo">
+          <button type="button" data-v="exacto"><span data-lang="es">Exacto</span><span data-lang="en">Exact</span></button>
+          <button type="button" data-v="5">5 s</button>
+          <button type="button" data-v="15">15 s</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <details class="bloque grafico" open>
+    <summary><span class="etq"><span data-lang="es">Curva de reciprocidad</span><span data-lang="en">Reciprocity curve</span></span></summary>
+    <p class="leyenda" data-lang="es">Tiempo corregido frente a medido, en escala logarítmica. La diagonal discontinua es la ley de reciprocidad sin fallo y el punto, tu exposición.</p>
+    <p class="leyenda" data-lang="en">Corrected time against metered time, on a log scale. The dashed diagonal is the reciprocity law without failure, and the dot is your exposure.</p>
+    <div id="grafico"></div>
+  </details>
+
+  <details class="bloque">
+    <summary><span class="etq"><span data-lang="es">Tabla con estos filtros</span><span data-lang="en">Table with these filters</span></span></summary>
+    <div class="tabla"><table id="tabla"></table></div>
+  </details>
+
+  <details class="bloque notas">
+    <summary><span class="etq"><span data-lang="es">Datos y advertencias</span><span data-lang="en">Data and caveats</span></span></summary>
+    <p data-lang="es">Ilford da para cada película un exponente de Schwarzschild P: el tiempo corregido es el medido elevado a P, y por debajo de un segundo no hace falta corregir. Kodak da tablas a 1, 10 y 100 s, que aquí se interpolan en escala logarítmica; por encima de 100 s el valor es una extrapolación. Fujifilm indica para Acros II que no hace falta corrección por debajo de 120 s y medio paso entre 120 y 1000 s.</p>
+    <p data-lang="en">Ilford gives a Schwarzschild exponent P for each film: the corrected time is the metered time raised to P, and below one second no correction is needed. Kodak gives tables at 1, 10 and 100 s, interpolated here on a log scale; above 100 s the value is an extrapolation. Fujifilm states for Acros II that no correction is needed below 120 s, and half a stop between 120 and 1000 s.</p>
+    <p data-lang="es">Los factores de los filtros de color son los habituales y cambian con la película y con la luz. En exposiciones muy largas los fabricantes recomiendan hacer pruebas y, como el contraste aumenta, reducir algo el revelado.</p>
+    <p data-lang="en">The colour filter factors are the usual ones and change with the film and the light. For very long exposures the manufacturers recommend testing and, since contrast increases, shortening development somewhat.</p>
+    <p data-lang="es">Fuentes: <a href="https://ilfordphoto.com/amfile/file/download/file/1964/product/695" target="_blank" rel="noopener">Ilford, fallo de la ley de reciprocidad</a>, <a href="https://kodakprofessional.com/sites/default/files/wysiwyg/film/f4017_trix_320400.pdf" target="_blank" rel="noopener">Kodak F-4017 (Tri-X)</a>, Kodak E-31 (T-Max) y <a href="https://www.freestylephoto.com/static/pdf/product_pdf/fujifilm/NEOPAN_100_ACROSII_(120)_data_sheet.pdf" target="_blank" rel="noopener">Fujifilm, Neopan 100 Acros II</a>.</p>
+    <p data-lang="en">Sources: <a href="https://ilfordphoto.com/amfile/file/download/file/1964/product/695" target="_blank" rel="noopener">Ilford, reciprocity law failure</a>, <a href="https://kodakprofessional.com/sites/default/files/wysiwyg/film/f4017_trix_320400.pdf" target="_blank" rel="noopener">Kodak F-4017 (Tri-X)</a>, Kodak E-31 (T-Max) and <a href="https://www.freestylephoto.com/static/pdf/product_pdf/fujifilm/NEOPAN_100_ACROSII_(120)_data_sheet.pdf" target="_blank" rel="noopener">Fujifilm, Neopan 100 Acros II</a>.</p>
+  </details>
+  <p class="relacion" data-lang="es">Relacionadas: <a href="exposicion-larga.html">exposición larga</a>, que calcula el tiempo a partir del arrastre que buscas y qué filtro hace falta, y <a href="sensor.html#nd">el filtro ND y la fuga infrarroja</a>, sobre lo que un ND de muchos pasos hace al color en digital.</p>
+  <p class="relacion" data-lang="en">Related: <a href="exposicion-larga.html">long exposure</a>, which works out the time from the blur you want and which filter you need, and <a href="sensor.html#nd">the ND filter and infrared leakage</a>, on what a deep ND does to colour on a digital sensor.</p>
+</main>
+
+<section class="reloj" id="reloj" hidden aria-live="assertive">
+  <span class="etq" id="reloj-etq"></span>
+  <div class="anillo">
+    <svg viewBox="0 0 120 120" aria-hidden="true">
+      <circle class="fondo" cx="60" cy="60" r="54" fill="none" stroke-width="6"/>
+      <circle class="progreso" id="anillo" cx="60" cy="60" r="54" fill="none" stroke-width="6" stroke-dasharray="339.29" stroke-dashoffset="339.29"/>
+    </svg>
+    <div class="dentro">
+      <div class="cuenta" id="cuenta">0:00</div>
+      <div class="fin" id="fin"></div>
+    </div>
+  </div>
+  <div class="acciones">
+    <button type="button" id="btn-parar"></button>
+    <button type="button" class="primario" id="btn-repetir" hidden><span data-lang="es">Otra vez</span><span data-lang="en">Again</span></button>
+  </div>
+</section>
+
+<script>
+"use strict";
+/* ---------- conmutador de idioma / language switch ---------- */
+(function(){
+  var KEY="pn-lang";
+  var META={
+    es:{ title:"Exposiciones largas: filtros ND y reciprocidad · Rafael Vida",
+         desc:"Exposiciones largas con filtros ND: el tiempo con filtros y la corrección por fallo de reciprocidad de la película, con los datos de Ilford, Kodak y Fujifilm, y un temporizador para la toma." },
+    en:{ title:"Long exposures: ND filters and reciprocity · Rafael Vida",
+         desc:"Long exposures with ND filters: the time with filters and the correction for film reciprocity failure, with the data from Ilford, Kodak and Fujifilm, and a timer for the shot." }
+  };
+  function apply(l){
+    document.documentElement.lang=l;
+    document.title=META[l].title;
+    var d=document.querySelector('meta[name="description"]');
+    if(d) d.setAttribute("content",META[l].desc);
+    [].forEach.call(document.querySelectorAll("[data-aria-"+l+"]"),function(e){
+      e.setAttribute("aria-label", e.getAttribute("data-aria-"+l));
+    });
+    [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+      var on=b.getAttribute("data-setlang")===l;
+      b.classList.toggle("on",on);
+      b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    if(window.onLangChange) window.onLangChange(l);
+  }
+  [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
+    b.addEventListener("click",function(){
+      var l=b.getAttribute("data-setlang");
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+      apply(l);
+    });
+  });
+  window.aplicarIdioma=apply;
+})();
+</script>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- cadenas generadas por JS ----------
+     DICT y LBL, nunca T ni t(), para que ningún contador local los eclipse. */
+  var DICT = {
+    es: {
+      sinRec: 'Sin reciprocidad', pasos: 'pasos', reciprocidad: 'reciprocidad',
+      revDigital: 'Sin corrección de reciprocidad', revSegun: 'Revelado %r %, según %f',
+      revCorto: 'Revelado algo más corto: el contraste sube', revNormal: 'Revelado normal',
+      avisoExtra: 'Fuera de los datos del fabricante; haz una prueba',
+      avisoIlford: 'Más de 1000 s: Ilford recomienda probar',
+      iniciar: 'Iniciar temporizador · ', grafico: 'Curva de reciprocidad', corregido: 'corregido', medido: 'medido',
+      thSin: 'Sin filtros', thCon: 'Con filtros', thExpon: 'Expón',
+      terminado: 'Terminado', cierra: 'Cierra el obturador', cerrar: 'Cerrar', parar: 'Parar',
+      exponiendo: 'Exponiendo', termina: 'Termina a las ', locale: 'es-ES',
+      filtros: { pol: 'Polarizador', am: 'Amarillo 8', nar: 'Naranja 21', roj: 'Rojo 25', roj29: 'Rojo 29', ver: 'Verde 11' }
+    },
+    en: {
+      sinRec: 'No reciprocity', pasos: 'stops', reciprocidad: 'reciprocity',
+      revDigital: 'No reciprocity correction', revSegun: 'Development %r %, per %f',
+      revCorto: 'Somewhat shorter development: contrast rises', revNormal: 'Normal development',
+      avisoExtra: "Outside the manufacturer's data; make a test",
+      avisoIlford: 'Over 1000 s: Ilford recommends testing',
+      iniciar: 'Start timer · ', grafico: 'Reciprocity curve', corregido: 'corrected', medido: 'metered',
+      thSin: 'No filters', thCon: 'With filters', thExpon: 'Expose',
+      terminado: 'Finished', cierra: 'Close the shutter', cerrar: 'Close', parar: 'Stop',
+      exponiendo: 'Exposing', termina: 'Ends at ', locale: 'en-GB',
+      filtros: { pol: 'Polariser', am: 'Yellow 8', nar: 'Orange 21', roj: 'Red 25', roj29: 'Red 29', ver: 'Green 11' }
+    }
+  };
+  function idioma() { return document.documentElement.lang === 'en' ? 'en' : 'es'; }
+  function LBL(k) { return DICT[idioma()][k]; }
+
+  // ------------------------------------------------------------ datos de los fabricantes
+  var PELICULAS = [
+    { id: 'digital', nombre: 'Digital', grupo: '', corto: 'Digital', tipo: 'nada' },
+    { id: 'trix', nombre: 'Tri-X 400', grupo: 'Kodak', corto: 'Tri-X', tipo: 'tabla', puntos: [[0.1, 0.1], [1, 2], [10, 50], [100, 1200]],
+      revelado: [[1, -10], [10, -20], [100, -30]], fuente: 'Kodak' },
+    { id: 'tmx', nombre: 'T-Max 100', grupo: 'Kodak', corto: 'T-Max 100', tipo: 'tabla', puntos: [[0.1, 0.1], [1, 1.26], [10, 15], [100, 200]] },
+    { id: 'tmy', nombre: 'T-Max 400', grupo: 'Kodak', corto: 'T-Max 400', tipo: 'tabla', puntos: [[0.1, 0.1], [1, 1.26], [10, 15], [100, 300]] },
+    { id: 'panf', nombre: 'Pan F Plus', grupo: 'Ilford', corto: 'Pan F', tipo: 'p', p: 1.33 },
+    { id: 'fp4', nombre: 'FP4 Plus', grupo: 'Ilford', corto: 'FP4', tipo: 'p', p: 1.26 },
+    { id: 'hp5', nombre: 'HP5 Plus', grupo: 'Ilford', corto: 'HP5', tipo: 'p', p: 1.31 },
+    { id: 'd100', nombre: 'Delta 100', grupo: 'Ilford', corto: 'Delta 100', tipo: 'p', p: 1.26 },
+    { id: 'd400', nombre: 'Delta 400', grupo: 'Ilford', corto: 'Delta 400', tipo: 'p', p: 1.41 },
+    { id: 'd3200', nombre: 'Delta 3200', grupo: 'Ilford', corto: 'Delta 3200', tipo: 'p', p: 1.33 },
+    { id: 'sfx', nombre: 'SFX 200', grupo: 'Ilford', corto: 'SFX', tipo: 'p', p: 1.43 },
+    { id: 'xp2', nombre: 'XP2 Super', grupo: 'Ilford', corto: 'XP2', tipo: 'p', p: 1.31 },
+    { id: 'ortho', nombre: 'Ortho Plus', grupo: 'Ilford', corto: 'Ortho', tipo: 'p', p: 1.25 },
+    { id: 'k100', nombre: 'Kentmere 100', grupo: 'Kentmere', corto: 'Kentmere 100', tipo: 'p', p: 1.26 },
+    { id: 'k400', nombre: 'Kentmere 400', grupo: 'Kentmere', corto: 'Kentmere 400', tipo: 'p', p: 1.30 },
+    { id: 'acros', nombre: 'Acros II', grupo: 'Fujifilm', corto: 'Acros II', tipo: 'acros' }
+  ];
+  var ND = [
+    { id: 'nd3', nombre: 'ND 0,9', pasos: 3 },
+    { id: 'nd6', nombre: 'ND 1,8', pasos: 6 },
+    { id: 'nd10', nombre: 'ND 3,0', pasos: 10 },
+    { id: 'nd15', nombre: 'ND 4,5', pasos: 15 },
+    { id: 'nd20', nombre: 'ND 6,0', pasos: 20 }
+  ];
+  var OTROS = [
+    { id: 'pol', nombre: 'Polarizador', pasos: 1.5 },
+    { id: 'am', nombre: 'Amarillo 8', pasos: 1 },
+    { id: 'nar', nombre: 'Naranja 21', pasos: 2 },
+    { id: 'roj', nombre: 'Rojo 25', pasos: 3 },
+    { id: 'roj29', nombre: 'Rojo 29', pasos: 4 },
+    { id: 'ver', nombre: 'Verde 11', pasos: 2 }
+  ];
+  // Velocidades nominales en tercios de paso, de 1/8000 a 60 s; el valor exacto es 2^(k/3)
+  var ETIQUETAS = ['1/8000', '1/6400', '1/5000', '1/4000', '1/3200', '1/2500', '1/2000', '1/1600', '1/1250', '1/1000',
+    '1/800', '1/640', '1/500', '1/400', '1/320', '1/250', '1/200', '1/160', '1/125', '1/100', '1/80', '1/60', '1/50',
+    '1/40', '1/30', '1/25', '1/20', '1/15', '1/13', '1/10', '1/8', '1/6', '1/5', '1/4', '1/3', '0,4"', '0,5"', '0,6"',
+    '0,8"', '1"', '1,3"', '1,6"', '2"', '2,5"', '3,2"', '4"', '5"', '6"', '8"', '10"', '13"', '15"', '20"',
+    '25"', '30"', '40"', '50"', '60"'];
+  var K0 = -39;
+
+  // ------------------------------------------------------------ cálculo
+  function interpLogLog(puntos, t) {
+    var lt = Math.log10(t);
+    if (t <= puntos[0][0]) return { tc: t, extrapolado: false };
+    for (var i = 1; i < puntos.length; i++) {
+      if (t <= puntos[i][0]) {
+        var a = puntos[i - 1], b = puntos[i];
+        var f = (lt - Math.log10(a[0])) / (Math.log10(b[0]) - Math.log10(a[0]));
+        return { tc: Math.pow(10, Math.log10(a[1]) + f * (Math.log10(b[1]) - Math.log10(a[1]))), extrapolado: false };
+      }
+    }
+    var p = puntos[puntos.length - 2], q = puntos[puntos.length - 1];
+    var pend = (Math.log10(q[1]) - Math.log10(p[1])) / (Math.log10(q[0]) - Math.log10(p[0]));
+    return { tc: Math.pow(10, Math.log10(q[1]) + pend * (lt - Math.log10(q[0]))), extrapolado: true };
+  }
+  function corregir(pel, tm) {
+    if (pel.tipo === 'p') return { tc: tm <= 1 ? tm : Math.pow(tm, pel.p), extrapolado: false };
+    if (pel.tipo === 'tabla') return interpLogLog(pel.puntos, tm);
+    if (pel.tipo === 'acros') return tm < 120 ? { tc: tm, extrapolado: false } : { tc: tm * Math.SQRT2, extrapolado: tm > 1000 };
+    return { tc: tm, extrapolado: false };
+  }
+  function revelado(pel, tm) {
+    if (!pel.revelado) return null;
+    var r = null;
+    pel.revelado.forEach(function (x) { if (tm >= x[0]) r = x[1]; });
+    return r;
+  }
+
+  // ------------------------------------------------------------ formato
+  function coma(x, d) { var v = x.toFixed(d); return idioma() === 'es' ? v.replace('.', ',') : v; }
+  // las etiquetas se guardan con coma decimal; en inglés se muestran con punto
+  function etiqueta(e) { return idioma() === 'es' ? e : e.replace(',', '.'); }
+  function partes(s) {
+    // [[número, unidad], ...] para la lectura grande
+    if (!isFinite(s)) return [['∞', '']];
+    if (s < 0.95) return [['1/' + Math.round(1 / s), 's']];
+    if (s < 10) return [[coma(s, 1), 's']];
+    if (s < 60) return [[String(Math.round(s)), 's']];
+    var t = Math.round(s), h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), seg = t % 60;
+    var out = [];
+    if (h) out.push([String(h), 'h']);
+    if (h || m) out.push([String(m), 'min']);
+    if (seg && h < 10) out.push([String(seg), 's']);
+    return out;
+  }
+  function texto(s) { return partes(s).map(function (p) { return p[0] + (p[1] ? ' ' + p[1] : ''); }).join(' '); }
+  function corto(s) {
+    if (!isFinite(s)) return '∞';
+    if (s < 600) return texto(s);
+    var t = Math.round(s / 60), h = Math.floor(t / 60), m = t % 60;
+    return h ? h + ' h ' + String(m).padStart(2, '0') : m + ' min';
+  }
+  function reloj(s) {
+    s = Math.max(0, Math.ceil(s));
+    var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), seg = s % 60;
+    return (h ? h + ':' + String(m).padStart(2, '0') : String(m)) + ':' + String(seg).padStart(2, '0');
+  }
+  function redondear(s, modo) {
+    if (modo === 'exacto' || s < 30) return s;
+    var paso = Number(modo);
+    return Math.max(paso, Math.round(s / paso) * paso);
+  }
+  function fraccion(x) {
+    var n = Math.round(x * 3), e = Math.trunc(n / 3), r = Math.abs(n % 3);
+    var signo = n < 0 ? '−' : (n > 0 ? '+' : '');
+    var ent = Math.abs(e), frac = r ? (r === 1 ? '1/3' : '2/3') : '';
+    if (!ent && !frac) return '0';
+    return signo + (ent ? ent : '') + (ent && frac ? ' ' : '') + frac;
+  }
+
+  // ------------------------------------------------------------ estado
+  var estado = { pelicula: 'trix', k: K0 + ETIQUETAS.indexOf('1/30'), filtros: ['nd10'], extra: 0, redondeo: 'exacto' };
+  try {
+    var g = JSON.parse(localStorage.getItem('exposiciones-largas') || 'null');
+    if (g && typeof g === 'object') estado = Object.assign(estado, g);
+  } catch (e) { /* sin almacenamiento: valores de ejemplo */ }
+  function guardar() { try { localStorage.setItem('exposiciones-largas', JSON.stringify(estado)); } catch (e) {} }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var resultado = { tc: 0 };
+
+  // ------------------------------------------------------------ película
+  var sel = $('pelicula');
+  function rellenarPeliculas() {
+    var grupos = {};
+    sel.innerHTML = '';
+    PELICULAS.forEach(function (p) {
+      var g = p.grupo || LBL('sinRec');
+      if (!grupos[g]) { grupos[g] = document.createElement('optgroup'); grupos[g].label = g; sel.appendChild(grupos[g]); }
+      var o = document.createElement('option'); o.value = p.id; o.textContent = p.nombre; grupos[g].appendChild(o);
+    });
+  }
+  rellenarPeliculas();
+  sel.addEventListener('change', function () { estado.pelicula = sel.value; actualizar(); });
+
+  // ------------------------------------------------------------ dial
+  var dial = $('dial'), ANCHO = 52, enCurso = null;
+  ETIQUETAS.forEach(function (e, i) {
+    var k = K0 + i, m = document.createElement('div');
+    m.className = 'marca' + (k % 3 === 0 ? ' entero' : '');
+    m.dataset.k = String(k);
+    m.innerHTML = '<span>' + etiqueta(e) + '</span><i></i>';
+    m.addEventListener('click', function () { irA(k, true); });
+    dial.appendChild(m);
+  });
+  function irA(k, suave) {
+    k = Math.max(K0, Math.min(K0 + ETIQUETAS.length - 1, k));
+    dial.scrollTo({ left: (k - K0) * ANCHO, behavior: suave ? 'smooth' : 'auto' });
+    if (estado.k !== k) { estado.k = k; actualizar(); }
+  }
+  dial.addEventListener('scroll', function () {
+    if (enCurso) cancelAnimationFrame(enCurso);
+    enCurso = requestAnimationFrame(function () {
+      var k = K0 + Math.round(dial.scrollLeft / ANCHO);
+      k = Math.max(K0, Math.min(K0 + ETIQUETAS.length - 1, k));
+      if (k !== estado.k) { estado.k = k; actualizar(true); }
+    });
+  });
+  dial.addEventListener('keydown', function (ev) {
+    if (ev.key === 'ArrowRight') { irA(estado.k + 1, true); ev.preventDefault(); }
+    if (ev.key === 'ArrowLeft') { irA(estado.k - 1, true); ev.preventDefault(); }
+  });
+  $('dial-menos').addEventListener('click', function () { irA(estado.k - 1, true); });
+  $('dial-mas').addEventListener('click', function () { irA(estado.k + 1, true); });
+
+  // ------------------------------------------------------------ fichas
+  function nombreFiltro(f) { return LBL('filtros')[f.id] || etiqueta(f.nombre); }
+  function fichas(cont, lista) {
+    lista.forEach(function (f) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'ficha'; b.dataset.id = f.id;
+      b.innerHTML = nombreFiltro(f) + '<small>' + coma(f.pasos, f.pasos % 1 ? 1 : 0) + '</small>';
+      b.addEventListener('click', function () {
+        var i = estado.filtros.indexOf(f.id);
+        if (i >= 0) estado.filtros.splice(i, 1); else estado.filtros.push(f.id);
+        actualizar();
+      });
+      cont.appendChild(b);
+    });
+  }
+  fichas($('fichas-nd'), ND);
+  fichas($('fichas-otros'), OTROS);
+
+  // ------------------------------------------------------------ ajustes finos
+  $('extra-menos').addEventListener('click', function () { estado.extra = Math.round((estado.extra - 1 / 3) * 3) / 3; actualizar(); });
+  $('extra-mas').addEventListener('click', function () { estado.extra = Math.round((estado.extra + 1 / 3) * 3) / 3; actualizar(); });
+  Array.prototype.forEach.call($('redondeo').querySelectorAll('button'), function (b) {
+    b.addEventListener('click', function () { estado.redondeo = b.dataset.v; actualizar(); });
+  });
+
+  function pasosFiltros() {
+    var t = 0;
+    ND.concat(OTROS).forEach(function (f) { if (estado.filtros.indexOf(f.id) >= 0) t += f.pasos; });
+    return t;
+  }
+
+  // ------------------------------------------------------------ actualizar todo
+  function actualizar(desdeDial) {
+    var pel = PELICULAS.filter(function (p) { return p.id === estado.pelicula; })[0] || PELICULAS[1];
+    sel.value = pel.id;
+    var idx = estado.k - K0;
+    Array.prototype.forEach.call(dial.children, function (m, i) { m.classList.toggle('activa', i === idx); });
+    dial.setAttribute('aria-valuetext', etiqueta(ETIQUETAS[idx]));
+    if (!desdeDial && Math.abs(dial.scrollLeft - idx * ANCHO) > 2 && !dial.dataset.mover) dial.scrollLeft = idx * ANCHO;
+    document.querySelectorAll('.ficha').forEach(function (b) {
+      b.setAttribute('aria-pressed', estado.filtros.indexOf(b.dataset.id) >= 0 ? 'true' : 'false');
+    });
+    Array.prototype.forEach.call($('redondeo').querySelectorAll('button'), function (b) {
+      b.setAttribute('aria-pressed', b.dataset.v === estado.redondeo ? 'true' : 'false');
+    });
+    $('extra').textContent = fraccion(estado.extra);
+
+    var t0 = Math.pow(2, estado.k / 3);
+    var pf = pasosFiltros(), pasos = pf + (estado.extra || 0);
+    var tm = t0 * Math.pow(2, pasos);
+    var c = corregir(pel, tm);
+    var tc = redondear(c.tc, estado.redondeo);
+    resultado.tc = tc;
+    var rec = Math.log2(c.tc / tm);
+
+    $('res-tiempo').innerHTML = partes(tc).map(function (p) {
+      return p[0] + (p[1] ? '<span class="ud">' + p[1] + '</span>' : '');
+    }).join('');
+    $('cadena').innerHTML =
+      '<span><b>' + etiqueta(ETIQUETAS[idx]) + '</b></span>' +
+      '<span class="op">+</span><span><b>' + coma(pasos, pasos % 1 ? 1 : 0) + '</b> ' + LBL('pasos') + '</span>' +
+      '<span class="op">=</span><span><b>' + texto(tm) + '</b></span>' +
+      (rec > 0.05 ? '<span class="op">→</span><span>' + LBL('reciprocidad') + ' <b>+' + coma(rec, 1) + '</b></span>' : '');
+    var rv = revelado(pel, tm);
+    if (pel.tipo === 'nada') $('p-revelado').textContent = LBL('revDigital');
+    else if (rv !== null) $('p-revelado').textContent = LBL('revSegun').replace('%r', String(rv).replace('-', '−')).replace('%f', pel.fuente);
+    else if (tm > 10) $('p-revelado').textContent = LBL('revCorto');
+    else $('p-revelado').textContent = LBL('revNormal');
+    var aviso = '';
+    if (c.extrapolado) aviso = LBL('avisoExtra');
+    else if (pel.tipo === 'p' && tm > 1000) aviso = LBL('avisoIlford');
+    $('p-aviso').textContent = aviso;
+
+    $('v-pelicula').textContent = pel.tipo === 'p' ? 'P = ' + coma(pel.p, 2) : pel.grupo;
+    $('v-medicion').textContent = etiqueta(ETIQUETAS[idx]);
+    $('v-filtros').textContent = coma(pf, pf % 1 ? 1 : 0) + ' ' + LBL('pasos');
+    $('btn-iniciar-t').textContent = LBL('iniciar') + reloj(Math.round(tc));
+    $('mini-t').textContent = texto(tc);
+    $('mini-s').textContent = pel.corto + ' · ' + etiqueta(ETIQUETAS[idx]) + ' · ' + coma(pasos, pasos % 1 ? 1 : 0) + ' ' + LBL('pasos');
+
+    dibujar(pel, tm, c.tc);
+    tabla(pel, pasos);
+    guardar();
+  }
+
+  // ------------------------------------------------------------ gráfico
+  function dibujar(pel, tm, tc) {
+    var W = 560, H = 330, ml = 76, mr = 16, mt = 26, mb = 46, xmin = -1, xmax = 4, ymin = -1, ymax = 5;
+    var X = function (v) { return ml + (v - xmin) / (xmax - xmin) * (W - ml - mr); };
+    var Y = function (v) { return H - mb - (v - ymin) / (ymax - ymin) * (H - mt - mb); };
+    var et = { '-1': etiqueta('0,1 s'), '0': '1 s', '1': '10 s', '2': '100 s', '3': '17 min', '4': etiqueta('2,8 h'), '5': '28 h' };
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + LBL('grafico') + '">';
+    for (var v = xmin; v <= xmax; v++) {
+      s += '<line class="rej" x1="' + X(v) + '" y1="' + Y(ymin) + '" x2="' + X(v) + '" y2="' + Y(ymax) + '"/>';
+      s += '<text x="' + X(v) + '" y="' + (H - mb + 24) + '" text-anchor="middle">' + et[v] + '</text>';
+    }
+    for (var w = ymin; w <= ymax; w++) {
+      s += '<line class="rej" x1="' + X(xmin) + '" y1="' + Y(w) + '" x2="' + X(xmax) + '" y2="' + Y(w) + '"/>';
+      s += '<text x="' + (ml - 8) + '" y="' + (Y(w) + 5) + '" text-anchor="end">' + et[w] + '</text>';
+    }
+    s += '<line class="id" x1="' + X(-1) + '" y1="' + Y(-1) + '" x2="' + X(4) + '" y2="' + Y(4) + '"/>';
+    var d = '', dx = '';
+    for (var i = 0; i <= 220; i++) {
+      var lt = xmin + (xmax - xmin) * i / 220, r = corregir(pel, Math.pow(10, lt));
+      var p = X(lt).toFixed(1) + ',' + Y(Math.min(ymax, Math.log10(r.tc))).toFixed(1);
+      if (r.extrapolado) dx += (dx ? ' L ' : 'M ') + p; else d += (d ? ' L ' : 'M ') + p;
+    }
+    s += '<path class="curva" d="' + d + '"/>' + (dx ? '<path class="extra" d="' + dx + '"/>' : '');
+    var lx = Math.log10(tm), ly = Math.log10(tc);
+    if (lx >= xmin && lx <= xmax && ly <= ymax) s += '<circle class="punto" cx="' + X(lx) + '" cy="' + Y(ly) + '" r="8"/>';
+    s += '<text x="' + ml + '" y="16">' + LBL('corregido') + '</text>';
+    s += '<text x="' + (W - mr) + '" y="' + (H - 4) + '" text-anchor="end">' + LBL('medido') + '</text></svg>';
+    $('grafico').innerHTML = s;
+  }
+
+  // ------------------------------------------------------------ tabla
+  function tabla(pel, pasos) {
+    var filas = ['1/1000', '1/500', '1/250', '1/125', '1/60', '1/30', '1/15', '1/8', '1/4', '0,5"', '1"', '2"', '4"', '8"', '15"', '30"'];
+    var h = '<thead><tr><th>' + LBL('thSin') + '</th><th>' + LBL('thCon') + '</th><th>' + LBL('thExpon') + '</th></tr></thead><tbody>';
+    filas.forEach(function (e) {
+      var i = ETIQUETAS.indexOf(e); if (i < 0) return;
+      var k = K0 + i, tm = Math.pow(2, k / 3) * Math.pow(2, pasos);
+      h += '<tr' + (k === estado.k ? ' class="actual"' : '') + '><td>' + etiqueta(e) + '</td><td>' + corto(tm) + '</td><td>' +
+           corto(redondear(corregir(pel, tm).tc, estado.redondeo)) + '</td></tr>';
+    });
+    $('tabla').innerHTML = h + '</tbody>';
+  }
+
+  // ------------------------------------------------------------ barra fija
+  try {
+    var obs = new IntersectionObserver(function (e) {
+      var ver = !e[0].isIntersecting;
+      $('mini').classList.toggle('visible', ver);
+      $('mini').setAttribute('aria-hidden', ver ? 'false' : 'true');
+    }, { threshold: 0, rootMargin: '-40% 0px 0px 0px' });
+    obs.observe($('btn-iniciar'));
+  } catch (e) { /* sin barra fija */ }
+
+  // ------------------------------------------------------------ temporizador
+  var intervalo = null, finMs = 0, totalMs = 0, bloqueo = null, audio = null, CIRC = 339.29, fase = 'expone';
+  function textosReloj() {
+    if (fase === 'fin') {
+      $('reloj-etq').textContent = LBL('terminado');
+      $('fin').textContent = LBL('cierra');
+      $('btn-parar').textContent = LBL('cerrar');
+    } else {
+      $('reloj-etq').textContent = LBL('exponiendo');
+      $('fin').textContent = LBL('termina') + new Date(finMs).toLocaleTimeString(LBL('locale'), { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      $('btn-parar').textContent = LBL('parar');
+    }
+  }
+  function pitidos() {
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      [0, 0.35, 0.7].forEach(function (t) {
+        var o = audio.createOscillator(), g = audio.createGain();
+        o.frequency.value = 880; o.connect(g); g.connect(audio.destination);
+        g.gain.setValueAtTime(0.0001, audio.currentTime + t);
+        g.gain.exponentialRampToValueAtTime(0.4, audio.currentTime + t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + t + 0.25);
+        o.start(audio.currentTime + t); o.stop(audio.currentTime + t + 0.3);
+      });
+    } catch (e) {}
+    try { if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 300]); } catch (e) {}
+  }
+  function pedirBloqueo() { try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (b) { bloqueo = b; }, function () {}); } catch (e) {} }
+  function soltarBloqueo() { try { if (bloqueo) bloqueo.release(); } catch (e) {} bloqueo = null; }
+  function tic() {
+    var queda = (finMs - Date.now()) / 1000;
+    $('cuenta').textContent = reloj(queda);
+    $('anillo').style.strokeDashoffset = String(CIRC * Math.max(0, queda * 1000 / totalMs));
+    if (queda <= 0) {
+      clearInterval(intervalo); intervalo = null;
+      $('cuenta').textContent = '0:00';
+      fase = 'fin'; textosReloj();
+      $('btn-repetir').hidden = false;
+      soltarBloqueo(); pitidos();
+    }
+  }
+  function iniciar() {
+    try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+    totalMs = Math.max(1000, resultado.tc * 1000);
+    finMs = Date.now() + totalMs;
+    fase = 'expone'; textosReloj();
+    $('btn-repetir').hidden = true;
+    $('reloj').hidden = false;
+    pedirBloqueo();
+    if (intervalo) clearInterval(intervalo);
+    intervalo = setInterval(tic, 250); tic();
+  }
+  $('btn-iniciar').addEventListener('click', iniciar);
+  $('mini-iniciar').addEventListener('click', iniciar);
+  $('btn-repetir').addEventListener('click', iniciar);
+  $('btn-parar').addEventListener('click', function () {
+    if (intervalo) clearInterval(intervalo);
+    intervalo = null; soltarBloqueo(); $('reloj').hidden = true;
+  });
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && intervalo) pedirBloqueo(); });
+
+  // ------------------------------------------------------------ modo nocturno
+  var noche = false;
+  try { noche = localStorage.getItem('exposiciones-largas-noche') === '1'; } catch (e) {}
+  function aplicarNoche() {
+    document.documentElement.classList.toggle('nocturno', noche);
+    $('btn-noche').setAttribute('aria-pressed', noche ? 'true' : 'false');
+    try { localStorage.setItem('exposiciones-largas-noche', noche ? '1' : '0'); } catch (e) {}
+  }
+  $('btn-noche').addEventListener('click', function () { noche = !noche; aplicarNoche(); });
+  aplicarNoche();
+
+  window.onLangChange = function () {
+    rellenarPeliculas();
+    Array.prototype.forEach.call(dial.children, function (m, i) { m.querySelector('span').textContent = etiqueta(ETIQUETAS[i]); });
+    document.querySelectorAll('.ficha').forEach(function (b) {
+      var f = ND.concat(OTROS).filter(function (x) { return x.id === b.dataset.id; })[0];
+      b.innerHTML = nombreFiltro(f) + '<small>' + coma(f.pasos, f.pasos % 1 ? 1 : 0) + '</small>';
+    });
+    if (!$('reloj').hidden) textosReloj();
+    actualizar();
+  };
+  window.aplicarIdioma(idioma());
+  requestAnimationFrame(function () { dial.scrollLeft = (estado.k - K0) * ANCHO; });
+})();
+</script>
+
+</body></html>
