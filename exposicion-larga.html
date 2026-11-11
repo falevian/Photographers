@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Crect%20width%3D%2764%27%20height%3D%2764%27%20rx%3D%2713%27%20fill%3D%27%230e1116%27%2F%3E%3Cg%20stroke%3D%27%23e8b04b%27%20stroke-width%3D%273%27%20stroke-linecap%3D%27round%27%3E%3Cpath%20d%3D%27M12%2042h34%27%20opacity%3D%27.25%27%2F%3E%3Cpath%20d%3D%27M12%2034h26%27%20opacity%3D%27.5%27%2F%3E%3Cpath%20d%3D%27M12%2026h16%27%2F%3E%3C%2Fg%3E%3Ccircle%20cx%3D%2748%27%20cy%3D%2722%27%20r%3D%276%27%20fill%3D%27%23e8b04b%27%2F%3E%3C%2Fsvg%3E">
 <link rel="apple-touch-icon" href="icons/exposicion-larga-180.png">
 <meta name="theme-color" content="#0e1116">
@@ -12,11 +12,11 @@
 <meta name="apple-mobile-web-app-title" content="Exposición larga">
 <title>Exposición larga · Rafael Vida</title>
 <meta name="author" content="Rafael Vida">
-<meta name="description" content="Exposición larga: cuánto arrastre deja tu sujeto y cuánto puedes sostener. Convierte los tiempos de receta (1/15 s para barrido, 30 s para vaciar una plaza) en el tiempo que tu escena y tu cámara piden de verdad, con el arrastre medido en píxeles.">
+<meta name="description" content="Exposición larga en el campo: eliges el efecto, tu cámara y la escena, y la página te dice el tiempo, cómo saldrá la foto y si necesitas filtro ND o trípode.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Photographers">
 <meta property="og:title" content="Exposición larga · Rafael Vida">
-<meta property="og:description" content="Exposición larga: cuánto arrastre deja tu sujeto y cuánto puedes sostener. Los tiempos de receta convertidos en el tiempo que tu escena y tu cámara piden de verdad.">
+<meta property="og:description" content="Eliges el efecto, tu cámara y la escena: el tiempo, cómo saldrá la foto y si necesitas filtro ND o trípode.">
 <meta property="og:url" content="https://lab.rafaelvida.com/exposicion-larga.html">
 <link rel="canonical" href="https://lab.rafaelvida.com/exposicion-larga.html">
 <meta property="og:image" content="https://lab.rafaelvida.com/og/exposicion-larga.png">
@@ -42,91 +42,95 @@
 :root{
   --bg:#0e1116; --panel:#161b22; --panel2:#11161d; --line:#242c36; --line2:#303a46;
   --fg:#dfe4ea; --fg2:#98a3b0; --fg3:#6b7684;
-  --amber:#e8b04b; --cyan:#5ec8d8; --green:#6fbf73; --red:#e2705f; --violet:#a98cd8;
+  --amber:#e8b04b; --cyan:#5ec8d8; --green:#6fbf73; --red:#e2705f;
   --mono:"IBM Plex Mono",ui-monospace,monospace; --disp:"Space Grotesk",system-ui,sans-serif; --sans:"Inter",system-ui,sans-serif;
 }
 html[lang="es"] [data-lang="en"]{display:none!important}
 html[lang="en"] [data-lang="es"]{display:none!important}
+[hidden]{display:none!important}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.6}
-.wrap{max-width:1060px;margin:0 auto;padding:0 20px 72px}
+.wrap{max-width:860px;margin:0 auto;padding:0 16px 96px}
 .langbar{position:fixed;top:10px;right:12px;display:flex;gap:6px;z-index:40;background:rgba(14,17,22,.85);border:1px solid var(--line);border-radius:999px;padding:4px 6px;backdrop-filter:blur(6px)}
 .langbar button,.langbar .home{font-family:var(--mono);font-size:11px;letter-spacing:.08em;background:none;border:0;color:var(--fg3);cursor:pointer;padding:3px 7px;border-radius:999px;display:inline-flex;align-items:center}
 .langbar button.on{background:var(--amber);color:#0e1116}
 .langbar .home svg{width:14px;height:14px}
-header.top{padding:54px 0 24px;border-bottom:1px solid var(--line)}
-h1{font-family:var(--disp);font-size:clamp(28px,5vw,44px);line-height:1.05;font-weight:700;letter-spacing:-.02em}
-.sub{color:var(--fg2);max-width:72ch;margin-top:12px}
-.src{font-size:12.5px;color:var(--fg3);margin-top:14px}
-.src a{color:var(--fg2)}
-h2{font-family:var(--disp);font-size:clamp(19px,3vw,25px);font-weight:600;margin:44px 0 12px;letter-spacing:-.01em}
-h3{font-family:var(--disp);font-size:16px;font-weight:600;margin:26px 0 8px}
-p{max-width:74ch;margin-bottom:12px}
+header.top{padding:54px 0 18px;border-bottom:1px solid var(--line)}
+h1{font-family:var(--disp);font-size:clamp(28px,5vw,42px);line-height:1.05;font-weight:700;letter-spacing:-.02em}
+.sub{color:var(--fg2);max-width:68ch;margin-top:10px}
+p{max-width:72ch;margin-bottom:12px}
 a{color:var(--amber)}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px 18px}
-.row{display:grid;grid-template-columns:230px 1fr;gap:6px 18px;align-items:center;margin-top:14px}
-.row label{margin:0}.row .chips{grid-column:2;margin:0}
-@media(max-width:640px){.row{grid-template-columns:1fr}.row .chips{grid-column:1}}
-.f .chk span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hero{display:grid;grid-template-columns:auto auto 1fr;gap:10px 28px;align-items:end;margin-top:20px;padding-top:14px;border-top:1px solid var(--line)}
-.hero b{display:block;font-family:var(--mono);font-weight:500;letter-spacing:-.02em}
-.hero-t b{font-size:46px;line-height:1;color:var(--amber)}
-.hero-b b{font-size:26px;line-height:1.1}
-.hero span{font-size:11.5px;color:var(--fg3);line-height:1.35;display:block;margin-top:4px}
-.hero-tag .tag{font-size:13px;padding:5px 12px}
-.hero-tag>span:not(.tag){margin-top:6px}
-@media(max-width:700px){.hero{grid-template-columns:1fr 1fr}.hero-b{grid-column:1/-1}}
-.grid>*{min-width:0}
-.f label{display:block;font-size:11.5px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--fg3);margin-bottom:5px}
-.f select,.f input[type=number]{width:100%;background:var(--panel2);border:1px solid var(--line2);border-radius:4px;color:var(--fg);font-family:var(--mono);font-size:13px;padding:7px 9px}
-.f input[type=range]{width:100%;accent-color:var(--amber)}
-.f .v{font-family:var(--mono);color:var(--fg);font-size:13px}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 0}
-.chips button{font-family:var(--mono);font-size:11px;letter-spacing:.04em;background:var(--panel2);border:1px solid var(--line2);color:var(--fg2);border-radius:999px;padding:4px 10px;cursor:pointer}
-.chips button.on{background:var(--amber);border-color:var(--amber);color:#0e1116}
-.out{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 18px;margin-top:16px}
-@media(max-width:700px){.out{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.out div{border-top:1px solid var(--line);padding-top:8px}
-.out b{display:block;font-family:var(--mono);font-size:19px;font-weight:500;letter-spacing:-.01em}
-.out b small{font-size:12px;color:var(--fg3);font-weight:400}
-.out span{font-size:11.5px;color:var(--fg3);line-height:1.35;display:block;margin-top:2px}
-.verdict{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--amber);border-radius:6px;padding:16px 18px;margin:16px 0}
-.verdict h4{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin:18px 0 6px;padding-top:12px;border-top:1px solid var(--line)}
-.verdict h4:first-child{border-top:0;padding-top:0;color:var(--fg3)}
-.verdict h4+p{font-size:15.5px;color:var(--fg)}
-.verdict h4:first-child{margin-top:0}
-.verdict p{font-size:14.5px;margin-bottom:8px}
-.verdict p:last-child{margin-bottom:0}
-.verdict b{color:var(--amber);font-weight:600}
-.tag{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;border:1px solid currentColor;border-radius:3px;padding:1px 7px}
-.tag.ok{color:var(--green)}.tag.warn{color:var(--amber)}.tag.bad{color:var(--red)}
-svg.chart{width:100%;height:auto;display:block;background:var(--panel2);border:1px solid var(--line);border-radius:6px;margin:12px 0 6px}
-svg.chart text{font-family:var(--mono);font-size:10px;fill:var(--fg3)}
-canvas.strip{width:100%;height:auto;display:block;background:#000;border:1px solid var(--line);border-radius:6px;margin:12px 0 6px}
-.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:12px;color:var(--fg3);margin:4px 0 14px}
-.legend i{display:inline-block;width:16px;height:0;border-top:3px solid;vertical-align:middle;margin-right:6px}
-.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:10px 0 18px}
-table{border-collapse:collapse;width:100%;font-size:13px;font-family:var(--mono);white-space:nowrap}
-th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line)}
-th{color:var(--fg3);font-weight:500;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
-td.num,th.num{text-align:right}
-tr.sel td{background:rgba(232,176,75,.09)}
-.note{font-size:13px;color:var(--fg2);max-width:74ch}
-dl{margin:0 0 14px;max-width:74ch}dt{font-weight:600;margin-top:12px;color:var(--fg)}dd{color:var(--fg2);margin-top:3px}
-footer{border-top:1px solid var(--line);margin-top:52px;padding-top:18px;font-size:12.5px;color:var(--fg3)}
-@media(max-width:620px){table{font-size:12px}th,td{padding:6px 7px}}
-  .f .chk{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);padding:7px 0}
-  .f .chk input{width:16px;height:16px;accent-color:var(--gold);flex:0 0 auto}
-  .f input:disabled{opacity:.5;cursor:not-allowed}
-  .navrow{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 2px}
-  .navlink{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:#ffd98a;
-    font-family:var(--mono,'IBM Plex Mono',monospace);font-size:12.5px;letter-spacing:.03em;
-    border:1px solid rgba(255,217,138,.38);border-radius:10px;padding:9px 14px;background:rgba(255,217,138,.08)}
-  .navlink:hover{background:rgba(255,217,138,.16)}
-  .navlink.alt{color:#9aa6b4;border-color:rgba(255,255,255,.14);background:rgba(255,255,255,.03)}
-  .navlink.alt:hover{background:rgba(255,255,255,.07)}
-  .navlink svg{width:15px;height:15px;flex:0 0 auto}
+.navrow{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 2px}
+.navlink{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:#9aa6b4;font-family:var(--mono);font-size:12px;letter-spacing:.03em;border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:8px 12px;background:rgba(255,255,255,.03)}
+.navlink:hover{background:rgba(255,255,255,.07)}
+.navlink svg{width:15px;height:15px;flex:0 0 auto}
+
+/* pasos */
+.paso{margin-top:28px}
+.paso-cab{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.paso-cab .num{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;flex:none;background:var(--amber);color:#0e1116;font:600 14px/1 var(--mono)}
+.paso-cab h2{font-family:var(--disp);font-size:clamp(19px,3vw,23px);font-weight:600;letter-spacing:-.01em}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+.campo+.campo{margin-top:16px}
+.etq{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--fg3);margin-bottom:7px}
+.etq .v{color:var(--fg);letter-spacing:0;text-transform:none;font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{font-family:var(--mono);font-size:12.5px;background:var(--panel2);border:1px solid var(--line2);color:var(--fg2);border-radius:999px;padding:0 13px;min-height:38px;cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--amber);border-color:var(--amber);color:#0e1116}
+.chips button small{font-size:11px;opacity:.75;margin-left:5px}
+.dos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media(max-width:560px){.dos{grid-template-columns:1fr}}
+.dos .campo+.campo{margin-top:0}
+.num-in{display:flex;align-items:center;gap:6px}
+.num-in input{width:100%;min-width:0;background:var(--panel2);border:1px solid var(--line2);border-radius:8px;color:var(--fg);font-family:var(--mono);font-size:15px;padding:0 10px;height:38px}
+.num-in span{font-family:var(--mono);font-size:13px;color:var(--fg3)}
+input[type=range]{width:100%;accent-color:var(--amber);height:30px}
+.pista-num{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+
+/* efectos */
+.efectos{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.efecto{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:start;text-align:left;cursor:pointer;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--fg);font:inherit}
+.efecto svg{width:26px;height:26px;grid-row:span 2;color:var(--fg2)}
+.efecto b{font-family:var(--disp);font-size:16px;font-weight:600;line-height:1.2}
+.efecto span{font-size:12.5px;line-height:1.35;color:var(--fg3)}
+.efecto[aria-pressed="true"]{border-color:var(--amber);background:rgba(232,176,75,.10)}
+.efecto[aria-pressed="true"] svg{color:var(--amber)}
+@media(max-width:560px){.efecto{grid-template-columns:1fr;padding:10px}.efecto svg{grid-row:auto;width:22px;height:22px}.efecto span{font-size:12px}}
+
+/* resultado */
+.veredictos{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:10px}
+@media(max-width:620px){.veredictos{grid-template-columns:1fr 1fr}.veredictos .ver-t{grid-column:1/-1}}
+.ver{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;border-top:3px solid var(--line2);min-width:0}
+.ver .k{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg3)}
+.ver b{display:block;font-family:var(--disp);font-size:clamp(22px,4.4vw,30px);font-weight:700;line-height:1.1;margin-top:6px;letter-spacing:-.01em}
+.ver .d{display:block;font-size:13px;color:var(--fg2);line-height:1.4;margin-top:6px}
+.ver-t b{font-family:var(--mono);font-weight:500;color:var(--amber);font-size:clamp(30px,7vw,44px);letter-spacing:-.03em}
+.ver.ok{border-top-color:var(--green)}.ver.ok b{color:var(--green)}
+.ver.warn{border-top-color:var(--amber)}.ver.warn b{color:var(--amber)}
+.ver.bad{border-top-color:var(--red)}.ver.bad b{color:var(--red)}
+.foto{margin-top:12px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:#000}
+.foto canvas{display:block;width:100%;height:auto}
+.pie{font-size:12.5px;color:var(--fg3);margin:6px 0 0}
+.veras{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--amber);border-radius:10px;padding:14px 16px;margin-top:12px}
+.veras h3{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:6px;font-weight:500}
+.veras p{font-size:15px;margin-bottom:8px}
+.veras p:last-child{margin-bottom:0}
+.veras p.det{font-size:13.5px;color:var(--fg2)}
+.veras b{color:var(--fg);font-weight:600}
+
+/* barra fija */
+.mini{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(14,17,22,.94);border-top:1px solid var(--line);backdrop-filter:blur(6px);padding:10px max(16px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));display:flex;gap:16px;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;transform:translateY(110%);transition:transform .2s}
+.mini.visible{transform:none}
+.mini b{color:var(--amber);font-weight:500;font-size:16px}
+.mini span{color:var(--fg2)}
+.mini a{color:var(--fg2);text-decoration:none;border:1px solid var(--line2);border-radius:8px;padding:4px 10px}
+@media(prefers-reduced-motion:reduce){.mini{transition:none}}
+
+/* notas */
+details.notas{margin-top:28px;border-top:1px solid var(--line);padding-top:10px}
+details.notas summary{cursor:pointer;font-family:var(--disp);font-size:18px;font-weight:600;padding:6px 0}
+dl{margin:8px 0 14px;max-width:72ch}dt{font-weight:600;margin-top:12px;color:var(--fg)}dd{color:var(--fg2);margin-top:3px;font-size:14px}
+footer{border-top:1px solid var(--line);margin-top:36px;padding-top:16px;font-size:12.5px;color:var(--fg3)}
 </style>
 </head>
 <body>
@@ -137,136 +141,97 @@ footer{border-top:1px solid var(--line);margin-top:52px;padding-top:18px;font-si
   <button type="button" data-setlang="en" aria-pressed="false">EN</button>
 </div>
 
+<div class="mini" id="mini" aria-hidden="true">
+  <b id="mini-t">—</b><span id="mini-nd"></span><span id="mini-tri"></span>
+</div>
+
 <div class="wrap">
 
 <header class="top">
-  <h1 data-lang="es">Exposición larga: cuánto arrastre, y cuánto puedes sostener</h1>
-  <h1 data-lang="en">Long exposure: how much blur, and how long you can hold it</h1>
-  <p class="sub" data-lang="es">Las recetas dan un tiempo fijo: 1/15 s para el barrido, un cuarto de segundo para las estelas, treinta segundos para vaciar una plaza. Ese tiempo solo vale para una velocidad, una distancia y una focal concretas. Aquí se calcula al revés: dices qué arrastre quieres y la herramienta dice el tiempo, cuántos píxeles va a medir esa raya, si tu cámara lo sostiene a pulso y qué filtro hace falta para llegar.</p>
-  <p class="sub" data-lang="en">Recipes give a fixed time: 1/15 s for panning, a quarter of a second for light trails, thirty seconds to empty a square. That time only holds for one particular speed, distance and focal length. Here it is computed the other way round: you say what blur you want and the tool gives the time, how many pixels that streak will measure, whether your camera can hold it handheld, and what filter you need to get there.</p>
-  <p class="src" data-lang="es">Las seis técnicas y la escalera de trucos para sostener la cámara vienen de la <i>Long Exposure Cheat Sheet</i> de Pit Haupert (2025). Esta página añade el cálculo, que traduce sus rangos de tiempo a tu escena, tu focal y tu cuerpo.</p>
-  <p class="src" data-lang="en">The six techniques and the ladder of tricks for holding the camera come from Pit Haupert's <i>Long Exposure Cheat Sheet</i> (2025). This page adds the arithmetic, which translates its time ranges to your scene, your focal length and your body.</p>
+  <h1><span data-lang="es">Exposición larga</span><span data-lang="en">Long exposure</span></h1>
+  <p class="sub" data-lang="es">Para usarla en el campo. Eliges qué quieres hacer, cómo es tu cámara y qué tienes delante, y la página te dice el tiempo, cómo saldrá la foto y si necesitas filtro ND o trípode.</p>
+  <p class="sub" data-lang="en">Made for use in the field. You choose what you want to do, what your camera is like and what is in front of you, and the page tells you the time, how the picture will come out and whether you need an ND filter or a tripod.</p>
   <div class="navrow">
-    <a class="navlink" href="manual-exposicion-larga.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M8 7h7M8 11h7"/></svg><span data-lang="es">Manual de la herramienta</span><span data-lang="en">Tool manual</span></a>
-    <a class="navlink alt" href="programa-camara.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20 20 4M4 12h8M12 4v8"/></svg><span data-lang="es">El programa de la cámara</span><span data-lang="en">The camera’s program</span></a>
-    <a class="navlink alt" href="simulador-flash.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg><span data-lang="es">Banco de flash</span><span data-lang="en">Flash bench</span></a>
+    <a class="navlink" href="reciprocidad.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 12l5-4"/></svg><span data-lang="es">Filtros ND y reciprocidad con película</span><span data-lang="en">ND filters and film reciprocity</span></a>
+    <a class="navlink" href="filtro-temporal.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 12c2.5-6 5-6 7.5 0s5 6 7.5 0M17 12h5"/></svg><span data-lang="es">Agua, nubes y estrellas: filtro temporal</span><span data-lang="en">Water, clouds and stars: temporal filter</span></a>
   </div>
 </header>
 
-<h2 data-lang="es">La escena</h2>
-<h2 data-lang="en">The scene</h2>
+<section class="paso">
+  <div class="paso-cab"><span class="num">1</span><h2><span data-lang="es">Qué quieres hacer</span><span data-lang="en">What you want to do</span></h2></div>
+  <div class="efectos" id="efectos"></div>
+</section>
 
-<div class="panel">
-  <div class="grid">
-    <div class="f"><label for="tec"><span data-lang="es">Técnica</span><span data-lang="en">Technique</span></label><select id="tec"></select></div>
-    <div class="f"><label for="cam"><span data-lang="es">Cuerpo</span><span data-lang="en">Body</span></label><select id="cam"></select></div>
-    <div class="f"><label for="focal"><span data-lang="es">Focal (mm)</span><span data-lang="en">Focal length (mm)</span></label><input id="focal" type="number" min="8" max="600" step="1" value="35"></div>
-    <div class="f"><label for="dist"><span data-lang="es">Distancia al sujeto (m)</span><span data-lang="en">Distance to subject (m)</span></label><input id="dist" type="number" min="0.5" max="500" step="0.5" value="10"></div>
-    <div class="f"><label for="ap"><span data-lang="es">Diafragma</span><span data-lang="en">Aperture</span></label><select id="ap"></select></div>
-    <div class="f"><label for="sup"><span data-lang="es">Apoyo</span><span data-lang="en">Support</span></label><select id="sup"></select></div>
-    <div class="f"><label for="stab"><span data-lang="es">Estabilización del cuerpo</span><span data-lang="en">Body stabilisation</span></label><label class="chk"><input id="stab" type="checkbox" checked><span id="stabTxt"></span></label></div>
+<section class="paso">
+  <div class="paso-cab"><span class="num">2</span><h2><span data-lang="es">Tu cámara y la toma</span><span data-lang="en">Your camera and the shot</span></h2></div>
+  <div class="panel">
+    <div class="campo"><div class="etq"><span data-lang="es">Sensor</span><span data-lang="en">Sensor</span></div><div class="chips" id="formato"></div></div>
+    <div class="campo"><div class="etq"><span data-lang="es">Resolución</span><span data-lang="en">Resolution</span></div><div class="chips" id="mp"></div></div>
+    <div class="campo"><div class="etq"><span data-lang="es">Estabilizador</span><span data-lang="en">Stabiliser</span></div><div class="chips" id="estab"></div></div>
+    <div class="campo"><div class="etq"><span data-lang="es">Focal</span><span data-lang="en">Focal length</span></div>
+      <div class="pista-num"><div class="chips" id="focales"></div><div class="num-in" style="width:96px"><input id="focal" type="number" inputmode="numeric" min="8" max="800" step="1" aria-label="Focal (mm)" data-aria-es="Focal (mm)" data-aria-en="Focal length (mm)"><span>mm</span></div></div>
+    </div>
+    <div class="campo"><div class="etq"><span data-lang="es">Diafragma</span><span data-lang="en">Aperture</span></div><div class="chips" id="diafs"></div></div>
   </div>
-  <div class="row f">
-    <label for="vel"><span data-lang="es">Velocidad del sujeto</span><span data-lang="en">Subject speed</span> <span class="v" id="velV">5,0 m/s</span></label>
-    <input id="vel" type="range" min="0" max="40" step="0.1" value="5">
-    <div class="chips" id="velpre"></div>
+</section>
+
+<section class="paso">
+  <div class="paso-cab"><span class="num">3</span><h2><span data-lang="es">La escena</span><span data-lang="en">The scene</span></h2></div>
+  <div class="panel">
+    <div class="campo"><div class="etq"><span data-lang="es">Qué se mueve</span><span data-lang="en">What moves</span></div><div class="chips" id="sujetos"></div></div>
+    <div class="dos campo">
+      <div class="campo"><div class="etq"><span data-lang="es">Velocidad</span><span data-lang="en">Speed</span><span class="v" id="velV"></span></div><input id="vel" type="range" min="0.5" max="50" step="0.1" aria-label="Velocidad" data-aria-es="Velocidad" data-aria-en="Speed"></div>
+      <div class="campo"><div class="etq"><span data-lang="es">Distancia</span><span data-lang="en">Distance</span></div><div class="num-in"><input id="dist" type="number" inputmode="decimal" min="0.5" max="2000" step="0.5" aria-label="Distancia (m)" data-aria-es="Distancia (m)" data-aria-en="Distance (m)"><span>m</span></div></div>
+    </div>
+    <div class="campo"><div class="etq"><span data-lang="es">Luz</span><span data-lang="en">Light</span></div><div class="chips" id="luces"></div></div>
   </div>
-  <div class="row f">
-    <label for="ev"><span data-lang="es">Luz de la escena</span><span data-lang="en">Scene light</span> <span class="v" id="evV">EV 12</span></label>
-    <input id="ev" type="range" min="-2" max="16" step="1" value="12">
-    <div class="chips" id="evpre"></div>
+</section>
+
+<section class="paso" id="resultado">
+  <div class="paso-cab"><span class="num">4</span><h2><span data-lang="es">Qué vas a hacer y qué vas a ver</span><span data-lang="en">What to do and what you will see</span></h2></div>
+  <div class="veredictos">
+    <div class="ver ver-t"><span class="k"><span data-lang="es">Tiempo</span><span data-lang="en">Time</span></span><b id="oT">—</b><span class="d" id="oTd"></span></div>
+    <div class="ver" id="vND"><span class="k"><span data-lang="es">Filtro ND</span><span data-lang="en">ND filter</span></span><b id="oND">—</b><span class="d" id="oNDd"></span></div>
+    <div class="ver" id="vTri"><span class="k"><span data-lang="es">Trípode</span><span data-lang="en">Tripod</span></span><b id="oTri">—</b><span class="d" id="oTrid"></span></div>
   </div>
+  <div class="foto"><canvas id="foto" role="img" aria-label="Simulación de la foto" data-aria-es="Simulación de la foto" data-aria-en="Simulation of the picture"></canvas></div>
+  <p class="pie" id="pie"></p>
+  <div class="veras" id="veras"></div>
+</section>
 
-  <div class="hero">
-    <div class="hero-t"><b id="oT">—</b><span data-lang="es">tiempo para el arrastre buscado</span><span data-lang="en">time for the intended blur</span></div>
-    <div class="hero-tag"><span class="tag" id="oTag">—</span><span data-lang="es">con este apoyo</span><span data-lang="en">with this support</span></div>
-    <div class="hero-b"><b id="oBlur">—</b><span data-lang="es">arrastre del sujeto, en píxeles y en anchos de fotograma</span><span data-lang="en">subject blur, in pixels and in frame widths</span></div>
-  </div>
-  <div class="out">
-    <div><b id="oHold">—</b><span data-lang="es">máximo a pulso con este apoyo (2 px de trepidación)</span><span data-lang="en">longest handheld with this support (2 px of shake)</span></div>
-    <div><b id="oShake">—</b><span data-lang="es">trepidación a ese tiempo</span><span data-lang="en">shake at that time</span></div>
-    <div><b id="oNd">—</b><span data-lang="es">filtro necesario a ISO base</span><span data-lang="en">filter needed at base ISO</span></div>
-    <div><b id="oIso">—</b><span data-lang="es">ISO si no pones filtro</span><span data-lang="en">ISO if you use no filter</span></div>
-  </div>
-</div>
+<details class="notas">
+  <summary><span data-lang="es">Cómo se calcula</span><span data-lang="en">How it is computed</span></summary>
+  <dl data-lang="es">
+    <dt>El efecto fija el tiempo</dt><dd>Cada efecto pide un recorrido del sujeto durante la toma. Cuando lo que importa es cómo se ve el sujeto, el recorrido se mide en su propio largo <i>W</i> y el tiempo es <i>t</i> = <i>K·W/v</i>, sin focal ni distancia: media vez su largo con flash, vez y media para que deje traza y aún se reconozca, tres veces para que lo que pasa sea un fantasma y cuarenta para que desaparezca (calle vacía). Cuando lo que importa es el encuadre, se mide en anchos de encuadre a la distancia del sujeto, <i>A</i> = <i>a·d/f</i> con <i>a</i> el ancho del sensor: en el barrido el fondo se estira un 3 % del encuadre y en las estelas el coche lo cruza entero. El zoom burst no depende del sujeto y se toma medio segundo, lo que dura un giro tranquilo del anillo.</dd>
+    <dt>Filtro ND</dt><dd>A ISO 100 la exposición correcta dura <i>N</i>²/2<sup>EV</sup>, con <i>N</i> el diafragma y el EV de la luz elegida (noche urbana 5, hora azul 8, sombra 11, nublado 13, sol 15). Si el efecto pide más tiempo, sobran log₂(<i>t</i>/<i>t</i><sub>correcto</sub>) pasos de luz, y se elige el filtro comercial, o la pareja de filtros, que los cubre: 1, 2, 3, 4, 6, 10 o 15 pasos. Si cerrar el diafragma hasta f/16 basta, la página lo ofrece como alternativa. Si el efecto pide menos tiempo del correcto, no hace falta filtro: en las estelas, la calle vacía y lo que pasa por delante se alarga el tiempo, que solo refuerza el efecto, y en el barrido, la traza y el flash se sube el ISO.</dd>
+    <dt>Trípode</dt><dd>La mano tiembla con una velocidad angular de unos 0,03 rad/s, que en el sensor deja un arrastre de <i>f·ω·t/p</i> píxeles, con <i>p</i> el paso de píxel que sale del sensor y la resolución. La foto es nítida si ese arrastre no pasa de dos píxeles. Cada paso de ayuda divide el temblor por dos: el estabilizador cuenta dos pasos si va en el objetivo y cuatro si va en el cuerpo, sujetar bien la cámara (codos pegados, correa tensa contra el cuello) añade dos, y apoyarla en un muro o una barandilla, tres. Si ni así llega, hace falta trípode. Es el mismo modelo que usa <a href="programa-camara.html">el programa de la cámara</a>. Por eso la resolución importa: con más megapíxeles el píxel es más pequeño y el temblor se nota antes.</dd>
+    <dt>La foto simulada</dt><dd>Es el encuadre entero a la distancia del sujeto, con el sujeto a su tamaño real. Cada píxel es el promedio de lo que vio durante la exposición, que es como integra el sensor: por eso lo que se mueve mucho se vuelve transparente y la gente desaparece. Los faros son tanto más brillantes que la escena que saturan el sensor, y su estela se dibuja entera.</dd>
+  </dl>
+  <dl data-lang="en">
+    <dt>The effect sets the time</dt><dd>Each effect asks for a certain travel of the subject during the shot. When what matters is how the subject looks, the travel is measured in its own length <i>W</i> and the time is <i>t</i> = <i>K·W/v</i>, with no focal length or distance: half its length with flash, one and a half for a trace that is still recognisable, three for whatever passes to become a ghost and forty for it to vanish (empty street). When what matters is the frame, it is measured in frame widths at the subject's distance, <i>A</i> = <i>a·d/f</i> with <i>a</i> the sensor width: in panning the background stretches 3 % of the frame and in light trails the car crosses all of it. Zoom burst does not depend on the subject and is taken as half a second, the length of a calm turn of the ring.</dd>
+    <dt>ND filter</dt><dd>At ISO 100 the correct exposure lasts <i>N</i>²/2<sup>EV</sup>, with <i>N</i> the aperture and the EV of the chosen light (city night 5, blue hour 8, shade 11, overcast 13, sun 15). If the effect asks for more time, there are log₂(<i>t</i>/<i>t</i><sub>correct</sub>) stops of light to spare, and the page picks the commercial filter, or pair of filters, that covers them: 1, 2, 3, 4, 6, 10 or 15 stops. If stopping down to f/16 is enough, the page offers it as an alternative. If the effect asks for less time than the correct one, no filter is needed: in light trails, the empty street and whatever passes in front the time is lengthened, which only strengthens the effect, and in panning, the trace and flash the ISO goes up.</dd>
+    <dt>Tripod</dt><dd>The hand trembles at an angular speed of about 0.03 rad/s, which on the sensor leaves a blur of <i>f·ω·t/p</i> pixels, with <i>p</i> the pixel pitch given by the sensor and the resolution. The picture is sharp if that blur stays within two pixels. Each stop of help halves the tremor: the stabiliser counts two stops in the lens and four in the body, holding the camera well (elbows tucked in, strap tensioned against the neck) adds two, and resting it on a wall or a railing, three. If even that is not enough, you need a tripod. It is the same model used by <a href="programa-camara.html">the camera's program</a>. That is why resolution matters: with more megapixels the pixel is smaller and the tremor shows sooner.</dd>
+    <dt>The simulated picture</dt><dd>It is the whole frame at the subject's distance, with the subject at its real size. Each pixel is the average of what it saw during the exposure, which is how the sensor integrates: that is why whatever moves a lot turns transparent and people vanish. Headlights are so much brighter than the scene that they saturate the sensor, and their trail is drawn in full.</dd>
+  </dl>
+</details>
 
-
-<div class="verdict" id="verdict"></div>
-
-<h2 data-lang="es">Lo que vas a ver</h2>
-<h2 data-lang="en">What you are going to see</h2>
-<p data-lang="es">El recuadro grande es <b>el fotograma entero</b>, con la proporción del formato, y dentro va <b>tu sujeto al tamaño que tiene en el sensor</b>: la silueta del preset (persona, ciclista, coche, tren) con su altura y su largo en píxeles, y la traza que deja al moverse durante la exposición, calculada como la integra el sensor. En ámbar, tu sujeto; en gris, lo que se mueve alrededor. Quién se mueve depende de la técnica: en estelas, ciudad desierta y libre el sujeto deja su traza; con flash, además, el destello lo congela al final; en el barrido el sujeto avanza y la cámara lo sigue, así que la escena lo muestra avanzando y las cajas de la derecha enseñan lo que queda en la foto (él nítido, el fondo arrastrado); en sujeto quieto son los grises los que pasan por delante. Las marcas ½ y ×2 dicen qué pasa con la mitad y el doble de tu tiempo, y un borde rojo avisa de que la traza se sale del fotograma.</p>
-<p data-lang="en">The large rectangle is <b>the whole frame</b>, in the format’s proportion, and inside it is <b>your subject at the size it has on the sensor</b>: the preset’s silhouette (person, cyclist, car, train) with its height and length in pixels, and the trace it leaves as it moves during the exposure, computed the way the sensor integrates it. Amber is your subject; grey is whatever moves around it. Who moves depends on the technique: in light trails, ghost town and free mode the subject leaves its trace; with flash the burst also freezes it at the end; in panning the subject advances and the camera follows, so the scene shows it advancing and the boxes on the right show what ends up in the picture (it crisp, the background smeared); in static subject it is the grey ones that pass in front. The ½ and ×2 marks say what happens with half and double your time, and a red edge warns that the trace runs off the frame.</p>
-<canvas class="strip" id="strip" width="1200" height="556"></canvas>
-<div class="legend" id="striplg"></div>
-
-<h2 data-lang="es">Arrastre frente a tiempo</h2>
-<h2 data-lang="en">Blur against time</h2>
-<p data-lang="es">La curva ámbar es el arrastre del sujeto; la azulada, la trepidación de tus manos con el apoyo elegido. Donde la azulada cruza los dos píxeles está tu tiempo máximo a pulso. Las bandas marcan qué significa cada cantidad de arrastre: por debajo de dos píxeles no se ve, hasta veinte es un sujeto movido, a partir de cien es una raya deliberada.</p>
-<p data-lang="en">The amber curve is the subject's blur; the cyan one, your hands' shake with the chosen support. Where the cyan one crosses two pixels is your longest handheld time. The bands say what each amount of blur means: below two pixels it is invisible, up to twenty it is a blurred subject, from a hundred it is a deliberate streak.</p>
-<svg class="chart" id="chart" viewBox="0 0 900 340" role="img" data-aria-es="Arrastre y trepidación frente al tiempo de obturación" data-aria-en="Blur and shake against shutter time" aria-label="Arrastre y trepidación frente al tiempo de obturación"></svg>
-<div class="legend" id="chartlg"></div>
-
-<h2 data-lang="es">Las seis técnicas de la chuleta, y una más, con tu escena</h2>
-<h2 data-lang="en">The cheat sheet's six techniques, and one more, with your scene</h2>
-<p data-lang="es">Cada técnica pide una cantidad de arrastre distinta. La tabla calcula el tiempo de cada una con la velocidad, la distancia y la focal que tienes puestas, en lugar de dar el de la receta. La columna del apoyo dice si ese tiempo se sostiene con lo que llevas.</p>
-<p data-lang="en">Each technique asks for a different amount of blur. The table works out the time for each one with the speed, distance and focal length you have set, instead of giving the recipe’s. The support column says whether that time is holdable with what you are carrying.</p>
-<div class="scroll"><table><thead id="tecHead"></thead><tbody id="tecBody"></tbody></table></div>
-
-<h2 data-lang="es">Los tres cuerpos, al mismo tiempo de obturación</h2>
-<h2 data-lang="en">The three bodies, at the same shutter time</h2>
-<p data-lang="es">El arrastre en píxeles depende del paso de píxel, así que la misma foto deja rayas de distinta longitud en cada cuerpo. Y el tiempo que se sostiene a pulso depende de la estabilización: es la diferencia práctica más grande entre la M11 y el SL3-S.</p>
-<p data-lang="en">Blur in pixels depends on the pixel pitch, so the same photograph leaves streaks of different lengths on each body. And the time you can hold depends on stabilisation: it is the largest practical difference between the M11 and the SL3-S.</p>
-<div class="scroll"><table><thead id="camHead"></thead><tbody id="camBody"></tbody></table></div>
-
-<h2 data-lang="es">Cuánto se sostiene a pulso</h2>
-<h2 data-lang="en">How long you can hold it</h2>
-<p data-lang="es">La escalera de apoyos, de menos a más. Cada peldaño divide la velocidad angular del temblor por dos, es decir, dobla el tiempo que aguantas. Los cuatro primeros no cuestan nada y son los de la chuleta: brazos sueltos, codos pegados al cuerpo, correa tensada contra el cuello y apoyo en un muro. La estabilización se combina con cualquiera de estos peldaños y multiplica lo que ya ganas con él.</p>
-<p data-lang="en">The ladder of supports, from least to most. Each rung halves the angular speed of your tremor, that is, doubles the time you can hold. The first four cost nothing and are the ones from the cheat sheet: arms loose, elbows tucked in, strap tensioned against the neck, and leaning on a wall. Stabilisation combines with any of these rungs and multiplies whatever you already gain from it.</p>
-<div class="scroll"><table><thead id="supHead"></thead><tbody id="supBody"></tbody></table></div>
-<p class="note" id="supNote"></p>
-<p class="note" data-lang="es">Fuera de la escalera queda un truco más, <b>disparar en ráfaga</b>. El temblor es aleatorio, así que de ocho fotogramas hay uno en el que la mano estaba casi quieta. El tiempo medio sigue igual, pero mejora la cola de la distribución. Con ocho intentos, la probabilidad de que al menos uno salga dentro del criterio pasa de un tercio a más de nueve de cada diez. No sirve cuando el arrastre que buscas es el del sujeto, porque entonces cada fotograma es una foto distinta.</p>
-<p class="note" data-lang="en">Outside the ladder there is one more trick, <b>shooting a burst</b>. Tremor is random, so out of eight frames there is one in which the hand was nearly still. The average time stays the same, but the tail of the distribution improves. With eight attempts, the chance that at least one lands within the criterion goes from a third to better than nine in ten. It is no use when the blur you want is the subject's, because then every frame is a different photograph.</p>
-
-<h2 data-lang="es">Cómo se calcula</h2>
-<h2 data-lang="en">How it is computed</h2>
-<dl data-lang="es">
-  <dt>Arrastre del sujeto</dt><dd>Un sujeto a distancia <i>d</i> que se mueve a <i>v</i> perpendicular al eje barre un ángulo a razón de <i>ω</i> = <i>v/d</i> radianes por segundo. Sobre el sensor eso es <i>b</i> = <i>f·v·t/d</i> milímetros, y en píxeles <i>b</i><sub>px</sub> = <i>f·v·t/(d·p)</i> con <i>p</i> el paso de píxel. Es la fórmula de la que cuelga toda la página, y explica por qué una receta de tiempo fijo no puede funcionar: el mismo 1/15 s deja 87 píxeles con un peatón a diez metros y 869 con un coche a la misma distancia.</dd>
-  <dt>Trepidación</dt><dd>Se modela como una velocidad angular residual de la mano, <i>ω</i>₀ = 0,03 rad/s a pulso limpio, que cada peldaño de apoyo o cada paso de estabilización divide por dos. El arrastre sale de la misma fórmula, con <i>ω</i> en lugar de <i>v/d</i>. Es el mismo modelo y la misma constante que usa <a href="programa-camara.html">el programa de la cámara</a>, para que las dos fichas no se contradigan.</dd>
-  <dt>Criterio de nitidez</dt><dd>Dos píxeles de arrastre, que es un par de líneas en el Nyquist del sensor. Es más exigente que la regla de 1/focal: a 35 mm en la M11 da 1/140 s en vez de 1/35 s, porque sesenta megapíxeles ven lo que la regla, pensada para una copia de contacto, se permitía ignorar. La página lo deja fijo. Si tu destino es una copia pequeña o una pantalla, el criterio real es más blando y el tiempo se alarga en la misma proporción: con cuatro píxeles se dobla, con ocho se cuadruplica.</dd>
-  <dt>Barrido</dt><dd>Al acompañar al sujeto con la cámara, el fondo recibe el arrastre completo y el sujeto solo el error de seguimiento, que se estima en un 15 % del movimiento. De ahí sale que el barrido funcione: a 1/15 s el fondo se raya y el sujeto se queda casi nítido. También explica por qué falla con teleobjetivo: el error absoluto crece con la focal aunque el porcentaje no cambie.</dd>
-  <dt>Exposición y filtro</dt><dd>A ISO 100, el tiempo correcto es <i>t</i> = <i>N</i>²/2<sup>EV</sup>. Los pasos de filtro necesarios son log₂ del cociente entre el tiempo que pide el efecto y ese tiempo correcto, redondeado al filtro comercial siguiente. El coste cromático de un ND de muchos pasos, que no es despreciable, se estudia en <a href="sensor.html#nd">el filtro ND y la fuga infrarroja</a>.</dd>
-  <dt>Ciudad desierta</dt><dd>Esta es la única técnica que se decide por tiempo; las demás se deciden por arrastre. Una persona solo tapa un punto del encuadre mientras tarda en cruzar su propio ancho, <i>w/v</i>, así que su contraste sobre ese punto queda dividido por <i>t·v/w</i>. Con cuarenta veces ese tiempo baja algo más de cinco pasos y deja de verse. La cuenta no lleva ni focal ni distancia, y por eso la receta de treinta segundos funciona en cualquier plaza: con alguien paseando a 1,4 m/s salen unos catorce segundos, y los treinta de la receta cubren además a quien se para a mirar el escaparate.</dd>
-  <dt>Ráfaga</dt><dd>Si la trepidación de un fotograma cumple el criterio con probabilidad <i>q</i>, la de al menos uno de <i>n</i> es 1 − (1 − <i>q</i>)<sup><i>n</i></sup>. Se toma <i>q</i> del cociente entre el tiempo elegido y el máximo sostenible, con un modelo de Rayleigh para la amplitud del temblor.</dd>
-</dl>
-<dl data-lang="en">
-  <dt>Subject blur</dt><dd>A subject at distance <i>d</i> moving at <i>v</i> perpendicular to the axis sweeps an angle at a rate of <i>ω</i> = <i>v/d</i> radians per second. On the sensor that is <i>b</i> = <i>f·v·t/d</i> millimetres, and in pixels <i>b</i><sub>px</sub> = <i>f·v·t/(d·p)</i> with <i>p</i> the pixel pitch. It is the formula everything on this page hangs from, and it explains why a fixed-time recipe cannot work: the same 1/15 s leaves 87 pixels with a pedestrian at ten metres and 869 with a car at the same distance.</dd>
-  <dt>Shake</dt><dd>Modelled as a residual angular speed of the hand, <i>ω</i>₀ = 0.03 rad/s clean handheld, which each rung of support or each stop of stabilisation halves. The blur comes from the same formula, with <i>ω</i> instead of <i>v/d</i>. It is the same model and the same constant used by <a href="programa-camara.html">the camera's program</a>, so that the two sheets cannot contradict each other.</dd>
-  <dt>Sharpness criterion</dt><dd>Two pixels of blur, which is one line pair at the sensor's Nyquist. It is stricter than the 1/focal rule: at 35 mm on the M11 it gives 1/140 s instead of 1/35 s, because sixty megapixels see what the rule, meant for a contact print, could afford to ignore. The page keeps it fixed. If your destination is a small print or a screen, the real criterion is softer and the time lengthens in the same proportion: four pixels double it, eight quadruple it.</dd>
-  <dt>Panning</dt><dd>When you follow the subject with the camera, the background gets the full blur and the subject only the tracking error, estimated at 15 % of the movement. That is why panning works: at 1/15 s the background streaks and the subject stays nearly sharp. It also explains why it fails with a telephoto: the absolute error grows with focal length even though the percentage does not.</dd>
-  <dt>Exposure and filter</dt><dd>At ISO 100, the correct time is <i>t</i> = <i>N</i>²/2<sup>EV</sup>. The filter stops needed are the log₂ of the ratio between the time the effect asks for and that correct time, rounded up to the next commercial filter. The colour cost of a deep ND, which is not negligible, is covered in <a href="sensor.html#nd">the ND filter and infrared leakage</a>.</dd>
-  <dt>Ghost town</dt><dd>This is the only technique decided by time; the others are decided by blur. A person only covers a point of the frame while they take to cross their own width, <i>w/v</i>, so their contrast over that point is divided by <i>t·v/w</i>. At forty times that time it drops a little over five stops and stops showing. The calculation involves neither focal length nor distance, and that is why the thirty-second recipe works in any square: with someone strolling at 1.4 m/s it comes to about fourteen seconds, and the recipe's thirty also cover whoever stops to look at a shop window.</dd>
-  <dt>Burst</dt><dd>If a single frame's shake meets the criterion with probability <i>q</i>, that of at least one out of <i>n</i> is 1 − (1 − <i>q</i>)<sup><i>n</i></sup>. <i>q</i> is taken from the ratio between the chosen time and the longest holdable one, with a Rayleigh model for the tremor amplitude.</dd>
-</dl>
-
-<h2 data-lang="es">Límites y supuestos</h2>
-<h2 data-lang="en">Limits and assumptions</h2>
-<dl data-lang="es">
-  <dt>Movimiento perpendicular</dt><dd>Se supone el sujeto cruzando el encuadre. Si viene de frente, el arrastre es mucho menor y la fórmula lo sobreestima: multiplica por el seno del ángulo respecto al eje. Un coche que se acerca en diagonal a 45° deja siete décimas de lo que dice la página.</dd>
-  <dt>La trepidación sigue una distribución</dt><dd>ω₀ = 0,03 rad/s es un valor típico de mano entrenada y respiración controlada. Con frío, con prisa o al final del día es peor; apoyado y con la respiración parada, mejor. El tiempo máximo que sale es la moda, el valor más probable: con él salen nítidas unas seis tomas de cada diez, así que unas veces aguantarás más y otras menos; para eso el veredicto propone la ráfaga.</dd>
-  <dt>Los pasos de estabilización son nominales</dt><dd>Leica anuncia cinco pasos para el IBIS del SL3-S, medidos en condiciones favorables y a focal corta. En la práctica se obtienen uno o dos menos, así que aquí se cuentan cuatro; el OIS del Q3 43 se cuenta como dos. La estabilización corrige tu movimiento y deja intacto el del sujeto.</dd>
-  <dt>Qué no entra</dt><dd>Ni la difracción ni el ruido, que deciden el diafragma y el ISO y se tratan en <a href="sensor.html#difraccion">la pestaña de difracción</a> y en <a href="sensor.html#datos">los datos del sensor</a>. Tampoco el flash, que tiene su propia página en <a href="simulador-flash.html">el banco óptico de flash</a>: la técnica del congelado con destello se nombra aquí, pero el reparto entre ambiente y destello se calcula allí.</dd>
-</dl>
-<dl data-lang="en">
-  <dt>Perpendicular movement</dt><dd>The subject is assumed to be crossing the frame. If it comes head on, the blur is far smaller and the formula overestimates it: multiply by the sine of the angle to the axis. A car approaching diagonally at 45° leaves seven tenths of what the page says.</dd>
-  <dt>Shake follows a distribution</dt><dd>ω₀ = 0.03 rad/s is a typical value for a trained hand and controlled breathing. Cold, hurried or at the end of the day it is worse; braced and holding your breath, better. The longest time that comes out is the mode, the most likely value: at that time about six frames in ten come out sharp, so sometimes you will hold for longer and sometimes for less; that is why the verdict suggests a burst.</dd>
-  <dt>Stabilisation stops are nominal</dt><dd>Leica quotes five stops for the SL3-S's IBIS, measured in favourable conditions and at short focal lengths. In practice you get one or two fewer, so four are counted here; the Q3 43's OIS is counted as two. Stabilisation corrects your movement and leaves the subject's untouched.</dd>
-  <dt>What is left out</dt><dd>Neither diffraction nor noise, which decide the aperture and the ISO and are covered in <a href="sensor.html#difraccion">the diffraction tab</a> and in <a href="sensor.html#datos">the sensor data</a>. Nor flash, which has its own page in <a href="simulador-flash.html">the flash optical bench</a>: the flash-freeze technique is named here, but the split between ambient and flash is computed there.</dd>
-</dl>
+<details class="notas">
+  <summary><span data-lang="es">Límites</span><span data-lang="en">Limits</span></summary>
+  <dl data-lang="es">
+    <dt>Movimiento de lado</dt><dd>Se supone que el sujeto cruza el encuadre. Si viene de frente el arrastre es mucho menor: multiplica por el seno del ángulo respecto al eje. Un coche que se acerca a 45° deja siete décimas de lo que dice la página.</dd>
+    <dt>El temblor varía</dt><dd>0,03 rad/s es una mano entrenada con la respiración controlada. Con frío o con prisa es peor. En el límite, dispara en ráfaga: de varias tomas alguna saldrá limpia. En el barrido la ráfaga también ayuda, porque el error de seguimiento cambia de una a otra.</dd>
+    <dt>Lo que no entra</dt><dd>La difracción a f/16 y más, que se estudia en <a href="sensor.html#difraccion">la pestaña de difracción</a>; el tinte que dejan los ND de muchos pasos, en <a href="sensor.html#nd">el filtro ND y la fuga infrarroja</a>; el reparto entre ambiente y destello, en <a href="simulador-flash.html">el banco óptico de flash</a>; y el fallo de reciprocidad de la película, en <a href="reciprocidad.html">filtros ND y reciprocidad</a>. Para el mar, los ríos, las nubes y las estrellas está <a href="filtro-temporal.html">el filtro temporal</a>.</dd>
+  </dl>
+  <dl data-lang="en">
+    <dt>Sideways movement</dt><dd>The subject is assumed to be crossing the frame. If it comes head on the blur is far smaller: multiply by the sine of the angle to the axis. A car approaching at 45° leaves seven tenths of what the page says.</dd>
+    <dt>Tremor varies</dt><dd>0.03 rad/s is a trained hand with controlled breathing. Cold or hurried, it is worse. At the limit, shoot a burst: out of several frames one will come out clean. In panning a burst also helps, because the tracking error changes from one frame to the next.</dd>
+    <dt>What is left out</dt><dd>Diffraction at f/16 and beyond, covered in <a href="sensor.html#difraccion">the diffraction tab</a>; the cast left by deep ND filters, in <a href="sensor.html#nd">the ND filter and infrared leakage</a>; the split between ambient and flash, in <a href="simulador-flash.html">the flash optical bench</a>; and film reciprocity failure, in <a href="reciprocidad.html">ND filters and reciprocity</a>. For the sea, rivers, clouds and stars there is <a href="filtro-temporal.html">the temporal filter</a>.</dd>
+  </dl>
+</details>
 
 <footer>
-  <p data-lang="es">Técnicas y trucos de sujeción: <i>Long Exposure Cheat Sheet</i>, Pit Haupert, 2025. El cálculo, las cifras por cuerpo y los veredictos son de esta página, explicada control a control en su <a href="manual-exposicion-larga.html">manual</a>. Relacionadas: <a href="programa-camara.html">el programa de la cámara</a>, <a href="simulador-flash.html">el banco óptico de flash</a>, <a href="sensor.html#nd">el filtro ND</a>, <a href="reciprocidad.html">filtros ND y reciprocidad con película</a> y <a href="sensor.html#difraccion">difracción y diafragma</a>.</p>
-  <p data-lang="en">Techniques and holding tricks: <i>Long Exposure Cheat Sheet</i>, Pit Haupert, 2025. The arithmetic, the per-body figures and the verdicts belong to this page, explained control by control in its <a href="manual-exposicion-larga.html">manual</a>. Related: <a href="programa-camara.html">the camera's program</a>, <a href="simulador-flash.html">the flash optical bench</a>, <a href="sensor.html#nd">the ND filter</a>, <a href="reciprocidad.html">ND filters and film reciprocity</a> and <a href="sensor.html#difraccion">diffraction and aperture</a>.</p>
+  <p data-lang="es">Las técnicas vienen de la <i>Long Exposure Cheat Sheet</i> de Pit Haupert (2025); el cálculo y la simulación son de esta página. Relacionadas: <a href="programa-camara.html">el programa de la cámara</a>, <a href="simulador-flash.html">el banco óptico de flash</a>, <a href="reciprocidad.html">filtros ND y reciprocidad</a> y <a href="filtro-temporal.html">el filtro temporal</a>.</p>
+  <p data-lang="en">The techniques come from Pit Haupert's <i>Long Exposure Cheat Sheet</i> (2025); the arithmetic and the simulation belong to this page. Related: <a href="programa-camara.html">the camera's program</a>, <a href="simulador-flash.html">the flash optical bench</a>, <a href="reciprocidad.html">ND filters and reciprocity</a> and <a href="filtro-temporal.html">the temporal filter</a>.</p>
 </footer>
 
 </div>
@@ -278,20 +243,17 @@ footer{border-top:1px solid var(--line);margin-top:52px;padding-top:18px;font-si
   var KEY="pn-lang";
   var META={
     es:{ title:"Exposición larga · Rafael Vida",
-         desc:"Exposición larga: cuánto arrastre deja tu sujeto y cuánto puedes sostener. Convierte los tiempos de receta en el tiempo que tu escena y tu cámara piden de verdad." },
+         desc:"Exposición larga en el campo: eliges el efecto, tu cámara y la escena, y la página te dice el tiempo, cómo saldrá la foto y si necesitas filtro ND o trípode." },
     en:{ title:"Long exposure · Rafael Vida",
-         desc:"Long exposure: how much blur your subject leaves and how long you can hold it. Turns recipe times into the time your scene and your camera actually ask for." }
+         desc:"Long exposure in the field: you choose the effect, your camera and the scene, and the page tells you the time, how the picture will come out and whether you need an ND filter or a tripod." }
   };
   function apply(l){
     document.documentElement.lang=l;
     document.title=META[l].title;
     var d=document.querySelector('meta[name="description"]');
     if(d) d.setAttribute("content",META[l].desc);
-    ["title","ph","alt","aria"].forEach(function(k){
-      [].forEach.call(document.querySelectorAll("[data-"+k+"-"+l+"]"),function(e){
-        var attr = k==="ph" ? "placeholder" : (k==="aria" ? "aria-label" : k);
-        e.setAttribute(attr, e.getAttribute("data-"+k+"-"+l));
-      });
+    [].forEach.call(document.querySelectorAll("[data-aria-"+l+"]"),function(e){
+      e.setAttribute("aria-label", e.getAttribute("data-aria-"+l));
     });
     [].forEach.call(document.querySelectorAll("[data-setlang]"),function(b){
       var on=b.getAttribute("data-setlang")===l;
@@ -307,7 +269,7 @@ footer{border-top:1px solid var(--line);margin-top:52px;padding-top:18px;font-si
       apply(l);
     });
   });
-  apply(document.documentElement.lang==="en"?"en":"es");
+  window.aplicarIdioma=apply;
 })();
 </script>
 
@@ -315,137 +277,105 @@ footer{border-top:1px solid var(--line);margin-top:52px;padding-top:18px;font-si
 "use strict";
 /* ---------- diccionario de cadenas generadas por JS ----------
    Se llama DICT y el ayudante LBL, nunca T ni t() ni S(), para que ningún
-   contador o parámetro local los eclipse (ha pasado tres veces en este repo). */
+   contador o parámetro local los eclipse. */
 const DICT={
  es:{
-  /* cuerpos */
-  m11:'Leica M11 · 60 Mpx', q3:'Leica Q3 43 · 60 Mpx', sl3s:'Leica SL3-S · 24 Mpx', sl96:'Leica SL3-S · multishot 96 Mpx',
-  /* técnicas */
-  tPan:'1 · Barrido: sigues al sujeto', tFlash:'2 · Congelado con flash', tStatic:'3 · Sujeto quieto, escena en movimiento',
-  tTrail:'4 · Estelas de luz', tZoom:'5 · Zoom burst', tGhost:'6 · Ciudad desierta', tTrace:'7 · Cámara quieta: el sujeto deja traza', tFree:'Libre: elige tú el arrastre',
-  /* apoyos */
-  sHand:'a pulso, brazos sueltos', sElbow:'codos pegados al cuerpo', sStrap:'correa tensada contra el cuello',
-  sLean:'apoyado en un muro o barandilla', sTri:'trípode',
-  stabNone:'este cuerpo no la tiene', stabOis:'OIS del objetivo, 2 pasos', stabIbis:'IBIS, 4 pasos',
-  supWith:(n,tipo)=>'Los tiempos de la tabla ya incluyen los '+n+' pasos de la estabilización del cuerpo ('+tipo+'), por eso la columna de pasos empieza en '+n+' y no en cero. Apágala arriba para ver la escalera desnuda.',
-  supWithout:'Los tiempos son los de tus manos solas. Si tu cuerpo tiene estabilización, enciéndela arriba y toda la tabla se corre hacia tiempos más largos.',
-  sFrame:(w)=>'El fotograma entero · '+w+' px de ancho · el sujeto y su traza a escala real',
-  sDetail:'Detalle · borde delantero · ventana de 1200 px',
-  sShakeBox:(px)=>'Tu temblor, misma ventana y escala · '+px+' px',
-  sCap:(w)=>'El recuadro grande es el fotograma completo, '+w+' px de ancho. El sujeto va dibujado al tamaño que tiene en el sensor y barrido a lo largo de su arrastre: la opacidad de cada píxel es la fracción de la exposición durante la que el sujeto lo cubrió, así que cuanto más se mueve más tenue queda. Esa caída sigue la física real y es la que hace desaparecer a la gente. El contorno punteado marca dónde estaba; las marcas ½ y ×2 son la mitad y el doble de tu tiempo.',
-  sCapPan:(b,e)=>'En el barrido el sujeto se mueve y la cámara lo sigue. El fotograma muestra la escena: el contorno punteado es donde estaba al abrirse el obturador, la silueta nítida es donde llega al cerrarse, '+b+' px más allá, y las farolas no se mueven. Las cajas de la derecha muestran lo que queda en la foto por haberlo seguido: él nítido salvo el error de seguimiento, '+e+' px, y el fondo arrastrado esos mismos '+b+' px.',
-  sScene:(w)=>'La escena · '+w+' px de ancho · el sujeto avanza y la cámara lo sigue',
-  sSubjPhoto:(px)=>'El sujeto en la foto · nítido salvo '+px+' px de seguimiento',
-  sCapStatic:(b)=>'En “sujeto quieto, escena en movimiento” tu sujeto, la persona ámbar, está quieto mientras los grises pasan por delante y dejan la traza de '+b+' px. Las marcas y la caja superior miden esa traza; la inferior, tu temblor sobre el sujeto quieto.',
-  sCapFlash:'Con el flash, el destello congela al sujeto al final del recorrido (segunda cortinilla) y la luz ambiente deja detrás la estela tenue del barrido.',
-  sMovBox:(px)=>'Lo que pasa por delante, misma ventana y escala · '+px+' px',
-  sPass:(n,h,w)=>'pasa por delante: '+n+', '+h+' px de alto · '+w+' px de largo',
-  sBgBox:(px)=>'El fondo en la foto, misma ventana y escala · '+px+' px',
-  sOut:'Alguna estela se sale del fotograma.',
-  fixedFocal:(f)=>'focal fija de '+f+' mm',
-  vStab:(n,tipo,tsin,tcon)=>'La estabilización del cuerpo ('+tipo+') suma '+n+' pasos a tu apoyo: el máximo pasa de <b>'+tsin+'</b> a <b>'+tcon+'</b>. Corrige tu movimiento y deja intacto el del sujeto.',
-  vStabOff:(tipo)=>'Este cuerpo tiene '+tipo+' y la tienes desactivada. Enciéndela y el tiempo que aguantas se multiplica.',
-  /* presets */
-  pPed:'peatón 1,4', pRun:'corriendo 3', pBike:'bici 5', pCity:'coche ciudad 14', pRoad:'carretera 25', pTrain:'tren 40',
-  eNight:'noche urbana', eBlue:'hora azul', eShade:'sombra', eCloud:'nublado', eSun:'sol',
-  /* lecturas */
-  px:'px', frames:'anchos', stops:'pasos', noFilter:'sin filtro', bulb:'bulb (más de 30 s)',
-  holdOk:'lo sostienes', holdNo:'pide apoyo', tripod:'pide trípode', trackLbl:'error de seguimiento',
-  shPerson:'persona de 1,70 m', shBike:'ciclista, 1,70 × 1,8 m', shCar:'coche, 1,5 × 4,5 m', shTrain:'tren, 4 × 20 m',
-  sSubj:(n,h,w)=>n+' · '+h+' px de alto · '+w+' px de largo',
-  sTick:(k,px)=>k+': '+px+' px',
-  /* veredicto */
-  vTitle:(tec,cam)=>tec+' · '+cam,
-  vBlur:(t,px,pc)=>'Para el efecto que buscas hacen falta <b>'+t+'</b>, y con esta escena eso deja <b>'+px+' px</b> de arrastre, un '+pc+' % del ancho del fotograma.',
-  vHoldOk:(tmax,sup)=>'Con '+sup+' aguantas hasta <b>'+tmax+'</b> antes de que tu propio temblor pase de dos píxeles, así que este tiempo se sostiene a pulso.',
-  vHoldNo:(tmax,sup,falta)=>'Con '+sup+' solo aguantas <b>'+tmax+'</b>: te faltan '+falta+' pasos. O subes un peldaño de apoyo, o pones la cámara en algo, o asumes que la foto entera irá movida y no solo el sujeto.',
-  vHoldTri:'Con trípode la trepidación desaparece y el único arrastre es el del sujeto, que es justo lo que buscas.',
-  vShake:(px)=>'A ese tiempo tus manos añaden <b>'+px+' px</b> de arrastre propio, encima del del sujeto.',
-  vShakeOk:(px)=>'A ese tiempo tus manos añaden '+px+' px, por debajo del umbral: el arrastre que se vea será del sujeto y no tuyo.',
-  vNd:(n,nom)=>'A ISO base y este diafragma, el tiempo correcto es más corto, así que necesitas <b>'+n+' pasos</b> de filtro: un '+nom+'.',
-  vNdNo:'A ISO base y este diafragma no necesitas filtro: la luz ya pide ese tiempo o más.',
-  vNdIso:(iso)=>'Si prefieres no poner filtro, tendrías que bajar a ISO '+iso+', que no existe, así que aquí el filtro es obligatorio.',
-  vIso:(iso)=>'Sin filtro tendrías que disparar a ISO '+iso+'.',
-  vBurst:(n,p)=>'A pulso y en el límite, dispara en ráfaga: con '+n+' fotogramas la probabilidad de que al menos uno entre en criterio es del '+p+' %.',
-  vPanHold:(sub,tag)=>'En el barrido mueves la cámara a propósito, así que el temblor de la mano deja de contar y lo que decide es el error de seguimiento, <b>'+sub+' px</b> sobre el sujeto. '+tag,
-  vPanOk:'Por debajo de veinte píxeles, así que el sujeto sale limpio y el fondo rayado.',
-  vPanNo:'Por encima de veinte píxeles: el sujeto también sale movido. Acórtalo con más práctica, con una focal más corta o siguiendo al sujeto desde más lejos.',
-  vPan:(sub,fondo)=>'En el barrido el fondo se lleva <b>'+fondo+' px</b> de raya y el sujeto solo <b>'+sub+' px</b> de error de seguimiento. Esa diferencia es el efecto; si el sujeto pasa de veinte píxeles, el barrido ha fallado.',
-  vGhost:(seg,tapa,px)=>'Alguien andando a esa velocidad solo tapa un punto del encuadre durante <b>'+tapa+'</b>, el tiempo que tarda en recorrer su propio ancho. Para que su rastro baje unos cinco pasos y deje de verse hace falta <b>'+seg+'</b>, unas cuarenta veces más. No depende de la focal ni de la distancia: por eso la receta de treinta segundos vale en cualquier plaza. Su rastro medirá '+px+' px, casi siempre más de lo que cabe en el encuadre.',
-  vTrace:(k,w,px)=>'Un faro deja una raya; un sujeto que refleja luz, en cambio, reparte su brillo a lo largo del recorrido. Con una traza de <b>'+nf(k,1)+' anchos</b> ('+w+' px de ancho, '+px+' px de traza) el centro de la silueta conserva el <b>'+Math.round(100/k)+' %</b> del brillo y los bordes se funden: se ve que se mueve y aún se reconoce. Con 3 anchos queda al 33 %, fantasmal; con 40, desaparece (ciudad desierta). Las estelas de luz funcionan de otra manera, porque un faro es tanto más brillante que la escena que su rastro sigue viéndose por largo que sea.',
-  vFlash:'El destello congela el sujeto dentro del arrastre. El reparto entre ambiente y flash, la sincronía de cada cuerpo y el recorte del pulso se calculan en <a href="simulador-flash.html">el banco óptico de flash</a>; aquí solo sale el arrastre del ambiente.',
-  vZoom:'El zoom burst no mide velocidad de sujeto: la raya es radial y su longitud depende de cuánto cambies la focal. Con trípode, la primera parte de la exposición fija la imagen y el resto la estira hacia fuera.',
-  /* tablas */
-  thTec:['Técnica','Arrastre que pide','Tiempo','En píxeles','Apoyo'],
-  thCam:['Cuerpo','Paso','Arrastre del sujeto','Trepidación','Máximo a pulso','Veredicto'],
-  thSup:['Apoyo','Pasos','ω (rad/s)','Máximo a 28 mm','a 35 mm','a 50 mm','a 90 mm'],
-  needPan:'fondo rayado, sujeto limpio', needFlash:'ambiente movido, sujeto congelado', needStatic:'escena rayada, sujeto quieto',
-  needTrail:'estela continua', needZoom:'raya radial', needGhost:'la gente desaparece', needTrace:'traza de 1,5 anchos, aún se reconoce', needFree:'el que elijas',
-  /* gráfica */
-  gx:'tiempo de obturación', gy:'arrastre (px)', gSubj:'arrastre del sujeto', gShake:'trepidación con este apoyo',
-  gInv:'invisible', gSoft:'sujeto movido', gStreak:'raya deliberada', gYour:'tu tiempo',
-  sRef:'referencia: sin movimiento', sHalf:'la mitad de tiempo', sDouble:'el doble de tiempo', sNow:'tu tiempo'
+  ef:{
+   pan:['Barrido','Sigues al sujeto: él nítido, el fondo rayado'],
+   trace:['Movimiento','Cámara quieta: el sujeto deja traza y aún se reconoce'],
+   static:['Quieto entre movimiento','Tu sujeto quieto; lo que pasa, un fantasma'],
+   trails:['Estelas de luz','Los faros dibujan líneas de lado a lado'],
+   ghost:['Calle vacía','La gente que pasa desaparece'],
+   flash:['Flash y arrastre','El destello congela, el ambiente deja estela'],
+   zoom:['Zoom burst','Giras el zoom durante la toma: rayas radiales']
+  },
+  fmt:{ff:'Formato completo',apsc:'APS-C',m43:'Micro 4/3'},
+  estab:['Sin','En el objetivo','En el cuerpo'],
+  suj:{ped:'Peatón',run:'Corriendo',bike:'Bici',city:'Coche en ciudad',road:'Carretera',train:'Tren'},
+  el:{ped:'el peatón',run:'el corredor',bike:'el ciclista',city:'el coche',road:'el coche',train:'el tren'},
+  al:{ped:'al peatón',run:'al corredor',bike:'al ciclista',city:'el coche',road:'el coche',train:'el tren'},
+  los:{ped:'los peatones',run:'los corredores',bike:'los ciclistas',city:'los coches',road:'los coches',train:'los trenes'},
+  luz:{night:'Noche urbana',blue:'Hora azul',shade:'Sombra',cloud:'Nublado',sun:'Sol'},
+  luzEn:{night:'de noche',blue:'en la hora azul',shade:'a la sombra',cloud:'con el cielo nublado',sun:'a pleno sol'},
+  /* veredictos */
+  tD:(N,iso)=>'a f/'+N+' e ISO '+iso,
+  bulb:' · modo B y disparador',
+  ndNo:'No hace falta', ndNoD:'La luz ya pide este tiempo o más.',
+  ndSiD:(p,nom)=>'Sobran '+p+' pasos de luz: '+nom+'.',
+  ndCierra:(N)=>' O cierra a f/'+N+' y no lo necesitas.',
+  ndIso:(iso)=>' Con él, sube a ISO '+iso+'.',
+  triHand:'No', triHandD:'A pulso, sin más.',
+  triBrace:'No', triBraceD:'A pulso, bien sujeta: codos pegados y correa tensa contra el cuello. Dispara en ráfaga.',
+  triLean:'Apóyala', triLeanD:'Sobre un muro, una barandilla o la mochila; o un trípode.',
+  triSi:'Sí', triSiD:(tmax)=>'A pulso solo aguantas '+tmax+', incluso apoyándote.',
+  triPan:'No', triPanD:'El barrido se hace a pulso: mueves la cámara con el sujeto.',
+  triFlash:'No', triFlashD:'El destello congela al sujeto; el temblor solo añade arrastre al ambiente.',
+  triZoom:'Sí', triZoomD:'Con la cámara quieta el centro sale reconocible y las rayas, limpias.',
+  /* qué verás */
+  verasH:'Lo que vas a ver',
+  vPan:(el,pc)=>cap(el)+' saldrá casi nítido y el fondo, rayado: cada punto del fondo se estira un <b>'+pc+' %</b> del ancho del encuadre.',
+  vPanTrack:(px)=>'Al seguirlo, la mano nunca va exacta: el error normal deja unos '+px+' px de arrastre en el sujeto. Dispara en ráfaga y quédate con la más limpia.',
+  vTrace:(el)=>cap(el)+' dejará una traza de <b>vez y media su largo</b>: se ve que se mueve y aún se reconoce. Su centro conserva dos tercios del brillo y los bordes se funden con el fondo.',
+  vStatic:(los)=>'Tu sujeto, quieto, saldrá nítido. '+cap(los)+' que pasen por delante dejarán un rastro de <b>tres veces su largo</b>, a un tercio de brillo: <b>fantasmas</b> a través de los que se ve el fondo.',
+  vTrails:(los)=>'Los faros y los pilotos dibujarán <b>líneas continuas de lado a lado</b> del encuadre; '+los+' casi no se verán.',
+  vTrailsDia:'De día los faros no destacan sobre la escena y las estelas apenas se verán. Este efecto pide noche u hora azul.',
+  vGhost:(los,tq)=>cap(los)+' que pasen <b>desaparecen</b>: su rastro queda más de cinco pasos por debajo del fondo. Quien se quede quieto más de '+tq+' sí dejará huella.',
+  vFlash:(al)=>'El destello congela '+al+' al final del recorrido y la luz ambiente deja detrás una <b>estela tenue de medio largo</b>. Usa la sincronización a la segunda cortinilla para que la estela quede detrás y no delante.',
+  vZoom:'Rayas <b>radiales</b> desde el centro del encuadre. Gira el anillo a ritmo constante; si esperas un instante antes de girarlo, el centro sale reconocible.',
+  vMas:(t)=>'La luz pide '+t+', más de lo que necesita el efecto; no pasa nada, porque más tiempo solo lo refuerza.',
+  vExpo:(luz,N,t)=>'Exposición correcta '+luz+' a f/'+N+' e ISO 100: '+t+'.',
+  vIsoAlto:(iso)=>'Ojo: ISO '+iso+' es mucho. Abre el diafragma o elige otro efecto; con flash también llegas.',
+  vFuera:'Con esta focal y esta distancia el sujeto no cabe entero en el encuadre.',
+  pie:(a,h)=>'El encuadre entero a la distancia del sujeto: '+a+' m de ancho y '+h+' m de alto. Así saldría la foto.',
+  pasos:'pasos', y:' y '
  },
  en:{
-  m11:'Leica M11 · 60 Mpx', q3:'Leica Q3 43 · 60 Mpx', sl3s:'Leica SL3-S · 24 Mpx', sl96:'Leica SL3-S · 96 Mpx multishot',
-  tPan:'1 · Panning: you follow the subject', tFlash:'2 · Flash freeze', tStatic:'3 · Static subject, moving scene',
-  tTrail:'4 · Light trails', tZoom:'5 · Zoom burst', tGhost:'6 · Ghost town', tTrace:'7 · Still camera: the subject leaves a trace', tFree:'Free: pick the blur yourself',
-  sHand:'handheld, arms loose', sElbow:'elbows tucked in', sStrap:'strap tensioned against the neck',
-  sLean:'leaning on a wall or railing', sTri:'tripod',
-  stabNone:'this body has none', stabOis:'lens OIS, 2 stops', stabIbis:'IBIS, 4 stops',
-  supWith:(n,tipo)=>'The times in the table already include the '+n+' stops of the body stabilisation ('+tipo+'), which is why the stops column starts at '+n+' and not at zero. Switch it off above to see the bare ladder.',
-  supWithout:'The times are those of your hands alone. If your body has stabilisation, switch it on above and the whole table shifts towards longer times.',
-  sFrame:(w)=>'The whole frame \u00b7 '+w+' px wide \u00b7 subject and trace at true scale',
-  sDetail:'Detail \u00b7 leading edge \u00b7 1,200 px window',
-  sShakeBox:(px)=>'Your tremor, same window and scale \u00b7 '+px+' px',
-  sCap:(w)=>'The large rectangle is the whole frame, '+w+' px wide. The subject is drawn at the size it has on the sensor and swept along its blur: each pixel\u2019s opacity is the fraction of the exposure during which the subject covered it, so the more it moves the fainter it gets. That fade follows the real physics, and it is what makes people vanish. The dotted outline marks where it stood; the \u00bd and \u00d72 marks are half and double your time.',
-  sCapPan:(b,e)=>'In panning the subject moves and the camera follows it. The frame shows the scene: the dotted outline is where it stood when the shutter opened, the crisp silhouette is where it gets to when it closes, '+b+' px further on, and the lamp posts do not move. The boxes on the right show what ends up in the picture because you followed it: the subject crisp but for the tracking error, '+e+' px, and the background smeared those same '+b+' px.',
-  sScene:(w)=>'The scene \u00b7 '+w+' px wide \u00b7 the subject advances and the camera follows',
-  sSubjPhoto:(px)=>'The subject in the picture \u00b7 crisp but for '+px+' px of tracking',
-  sCapStatic:(b)=>'In \u201cstatic subject, moving scene\u201d your subject, the amber person, stands still while the grey ones pass in front and leave the '+b+' px trace. The marks and the top box measure that trace; the bottom one, your tremor on the still subject.',
-  sCapFlash:'With flash, the burst freezes the subject at the end of its path (rear curtain) and the ambient light leaves the faint sweep trail behind it.',
-  sMovBox:(px)=>'What passes in front, same window and scale \u00b7 '+px+' px',
-  sPass:(n,h,w)=>'passing in front: '+n+', '+h+' px tall \u00b7 '+w+' px long',
-  sBgBox:(px)=>'The background in the picture, same window and scale \u00b7 '+px+' px',
-  sOut:'Some streak runs off the frame.',
-  fixedFocal:(f)=>'fixed '+f+' mm lens',
-  vStab:(n,tipo,tsin,tcon)=>'The body stabilisation ('+tipo+') adds '+n+' stops to your support: the longest time goes from <b>'+tsin+'</b> to <b>'+tcon+'</b>. It corrects your movement and leaves the subject\u2019s untouched.',
-  vStabOff:(tipo)=>'This body has '+tipo+' and you have it switched off. Turn it on and the time you can hold multiplies.',
-  pPed:'pedestrian 1.4', pRun:'running 3', pBike:'bike 5', pCity:'city car 14', pRoad:'road 25', pTrain:'train 40',
-  eNight:'city night', eBlue:'blue hour', eShade:'shade', eCloud:'overcast', eSun:'sun',
-  px:'px', frames:'widths', stops:'stops', noFilter:'no filter', bulb:'bulb (beyond 30 s)',
-  holdOk:'handheld', holdNo:'needs support', tripod:'needs a tripod', trackLbl:'tracking error',
-  shPerson:'1.70 m person', shBike:'cyclist, 1.70 × 1.8 m', shCar:'car, 1.5 × 4.5 m', shTrain:'train, 4 × 20 m',
-  sSubj:(n,h,w)=>n+' \u00b7 '+h+' px tall \u00b7 '+w+' px long',
-  sTick:(k,px)=>k+': '+px+' px',
-  vTitle:(tec,cam)=>tec+' · '+cam,
-  vBlur:(t,px,pc)=>'The effect you are after needs <b>'+t+'</b>, and with this scene that leaves <b>'+px+' px</b> of blur, '+pc+' % of the frame width.',
-  vHoldOk:(tmax,sup)=>'With '+sup+' you hold up to <b>'+tmax+'</b> before your own tremor passes two pixels, so this time is holdable.',
-  vHoldNo:(tmax,sup,falta)=>'With '+sup+' you only hold <b>'+tmax+'</b>: you are '+falta+' stops short. Either climb a rung of support, or rest the camera on something, or accept that the whole picture will be blurred and not just the subject.',
-  vHoldTri:'On a tripod shake disappears and the only blur is the subject’s, which is exactly what you are after.',
-  vShake:(px)=>'At that time your hands add <b>'+px+' px</b> of blur of their own, on top of the subject’s.',
-  vShakeOk:(px)=>'At that time your hands add '+px+' px, below the threshold: the blur that shows will be the subject’s and not yours.',
-  vNd:(n,nom)=>'At base ISO and this aperture the correct time is shorter, so you need <b>'+n+' stops</b> of filter: an '+nom+'.',
-  vNdNo:'At base ISO and this aperture you need no filter: the light already asks for that time or longer.',
-  vNdIso:(iso)=>'If you would rather not use a filter, you would have to drop to ISO '+iso+', which does not exist, so here the filter is mandatory.',
-  vIso:(iso)=>'With no filter you would have to shoot at ISO '+iso+'.',
-  vBurst:(n,p)=>'Handheld and at the limit, shoot a burst: with '+n+' frames the chance that at least one lands within the criterion is '+p+' %.',
-  vPanHold:(sub,tag)=>'In panning you move the camera on purpose, so hand tremor stops counting and what decides is the tracking error, <b>'+sub+' px</b> on the subject. '+tag,
-  vPanOk:'Below twenty pixels, so the subject comes out clean and the background streaked.',
-  vPanNo:'Above twenty pixels: the subject comes out blurred too. Shorten it with practice, with a shorter focal length, or by following the subject from further away.',
-  vPan:(sub,fondo)=>'In panning the background takes <b>'+fondo+' px</b> of streak and the subject only <b>'+sub+' px</b> of tracking error. That difference is the effect; if the subject passes twenty pixels, the pan has failed.',
-  vGhost:(seg,tapa,px)=>'Someone walking at that speed only covers a given point of the frame for <b>'+tapa+'</b>, the time it takes them to cross their own width. For their trace to drop some five stops and stop showing you need <b>'+seg+'</b>, about forty times longer. It does not depend on focal length or distance: that is why the thirty-second recipe works in any square. Their trail will measure '+px+' px, almost always more than fits in the frame.',
-  vTrace:(k,w,px)=>'A headlight draws a line; a subject that reflects light, by contrast, spreads its brightness along its path. With a trace of <b>'+nf(k,1)+' widths</b> ('+w+' px wide, '+px+' px of trace) the centre of the silhouette keeps <b>'+Math.round(100/k)+' %</b> of its brightness and the edges melt: you can see it moves and still recognise it. At 3 widths it drops to 33 %, ghostly; at 40 it vanishes (ghost town). Light trails work differently, because a headlight is so much brighter than the scene that its trail stays visible however long it gets.',
-  vFlash:'The flash freezes the subject inside the blur. The split between ambient and flash, each body’s sync speed and the pulse clipping are computed in <a href="simulador-flash.html">the flash optical bench</a>; here only the ambient blur comes out.',
-  vZoom:'Zoom burst does not measure subject speed: the streak is radial and its length depends on how much you change the focal length. On a tripod, the first part of the exposure fixes the image and the rest stretches it outwards.',
-  thTec:['Technique','Blur it asks for','Time','In pixels','Support'],
-  thCam:['Body','Pitch','Subject blur','Shake','Longest handheld','Verdict'],
-  thSup:['Support','Stops','ω (rad/s)','Longest at 28 mm','at 35 mm','at 50 mm','at 90 mm'],
-  needPan:'streaked background, clean subject', needFlash:'blurred ambient, frozen subject', needStatic:'streaked scene, still subject',
-  needTrail:'continuous trail', needZoom:'radial streak', needGhost:'people disappear', needTrace:'1.5-width trace, still recognisable', needFree:'whatever you choose',
-  gx:'shutter time', gy:'blur (px)', gSubj:'subject blur', gShake:'shake with this support',
-  gInv:'invisible', gSoft:'blurred subject', gStreak:'deliberate streak', gYour:'your time',
-  sRef:'reference: no movement', sHalf:'half the time', sDouble:'twice the time', sNow:'your time'
+  ef:{
+   pan:['Panning','You follow the subject: it sharp, the background streaked'],
+   trace:['Motion','Still camera: the subject leaves a trace and is still recognisable'],
+   static:['Still amid motion','Your subject still; whatever passes, a ghost'],
+   trails:['Light trails','Headlights draw lines across the frame'],
+   ghost:['Empty street','People passing by disappear'],
+   flash:['Flash and drag','The flash freezes, the ambient leaves a trail'],
+   zoom:['Zoom burst','You turn the zoom during the shot: radial streaks']
+  },
+  fmt:{ff:'Full frame',apsc:'APS-C',m43:'Micro 4/3'},
+  estab:['None','In the lens','In the body'],
+  suj:{ped:'Pedestrian',run:'Running',bike:'Bike',city:'City car',road:'Road',train:'Train'},
+  el:{ped:'the pedestrian',run:'the runner',bike:'the cyclist',city:'the car',road:'the car',train:'the train'},
+  al:{ped:'the pedestrian',run:'the runner',bike:'the cyclist',city:'the car',road:'the car',train:'the train'},
+  los:{ped:'pedestrians',run:'runners',bike:'cyclists',city:'cars',road:'cars',train:'trains'},
+  luz:{night:'City night',blue:'Blue hour',shade:'Shade',cloud:'Overcast',sun:'Sun'},
+  luzEn:{night:'at night',blue:'at blue hour',shade:'in the shade',cloud:'under an overcast sky',sun:'in full sun'},
+  tD:(N,iso)=>'at f/'+N+' and ISO '+iso,
+  bulb:' · bulb mode and a remote',
+  ndNo:'Not needed', ndNoD:'The light already asks for this time or longer.',
+  ndSiD:(p,nom)=>p+' stops of light to spare: '+nom+'.',
+  ndCierra:(N)=>' Or stop down to f/'+N+' and you do not need it.',
+  ndIso:(iso)=>' With it, raise to ISO '+iso+'.',
+  triHand:'No', triHandD:'Handheld, nothing more.',
+  triBrace:'No', triBraceD:'Handheld, held firmly: elbows tucked in and strap tensioned against the neck. Shoot a burst.',
+  triLean:'Rest it', triLeanD:'On a wall, a railing or your bag; or a tripod.',
+  triSi:'Yes', triSiD:(tmax)=>'Handheld you only hold '+tmax+', even resting it.',
+  triPan:'No', triPanD:'Panning is done handheld: you move the camera with the subject.',
+  triFlash:'No', triFlashD:'The flash freezes the subject; tremor only adds blur to the ambient.',
+  triZoom:'Yes', triZoomD:'With the camera still the centre stays recognisable and the streaks clean.',
+  verasH:'What you will see',
+  vPan:(el,pc)=>cap(el)+' will come out nearly sharp and the background streaked: every point of the background stretches <b>'+pc+' %</b> of the frame width.',
+  vPanTrack:(px)=>'Following it, the hand is never exact: the usual error leaves about '+px+' px of blur on the subject. Shoot a burst and keep the cleanest.',
+  vTrace:(el)=>cap(el)+' will leave a trace of <b>one and a half times its length</b>: you can see it moves and still recognise it. Its centre keeps two thirds of its brightness and the edges melt into the background.',
+  vStatic:(los)=>'Your subject, standing still, will come out sharp. '+cap(los)+' passing in front will leave a trail of <b>three times their length</b>, at a third of their brightness: <b>ghosts</b> you can see the background through.',
+  vTrails:(los)=>'Headlights and tail lights will draw <b>continuous lines across</b> the frame; the '+los+' themselves will barely show.',
+  vTrailsDia:'In daylight headlights do not stand out from the scene and the trails will barely show. This effect asks for night or blue hour.',
+  vGhost:(los,tq)=>cap(los)+' passing by <b>disappear</b>: their trace ends up more than five stops below the background. Anyone who stands still for more than '+tq+' will leave a mark.',
+  vFlash:(el)=>'The flash freezes '+el+' at the end of its path and the ambient light leaves a <b>faint trail half its length</b> behind it. Use rear-curtain sync so the trail falls behind and not in front.',
+  vZoom:'<b>Radial</b> streaks from the centre of the frame. Turn the ring at a steady pace; if you wait a moment before turning it, the centre stays recognisable.',
+  vMas:(t)=>'The light asks for '+t+', more than the effect needs; that is fine, because more time only strengthens it.',
+  vExpo:(luz,N,t)=>'Correct exposure '+luz+' at f/'+N+' and ISO 100: '+t+'.',
+  vIsoAlto:(iso)=>'Careful: ISO '+iso+' is a lot. Open the aperture or choose another effect; flash also gets you there.',
+  vFuera:'With this focal length and distance the subject does not fit whole in the frame.',
+  pie:(a,h)=>'The whole frame at the subject’s distance: '+a+' m wide and '+h+' m tall. This is how the picture would come out.',
+  pasos:'stops', y:' and '
  }
 };
 const LANG=()=>document.documentElement.lang==="en"?"en":"es";
@@ -453,451 +383,463 @@ const LOC=()=>LANG()==="en"?"en-GB":"es-ES";
 function LBL(k,...a){ const v=DICT[LANG()][k]; return typeof v==="function"?v(...a):v; }
 const $=id=>document.getElementById(id);
 const nf=(x,d)=>Number.isFinite(x)?x.toLocaleString(LOC(),{minimumFractionDigits:d,maximumFractionDigits:d}):"—";
+function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
 
 /* ---------- datos ---------- */
-const CAMS=[
-  {id:'m11',  p:3.76, w:9528, stab:0, color:'#6fbf73'},
-  {id:'q3',   p:3.76, w:9520, stab:2, fixed:43, color:'#e8b04b'},
-  {id:'sl3s', p:5.94, w:6000, stab:4, color:'#5ec8d8'},
-  {id:'sl96', p:2.97, w:12000, stab:4, color:'#a98cd8'}
+const FORMATOS={ff:{w:36,h:24},apsc:{w:23.5,h:15.6},m43:{w:17.3,h:13}};
+const MPS=[12,24,33,45,61,100];
+const ESTABS=[0,2,4];                  // pasos: sin, en el objetivo, en el cuerpo
+const FOCALES=[24,35,50,85,135];
+const DIAFS=[2.8,4,5.6,8,11,16];
+/* qué se mueve: velocidad (m/s), distancia típica a la que se fotografía (m) y forma */
+const SUJETOS=[
+  {id:'ped',  v:1.4, d:6,  forma:'persona'},
+  {id:'run',  v:3,   d:8,  forma:'persona'},
+  {id:'bike', v:5,   d:10, forma:'bici'},
+  {id:'city', v:14,  d:15, forma:'coche'},
+  {id:'road', v:25,  d:30, forma:'coche'},
+  {id:'train',v:40,  d:35, forma:'tren'}
 ];
-/* Escalera de apoyo. Cada peldaño divide ω por dos. Los cuatro primeros son
-   los trucos de la chuleta; los dos siguientes son estabilización del cuerpo. */
-const SUPS=[
-  {id:'sHand', st:0}, {id:'sElbow', st:1}, {id:'sStrap', st:2}, {id:'sLean', st:3}, {id:'sTri', st:99}
+/* tamaño real de cada forma, en metros (alto y largo) */
+const FORMAS={persona:{H:1.7,W:0.5}, bici:{H:1.7,W:1.8}, coche:{H:1.5,W:4.5}, tren:{H:4.0,W:20}};
+const LUCES=[['night',5],['blue',8],['shade',11],['cloud',13],['sun',15]];
+/* Cada efecto pide un recorrido del sujeto: K veces su propio largo, o una fracción
+   del ancho del encuadre. "exacto": el efecto pide ese tiempo; "minimo": más tiempo
+   solo lo refuerza. */
+const EFECTOS=[
+  {id:'pan',    tipo:'exacto', frac:0.03, sujeto:'bike'},
+  {id:'trace',  tipo:'exacto', K:1.5,     sujeto:'run'},
+  {id:'static', tipo:'minimo', K:3,       sujeto:'ped'},
+  {id:'trails', tipo:'minimo', frac:1,    sujeto:'city'},
+  {id:'ghost',  tipo:'minimo', K:40,      sujeto:'ped'},
+  {id:'flash',  tipo:'exacto', K:0.5,     sujeto:'run'},
+  {id:'zoom',   tipo:'zoom',   t:0.5,     sujeto:'ped'}
 ];
-const W0=0.03;                       // rad/s de temblor a pulso limpio
-const CRIT=2;                        // px de arrastre que se considera nítido
-const TRACK=0.15;                    // error de seguimiento en el barrido
-/* Técnicas: cada una pide una cantidad de arrastre, en píxeles o por regla propia. */
-const TECS=[
-  {id:'tPan',    need:'needPan',    px:110},
-  {id:'tFlash',  need:'needFlash',  px:60},
-  {id:'tStatic', need:'needStatic', px:220},
-  {id:'tTrail',  need:'needTrail',  px:500},
-  {id:'tZoom',   need:'needZoom',   px:600, tripod:true},
-  {id:'tGhost',  need:'needGhost',  ghost:true, K:40},
-  {id:'tTrace',  need:'needTrace',  trace:true, K:1.5},
-  {id:'tFree',   need:'needFree',   px:110, free:true}
-];
-/* Cada caso de uso trae la distancia típica a la que se fotografía: un peatón
-   se retrata de cerca y un tren desde el andén de enfrente. Se puede cambiar. */
-const VPRE=[['pPed',1.4,6,'person'],['pRun',3,8,'person'],['pBike',5,10,'bike'],['pCity',14,15,'car'],['pRoad',25,30,'car'],['pTrain',40,35,'train']];
-/* Tamaño real de cada sujeto, en metros (alto × largo), para dibujarlo a escala en el fotograma. */
-const SHAPES={person:{H:1.7,W:0.5}, bike:{H:1.7,W:1.8}, car:{H:1.5,W:4.5}, train:{H:4.0,W:20}};
-let SHAPE='person';
-const EVPRE=[['eNight',5],['eBlue',8],['eShade',11],['eCloud',13],['eSun',15]];
-const APS=[1.4,2,2.8,4,5.6,8,11,16,22];
-const NDS=[[1,'ND2'],[2,'ND4'],[3,'ND8'],[6,'ND64'],[10,'ND1000'],[13,'ND8000'],[16,'ND64000']];
-
-/* ---------- física ---------- */
-const blurPx=(f,v,t,d,p)=>f*v*t/(d*p*1e-3);          // arrastre del sujeto, px
-const tForBlur=(f,v,b,d,p)=>b*d*p*1e-3/(f*v);        // tiempo para un arrastre dado
-const omega=st=>W0/Math.pow(2,st);                    // temblor residual
-const shakePx=(f,t,st,p)=>f*omega(st)*t/(p*1e-3);
-const tHold=(f,st,p,crit)=>crit*p*1e-3/(f*omega(st));
-const tCorrect=(N,ev)=>N*N/Math.pow(2,ev);            // ISO 100
-function fmtT(t){
-  if(!Number.isFinite(t)||t<=0) return "—";
-  if(t>=60) return nf(t/60,1)+" min";
-  if(t>=1) return nf(t,t<10?1:0)+" s";
-  return "1/"+Math.round(1/t);
-}
-/* La estabilización es del CUERPO, no un peldaño de apoyo: se suma a lo que
-   hagas con las manos. El Q3 43 declara dos pasos de OIS y el SL3-S cuatro de
-   IBIS; la M11 no tiene. Corrigen tu movimiento, nunca el del sujeto. */
-function stabOn(){ const c=$('stab'); return !!(c && !c.disabled && c.checked); }
-function supStops(sup,cam){ return sup.st===99 ? 99 : sup.st + (stabOn()&&cam.stab?cam.stab:0); }
+const ICONOS={
+  pan:'<path d="M2 7h5M2 12h4M2 17h5M17 7h5M18 12h4M17 17h5"/><circle cx="12" cy="12" r="4"/>',
+  trace:'<circle cx="16" cy="12" r="4"/><circle cx="9" cy="12" r="4" opacity=".45"/><path d="M2 12h3" opacity=".3"/>',
+  static:'<circle cx="12" cy="5.5" r="2.5"/><path d="M12 8.5v7M9 21l3-5.5 3 5.5M2 12h5M17 12h5"/>',
+  trails:'<path d="M2 17c6-1 13-6 20-10"/><path d="M2 20c7-1 13-4 20-8" opacity=".55"/>',
+  ghost:'<circle cx="12" cy="5.5" r="2.5" stroke-dasharray="2 2.2"/><path d="M12 8.5v7M9 21l3-5.5 3 5.5" stroke-dasharray="2 2.2"/>',
+  flash:'<path d="M13 2 4 14h6l-1 8 9-12h-6z"/>',
+  zoom:'<path d="M12 2v5M12 17v5M2 12h5M17 12h5M5 5l3.5 3.5M15.5 15.5 19 19M19 5l-3.5 3.5M8.5 15.5 5 19"/>'
+};
+/* filtros comerciales, en pasos */
+const NDS=[1,2,3,4,6,10,15];
+const NOMBRE_ND={1:'ND2',2:'ND4',3:'ND8',4:'ND16',6:'ND64',10:'ND1000',15:'ND32000'};
+const DIAF_TERCIOS=[2.8,3.2,3.5,4,4.5,5,5.6,6.3,7.1,8,9,10,11,13,14,16];
+const ISOS=[100,125,160,200,250,320,400,500,640,800,1000,1250,1600,2000,2500,3200,4000,5000,6400,8000,10000,12800,16000,20000,25600,32000,40000,51200,102400];
+const W0=0.03;        // rad/s de temblor a pulso limpio, como en el programa de la cámara
+const CRIT=2;         // px de arrastre que se considera nítido
+const TRACK=0.15;     // error de seguimiento en el barrido, fracción del movimiento
 
 /* ---------- estado ---------- */
-function rellenar(){
-  const tec=$('tec'), cam=$('cam'), sup=$('sup'), ap=$('ap');
-  const keep=[tec.value,cam.value,sup.value,ap.value];
-  tec.innerHTML=TECS.map(x=>`<option value="${x.id}">${LBL(x.id)}</option>`).join('');
-  cam.innerHTML=CAMS.map(x=>`<option value="${x.id}">${LBL(x.id)}</option>`).join('');
-  sup.innerHTML=SUPS.map((x,i)=>`<option value="${i}">${LBL(x.id)}</option>`).join('');
-  ap.innerHTML=APS.map(x=>`<option value="${x}">f/${x}</option>`).join('');
-  tec.value=keep[0]||'tPan'; cam.value=keep[1]||'m11'; sup.value=keep[2]||'1'; ap.value=keep[3]||'5.6';
-  $('velpre').innerHTML=VPRE.map(([k,v,d,sh])=>`<button type="button" data-v="${v}" data-d="${d}" data-s="${sh}">${LBL(k)}</button>`).join('');
-  $('evpre').innerHTML=EVPRE.map(([k,v])=>`<button type="button" data-ev="${v}">${LBL(k)}</button>`).join('');
-  [].forEach.call($('velpre').children,b=>b.onclick=()=>{$('vel').value=b.dataset.v; $('dist').value=b.dataset.d; SHAPE=b.dataset.s||'person'; update();});
-  [].forEach.call($('evpre').children,b=>b.onclick=()=>{$('ev').value=b.dataset.ev; update();});
-  const ck=$('stab'); if(ck && !ck.dataset.w){ ck.addEventListener('change',function(){ ck.dataset.pref = ck.checked?'1':'0'; update(); }); ck.dataset.w='1'; }
-}
-function lee(){
-  const tec=TECS.find(x=>x.id===$('tec').value)||TECS[0];
-  const cam=CAMS.find(x=>x.id===$('cam').value)||CAMS[0];
-  const sup=SUPS[+$('sup').value]||SUPS[0];
-  return {tec,cam,sup, f:+$('focal').value||35, d:Math.max(0.5,+$('dist').value||10),
-          v:Math.max(0.1,+$('vel').value||5), ev:+$('ev').value, N:+$('ap').value||5.6,
-          st:supStops(sup,cam)};
-}
-/* el arrastre que pide la técnica, en px; la ciudad desierta se calcula aparte */
-const ANCHO_PERSONA=0.5;                 // m, ancho aparente de alguien de pie
-/* La ciudad desierta no se decide por arrastre sino por TIEMPO: cada persona
-   solo tapa un punto dado mientras tarda en recorrer su propio ancho, w/v, así
-   que su contraste queda dividido por t·v/w. Con K = 40 su aportación baja algo
-   más de cinco pasos (log2 40 ≈ 5,3) y deja de verse. No depende de la focal ni de la distancia,
-   que es justo por lo que la receta de treinta segundos vale en cualquier plaza. */
-function tGhost(s){ return s.tec.K*ANCHO_PERSONA/Math.max(0.2,s.v); }
-function anchoSujeto(s){ return (SHAPES[SHAPE]||SHAPES.person).W*s.f/(s.d*s.cam.p*1e-3); }   // px de sensor
-function pideBlur(s){
-  if(s.tec.ghost) return blurPx(s.f,s.v,tGhost(s),s.d,s.cam.p);
-  if(s.tec.trace) return s.tec.K*anchoSujeto(s);      // la traza se mide en anchos del propio sujeto
-  return s.tec.px*(s.cam.p===2.97?2:1)*(s.cam.w/9528);
-}
-function tPedida(s){
-  if(s.tec.ghost) return tGhost(s);
-  return tForBlur(s.f,s.v,pideBlur(s),s.d,s.cam.p);
-}
+const CLAVE='exposicion-larga-campo';
+let E={efecto:'pan',formato:'ff',mp:24,estab:2,focal:35,ap:8,sujeto:'bike',vel:5,dist:10,luz:13};
+try{ const g=JSON.parse(localStorage.getItem(CLAVE)||'null'); if(g&&typeof g==='object') E=Object.assign(E,g); }catch(e){}
+function guardar(){ try{ localStorage.setItem(CLAVE,JSON.stringify(E)); }catch(e){} }
+const efecto=()=>EFECTOS.find(x=>x.id===E.efecto)||EFECTOS[0];
+const sujeto=()=>SUJETOS.find(x=>x.id===E.sujeto)||SUJETOS[0];
 
-/* El cuerpo manda sobre dos controles: el Q3 43 tiene focal fija, y la
-   estabilización solo se ofrece si el cuerpo la lleva. */
-function sincronizaCuerpo(){
-  const cam=CAMS.find(x=>x.id===$('cam').value)||CAMS[0];
-  const foc=$('focal'), chk=$('stab'), txt=$('stabTxt');
-  if(cam.fixed){
-    if(!foc.disabled) foc.dataset.prev=foc.value;      // guarda la focal del usuario
-    foc.value=cam.fixed; foc.disabled=true; foc.title=LBL('fixedFocal',cam.fixed);
-  } else {
-    if(foc.disabled && foc.dataset.prev) foc.value=foc.dataset.prev;   // y la devuelve
-    foc.disabled=false; foc.removeAttribute('title');
+/* ---------- formato de números ---------- */
+const NOMS=[8000,6400,5000,4000,3200,2500,2000,1600,1250,1000,800,640,500,400,320,250,200,160,125,100,80,60,50,40,30,25,20,15,13,10,8,6,5,4,3,2.5,2,1.6,1.3];
+function fmtT(t){
+  if(!Number.isFinite(t)||t<=0) return '—';
+  if(t<0.7){
+    const inv=1/t; let m=NOMS[0];
+    NOMS.forEach(n=>{ if(Math.abs(Math.log(n/inv))<Math.abs(Math.log(m/inv))) m=n; });
+    return '1/'+nf(m,m%1?1:0)+' s';
   }
-  /* La preferencia del usuario se guarda aparte: pasar por un cuerpo sin
-     estabilización no debe apagarla para siempre en los que sí la tienen. */
-  if(chk.dataset.pref===undefined) chk.dataset.pref = chk.checked ? '1' : '0';
-  if(cam.stab){
-    chk.disabled=false; chk.checked = chk.dataset.pref==='1';
-    txt.textContent=LBL(cam.stab>=4?'stabIbis':'stabOis');
-  } else {
-    chk.disabled=true; chk.checked=false; txt.textContent=LBL('stabNone');
-  }
+  if(t<10) return nf(t,1)+' s';
+  if(t<59.5) return nf(Math.round(t),0)+' s';
+  const s=Math.round(t), h=Math.floor(s/3600), mi=Math.floor(s%3600/60), se=s%60;
+  return (h?h+' h ':'')+((h||mi)?mi+' min':'')+(se&&!h?' '+se+' s':'');
+}
+function isoNominal(x){ let m=ISOS[0]; ISOS.forEach(n=>{ if(Math.abs(Math.log(n/x))<Math.abs(Math.log(m/x))) m=n; }); return m; }
+function fmtPasos(p){ return nf(Math.round(p*3)/3, Math.abs(Math.round(p*3)/3-Math.round(p))>0.01?1:0); }
+
+/* el filtro, o la pareja de filtros, que cubre los pasos que sobran con menos pasos */
+function eligeND(p){
+  const cands=[];
+  NDS.forEach((a,i)=>{ cands.push([a]); NDS.slice(i).forEach(b=>cands.push([a,b])); });
+  let mejor=null;
+  cands.forEach(c=>{
+    const s=c[0]+(c[1]||0);
+    if(s<p-0.34) return;
+    if(!mejor || s<mejor.s || (s===mejor.s && c.length<mejor.c.length)) mejor={c,s};
+  });
+  if(mejor) mejor.c.sort((a,b)=>b-a);
+  return mejor || {c:[15,15],s:30};
 }
 
-function update(){
-  sincronizaCuerpo();
-  const s=lee();
-  $('velV').textContent=nf(s.v,1)+" m/s";
-  s.shape=SHAPES[SHAPE]||SHAPES.person; s.shapeId=SHAPE;
-  $('evV').textContent="EV "+s.ev;
-  [].forEach.call($('velpre').children,b=>b.classList.toggle('on',Math.abs(+b.dataset.v-s.v)<0.05));
-  [].forEach.call($('evpre').children,b=>b.classList.toggle('on',+b.dataset.ev===s.ev));
-
-  const need=pideBlur(s);
-  const t=tPedida(s);
-  const bpx=blurPx(s.f,s.v,t,s.d,s.cam.p);
-  const th=tHold(s.f,s.st,s.cam.p,CRIT);
-  const sh=s.st>=99?0:shakePx(s.f,t,s.st,s.cam.p);
-  const tc=tCorrect(s.N,s.ev);
-  const stopsNd=Math.log2(t/tc);
-
-  $('oT').textContent=fmtT(t);
-  $('oBlur').innerHTML=nf(bpx,0)+" <small>px · "+nf(bpx/s.cam.w,2)+" "+LBL('frames')+"</small>";
-  $('oHold').textContent=s.st>=99?LBL('sTri'):fmtT(th);
-  { let k,txt;
-    if(s.tec.id==='tPan'){ const res=bpx*TRACK; k=res<=20?'ok':'warn'; txt=nf(res,0)+' px · '+LBL('trackLbl'); }
-    else if(s.tec.tripod){ k='bad'; txt=LBL('tripod'); }
-    else if(s.st>=99){ k='ok'; txt=LBL('sTri'); }
-    else { k=t<=th?'ok':'bad'; txt=k==='ok'?LBL('holdOk'):LBL('holdNo'); }
-    const tg=$('oTag'); tg.className='tag '+k; tg.textContent=txt; }
-  $('oShake').innerHTML=s.st>=99?"0 <small>px</small>":nf(sh,0)+" <small>px</small>";
-  $('oNd').textContent=stopsNd<=0.3?LBL('noFilter'):nf(stopsNd,1)+" "+LBL('stops');
-  const isoSin=100*Math.pow(2,-stopsNd);
-  $('oIso').textContent=stopsNd<=0.3?"—":(isoSin>=25?nf(isoSin,0):"< 25");
-
-  /* veredicto */
-  let h=`<h4>${LBL('vTitle',LBL(s.tec.id),LBL(s.cam.id))}</h4>`;
-  h+=`<p>${LBL('vBlur',fmtT(t),nf(bpx,0),nf(100*bpx/s.cam.w,1))}</p>`;
-  if(s.tec.id==='tPan'){ h+=`<p>${LBL('vPan',nf(bpx*TRACK,0),nf(bpx,0))}</p>`; }
-  if(s.tec.id==='tGhost'){ h+=`<p>${LBL('vGhost',fmtT(t),fmtT(ANCHO_PERSONA/Math.max(0.2,s.v)),nf(need,0))}</p>`; }
-  if(s.tec.id==='tFlash'){ h+=`<p>${LBL('vFlash')}</p>`; }
-  if(s.tec.id==='tZoom'){ h+=`<p>${LBL('vZoom')}</p>`; }
-  if(s.tec.id==='tTrace'){ h+=`<p>${LBL('vTrace',s.tec.K,nf(anchoSujeto(s),0),nf(need,0))}</p>`; }
-  h+=`<h4>${LANG()==='en'?'Can you hold it':'Se sostiene'}</h4>`;
-  if(s.tec.id==='tPan'){
-    const res=bpx*TRACK;
-    h+=`<p>${LBL('vPanHold',nf(res,0),LBL(res<=20?'vPanOk':'vPanNo'))}</p>`;
-  }
-  else if(s.st>=99){ h+=`<p>${LBL('vHoldTri')}</p>`; }
-  else if(t<=th){ h+=`<p>${LBL('vHoldOk',fmtT(th),LBL(s.sup.id))}</p><p>${LBL('vShakeOk',nf(sh,0))}</p>`; }
+/* ---------- cálculo ---------- */
+function calcula(){
+  const F=FORMATOS[E.formato]||FORMATOS.ff, ef=efecto(), sj=sujeto(), fo=FORMAS[sj.forma];
+  const pxW=Math.sqrt(E.mp*1e6*F.w/F.h), p=F.w/pxW;          // píxeles de ancho y paso (mm)
+  const f=E.focal, d=E.dist, v=Math.max(0.1,E.vel), N=E.ap;
+  const A=F.w*d/f, Al=F.h*d/f;                               // encuadre a la distancia del sujeto (m)
+  let tNeed;
+  if(ef.frac) tNeed=ef.frac*A/v;
+  else if(ef.K) tNeed=ef.K*fo.W/v;
+  else tNeed=ef.t;
+  const tOk=N*N/Math.pow(2,E.luz);                          // exposición correcta a ISO 100
+  const r={F,ef,sj,fo,pxW,p,f,d,v,N,A,Al,tNeed,tOk,t:tNeed,iso:100,nd:null,sobra:0,cierra:null,mas:false};
+  const pasos=Math.log2(tNeed/tOk);                         // > 0: sobra luz
+  if(ef.tipo==='minimo' && pasos<=0){ r.t=tOk; r.mas=tOk>tNeed*1.26; }
+  else if(ef.tipo==='zoom' && tOk>=0.25 && tOk<=1){ r.t=tOk; }
+  else if(pasos<=1/3){ if(pasos<0) r.iso=isoNominal(100*Math.pow(2,-pasos)); }
   else {
-    const falta=nf(Math.log2(t/th),1);
-    h+=`<p>${LBL('vHoldNo',fmtT(th),LBL(s.sup.id),falta)}</p><p>${LBL('vShake',nf(sh,0))}</p>`;
-    const q=Math.min(0.95,Math.exp(-Math.pow(t/th,2)/2));
-    h+=`<p>${LBL('vBurst',8,nf(100*(1-Math.pow(1-q,8)),0))}</p>`;
+    r.sobra=pasos; r.nd=eligeND(pasos);
+    const resto=r.nd.s-pasos;
+    if(ef.tipo==='minimo') r.t=tOk*Math.pow(2,r.nd.s);
+    else if(resto>1/6) r.iso=isoNominal(100*Math.pow(2,resto));
+    /* cerrar el diafragma hasta f/16 como alternativa */
+    const Nn=N*Math.sqrt(Math.pow(2,pasos))*0.97;
+    const alt=DIAF_TERCIOS.find(x=>x>=Nn);
+    if(alt && alt>N) r.cierra=alt;
   }
-  if(s.cam.stab && s.st<99){
-    const tipo=LBL(s.cam.stab>=4?'stabIbis':'stabOis');
-    if(stabOn()) h+=`<p>${LBL('vStab',s.cam.stab,tipo,fmtT(tHold(s.f,s.sup.st,s.cam.p,CRIT)),fmtT(th))}</p>`;
-    else h+=`<p>${LBL('vStabOff',tipo)}</p>`;
-  }
-  h+=`<h4>${LANG()==='en'?'Getting there':'Cómo llegar'}</h4>`;
-  if(stopsNd<=0.3) h+=`<p>${LBL('vNdNo')}</p>`;
+  /* temblor: tiempo máximo sostenible con s pasos de ayuda */
+  const tHold=s=>CRIT*p/(f*W0/Math.pow(2,s));
+  r.tHold=tHold;
+  const s0=ESTABS[E.estab]||0;
+  if(r.t<=tHold(s0)) r.tri='hand';
+  else if(r.t<=tHold(s0+2)) r.tri='brace';
+  else if(r.t<=tHold(s0+3)) r.tri='lean';
+  else r.tri='tripod';
+  if(ef.id==='pan') r.tri='pan';
+  else if(ef.id==='flash' && r.tri!=='hand') r.tri='flash';
+  else if(ef.id==='zoom') r.tri='zoom';
+  r.tMaxApoyo=tHold(s0+3);
+  r.B=v*r.t;                                                 // recorrido del sujeto (m)
+  r.trackPx=TRACK*r.B*f/(d*p);                               // error de seguimiento (px de sensor)
+  return r;
+}
+
+/* ---------- controles ---------- */
+function chips(cont, lista, actual, alPulsar){
+  cont.innerHTML='';
+  lista.forEach(o=>{
+    const b=document.createElement('button');
+    b.type='button'; b.innerHTML=o.n; b.setAttribute('aria-pressed', String(o.v)===String(actual)?'true':'false');
+    b.addEventListener('click',()=>alPulsar(o.v));
+    cont.appendChild(b);
+  });
+}
+function pintarControles(){
+  const efs=$('efectos'); efs.innerHTML='';
+  EFECTOS.forEach(ef=>{
+    const b=document.createElement('button'), tx=LBL('ef')[ef.id];
+    b.type='button'; b.className='efecto'; b.setAttribute('aria-pressed', ef.id===E.efecto?'true':'false');
+    b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+ICONOS[ef.id]+'</svg><b>'+tx[0]+'</b><span>'+tx[1]+'</span>';
+    b.addEventListener('click',()=>{
+      E.efecto=ef.id;
+      /* cada efecto propone su sujeto típico, con su velocidad y su distancia */
+      const sj=SUJETOS.find(x=>x.id===ef.sujeto);
+      if(sj){ E.sujeto=sj.id; E.vel=sj.v; E.dist=sj.d; }
+      /* las estelas de luz piden noche: si es de día, la propone */
+      if(ef.id==='trails' && E.luz>8) E.luz=5;
+      cambio();
+    });
+    efs.appendChild(b);
+  });
+  chips($('formato'), Object.keys(FORMATOS).map(k=>({v:k,n:LBL('fmt')[k]})), E.formato, v=>{E.formato=v; cambio();});
+  chips($('mp'), MPS.map(m=>({v:m,n:m+' MP'})), E.mp, v=>{E.mp=v; cambio();});
+  chips($('estab'), ESTABS.map((s,i)=>({v:i,n:LBL('estab')[i]+(s?'<small>'+s+' '+LBL('pasos')+'</small>':'')})), E.estab, v=>{E.estab=v; cambio();});
+  chips($('focales'), FOCALES.map(x=>({v:x,n:String(x)})), E.focal, v=>{E.focal=v; cambio();});
+  chips($('diafs'), DIAFS.map(x=>({v:x,n:'f/'+nf(x,x%1?1:0)})), E.ap, v=>{E.ap=v; cambio();});
+  chips($('sujetos'), SUJETOS.map(x=>({v:x.id,n:LBL('suj')[x.id]})), E.sujeto, v=>{
+    const sj=SUJETOS.find(x=>x.id===v); E.sujeto=v; E.vel=sj.v; E.dist=sj.d; cambio();
+  });
+  chips($('luces'), LUCES.map(([k,ev])=>({v:ev,n:LBL('luz')[k]})), E.luz, v=>{E.luz=v; cambio();});
+  $('focal').value=E.focal; $('dist').value=E.dist; $('vel').value=E.vel;
+  $('velV').textContent=nf(E.vel,1)+' m/s · '+nf(E.vel*3.6,0)+' km/h';
+}
+$('focal').addEventListener('change',()=>{ const x=+$('focal').value; if(x>=8&&x<=800){ E.focal=x; } cambio(); });
+$('dist').addEventListener('change',()=>{ const x=+$('dist').value; if(x>=0.5&&x<=2000){ E.dist=x; } cambio(); });
+$('vel').addEventListener('input',()=>{ E.vel=+$('vel').value; $('velV').textContent=nf(E.vel,1)+' m/s · '+nf(E.vel*3.6,0)+' km/h'; programar(); guardar(); });
+
+/* ---------- resultado ---------- */
+function veredicto(caja, clase){ caja.classList.remove('ok','warn','bad'); if(clase) caja.classList.add(clase); }
+function lista(a){ return a.length>1 ? a.slice(0,-1).join(', ')+LBL('y')+a[a.length-1] : a[0]; }
+function pintarResultado(r){
+  const ef=r.ef, sj=r.sj;
+  $('oT').textContent=fmtT(r.t);
+  $('oTd').textContent=LBL('tD',nf(r.N,r.N%1?1:0),nf(r.iso,0))+(r.t>30?LBL('bulb'):'');
+  /* filtro */
+  if(!r.nd){ $('oND').textContent=LBL('ndNo'); $('oNDd').textContent=LBL('ndNoD'); veredicto($('vND'),'ok'); }
   else {
-    const nd=NDS.find(x=>x[0]>=stopsNd)||NDS[NDS.length-1];
-    h+=`<p>${LBL('vNd',nf(stopsNd,1),nd[1])}</p>`;
-    h+=`<p>${isoSin>=25?LBL('vIso',nf(isoSin,0)):LBL('vNdIso',nf(isoSin,0))}</p>`;
+    const nom=r.nd.c.map(x=>NOMBRE_ND[x]).join(' + ');
+    $('oND').textContent=r.nd.s+' '+LBL('pasos');
+    let d=LBL('ndSiD',fmtPasos(r.sobra),nom);
+    if(r.iso>100) d+=LBL('ndIso',nf(r.iso,0));
+    if(r.cierra) d+=LBL('ndCierra',nf(r.cierra,r.cierra%1?1:0));
+    $('oNDd').textContent=d; veredicto($('vND'),'warn');
   }
-  $('verdict').innerHTML=h;
-
-  tablaTecnicas(s); tablaCuerpos(s,t); tablaApoyos(s); grafica(s,t,th); franja(s,t);
+  /* trípode */
+  const T={hand:['triHand','triHandD','ok'],brace:['triBrace','triBraceD','ok'],lean:['triLean','triLeanD','warn'],
+           tripod:['triSi','triSiD','bad'],pan:['triPan','triPanD','ok'],flash:['triFlash','triFlashD','ok'],zoom:['triZoom','triZoomD','warn']}[r.tri];
+  $('oTri').textContent=LBL(T[0]); $('oTrid').textContent=LBL(T[1],fmtT(r.tMaxApoyo)); veredicto($('vTri'),T[2]);
+  /* lo que vas a ver */
+  const el=LBL('el')[sj.id], los=LBL('los')[sj.id];
+  const noche=E.luz<=8;
+  let h='<h3>'+LBL('verasH')+'</h3>';
+  let txt;
+  if(ef.id==='pan') txt=LBL('vPan',el,nf(ef.frac*100,0))+' '+LBL('vPanTrack',nf(Math.round(r.trackPx),0));
+  else if(ef.id==='trace') txt=LBL('vTrace',el);
+  else if(ef.id==='static') txt=LBL('vStatic',los);
+  else if(ef.id==='trails') txt=noche?LBL('vTrails',los):LBL('vTrailsDia');
+  else if(ef.id==='ghost') txt=LBL('vGhost',los,fmtT(r.t/4));
+  else if(ef.id==='flash') txt=LBL('vFlash',LBL('al')[sj.id]);
+  else txt=LBL('vZoom');
+  h+='<p>'+txt+'</p>';
+  const det=[];
+  if(r.mas) det.push(LBL('vMas',fmtT(r.t)));
+  det.push(LBL('vExpo',LBL('luzEn')[(LUCES.find(x=>x[1]===E.luz)||LUCES[3])[0]],nf(r.N,r.N%1?1:0),fmtT(r.tOk)));
+  if(r.iso>6400) det.push(LBL('vIsoAlto',nf(r.iso,0)));
+  if(r.fo.H>r.Al*0.95 || (ef.id!=='trails'&&ef.id!=='ghost'&&r.fo.W>r.A)) det.push(LBL('vFuera'));
+  h+='<p class="det">'+det.join(' ')+'</p>';
+  $('veras').innerHTML=h;
+  $('pie').textContent=LBL('pie',nf(r.A,r.A<10?1:0),nf(r.Al,r.Al<10?1:0));
+  /* barra fija */
+  $('mini-t').textContent=fmtT(r.t);
+  $('mini-nd').textContent='ND: '+(r.nd?r.nd.c.map(x=>NOMBRE_ND[x]).join('+'):'—');
+  $('mini-tri').textContent=(LANG()==='en'?'Tripod: ':'Trípode: ')+LBL(T[0]).toLowerCase();
 }
 
-/* ---------- tablas ---------- */
-function tablaTecnicas(s){
-  const th=LBL('thTec');
-  $('tecHead').innerHTML="<tr>"+th.map((x,i)=>`<th class="${i>1&&i<4?'num':''}">${x}</th>`).join("")+"</tr>";
-  $('tecBody').innerHTML=TECS.map(x=>{
-    const s2=Object.assign({},s,{tec:x});
-    const need=pideBlur(s2), t=tPedida(s2);
-    const thold=tHold(s.f,s.st,s.cam.p,CRIT);
-    let ok,txt;
-    if(x.id==='tPan'){ const res=need*TRACK; ok=res<=20?'ok':'warn'; txt=nf(res,0)+' px'; }
-    else if(x.tripod){ ok='bad'; txt=LBL('tripod'); }
-    else { ok=(s.st>=99||t<=thold)?'ok':'bad'; txt=ok==='ok'?LBL('holdOk'):LBL('holdNo'); }
-    return `<tr class="${x.id===s.tec.id?'sel':''}"><td>${LBL(x.id)}</td><td>${LBL(x.need)}</td><td class="num">${fmtT(t)}</td><td class="num">${nf(need,0)}</td><td><span class="tag ${ok}">${txt}</span></td></tr>`;
-  }).join("");
-}
-function tablaCuerpos(s,t){
-  const th=LBL('thCam');
-  $('camHead').innerHTML="<tr>"+th.map((x,i)=>`<th class="${i>0&&i<5?'num':''}">${x}</th>`).join("")+"</tr>";
-  $('camBody').innerHTML=CAMS.map(c=>{
-    /* Cada fila lleva la estabilización DE SU cuerpo, que es lo que esta tabla
-       compara: el mismo apoyo de manos, y encima lo que cada cámara añade. */
-    const stc = s.sup.st>=99 ? 99 : s.sup.st + (stabOn() && c.stab ? c.stab : 0);
-    const b=blurPx(s.f,s.v,t,s.d,c.p), sh=stc>=99?0:shakePx(s.f,t,stc,c.p), thold=tHold(s.f,stc,c.p,CRIT);
-    const k = stc>=99||t<=thold ? 'ok':'bad';
-    return `<tr class="${c.id===s.cam.id?'sel':''}"><td>${LBL(c.id)}</td><td class="num">${nf(c.p,2)} µm</td><td class="num">${nf(b,0)} px</td><td class="num">${nf(sh,0)} px</td><td class="num">${fmtT(thold)}</td><td><span class="tag ${k}">${k==='ok'?LBL('holdOk'):LBL('holdNo')}</span></td></tr>`;
-  }).join("");
-}
-function tablaApoyos(s){
-  const th=LBL('thSup');
-  $('supHead').innerHTML="<tr>"+th.map((x,i)=>`<th class="${i>0?'num':''}">${x}</th>`).join("")+"</tr>";
-  $('supBody').innerHTML=SUPS.map((x,i)=>{
-    const st = x.st===99 ? 99 : x.st + (stabOn()&&s.cam.stab?s.cam.stab:0);
-    const w = st>=99 ? 0 : omega(st);
-    const cel = [28,35,50,90].map(f=>st>=99?"—":fmtT(tHold(f,st,s.cam.p,CRIT)));
-    return `<tr class="${i===+$('sup').value?'sel':''}"><td>${LBL(x.id)}</td><td class="num">${st>=99?'∞':st}</td><td class="num">${st>=99?'0':nf(w,4)}</td>`+
-           cel.map(c=>`<td class="num">${c}</td>`).join("")+"</tr>";
-  }).join("");
-  const nota=$('supNote');
-  if(nota) nota.innerHTML = (s.cam.stab && stabOn())
-    ? LBL('supWith', s.cam.stab, LBL(s.cam.stab>=4?'stabIbis':'stabOis'))
-    : LBL('supWithout');
-}
-
-/* ---------- gráfica: arrastre y trepidación frente al tiempo ---------- */
-function grafica(s,t,th){
-  const W=900,H=340,L=58,R=18,T=16,B=44;
-  const t0=1/2000, t1=60;
-  const xs=v=>L+(Math.log(v)-Math.log(t0))/(Math.log(t1)-Math.log(t0))*(W-L-R);
-  const y0=0.5, y1=20000;
-  const ys=v=>H-B-(Math.log(Math.max(v,y0))-Math.log(y0))/(Math.log(y1)-Math.log(y0))*(H-B-T);
-  let g="";
-  /* bandas de significado */
-  const banda=(a,b,col,lab)=>{const ya=ys(b),yb=ys(a);g+=`<rect x="${L}" y="${ya.toFixed(1)}" width="${W-L-R}" height="${(yb-ya).toFixed(1)}" fill="${col}"/>`+
-    `<text x="${L+6}" y="${(ya+12).toFixed(1)}">${lab}</text>`;};
-  banda(y0,2,'rgba(111,191,115,.07)',LBL('gInv'));
-  banda(2,20,'rgba(232,176,75,.06)',LBL('gSoft'));
-  banda(100,y1,'rgba(94,200,216,.06)',LBL('gStreak'));
-  [1,10,100,1000,10000].forEach(v=>{g+=`<line x1="${L}" x2="${W-R}" y1="${ys(v).toFixed(1)}" y2="${ys(v).toFixed(1)}" stroke="#242c36"/><text x="${L-8}" y="${(ys(v)+4).toFixed(1)}" text-anchor="end">${v}</text>`;});
-  [1/1000,1/125,1/15,1/2,4,30].forEach(v=>{g+=`<line x1="${xs(v).toFixed(1)}" x2="${xs(v).toFixed(1)}" y1="${T}" y2="${H-B}" stroke="#1b222b"/><text x="${xs(v).toFixed(1)}" y="${H-B+16}" text-anchor="middle">${fmtT(v)}</text>`;});
-  g+=`<line x1="${L}" x2="${L}" y1="${T}" y2="${H-B}" stroke="#303a46"/><line x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}" stroke="#303a46"/>`;
-  g+=`<text x="${(L+W-R)/2}" y="${H-8}" text-anchor="middle">${LBL('gx')}</text>`;
-  g+=`<text transform="translate(14 ${(T+H-B)/2}) rotate(-90)" text-anchor="middle">${LBL('gy')}</text>`;
-  const path=fn=>{let d="";for(let i=0;i<=160;i++){const v=t0*Math.pow(t1/t0,i/160);d+=(i?"L":"M")+xs(v).toFixed(1)+" "+ys(fn(v)).toFixed(1);}return d;};
-  g+=`<path d="${path(v=>blurPx(s.f,s.v,v,s.d,s.cam.p))}" fill="none" stroke="#e8b04b" stroke-width="2.4"/>`;
-  if(s.st<99) g+=`<path d="${path(v=>shakePx(s.f,v,s.st,s.cam.p))}" fill="none" stroke="#5ec8d8" stroke-width="2"/>`;
-  if(s.st<99&&th>t0&&th<t1) g+=`<line x1="${xs(th).toFixed(1)}" x2="${xs(th).toFixed(1)}" y1="${T}" y2="${H-B}" stroke="#5ec8d8" stroke-dasharray="4 4"/>`;
-  if(t>t0&&t<t1){ g+=`<line x1="${xs(t).toFixed(1)}" x2="${xs(t).toFixed(1)}" y1="${T}" y2="${H-B}" stroke="#dfe4ea" stroke-width="1.3"/>`+
-    `<circle cx="${xs(t).toFixed(1)}" cy="${ys(blurPx(s.f,s.v,t,s.d,s.cam.p)).toFixed(1)}" r="4.5" fill="#dfe4ea"/>`;}
-  $('chart').innerHTML=g;
-  $('chartlg').innerHTML=`<span><i style="border-color:#e8b04b"></i>${LBL('gSubj')}</span>`+
-    (s.st<99?`<span><i style="border-color:#5ec8d8"></i>${LBL('gShake')}</span>`:"")+
-    `<span><i style="border-color:#dfe4ea"></i>${LBL('gYour')} ${fmtT(t)}</span>`;
-}
-
-/* ---------- el fotograma: el sujeto a tamaño real y la traza que deja ----------
-   El recuadro grande ES el fotograma, en la proporción 3:2 del formato. El sujeto
-   se dibuja a la escala que de verdad tiene en el sensor y se barre a lo largo de
-   su arrastre con la integración exacta de un movimiento uniforme: la opacidad de
-   cada píxel es la fracción del tiempo de exposición durante la que el sujeto lo
-   cubrió (un filtro de caja a lo largo del recorrido). En el barrido se sigue al
-   sujeto: él solo se arrastra el error de seguimiento y es el fondo el que corre. */
-function shapePath(x,yb,h,w,kind){
-  /* pictograma a escala como un único trazado: unión por regla nonzero, ventanas como huecos
-     x = borde izquierdo, yb = línea de suelo, h alto, w largo (px) */
-  const p=new Path2D();
-  const rr=(x0,y0,ww,hh,r)=>{ if(p.roundRect) p.roundRect(x0,y0,ww,hh,Math.max(0,Math.min(r,ww/2,hh/2))); else p.rect(x0,y0,ww,hh); };
-  const circ=(cx,cy,r)=>{ r=Math.max(0.6,r); p.moveTo(cx+r,cy); p.arc(cx,cy,r,0,6.2832); };
-  const hole=(x0,y0,ww,hh)=>{ p.moveTo(x0,y0); p.lineTo(x0,y0+hh); p.lineTo(x0+ww,y0+hh); p.lineTo(x0+ww,y0); p.closePath(); };
-  if(kind==='person'){
-    const r=h*0.085; circ(x+w/2, yb-h+r, r);
-    rr(x+w*0.12, yb-h+2.2*r, w*0.76, h*0.46, w*0.3);          // torso
-    rr(x+w*0.18, yb-h*0.42, w*0.27, h*0.42, w*0.1);             // piernas
-    rr(x+w*0.55, yb-h*0.42, w*0.27, h*0.42, w*0.1);
-  } else if(kind==='bike'){
-    const rw=h*0.2; circ(x+rw, yb-rw, rw); circ(x+w-rw, yb-rw, rw);
-    p.rect(x+rw, yb-rw-h*0.03, w-2*rw, h*0.06);                  // cuadro
-    const pw=w*0.22, px=x+w*0.42, ph=h*0.78, r=ph*0.11;
-    circ(px+pw/2, yb-h+r, r); rr(px, yb-h+2.1*r, pw, ph*0.5, pw*0.3); rr(px+pw*0.2, yb-h*0.5, pw*0.6, h*0.3, pw*0.1);
-  } else if(kind==='car'){
-    rr(x, yb-h*0.55, w, h*0.42, h*0.12);                          // carrocería
-    rr(x+w*0.22, yb-h, w*0.5, h*0.5, h*0.14);                     // habitáculo
-    const rw=h*0.17; circ(x+w*0.22, yb-rw, rw); circ(x+w*0.78, yb-rw, rw);
-  } else if(kind==='post'){                                       // farola del fondo
-    rr(x, yb-h, w, h, w/2); rr(x-w, yb-h-w*1.2, w*3, w*2, w*0.6);
-  } else {                                                       // train
-    rr(x, yb-h*0.9, w, h*0.75, h*0.12);
-    rr(x+w*0.02, yb-h, w*0.96, h*0.25, h*0.1);
-    const n=Math.max(2,Math.floor(w/(h*0.9))), vw=w/n*0.55;
-    for(let k=0;k<n;k++) hole(x+(k+0.22)*w/n, yb-h*0.8, vw, h*0.3);
-  }
-  return p;
-}
-const _offs={};
-function barrido(ctx,clip,draw,b,dir,rgb,floor,dpr,gain){
-  /* dibuja la máscara en un lienzo auxiliar y la barre b px (pantalla) en la dirección dir con
-     una suma móvil por filas: cada píxel queda con la fracción del tiempo que estuvo cubierto */
-  const w=Math.ceil(clip.w*dpr), h=Math.ceil(clip.h*dpr), key=w+'x'+h;
-  const off=_offs[key]||(_offs[key]=document.createElement('canvas'));
-  if(off.width!==w||off.height!==h){ off.width=w; off.height=h; }
-  const c=off.getContext('2d'); c.setTransform(dpr,0,0,dpr,0,0); c.clearRect(0,0,clip.w,clip.h); c.fillStyle="#fff"; draw(c);
-  const img=c.getImageData(0,0,w,h), d=img.data, bi=Math.round(b*dpr);
-  if(bi>=2){
-    const row=new Float32Array(w);
-    for(let y=0;y<h;y++){
-      const o=y*w*4; for(let x=0;x<w;x++) row[x]=d[o+x*4+3];
-      let acc=0;
-      if(dir>0){ for(let x=0;x<w;x++){ acc+=row[x]; if(x>=bi) acc-=row[x-bi]; d[o+x*4+3]=acc/bi; } }
-      else     { for(let x=w-1;x>=0;x--){ acc+=row[x]; if(x+bi<w) acc-=row[x+bi]; d[o+x*4+3]=acc/bi; } }
+/* ---------- la foto simulada ----------
+   El encuadre entero a la distancia del sujeto, a escala. Lo que se mueve se
+   promedia en el tiempo como lo integra el sensor: cada píxel es la media de lo
+   que vio, con un filtro de caja horizontal sobre colores premultiplicados. */
+function hcaja(src,W,H,a,b,periodico){
+  // ventana [x+a, x+b], enteros, a <= b
+  const n=b-a+1, out=new Uint8ClampedArray(src.length), P=new Float64Array((W+1)*4);
+  for(let y=0;y<H;y++){
+    const o=y*W*4;
+    for(let x=0;x<W;x++){
+      const i=o+x*4, al=src[i+3]/255, j=x*4;
+      P[j+4]=P[j]+src[i]*al; P[j+5]=P[j+1]+src[i+1]*al; P[j+6]=P[j+2]+src[i+2]*al; P[j+7]=P[j+3]+al;
+    }
+    const tot=W*4;
+    const cum=(x,c)=>{ // suma de [0, x) en la extensión periódica
+      const q=Math.floor(x/W), m=x-q*W; return q*P[tot+c]+P[m*4+c];
+    };
+    for(let x=0;x<W;x++){
+      let s0,s1,s2,s3;
+      if(periodico){
+        const L=x+a, R=x+b+1;
+        s0=cum(R,0)-cum(L,0); s1=cum(R,1)-cum(L,1); s2=cum(R,2)-cum(L,2); s3=cum(R,3)-cum(L,3);
+      } else {
+        const lo=Math.max(0,x+a), hi=Math.min(W-1,x+b);
+        if(lo>hi){ s0=s1=s2=s3=0; }
+        else { s0=P[(hi+1)*4]-P[lo*4]; s1=P[(hi+1)*4+1]-P[lo*4+1]; s2=P[(hi+1)*4+2]-P[lo*4+2]; s3=P[(hi+1)*4+3]-P[lo*4+3]; }
+      }
+      const i=o+x*4, A=s3/n;
+      out[i+3]=A*255;
+      if(s3>1e-9){ out[i]=s0/s3; out[i+1]=s1/s3; out[i+2]=s2/s3; }
     }
   }
-  const fl=Math.round(255*floor);
-  const g=gain||1;
-  for(let i=0;i<d.length;i+=4){ let a=d[i+3]; if(a){ d[i]=rgb[0]; d[i+1]=rgb[1]; d[i+2]=rgb[2]; if(a<fl) a=fl; d[i+3]=a*g; } }
-  c.putImageData(img,0,0);
-  ctx.drawImage(off, clip.x, clip.y, clip.w, clip.h);
+  return out;
 }
-function escena(ctx,clip,win,S,o){
-  /* la escena en píxeles de sensor vista por la ventana win = {x0,y0,sc}: suelo, lo que se mueve
-     alrededor (gris) y tu sujeto (ámbar). o dice cómo: xSub dónde está el sujeto, bSub cuánto se
-     arrastra, gain la intensidad de su rastro, flashAt dónde va una copia nítida, bMov/dirMov el
-     arrastre de los grises. pantalla = clip + (sensor − origen)·sc */
-  const sc=win.sc, X=v=>clip.x+(v-win.x0)*sc, Y=v=>clip.y+(v-win.y0)*sc, yb=Y(S.ys)-clip.y;
-  ctx.save(); ctx.beginPath(); ctx.rect(clip.x,clip.y,clip.w,clip.h); ctx.clip();
-  ctx.strokeStyle="rgba(255,255,255,.07)"; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(clip.x,Y(S.ys)+.5); ctx.lineTo(clip.x+clip.w,Y(S.ys)+.5); ctx.stroke();
-  if(o.movers && S.movers.length)
-    barrido(ctx,clip,c=>{ for(const xm of S.movers) c.fill(shapePath(X(xm)-clip.x, yb, S.mH*sc, S.mW*sc, S.mKind)); }, o.bMov*sc, o.dirMov, o.grey, o.floor, o.dpr, 1);
-  barrido(ctx,clip,c=>{ c.fill(shapePath(X(o.xSub)-clip.x, yb, S.hSen*sc, S.wSen*sc, S.kind)); }, o.bSub*sc, 1, o.color, o.floor, o.dpr, o.gain);
-  if(o.flashAt!==null){                                                                // copia nítida (destello, o el sujeto donde llega)
-    ctx.fillStyle=`rgba(${o.color[0]},${o.color[1]},${o.color[2]},.96)`; ctx.translate(clip.x,clip.y); ctx.fill(shapePath(X(o.flashAt)-clip.x, yb, S.hSen*sc, S.wSen*sc, S.kind)); ctx.translate(-clip.x,-clip.y); }
-  ctx.strokeStyle=o.ref; ctx.setLineDash([3,3]); ctx.lineWidth=1;                      // referencia: dónde estaba al abrirse el obturador
-  ctx.strokeRect(X(S.xs)-.5, Y(S.ys)-S.hSen*sc-.5, Math.max(2,S.wSen*sc)+1, S.hSen*sc+1); ctx.setLineDash([]);
-  ctx.restore();
-}
-function franja(s,t){
-  const cv=$('strip'), dpr=Math.min(2,window.devicePixelRatio||1);
-  const W=1200,H=556;
-  cv.width=W*dpr; cv.height=H*dpr; cv.style.aspectRatio=W+" / "+H;
-  const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
-  ctx.fillStyle="#07090d"; ctx.fillRect(0,0,W,H);
-  ctx.font="12px 'IBM Plex Mono', monospace"; ctx.textBaseline="middle";
-  const AMB=[232,176,75], CYN=[94,200,216], GRY=[128,140,154], FLOOR=0.08;
-  const tec = s.tec ? s.tec.id : 'tFree';
-  const mode = tec==='tPan' ? 'pan' : tec==='tStatic' ? 'static' : tec==='tFlash' ? 'flash' : 'free';
+function lienzo(w,h){ const c=document.createElement('canvas'); c.width=w; c.height=h; return c; }
+function azar(semilla){ return function(){ semilla|=0; semilla=semilla+0x6D2B79F5|0; let t=Math.imul(semilla^semilla>>>15,1|semilla); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
 
-  /* --- la escena, en píxeles de sensor: quién se mueve depende de la técnica --- */
-  const camW=s.cam.w, camH=camW*2/3;
-  const pxPorM=s.f/(s.d*s.cam.p*1e-3);                 // px de sensor por metro en el plano del sujeto
-  const kind=s.shapeId||'person', sh=SHAPES[kind]||SHAPES.person;
-  const bNow=blurPx(s.f,s.v,t,s.d,s.cam.p);            // el arrastre buscado
-  const shk = s.st>=99 ? 0 : shakePx(s.f,t,s.st,s.cam.p);
-  const subKind = mode==='static' ? 'person' : kind, subSh=SHAPES[subKind];   // en «sujeto quieto» tu sujeto es una persona parada
-  const S={ xs:camW*0.12, ys:camH*0.82, kind:subKind, hSen:subSh.H*pxPorM, wSen:subSh.W*pxPorM, movers:[], mKind:null, mH:0, mW:0 };
-  const base={color:AMB,grey:GRY,ref:"rgba(255,217,138,.9)",floor:FLOOR,dpr,movers:true,dirMov:1,bMov:0,gain:1,flashAt:null,xSub:S.xs};
-  let oScene, oPhoto, oShake, xMark=S.xs+S.wSen, xMov=null;          // xMark: nace la traza que manda; xMov: centro de la ventana de los grises
-  if(mode==='pan'){
-    /* el sujeto avanza bNow y la cámara lo sigue: la escena lo muestra avanzando con las farolas quietas;
-       en la foto él queda nítido salvo el error de seguimiento y el fondo se arrastra lo que él avanzó */
-    S.mKind='post'; S.mH=3*pxPorM; S.mW=0.15*pxPorM;
-    S.movers=[0.05,0.3,0.55,0.8].map(k=>k*camW).filter(x=>x+S.mW<S.xs-0.02*camW || x>S.xs+S.wSen+2*bNow+0.02*camW);   // fuera del recorrido del sujeto (hasta ×2)
-    oScene=Object.assign({},base,{bSub:bNow,gain:0.35,flashAt:S.xs+bNow});
-    oPhoto=Object.assign({},base,{bSub:bNow*TRACK,xSub:S.xs+bNow,bMov:bNow,dirMov:1});
-    const c=S.movers.filter(x=>x>S.xs+S.wSen+bNow+0.03*camW); const q=c.length?c[0]:S.movers[S.movers.length-1];
-    xMov=q+(S.mW+bNow)/2;
-  } else if(mode==='static'){
-    /* tu sujeto no se mueve: pasan por delante los del preset y dejan la traza */
-    S.mKind=kind; S.mH=sh.H*pxPorM; S.mW=sh.W*pxPorM;
-    for(let x=0.34*camW,k=0; x<camW&&k<4; x+=S.mW+bNow+0.05*camW,k++) S.movers.push(x);
-    oScene=Object.assign({},base,{bSub:0,bMov:bNow,dirMov:1}); oPhoto=oScene;
-    xMark=S.movers[0]+S.mW; xMov=xMark;
-  } else {
-    /* el sujeto se mueve con la cámara quieta y deja su traza; con flash, copia nítida al final */
-    oScene=Object.assign({},base,{bSub:bNow,flashAt:mode==='flash'?S.xs+bNow:null}); oPhoto=oScene;
+/* paletas según la luz */
+function paleta(ev){
+  if(ev<=5) return {cielo:['#04060b','#121a28'],edif:'#0a0d13',vent:'rgba(240,190,110,.85)',ventP:0.45,suelo:'#0b0e12',acera:'#14181e',farola:'#1a1f26',luzF:true,suj:'#c99a48',gris:'#59606b',coche:'#191d24',noche:true};
+  if(ev<=8) return {cielo:['#18284a','#4a6a9a'],edif:'#121a28',vent:'rgba(240,190,110,.75)',ventP:0.35,suelo:'#161c26',acera:'#222a36',farola:'#232b37',luzF:true,suj:'#d9a650',gris:'#6e7787',coche:'#2a3140',noche:true};
+  if(ev<=11) return {cielo:['#8fa2b5','#cdd6de'],edif:'#5d6670',vent:'rgba(40,48,58,.55)',ventP:0.9,suelo:'#4d535b',acera:'#7a8088',farola:'#3a4048',luzF:false,suj:'#d8902f',gris:'#3f454d',coche:'#30363e',noche:false};
+  if(ev<=13) return {cielo:['#b9c3cc','#e4e8eb'],edif:'#80878f',vent:'rgba(50,58,68,.5)',ventP:0.9,suelo:'#5d636a',acera:'#949aa1',farola:'#454b53',luzF:false,suj:'#dc8f2a',gris:'#454b53',coche:'#383e46',noche:false};
+  return {cielo:['#5d97d0','#cfe2f1'],edif:'#c9b897',vent:'rgba(60,70,85,.55)',ventP:0.9,suelo:'#6b6f74',acera:'#b9b2a3',farola:'#4a4f56',luzF:false,suj:'#e08a1f',gris:'#3e434a',coche:'#30343a',noche:false};
+}
+
+/* siluetas de perfil, mirando a la derecha; x es el centro, y el suelo, k px por metro */
+function dibujaForma(c,forma,x,y,k,col,dir){
+  c.save(); c.translate(x,y); if(dir<0) c.scale(-1,1); c.fillStyle=col; c.strokeStyle=col;
+  if(forma==='persona'){
+    const h=1.7*k;
+    c.beginPath(); c.arc(0.02*h,-0.9*h,0.075*h,0,2*Math.PI); c.fill();
+    c.beginPath(); c.moveTo(-0.11*h,-0.8*h); c.lineTo(0.12*h,-0.8*h); c.lineTo(0.1*h,-0.44*h); c.lineTo(-0.09*h,-0.44*h); c.closePath(); c.fill();
+    c.lineCap='round'; c.lineWidth=0.075*h;
+    c.beginPath(); c.moveTo(-0.03*h,-0.46*h); c.lineTo(-0.13*h,-0.02*h); c.moveTo(0.04*h,-0.46*h); c.lineTo(0.13*h,-0.02*h); c.stroke();
+    c.lineWidth=0.06*h; c.beginPath(); c.moveTo(0,-0.76*h); c.lineTo(-0.1*h,-0.5*h); c.moveTo(0.05*h,-0.76*h); c.lineTo(0.15*h,-0.52*h); c.stroke();
+  } else if(forma==='bici'){
+    const rr=0.34*k; c.lineWidth=Math.max(1,0.05*k);
+    c.beginPath(); c.arc(-0.55*k,-rr,rr,0,2*Math.PI); c.stroke();
+    c.beginPath(); c.arc(0.55*k,-rr,rr,0,2*Math.PI); c.stroke();
+    c.beginPath(); c.moveTo(-0.55*k,-rr); c.lineTo(-0.1*k,-0.95*k); c.lineTo(0.45*k,-0.95*k); c.lineTo(0.55*k,-rr); c.moveTo(-0.55*k,-rr); c.lineTo(0.05*k,-rr); c.lineTo(0.45*k,-0.95*k); c.stroke();
+    // ciclista
+    c.lineCap='round'; c.lineWidth=0.11*k;
+    c.beginPath(); c.moveTo(-0.15*k,-1.0*k); c.lineTo(0.25*k,-1.45*k); c.stroke();
+    c.beginPath(); c.arc(0.36*k,-1.58*k,0.12*k,0,2*Math.PI); c.fill();
+    c.lineWidth=0.09*k; c.beginPath(); c.moveTo(-0.12*k,-1.0*k); c.lineTo(0.1*k,-0.62*k); c.lineTo(0.05*k,-rr); c.moveTo(0.25*k,-1.4*k); c.lineTo(0.48*k,-1.0*k); c.stroke();
+  } else if(forma==='coche'){
+    c.beginPath(); c.roundRect ? c.roundRect(-2.25*k,-1.0*k,4.5*k,0.7*k,0.15*k) : c.rect(-2.25*k,-1.0*k,4.5*k,0.7*k); c.fill();
+    c.beginPath(); c.moveTo(-1.5*k,-1.0*k); c.lineTo(-1.05*k,-1.45*k); c.lineTo(0.75*k,-1.45*k); c.lineTo(1.35*k,-1.0*k); c.closePath(); c.fill();
+    c.fillStyle='#0b0d10';
+    c.beginPath(); c.arc(-1.45*k,-0.33*k,0.33*k,0,2*Math.PI); c.arc(1.45*k,-0.33*k,0.33*k,0,2*Math.PI); c.fill();
+  } else if(forma==='tren'){
+    c.beginPath(); c.roundRect ? c.roundRect(-10*k,-4.0*k,20*k,3.5*k,0.6*k) : c.rect(-10*k,-4.0*k,20*k,3.5*k); c.fill();
+    c.fillStyle='rgba(0,0,0,.35)';
+    for(let i=0;i<8;i++) c.fillRect((-9+i*2.3)*k,-3.3*k,1.5*k,0.9*k);
+    c.fillStyle='#0b0d10'; c.fillRect(-10*k,-0.55*k,20*k,0.25*k);
   }
-  oShake=Object.assign({},base,{bSub:shk,movers:false,color:CYN,ref:"rgba(94,200,216,.9)"});
-
-  /* --- el fotograma --- */
-  const fx=18, fy=34, fw=720, fh=480, esc=fw/camW;
-  const X=v=>fx+v*esc, Y=v=>fy+v*esc;
-  ctx.fillStyle="#0b0d11"; ctx.fillRect(fx,fy,fw,fh);
-  escena(ctx,{x:fx,y:fy,w:fw,h:fh},{x0:0,y0:0,sc:esc},S,oScene);
-  /* marcas de ½, tu tiempo y ×2 sobre la traza que manda */
-  const yTop=Math.max(fy+52, Y(S.ys-Math.max(S.hSen, S.movers.length?S.mH:0)));
-  ctx.save(); ctx.beginPath(); ctx.rect(fx,fy,fw,fh); ctx.clip();
-  const marca=(bs,lab,alpha,fila)=>{ const xe=X(xMark+bs); if(xe>fx+fw-2||xe<fx+2) return;
-    const yl=yTop-10-fila*14;
-    ctx.strokeStyle=`rgba(232,176,75,${alpha})`; ctx.setLineDash([2,3]); ctx.beginPath(); ctx.moveTo(xe,yl+7); ctx.lineTo(xe,Y(S.ys)+6); ctx.stroke(); ctx.setLineDash([]);
-    ctx.fillStyle=`rgba(232,176,75,${Math.min(1,alpha+0.3)})`; ctx.textAlign="left"; ctx.fillText(lab, xe+4, yl); };
-  marca(bNow*2, LBL('sTick','×2',Math.round(bNow*2)), .45, 0);
-  marca(bNow,   LBL('sTick',fmtT(t),Math.round(bNow)), .95, 1);
-  marca(bNow/2, LBL('sTick','½',Math.round(bNow/2)), .45, 2);
-  ctx.restore(); ctx.textAlign="left";
-  const sale = mode!=='static' && S.xs+S.wSen+bNow > camW;
-  if(sale){ ctx.fillStyle="#e2705f"; ctx.fillRect(fx+fw-3, Y(S.ys-S.hSen)-10, 3, Math.min(S.hSen*esc+16, fh)); }
-  /* regla de 1 m en el plano del sujeto */
-  const m1=pxPorM*esc;
-  if(m1>6 && m1<fw*0.6){ ctx.strokeStyle="#6b7684"; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(fx+14,fy+fh-16); ctx.lineTo(fx+14+m1,fy+fh-16); ctx.stroke();
-    ctx.fillStyle="#6b7684"; ctx.fillText("1 m", fx+18+m1, fy+fh-16); }
-  /* ventanas de aumento: lo que amplían las cajas de detalle */
-  const dx=760, dy=fy, dw=W-dx-18, dh=214, escD=dw/1200, winH=dh/escD;   // 1200 px de sensor de ancho
-  const cy=S.ys-S.hSen/2;
-  const winSub={x0:oPhoto.xSub+S.wSen-600, y0:cy-winH/2, sc:escD};      // el borde delantero de tu sujeto (donde llega)
-  const winMov= xMov!==null ? {x0:xMov-600, y0:cy-winH/2, sc:escD} : null;   // la traza de los grises
-  const ventana=(w,col)=>{ ctx.strokeStyle=col; ctx.setLineDash([4,3]); ctx.lineWidth=1; ctx.strokeRect(X(w.x0), Y(w.y0), 1200*esc, winH*esc); ctx.setLineDash([]); };
-  ventana(winSub,"rgba(255,217,138,.5)"); if(winMov) ventana(winMov,"rgba(160,172,186,.55)");
-  ctx.strokeStyle="#3a4552"; ctx.lineWidth=1; ctx.strokeRect(fx+.5,fy+.5,fw-1,fh-1);
-  ctx.fillStyle="#98a3b0"; ctx.fillText(mode==='pan'?LBL('sScene',nf(camW,0)):LBL('sFrame',nf(camW,0)), fx, 18);
-  const nom=k=>LBL('sh'+k.charAt(0).toUpperCase()+k.slice(1));
-  ctx.fillStyle="#6b7684"; ctx.fillText(LBL('sSubj',nom(subKind),nf(S.hSen,0),nf(S.wSen,0))+(mode==='static'?' · '+LBL('sPass',nom(kind),nf(S.mH,0),nf(S.mW,0)):''), fx, fy+fh+16);
-
-  /* --- cajas de detalle: la foto, por una ventana de 1200 px --- */
-  const caja=(y,label,win,o,red)=>{
-    ctx.fillStyle="#0b0d11"; ctx.fillRect(dx,y,dw,dh);
-    escena(ctx,{x:dx,y:y,w:dw,h:dh},win,S,o);
-    if(red && (o.xSub+S.wSen+o.bSub-win.x0)*escD>dw){ ctx.fillStyle="#e2705f"; ctx.fillRect(dx+dw-3,y,3,dh); }
-    ctx.strokeStyle="#3a4552"; ctx.lineWidth=1; ctx.strokeRect(dx+.5,y+.5,dw-1,dh-1);
-    ctx.fillStyle="#98a3b0"; ctx.font="12.5px 'IBM Plex Mono', monospace"; ctx.fillText(label, dx, y-14); ctx.font="12px 'IBM Plex Mono', monospace";
-  };
-  const oP=Object.assign({},oPhoto,{ref:"rgba(232,176,75,.9)"});
-  if(mode==='pan'){         caja(dy, LBL('sSubjPhoto',nf(bNow*TRACK,0)), winSub, oP, false); caja(dy+dh+34, LBL('sBgBox',nf(bNow,0)), winMov, oP, false); }
-  else if(mode==='static'){ caja(dy, LBL('sMovBox',nf(bNow,0)), winMov, oP, false);          caja(dy+dh+34, LBL('sShakeBox',nf(shk,0)), winSub, oShake, false); }
-  else {                    caja(dy, LBL('sDetail'), winSub, oP, true);                       caja(dy+dh+34, LBL('sShakeBox',nf(shk,0)), winSub, oShake, false); }
-
-  $('striplg').innerHTML = `<span>${LBL('sCap',nf(camW,0))}</span>`+
-    (mode==='pan'?`<span>${LBL('sCapPan',nf(bNow,0),nf(bNow*TRACK,0))}</span>`:"")+
-    (mode==='static'?`<span>${LBL('sCapStatic',nf(bNow,0))}</span>`:"")+
-    (mode==='flash'?`<span>${LBL('sCapFlash')}</span>`:"")+
-    (sale?`<span style="color:#e2705f">${LBL('sOut')}</span>`:"");
+  c.restore();
+}
+/* faros y pilotos de un coche, para las estelas */
+function lucesCoche(forma,dir){
+  if(forma!=='coche'&&forma!=='tren') return [];
+  const L=forma==='tren'?10:2.25, hy=forma==='tren'?1.0:0.7;
+  return [{dx:dir*L,dy:-hy,col:'rgba(255,248,225,1)'},{dx:-dir*L,dy:-(hy+0.15),col:'rgba(255,60,40,1)'}];
 }
 
-/* ---------- arranque ---------- */
-['tec','cam','focal','dist','vel','sup','ev','ap'].forEach(id=>{
-  $(id).addEventListener('input',update); $(id).addEventListener('change',update);
-});
-rellenar(); update();
-window.onLangChange=function(){ rellenar(); update(); };
+function fondo(W,H,yS,k,pal){
+  // periódico en horizontal con periodo W, para poder barrerlo en el barrido
+  const cv=lienzo(W,H), c=cv.getContext('2d'), rnd=azar(7);
+  const g=c.createLinearGradient(0,0,0,yS); g.addColorStop(0,pal.cielo[0]); g.addColorStop(1,pal.cielo[1]);
+  c.fillStyle=g; c.fillRect(0,0,W,H);
+  // edificios al fondo
+  let x=-20;
+  while(x<W){
+    const bw=W*(0.08+0.12*rnd()), bh=yS*(0.35+0.45*rnd());
+    [0,-W,W].forEach(dx=>{
+      c.fillStyle=pal.edif; c.fillRect(x+dx,yS-bh,bw-2,bh);
+      const vw=Math.max(2,bw*0.07), vh=Math.max(2,bh*0.05);
+      const r2=azar(Math.floor(x*13)+5);
+      for(let yy=yS-bh+vh*1.5; yy<yS-vh*2; yy+=vh*2.2)
+        for(let xx=x+vw; xx<x+bw-vw*2; xx+=vw*2.2)
+          if(r2()<pal.ventP){ c.fillStyle=pal.vent; c.fillRect(xx+dx,yy,vw,vh); }
+    });
+    x+=bw;
+  }
+  // acera y calzada
+  c.fillStyle=pal.acera; c.fillRect(0,yS,W,H-yS);
+  c.fillStyle=pal.suelo; c.fillRect(0,yS+Math.max(3,0.25*k),W,H-yS);
+  // farolas en el plano del sujeto, cada 12 m
+  const paso=12*k;
+  if(paso>W*0.05){
+    for(let fx=paso*0.37; fx<W+paso; fx+=paso){
+      [0,-W].forEach(dx=>{
+        const xx=(fx+dx)%W;
+        c.fillStyle=pal.farola; c.fillRect(xx-0.06*k,yS-5*k,0.12*k,5*k);
+        c.fillRect(xx-0.06*k,yS-5*k,0.6*k,0.1*k);
+        if(pal.luzF){
+          const gl=c.createRadialGradient(xx+0.55*k,yS-4.85*k,0,xx+0.55*k,yS-4.85*k,0.7*k);
+          gl.addColorStop(0,'rgba(255,214,150,.95)'); gl.addColorStop(1,'rgba(255,214,150,0)');
+          c.fillStyle=gl; c.beginPath(); c.arc(xx+0.55*k,yS-4.85*k,0.7*k,0,2*Math.PI); c.fill();
+        }
+      });
+    }
+  }
+  return cv;
+}
+
+function compone(cv,r){
+  const marco=cv.parentElement, dpr=Math.min(2,window.devicePixelRatio||1);
+  const cssW=marco.clientWidth||600;
+  const W=Math.min(1400,Math.round(cssW*dpr)), H=Math.round(W*r.F.h/r.F.w);
+  if(cv.width!==W||cv.height!==H){ cv.width=W; cv.height=H; }
+  const c=cv.getContext('2d'), pal=paleta(E.luz), ef=r.ef;
+  const k=W/r.A;                                    // px de lienzo por metro en el plano del sujeto
+  const hSuj=r.fo.H*k;
+  const yS=Math.min(H*0.97, Math.max(H*0.8, hSuj*1.08));   // el suelo, para que el sujeto quepa si puede
+  const Bc=r.B*k;                                   // recorrido en px de lienzo
+  const bg=fondo(W,H,yS,k,pal);
+  const datos=lz=>lz.getContext('2d').getImageData(0,0,W,H).data;
+  const pon=(arr)=>{ const lz=lienzo(W,H); lz.getContext('2d').putImageData(new ImageData(arr,W,H),0,0); return lz; };
+  const forma=r.sj.forma;
+  const ent=x=>Math.round(x);
+  c.clearRect(0,0,W,H);
+
+  if(ef.id==='pan'){
+    // la cámara sigue al sujeto: el fondo se barre entero y el sujeto solo el error de seguimiento
+    c.drawImage(pon(hcaja(datos(bg),W,H,0,Math.max(0,ent(Bc)),true)),0,0);
+    const s=lienzo(W,H); dibujaForma(s.getContext('2d'),forma,W*0.5,yS,k,pal.suj,1);
+    const e=Math.max(0,ent(TRACK*Bc));
+    c.drawImage(pon(hcaja(datos(s),W,H,-Math.floor(e/2),Math.ceil(e/2),false)),0,0);
+  }
+  else if(ef.id==='trace' || ef.id==='flash'){
+    c.drawImage(bg,0,0);
+    const x0=W*0.5-Bc/2;
+    const s=lienzo(W,H); dibujaForma(s.getContext('2d'),forma,x0,yS,k,pal.suj,1);
+    c.drawImage(pon(hcaja(datos(s),W,H,-Math.max(0,ent(Bc)),0,false)),0,0);
+    if(ef.id==='flash'){ c.globalAlpha=0.92; dibujaForma(c,forma,x0+Bc,yS,k,pal.suj,1); c.globalAlpha=1; }
+  }
+  else if(ef.id==='static' || ef.id==='ghost' || ef.id==='trails'){
+    c.drawImage(bg,0,0);
+    const rnd=azar(19);
+    // tu sujeto quieto (o, en la calle vacía, alguien que se para)
+    if(ef.id==='static') dibujaForma(c,'persona',W*0.5,yS,k,pal.suj,1);
+    if(ef.id==='ghost') dibujaForma(c,'persona',W*0.72,yS,k,pal.gris,-1);
+    // flujo periódico de lo que pasa, en dos sentidos
+    const ancho=r.fo.W*k;
+    const n=ef.id==='ghost' ? Math.max(3,Math.min(14,Math.round(W/(ancho*3)))) : Math.max(1,Math.min(5,Math.round(W/(ancho*4))));
+    const col=ef.id==='trails'?pal.coche:pal.gris;
+    const capas=[];
+    [1,-1].forEach((dir,di)=>{
+      if(ef.id==='static' && di===1) return;
+      const s=lienzo(W,H), sc=s.getContext('2d'), esc=di?0.82:1, y=di?yS-0.05*k:yS+0.25*k;
+      const luces=[];
+      for(let i=0;i<n;i++){
+        const x=(i+0.3+0.4*rnd())*W/n;
+        [0,-W,W].forEach(dx=>dibujaForma(sc,forma,x+dx,y,k*esc,col,dir));
+        lucesCoche(forma,dir).forEach(l=>luces.push({x:x+l.dx*k*esc,y:y+l.dy*k*esc,col:l.col}));
+      }
+      capas.push({s,dir,luces,esc});
+    });
+    capas.forEach(cp=>{
+      const b=Math.max(0,ent(Bc));
+      c.drawImage(pon(hcaja(datos(cp.s),W,H,cp.dir>0?-b:0,cp.dir>0?0:b,true)),0,0);
+    });
+    if(ef.id==='trails'){
+      // los faros saturan el sensor: su estela se ve entera, por larga que sea
+      c.save(); c.globalCompositeOperation='lighter'; c.lineCap='round';
+      capas.forEach(cp=>{
+        const lw=Math.max(1.2,0.12*k*cp.esc);
+        cp.luces.forEach(l=>{
+          c.strokeStyle=l.col; c.globalAlpha=pal.noche?1:0.2; c.lineWidth=lw;
+          if(pal.noche){ c.shadowColor=l.col; c.shadowBlur=lw*4; }
+          const L=Math.min(Bc,W*3);
+          for(let dx=-W*4; dx<=W*4; dx+=W){
+            const xa=l.x+dx, xb=xa+cp.dir*L;
+            if(Math.max(xa,xb)<0||Math.min(xa,xb)>W) continue;
+            c.beginPath(); c.moveTo(xa,l.y); c.lineTo(xb,l.y); c.stroke();
+          }
+        });
+      });
+      c.restore();
+    }
+  }
+  else { // zoom burst: promedio de copias escaladas desde el centro, con un primer tramo quieto
+    c.drawImage(bg,0,0);
+    dibujaForma(c,forma,W*0.5,yS,k,pal.suj,1);
+    const sW=Math.round(W/2), sH=Math.round(H/2), red=lienzo(sW,sH); red.getContext('2d').drawImage(cv,0,0,sW,sH);
+    const src=red.getContext('2d').getImageData(0,0,sW,sH).data, out=new Uint8ClampedArray(src.length);
+    const NS=26, Z=0.4, cx=sW/2, cy=sH/2;
+    const esc=[]; for(let i=0;i<NS;i++){ const u=i/(NS-1); esc.push(u<0.35?1:1+Z*(u-0.35)/0.65); }
+    for(let y=0;y<sH;y++) for(let x=0;x<sW;x++){
+      let r0=0,g0=0,b0=0;
+      for(let i=0;i<NS;i++){
+        const sx=Math.round(cx+(x-cx)/esc[i]), sy=Math.round(cy+(y-cy)/esc[i]), j=(sy*sW+sx)*4;
+        r0+=src[j]; g0+=src[j+1]; b0+=src[j+2];
+      }
+      const o=(y*sW+x)*4; out[o]=r0/NS; out[o+1]=g0/NS; out[o+2]=b0/NS; out[o+3]=255;
+    }
+    red.getContext('2d').putImageData(new ImageData(out,sW,sH),0,0);
+    c.imageSmoothingQuality='high'; c.drawImage(red,0,0,W,H);
+  }
+}
+
+/* ---------- actualizar ---------- */
+let pendiente=null;
+function programar(){ if(pendiente) return; pendiente=setTimeout(()=>{ pendiente=null; const r=calcula(); pintarResultado(r); compone($('foto'),r); },16); }
+function cambio(){ pintarControles(); guardar(); programar(); }
+window.onLangChange=function(){ pintarControles(); programar(); };
+window.addEventListener('resize',()=>{ clearTimeout(window.__rz); window.__rz=setTimeout(programar,150); });
+try{
+  const obs=new IntersectionObserver(e=>{ const v=!e[0].isIntersecting && e[0].boundingClientRect.top>0; $('mini').classList.toggle('visible',v); $('mini').setAttribute('aria-hidden',v?'false':'true'); },{threshold:0});
+  obs.observe($('resultado'));
+}catch(e){}
+window.aplicarIdioma(LANG());
 </script>
 </body>
 </html>
