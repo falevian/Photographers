@@ -120,8 +120,16 @@ input[type=range]{width:100%;accent-color:var(--amber);height:30px}
 /* lectura y recomendación */
 .lectura{display:flex;flex-wrap:wrap;gap:4px 22px;align-items:baseline}
 .lectura b{font-family:var(--mono);font-weight:500;color:var(--amber);font-size:clamp(26px,6vw,38px);letter-spacing:-.03em;line-height:1.1}
-.rec{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:8px 0 14px;font-size:13.5px;color:var(--fg2)}
+.rec{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:8px 0 6px;font-size:13.5px;color:var(--fg2)}
 .rec b{color:var(--fg);font-weight:600}
+.enlace{display:flex;align-items:center;gap:10px;background:none;border:0;color:var(--fg2);cursor:pointer;padding:4px 0 14px;text-align:left;font:inherit;font-size:13.5px;line-height:1.4}
+.enlace b{color:var(--fg);font-weight:600}
+.enlace .pista{position:relative;flex:none;width:44px;height:26px;border-radius:13px;background:var(--panel2);border:1px solid var(--line2);transition:background .18s,border-color .18s}
+.enlace .pista::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--fg3);transition:transform .18s,background .18s}
+.enlace[aria-checked="true"] .pista{background:var(--amber);border-color:var(--amber)}
+.enlace[aria-checked="true"] .pista::after{transform:translateX(18px);background:#0e1116}
+.enlace:focus-visible{outline:2px solid var(--amber);outline-offset:3px;border-radius:8px}
+@media(prefers-reduced-motion:reduce){.enlace .pista,.enlace .pista::after{transition:none}}
 .rec button{font-family:var(--mono);font-size:12px;background:var(--panel2);border:1px solid var(--amber);color:var(--amber);border-radius:999px;padding:0 12px;min-height:34px;cursor:pointer}
 
 /* ruedas: el componente y el aro de metal de la calculadora de reciprocidad */
@@ -238,6 +246,7 @@ footer{border-top:1px solid var(--line);margin-top:36px;padding-top:16px;font-si
   <div class="panel">
     <div class="lectura" id="lectura"></div>
     <div class="rec"><span id="recTxt"></span><button type="button" id="usarRec" hidden><span data-lang="es">Volver a lo recomendado</span><span data-lang="en">Back to the recommendation</span></button></div>
+    <button type="button" class="enlace" id="enlace" role="switch" aria-checked="true"><span class="pista" aria-hidden="true"></span><span><b data-lang="es">Ajustes recomendados</b><b data-lang="en">Recommended settings</b> <span id="enlaceTxt"></span></span></button>
     <div class="campo"><div class="etq"><span data-lang="es">Velocidad</span><span data-lang="en">Shutter speed</span></div>
       <div class="dial-marco">
         <button class="giro" type="button" id="t-menos" aria-label="Un tercio de paso más corto" data-aria-es="Un tercio de paso más corto" data-aria-en="One third of a stop shorter">−</button>
@@ -385,6 +394,7 @@ const DICT={
   luz:{night:'Noche urbana',blue:'Hora azul',shade:'Sombra',cloud:'Nublado',sun:'Sol'},
   /* ruedas */
   ariaT:'Velocidad de obturación', ariaD:'Diafragma', ariaI:'Sensibilidad ISO',
+  enlOn:'al girar un mando, los otros dos compensan y la exposición se mantiene.', enlOff:'los tres mandos se mueven libres.',
   rec:(s)=>'Recomendado para esta foto: <b>'+s+'</b>', recNd:(n)=>' con '+n, recSin:' sin filtro',
   /* veredictos */
   ndOk:'No hace falta', ndOkD:'Con estos ajustes la exposición ya es correcta.',
@@ -444,6 +454,7 @@ const DICT={
   los:{ped:'the pedestrians',run:'the runners',bike:'the cyclists',city:'the cars',road:'the cars',train:'the trains'},
   luz:{night:'City night',blue:'Blue hour',shade:'Shade',cloud:'Overcast',sun:'Sun'},
   ariaT:'Shutter speed', ariaD:'Aperture', ariaI:'ISO sensitivity',
+  enlOn:'turn one control and the other two compensate to keep the exposure.', enlOff:'the three controls move freely.',
   rec:(s)=>'Recommended for this picture: <b>'+s+'</b>', recNd:(n)=>' with '+n, recSin:' with no filter',
   ndOk:'Not needed', ndOkD:'With these settings the exposure is already correct.',
   ndSiD:(p)=>p+(p==='1'?' stop':' stops')+' of light to spare with these settings.',
@@ -562,7 +573,7 @@ const ISO_CIFRA=[64,100,200,400,800,1600,3200,6400];
 
 /* ---------- estado ---------- */
 const CLAVE='exposicion-larga-campo';
-let E={efecto:'pan',formato:'ff',mp:24,estab:2,focal:35,sujeto:'bike',vel:5,dist:10,luz:13,k:null,j:null,iso:null};
+let E={efecto:'pan',formato:'ff',mp:24,estab:2,focal:35,sujeto:'bike',vel:5,dist:10,luz:13,k:null,j:null,iso:null,enlace:true};
 try{ const g=JSON.parse(localStorage.getItem(CLAVE)||'null'); if(g&&typeof g==='object') E=Object.assign(E,g); }catch(e){}
 delete E.ap; delete E.m; delete E.isoM;
 function guardar(){ try{ localStorage.setItem(CLAVE,JSON.stringify(E)); }catch(e){} }
@@ -962,10 +973,14 @@ function crearRuedas(){
     mayor:i=>(K_MIN+i)%3===0,
     contenido:(e,may)=>'<span aria-hidden="true">'+grabado(etiqueta(e),may?1.05:0.95)+'</span><i></i>',
     texto:i=>etiqueta(ETQ_T[i]),
-    alCambiar:i=>{ E.k=K_MIN+i; actualizar(); }
+    alCambiar:i=>{ const nk=K_MIN+i, d=nk-E.k; E.k=nk; compensa('t',d); actualizar(); }
   });
-  ruedaD=anillo('d',ETQ_D,i=>(J_MIN+i)%3===0,E.j-J_MIN,i=>diafTxt(J_MIN+i),i=>{ E.j=J_MIN+i; actualizar(); });
-  dialISO=crearDialISO(i=>{ E.iso=ISO_POS[i]; actualizar(); });
+  ruedaD=anillo('d',ETQ_D,i=>(J_MIN+i)%3===0,E.j-J_MIN,i=>diafTxt(J_MIN+i),i=>{ const nj=J_MIN+i, d=E.j-nj; E.j=nj; compensa('d',d); actualizar(); });
+  dialISO=crearDialISO(i=>{
+    const v=ISO_POS[i], antes=E.iso; E.iso=v;
+    if(v!=='A' && antes!=='A') compensa('i',ISO_VAL.indexOf(v)-ISO_VAL.indexOf(+antes));
+    actualizar();
+  });
   dialISO.ir(ISO_POS.findIndex(x=>String(x)===String(E.iso)),false);
 }
 
@@ -1047,6 +1062,29 @@ function crearDialISO(alCambiar){
   $('i-mas').addEventListener('click',()=>paso(1));
   return {ir};
 }
+/* Con el interruptor de ajustes recomendados encendido, al mover un mando los otros dos
+   compensan, en tercios de paso, para que la exposición no cambie: la luz que llega va
+   como k − j + m (velocidad, diafragma e ISO en tercios). d son los tercios de luz que
+   ha añadido el mando movido. El orden protege el efecto: en los exactos el tiempo se
+   toca el último; en los mínimos, alargarlo es lo primero, porque solo lo refuerza. */
+function compensa(quien,d){
+  if(!E.enlace || !d || E.iso==='A') return;          // en A ya compensa la cámara
+  const exacto=efecto().tipo==='exacto';
+  const orden = quien==='t' ? ['d','i'] : quien==='d' ? (exacto?['i','t']:['t','i']) : (exacto?['d','t']:['t','d']);
+  let resto=d;
+  orden.forEach(o=>{
+    if(!resto) return;
+    if(o==='t'){ const nk=limita(E.k-resto,K_MIN,K_MAX); resto-=E.k-nk; E.k=nk; ruedaT.seguir(E.k-K_MIN); }
+    else if(o==='d'){ const nj=limita(E.j+resto,J_MIN,J_MAX); resto-=nj-E.j; E.j=nj; ruedaD.seguir(E.j-J_MIN); }
+    else { const m=ISO_VAL.indexOf(+E.iso), nm=limita(m-resto,0,ISO_VAL.length-1); resto-=m-nm; E.iso=ISO_VAL[nm]; dialISO.ir(ISO_POS.indexOf(E.iso),true,true); }
+  });
+}
+function pintarEnlace(){
+  $('enlace').setAttribute('aria-checked',E.enlace?'true':'false');
+  $('enlaceTxt').textContent=LBL(E.enlace?'enlOn':'enlOff');
+}
+$('enlace').addEventListener('click',()=>{ E.enlace=!E.enlace; pintarEnlace(); guardar(); });
+
 /* lleva las ruedas a lo recomendado para la foto elegida */
 function aplicarRec(){
   const rc=recomienda(escena());
@@ -1346,6 +1384,7 @@ function cambio(){ pintarControles(); aplicarRec(); actualizar(); }
 window.onLangChange=function(){
   pintarControles();
   [ruedaT,ruedaD].forEach(rd=>rd&&rd.reetiquetar());
+  pintarEnlace();
   actualizar();
 };
 window.addEventListener('resize',()=>{ clearTimeout(window.__rz); window.__rz=setTimeout(()=>ultimo&&compone($('foto'),ultimo),150); });
