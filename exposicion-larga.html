@@ -134,7 +134,13 @@ input[type=range]{width:100%;accent-color:var(--amber);height:30px}
 .tambor{position:absolute;inset:0;transform-style:preserve-3d}
 .marca{position:absolute;left:50%;top:0;height:100%;width:66px;margin-left:-33px;display:grid;justify-items:center;align-content:end;gap:7px;padding-bottom:12px;
   backface-visibility:hidden;-webkit-backface-visibility:hidden;will-change:transform,opacity}
+.franja{position:absolute;left:50%;top:8px;bottom:8px;width:66px;margin-left:-33px;border-radius:10px;background:var(--panel);box-shadow:0 1px 3px rgba(0,0,0,.3);pointer-events:none}
+.aguja{position:absolute;left:50%;bottom:8px;width:2px;height:26px;margin-left:-1px;background:var(--amber);z-index:3;pointer-events:none;border-radius:1px}
+.marca i{display:block;width:1px;background:var(--fg3);height:10px;opacity:.7}
+.marca.entero i{height:22px;width:2px;opacity:1;background:var(--fg)}
 .marca span{display:block;height:11px;color:var(--fg3)}
+.marca.entero span{height:14px;color:var(--fg)}
+.marca.activa span{color:var(--amber);font-weight:600}
 .marca span svg{display:block;height:100%;width:auto;overflow:visible}
 .dial-ventana:focus-within{outline:2px solid var(--amber);outline-offset:3px}
 .aro .dial-ventana{height:100px;border-color:#000;background:linear-gradient(180deg,var(--metal-2),var(--metal) 60%)}
@@ -149,6 +155,15 @@ input[type=range]{width:100%;accent-color:var(--amber);height:30px}
 .aro .base{position:absolute;left:0;right:0;bottom:0;height:20px;pointer-events:none;background:linear-gradient(180deg,#3a3c3e,#222426);border-top:1px solid rgba(0,0,0,.8)}
 .aro .indice{position:absolute;left:50%;top:3px;margin-left:-6px;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:9px solid var(--indice)}
 .aro .sombra{position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,.8),rgba(0,0,0,0) 30%,rgba(255,255,255,.06) 50%,rgba(0,0,0,0) 70%,rgba(0,0,0,.8))}
+
+/* dial de ISO */
+.iso-marco{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:6px}
+#isoDial{display:block;width:min(300px,100%);height:auto;margin:0 auto;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+#isoDial.arrastrando{cursor:grabbing}
+#isoDial:focus-visible{outline:2px solid var(--amber);outline-offset:3px;border-radius:50%}
+#isoDial .disco{transform-origin:0 0}
+#isoDial .disco.anim{transition:transform .35s cubic-bezier(.2,.8,.25,1)}
+@media(prefers-reduced-motion:reduce){#isoDial .disco.anim{transition:none}}
 
 /* barra fija */
 .mini{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(14,17,22,.94);border-top:1px solid var(--line);backdrop-filter:blur(6px);padding:10px max(16px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));display:flex;gap:16px;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;transform:translateY(110%);transition:transform .2s}
@@ -224,13 +239,12 @@ footer{border-top:1px solid var(--line);margin-top:36px;padding-top:16px;font-si
     <div class="lectura" id="lectura"></div>
     <div class="rec"><span id="recTxt"></span><button type="button" id="usarRec" hidden><span data-lang="es">Volver a lo recomendado</span><span data-lang="en">Back to the recommendation</span></button></div>
     <div class="campo"><div class="etq"><span data-lang="es">Velocidad</span><span data-lang="en">Shutter speed</span></div>
-      <div class="dial-marco aro">
+      <div class="dial-marco">
         <button class="giro" type="button" id="t-menos" aria-label="Un tercio de paso más corto" data-aria-es="Un tercio de paso más corto" data-aria-en="One third of a stop shorter">−</button>
         <div class="dial-ventana">
-          <div class="moleteado" id="mol-t"></div>
+          <div class="franja"></div>
           <div class="rueda" id="rueda-t" tabindex="0" role="slider" aria-label="Velocidad de obturación" data-aria-es="Velocidad de obturación" data-aria-en="Shutter speed"><div class="tambor" id="tambor-t"></div></div>
-          <div class="base"><span class="indice"></span></div>
-          <div class="sombra"></div>
+          <div class="aguja"></div>
         </div>
         <button class="giro" type="button" id="t-mas" aria-label="Un tercio de paso más largo" data-aria-es="Un tercio de paso más largo" data-aria-en="One third of a stop longer">+</button>
       </div>
@@ -247,17 +261,14 @@ footer{border-top:1px solid var(--line);margin-top:36px;padding-top:16px;font-si
         <button class="giro" type="button" id="d-mas" aria-label="Cerrar un tercio de paso" data-aria-es="Cerrar un tercio de paso" data-aria-en="Stop down one third of a stop">+</button>
       </div>
     </div>
-    <div class="campo"><div class="etq"><span data-lang="es">ISO</span><span data-lang="en">ISO</span></div>
-      <div class="dial-marco aro">
-        <button class="giro" type="button" id="i-menos" aria-label="Bajar un tercio de paso" data-aria-es="Bajar un tercio de paso" data-aria-en="Down one third of a stop">−</button>
-        <div class="dial-ventana">
-          <div class="moleteado" id="mol-i"></div>
-          <div class="rueda" id="rueda-i" tabindex="0" role="slider" aria-label="Sensibilidad ISO" data-aria-es="Sensibilidad ISO" data-aria-en="ISO sensitivity"><div class="tambor" id="tambor-i"></div></div>
-          <div class="base"><span class="indice"></span></div>
-          <div class="sombra"></div>
-        </div>
-        <button class="giro" type="button" id="i-mas" aria-label="Subir un tercio de paso" data-aria-es="Subir un tercio de paso" data-aria-en="Up one third of a stop">+</button>
+    <div class="campo"><div class="etq"><span>ISO</span><span class="v" id="isoV"></span></div>
+      <div class="iso-marco">
+        <button class="giro" type="button" id="i-menos" aria-label="Bajar el ISO" data-aria-es="Bajar el ISO" data-aria-en="Lower the ISO">−</button>
+        <svg id="isoDial" viewBox="-120 -110 240 220" tabindex="0" role="slider" aria-label="Dial de ISO" data-aria-es="Dial de ISO" data-aria-en="ISO dial"></svg>
+        <button class="giro" type="button" id="i-mas" aria-label="Subir el ISO" data-aria-es="Subir el ISO" data-aria-en="Raise the ISO">+</button>
       </div>
+      <p class="pie" data-lang="es">Cifras en los pasos enteros y puntos en los tercios. En A, la cámara elige el ISO para que la exposición sea correcta.</p>
+      <p class="pie" data-lang="en">Numbers on the full stops and dots on the thirds. On A, the camera picks the ISO so that the exposure is correct.</p>
     </div>
     <p class="pie" data-lang="es">Cambiar el efecto, la cámara o la escena devuelve las ruedas a lo recomendado. Gíralas para probar otros ajustes: lo de abajo los sigue.</p>
     <p class="pie" data-lang="en">Changing the effect, the camera or the scene puts the wheels back on the recommendation. Turn them to try other settings: everything below follows them.</p>
@@ -533,21 +544,27 @@ const TRACK=0.15;     // error de seguimiento en el barrido, fracción del movim
    ISO 100·2^(m/3). */
 const K_MIN=-39, K_MAX=33;            // de 1/8000 s a 30 min
 const J_MIN=3, J_MAX=27;              // de f/1,4 a f/22
-const M_MIN=-3, M_MAX=24;             // de ISO 50 a 25600
-const VEL_MAY={'-13':'1/8000','-12':'1/4000','-11':'1/2000','-10':'1/1000','-9':'1/500','-8':'1/250','-7':'1/125','-6':'1/60',
-  '-5':'1/30','-4':'1/15','-3':'1/8','-2':'1/4','-1':'1/2','0':'1"','1':'2"','2':'4"','3':'8"','4':'15"','5':'30"',
-  '6':"1'",'7':"2'",'8':"4'",'9':"8'",'10':"15'",'11':"30'"};
+/* velocidades nominales en tercios, las de la calculadora de reciprocidad; de un minuto en
+   adelante se repiten las de los segundos en minutos, porque 2^6 = 64 s es casi un minuto */
+const ETQ_SEG=['1/8000','1/6400','1/5000','1/4000','1/3200','1/2500','1/2000','1/1600','1/1250','1/1000',
+  '1/800','1/640','1/500','1/400','1/320','1/250','1/200','1/160','1/125','1/100','1/80','1/60','1/50',
+  '1/40','1/30','1/25','1/20','1/15','1/13','1/10','1/8','1/6','1/5','1/4','1/3','0,4"','0,5"','0,6"',
+  '0,8"','1"','1,3"','1,6"','2"','2,5"','3,2"','4"','5"','6"','8"','10"','13"','15"','20"',
+  '25"','30"','40"','50"','60"'];
+const ETQ_T=ETQ_SEG.concat(ETQ_SEG.slice(40,55).map(e=>e.replace('"',"'")));   // 1,3' … 30'
 const DIAF_NOM=['1','1,1','1,2','1,4','1,6','1,8','2','2,2','2,5','2,8','3,2','3,5','4','4,5','5','5,6','6,3','7,1','8','9','10','11','13','14','16','18','20','22'];
-const ISO_NOM=[50,64,80,100,125,160,200,250,320,400,500,640,800,1000,1250,1600,2000,2500,3200,4000,5000,6400,8000,10000,12800,16000,20000,25600];
-const ETQ_T=[]; for(let k=K_MIN;k<=K_MAX;k++) ETQ_T.push(k%3===0?VEL_MAY[String(k/3)]:'');
 const ETQ_D=DIAF_NOM.slice(J_MIN,J_MAX+1);
-const ETQ_I=ISO_NOM.map(String);
+const ISO_NOM=[50,64,80,100,125,160,200,250,320,400,500,640,800,1000,1250,1600,2000,2500,3200,4000,5000,6400,8000,10000,12800,16000,20000,25600,32000,40000,51200];
+/* el dial de ISO, a la manera de las Leica: A (automático) y de 64 a 12800 en tercios,
+   con cifra en los pasos enteros y un punto en los tercios */
+const ISO_POS=['A'].concat(ISO_NOM.filter(x=>x>=64&&x<=12800));
+const ISO_CIFRA=[64,100,200,400,800,1600,3200,6400,12800];
 
 /* ---------- estado ---------- */
 const CLAVE='exposicion-larga-campo';
-let E={efecto:'pan',formato:'ff',mp:24,estab:2,focal:35,sujeto:'bike',vel:5,dist:10,luz:13,k:null,j:null,m:null};
+let E={efecto:'pan',formato:'ff',mp:24,estab:2,focal:35,sujeto:'bike',vel:5,dist:10,luz:13,k:null,j:null,iso:null};
 try{ const g=JSON.parse(localStorage.getItem(CLAVE)||'null'); if(g&&typeof g==='object') E=Object.assign(E,g); }catch(e){}
-delete E.ap;
+delete E.ap; delete E.m; delete E.isoM;
 function guardar(){ try{ localStorage.setItem(CLAVE,JSON.stringify(E)); }catch(e){} }
 const efecto=()=>EFECTOS.find(x=>x.id===E.efecto)||EFECTOS[0];
 const sujeto=()=>SUJETOS.find(x=>x.id===E.sujeto)||SUJETOS[0];
@@ -568,16 +585,22 @@ function fmtT(t){
 }
 function fmtPasos(p){ const r=Math.round(p*3)/3; return nf(r, Math.abs(r-Math.round(r))>0.01?1:0); }
 const diafTxt=j=>'f/'+etiqueta(DIAF_NOM[j]);
-const isoTxt=m=>'ISO '+ISO_NOM[m-M_MIN];
-function ajustesTxt(k,j,m){ return fmtT(Math.pow(2,k/3))+' · '+diafTxt(j)+' · '+isoTxt(m); }
+/* el ISO que vale cada posición del dial; en A, el que da la exposición correcta */
+const ISO_VAL=ISO_POS.slice(1);
+function autoISO(t,N){ return cercano(ISO_VAL, limita(100*N*N/(Math.pow(2,E.luz)*t),64,12800)); }
+function isoValor(pos,t,N){ return pos==='A' ? autoISO(t,N) : +pos; }
+const isoTxt=(pos,val)=>(pos==='A'?'A · ':'')+'ISO '+nf(val,0);
+function ajustesTxt(k,j,pos,val){ return fmtT(Math.pow(2,k/3))+' · '+diafTxt(j)+' · '+isoTxt(pos,val); }
 
 /* el filtro, o la pareja de filtros, que cubre los pasos que sobran con menos pasos */
 function eligeND(p){
   let mejor=null;
   NDS.forEach((a,i)=>{ [[a]].concat(NDS.slice(i).map(b=>[a,b])).forEach(c=>{
     const s=c[0]+(c[1]||0);
-    if(s<p-0.34) return;
-    if(!mejor || s<mejor.s || (s===mejor.s && c.length<mejor.c.length)) mejor={c:c.slice().sort((x,y)=>y-x),s};
+    if(s<p-0.4) return;
+    /* apilar dos filtros cuesta como un paso de más: con lo mismo, gana el filtro suelto */
+    const coste=s+(c.length-1);
+    if(!mejor || coste<mejor.coste || (coste===mejor.coste && c.length<mejor.c.length)) mejor={c:c.slice().sort((x,y)=>y-x),s,coste};
   }); });
   return mejor || {c:[15,15],s:30};
 }
@@ -599,7 +622,7 @@ function escena(){
 function recomienda(b){
   const ef=b.ef, EV=E.luz;
   let t=b.tNeed, N=8, iso=100, nd=null;
-  const s=Math.log2(t/(N*N/Math.pow(2,EV)));                // pasos que sobran a f/8 e ISO 100
+  const s=Math.log2(t/(N*N/Math.pow(2,EV)*100/iso));        // pasos que sobran a f/8 e ISO 100
   if(s>=0){
     const a=Math.min(s,1); N=8*Math.pow(2,a/2);
     const r=s-a;
@@ -618,12 +641,23 @@ function recomienda(b){
     if(falta>0){ const ab=Math.min(falta,2*Math.log2(8/2.8)); N=8/Math.pow(2,ab/2); falta-=ab; }
     if(falta>0) iso*=Math.pow(2,falta);
   }
-  return {k:limita(Math.round(3*Math.log2(t)),K_MIN,K_MAX), j:limita(Math.round(6*Math.log2(N)),J_MIN,J_MAX),
-          m:limita(Math.round(3*Math.log2(iso/100)),M_MIN,M_MAX), nd};
+  iso=cercano(ISO_VAL,limita(iso,64,12800));                // al tercio del dial
+  let k=limita(Math.round(3*Math.log2(t)),K_MIN,K_MAX), j=limita(Math.round(6*Math.log2(N)),J_MIN,J_MAX);
+  const isoV=iso;
+  /* el filtro se elige con los valores ya redondeados de las ruedas, los mismos que juzga
+     el veredicto; si se pasa más de un tercio, se corrige con el tiempo o el diafragma */
+  const sR=()=>Math.log2(Math.pow(2,k/3)/(Math.pow(2,j/3)/Math.pow(2,EV)*100/isoV));
+  let sr=sR(); nd=sr>1/3?eligeND(sr):null;
+  if(nd && nd.s-sr>1/3){
+    const d=Math.round(3*(nd.s-sr));
+    if(ef.tipo==='minimo'||ef.tipo==='zoom') k=limita(k+d,K_MIN,K_MAX); else j=limita(j-d,J_MIN,J_MAX);
+    sr=sR(); nd=sr>1/3?eligeND(sr):null;
+  }
+  return {k, j, iso, nd};
 }
 /* lo que sale con los ajustes de las ruedas */
 function evalua(b){
-  const t=Math.pow(2,E.k/3), N=Math.pow(2,E.j/6), iso=100*Math.pow(2,E.m/3);
+  const t=Math.pow(2,E.k/3), N=Math.pow(2,E.j/6), iso=isoValor(E.iso,t,N);
   const r=Object.assign({},b,{t,N,iso});
   r.tOk=N*N/Math.pow(2,E.luz)*100/iso;
   r.sobra=Math.log2(t/r.tOk);                                // pasos de luz que sobran
@@ -918,17 +952,105 @@ function anillo(id,etiquetas,mayor,inicial,texto,alCambiar){
     alCambiar:alCambiar
   });
 }
-let ruedaT=null, ruedaD=null, ruedaI=null;
+let ruedaT=null, ruedaD=null, dialISO=null;
 function crearRuedas(){
-  ruedaT=anillo('t',ETQ_T,i=>(K_MIN+i)%3===0,E.k-K_MIN,i=>fmtT(Math.pow(2,(K_MIN+i)/3)),i=>{ E.k=K_MIN+i; actualizar(); });
+  /* la velocidad, como el tambor de la calculadora de reciprocidad: todos los tercios rotulados */
+  ruedaT=crearRueda({
+    rueda:$('rueda-t'), tambor:$('tambor-t'), etiquetas:ETQ_T, inicial:E.k-K_MIN,
+    menos:$('t-menos'), mas:$('t-mas'),
+    mayor:i=>(K_MIN+i)%3===0,
+    contenido:(e,may)=>'<span aria-hidden="true">'+grabado(etiqueta(e),may?1.05:0.95)+'</span><i></i>',
+    texto:i=>etiqueta(ETQ_T[i]),
+    alCambiar:i=>{ E.k=K_MIN+i; actualizar(); }
+  });
   ruedaD=anillo('d',ETQ_D,i=>(J_MIN+i)%3===0,E.j-J_MIN,i=>diafTxt(J_MIN+i),i=>{ E.j=J_MIN+i; actualizar(); });
-  ruedaI=anillo('i',ETQ_I,i=>i%3===0,E.m-M_MIN,i=>isoTxt(M_MIN+i),i=>{ E.m=M_MIN+i; actualizar(); });
+  dialISO=crearDialISO(i=>{ E.iso=ISO_POS[i]; actualizar(); });
+  dialISO.ir(ISO_POS.findIndex(x=>String(x)===String(E.iso)),false);
+}
+
+/* ---------- dial de ISO ----------
+   Un disco negro moleteado con las cifras grabadas en radial, que se leen derechas al
+   pasar por la marca índice de la derecha. Se gira arrastrando, tocando una cifra, con
+   la rueda del ratón, las flechas o los botones, y encaja en cada posición. */
+GLIFOS.A=[5,'M0 8L2.5 0L5 8M0.9 5.4H4.1'];
+function crearDialISO(alCambiar){
+  const svg=$('isoDial'), N=ISO_POS.length, PASO=360/N, rad=Math.PI/180;
+  let h='<defs><radialGradient id="isoG" cx="38%" cy="32%" r="80%"><stop offset="0" stop-color="#2c2d30"/><stop offset="1" stop-color="#0a0a0b"/></radialGradient>'+
+        '<radialGradient id="isoB" cx="50%" cy="50%" r="50%"><stop offset=".86" stop-color="#3a3c3f"/><stop offset="1" stop-color="#121314"/></radialGradient></defs>';
+  h+='<circle r="104" fill="url(#isoB)" stroke="#000" stroke-width="1.5"/>';
+  h+='<g class="disco">';
+  h+='<circle r="96" fill="url(#isoG)" stroke="#000" stroke-width="1.5"/>';
+  for(let a=0;a<360;a+=3){
+    const c=Math.cos(a*rad), sn=Math.sin(a*rad);
+    h+='<line x1="'+(90*c).toFixed(2)+'" y1="'+(90*sn).toFixed(2)+'" x2="'+(96*c).toFixed(2)+'" y2="'+(96*sn).toFixed(2)+'" stroke="rgba(255,255,255,.17)" stroke-width="1.2"/>';
+  }
+  h+='<circle r="88" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="1"/>';
+  ISO_POS.forEach((v,i)=>{
+    if(v!=='A' && ISO_CIFRA.indexOf(v)<0){   // tercio: un punto grabado
+      h+='<g class="iso-et" data-i="'+i+'" transform="rotate('+(-i*PASO)+')"><rect x="48" y="-6" width="20" height="12" fill="transparent"/><circle cx="57" cy="0" r="2.1" fill="#f1f0ea" opacity=".75"/></g>';
+      return;
+    }
+    let x=0, d=''; for(const ch of String(v)){ const g=GLIFOS[ch]; if(!g) continue; if(g[1]) d+='<path transform="translate('+x.toFixed(2)+' 0)" d="'+g[1]+'"/>'; x+=g[0]+1.5; }
+    const es=1.2, col=v==='A'?'#e2402e':'#f1f0ea';
+    h+='<g class="iso-et" data-i="'+i+'" transform="rotate('+(-i*PASO)+') translate(46 '+(-4*es)+') scale('+es+')">'+
+       '<rect x="-2" y="-2" width="'+(x+2.5).toFixed(1)+'" height="12" fill="transparent"/>'+
+       '<g fill="none" stroke="'+col+'" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">'+d+'</g></g>';
+  });
+  h+='<circle r="9" fill="#0d0d0e" stroke="rgba(255,255,255,.12)"/></g>';
+  h+='<line x1="102" y1="0" x2="117" y2="0" stroke="#f1f0ea" stroke-width="4" stroke-linecap="round"/>';
+  svg.innerHTML=h;
+  const disco=svg.querySelector('.disco');
+  let R=0, actual=-1, arr=null;
+  const indice=()=>((Math.round(R/PASO)%N)+N)%N;
+  function pinta(anim){ disco.classList.toggle('anim',!!anim); disco.style.transform='rotate('+R.toFixed(2)+'deg)'; }
+  function avisa(silencio){
+    const i=indice();
+    svg.setAttribute('aria-valuetext',String(ISO_POS[i]));
+    if(i!==actual){ actual=i; if(!silencio) alCambiar(i); }
+  }
+  /* lleva el disco a la posición i por el camino más corto */
+  function ir(i,anim,silencio){
+    if(i<0) i=0;
+    const base=Math.round(R/PASO); let d=i-((base%N)+N)%N;
+    if(d>N/2) d-=N; if(d<-N/2) d+=N;
+    R=(base+d)*PASO; pinta(anim); avisa(silencio!==false);
+  }
+  function paso(d){ const i=limita(indice()+d,0,N-1); ir(i,true,false); }
+  const angulo=e=>{ const r=svg.getBoundingClientRect(); return Math.atan2(e.clientY-(r.top+r.height/2), e.clientX-(r.left+r.width/2))/rad; };
+  svg.addEventListener('pointerdown',e=>{
+    if(e.button!==undefined && e.button!==0) return;
+    arr={a:angulo(e),R0:R,mov:0,id:e.pointerId,et:e.target.closest?e.target.closest('.iso-et'):null};
+    try{ svg.setPointerCapture(e.pointerId); }catch(er){}
+    svg.classList.add('arrastrando');
+  });
+  svg.addEventListener('pointermove',e=>{
+    if(!arr||e.pointerId!==arr.id) return;
+    let d=angulo(e)-arr.a; if(d>180) d-=360; if(d<-180) d+=360;
+    arr.a+=d; arr.mov+=Math.abs(d); R+=d; pinta(false);
+  });
+  function suelta(e){
+    if(!arr||(e&&e.pointerId!==arr.id)) return;
+    svg.classList.remove('arrastrando');
+    const toque=arr.mov<4, et=arr.et; arr=null;
+    if(toque && et){ ir(+et.dataset.i,true,false); return; }
+    R=Math.round(R/PASO)*PASO; pinta(true); avisa(false);
+  }
+  svg.addEventListener('pointerup',suelta);
+  svg.addEventListener('pointercancel',suelta);
+  svg.addEventListener('wheel',e=>{ e.preventDefault(); const d=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY; if(d) paso(d>0?1:-1); },{passive:false});
+  svg.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='ArrowUp'){ paso(1); e.preventDefault(); }
+    if(e.key==='ArrowLeft'||e.key==='ArrowDown'){ paso(-1); e.preventDefault(); }
+  });
+  $('i-menos').addEventListener('click',()=>paso(-1));
+  $('i-mas').addEventListener('click',()=>paso(1));
+  return {ir};
 }
 /* lleva las ruedas a lo recomendado para la foto elegida */
 function aplicarRec(){
   const rc=recomienda(escena());
-  E.k=rc.k; E.j=rc.j; E.m=rc.m;
-  if(ruedaT){ ruedaT.seguir(E.k-K_MIN); ruedaD.seguir(E.j-J_MIN); ruedaI.seguir(E.m-M_MIN); }
+  E.k=rc.k; E.j=rc.j; E.iso=rc.iso;
+  if(ruedaT){ ruedaT.seguir(E.k-K_MIN); ruedaD.seguir(E.j-J_MIN); dialISO.ir(ISO_POS.findIndex(x=>String(x)===String(E.iso)),true); }
 }
 $('usarRec').addEventListener('click',()=>{ aplicarRec(); actualizar(); });
 
@@ -937,14 +1059,15 @@ function veredicto(caja, clase){ caja.classList.remove('ok','warn','bad'); if(cl
 function pintarResultado(b,r,rc){
   const ef=b.ef, sj=b.sj;
   /* lectura y recomendación */
-  $('lectura').innerHTML='<b>'+fmtT(r.t)+'</b><b>'+diafTxt(E.j)+'</b><b>'+isoTxt(E.m)+'</b>';
-  $('recTxt').innerHTML=LBL('rec',ajustesTxt(rc.k,rc.j,rc.m))+(rc.nd?LBL('recNd',nombreND(rc.nd)):LBL('recSin'));
-  $('usarRec').hidden = rc.k===E.k && rc.j===E.j && rc.m===E.m;
+  $('lectura').innerHTML='<b>'+fmtT(r.t)+'</b><b>'+diafTxt(E.j)+'</b><b>'+isoTxt(E.iso,r.iso)+'</b>';
+  $('isoV').textContent=isoTxt(E.iso,r.iso);
+  $('recTxt').innerHTML=LBL('rec',ajustesTxt(rc.k,rc.j,rc.iso,rc.iso))+(rc.nd?LBL('recNd',nombreND(rc.nd)):LBL('recSin'));
+  $('usarRec').hidden = rc.k===E.k && rc.j===E.j && String(rc.iso)===String(E.iso);
   /* filtro */
   if(r.nd){
     $('oND').textContent=nombreND(r.nd);
     let d=LBL('ndSiD',fmtPasos(r.sobra));
-    if(Math.abs(r.resto)>1/3+0.01) d+=LBL('ndResto',fmtPasos(Math.abs(r.resto)),r.resto>0);
+    if(Math.abs(r.resto)>=0.5) d+=LBL('ndResto',fmtPasos(Math.abs(r.resto)),r.resto>0);
     if(r.cierra) d+=LBL('ndCierra',etiqueta(DIAF_NOM[r.cierra]));
     $('oNDd').textContent=d; veredicto($('vND'),'warn');
   } else if(r.sobra<-1/3-0.01){
@@ -973,12 +1096,12 @@ function pintarResultado(b,r,rc){
   else if(ef.id==='flash') txt=LBL('vFlash',LBL('al')[sj.id],ef.K*q);
   else txt=r.t<0.2?LBL('vZoomCorto'):LBL('vZoom');
   const det=[];
-  if(r.iso>6500) det.push(LBL('vIsoAlto',nf(ISO_NOM[E.m-M_MIN],0)));
+  if(r.iso>6500) det.push(LBL('vIsoAlto',nf(r.iso,0)));
   if(b.fo.H>b.Al*0.95 || (ef.id!=='trails'&&ef.id!=='ghost'&&b.fo.W>b.A)) det.push(LBL('vFuera'));
   $('veras').innerHTML='<h3>'+LBL('verasH')+'</h3><p>'+txt+'</p>'+(det.length?'<p class="det">'+det.join(' ')+'</p>':'');
   $('pie').textContent=LBL('pie',nf(b.A,b.A<10?1:0),nf(b.Al,b.Al<10?1:0));
   /* barra fija */
-  $('mini-t').textContent=ajustesTxt(E.k,E.j,E.m);
+  $('mini-t').textContent=ajustesTxt(E.k,E.j,E.iso,r.iso);
   $('mini-nd').textContent='ND: '+(r.nd?r.nd.c.map(x=>NOMBRE_ND[x]).join('+'):'—');
   $('mini-tri').textContent=LBL('tri')+': '+LBL(T[0]).toLowerCase();
 }
@@ -1221,7 +1344,7 @@ function actualizar(){
 function cambio(){ pintarControles(); aplicarRec(); actualizar(); }
 window.onLangChange=function(){
   pintarControles();
-  [ruedaT,ruedaD,ruedaI].forEach(rd=>rd&&rd.reetiquetar());
+  [ruedaT,ruedaD].forEach(rd=>rd&&rd.reetiquetar());
   actualizar();
 };
 window.addEventListener('resize',()=>{ clearTimeout(window.__rz); window.__rz=setTimeout(()=>ultimo&&compone($('foto'),ultimo),150); });
@@ -1231,11 +1354,11 @@ try{
 }catch(e){}
 
 /* arranque: si no hay ajustes guardados, los recomendados */
-if(E.k==null||E.j==null||E.m==null){ const rc=recomienda(escena()); E.k=rc.k; E.j=rc.j; E.m=rc.m; }
-E.k=limita(E.k,K_MIN,K_MAX); E.j=limita(E.j,J_MIN,J_MAX); E.m=limita(E.m,M_MIN,M_MAX);
+if(E.k==null||E.j==null||E.iso==null||!ISO_POS.some(x=>String(x)===String(E.iso))){ const rc=recomienda(escena()); E.k=rc.k; E.j=rc.j; E.iso=rc.iso; }
+E.k=limita(E.k,K_MIN,K_MAX); E.j=limita(E.j,J_MIN,J_MAX);
 crearRuedas();
 window.aplicarIdioma(LANG());
-ruedaT.iniciar(); ruedaD.iniciar(); ruedaI.iniciar();
+ruedaT.iniciar(); ruedaD.iniciar();
 </script>
 </body>
 </html>
