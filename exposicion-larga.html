@@ -61,6 +61,7 @@ h1{font-family:var(--disp);font-size:clamp(28px,5vw,42px);line-height:1.05;font-
 .sub{color:var(--fg2);max-width:68ch;margin-top:10px}
 p{max-width:72ch;margin-bottom:12px}
 a{color:var(--amber)}
+button{touch-action:manipulation}
 .navrow{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 2px}
 .navlink{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:#9aa6b4;font-family:var(--mono);font-size:12px;letter-spacing:.03em;border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:8px 12px;background:rgba(255,255,255,.03)}
 .navlink:hover{background:rgba(255,255,255,.07)}
@@ -83,7 +84,7 @@ a{color:var(--amber)}
 @media(max-width:560px){.dos{grid-template-columns:1fr}}
 .dos .campo+.campo{margin-top:0}
 .num-in{display:flex;align-items:center;gap:6px}
-.num-in input{width:100%;min-width:0;background:var(--panel2);border:1px solid var(--line2);border-radius:8px;color:var(--fg);font-family:var(--mono);font-size:15px;padding:0 10px;height:38px}
+.num-in input{width:100%;min-width:0;background:var(--panel2);border:1px solid var(--line2);border-radius:8px;color:var(--fg);font-family:var(--mono);font-size:16px;padding:0 10px;height:38px}
 .num-in span{font-family:var(--mono);font-size:13px;color:var(--fg3)}
 input[type=range]{width:100%;accent-color:var(--amber);height:30px}
 .pista-num{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
@@ -166,7 +167,7 @@ input[type=range]{width:100%;accent-color:var(--amber);height:30px}
 
 /* dial de ISO */
 .iso-marco{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:6px}
-#isoDial{display:block;width:min(300px,100%);height:auto;margin:0 auto;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+#isoDial{display:block;width:min(300px,100%);height:auto;margin:0 auto;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
 #isoDial.arrastrando{cursor:grabbing}
 #isoDial:focus-visible{outline:2px solid var(--amber);outline-offset:3px;border-radius:50%}
 #isoDial .disco{transform-origin:0 0}
@@ -207,6 +208,7 @@ footer{border-top:1px solid var(--line);margin-top:36px;padding-top:16px;font-si
   <p class="sub" data-lang="es">Para usarla en el campo. Eliges qué quieres hacer, cómo es tu cámara y qué tienes delante, y la página te dice el tiempo, cómo saldrá la foto y si necesitas filtro ND o trípode.</p>
   <p class="sub" data-lang="en">Made for use in the field. You choose what you want to do, what your camera is like and what is in front of you, and the page tells you the time, how the picture will come out and whether you need an ND filter or a tripod.</p>
   <div class="navrow">
+    <a class="navlink" href="manual-exposicion-larga.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M8 7h7M8 11h7"/></svg><span data-lang="es">Manual</span><span data-lang="en">Manual</span></a>
     <a class="navlink" href="reciprocidad.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 12l5-4"/></svg><span data-lang="es">Filtros ND y reciprocidad con película</span><span data-lang="en">ND filters and film reciprocity</span></a>
     <a class="navlink" href="filtro-temporal.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 12c2.5-6 5-6 7.5 0s5 6 7.5 0M17 12h5"/></svg><span data-lang="es">Agua, nubes y estrellas: filtro temporal</span><span data-lang="en">Water, clouds and stars: temporal filter</span></a>
   </div>
@@ -232,10 +234,10 @@ footer{border-top:1px solid var(--line);margin-top:36px;padding-top:16px;font-si
 <section class="paso">
   <div class="paso-cab"><span class="num">3</span><h2><span data-lang="es">La escena</span><span data-lang="en">The scene</span></h2></div>
   <div class="panel">
-    <div class="campo"><div class="etq"><span data-lang="es">Qué se mueve</span><span data-lang="en">What moves</span></div><div class="chips" id="sujetos"></div></div>
+    <div class="campo"><div class="etq"><span id="queEtq"></span></div><div class="chips" id="sujetos"></div></div>
     <div class="dos campo">
       <div class="campo"><div class="etq"><span data-lang="es">Velocidad</span><span data-lang="en">Speed</span><span class="v" id="velV"></span></div><input id="vel" type="range" min="0.5" max="50" step="0.1" aria-label="Velocidad" data-aria-es="Velocidad" data-aria-en="Speed"></div>
-      <div class="campo"><div class="etq"><span data-lang="es">Distancia</span><span data-lang="en">Distance</span></div><div class="num-in"><input id="dist" type="number" inputmode="decimal" min="0.5" max="2000" step="0.5" aria-label="Distancia (m)" data-aria-es="Distancia (m)" data-aria-en="Distance (m)"><span>m</span></div></div>
+      <div class="campo"><div class="etq"><span id="distEtq"></span></div><div class="num-in"><input id="dist" type="number" inputmode="decimal" min="0.5" max="2000" step="0.5" aria-label="Distancia (m)" data-aria-es="Distancia (m)" data-aria-en="Distance (m)"><span>m</span></div></div>
     </div>
     <div class="campo"><div class="etq"><span data-lang="es">Luz</span><span data-lang="en">Light</span></div><div class="chips" id="luces"></div></div>
   </div>
@@ -279,8 +281,8 @@ footer{border-top:1px solid var(--line);margin-top:36px;padding-top:16px;font-si
       <p class="pie" data-lang="es">Cifras en los pasos enteros y puntos en los tercios. En A, la cámara elige el ISO para que la exposición sea correcta.</p>
       <p class="pie" data-lang="en">Numbers on the full stops and dots on the thirds. On A, the camera picks the ISO so that the exposure is correct.</p>
     </div>
-    <p class="pie" data-lang="es">Cambiar el efecto, la cámara o la escena devuelve las ruedas a lo recomendado. Gíralas para probar otros ajustes: lo de abajo los sigue.</p>
-    <p class="pie" data-lang="en">Changing the effect, the camera or the scene puts the wheels back on the recommendation. Turn them to try other settings: everything below follows them.</p>
+    <p class="pie" data-lang="es">Cambiar el efecto, el sensor, la focal o la escena devuelve los mandos a lo recomendado. Gíralos para probar otros ajustes: lo de abajo los sigue.</p>
+    <p class="pie" data-lang="en">Changing the effect, the sensor, the focal length or the scene puts the controls back on the recommendation. Turn them to try other settings: everything below follows them.</p>
   </div>
 </section>
 
@@ -326,8 +328,8 @@ footer{border-top:1px solid var(--line);margin-top:36px;padding-top:16px;font-si
 </details>
 
 <footer>
-  <p data-lang="es">Las técnicas vienen de la <i>Long Exposure Cheat Sheet</i> de Pit Haupert (2025); el cálculo y la simulación son de esta página. Relacionadas: <a href="programa-camara.html">el programa de la cámara</a>, <a href="simulador-flash.html">el banco óptico de flash</a>, <a href="reciprocidad.html">filtros ND y reciprocidad</a> y <a href="filtro-temporal.html">el filtro temporal</a>.</p>
-  <p data-lang="en">The techniques come from Pit Haupert's <i>Long Exposure Cheat Sheet</i> (2025); the arithmetic and the simulation belong to this page. Related: <a href="programa-camara.html">the camera's program</a>, <a href="simulador-flash.html">the flash optical bench</a>, <a href="reciprocidad.html">ND filters and reciprocity</a> and <a href="filtro-temporal.html">the temporal filter</a>.</p>
+  <p data-lang="es">Las técnicas vienen de la <i>Long Exposure Cheat Sheet</i> de Pit Haupert (2025); el cálculo y la simulación son de esta página, explicada paso a paso en su <a href="manual-exposicion-larga.html">manual</a>. Relacionadas: <a href="programa-camara.html">el programa de la cámara</a>, <a href="simulador-flash.html">el banco óptico de flash</a>, <a href="reciprocidad.html">filtros ND y reciprocidad</a> y <a href="filtro-temporal.html">el filtro temporal</a>.</p>
+  <p data-lang="en">The techniques come from Pit Haupert's <i>Long Exposure Cheat Sheet</i> (2025); the arithmetic and the simulation belong to this page, explained step by step in its <a href="manual-exposicion-larga.html">manual</a>. Related: <a href="programa-camara.html">the camera's program</a>, <a href="simulador-flash.html">the flash optical bench</a>, <a href="reciprocidad.html">ND filters and reciprocity</a> and <a href="filtro-temporal.html">the temporal filter</a>.</p>
 </footer>
 
 </div>
@@ -393,6 +395,7 @@ const DICT={
   los:{ped:'los peatones',run:'los corredores',bike:'los ciclistas',city:'los coches',road:'los coches',train:'los trenes'},
   luz:{night:'Noche urbana',blue:'Hora azul',shade:'Sombra',cloud:'Nublado',sun:'Sol'},
   /* ruedas */
+  queMueve:'Qué se mueve', quePasa:'Qué pasa alrededor', distMueve:'Distancia a lo que se mueve', distSujeto:'Distancia a tu sujeto',
   ariaT:'Velocidad de obturación', ariaD:'Diafragma', ariaI:'Sensibilidad ISO',
   enlOn:'al girar un mando, los otros dos compensan y la exposición se mantiene.', enlOff:'los tres mandos se mueven libres.',
   rec:(s)=>'Recomendado para esta foto: <b>'+s+'</b>', recNd:(n)=>' con '+n, recSin:' sin filtro',
@@ -400,7 +403,7 @@ const DICT={
   ndOk:'No hace falta', ndOkD:'Con estos ajustes la exposición ya es correcta.',
   ndSiD:(p)=>(p==='1'?'Sobra 1 paso':'Sobran '+p+' pasos')+' de luz con estos ajustes.',
   ndResto:(p,o)=>' Con él queda '+p+(p==='1'?' paso ':' pasos ')+(o?'oscura: sube el ISO o abre un poco.':'clara: baja el ISO o cierra un poco.'),
-  ndCierra:(N)=>' O cierra a f/'+N+' y no lo necesitas.',
+  ndCierra:(N,enl)=>' O cierra a f/'+N+(enl?', con «Ajustes recomendados» apagado para que nada compense,':'')+' y no lo necesitas.',
   ndFalta:'Falta luz', ndFaltaD:(p)=>(p==='1'?'Falta 1 paso':'Faltan '+p+' pasos')+': sube el ISO, abre el diafragma o alarga el tiempo.',
   triHand:'No', triHandD:'A pulso, sin más.',
   triBrace:'No', triBraceD:'A pulso, bien sujeta: codos pegados y correa tensa contra el cuello. Dispara en ráfaga.',
@@ -427,6 +430,7 @@ const DICT={
   vGhost:(los,a,tq)=>'Cada uno de '+los+' que pasen '+a+'. Quien se quede quieto más de '+tq+' sí dejará huella.',
   vTrails:(los)=>'Los faros y los pilotos dibujarán <b>líneas continuas de lado a lado</b> del encuadre; '+los+' casi no se verán.',
   vTrailsCorto:(pc)=>'Las estelas cubrirán un <b>'+pc+' %</b> del ancho del encuadre: trazos cortos, no líneas de lado a lado. Alarga el tiempo.',
+  vTrailsSinLuz:'Quien va a pie no lleva luces y no deja estela. Elige bicis, coches o trenes.',
   vTrailsDia:' De día los faros no destacan sobre la escena y las estelas apenas se verán: este efecto pide noche u hora azul.',
   vFlash:(al,k)=>'El destello congela '+al+' al final del recorrido y la luz ambiente deja detrás una <b>estela de '+nf(k,1)+' veces su largo</b>. Usa la sincronización a la segunda cortinilla para que la estela quede detrás y no delante.',
   vZoom:'Rayas <b>radiales</b> desde el centro del encuadre. Gira el anillo a ritmo constante; si esperas un instante antes de girarlo, el centro sale reconocible.',
@@ -453,13 +457,14 @@ const DICT={
   al:{ped:'the pedestrian',run:'the runner',bike:'the cyclist',city:'the car',road:'the car',train:'the train'},
   los:{ped:'the pedestrians',run:'the runners',bike:'the cyclists',city:'the cars',road:'the cars',train:'the trains'},
   luz:{night:'City night',blue:'Blue hour',shade:'Shade',cloud:'Overcast',sun:'Sun'},
+  queMueve:'What moves', quePasa:'What passes around', distMueve:'Distance to what moves', distSujeto:'Distance to your subject',
   ariaT:'Shutter speed', ariaD:'Aperture', ariaI:'ISO sensitivity',
   enlOn:'turn one control and the other two compensate to keep the exposure.', enlOff:'the three controls move freely.',
   rec:(s)=>'Recommended for this picture: <b>'+s+'</b>', recNd:(n)=>' with '+n, recSin:' with no filter',
   ndOk:'Not needed', ndOkD:'With these settings the exposure is already correct.',
   ndSiD:(p)=>p+(p==='1'?' stop':' stops')+' of light to spare with these settings.',
   ndResto:(p,o)=>' With it the picture is '+p+(p==='1'?' stop ':' stops ')+(o?'dark: raise the ISO or open up a little.':'bright: lower the ISO or stop down a little.'),
-  ndCierra:(N)=>' Or stop down to f/'+N+' and you do not need it.',
+  ndCierra:(N,enl)=>' Or stop down to f/'+N+(enl?', with “Recommended settings” switched off so nothing compensates,':'')+' and you do not need it.',
   ndFalta:'Not enough light', ndFaltaD:(p)=>p+(p==='1'?' stop':' stops')+' short: raise the ISO, open the aperture or lengthen the time.',
   triHand:'No', triHandD:'Handheld, nothing more.',
   triBrace:'No', triBraceD:'Handheld, held firmly: elbows tucked in and strap tensioned against the neck. Shoot a burst.',
@@ -485,6 +490,7 @@ const DICT={
   vGhost:(los,a,tq)=>'Each of '+los+' passing by '+a+'. Anyone who stands still for more than '+tq+' will leave a mark.',
   vTrails:(los)=>'Headlights and tail lights will draw <b>continuous lines across</b> the frame; '+los+' themselves will barely show.',
   vTrailsCorto:(pc)=>'The trails will cover <b>'+pc+' %</b> of the frame width: short strokes, not lines across. Lengthen the time.',
+  vTrailsSinLuz:'People on foot carry no lights and leave no trail. Choose bikes, cars or trains.',
   vTrailsDia:' In daylight headlights do not stand out from the scene and the trails will barely show: this effect asks for night or blue hour.',
   vFlash:(al,k)=>'The flash freezes '+al+' at the end of its path and the ambient light leaves a <b>trail '+nf(k,1)+' times its length</b> behind it. Use rear-curtain sync so the trail falls behind and not in front.',
   vZoom:'<b>Radial</b> streaks from the centre of the frame. Turn the ring at a steady pace; if you wait a moment before turning it, the centre stays recognisable.',
@@ -593,7 +599,12 @@ function fmtT(t){
   const e=Math.log2(t);
   if(Math.abs(e-Math.round(e))<0.02 && MINS[Math.round(e)]) return MINS[Math.round(e)];
   const s=Math.round(t), h=Math.floor(s/3600), mi=Math.floor(s%3600/60), se=s%60;
-  return (h?h+' h ':'')+((h||mi)?mi+' min':'')+(se&&!h?' '+se+' s':'');
+  return [h?h+' h':'', (h||mi)?mi+' min':'', se&&!h?se+' s':''].filter(Boolean).join(' ');
+}
+/* el tiempo de una posición del tambor, con el mismo rótulo que lleva grabado: 1/15 s, 50 s, 1,3 min */
+function fmtK(k){
+  const e=etiqueta(ETQ_T[limita(k,K_MIN,K_MAX)-K_MIN]);
+  return e.endsWith('"') ? e.slice(0,-1)+' s' : e.endsWith("'") ? e.slice(0,-1)+' min' : e+' s';
 }
 function fmtPasos(p){ const r=Math.round(p*3)/3; return nf(r, Math.abs(r-Math.round(r))>0.01?1:0); }
 const diafTxt=j=>'f/'+etiqueta(DIAF_NOM[j]);
@@ -602,7 +613,7 @@ const ISO_VAL=ISO_POS.filter(x=>x!=='A');
 function autoISO(t,N){ return cercano(ISO_VAL, limita(100*N*N/(Math.pow(2,E.luz)*t),64,6400)); }
 function isoValor(pos,t,N){ return pos==='A' ? autoISO(t,N) : +pos; }
 const isoTxt=(pos,val)=>(pos==='A'?'A · ':'')+'ISO '+nf(val,0);
-function ajustesTxt(k,j,pos,val){ return fmtT(Math.pow(2,k/3))+' · '+diafTxt(j)+' · '+isoTxt(pos,val); }
+function ajustesTxt(k,j,pos,val){ return fmtK(k)+' · '+diafTxt(j)+' · '+isoTxt(pos,val); }
 
 /* el filtro, o la pareja de filtros, que cubre los pasos que sobran con menos pasos */
 function eligeND(p){
@@ -709,6 +720,9 @@ function chips(cont, lista, actual, alPulsar){
 }
 function velTxt(){ return nf(E.vel,1)+' m/s · '+nf(E.vel*3.6,0)+' km/h'; }
 function pintarControles(){
+  /* las fichas se vuelven a crear: se recuerda cuál tenía el foco para devolvérselo */
+  const act=document.activeElement, cont=act&&act.parentElement&&act.parentElement.id;
+  const idx=cont?[].indexOf.call(act.parentElement.children,act):-1;
   const efs=$('efectos'); efs.innerHTML='';
   EFECTOS.forEach(ef=>{
     const b=document.createElement('button'), tx=LBL('ef')[ef.id];
@@ -726,8 +740,8 @@ function pintarControles(){
     efs.appendChild(b);
   });
   chips($('formato'), Object.keys(FORMATOS).map(k=>({v:k,n:LBL('fmt')[k]})), E.formato, v=>{E.formato=v; cambio();});
-  chips($('mp'), MPS.map(m=>({v:m,n:m+' MP'})), E.mp, v=>{E.mp=v; cambio();});
-  chips($('estab'), ESTABS.map((s,i)=>({v:i,n:LBL('estab')[i]+(s?'<small>'+s+' '+LBL('pasos')+'</small>':'')})), E.estab, v=>{E.estab=v; cambio();});
+  chips($('mp'), MPS.map(m=>({v:m,n:m+' MP'})), E.mp, v=>{E.mp=v; cambio(true);});
+  chips($('estab'), ESTABS.map((s,i)=>({v:i,n:LBL('estab')[i]+(s?'<small>'+s+' '+LBL('pasos')+'</small>':'')})), E.estab, v=>{E.estab=v; cambio(true);});
   chips($('focales'), FOCALES.map(x=>({v:x,n:String(x)})), E.focal, v=>{E.focal=v; cambio();});
   chips($('sujetos'), SUJETOS.map(x=>({v:x.id,n:LBL('suj')[x.id]})), E.sujeto, v=>{
     /* en «quieto entre movimiento» la distancia es la de tu sujeto, y no cambia con lo que pasa */
@@ -736,13 +750,19 @@ function pintarControles(){
   chips($('luces'), LUCES.map(([k,ev])=>({v:ev,n:LBL('luz')[k]})), E.luz, v=>{E.luz=v; cambio();});
   $('focal').value=E.focal; $('dist').value=E.dist; $('vel').value=E.vel;
   $('velV').textContent=velTxt();
+  const quieto=E.efecto==='static';
+  $('queEtq').textContent=LBL(quieto?'quePasa':'queMueve');
+  $('distEtq').textContent=LBL(quieto?'distSujeto':'distMueve');
+  if(cont && idx>=0 && $(cont) && $(cont).children[idx] && act.tagName==='BUTTON') $(cont).children[idx].focus({preventScroll:true});
 }
 $('focal').addEventListener('change',()=>{ const x=+$('focal').value; if(x>=8&&x<=800){ E.focal=x; } cambio(); });
 $('dist').addEventListener('change',()=>{ const x=+$('dist').value; if(x>=0.5&&x<=2000){ E.dist=x; } cambio(); });
 $('vel').addEventListener('input',()=>{ E.vel=+$('vel').value; $('velV').textContent=velTxt(); aplicarRec(); actualizar(); });
 
 /* ---------- ruedas: velocidad, diafragma e ISO ---------- */
-/* Del componente de rueda de reciprocidad.html, sin cambios. */
+/* Del componente de rueda de reciprocidad.html, con un cambio: la rueda del ratón en
+   vertical solo gira el mando si tiene el foco, para no secuestrar el desplazamiento
+   de la página al pasar por encima. */
 // ------------------------------------------------------------ cifras grabadas
 // Letra de trazo propia para las escalas, dibujada con las reglas de las letras de
 // grabado por fresado: un solo grosor, tramos rectos, giros en ángulo recto, curvas de
@@ -917,6 +937,7 @@ function crearRueda(o) {
   rueda.addEventListener('wheel', function (e) {
     var d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
     if (!d) return;
+    if (d === e.deltaY && document.activeElement !== rueda) return;
     e.preventDefault();
     conducida = false;
     medir();
@@ -1036,14 +1057,21 @@ function crearDialISO(alCambiar){
   const angulo=e=>{ const r=svg.getBoundingClientRect(); return Math.atan2(e.clientY-(r.top+r.height/2), e.clientX-(r.left+r.width/2))/rad; };
   svg.addEventListener('pointerdown',e=>{
     if(e.button!==undefined && e.button!==0) return;
-    arr={a:angulo(e),R0:R,mov:0,id:e.pointerId,et:e.target.closest?e.target.closest('.iso-et'):null};
+    const caja=svg.getBoundingClientRect();
+    /* con el dedo, el dial gira con el arrastre horizontal, como si se empujara el borde de
+       arriba o el de abajo, y el vertical queda para desplazar la página */
+    arr={a:angulo(e),R0:R,mov:0,id:e.pointerId,et:e.target.closest?e.target.closest('.iso-et'):null,
+         tactil:e.pointerType==='touch', x:e.clientX, radio:caja.width*96/240,
+         sentido:e.clientY<caja.top+caja.height/2?1:-1};
     try{ svg.setPointerCapture(e.pointerId); }catch(er){}
     svg.classList.add('arrastrando');
   });
   svg.addEventListener('pointermove',e=>{
     if(!arr||e.pointerId!==arr.id) return;
-    let d=angulo(e)-arr.a; if(d>180) d-=360; if(d<-180) d+=360;
-    arr.a+=d; arr.mov+=Math.abs(d); R+=d; pinta(false);
+    let d;
+    if(arr.tactil){ d=arr.sentido*(e.clientX-arr.x)/arr.radio/rad; arr.x=e.clientX; }
+    else { d=angulo(e)-arr.a; if(d>180) d-=360; if(d<-180) d+=360; arr.a+=d; }
+    arr.mov+=Math.abs(d); R+=d; pinta(false);
   });
   function suelta(e){
     if(!arr||(e&&e.pointerId!==arr.id)) return;
@@ -1054,7 +1082,7 @@ function crearDialISO(alCambiar){
   }
   svg.addEventListener('pointerup',suelta);
   svg.addEventListener('pointercancel',suelta);
-  svg.addEventListener('wheel',e=>{ e.preventDefault(); const d=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY; if(d) paso(d>0?1:-1); },{passive:false});
+  svg.addEventListener('wheel',e=>{ if(document.activeElement!==svg) return; e.preventDefault(); const d=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY; if(d) paso(d>0?1:-1); },{passive:false});
   svg.addEventListener('keydown',e=>{
     if(e.key==='ArrowRight'||e.key==='ArrowUp'){ paso(1); e.preventDefault(); }
     if(e.key==='ArrowLeft'||e.key==='ArrowDown'){ paso(-1); e.preventDefault(); }
@@ -1099,7 +1127,7 @@ function veredicto(caja, clase){ caja.classList.remove('ok','warn','bad'); if(cl
 function pintarResultado(b,r,rc){
   const ef=b.ef, sj=b.sj;
   /* lectura y recomendación */
-  $('lectura').innerHTML='<b>'+fmtT(r.t)+'</b><b>'+diafTxt(E.j)+'</b><b>'+isoTxt(E.iso,r.iso)+'</b>';
+  $('lectura').innerHTML='<b>'+fmtK(E.k)+'</b><b>'+diafTxt(E.j)+'</b><b>'+isoTxt(E.iso,r.iso)+'</b>';
   $('isoV').textContent=isoTxt(E.iso,r.iso);
   $('recTxt').innerHTML=LBL('rec',ajustesTxt(rc.k,rc.j,rc.iso,rc.iso))+(rc.nd?LBL('recNd',nombreND(rc.nd)):LBL('recSin'));
   $('usarRec').hidden = rc.k===E.k && rc.j===E.j && String(rc.iso)===String(E.iso);
@@ -1108,7 +1136,7 @@ function pintarResultado(b,r,rc){
     $('oND').textContent=nombreND(r.nd);
     let d=LBL('ndSiD',fmtPasos(r.sobra));
     if(Math.abs(r.resto)>=0.5) d+=LBL('ndResto',fmtPasos(Math.abs(r.resto)),r.resto>0);
-    if(r.cierra) d+=LBL('ndCierra',etiqueta(DIAF_NOM[r.cierra]));
+    if(r.cierra) d+=LBL('ndCierra',etiqueta(DIAF_NOM[r.cierra]),E.enlace&&E.iso!=='A');
     $('oNDd').textContent=d; veredicto($('vND'),'warn');
   } else if(r.sobra<-1/3-0.01){
     $('oND').textContent=LBL('ndFalta'); $('oNDd').textContent=LBL('ndFaltaD',fmtPasos(-r.sobra)); veredicto($('vND'),'bad');
@@ -1131,18 +1159,19 @@ function pintarResultado(b,r,rc){
   }
   else if(ef.id==='trace') txt=LBL('vTrace',el,asp(ef.K*q));
   else if(ef.id==='static') txt=LBL('vStatic',los,asp(ef.K*q),asp(2*ef.K*q));
-  else if(ef.id==='trails') txt=(q>=0.97?LBL('vTrails',los):LBL('vTrailsCorto',nf(Math.round(q*100),0)))+(E.luz>8?LBL('vTrailsDia'):'');
+  else if(ef.id==='trails') txt=sj.forma==='persona' ? LBL('vTrailsSinLuz') : (q>=0.97?LBL('vTrails',los):LBL('vTrailsCorto',nf(Math.round(q*100),0)))+(E.luz>8?LBL('vTrailsDia'):'');
   else if(ef.id==='ghost') txt=LBL('vGhost',los,asp(ef.K*q),fmtT(r.t/4));
   else if(ef.id==='flash') txt=LBL('vFlash',LBL('al')[sj.id],ef.K*q);
   else txt=r.t<0.2?LBL('vZoomCorto'):LBL('vZoom');
   const det=[];
   if(r.iso>=6400) det.push(LBL('vIsoAlto',nf(r.iso,0)));
-  if(b.fo.H>b.Al*0.95 || (ef.id!=='trails'&&ef.id!=='ghost'&&b.fo.W>b.A)) det.push(LBL('vFuera'));
+  const fq=ef.id==='static'?FORMAS.persona:b.fo;      // lo que se fotografía
+  if(fq.H>b.Al*0.95 || (ef.id!=='trails'&&ef.id!=='ghost'&&fq.W>b.A)) det.push(LBL('vFuera'));
   $('veras').innerHTML='<h3>'+LBL('verasH')+'</h3><p>'+txt+'</p>'+(det.length?'<p class="det">'+det.join(' ')+'</p>':'');
   $('pie').textContent=LBL('pie',nf(b.A,b.A<10?1:0),nf(b.Al,b.Al<10?1:0));
   /* barra fija */
   $('mini-t').textContent=ajustesTxt(E.k,E.j,E.iso,r.iso);
-  $('mini-nd').textContent='ND: '+(r.nd?r.nd.c.map(x=>NOMBRE_ND[x]).join('+'):'—');
+  $('mini-nd').textContent=!r.nd&&r.sobra<-1/3-0.01 ? LBL('ndFalta') : 'ND: '+(r.nd?r.nd.c.map(x=>NOMBRE_ND[x]).join('+'):'—');
   $('mini-tri').textContent=LBL('tri')+': '+LBL(T[0]).toLowerCase();
 }
 
@@ -1229,8 +1258,8 @@ function dibujaForma(c,forma,x,y,k,col,dir){
 }
 /* faros y pilotos de un coche, para las estelas */
 function lucesCoche(forma,dir){
-  if(forma!=='coche'&&forma!=='tren') return [];
-  const L=forma==='tren'?10:2.25, hy=forma==='tren'?1.0:0.7;
+  if(forma==='persona') return [];
+  const L=forma==='tren'?10:forma==='bici'?0.8:2.25, hy=forma==='tren'?1.0:forma==='bici'?0.95:0.7;
   return [{dx:dir*L,dy:-hy,col:'rgba(255,248,225,1)'},{dx:-dir*L,dy:-(hy+0.15),col:'rgba(255,60,40,1)'}];
 }
 
@@ -1282,10 +1311,13 @@ function compone(cv,r){
   if(cv.width!==W||cv.height!==H){ cv.width=W; cv.height=H; }
   const c=cv.getContext('2d'), pal=paleta(E.luz), ef=r.ef;
   const k=W/r.A;                                    // px de lienzo por metro en el plano del sujeto
-  const hSuj=r.fo.H*k;
+  const hSuj=(ef.id==='static'?FORMAS.persona:r.fo).H*k;
   const yS=Math.min(H*0.97, Math.max(H*0.8, hSuj*1.08));   // el suelo, para que el sujeto quepa si puede
   const Bc=r.B*k;                                   // recorrido en px de lienzo
-  const bg=fondo(W,H,yS,k,pal);
+  /* el fondo solo cambia con el encuadre y la luz: se guarda de una vez para otra */
+  const claveBg=[W,H,Math.round(yS),k.toFixed(3),E.luz].join('|');
+  if(compone.clave!==claveBg){ compone.clave=claveBg; compone.bg=fondo(W,H,yS,k,pal); }
+  const bg=compone.bg;
   const datos=lz=>lz.getContext('2d').getImageData(0,0,W,H).data;
   const pon=(arr)=>{ const lz=lienzo(W,H); lz.getContext('2d').putImageData(new ImageData(arr,W,H),0,0); return lz; };
   const forma=r.sj.forma;
@@ -1390,17 +1422,22 @@ function compone(cv,r){
 
 
 /* ---------- actualizar ---------- */
-let pendiente=null, ultimo=null;
+let pendiente=null, ultimo=null, ultimaFoto=0;
 function actualizar(){
   guardar();
   const b=escena(), rc=recomienda(b), r=evalua(b);
   pintarResultado(b,r,rc);
   ultimo=r;
-  if(pendiente) return;
-  pendiente=setTimeout(()=>{ pendiente=null; compone($('foto'),ultimo); },30);
+  /* las cifras siguen a los mandos al instante; la foto, que cuesta más, espera a que
+     paren, para que las ruedas giren suaves también en el móvil */
+  clearTimeout(pendiente);
+  const espera=performance.now()-ultimaFoto>300 ? 30 : 140;
+  pendiente=setTimeout(()=>{ pendiente=null; ultimaFoto=performance.now(); compone($('foto'),ultimo); },espera);
 }
-/* cambiar el efecto, la cámara o la escena vuelve a lo recomendado */
-function cambio(){ pintarControles(); aplicarRec(); actualizar(); }
+/* Cambiar el efecto, la óptica o la escena vuelve a lo recomendado. Los megapíxeles y el
+   estabilizador no entran en la recomendación, solo en el veredicto del trípode, así que
+   no deshacen lo que se haya girado a mano (mantener). */
+function cambio(mantener){ pintarControles(); if(!mantener) aplicarRec(); actualizar(); }
 window.onLangChange=function(){
   pintarControles();
   [ruedaT,ruedaD].forEach(rd=>rd&&rd.reetiquetar());
