@@ -388,10 +388,10 @@ const DICT={
   rec:(s)=>'Recomendado para esta foto: <b>'+s+'</b>', recNd:(n)=>' con '+n, recSin:' sin filtro',
   /* veredictos */
   ndOk:'No hace falta', ndOkD:'Con estos ajustes la exposición ya es correcta.',
-  ndSiD:(p)=>'Sobran '+p+' pasos de luz con estos ajustes.',
-  ndResto:(p,o)=>' Con él queda '+p+' '+(o?'pasos oscura: sube el ISO o abre un poco.':'pasos clara: baja el ISO o cierra un poco.'),
+  ndSiD:(p)=>(p==='1'?'Sobra 1 paso':'Sobran '+p+' pasos')+' de luz con estos ajustes.',
+  ndResto:(p,o)=>' Con él queda '+p+(p==='1'?' paso ':' pasos ')+(o?'oscura: sube el ISO o abre un poco.':'clara: baja el ISO o cierra un poco.'),
   ndCierra:(N)=>' O cierra a f/'+N+' y no lo necesitas.',
-  ndFalta:'Falta luz', ndFaltaD:(p)=>'Faltan '+p+' pasos: sube el ISO, abre el diafragma o alarga el tiempo.',
+  ndFalta:'Falta luz', ndFaltaD:(p)=>(p==='1'?'Falta 1 paso':'Faltan '+p+' pasos')+': sube el ISO, abre el diafragma o alarga el tiempo.',
   triHand:'No', triHandD:'A pulso, sin más.',
   triBrace:'No', triBraceD:'A pulso, bien sujeta: codos pegados y correa tensa contra el cuello. Dispara en ráfaga.',
   triLean:'Apóyala', triLeanD:'Sobre un muro, una barandilla o la mochila; o un trípode.',
@@ -446,10 +446,10 @@ const DICT={
   ariaT:'Shutter speed', ariaD:'Aperture', ariaI:'ISO sensitivity',
   rec:(s)=>'Recommended for this picture: <b>'+s+'</b>', recNd:(n)=>' with '+n, recSin:' with no filter',
   ndOk:'Not needed', ndOkD:'With these settings the exposure is already correct.',
-  ndSiD:(p)=>p+' stops of light to spare with these settings.',
-  ndResto:(p,o)=>' With it the picture is '+p+' '+(o?'stops dark: raise the ISO or open up a little.':'stops bright: lower the ISO or stop down a little.'),
+  ndSiD:(p)=>p+(p==='1'?' stop':' stops')+' of light to spare with these settings.',
+  ndResto:(p,o)=>' With it the picture is '+p+(p==='1'?' stop ':' stops ')+(o?'dark: raise the ISO or open up a little.':'bright: lower the ISO or stop down a little.'),
   ndCierra:(N)=>' Or stop down to f/'+N+' and you do not need it.',
-  ndFalta:'Not enough light', ndFaltaD:(p)=>p+' stops short: raise the ISO, open the aperture or lengthen the time.',
+  ndFalta:'Not enough light', ndFaltaD:(p)=>p+(p==='1'?' stop':' stops')+' short: raise the ISO, open the aperture or lengthen the time.',
   triHand:'No', triHandD:'Handheld, nothing more.',
   triBrace:'No', triBraceD:'Handheld, held firmly: elbows tucked in and strap tensioned against the neck. Shoot a burst.',
   triLean:'Rest it', triLeanD:'On a wall, a railing or your bag; or a tripod.',
@@ -548,17 +548,17 @@ const J_MIN=3, J_MAX=27;              // de f/1,4 a f/22
    adelante se repiten las de los segundos en minutos, porque 2^6 = 64 s es casi un minuto */
 const ETQ_SEG=['1/8000','1/6400','1/5000','1/4000','1/3200','1/2500','1/2000','1/1600','1/1250','1/1000',
   '1/800','1/640','1/500','1/400','1/320','1/250','1/200','1/160','1/125','1/100','1/80','1/60','1/50',
-  '1/40','1/30','1/25','1/20','1/15','1/13','1/10','1/8','1/6','1/5','1/4','1/3','0,4"','0,5"','0,6"',
-  '0,8"','1"','1,3"','1,6"','2"','2,5"','3,2"','4"','5"','6"','8"','10"','13"','15"','20"',
+  '1/40','1/30','1/25','1/20','1/15','1/13','1/10','1/8','1/6','1/5','1/4','1/3','1/2,5','1/2','1/1,6',
+  '1/1,3','1"','1,3"','1,6"','2"','2,5"','3,2"','4"','5"','6"','8"','10"','13"','15"','20"',
   '25"','30"','40"','50"','60"'];
 const ETQ_T=ETQ_SEG.concat(ETQ_SEG.slice(40,55).map(e=>e.replace('"',"'")));   // 1,3' … 30'
 const DIAF_NOM=['1','1,1','1,2','1,4','1,6','1,8','2','2,2','2,5','2,8','3,2','3,5','4','4,5','5','5,6','6,3','7,1','8','9','10','11','13','14','16','18','20','22'];
 const ETQ_D=DIAF_NOM.slice(J_MIN,J_MAX+1);
 const ISO_NOM=[50,64,80,100,125,160,200,250,320,400,500,640,800,1000,1250,1600,2000,2500,3200,4000,5000,6400,8000,10000,12800,16000,20000,25600,32000,40000,51200];
-/* el dial de ISO, a la manera de las Leica: A (automático) y de 64 a 12800 en tercios,
+/* el dial de ISO, a la manera de las Leica: de 64 a 6400 en tercios y después A (automático),
    con cifra en los pasos enteros y un punto en los tercios */
-const ISO_POS=['A'].concat(ISO_NOM.filter(x=>x>=64&&x<=12800));
-const ISO_CIFRA=[64,100,200,400,800,1600,3200,6400,12800];
+const ISO_POS=ISO_NOM.filter(x=>x>=64&&x<=6400).concat(['A']);
+const ISO_CIFRA=[64,100,200,400,800,1600,3200,6400];
 
 /* ---------- estado ---------- */
 const CLAVE='exposicion-larga-campo';
@@ -576,7 +576,8 @@ const MINS={6:'1 min',7:'2 min',8:'4 min',9:'8 min',10:'15 min',11:'30 min'};
 function cercano(lista,x){ let m=lista[0]; lista.forEach(n=>{ if(Math.abs(Math.log(n/x))<Math.abs(Math.log(m/x))) m=n; }); return m; }
 function fmtT(t){
   if(!Number.isFinite(t)||t<=0) return '—';
-  if(t<0.7){ const m=cercano(NOMS,1/t); return '1/'+nf(m,m%1?1:0)+' s'; }
+  /* por debajo del segundo, en fracción, como en la cámara: 1/2, 1/1,3 */
+  if(t<0.9){ const m=cercano(NOMS,1/t); return '1/'+nf(m,m%1?1:0)+' s'; }
   if(t<40){ const m=cercano(SEGS,t); return nf(m,m%1?1:0)+' s'; }
   const e=Math.log2(t);
   if(Math.abs(e-Math.round(e))<0.02 && MINS[Math.round(e)]) return MINS[Math.round(e)];
@@ -586,8 +587,8 @@ function fmtT(t){
 function fmtPasos(p){ const r=Math.round(p*3)/3; return nf(r, Math.abs(r-Math.round(r))>0.01?1:0); }
 const diafTxt=j=>'f/'+etiqueta(DIAF_NOM[j]);
 /* el ISO que vale cada posición del dial; en A, el que da la exposición correcta */
-const ISO_VAL=ISO_POS.slice(1);
-function autoISO(t,N){ return cercano(ISO_VAL, limita(100*N*N/(Math.pow(2,E.luz)*t),64,12800)); }
+const ISO_VAL=ISO_POS.filter(x=>x!=='A');
+function autoISO(t,N){ return cercano(ISO_VAL, limita(100*N*N/(Math.pow(2,E.luz)*t),64,6400)); }
 function isoValor(pos,t,N){ return pos==='A' ? autoISO(t,N) : +pos; }
 const isoTxt=(pos,val)=>(pos==='A'?'A · ':'')+'ISO '+nf(val,0);
 function ajustesTxt(k,j,pos,val){ return fmtT(Math.pow(2,k/3))+' · '+diafTxt(j)+' · '+isoTxt(pos,val); }
@@ -641,7 +642,7 @@ function recomienda(b){
     if(falta>0){ const ab=Math.min(falta,2*Math.log2(8/2.8)); N=8/Math.pow(2,ab/2); falta-=ab; }
     if(falta>0) iso*=Math.pow(2,falta);
   }
-  iso=cercano(ISO_VAL,limita(iso,64,12800));                // al tercio del dial
+  iso=cercano(ISO_VAL,limita(iso,64,6400));                 // al tercio del dial
   let k=limita(Math.round(3*Math.log2(t)),K_MIN,K_MAX), j=limita(Math.round(6*Math.log2(N)),J_MIN,J_MAX);
   const isoV=iso;
   /* el filtro se elige con los valores ya redondeados de las ruedas, los mismos que juzga
@@ -1096,7 +1097,7 @@ function pintarResultado(b,r,rc){
   else if(ef.id==='flash') txt=LBL('vFlash',LBL('al')[sj.id],ef.K*q);
   else txt=r.t<0.2?LBL('vZoomCorto'):LBL('vZoom');
   const det=[];
-  if(r.iso>6500) det.push(LBL('vIsoAlto',nf(r.iso,0)));
+  if(r.iso>=6400) det.push(LBL('vIsoAlto',nf(r.iso,0)));
   if(b.fo.H>b.Al*0.95 || (ef.id!=='trails'&&ef.id!=='ghost'&&b.fo.W>b.A)) det.push(LBL('vFuera'));
   $('veras').innerHTML='<h3>'+LBL('verasH')+'</h3><p>'+txt+'</p>'+(det.length?'<p class="det">'+det.join(' ')+'</p>':'');
   $('pie').textContent=LBL('pie',nf(b.A,b.A<10?1:0),nf(b.Al,b.Al<10?1:0));
