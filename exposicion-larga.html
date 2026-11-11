@@ -40,6 +40,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
+  --metal:#18191a; --metal-2:#2e3032; --grabado:#f1f0ea; --indice:#e2512e;
   --bg:#0e1116; --panel:#161b22; --panel2:#11161d; --line:#242c36; --line2:#303a46;
   --fg:#dfe4ea; --fg2:#98a3b0; --fg3:#6b7684;
   --amber:#e8b04b; --cyan:#5ec8d8; --green:#6fbf73; --red:#e2705f;
@@ -98,13 +99,11 @@ input[type=range]{width:100%;accent-color:var(--amber);height:30px}
 @media(max-width:560px){.efecto{grid-template-columns:1fr;padding:10px}.efecto svg{grid-row:auto;width:22px;height:22px}.efecto span{font-size:12px}}
 
 /* resultado */
-.veredictos{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:10px}
-@media(max-width:620px){.veredictos{grid-template-columns:1fr 1fr}.veredictos .ver-t{grid-column:1/-1}}
+.veredictos{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .ver{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;border-top:3px solid var(--line2);min-width:0}
 .ver .k{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg3)}
 .ver b{display:block;font-family:var(--disp);font-size:clamp(22px,4.4vw,30px);font-weight:700;line-height:1.1;margin-top:6px;letter-spacing:-.01em}
 .ver .d{display:block;font-size:13px;color:var(--fg2);line-height:1.4;margin-top:6px}
-.ver-t b{font-family:var(--mono);font-weight:500;color:var(--amber);font-size:clamp(30px,7vw,44px);letter-spacing:-.03em}
 .ver.ok{border-top-color:var(--green)}.ver.ok b{color:var(--green)}
 .ver.warn{border-top-color:var(--amber)}.ver.warn b{color:var(--amber)}
 .ver.bad{border-top-color:var(--red)}.ver.bad b{color:var(--red)}
@@ -117,6 +116,39 @@ input[type=range]{width:100%;accent-color:var(--amber);height:30px}
 .veras p:last-child{margin-bottom:0}
 .veras p.det{font-size:13.5px;color:var(--fg2)}
 .veras b{color:var(--fg);font-weight:600}
+
+/* lectura y recomendación */
+.lectura{display:flex;flex-wrap:wrap;gap:4px 22px;align-items:baseline}
+.lectura b{font-family:var(--mono);font-weight:500;color:var(--amber);font-size:clamp(26px,6vw,38px);letter-spacing:-.03em;line-height:1.1}
+.rec{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:8px 0 14px;font-size:13.5px;color:var(--fg2)}
+.rec b{color:var(--fg);font-weight:600}
+.rec button{font-family:var(--mono);font-size:12px;background:var(--panel2);border:1px solid var(--amber);color:var(--amber);border-radius:999px;padding:0 12px;min-height:34px;cursor:pointer}
+
+/* ruedas: el componente y el aro de metal de la calculadora de reciprocidad */
+.dial-marco{position:relative;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:6px}
+.giro{width:44px;height:44px;border-radius:50%;border:1px solid var(--line2);background:var(--panel2);color:var(--fg);display:grid;place-items:center;cursor:pointer;font:500 22px/1 var(--mono)}
+.dial-ventana{position:relative;min-width:0;height:88px;border-radius:14px;overflow:hidden;background:var(--panel2);border:1px solid var(--line)}
+.rueda{position:absolute;inset:0;perspective:640px;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 26%,#000 74%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 26%,#000 74%,transparent 100%)}
+.rueda.arrastrando{cursor:grabbing}
+.tambor{position:absolute;inset:0;transform-style:preserve-3d}
+.marca{position:absolute;left:50%;top:0;height:100%;width:66px;margin-left:-33px;display:grid;justify-items:center;align-content:end;gap:7px;padding-bottom:12px;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;will-change:transform,opacity}
+.marca span{display:block;height:11px;color:var(--fg3)}
+.marca span svg{display:block;height:100%;width:auto;overflow:visible}
+.dial-ventana:focus-within{outline:2px solid var(--amber);outline-offset:3px}
+.aro .dial-ventana{height:100px;border-color:#000;background:linear-gradient(180deg,var(--metal-2),var(--metal) 60%)}
+.aro .moleteado{position:absolute;left:0;right:0;top:0;height:22px;pointer-events:none;
+  background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.18) 0 2px,rgba(0,0,0,.45) 2px 6px);background-size:6px 100%;border-bottom:1px solid rgba(0,0,0,.7)}
+.aro .rueda{top:22px;bottom:20px}
+.aro .marca{align-content:center;padding:0;gap:0}
+.aro .marca span{display:block;height:18px;color:var(--grabado)}
+.aro .marca .punto{display:block;width:5px;height:5px;border-radius:50%;background:var(--grabado);opacity:.75}
+.aro .marca.activa span{color:var(--indice)}
+.aro .marca.activa .punto{background:var(--indice);opacity:1;transform:scale(1.4)}
+.aro .base{position:absolute;left:0;right:0;bottom:0;height:20px;pointer-events:none;background:linear-gradient(180deg,#3a3c3e,#222426);border-top:1px solid rgba(0,0,0,.8)}
+.aro .indice{position:absolute;left:50%;top:3px;margin-left:-6px;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:9px solid var(--indice)}
+.aro .sombra{position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,.8),rgba(0,0,0,0) 30%,rgba(255,255,255,.06) 50%,rgba(0,0,0,0) 70%,rgba(0,0,0,.8))}
 
 /* barra fija */
 .mini{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(14,17,22,.94);border-top:1px solid var(--line);backdrop-filter:blur(6px);padding:10px max(16px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));display:flex;gap:16px;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;transform:translateY(110%);transition:transform .2s}
@@ -171,7 +203,6 @@ footer{border-top:1px solid var(--line);margin-top:36px;padding-top:16px;font-si
     <div class="campo"><div class="etq"><span data-lang="es">Focal</span><span data-lang="en">Focal length</span></div>
       <div class="pista-num"><div class="chips" id="focales"></div><div class="num-in" style="width:96px"><input id="focal" type="number" inputmode="numeric" min="8" max="800" step="1" aria-label="Focal (mm)" data-aria-es="Focal (mm)" data-aria-en="Focal length (mm)"><span>mm</span></div></div>
     </div>
-    <div class="campo"><div class="etq"><span data-lang="es">Diafragma</span><span data-lang="en">Aperture</span></div><div class="chips" id="diafs"></div></div>
   </div>
 </section>
 
@@ -187,10 +218,55 @@ footer{border-top:1px solid var(--line);margin-top:36px;padding-top:16px;font-si
   </div>
 </section>
 
+<section class="paso" id="ajustes">
+  <div class="paso-cab"><span class="num">4</span><h2><span data-lang="es">Ajustes de la cámara</span><span data-lang="en">Camera settings</span></h2></div>
+  <div class="panel">
+    <div class="lectura" id="lectura"></div>
+    <div class="rec"><span id="recTxt"></span><button type="button" id="usarRec" hidden><span data-lang="es">Volver a lo recomendado</span><span data-lang="en">Back to the recommendation</span></button></div>
+    <div class="campo"><div class="etq"><span data-lang="es">Velocidad</span><span data-lang="en">Shutter speed</span></div>
+      <div class="dial-marco aro">
+        <button class="giro" type="button" id="t-menos" aria-label="Un tercio de paso más corto" data-aria-es="Un tercio de paso más corto" data-aria-en="One third of a stop shorter">−</button>
+        <div class="dial-ventana">
+          <div class="moleteado" id="mol-t"></div>
+          <div class="rueda" id="rueda-t" tabindex="0" role="slider" aria-label="Velocidad de obturación" data-aria-es="Velocidad de obturación" data-aria-en="Shutter speed"><div class="tambor" id="tambor-t"></div></div>
+          <div class="base"><span class="indice"></span></div>
+          <div class="sombra"></div>
+        </div>
+        <button class="giro" type="button" id="t-mas" aria-label="Un tercio de paso más largo" data-aria-es="Un tercio de paso más largo" data-aria-en="One third of a stop longer">+</button>
+      </div>
+    </div>
+    <div class="campo"><div class="etq"><span data-lang="es">Diafragma</span><span data-lang="en">Aperture</span></div>
+      <div class="dial-marco aro">
+        <button class="giro" type="button" id="d-menos" aria-label="Abrir un tercio de paso" data-aria-es="Abrir un tercio de paso" data-aria-en="Open up one third of a stop">−</button>
+        <div class="dial-ventana">
+          <div class="moleteado" id="mol-d"></div>
+          <div class="rueda" id="rueda-d" tabindex="0" role="slider" aria-label="Diafragma" data-aria-es="Diafragma" data-aria-en="Aperture"><div class="tambor" id="tambor-d"></div></div>
+          <div class="base"><span class="indice"></span></div>
+          <div class="sombra"></div>
+        </div>
+        <button class="giro" type="button" id="d-mas" aria-label="Cerrar un tercio de paso" data-aria-es="Cerrar un tercio de paso" data-aria-en="Stop down one third of a stop">+</button>
+      </div>
+    </div>
+    <div class="campo"><div class="etq"><span data-lang="es">ISO</span><span data-lang="en">ISO</span></div>
+      <div class="dial-marco aro">
+        <button class="giro" type="button" id="i-menos" aria-label="Bajar un tercio de paso" data-aria-es="Bajar un tercio de paso" data-aria-en="Down one third of a stop">−</button>
+        <div class="dial-ventana">
+          <div class="moleteado" id="mol-i"></div>
+          <div class="rueda" id="rueda-i" tabindex="0" role="slider" aria-label="Sensibilidad ISO" data-aria-es="Sensibilidad ISO" data-aria-en="ISO sensitivity"><div class="tambor" id="tambor-i"></div></div>
+          <div class="base"><span class="indice"></span></div>
+          <div class="sombra"></div>
+        </div>
+        <button class="giro" type="button" id="i-mas" aria-label="Subir un tercio de paso" data-aria-es="Subir un tercio de paso" data-aria-en="Up one third of a stop">+</button>
+      </div>
+    </div>
+    <p class="pie" data-lang="es">Cambiar el efecto, la cámara o la escena devuelve las ruedas a lo recomendado. Gíralas para probar otros ajustes: lo de abajo los sigue.</p>
+    <p class="pie" data-lang="en">Changing the effect, the camera or the scene puts the wheels back on the recommendation. Turn them to try other settings: everything below follows them.</p>
+  </div>
+</section>
+
 <section class="paso" id="resultado">
-  <div class="paso-cab"><span class="num">4</span><h2><span data-lang="es">Qué vas a hacer y qué vas a ver</span><span data-lang="en">What to do and what you will see</span></h2></div>
+  <div class="paso-cab"><span class="num">5</span><h2><span data-lang="es">Qué te hace falta y qué vas a ver</span><span data-lang="en">What you need and what you will see</span></h2></div>
   <div class="veredictos">
-    <div class="ver ver-t"><span class="k"><span data-lang="es">Tiempo</span><span data-lang="en">Time</span></span><b id="oT">—</b><span class="d" id="oTd"></span></div>
     <div class="ver" id="vND"><span class="k"><span data-lang="es">Filtro ND</span><span data-lang="en">ND filter</span></span><b id="oND">—</b><span class="d" id="oNDd"></span></div>
     <div class="ver" id="vTri"><span class="k"><span data-lang="es">Trípode</span><span data-lang="en">Tripod</span></span><b id="oTri">—</b><span class="d" id="oTrid"></span></div>
   </div>
@@ -296,14 +372,15 @@ const DICT={
   al:{ped:'al peatón',run:'al corredor',bike:'al ciclista',city:'el coche',road:'el coche',train:'el tren'},
   los:{ped:'los peatones',run:'los corredores',bike:'los ciclistas',city:'los coches',road:'los coches',train:'los trenes'},
   luz:{night:'Noche urbana',blue:'Hora azul',shade:'Sombra',cloud:'Nublado',sun:'Sol'},
-  luzEn:{night:'de noche',blue:'en la hora azul',shade:'a la sombra',cloud:'con el cielo nublado',sun:'a pleno sol'},
+  /* ruedas */
+  ariaT:'Velocidad de obturación', ariaD:'Diafragma', ariaI:'Sensibilidad ISO',
+  rec:(s)=>'Recomendado para esta foto: <b>'+s+'</b>', recNd:(n)=>' con '+n, recSin:' sin filtro',
   /* veredictos */
-  tD:(N,iso)=>'a f/'+N+' e ISO '+iso,
-  bulb:' · modo B y disparador',
-  ndNo:'No hace falta', ndNoD:'La luz ya pide este tiempo o más.',
-  ndSiD:(p,nom)=>'Sobran '+p+' pasos de luz: '+nom+'.',
+  ndOk:'No hace falta', ndOkD:'Con estos ajustes la exposición ya es correcta.',
+  ndSiD:(p)=>'Sobran '+p+' pasos de luz con estos ajustes.',
+  ndResto:(p,o)=>' Con él queda '+p+' '+(o?'pasos oscura: sube el ISO o abre un poco.':'pasos clara: baja el ISO o cierra un poco.'),
   ndCierra:(N)=>' O cierra a f/'+N+' y no lo necesitas.',
-  ndIso:(iso)=>' Con él, sube a ISO '+iso+'.',
+  ndFalta:'Falta luz', ndFaltaD:(p)=>'Faltan '+p+' pasos: sube el ISO, abre el diafragma o alarga el tiempo.',
   triHand:'No', triHandD:'A pulso, sin más.',
   triBrace:'No', triBraceD:'A pulso, bien sujeta: codos pegados y correa tensa contra el cuello. Dispara en ráfaga.',
   triLean:'Apóyala', triLeanD:'Sobre un muro, una barandilla o la mochila; o un trípode.',
@@ -311,23 +388,32 @@ const DICT={
   triPan:'No', triPanD:'El barrido se hace a pulso: mueves la cámara con el sujeto.',
   triFlash:'No', triFlashD:'El destello congela al sujeto; el temblor solo añade arrastre al ambiente.',
   triZoom:'Sí', triZoomD:'Con la cámara quieta el centro sale reconocible y las rayas, limpias.',
+  bulb:'Más de 30 s: modo B y un disparador.',
   /* qué verás */
   verasH:'Lo que vas a ver',
+  aspecto:(k,p)=> k<0.1?'saldrá nítido'
+    : k<0.5?'saldrá algo movido'
+    : k<1?'saldrá movido, pero se reconoce bien'
+    : k<=2.5?'dejará una traza de <b>'+nf(k,1)+' veces su largo</b>: se ve que se mueve y aún se reconoce'
+    : k<=10?'será un <b>fantasma</b>: deja un rastro de '+nf(k,0)+' veces su largo, a un '+p+' % de su brillo'
+    : k<32?'será un fantasma muy tenue, a un '+p+' % de su brillo'
+    : '<b>desaparecerá</b>: su rastro queda más de cinco pasos por debajo del fondo',
   vPan:(el,pc)=>cap(el)+' saldrá casi nítido y el fondo, rayado: cada punto del fondo se estira un <b>'+pc+' %</b> del ancho del encuadre.',
+  vPanPoco:(pc)=>'El fondo apenas se estira, un '+pc+' % del encuadre: el barrido casi no se notará. Alarga el tiempo.',
   vPanTrack:(px)=>'Al seguirlo, la mano nunca va exacta: el error normal deja unos '+px+' px de arrastre en el sujeto. Dispara en ráfaga y quédate con la más limpia.',
-  vTrace:(el)=>cap(el)+' dejará una traza de <b>vez y media su largo</b>: se ve que se mueve y aún se reconoce. Su centro conserva dos tercios del brillo y los bordes se funden con el fondo.',
-  vStatic:(los)=>'Tu sujeto, quieto, saldrá nítido. '+cap(los)+' que pasen por delante dejarán un rastro de <b>tres veces su largo</b>, a un tercio de brillo: <b>fantasmas</b> a través de los que se ve el fondo.',
+  vTrace:(el,a)=>cap(el)+' '+a+'.',
+  vStatic:(los,a)=>'Tu sujeto, quieto, saldrá nítido. Cada uno de '+los+' que pasen por delante '+a+'.',
+  vGhost:(los,a,tq)=>'Cada uno de '+los+' que pasen '+a+'. Quien se quede quieto más de '+tq+' sí dejará huella.',
   vTrails:(los)=>'Los faros y los pilotos dibujarán <b>líneas continuas de lado a lado</b> del encuadre; '+los+' casi no se verán.',
-  vTrailsDia:'De día los faros no destacan sobre la escena y las estelas apenas se verán. Este efecto pide noche u hora azul.',
-  vGhost:(los,tq)=>cap(los)+' que pasen <b>desaparecen</b>: su rastro queda más de cinco pasos por debajo del fondo. Quien se quede quieto más de '+tq+' sí dejará huella.',
-  vFlash:(al)=>'El destello congela '+al+' al final del recorrido y la luz ambiente deja detrás una <b>estela tenue de medio largo</b>. Usa la sincronización a la segunda cortinilla para que la estela quede detrás y no delante.',
+  vTrailsCorto:(pc)=>'Las estelas cubrirán un <b>'+pc+' %</b> del ancho del encuadre: trazos cortos, no líneas de lado a lado. Alarga el tiempo.',
+  vTrailsDia:' De día los faros no destacan sobre la escena y las estelas apenas se verán: este efecto pide noche u hora azul.',
+  vFlash:(al,k)=>'El destello congela '+al+' al final del recorrido y la luz ambiente deja detrás una <b>estela de '+nf(k,1)+' veces su largo</b>. Usa la sincronización a la segunda cortinilla para que la estela quede detrás y no delante.',
   vZoom:'Rayas <b>radiales</b> desde el centro del encuadre. Gira el anillo a ritmo constante; si esperas un instante antes de girarlo, el centro sale reconocible.',
-  vMas:(t)=>'La luz pide '+t+', más de lo que necesita el efecto; no pasa nada, porque más tiempo solo lo refuerza.',
-  vExpo:(luz,N,t)=>'Exposición correcta '+luz+' a f/'+N+' e ISO 100: '+t+'.',
-  vIsoAlto:(iso)=>'Ojo: ISO '+iso+' es mucho. Abre el diafragma o elige otro efecto; con flash también llegas.',
+  vZoomCorto:'Es demasiado corto para girar el anillo durante la toma: alárgalo hasta medio segundo o más.',
+  vIsoAlto:(iso)=>'Ojo: ISO '+iso+' es mucho; habrá ruido.',
   vFuera:'Con esta focal y esta distancia el sujeto no cabe entero en el encuadre.',
-  pie:(a,h)=>'El encuadre entero a la distancia del sujeto: '+a+' m de ancho y '+h+' m de alto. Así saldría la foto.',
-  pasos:'pasos', y:' y '
+  pie:(a,h)=>'El encuadre entero a la distancia del sujeto: '+a+' m de ancho y '+h+' m de alto. Así saldría la foto con estos ajustes.',
+  pasos:'pasos', y:' y ', tri:'Trípode'
  },
  en:{
   ef:{
@@ -344,15 +430,15 @@ const DICT={
   suj:{ped:'Pedestrian',run:'Running',bike:'Bike',city:'City car',road:'Road',train:'Train'},
   el:{ped:'the pedestrian',run:'the runner',bike:'the cyclist',city:'the car',road:'the car',train:'the train'},
   al:{ped:'the pedestrian',run:'the runner',bike:'the cyclist',city:'the car',road:'the car',train:'the train'},
-  los:{ped:'pedestrians',run:'runners',bike:'cyclists',city:'cars',road:'cars',train:'trains'},
+  los:{ped:'the pedestrians',run:'the runners',bike:'the cyclists',city:'the cars',road:'the cars',train:'the trains'},
   luz:{night:'City night',blue:'Blue hour',shade:'Shade',cloud:'Overcast',sun:'Sun'},
-  luzEn:{night:'at night',blue:'at blue hour',shade:'in the shade',cloud:'under an overcast sky',sun:'in full sun'},
-  tD:(N,iso)=>'at f/'+N+' and ISO '+iso,
-  bulb:' · bulb mode and a remote',
-  ndNo:'Not needed', ndNoD:'The light already asks for this time or longer.',
-  ndSiD:(p,nom)=>p+' stops of light to spare: '+nom+'.',
+  ariaT:'Shutter speed', ariaD:'Aperture', ariaI:'ISO sensitivity',
+  rec:(s)=>'Recommended for this picture: <b>'+s+'</b>', recNd:(n)=>' with '+n, recSin:' with no filter',
+  ndOk:'Not needed', ndOkD:'With these settings the exposure is already correct.',
+  ndSiD:(p)=>p+' stops of light to spare with these settings.',
+  ndResto:(p,o)=>' With it the picture is '+p+' '+(o?'stops dark: raise the ISO or open up a little.':'stops bright: lower the ISO or stop down a little.'),
   ndCierra:(N)=>' Or stop down to f/'+N+' and you do not need it.',
-  ndIso:(iso)=>' With it, raise to ISO '+iso+'.',
+  ndFalta:'Not enough light', ndFaltaD:(p)=>p+' stops short: raise the ISO, open the aperture or lengthen the time.',
   triHand:'No', triHandD:'Handheld, nothing more.',
   triBrace:'No', triBraceD:'Handheld, held firmly: elbows tucked in and strap tensioned against the neck. Shoot a burst.',
   triLean:'Rest it', triLeanD:'On a wall, a railing or your bag; or a tripod.',
@@ -360,22 +446,31 @@ const DICT={
   triPan:'No', triPanD:'Panning is done handheld: you move the camera with the subject.',
   triFlash:'No', triFlashD:'The flash freezes the subject; tremor only adds blur to the ambient.',
   triZoom:'Yes', triZoomD:'With the camera still the centre stays recognisable and the streaks clean.',
+  bulb:'Over 30 s: bulb mode and a remote.',
   verasH:'What you will see',
+  aspecto:(k,p)=> k<0.1?'will come out sharp'
+    : k<0.5?'will come out slightly blurred'
+    : k<1?'will come out blurred but easy to recognise'
+    : k<=2.5?'will leave a trace <b>'+nf(k,1)+' times its length</b>: you can see it moves and still recognise it'
+    : k<=10?'will be a <b>ghost</b>: it leaves a trail '+nf(k,0)+' times its length, at '+p+' % of its brightness'
+    : k<32?'will be a very faint ghost, at '+p+' % of its brightness'
+    : 'will <b>disappear</b>: its trace ends up more than five stops below the background',
   vPan:(el,pc)=>cap(el)+' will come out nearly sharp and the background streaked: every point of the background stretches <b>'+pc+' %</b> of the frame width.',
+  vPanPoco:(pc)=>'The background barely stretches, '+pc+' % of the frame: the pan will hardly show. Lengthen the time.',
   vPanTrack:(px)=>'Following it, the hand is never exact: the usual error leaves about '+px+' px of blur on the subject. Shoot a burst and keep the cleanest.',
-  vTrace:(el)=>cap(el)+' will leave a trace of <b>one and a half times its length</b>: you can see it moves and still recognise it. Its centre keeps two thirds of its brightness and the edges melt into the background.',
-  vStatic:(los)=>'Your subject, standing still, will come out sharp. '+cap(los)+' passing in front will leave a trail of <b>three times their length</b>, at a third of their brightness: <b>ghosts</b> you can see the background through.',
-  vTrails:(los)=>'Headlights and tail lights will draw <b>continuous lines across</b> the frame; the '+los+' themselves will barely show.',
-  vTrailsDia:'In daylight headlights do not stand out from the scene and the trails will barely show. This effect asks for night or blue hour.',
-  vGhost:(los,tq)=>cap(los)+' passing by <b>disappear</b>: their trace ends up more than five stops below the background. Anyone who stands still for more than '+tq+' will leave a mark.',
-  vFlash:(el)=>'The flash freezes '+el+' at the end of its path and the ambient light leaves a <b>faint trail half its length</b> behind it. Use rear-curtain sync so the trail falls behind and not in front.',
+  vTrace:(el,a)=>cap(el)+' '+a+'.',
+  vStatic:(los,a)=>'Your subject, standing still, will come out sharp. Each of '+los+' passing in front '+a+'.',
+  vGhost:(los,a,tq)=>'Each of '+los+' passing by '+a+'. Anyone who stands still for more than '+tq+' will leave a mark.',
+  vTrails:(los)=>'Headlights and tail lights will draw <b>continuous lines across</b> the frame; '+los+' themselves will barely show.',
+  vTrailsCorto:(pc)=>'The trails will cover <b>'+pc+' %</b> of the frame width: short strokes, not lines across. Lengthen the time.',
+  vTrailsDia:' In daylight headlights do not stand out from the scene and the trails will barely show: this effect asks for night or blue hour.',
+  vFlash:(al,k)=>'The flash freezes '+al+' at the end of its path and the ambient light leaves a <b>trail '+nf(k,1)+' times its length</b> behind it. Use rear-curtain sync so the trail falls behind and not in front.',
   vZoom:'<b>Radial</b> streaks from the centre of the frame. Turn the ring at a steady pace; if you wait a moment before turning it, the centre stays recognisable.',
-  vMas:(t)=>'The light asks for '+t+', more than the effect needs; that is fine, because more time only strengthens it.',
-  vExpo:(luz,N,t)=>'Correct exposure '+luz+' at f/'+N+' and ISO 100: '+t+'.',
-  vIsoAlto:(iso)=>'Careful: ISO '+iso+' is a lot. Open the aperture or choose another effect; flash also gets you there.',
+  vZoomCorto:'It is too short to turn the ring during the shot: lengthen it to half a second or more.',
+  vIsoAlto:(iso)=>'Careful: ISO '+iso+' is a lot; there will be noise.',
   vFuera:'With this focal length and distance the subject does not fit whole in the frame.',
-  pie:(a,h)=>'The whole frame at the subject’s distance: '+a+' m wide and '+h+' m tall. This is how the picture would come out.',
-  pasos:'stops', y:' and '
+  pie:(a,h)=>'The whole frame at the subject’s distance: '+a+' m wide and '+h+' m tall. This is how the picture would come out with these settings.',
+  pasos:'stops', y:' and ', tri:'Tripod'
  }
 };
 const LANG=()=>document.documentElement.lang==="en"?"en":"es";
@@ -384,13 +479,15 @@ function LBL(k,...a){ const v=DICT[LANG()][k]; return typeof v==="function"?v(..
 const $=id=>document.getElementById(id);
 const nf=(x,d)=>Number.isFinite(x)?x.toLocaleString(LOC(),{minimumFractionDigits:d,maximumFractionDigits:d}):"—";
 function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+// las etiquetas de las escalas se guardan con coma decimal; en inglés se muestran con punto
+function etiqueta(e){ return LANG()==='en' ? e.replace(',','.') : e; }
+const limita=(x,a,b)=>Math.max(a,Math.min(b,x));
 
 /* ---------- datos ---------- */
 const FORMATOS={ff:{w:36,h:24},apsc:{w:23.5,h:15.6},m43:{w:17.3,h:13}};
 const MPS=[12,24,33,45,61,100];
 const ESTABS=[0,2,4];                  // pasos: sin, en el objetivo, en el cuerpo
 const FOCALES=[24,35,50,85,135];
-const DIAFS=[2.8,4,5.6,8,11,16];
 /* qué se mueve: velocidad (m/s), distancia típica a la que se fotografía (m) y forma */
 const SUJETOS=[
   {id:'ped',  v:1.4, d:6,  forma:'persona'},
@@ -427,91 +524,130 @@ const ICONOS={
 /* filtros comerciales, en pasos */
 const NDS=[1,2,3,4,6,10,15];
 const NOMBRE_ND={1:'ND2',2:'ND4',3:'ND8',4:'ND16',6:'ND64',10:'ND1000',15:'ND32000'};
-const DIAF_TERCIOS=[2.8,3.2,3.5,4,4.5,5,5.6,6.3,7.1,8,9,10,11,13,14,16];
-const ISOS=[100,125,160,200,250,320,400,500,640,800,1000,1250,1600,2000,2500,3200,4000,5000,6400,8000,10000,12800,16000,20000,25600,32000,40000,51200,102400];
 const W0=0.03;        // rad/s de temblor a pulso limpio, como en el programa de la cámara
 const CRIT=2;         // px de arrastre que se considera nítido
 const TRACK=0.15;     // error de seguimiento en el barrido, fracción del movimiento
 
+/* Escalas de las ruedas, en tercios de paso, con el valor exacto en potencias de dos
+   como en la calculadora de reciprocidad: velocidad 2^(k/3) s, diafragma 2^(j/6),
+   ISO 100·2^(m/3). */
+const K_MIN=-39, K_MAX=33;            // de 1/8000 s a 30 min
+const J_MIN=3, J_MAX=27;              // de f/1,4 a f/22
+const M_MIN=-3, M_MAX=24;             // de ISO 50 a 25600
+const VEL_MAY={'-13':'1/8000','-12':'1/4000','-11':'1/2000','-10':'1/1000','-9':'1/500','-8':'1/250','-7':'1/125','-6':'1/60',
+  '-5':'1/30','-4':'1/15','-3':'1/8','-2':'1/4','-1':'1/2','0':'1"','1':'2"','2':'4"','3':'8"','4':'15"','5':'30"',
+  '6':"1'",'7':"2'",'8':"4'",'9':"8'",'10':"15'",'11':"30'"};
+const DIAF_NOM=['1','1,1','1,2','1,4','1,6','1,8','2','2,2','2,5','2,8','3,2','3,5','4','4,5','5','5,6','6,3','7,1','8','9','10','11','13','14','16','18','20','22'];
+const ISO_NOM=[50,64,80,100,125,160,200,250,320,400,500,640,800,1000,1250,1600,2000,2500,3200,4000,5000,6400,8000,10000,12800,16000,20000,25600];
+const ETQ_T=[]; for(let k=K_MIN;k<=K_MAX;k++) ETQ_T.push(k%3===0?VEL_MAY[String(k/3)]:'');
+const ETQ_D=DIAF_NOM.slice(J_MIN,J_MAX+1);
+const ETQ_I=ISO_NOM.map(String);
+
 /* ---------- estado ---------- */
 const CLAVE='exposicion-larga-campo';
-let E={efecto:'pan',formato:'ff',mp:24,estab:2,focal:35,ap:8,sujeto:'bike',vel:5,dist:10,luz:13};
+let E={efecto:'pan',formato:'ff',mp:24,estab:2,focal:35,sujeto:'bike',vel:5,dist:10,luz:13,k:null,j:null,m:null};
 try{ const g=JSON.parse(localStorage.getItem(CLAVE)||'null'); if(g&&typeof g==='object') E=Object.assign(E,g); }catch(e){}
+delete E.ap;
 function guardar(){ try{ localStorage.setItem(CLAVE,JSON.stringify(E)); }catch(e){} }
 const efecto=()=>EFECTOS.find(x=>x.id===E.efecto)||EFECTOS[0];
 const sujeto=()=>SUJETOS.find(x=>x.id===E.sujeto)||SUJETOS[0];
 
 /* ---------- formato de números ---------- */
 const NOMS=[8000,6400,5000,4000,3200,2500,2000,1600,1250,1000,800,640,500,400,320,250,200,160,125,100,80,60,50,40,30,25,20,15,13,10,8,6,5,4,3,2.5,2,1.6,1.3];
+const SEGS=[0.8,1,1.3,1.6,2,2.5,3.2,4,5,6,8,10,13,15,20,25,30];
+const MINS={6:'1 min',7:'2 min',8:'4 min',9:'8 min',10:'15 min',11:'30 min'};
+function cercano(lista,x){ let m=lista[0]; lista.forEach(n=>{ if(Math.abs(Math.log(n/x))<Math.abs(Math.log(m/x))) m=n; }); return m; }
 function fmtT(t){
   if(!Number.isFinite(t)||t<=0) return '—';
-  if(t<0.7){
-    const inv=1/t; let m=NOMS[0];
-    NOMS.forEach(n=>{ if(Math.abs(Math.log(n/inv))<Math.abs(Math.log(m/inv))) m=n; });
-    return '1/'+nf(m,m%1?1:0)+' s';
-  }
-  if(t<10) return nf(t,1)+' s';
-  if(t<59.5) return nf(Math.round(t),0)+' s';
+  if(t<0.7){ const m=cercano(NOMS,1/t); return '1/'+nf(m,m%1?1:0)+' s'; }
+  if(t<40){ const m=cercano(SEGS,t); return nf(m,m%1?1:0)+' s'; }
+  const e=Math.log2(t);
+  if(Math.abs(e-Math.round(e))<0.02 && MINS[Math.round(e)]) return MINS[Math.round(e)];
   const s=Math.round(t), h=Math.floor(s/3600), mi=Math.floor(s%3600/60), se=s%60;
   return (h?h+' h ':'')+((h||mi)?mi+' min':'')+(se&&!h?' '+se+' s':'');
 }
-function isoNominal(x){ let m=ISOS[0]; ISOS.forEach(n=>{ if(Math.abs(Math.log(n/x))<Math.abs(Math.log(m/x))) m=n; }); return m; }
-function fmtPasos(p){ return nf(Math.round(p*3)/3, Math.abs(Math.round(p*3)/3-Math.round(p))>0.01?1:0); }
+function fmtPasos(p){ const r=Math.round(p*3)/3; return nf(r, Math.abs(r-Math.round(r))>0.01?1:0); }
+const diafTxt=j=>'f/'+etiqueta(DIAF_NOM[j]);
+const isoTxt=m=>'ISO '+ISO_NOM[m-M_MIN];
+function ajustesTxt(k,j,m){ return fmtT(Math.pow(2,k/3))+' · '+diafTxt(j)+' · '+isoTxt(m); }
 
 /* el filtro, o la pareja de filtros, que cubre los pasos que sobran con menos pasos */
 function eligeND(p){
-  const cands=[];
-  NDS.forEach((a,i)=>{ cands.push([a]); NDS.slice(i).forEach(b=>cands.push([a,b])); });
   let mejor=null;
-  cands.forEach(c=>{
+  NDS.forEach((a,i)=>{ [[a]].concat(NDS.slice(i).map(b=>[a,b])).forEach(c=>{
     const s=c[0]+(c[1]||0);
     if(s<p-0.34) return;
-    if(!mejor || s<mejor.s || (s===mejor.s && c.length<mejor.c.length)) mejor={c,s};
-  });
-  if(mejor) mejor.c.sort((a,b)=>b-a);
+    if(!mejor || s<mejor.s || (s===mejor.s && c.length<mejor.c.length)) mejor={c:c.slice().sort((x,y)=>y-x),s};
+  }); });
   return mejor || {c:[15,15],s:30};
 }
+const nombreND=nd=>nd.c.map(x=>NOMBRE_ND[x]).join(' + ');
 
 /* ---------- cálculo ---------- */
-function calcula(){
+/* la escena: el encuadre, el paso de píxel y el tiempo que pide el efecto */
+function escena(){
   const F=FORMATOS[E.formato]||FORMATOS.ff, ef=efecto(), sj=sujeto(), fo=FORMAS[sj.forma];
   const pxW=Math.sqrt(E.mp*1e6*F.w/F.h), p=F.w/pxW;          // píxeles de ancho y paso (mm)
-  const f=E.focal, d=E.dist, v=Math.max(0.1,E.vel), N=E.ap;
+  const f=E.focal, d=E.dist, v=Math.max(0.1,E.vel);
   const A=F.w*d/f, Al=F.h*d/f;                               // encuadre a la distancia del sujeto (m)
-  let tNeed;
-  if(ef.frac) tNeed=ef.frac*A/v;
-  else if(ef.K) tNeed=ef.K*fo.W/v;
-  else tNeed=ef.t;
-  const tOk=N*N/Math.pow(2,E.luz);                          // exposición correcta a ISO 100
-  const r={F,ef,sj,fo,pxW,p,f,d,v,N,A,Al,tNeed,tOk,t:tNeed,iso:100,nd:null,sobra:0,cierra:null,mas:false};
-  const pasos=Math.log2(tNeed/tOk);                         // > 0: sobra luz
-  if(ef.tipo==='minimo' && pasos<=0){ r.t=tOk; r.mas=tOk>tNeed*1.26; }
-  else if(ef.tipo==='zoom' && tOk>=0.25 && tOk<=1){ r.t=tOk; }
-  else if(pasos<=1/3){ if(pasos<0) r.iso=isoNominal(100*Math.pow(2,-pasos)); }
-  else {
-    r.sobra=pasos; r.nd=eligeND(pasos);
-    const resto=r.nd.s-pasos;
-    if(ef.tipo==='minimo') r.t=tOk*Math.pow(2,r.nd.s);
-    else if(resto>1/6) r.iso=isoNominal(100*Math.pow(2,resto));
-    /* cerrar el diafragma hasta f/16 como alternativa */
-    const Nn=N*Math.sqrt(Math.pow(2,pasos))*0.97;
-    const alt=DIAF_TERCIOS.find(x=>x>=Nn);
-    if(alt && alt>N) r.cierra=alt;
+  const tNeed = ef.frac ? ef.frac*A/v : ef.K ? ef.K*fo.W/v : ef.t;
+  return {F,ef,sj,fo,pxW,p,f,d,v,A,Al,tNeed};
+}
+/* Los ajustes que la página propone. Parte de f/8 e ISO 100. Si sobra luz, cierra
+   hasta f/11 y el resto lo pone el filtro; si falta, en los efectos que admiten más
+   tiempo lo alarga, y en los demás abre hasta f/2,8 y después sube el ISO. */
+function recomienda(b){
+  const ef=b.ef, EV=E.luz;
+  let t=b.tNeed, N=8, iso=100, nd=null;
+  const s=Math.log2(t/(N*N/Math.pow(2,EV)));                // pasos que sobran a f/8 e ISO 100
+  if(s>=0){
+    const a=Math.min(s,1); N=8*Math.pow(2,a/2);
+    const r=s-a;
+    if(r>1/3){
+      nd=eligeND(r);
+      const e=nd.s-r;                                        // > 0: con el filtro queda oscura
+      if(e>0){
+        if(ef.tipo==='minimo' || (ef.tipo==='zoom' && t*Math.pow(2,e)<=1)) t*=Math.pow(2,e);
+        else { const ab=Math.min(e,2*Math.log2(N/2.8)); N/=Math.pow(2,ab/2); if(e-ab>0) iso*=Math.pow(2,e-ab); }
+      }
+    }
+  } else {
+    let falta=-s;
+    if(ef.tipo==='minimo'){ t*=Math.pow(2,falta); falta=0; }
+    else if(ef.tipo==='zoom'){ const al=Math.max(0,Math.min(falta,Math.log2(1/t))); t*=Math.pow(2,al); falta-=al; }
+    if(falta>0){ const ab=Math.min(falta,2*Math.log2(8/2.8)); N=8/Math.pow(2,ab/2); falta-=ab; }
+    if(falta>0) iso*=Math.pow(2,falta);
+  }
+  return {k:limita(Math.round(3*Math.log2(t)),K_MIN,K_MAX), j:limita(Math.round(6*Math.log2(N)),J_MIN,J_MAX),
+          m:limita(Math.round(3*Math.log2(iso/100)),M_MIN,M_MAX), nd};
+}
+/* lo que sale con los ajustes de las ruedas */
+function evalua(b){
+  const t=Math.pow(2,E.k/3), N=Math.pow(2,E.j/6), iso=100*Math.pow(2,E.m/3);
+  const r=Object.assign({},b,{t,N,iso});
+  r.tOk=N*N/Math.pow(2,E.luz)*100/iso;
+  r.sobra=Math.log2(t/r.tOk);                                // pasos de luz que sobran
+  r.nd = r.sobra>1/3 ? eligeND(r.sobra) : null;
+  if(r.nd){
+    r.resto=r.nd.s-r.sobra;                                  // > 0: con el filtro queda oscura
+    const Nn=N*Math.sqrt(Math.pow(2,r.sobra))*0.97;
+    const alt=DIAF_NOM.findIndex((x,j)=>j>=J_MIN && j<=24 && Math.pow(2,j/6)>=Nn);   // hasta f/16
+    r.cierra = alt>E.j ? alt : null;
   }
   /* temblor: tiempo máximo sostenible con s pasos de ayuda */
-  const tHold=s=>CRIT*p/(f*W0/Math.pow(2,s));
-  r.tHold=tHold;
+  const tHold=s=>CRIT*b.p/(b.f*W0/Math.pow(2,s));
   const s0=ESTABS[E.estab]||0;
-  if(r.t<=tHold(s0)) r.tri='hand';
-  else if(r.t<=tHold(s0+2)) r.tri='brace';
-  else if(r.t<=tHold(s0+3)) r.tri='lean';
+  if(t<=tHold(s0)) r.tri='hand';
+  else if(t<=tHold(s0+2)) r.tri='brace';
+  else if(t<=tHold(s0+3)) r.tri='lean';
   else r.tri='tripod';
-  if(ef.id==='pan') r.tri='pan';
-  else if(ef.id==='flash' && r.tri!=='hand') r.tri='flash';
-  else if(ef.id==='zoom') r.tri='zoom';
+  if(b.ef.id==='pan') r.tri='pan';
+  else if(b.ef.id==='flash' && r.tri!=='hand') r.tri='flash';
+  else if(b.ef.id==='zoom') r.tri='zoom';
   r.tMaxApoyo=tHold(s0+3);
-  r.B=v*r.t;                                                 // recorrido del sujeto (m)
-  r.trackPx=TRACK*r.B*f/(d*p);                               // error de seguimiento (px de sensor)
+  r.q=t/b.tNeed;                                             // cuánto se aparta del tiempo del efecto
+  r.B=b.v*t;                                                 // recorrido del sujeto (m)
+  r.trackPx=TRACK*r.B*b.f/(b.d*b.p);                         // error de seguimiento (px de sensor)
   return r;
 }
 
@@ -525,6 +661,7 @@ function chips(cont, lista, actual, alPulsar){
     cont.appendChild(b);
   });
 }
+function velTxt(){ return nf(E.vel,1)+' m/s · '+nf(E.vel*3.6,0)+' km/h'; }
 function pintarControles(){
   const efs=$('efectos'); efs.innerHTML='';
   EFECTOS.forEach(ef=>{
@@ -546,64 +683,304 @@ function pintarControles(){
   chips($('mp'), MPS.map(m=>({v:m,n:m+' MP'})), E.mp, v=>{E.mp=v; cambio();});
   chips($('estab'), ESTABS.map((s,i)=>({v:i,n:LBL('estab')[i]+(s?'<small>'+s+' '+LBL('pasos')+'</small>':'')})), E.estab, v=>{E.estab=v; cambio();});
   chips($('focales'), FOCALES.map(x=>({v:x,n:String(x)})), E.focal, v=>{E.focal=v; cambio();});
-  chips($('diafs'), DIAFS.map(x=>({v:x,n:'f/'+nf(x,x%1?1:0)})), E.ap, v=>{E.ap=v; cambio();});
   chips($('sujetos'), SUJETOS.map(x=>({v:x.id,n:LBL('suj')[x.id]})), E.sujeto, v=>{
     const sj=SUJETOS.find(x=>x.id===v); E.sujeto=v; E.vel=sj.v; E.dist=sj.d; cambio();
   });
   chips($('luces'), LUCES.map(([k,ev])=>({v:ev,n:LBL('luz')[k]})), E.luz, v=>{E.luz=v; cambio();});
   $('focal').value=E.focal; $('dist').value=E.dist; $('vel').value=E.vel;
-  $('velV').textContent=nf(E.vel,1)+' m/s · '+nf(E.vel*3.6,0)+' km/h';
+  $('velV').textContent=velTxt();
 }
 $('focal').addEventListener('change',()=>{ const x=+$('focal').value; if(x>=8&&x<=800){ E.focal=x; } cambio(); });
 $('dist').addEventListener('change',()=>{ const x=+$('dist').value; if(x>=0.5&&x<=2000){ E.dist=x; } cambio(); });
-$('vel').addEventListener('input',()=>{ E.vel=+$('vel').value; $('velV').textContent=nf(E.vel,1)+' m/s · '+nf(E.vel*3.6,0)+' km/h'; programar(); guardar(); });
+$('vel').addEventListener('input',()=>{ E.vel=+$('vel').value; $('velV').textContent=velTxt(); aplicarRec(); actualizar(); });
+
+/* ---------- ruedas: velocidad, diafragma e ISO ---------- */
+/* Del componente de rueda de reciprocidad.html, sin cambios. */
+// ------------------------------------------------------------ cifras grabadas
+// Letra de trazo propia para las escalas, dibujada con las reglas de las letras de
+// grabado por fresado: un solo grosor, tramos rectos, giros en ángulo recto, curvas de
+// cuarto de círculo y extremos redondeados, como si una fresa la trazara de una pasada.
+// Rejilla de 5 por 8 unidades, con el eje y hacia abajo.
+var GLIFOS = {
+  '0': [5, 'M1.6 0H3.4A1.6 1.6 0 0 1 5 1.6V6.4A1.6 1.6 0 0 1 3.4 8H1.6A1.6 1.6 0 0 1 0 6.4V1.6A1.6 1.6 0 0 1 1.6 0Z'],
+  '1': [3.4, 'M0.4 1.8L2.4 0V8'],
+  '2': [5, 'M0 1.6A1.6 1.6 0 0 1 1.6 0H3.4A1.6 1.6 0 0 1 5 1.6V2.4A2 2 0 0 1 4.4 3.8L0 8H5'],
+  '3': [5, 'M0 0H5L2.2 3.4H3.4A1.6 1.6 0 0 1 5 5V6.4A1.6 1.6 0 0 1 3.4 8H1.6A1.6 1.6 0 0 1 0 6.4'],
+  '4': [5, 'M3.8 8V0L0 5.6H5'],
+  '5': [5, 'M5 0H0.4L0.2 3.4H3.4A1.6 1.6 0 0 1 5 5V6.4A1.6 1.6 0 0 1 3.4 8H1.6A1.6 1.6 0 0 1 0 6.4'],
+  '6': [5, 'M4.4 0H1.6A1.6 1.6 0 0 0 0 1.6V6.4A1.6 1.6 0 0 0 1.6 8H3.4A1.6 1.6 0 0 0 5 6.4V5A1.6 1.6 0 0 0 3.4 3.4H0'],
+  '7': [5, 'M0 0H5L1.6 8'],
+  '8': [5, 'M1.6 0H3.4A1.6 1.6 0 0 1 5 1.6V2A1.6 1.6 0 0 1 3.4 3.6H1.6A1.6 1.6 0 0 1 0 2V1.6A1.6 1.6 0 0 1 1.6 0ZM1.6 3.6H3.4A1.6 1.6 0 0 1 5 5.2V6.4A1.6 1.6 0 0 1 3.4 8H1.6A1.6 1.6 0 0 1 0 6.4V5.2A1.6 1.6 0 0 1 1.6 3.6Z'],
+  '9': [5, 'M0.6 8H3.4A1.6 1.6 0 0 0 5 6.4V1.6A1.6 1.6 0 0 0 3.4 0H1.6A1.6 1.6 0 0 0 0 1.6V3A1.6 1.6 0 0 0 1.6 4.6H5'],
+  ',': [1.4, 'M0.7 7.2V8L0.2 9.2'],
+  '.': [1.2, 'M0.6 7.7V7.8'],
+  '/': [3, 'M0 8.4L3 -0.4'],
+  '"': [2, 'M0.5 0L0.3 2M1.7 0L1.5 2'],
+  "'": [0.8, 'M0.5 0L0.3 2'],
+  'h': [4.4, 'M0 0V8M0 5A1.6 1.6 0 0 1 1.6 3.4H2.8A1.6 1.6 0 0 1 4.4 5V8'],
+  ' ': [2, '']
+};
+var cacheGrabado = {};
+function grabado(texto, grosor) {
+  var clave = texto + '|' + (grosor || 1);
+  if (cacheGrabado[clave]) return cacheGrabado[clave];
+  var x = 0, trazos = '', ESP = 1.5;
+  for (var i = 0; i < texto.length; i++) {
+    var g = GLIFOS[texto[i]];
+    if (!g) continue;
+    if (g[1]) trazos += '<path transform="translate(' + x.toFixed(2) + ' 0)" d="' + g[1] + '"/>';
+    x += g[0] + ESP;
+  }
+  x -= ESP;
+  var svg = '<svg viewBox="-0.8 -0.8 ' + (x + 1.6).toFixed(2) + ' 9.8" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="' +
+    (grosor || 1) + '" stroke-linecap="round" stroke-linejoin="round">' + trazos + '</g></svg>';
+  cacheGrabado[clave] = svg;
+  return svg;
+}
+
+// ------------------------------------------------------------ ruedas
+// Un componente para las tres ruedas (velocidades y los dos anillos de diafragma).
+// Física: posición continua en índices; al soltar, inercia con decaimiento exponencial
+// (constante de tiempo TAU, como el desplazamiento de iOS) y después un muelle con
+// amortiguamiento crítico hasta la marca más cercana. Fuera de los extremos, el
+// arrastre se frena y el muelle devuelve la rueda a su sitio.
+var sinMovimiento = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function crearRueda(o) {
+  var rueda = o.rueda, tambor = o.tambor, MAX = o.etiquetas.length - 1;
+  var PASO = (o.grados || 28) * Math.PI / 180, TAU = 0.33, KM = 170, CM = 2 * Math.sqrt(170);
+  var R = 150, PX = R * PASO;
+  var pos = o.inicial, vel = 0, modo = 'quieta', objetivo = pos, ultimo = 0, anim = null, conducida = false;
+  var arrastre = null, muestras = [], timer = null, actual = o.inicial;
+  var marcas = o.etiquetas.map(function (e, i) {
+    var m = document.createElement('div'), mayor = o.mayor(i);
+    m.className = 'marca' + (mayor ? ' entero' : '');
+    m.dataset.i = String(i);
+    m.innerHTML = o.contenido(e, mayor);
+    tambor.appendChild(m);
+    return m;
+  });
+  function medir() {
+    var ancho = rueda.clientWidth || 300;
+    // radio para que el tambor llene la ventana; con 28 grados entre marcas, la separación
+    // en el centro (R sen 28) supera el ancho de la etiqueta más larga
+    R = Math.max(110, ancho / 2 / Math.sin(82 * Math.PI / 180));
+    PX = R * PASO;
+  }
+  function limitar(i) { return Math.max(0, Math.min(MAX, i)); }
+  function pintar() {
+    var activo = limitar(Math.round(pos));
+    for (var i = 0; i < marcas.length; i++) {
+      var th = (i - pos) * PASO, m = marcas[i];
+      if (Math.abs(th) > 1.5) { m.style.visibility = 'hidden'; continue; }
+      m.style.visibility = 'visible';
+      m.style.transform = 'translateX(' + (R * Math.sin(th)).toFixed(2) + 'px) translateZ(' +
+        (R * (Math.cos(th) - 1)).toFixed(2) + 'px) rotateY(' + (th * 180 / Math.PI).toFixed(2) + 'deg)';
+      m.style.opacity = Math.pow(Math.max(0, Math.cos(th)), 1.6).toFixed(3);
+      m.classList.toggle('activa', i === activo);
+    }
+    if (o.alPintar) o.alPintar(pos, PX);
+    if (activo !== actual) {
+      actual = activo;
+      rueda.setAttribute('aria-valuetext', o.texto(activo));
+      if (!conducida) o.alCambiar(activo);
+    }
+  }
+  function bucle(t) {
+    var dt = Math.min(1 / 30, (t - (ultimo || t)) / 1000);
+    ultimo = t;
+    if (modo === 'inercia') {
+      vel *= Math.exp(-dt / TAU);
+      pos += vel * dt;
+      if (pos < -0.4 || pos > MAX + 0.4) { objetivo = limitar(Math.round(pos)); modo = 'muelle'; }
+      else if (Math.abs(vel) < 2.2) { objetivo = limitar(Math.round(pos + vel * 0.08)); modo = 'muelle'; }
+    } else if (modo === 'muelle') {
+      vel += (-KM * (pos - objetivo) - CM * vel) * dt;
+      pos += vel * dt;
+      if (Math.abs(pos - objetivo) < 0.002 && Math.abs(vel) < 0.02) { pos = objetivo; vel = 0; modo = 'quieta'; }
+    }
+    pintar();
+    if (modo === 'inercia' || modo === 'muelle') anim = requestAnimationFrame(bucle);
+    else { anim = null; ultimo = 0; conducida = false; }
+  }
+  function arrancar(nuevo) {
+    modo = nuevo;
+    if (sinMovimiento && modo !== 'quieta') {
+      pos = modo === 'muelle' ? objetivo : limitar(Math.round(pos)); vel = 0; modo = 'quieta'; pintar(); conducida = false; return;
+    }
+    if (!anim) { ultimo = 0; anim = requestAnimationFrame(bucle); }
+  }
+  function mover(d) {
+    conducida = false;
+    var base = modo === 'muelle' ? objetivo : limitar(Math.round(pos));
+    objetivo = limitar(base + d);
+    arrancar('muelle');
+  }
+  function goma(x) {
+    if (x < 0) return -Math.pow(-x, 0.7) * 0.6;
+    if (x > MAX) return MAX + Math.pow(x - MAX, 0.7) * 0.6;
+    return x;
+  }
+  rueda.addEventListener('pointerdown', function (e) {
+    if (e.button !== undefined && e.button !== 0) return;
+    conducida = false;
+    medir();
+    if (anim) { cancelAnimationFrame(anim); anim = null; }
+    arrastre = { x: e.clientX, y: e.clientY, crudo: pos, movido: 0, id: e.pointerId, horizontal: null };
+    muestras = [{ t: performance.now(), x: e.clientX }];
+    vel = 0; modo = 'arrastre';
+  });
+  rueda.addEventListener('pointermove', function (e) {
+    if (!arrastre || e.pointerId !== arrastre.id) return;
+    var dx = e.clientX - arrastre.x, dy = e.clientY - arrastre.y;
+    if (arrastre.horizontal === null && (Math.abs(dx) > 6 || Math.abs(dy) > 6)) {
+      arrastre.horizontal = Math.abs(dx) >= Math.abs(dy);
+      if (arrastre.horizontal) { try { rueda.setPointerCapture(e.pointerId); } catch (er) {} rueda.classList.add('arrastrando'); }
+    }
+    if (!arrastre.horizontal) return;
+    arrastre.movido += Math.abs(dx);
+    arrastre.crudo -= dx / PX;
+    arrastre.x = e.clientX; arrastre.y = e.clientY;
+    pos = goma(arrastre.crudo);
+    var ahora = performance.now();
+    muestras.push({ t: ahora, x: e.clientX });
+    while (muestras.length > 2 && ahora - muestras[0].t > 100) muestras.shift();
+    pintar();
+  });
+  function soltar(e) {
+    if (!arrastre || (e && e.pointerId !== arrastre.id)) return;
+    rueda.classList.remove('arrastrando');
+    var fueToque = arrastre.horizontal !== true && arrastre.movido < 6;
+    arrastre = null;
+    if (fueToque && e) {
+      var m = e.target.closest ? e.target.closest('.marca') : null;
+      if (m) { objetivo = Number(m.dataset.i); arrancar('muelle'); return; }
+      objetivo = limitar(Math.round(pos)); arrancar('muelle'); return;
+    }
+    var a = muestras[0], b = muestras[muestras.length - 1];
+    var dt = (b.t - a.t) / 1000;
+    vel = dt > 0.008 ? -((b.x - a.x) / PX) / dt : 0;
+    vel = Math.max(-60, Math.min(60, vel));
+    if (pos < 0 || pos > MAX) { objetivo = limitar(Math.round(pos)); arrancar('muelle'); }
+    else if (Math.abs(vel) > 2.2) arrancar('inercia');
+    else { objetivo = limitar(Math.round(pos)); arrancar('muelle'); }
+  }
+  rueda.addEventListener('pointerup', soltar);
+  rueda.addEventListener('pointercancel', soltar);
+  rueda.addEventListener('wheel', function (e) {
+    var d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    if (!d) return;
+    e.preventDefault();
+    conducida = false;
+    medir();
+    if (anim) { cancelAnimationFrame(anim); anim = null; }
+    modo = 'quieta';
+    pos = limitar(pos + d / PX * 0.5);
+    pintar();
+    clearTimeout(timer);
+    timer = setTimeout(function () { objetivo = limitar(Math.round(pos)); arrancar('muelle'); }, 120);
+  }, { passive: false });
+  rueda.addEventListener('keydown', function (ev) {
+    if (ev.key === 'ArrowRight') { mover(1); ev.preventDefault(); }
+    if (ev.key === 'ArrowLeft') { mover(-1); ev.preventDefault(); }
+  });
+  if (o.menos) o.menos.addEventListener('click', function () { mover(-1); });
+  if (o.mas) o.mas.addEventListener('click', function () { mover(1); });
+  window.addEventListener('resize', function () { medir(); pintar(); });
+  rueda.setAttribute('aria-valuetext', o.texto(o.inicial));
+  return {
+    iniciar: function () { medir(); pintar(); },
+    // la mueve otra rueda: anima hasta i sin avisar con alCambiar, para no realimentar
+    seguir: function (i) {
+      conducida = true; medir();
+      objetivo = limitar(i); arrancar('muelle');
+    },
+    // vuelve a dibujar las cifras, al cambiar de idioma
+    reetiquetar: function () {
+      marcas.forEach(function (m, i) { m.innerHTML = o.contenido(o.etiquetas[i], o.mayor(i)); });
+      rueda.setAttribute('aria-valuetext', o.texto(actual));
+    },
+    sincronizar: function (i) {
+      if (modo === 'quieta' && Math.round(pos) !== i) { pos = i; objetivo = i; actual = i; pintar(); }
+    }
+  };
+}
+
+
+function anillo(id,etiquetas,mayor,inicial,texto,alCambiar){
+  const mol=$('mol-'+id);
+  return crearRueda({
+    rueda:$('rueda-'+id), tambor:$('tambor-'+id), etiquetas:etiquetas, inicial:inicial, grados:13,
+    menos:$(id+'-menos'), mas:$(id+'-mas'), mayor:mayor,
+    contenido:(e,may)=>may&&e ? '<span aria-hidden="true">'+grabado(etiqueta(e),1.05)+'</span>' : '<span class="punto"></span>',
+    texto:texto,
+    alPintar:(p,px)=>{ mol.style.backgroundPosition=(-p*px).toFixed(1)+'px 0'; },
+    alCambiar:alCambiar
+  });
+}
+let ruedaT=null, ruedaD=null, ruedaI=null;
+function crearRuedas(){
+  ruedaT=anillo('t',ETQ_T,i=>(K_MIN+i)%3===0,E.k-K_MIN,i=>fmtT(Math.pow(2,(K_MIN+i)/3)),i=>{ E.k=K_MIN+i; actualizar(); });
+  ruedaD=anillo('d',ETQ_D,i=>(J_MIN+i)%3===0,E.j-J_MIN,i=>diafTxt(J_MIN+i),i=>{ E.j=J_MIN+i; actualizar(); });
+  ruedaI=anillo('i',ETQ_I,i=>i%3===0,E.m-M_MIN,i=>isoTxt(M_MIN+i),i=>{ E.m=M_MIN+i; actualizar(); });
+}
+/* lleva las ruedas a lo recomendado para la foto elegida */
+function aplicarRec(){
+  const rc=recomienda(escena());
+  E.k=rc.k; E.j=rc.j; E.m=rc.m;
+  if(ruedaT){ ruedaT.seguir(E.k-K_MIN); ruedaD.seguir(E.j-J_MIN); ruedaI.seguir(E.m-M_MIN); }
+}
+$('usarRec').addEventListener('click',()=>{ aplicarRec(); actualizar(); });
 
 /* ---------- resultado ---------- */
 function veredicto(caja, clase){ caja.classList.remove('ok','warn','bad'); if(clase) caja.classList.add(clase); }
-function lista(a){ return a.length>1 ? a.slice(0,-1).join(', ')+LBL('y')+a[a.length-1] : a[0]; }
-function pintarResultado(r){
-  const ef=r.ef, sj=r.sj;
-  $('oT').textContent=fmtT(r.t);
-  $('oTd').textContent=LBL('tD',nf(r.N,r.N%1?1:0),nf(r.iso,0))+(r.t>30?LBL('bulb'):'');
+function pintarResultado(b,r,rc){
+  const ef=b.ef, sj=b.sj;
+  /* lectura y recomendación */
+  $('lectura').innerHTML='<b>'+fmtT(r.t)+'</b><b>'+diafTxt(E.j)+'</b><b>'+isoTxt(E.m)+'</b>';
+  $('recTxt').innerHTML=LBL('rec',ajustesTxt(rc.k,rc.j,rc.m))+(rc.nd?LBL('recNd',nombreND(rc.nd)):LBL('recSin'));
+  $('usarRec').hidden = rc.k===E.k && rc.j===E.j && rc.m===E.m;
   /* filtro */
-  if(!r.nd){ $('oND').textContent=LBL('ndNo'); $('oNDd').textContent=LBL('ndNoD'); veredicto($('vND'),'ok'); }
-  else {
-    const nom=r.nd.c.map(x=>NOMBRE_ND[x]).join(' + ');
-    $('oND').textContent=r.nd.s+' '+LBL('pasos');
-    let d=LBL('ndSiD',fmtPasos(r.sobra),nom);
-    if(r.iso>100) d+=LBL('ndIso',nf(r.iso,0));
-    if(r.cierra) d+=LBL('ndCierra',nf(r.cierra,r.cierra%1?1:0));
+  if(r.nd){
+    $('oND').textContent=nombreND(r.nd);
+    let d=LBL('ndSiD',fmtPasos(r.sobra));
+    if(Math.abs(r.resto)>1/3+0.01) d+=LBL('ndResto',fmtPasos(Math.abs(r.resto)),r.resto>0);
+    if(r.cierra) d+=LBL('ndCierra',etiqueta(DIAF_NOM[r.cierra]));
     $('oNDd').textContent=d; veredicto($('vND'),'warn');
-  }
+  } else if(r.sobra<-1/3-0.01){
+    $('oND').textContent=LBL('ndFalta'); $('oNDd').textContent=LBL('ndFaltaD',fmtPasos(-r.sobra)); veredicto($('vND'),'bad');
+  } else { $('oND').textContent=LBL('ndOk'); $('oNDd').textContent=LBL('ndOkD'); veredicto($('vND'),'ok'); }
   /* trípode */
   const T={hand:['triHand','triHandD','ok'],brace:['triBrace','triBraceD','ok'],lean:['triLean','triLeanD','warn'],
            tripod:['triSi','triSiD','bad'],pan:['triPan','triPanD','ok'],flash:['triFlash','triFlashD','ok'],zoom:['triZoom','triZoomD','warn']}[r.tri];
-  $('oTri').textContent=LBL(T[0]); $('oTrid').textContent=LBL(T[1],fmtT(r.tMaxApoyo)); veredicto($('vTri'),T[2]);
-  /* lo que vas a ver */
+  $('oTri').textContent=LBL(T[0]);
+  $('oTrid').textContent=LBL(T[1],fmtT(r.tMaxApoyo))+(r.t>30?' '+LBL('bulb'):'');
+  veredicto($('vTri'),T[2]);
+  /* lo que vas a ver, con el tiempo de la rueda */
   const el=LBL('el')[sj.id], los=LBL('los')[sj.id];
-  const noche=E.luz<=8;
-  let h='<h3>'+LBL('verasH')+'</h3>';
+  const asp=k=>LBL('aspecto',k,Math.round(100/Math.max(1,k)));
+  const q=r.q;
   let txt;
-  if(ef.id==='pan') txt=LBL('vPan',el,nf(ef.frac*100,0))+' '+LBL('vPanTrack',nf(Math.round(r.trackPx),0));
-  else if(ef.id==='trace') txt=LBL('vTrace',el);
-  else if(ef.id==='static') txt=LBL('vStatic',los);
-  else if(ef.id==='trails') txt=noche?LBL('vTrails',los):LBL('vTrailsDia');
-  else if(ef.id==='ghost') txt=LBL('vGhost',los,fmtT(r.t/4));
-  else if(ef.id==='flash') txt=LBL('vFlash',LBL('al')[sj.id]);
-  else txt=LBL('vZoom');
-  h+='<p>'+txt+'</p>';
+  if(ef.id==='pan'){
+    const pc=ef.frac*100*q;
+    const pcT=nf(pc,pc<10&&Math.abs(pc-Math.round(pc))>0.05?1:0);
+    txt=(pc<1?LBL('vPanPoco',pcT):LBL('vPan',el,pcT))+' '+LBL('vPanTrack',nf(Math.round(r.trackPx),0));
+  }
+  else if(ef.id==='trace') txt=LBL('vTrace',el,asp(ef.K*q));
+  else if(ef.id==='static') txt=LBL('vStatic',los,asp(ef.K*q));
+  else if(ef.id==='trails') txt=(q>=0.97?LBL('vTrails',los):LBL('vTrailsCorto',nf(Math.round(q*100),0)))+(E.luz>8?LBL('vTrailsDia'):'');
+  else if(ef.id==='ghost') txt=LBL('vGhost',los,asp(ef.K*q),fmtT(r.t/4));
+  else if(ef.id==='flash') txt=LBL('vFlash',LBL('al')[sj.id],ef.K*q);
+  else txt=r.t<0.2?LBL('vZoomCorto'):LBL('vZoom');
   const det=[];
-  if(r.mas) det.push(LBL('vMas',fmtT(r.t)));
-  det.push(LBL('vExpo',LBL('luzEn')[(LUCES.find(x=>x[1]===E.luz)||LUCES[3])[0]],nf(r.N,r.N%1?1:0),fmtT(r.tOk)));
-  if(r.iso>6400) det.push(LBL('vIsoAlto',nf(r.iso,0)));
-  if(r.fo.H>r.Al*0.95 || (ef.id!=='trails'&&ef.id!=='ghost'&&r.fo.W>r.A)) det.push(LBL('vFuera'));
-  h+='<p class="det">'+det.join(' ')+'</p>';
-  $('veras').innerHTML=h;
-  $('pie').textContent=LBL('pie',nf(r.A,r.A<10?1:0),nf(r.Al,r.Al<10?1:0));
+  if(r.iso>6500) det.push(LBL('vIsoAlto',nf(ISO_NOM[E.m-M_MIN],0)));
+  if(b.fo.H>b.Al*0.95 || (ef.id!=='trails'&&ef.id!=='ghost'&&b.fo.W>b.A)) det.push(LBL('vFuera'));
+  $('veras').innerHTML='<h3>'+LBL('verasH')+'</h3><p>'+txt+'</p>'+(det.length?'<p class="det">'+det.join(' ')+'</p>':'');
+  $('pie').textContent=LBL('pie',nf(b.A,b.A<10?1:0),nf(b.Al,b.Al<10?1:0));
   /* barra fija */
-  $('mini-t').textContent=fmtT(r.t);
+  $('mini-t').textContent=ajustesTxt(E.k,E.j,E.m);
   $('mini-nd').textContent='ND: '+(r.nd?r.nd.c.map(x=>NOMBRE_ND[x]).join('+'):'—');
-  $('mini-tri').textContent=(LANG()==='en'?'Tripod: ':'Trípode: ')+LBL(T[0]).toLowerCase();
+  $('mini-tri').textContent=LBL('tri')+': '+LBL(T[0]).toLowerCase();
 }
 
 /* ---------- la foto simulada ----------
@@ -829,17 +1206,36 @@ function compone(cv,r){
   }
 }
 
+
 /* ---------- actualizar ---------- */
-let pendiente=null;
-function programar(){ if(pendiente) return; pendiente=setTimeout(()=>{ pendiente=null; const r=calcula(); pintarResultado(r); compone($('foto'),r); },16); }
-function cambio(){ pintarControles(); guardar(); programar(); }
-window.onLangChange=function(){ pintarControles(); programar(); };
-window.addEventListener('resize',()=>{ clearTimeout(window.__rz); window.__rz=setTimeout(programar,150); });
+let pendiente=null, ultimo=null;
+function actualizar(){
+  guardar();
+  const b=escena(), rc=recomienda(b), r=evalua(b);
+  pintarResultado(b,r,rc);
+  ultimo=r;
+  if(pendiente) return;
+  pendiente=setTimeout(()=>{ pendiente=null; compone($('foto'),ultimo); },30);
+}
+/* cambiar el efecto, la cámara o la escena vuelve a lo recomendado */
+function cambio(){ pintarControles(); aplicarRec(); actualizar(); }
+window.onLangChange=function(){
+  pintarControles();
+  [ruedaT,ruedaD,ruedaI].forEach(rd=>rd&&rd.reetiquetar());
+  actualizar();
+};
+window.addEventListener('resize',()=>{ clearTimeout(window.__rz); window.__rz=setTimeout(()=>ultimo&&compone($('foto'),ultimo),150); });
 try{
   const obs=new IntersectionObserver(e=>{ const v=!e[0].isIntersecting && e[0].boundingClientRect.top>0; $('mini').classList.toggle('visible',v); $('mini').setAttribute('aria-hidden',v?'false':'true'); },{threshold:0});
-  obs.observe($('resultado'));
+  obs.observe($('ajustes'));
 }catch(e){}
+
+/* arranque: si no hay ajustes guardados, los recomendados */
+if(E.k==null||E.j==null||E.m==null){ const rc=recomienda(escena()); E.k=rc.k; E.j=rc.j; E.m=rc.m; }
+E.k=limita(E.k,K_MIN,K_MAX); E.j=limita(E.j,J_MIN,J_MAX); E.m=limita(E.m,M_MIN,M_MAX);
+crearRuedas();
 window.aplicarIdioma(LANG());
+ruedaT.iniciar(); ruedaD.iniciar(); ruedaI.iniciar();
 </script>
 </body>
 </html>
