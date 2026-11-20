@@ -80,6 +80,7 @@ button{touch-action:manipulation}
 .chips button{font-family:var(--mono);font-size:12.5px;background:var(--panel2);border:1px solid var(--line2);color:var(--fg2);border-radius:999px;padding:0 13px;min-height:38px;cursor:pointer}
 .chips button[aria-pressed="true"]{background:var(--amber);border-color:var(--amber);color:#0e1116}
 .chips button small{font-size:11px;opacity:.75;margin-left:5px}
+.chips button.sug{border-style:dashed;border-color:var(--amber);color:var(--amber)}
 .dos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
 @media(max-width:560px){.dos{grid-template-columns:1fr}}
 .dos .campo+.campo{margin-top:0}
@@ -295,6 +296,10 @@ footer{border-top:1px solid var(--line);margin-top:36px;padding-top:16px;font-si
       <p class="pie" data-lang="es">Cifras en los pasos enteros y puntos en los tercios. En A, la cámara elige el ISO para que la exposición sea correcta.</p>
       <p class="pie" data-lang="en">Numbers on the full stops and dots on the thirds. On A, the camera picks the ISO so that the exposure is correct.</p>
     </div>
+    <div class="campo" id="ndCampo" hidden><div class="etq"><span data-lang="es">Filtro ND</span><span data-lang="en">ND filter</span><span class="v" id="ndV"></span></div>
+      <div class="chips" id="ndChips"></div>
+      <p class="pie" id="ndPie"></p>
+    </div>
     <p class="pie" data-lang="es">Cambiar el efecto, el sensor, la focal o la escena devuelve los mandos a lo recomendado. Gíralos para probar otros ajustes: lo de abajo los sigue.</p>
     <p class="pie" data-lang="en">Changing the effect, the sensor, the focal length or the scene puts the controls back on the recommendation. Turn them to try other settings: everything below follows them.</p>
   </div>
@@ -315,7 +320,7 @@ footer{border-top:1px solid var(--line);margin-top:36px;padding-top:16px;font-si
   <summary><span data-lang="es">Cómo se calcula</span><span data-lang="en">How it is computed</span></summary>
   <dl data-lang="es">
     <dt>El efecto fija el tiempo</dt><dd>Cada efecto pide un recorrido del sujeto durante la toma. Cuando lo que importa es cómo se ve el sujeto, el recorrido se mide en su propio largo <i>W</i> y el tiempo es <i>t</i> = <i>K·W/v</i>, sin focal ni distancia: media vez su largo con flash, vez y media para que deje traza y aún se reconozca y cuarenta para que desaparezca (calle vacía). En quieto entre movimiento, una vez el ancho de quien pasa a la altura de tu sujeto; quien cruza por delante, a mitad de distancia, se arrastra el doble. Cuando lo que importa es el encuadre, se mide en anchos de encuadre a la distancia del sujeto, <i>A</i> = <i>a·d/f</i> con <i>a</i> el ancho del sensor: en el barrido el fondo se estira un 3 % del encuadre y en las estelas el coche lo cruza entero. El zoom burst no depende del sujeto y se toma medio segundo, lo que dura un giro tranquilo del anillo.</dd>
-    <dt>Filtro ND</dt><dd>A ISO 100 la exposición correcta dura <i>N</i>²/2<sup>EV</sup>, con <i>N</i> el diafragma y el EV de la luz elegida (noche urbana 5, hora azul 8, sombra 11, nublado 13, sol 15), que el ajuste fino corrige en tercios si tu fotómetro dice otra cosa. Si el efecto pide más tiempo, sobran log₂(<i>t</i>/<i>t</i><sub>correcto</sub>) pasos de luz, y se elige el filtro comercial, o la pareja de filtros, que los cubre: 1, 2, 3, 4, 6, 10 o 15 pasos. Si cerrar el diafragma hasta f/16 basta, la página lo ofrece como alternativa. Si el efecto pide menos tiempo del correcto, no hace falta filtro: en las estelas y la calle vacía se alarga el tiempo, que solo refuerza el efecto, y en los demás se abre el diafragma o se sube el ISO.</dd>
+    <dt>Filtro ND</dt><dd>A ISO 100 la exposición correcta dura <i>N</i>²/2<sup>EV</sup>, con <i>N</i> el diafragma y el EV de la luz elegida (noche urbana 5, hora azul 8, sombra 11, nublado 13, sol 15), que el ajuste fino corrige en tercios si tu fotómetro dice otra cosa. Si el efecto pide más tiempo, sobran log₂(<i>t</i>/<i>t</i><sub>correcto</sub>) pasos de luz, y la página propone el más suave de los filtros comunes que los cubre: ND4, ND8, ND16, ND64 o ND1000, que son 2, 3, 4, 6 y 10 pasos. El filtro es un mando más del paso 4: puedes tocar el que tengas y, con «Ajustes recomendados» encendido, se recoloca primero el ISO, después el tiempo si el efecto admite más, y el diafragma, respetando el mando que hayas girado el último. Así, si abres el diafragma para desenfocar el fondo, el tiempo del efecto no se toca: la página pide un filtro más denso y, al elegirlo, ajusta el ISO. Si el efecto pide menos tiempo del correcto, no hace falta filtro: en las estelas y la calle vacía se alarga el tiempo, que solo refuerza el efecto, y en los demás se abre el diafragma o se sube el ISO.</dd>
     <dt>Trípode</dt><dd>La mano tiembla con una velocidad angular de unos 0,03 rad/s, que en el sensor deja un arrastre de <i>f·ω·t/p</i> píxeles, con <i>p</i> el paso de píxel que sale del sensor y la resolución. La foto es nítida si ese arrastre no pasa de dos píxeles. Cada paso de ayuda divide el temblor por dos: el estabilizador cuenta dos pasos si va en el objetivo y cuatro si va en el cuerpo, sujetar bien la cámara (codos pegados, correa tensa contra el cuello) añade dos, y apoyarla en un muro o una barandilla, tres. Si ni así llega, hace falta trípode. Es el mismo modelo que usa <a href="programa-camara.html">el programa de la cámara</a>. Por eso la resolución importa: con más megapíxeles el píxel es más pequeño y el temblor se nota antes. Ese criterio es para una copia grande, mirada al píxel. Si eliges «Pantalla», los dos píxeles son los de una pantalla 4K, de 3840 de ancho, llevados al sensor: con 61 MP son cinco píxeles del sensor y aguantas dos veces y media más tiempo.</dd>
     <dt>Dirección del movimiento</dt><dd>Solo cuenta lo que el sujeto cruza el encuadre: su velocidad por el seno del ángulo con el eje de la cámara. De lado cuenta entera; en diagonal, a 45°, siete décimas; casi de frente, a 20°, un tercio. El tiempo que pide el efecto se alarga en la misma proporción.</dd>
     <dt>Difracción</dt><dd>Como en <a href="sensor.html#difraccion">la pestaña de difracción</a>, el diafragma crítico es 1,49 veces el tamaño del píxel en micras y al doble el detalle queda claramente limitado: f/18 con 24 MP en formato completo, f/11 con 61 MP. La recomendación no cierra más allá de ese límite ni de f/11, y la página avisa si lo pasas girando el aro. Con «Pantalla» el píxel que cuenta es mayor y el límite se aleja.</dd>
@@ -323,7 +328,7 @@ footer{border-top:1px solid var(--line);margin-top:36px;padding-top:16px;font-si
   </dl>
   <dl data-lang="en">
     <dt>The effect sets the time</dt><dd>Each effect asks for a certain travel of the subject during the shot. When what matters is how the subject looks, the travel is measured in its own length <i>W</i> and the time is <i>t</i> = <i>K·W/v</i>, with no focal length or distance: half its length with flash, one and a half for a trace that is still recognisable and forty for it to vanish (empty street). In still amid motion, once the width of whoever passes at your subject's distance; whoever crosses in front, at half the distance, blurs twice as much. When what matters is the frame, it is measured in frame widths at the subject's distance, <i>A</i> = <i>a·d/f</i> with <i>a</i> the sensor width: in panning the background stretches 3 % of the frame and in light trails the car crosses all of it. Zoom burst does not depend on the subject and is taken as half a second, the length of a calm turn of the ring.</dd>
-    <dt>ND filter</dt><dd>At ISO 100 the correct exposure lasts <i>N</i>²/2<sup>EV</sup>, with <i>N</i> the aperture and the EV of the chosen light (city night 5, blue hour 8, shade 11, overcast 13, sun 15), which the fine adjustment corrects in thirds if your meter says otherwise. If the effect asks for more time, there are log₂(<i>t</i>/<i>t</i><sub>correct</sub>) stops of light to spare, and the page picks the commercial filter, or pair of filters, that covers them: 1, 2, 3, 4, 6, 10 or 15 stops. If stopping down to f/16 is enough, the page offers it as an alternative. If the effect asks for less time than the correct one, no filter is needed: in light trails and the empty street the time is lengthened, which only strengthens the effect, and in the others the aperture opens or the ISO goes up.</dd>
+    <dt>ND filter</dt><dd>At ISO 100 the correct exposure lasts <i>N</i>²/2<sup>EV</sup>, with <i>N</i> the aperture and the EV of the chosen light (city night 5, blue hour 8, shade 11, overcast 13, sun 15), which the fine adjustment corrects in thirds if your meter says otherwise. If the effect asks for more time, there are log₂(<i>t</i>/<i>t</i><sub>correct</sub>) stops of light to spare, and the page suggests the mildest of the common filters that covers them: ND4, ND8, ND16, ND64 or ND1000, which are 2, 3, 4, 6 and 10 stops. The filter is one more control in step 4: you can tap the one you have and, with “Recommended settings” on, the ISO moves first, then the time if the effect allows more, and the aperture, leaving alone the control you turned last. So if you open the aperture to blur the background, the effect's time is not touched: the page asks for a denser filter and, when you choose it, adjusts the ISO. If the effect asks for less time than the correct one, no filter is needed: in light trails and the empty street the time is lengthened, which only strengthens the effect, and in the others the aperture opens or the ISO goes up.</dd>
     <dt>Tripod</dt><dd>The hand trembles at an angular speed of about 0.03 rad/s, which on the sensor leaves a blur of <i>f·ω·t/p</i> pixels, with <i>p</i> the pixel pitch given by the sensor and the resolution. The picture is sharp if that blur stays within two pixels. Each stop of help halves the tremor: the stabiliser counts two stops in the lens and four in the body, holding the camera well (elbows tucked in, strap tensioned against the neck) adds two, and resting it on a wall or a railing, three. If even that is not enough, you need a tripod. It is the same model used by <a href="programa-camara.html">the camera's program</a>. That is why resolution matters: with more megapixels the pixel is smaller and the tremor shows sooner. That criterion is for a large print, viewed at pixel level. If you choose “Screen”, the two pixels are those of a 4K screen, 3840 wide, taken back to the sensor: with 61 MP that is five sensor pixels and you can hold two and a half times longer.</dd>
     <dt>Direction of movement</dt><dd>Only what the subject travels across the frame counts: its speed times the sine of the angle to the camera axis. Sideways it counts in full; diagonally, at 45°, seven tenths; nearly head on, at 20°, a third. The time the effect asks for lengthens in the same proportion.</dd>
     <dt>Diffraction</dt><dd>As in <a href="sensor.html#difraccion">the diffraction tab</a>, the critical aperture is 1.49 times the pixel size in microns, and at twice that detail is clearly limited: f/18 with 24 MP on full frame, f/11 with 61 MP. The recommendation does not stop down beyond that limit nor beyond f/11, and the page warns if you pass it by turning the ring. With “Screen” the pixel that counts is larger and the limit moves away.</dd>
@@ -423,10 +428,15 @@ const DICT={
   rec:(s)=>'Recomendado para esta foto: <b>'+s+'</b>', recNd:(n)=>' con '+n, recSin:' sin filtro',
   /* veredictos */
   ndOk:'No hace falta', ndOkD:'Con estos ajustes la exposición ya es correcta.',
-  ndSiD:(p)=>(p==='1'?'Sobra 1 paso':'Sobran '+p+' pasos')+' de luz con estos ajustes.',
-  ndResto:(p,o)=>' Con él queda '+p+(p==='1'?' paso ':' pasos ')+(o?'oscura: sube el ISO o abre un poco.':'clara: baja el ISO o cierra un poco.'),
+  ndSin:'Sin filtro',
+  ndPuestoD:(n,p)=>'Con el '+n+' puesto ('+p+' pasos), la exposición es correcta.',
+  ndSobra:'Sobra luz',
+  ndSobraD:(p,n,sug)=>(p==='1'?'Sobra 1 paso':'Sobran '+p+' pasos')+(n?' con el '+n:'')+'.'+(sug?' Elige el '+sug+' en el paso 4.':(n?' Ni el filtro más denso basta: cierra el diafragma o baja el ISO.':'')),
   ndCierra:(N,enl)=>' O cierra a f/'+N+(enl?', con «Ajustes recomendados» apagado para que nada compense,':'')+' y no lo necesitas.',
-  ndFalta:'Falta luz', ndFaltaD:(p)=>(p==='1'?'Falta 1 paso':'Faltan '+p+' pasos')+': sube el ISO, abre el diafragma o alarga el tiempo.',
+  ndFalta:'Falta luz',
+  ndFaltaD:(p,n,sug)=>(p==='1'?'Falta 1 paso':'Faltan '+p+' pasos')+(n?' con el '+n:'')+(sug?'. Prueba '+(sug==='sin filtro'?sug:'con el '+sug)+', en el paso 4.':': sube el ISO, abre el diafragma o alarga el tiempo.'),
+  ndSug:(n)=>'Para estos ajustes: '+n+'. Tócalo y, con «Ajustes recomendados» encendido, lo demás se recoloca solo.',
+  ndSugOk:'Si cambias de filtro con «Ajustes recomendados» encendido, el ISO y, si hace falta, lo demás se recolocan para que la exposición siga bien.',
   triHand:'No', triHandD:'A pulso, sin más.',
   triBrace:'No', triBraceD:'A pulso, bien sujeta: codos pegados y correa tensa contra el cuello. Dispara en ráfaga.',
   triLean:'Apóyala', triLeanD:'Sobre un muro, una barandilla o la mochila; o un trípode.',
@@ -488,10 +498,15 @@ const DICT={
   enlOn:'turn one control and the other two compensate to keep the exposure.', enlOff:'the three controls move freely.',
   rec:(s)=>'Recommended for this picture: <b>'+s+'</b>', recNd:(n)=>' with '+n, recSin:' with no filter',
   ndOk:'Not needed', ndOkD:'With these settings the exposure is already correct.',
-  ndSiD:(p)=>p+(p==='1'?' stop':' stops')+' of light to spare with these settings.',
-  ndResto:(p,o)=>' With it the picture is '+p+(p==='1'?' stop ':' stops ')+(o?'dark: raise the ISO or open up a little.':'bright: lower the ISO or stop down a little.'),
+  ndSin:'No filter',
+  ndPuestoD:(n,p)=>'With the '+n+' on ('+p+' stops), the exposure is correct.',
+  ndSobra:'Too much light',
+  ndSobraD:(p,n,sug)=>p+(p==='1'?' stop':' stops')+' to spare'+(n?' with the '+n:'')+'.'+(sug?' Choose the '+sug+' in step 4.':(n?' Not even the densest filter is enough: stop down or lower the ISO.':'')),
   ndCierra:(N,enl)=>' Or stop down to f/'+N+(enl?', with “Recommended settings” switched off so nothing compensates,':'')+' and you do not need it.',
-  ndFalta:'Not enough light', ndFaltaD:(p)=>p+(p==='1'?' stop':' stops')+' short: raise the ISO, open the aperture or lengthen the time.',
+  ndFalta:'Not enough light',
+  ndFaltaD:(p,n,sug)=>p+(p==='1'?' stop':' stops')+' short'+(n?' with the '+n:'')+(sug?'. Try '+(sug==='no filter'?sug:'the '+sug)+', in step 4.':': raise the ISO, open the aperture or lengthen the time.'),
+  ndSug:(n)=>'For these settings: '+n+'. Tap it and, with “Recommended settings” on, the rest falls into place by itself.',
+  ndSugOk:'If you change the filter with “Recommended settings” on, the ISO and, if needed, the rest move so that the exposure stays right.',
   triHand:'No', triHandD:'Handheld, nothing more.',
   triBrace:'No', triBraceD:'Handheld, held firmly: elbows tucked in and strap tensioned against the neck. Shoot a burst.',
   triLean:'Rest it', triLeanD:'On a wall, a railing or your bag; or a tripod.',
@@ -581,7 +596,7 @@ const ICONOS={
   zoom:'<path d="M12 2v5M12 17v5M2 12h5M17 12h5M5 5l3.5 3.5M15.5 15.5 19 19M19 5l-3.5 3.5M8.5 15.5 5 19"/>'
 };
 /* filtros comerciales, en pasos */
-const NDS=[1,2,3,4,6,10,15];
+const NDS=[2,3,4,6,10];              // los más comunes: ND4, ND8, ND16, ND64 y ND1000
 const NOMBRE_ND={1:'ND2',2:'ND4',3:'ND8',4:'ND16',6:'ND64',10:'ND1000',15:'ND32000'};
 const W0=0.03;        // rad/s de temblor a pulso limpio, como en el programa de la cámara
 const CRIT=2;         // px de arrastre que se considera nítido
@@ -610,7 +625,7 @@ const ISO_CIFRA=[64,100,200,400,800,1600,3200,6400];
 
 /* ---------- estado ---------- */
 const CLAVE='exposicion-larga-campo';
-let E={efecto:'pan',formato:'ff',mp:24,estab:2,focal:35,sujeto:'bike',vel:5,dist:10,luz:13,fino:0,dir:90,nitidez:'pixel',k:null,j:null,iso:null,enlace:true};
+let E={efecto:'pan',formato:'ff',mp:24,estab:2,focal:35,sujeto:'bike',vel:5,dist:10,luz:13,fino:0,dir:90,nitidez:'pixel',k:null,j:null,iso:null,nd:null,enlace:true};
 try{ const g=JSON.parse(localStorage.getItem(CLAVE)||'null'); if(g&&typeof g==='object') E=Object.assign(E,g); }catch(e){}
 delete E.ap; delete E.m; delete E.isoM;
 function guardar(){ try{ localStorage.setItem(CLAVE,JSON.stringify(E)); }catch(e){} }
@@ -646,24 +661,14 @@ const diafTxt=j=>'f/'+etiqueta(DIAF_NOM[j]);
 /* el ISO que vale cada posición del dial; en A, el que da la exposición correcta */
 const ISO_VAL=ISO_POS.filter(x=>x!=='A');
 function evEf(){ return E.luz+(E.fino||0)/3; }              // la luz elegida, con su ajuste fino en tercios
-function autoISO(t,N){ return cercano(ISO_VAL, limita(100*N*N/(Math.pow(2,evEf())*t),64,6400)); }
+function autoISO(t,N){ return cercano(ISO_VAL, limita(100*N*N*Math.pow(2,E.nd||0)/(Math.pow(2,evEf())*t),64,6400)); }
 function isoValor(pos,t,N){ return pos==='A' ? autoISO(t,N) : +pos; }
 const isoTxt=(pos,val)=>(pos==='A'?'A · ':'')+'ISO '+nf(val,0);
 function ajustesTxt(k,j,pos,val){ return fmtK(k)+' · '+diafTxt(j)+' · '+isoTxt(pos,val); }
 
-/* el filtro, o la pareja de filtros, que cubre los pasos que sobran con menos pasos */
-function eligeND(p){
-  let mejor=null;
-  NDS.forEach((a,i)=>{ [[a]].concat(NDS.slice(i).map(b=>[a,b])).forEach(c=>{
-    const s=c[0]+(c[1]||0);
-    if(s<p-0.4) return;
-    /* apilar dos filtros cuesta como un paso de más: con lo mismo, gana el filtro suelto */
-    const coste=s+(c.length-1);
-    if(!mejor || coste<mejor.coste || (coste===mejor.coste && c.length<mejor.c.length)) mejor={c:c.slice().sort((x,y)=>y-x),s,coste};
-  }); });
-  return mejor || {c:[15,15],s:30};
-}
-const nombreND=nd=>nd.c.map(x=>NOMBRE_ND[x]).join(' + ');
+/* el filtro común más suave que cubre los pasos que sobran; si ninguno llega, el más denso */
+function eligeND(p){ const s=NDS.find(x=>x>=p-0.4); return s===undefined ? NDS[NDS.length-1] : s; }
+const nombreND=n=>NOMBRE_ND[n];
 
 /* ---------- cálculo ---------- */
 /* la escena: el encuadre, el paso de píxel y el tiempo que pide el efecto */
@@ -690,14 +695,14 @@ function recomienda(b){
   const ef=b.ef, EV=b.EV;
   const jCap=Math.min(21,Math.floor(6*Math.log2(b.Nlim)+1e-9));          // f/11 o el límite de difracción
   const N0=Math.pow(2,Math.min(18,jCap)/6);                              // f/8, o menos si el píxel es pequeño
-  let t=b.tNeed, N=N0, iso=100, nd=null;
+  let t=b.tNeed, N=N0, iso=100, nd=0;
   const s=Math.log2(t/(N*N/Math.pow(2,EV)*100/iso));        // pasos que sobran a f/8 e ISO 100
   if(s>=0){
     const a=Math.min(s,(jCap-6*Math.log2(N0))/3); N=N0*Math.pow(2,a/2);
     const r=s-a;
     if(r>1/3){
       nd=eligeND(r);
-      const e=nd.s-r;                                        // > 0: con el filtro queda oscura
+      const e=nd-r;                                          // > 0: con el filtro queda oscura
       if(e>0){
         if(ef.tipo==='minimo' || (ef.tipo==='zoom' && t*Math.pow(2,e)<=1)) t*=Math.pow(2,e);
         else { const ab=Math.min(e,2*Math.log2(N/2.8)); N/=Math.pow(2,ab/2); if(e-ab>0) iso*=Math.pow(2,e-ab); }
@@ -712,15 +717,21 @@ function recomienda(b){
   }
   iso=cercano(ISO_VAL,limita(iso,64,6400));                 // al tercio del dial
   let k=limita(Math.round(3*Math.log2(t)),K_MIN,K_MAX), j=limita(Math.round(6*Math.log2(N)),J_MIN,Math.min(J_MAX,jCap));
-  const isoV=iso;
-  /* el filtro se elige con los valores ya redondeados de las ruedas, los mismos que juzga
-     el veredicto; si se pasa más de un tercio, se corrige con el tiempo o el diafragma */
-  const sR=()=>Math.log2(Math.pow(2,k/3)/(Math.pow(2,j/3)/Math.pow(2,EV)*100/isoV));
-  let sr=sR(); nd=sr>1/3?eligeND(sr):null;
-  if(nd && nd.s-sr>1/3){
-    const d=Math.round(3*(nd.s-sr));
-    if(ef.tipo==='minimo'||ef.tipo==='zoom') k=limita(k+d,K_MIN,K_MAX); else j=limita(j-d,J_MIN,J_MAX);
-    sr=sR(); nd=sr>1/3?eligeND(sr):null;
+  /* El filtro se elige entre los comunes con los valores ya redondeados de las ruedas, los
+     mismos que juzga el veredicto, y lo que el filtro se pase o no llegue se reparte: más
+     tiempo si el efecto lo admite, y si no diafragma e ISO. */
+  const sR=()=>Math.log2(Math.pow(2,k/3)/(Math.pow(2,j/3)/Math.pow(2,EV)*100/iso));
+  const sr=sR(); nd=sr>1/3?eligeND(sr):0;
+  if(nd){
+    const d=Math.round(3*(nd-sr));                           // tercios; > 0: con el filtro queda oscura
+    const m=ISO_VAL.indexOf(iso);
+    if(d>0){
+      if(ef.tipo==='minimo'||ef.tipo==='zoom') k=limita(k+d,K_MIN,K_MAX);
+      else { const ab=Math.min(d,Math.max(0,j-9)); j-=ab; iso=ISO_VAL[limita(m+d-ab,0,ISO_VAL.length-1)]; }
+    } else if(d<0){                                          // ni el más denso basta: ISO al mínimo y,
+      const bi=Math.min(-d,m); iso=ISO_VAL[m-bi];            // como último recurso, se cierra más allá
+      j=limita(j+(-d-bi),J_MIN,J_MAX);                       // del tope de difracción (la página avisa)
+    }
   }
   return {k, j, iso, nd};
 }
@@ -730,9 +741,13 @@ function evalua(b){
   const r=Object.assign({},b,{t,N,iso});
   r.tOk=N*N/Math.pow(2,b.EV)*100/iso;
   r.sobra=Math.log2(t/r.tOk);                                // pasos de luz que sobran
-  r.nd = r.sobra>1/3 ? eligeND(r.sobra) : null;
-  if(r.nd){
-    r.resto=r.nd.s-r.sobra;                                  // > 0: con el filtro queda oscura
+  r.nd=E.nd||0;                                              // el filtro puesto, en pasos
+  r.resid=r.sobra-r.nd;                                      // > 0: aún sobra luz; < 0: falta
+  /* el filtro que piden estos ajustes, contando con que el ISO puede bajar hasta 64 */
+  const s100=Math.log2(t/(N*N/Math.pow(2,b.EV)));
+  r.sug = s100>1 ? eligeND(s100-0.6) : 0;
+  r.cierra=null;
+  if(!r.nd && r.resid>1/3){                                  // sin filtro: cerrar el diafragma como alternativa
     const Nn=N*Math.sqrt(Math.pow(2,r.sobra))*0.97;
     const tope=Math.min(24,Math.floor(6*Math.log2(b.Nlim)+1e-9));                    // hasta f/16 o la difracción
     const alt=DIAF_NOM.findIndex((x,j)=>j>=J_MIN && j<=tope && Math.pow(2,j/6)>=Nn);
@@ -1049,11 +1064,11 @@ function crearRuedas(){
     mayor:i=>(K_MIN+i)%3===0,
     contenido:(e,may)=>'<span aria-hidden="true">'+grabado(etiqueta(e),may?1.5:0.9)+'</span><i></i>',
     texto:i=>etiqueta(ETQ_T[i]),
-    alCambiar:i=>{ const nk=K_MIN+i, d=nk-E.k; E.k=nk; compensa('t',d); actualizar(); }
+    alCambiar:i=>{ const nk=K_MIN+i, d=nk-E.k; E.k=nk; tocado='t'; compensa('t',d); actualizar(); }
   });
-  ruedaD=anillo('d',ETQ_D,i=>(J_MIN+i)%3===0,E.j-J_MIN,i=>diafTxt(J_MIN+i),i=>{ const nj=J_MIN+i, d=E.j-nj; E.j=nj; compensa('d',d); actualizar(); });
+  ruedaD=anillo('d',ETQ_D,i=>(J_MIN+i)%3===0,E.j-J_MIN,i=>diafTxt(J_MIN+i),i=>{ const nj=J_MIN+i, d=E.j-nj; E.j=nj; tocado='d'; compensa('d',d); actualizar(); });
   dialISO=crearDialISO(i=>{
-    const v=ISO_POS[i], antes=E.iso; E.iso=v;
+    const v=ISO_POS[i], antes=E.iso; E.iso=v; tocado='i';
     if(v!=='A' && antes!=='A') compensa('i',ISO_VAL.indexOf(v)-ISO_VAL.indexOf(+antes));
     actualizar();
   });
@@ -1145,22 +1160,47 @@ function crearDialISO(alCambiar){
   $('i-mas').addEventListener('click',()=>paso(1));
   return {ir};
 }
-/* Con el interruptor de ajustes recomendados encendido, al mover un mando los otros dos
+/* Con el interruptor de ajustes recomendados encendido, al mover un mando los otros
    compensan, en tercios de paso, para que la exposición no cambie: la luz que llega va
    como k − j + m (velocidad, diafragma e ISO en tercios). d son los tercios de luz que
-   ha añadido el mando movido. El orden protege el efecto: en los exactos el tiempo se
-   toca el último; en los mínimos, alargarlo es lo primero, porque solo lo refuerza. */
+   ha añadido el mando movido. El tiempo se protege: en los efectos exactos no se toca
+   si no lo giras tú, y en los mínimos se puede alargar pero no bajar del que pide el
+   efecto. Lo que no se pueda compensar queda para el filtro: el mando de filtros
+   propone el que hace falta. */
+let tocado=null;                                      // el último mando que giró el usuario
+function mueve(o,resto,b,suelo){
+  /* quita «resto» tercios de luz con el mando o; devuelve lo que no ha podido quitar */
+  if(o==='t'){
+    const kNeed=limita(Math.round(3*Math.log2(b.tNeed)),K_MIN,K_MAX);
+    const nk=limita(E.k-resto, resto>0?Math.min(E.k,kNeed):K_MIN, K_MAX);
+    resto-=E.k-nk; E.k=nk; ruedaT.seguir(E.k-K_MIN);
+  } else if(o==='d'){
+    const nj=limita(E.j+resto, suelo?Math.min(E.j,9):J_MIN, J_MAX);   // al abrir sola, no pasa de f/2,8
+    resto-=nj-E.j; E.j=nj; ruedaD.seguir(E.j-J_MIN);
+  } else {
+    const m=ISO_VAL.indexOf(+E.iso), nm=limita(m-resto,0,ISO_VAL.length-1);
+    resto-=m-nm; E.iso=ISO_VAL[nm]; dialISO.ir(ISO_POS.indexOf(E.iso),true,true);
+  }
+  return resto;
+}
 function compensa(quien,d){
   if(!E.enlace || !d || E.iso==='A') return;          // en A ya compensa la cámara
-  const exacto=efecto().tipo==='exacto';
-  const orden = quien==='t' ? ['d','i'] : quien==='d' ? (exacto?['i','t']:['t','i']) : (exacto?['d','t']:['t','d']);
+  const b=escena(), minimo=b.ef.tipo==='minimo';
+  const orden = quien==='t' ? ['d','i'] : quien==='d' ? (minimo?['t','i']:['i']) : (minimo?['t','d']:['d']);
   let resto=d;
-  orden.forEach(o=>{
-    if(!resto) return;
-    if(o==='t'){ const nk=limita(E.k-resto,K_MIN,K_MAX); resto-=E.k-nk; E.k=nk; ruedaT.seguir(E.k-K_MIN); }
-    else if(o==='d'){ const nj=limita(E.j+resto,J_MIN,J_MAX); resto-=nj-E.j; E.j=nj; ruedaD.seguir(E.j-J_MIN); }
-    else { const m=ISO_VAL.indexOf(+E.iso), nm=limita(m-resto,0,ISO_VAL.length-1); resto-=m-nm; E.iso=ISO_VAL[nm]; dialISO.ir(ISO_POS.indexOf(E.iso),true,true); }
-  });
+  orden.forEach(o=>{ if(resto) resto=mueve(o,resto,b,false); });
+}
+/* Al elegir un filtro, recoloca los mandos para que la exposición cuadre con él. Respeta el
+   último mando que giraste (el diafragma, si buscabas poca profundidad de campo) y mueve
+   primero lo que menos cambia la foto: el ISO; después, el tiempo si el efecto admite más,
+   y el diafragma. */
+function ajustaAlFiltro(){
+  if(!E.enlace || E.iso==='A') return;
+  const b=escena(), minimo=b.ef.tipo==='minimo';
+  const t=Math.pow(2,E.k/3), N=Math.pow(2,E.j/6);
+  let resto=Math.round(3*(Math.log2(t/(N*N/Math.pow(2,b.EV)*100/(+E.iso)))-(E.nd||0)));   // tercios que sobran
+  const orden=(resto>0 ? ['i',minimo?'t':null,'d'] : (minimo?['t','i','d']:['i','d'])).filter(o=>o && o!==tocado);
+  orden.forEach(o=>{ if(resto) resto=mueve(o,resto,b,true); });
 }
 function pintarEnlace(){
   $('enlace').setAttribute('aria-checked',E.enlace?'true':'false');
@@ -1168,10 +1208,18 @@ function pintarEnlace(){
 }
 $('enlace').addEventListener('click',()=>{ E.enlace=!E.enlace; pintarEnlace(); guardar(); });
 
+/* el mando de filtros: sin filtro y los cinco más comunes */
+[0].concat(NDS).forEach(v=>{
+  const ch=document.createElement('button');
+  ch.type='button'; ch.dataset.v=v; ch.innerHTML='<span></span>'+(v?'<small>'+v+'</small>':'');
+  ch.addEventListener('click',()=>{ E.nd=v; ajustaAlFiltro(); actualizar(); });
+  $('ndChips').appendChild(ch);
+});
+
 /* lleva las ruedas a lo recomendado para la foto elegida */
 function aplicarRec(){
   const rc=recomienda(escena());
-  E.k=rc.k; E.j=rc.j; E.iso=rc.iso;
+  E.k=rc.k; E.j=rc.j; E.iso=rc.iso; E.nd=rc.nd; tocado=null;
   if(ruedaT){ ruedaT.seguir(E.k-K_MIN); ruedaD.seguir(E.j-J_MIN); dialISO.ir(ISO_POS.findIndex(x=>String(x)===String(E.iso)),true); }
 }
 $('usarRec').addEventListener('click',()=>{ aplicarRec(); actualizar(); });
@@ -1181,19 +1229,34 @@ function veredicto(caja, clase){ caja.classList.remove('ok','warn','bad'); if(cl
 function pintarResultado(b,r,rc){
   const ef=b.ef, sj=b.sj;
   /* lectura y recomendación */
-  $('lectura').innerHTML='<b>'+fmtK(E.k)+'</b><b>'+diafTxt(E.j)+'</b><b>'+isoTxt(E.iso,r.iso)+'</b>';
+  $('lectura').innerHTML='<b>'+fmtK(E.k)+'</b><b>'+diafTxt(E.j)+'</b><b>'+isoTxt(E.iso,r.iso)+'</b>'+(r.nd?'<b>'+nombreND(r.nd)+'</b>':'');
   $('isoV').textContent=isoTxt(E.iso,r.iso);
   $('recTxt').innerHTML=LBL('rec',ajustesTxt(rc.k,rc.j,rc.iso,rc.iso))+(rc.nd?LBL('recNd',nombreND(rc.nd)):LBL('recSin'));
-  $('usarRec').hidden = rc.k===E.k && rc.j===E.j && String(rc.iso)===String(E.iso);
-  /* filtro */
-  if(r.nd){
-    $('oND').textContent=nombreND(r.nd);
-    let d=LBL('ndSiD',fmtPasos(r.sobra));
-    if(Math.abs(r.resto)>=0.5) d+=LBL('ndResto',fmtPasos(Math.abs(r.resto)),r.resto>0);
+  $('usarRec').hidden = rc.k===E.k && rc.j===E.j && String(rc.iso)===String(E.iso) && rc.nd===r.nd;
+  /* el mando de filtros: aparece cuando hay uno puesto o cuando los ajustes lo piden */
+  const sobraLuz=r.resid>1/3+0.01, faltaLuz=r.resid<-1/3-0.01;
+  $('ndCampo').hidden = !(r.nd || r.sug || sobraLuz);
+  $('ndV').textContent = r.nd ? r.nd+' '+LBL('pasos') : '';
+  [].forEach.call($('ndChips').children,ch=>{
+    const v=+ch.dataset.v;
+    ch.setAttribute('aria-pressed', v===r.nd?'true':'false');
+    ch.classList.toggle('sug', v===r.sug && v!==r.nd);
+    ch.firstChild.textContent = v ? nombreND(v) : LBL('ndSin');
+  });
+  $('ndPie').textContent = r.sug!==r.nd ? LBL('ndSug', r.sug?nombreND(r.sug):LBL('ndSin').toLowerCase()) : LBL('ndSugOk');
+  /* filtro: se juzga con el que está puesto */
+  const nomND=r.nd?nombreND(r.nd):'', nomSug=r.sug?nombreND(r.sug):'';
+  if(sobraLuz){
+    $('oND').textContent=LBL('ndSobra');
+    let d=LBL('ndSobraD',fmtPasos(r.resid),nomND,r.sug>r.nd?nomSug:'');
     if(r.cierra) d+=LBL('ndCierra',etiqueta(DIAF_NOM[r.cierra]),E.enlace&&E.iso!=='A');
-    $('oNDd').textContent=d; veredicto($('vND'),'warn');
-  } else if(r.sobra<-1/3-0.01){
-    $('oND').textContent=LBL('ndFalta'); $('oNDd').textContent=LBL('ndFaltaD',fmtPasos(-r.sobra)); veredicto($('vND'),'bad');
+    $('oNDd').textContent=d; veredicto($('vND'),'bad');
+  } else if(faltaLuz){
+    $('oND').textContent=LBL('ndFalta');
+    $('oNDd').textContent=LBL('ndFaltaD',fmtPasos(-r.resid),nomND,r.nd&&r.sug<r.nd?(nomSug||LBL('ndSin').toLowerCase()):'');
+    veredicto($('vND'),'bad');
+  } else if(r.nd){
+    $('oND').textContent=nomND; $('oNDd').textContent=LBL('ndPuestoD',nomND,r.nd); veredicto($('vND'),'warn');
   } else { $('oND').textContent=LBL('ndOk'); $('oNDd').textContent=LBL('ndOkD'); veredicto($('vND'),'ok'); }
   /* trípode */
   const T={hand:['triHand','triHandD','ok'],brace:['triBrace','triBraceD','ok'],lean:['triLean','triLeanD','warn'],
@@ -1227,7 +1290,7 @@ function pintarResultado(b,r,rc){
   $('pie').textContent=LBL('pie',nf(b.A,b.A<10?1:0),nf(b.Al,b.Al<10?1:0));
   /* barra fija */
   $('mini-t').textContent=ajustesTxt(E.k,E.j,E.iso,r.iso);
-  $('mini-nd').textContent=!r.nd&&r.sobra<-1/3-0.01 ? LBL('ndFalta') : 'ND: '+(r.nd?r.nd.c.map(x=>NOMBRE_ND[x]).join('+'):'—');
+  $('mini-nd').textContent=faltaLuz ? LBL('ndFalta') : sobraLuz ? LBL('ndSobra') : 'ND: '+(r.nd?nombreND(r.nd):'—');
   $('mini-tri').textContent=LBL('tri')+': '+LBL(T[0]).toLowerCase();
 }
 
@@ -1496,7 +1559,7 @@ function actualizar(){
    recolocan los mandos si con ellos cambia la recomendación (mantener), para no deshacer
    lo que se haya girado a mano. */
 let recPrevia='';
-const claveRec=rc=>rc.k+'|'+rc.j+'|'+rc.iso;
+const claveRec=rc=>rc.k+'|'+rc.j+'|'+rc.iso+'|'+rc.nd;
 function cambio(mantener){
   pintarControles();
   if(!mantener || claveRec(recomienda(escena()))!==recPrevia) aplicarRec();
@@ -1515,7 +1578,7 @@ try{
 }catch(e){}
 
 /* arranque: si no hay ajustes guardados, los recomendados */
-if(E.k==null||E.j==null||E.iso==null||!ISO_POS.some(x=>String(x)===String(E.iso))){ const rc=recomienda(escena()); E.k=rc.k; E.j=rc.j; E.iso=rc.iso; }
+if(E.k==null||E.j==null||E.iso==null||E.nd==null||NDS.concat(0).indexOf(E.nd)<0||!ISO_POS.some(x=>String(x)===String(E.iso))){ const rc=recomienda(escena()); E.k=rc.k; E.j=rc.j; E.iso=rc.iso; E.nd=rc.nd; }
 E.k=limita(E.k,K_MIN,K_MAX); E.j=limita(E.j,J_MIN,J_MAX);
 crearRuedas();
 window.aplicarIdioma(LANG());
